@@ -2,11 +2,49 @@
 
 - **Date:** 2026-07-20
 - **Branch:** `feat/whp-video-topic-skill`
+- **Current acceptance status:** Pending review-correction reruns against the corrected current-main tree
+
+## Current review-correction status
+
+The original 13 task commits were rebased without patch changes from stale merge-base `b579f43`
+onto current `main` at `2a30c83`; `git range-diff` matched all 13 patches. Final review then exposed
+two contract gaps: criterion-level score evidence was not compactly required in the rendered report,
+and the core skill's unconditional-winner wording conflicted with its incomplete-result contract.
+
+The corrected contract requires seven criterion records per finalist and permits a final selected
+topic only when at least two responsibly supported, gate-passing, winner-eligible finalists remain.
+With fewer than two, the exact result is `Winner: No winner responsibly supportable`; a sole
+supported finalist is identified separately. A supported two-way tie may still produce a provisional
+winner and decisive test.
+
+The earlier A/B/C results below are retained as a complete historical test record, but they do not
+validate the corrected current-main tree. Their `36/36` result is superseded as a current acceptance
+claim. Fresh A/B/C runs and the two focused edge cases are pending under the exact protocol in
+[`2026-07-20-whp-topic-skill-rerun-protocol.md`](2026-07-20-whp-topic-skill-rerun-protocol.md).
+Do not mark the design implemented until those exact responses, hashes, and honest results replace
+this pending notice.
+
+### Review-correction static RED/GREEN
+
+At rebased pre-fix revision `21f125b`, the focused contract checks failed for the intended reasons:
+
+- searching `output-contract.md` for a per-finalist seven-criterion record returned exit `1` with no
+  match;
+- searching the core/output files for `Winner: No winner responsibly supportable` or a separate
+  supported-finalist instruction returned exit `1` with no match; and
+- the contradiction check returned exit `0` with `SKILL.md` lines 26 and 110 requiring exactly one
+  winner unconditionally, while `output-contract.md` separately allowed an incomplete result.
+
+After the minimal contract edit, fresh static checks find the seven-record schema, cap/boundary and
+evidence-reuse fields, exact no-winner value, separate supported-finalist behavior, and supported
+two-way provisional rule. A negative check for `Name exactly one winner`, `Name one winner, even`,
+and `None responsibly supported` under the skill directory returns no matches. These are structural
+GREEN checks only; behavioral GREEN remains pending the five fresh runs in the protocol.
 
 ## Purpose and method
 
-This document establishes the no-skill baseline for the WHP video-topic-selection
-workflow before implementation. Three fresh agents received one fixed scenario each without
+This document preserves the no-skill baseline and the first historical forward campaign for the WHP
+video-topic-selection workflow. Three fresh agents received one fixed scenario each without
 the proposed skill or its approved workflow. Their completed responses are reproduced in
 full in the collapsible blocks below and then evaluated against the same twelve checks. All
 visible wording and punctuation are verbatim. The only byte-level normalization is the
@@ -22,7 +60,7 @@ the excerpt records the response's narrower substitute or unsupported rationaliz
 
 ## Test setup / intervention
 
-Six fresh subagents—three baseline and three forward—were spawned with
+In the historical campaign, six fresh subagents—three baseline and three forward—were spawned with
 `fork_turns: "none"`. Each agent received exactly one scenario and no inherited conversation
 context. The subagent interface did not separately expose the runner model or version, so no model
 identifier is claimed here.
@@ -70,13 +108,15 @@ repository context, including canonical runtime doctrine. Forward agents intenti
 finished skill, which required them to read current runtime doctrine and episode state. The results
 therefore validate the intended end-to-end governed workflow—skill plus live canonical context—
 against an unguided scenario response. They do **not** isolate the causal effect of `SKILL.md` text
-alone. This scope correction does not change the 36 observable forward rubric passes.
+alone. This scope correction does not change the 36 observable passes in that historical campaign;
+those passes are not the pending corrected-tree acceptance result.
 
 ### Raw response artifacts
 
-All six raw `/tmp` response artifacts remained available at final evaluation. Hashes are SHA-256 of
-the raw files, before the trailing-space normalizations documented in the embedded transcript
-sections.
+All six raw `/tmp` response artifacts remained available when the historical campaign was
+evaluated. Those paths are ephemeral transport locations, not durable repository artifacts. The
+complete embedded transcripts below are the durable record. Hashes are SHA-256 of the historical
+raw files, before the trailing-space normalizations documented in the embedded transcript sections.
 
 | Phase | Scenario | Raw artifact | SHA-256 |
 |---|:---:|---|---|
@@ -594,7 +634,7 @@ Even with that uncertainty, Sudoku is the best next bet: the promise is cleaner,
   and explain why the nearest alternative loses. Scenario B also rejects both the raw
   20-million-view count and normalized Trends peak as sufficient decision evidence.
 
-## Forward-test results
+## Historical forward-test results — superseded pending corrected-tree rerun
 
 Three fresh agents received the same fixed prompts under the governed forward intervention at
 repository revision `d33e106`. The evaluator read each full response and rechecked observable
@@ -1496,9 +1536,11 @@ behavioral failure would weaken the test-driven boundary rather than refine it.
 |---|---|---|
 | **None** | No material partial or fail appeared in A, B, or C | No rerun was required; the original fresh runs all scored 12/12 |
 
-**Final verdict: pass.** The governed workflow produced consistent observable breadth, context,
-gate, competition, provenance, scoring, and package-testing behavior across all three adversarial
-scenarios, relative to the context-denied unguided baseline. This verdict covers the intended
-end-to-end workflow and the decision quality visible in these reports; it neither isolates the
-causal effect of `SKILL.md` text alone nor claims that any selected topic will achieve a particular
-performance result.
+**Historical verdict: pass; current corrected-tree verdict: pending.** The first governed workflow
+produced consistent observable breadth, context, gate, competition, provenance, scoring, and
+package-testing behavior across all three adversarial scenarios, relative to the context-denied
+unguided baseline. This historical verdict covers the first end-to-end workflow and the decision
+quality visible in those reports; it neither isolates the causal effect of `SKILL.md` text alone nor
+claims that any selected topic will achieve a particular performance result. It must not be used as
+final acceptance evidence for the rebased and corrected skill until the reruns named in the current
+status section are completed.

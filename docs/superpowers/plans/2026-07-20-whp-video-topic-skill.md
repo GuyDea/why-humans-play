@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build and verify a project-local skill that researches current audience opportunity and selects one evidence-backed, reach-weighted topic and angle for WHP's next YouTube video.
+**Goal:** Build and verify a project-local skill that researches current audience opportunity and selects one evidence-backed, reach-weighted topic and angle for WHP's next YouTube video when a responsible comparison exists, while returning an explicit incomplete result otherwise.
 
 **Architecture:** Keep discovery and orchestration in `SKILL.md`, detailed evidence collection and scoring rules in `references/research-method.md`, and the reusable decision report in `references/output-contract.md`. Establish a no-skill baseline first, scaffold with the system skill creator, then forward-test fresh agents against the same scenarios and refine only where observed failures justify it.
 
@@ -15,7 +15,8 @@
 | Path | Responsibility |
 |---|---|
 | `docs/research/2026-07-20-whp-topic-skill-evaluations.md` | Preserve baseline and forward-test scenarios, exact failure excerpts, scored results, refinements, and final acceptance evidence. |
-| `.agents/skills/choosing-whp-video-topic/SKILL.md` | Trigger the skill, read current WHP context, enforce the decision funnel and hard gates, route to references, and require one winner. |
+| `docs/research/2026-07-20-whp-topic-skill-rerun-protocol.md` | Preserve the exact review-correction prompts, contamination controls, artifact rules, and focused edge-case assertions. |
+| `.agents/skills/choosing-whp-video-topic/SKILL.md` | Trigger the skill, read current WHP context, enforce the decision funnel and hard gates, route to references, and resolve winner versus incomplete status. |
 | `.agents/skills/choosing-whp-video-topic/agents/openai.yaml` | Supply concise UI metadata and a default invocation prompt. |
 | `.agents/skills/choosing-whp-video-topic/references/research-method.md` | Define evidence modes, research queries, comparison rules, scoring anchors, confidence, and error handling. |
 | `.agents/skills/choosing-whp-video-topic/references/output-contract.md` | Define the complete recommendation report and final completeness audit. |
@@ -172,7 +173,7 @@ The body must remain under 500 lines and implement these sections in this order:
 7. **Apply hard gates at angle level** — game/play centrality, human revelation, recognized payoff, evidence path, production reality, and portfolio fit; a failed angle may be reframed.
 8. **Narrow in stages** — shallow scan to roughly 8–12, deep multi-signal research on finalists, then a ranked shortlist of roughly five.
 9. **Score and stress-test** — use the exact 100-point weights from the research reference, attach evidence grades and uncertainty, and create three distinct package promises for every top-three finalist.
-10. **Decide** — choose exactly one winner, explain why it wins now and why the runner-up loses, name a falsifier/pre-script verification need, and give two adjacent follow-ups.
+10. **Decide** — choose exactly one winner only with at least two responsibly supported finalists; otherwise return the exact incomplete/no-winner result and identify any sole supported finalist separately. For a winner, explain why it wins now and why the runner-up loses, name a falsifier/pre-script verification need, and give two adjacent follow-ups.
 11. **Failure handling** — mark missing/ambiguous data unknown, lower confidence, use a reduced-confidence public-evidence fallback when live research is unavailable, and never fabricate metrics or sources.
 12. **Boundaries** — stop at topic, angle, packaging direction, and research brief; do not write a full script or claim guaranteed reach.
 
@@ -328,7 +329,7 @@ Permit an intermediate integer only when the rationale explains why it falls bet
 - `C`: weak proxy, sparse evidence, unresolved conflict, or editorial inference; and
 - `unknown`: unavailable evidence, never silently converted to zero.
 
-Every criterion must have score, grade, one-sentence rationale, cited observations, and largest uncertainty. The three reach-facing criteria total 60 points, but none can override a failed hard gate.
+Every finalist must have one compact record for each of the seven criteria. Each record must have score, grade, cited one-sentence rationale or ledger pointer, largest uncertainty, any cap/boundary applied, and any reused evidence with its distinct criterion-specific use. The three reach-facing criteria total 60 points, but none can override a failed hard gate.
 
 - [ ] **Step 5: Define packaging and confidence tests**
 
@@ -380,7 +381,7 @@ Start with a contents list and require these sections in every complete run:
 ## Completeness audit
 ```
 
-The `Decision` section leads with one topic-and-angle winner, confidence, one-sentence reason, and the strongest package direction.
+The `Decision` section leads with winner status. When a supported comparison exists, it names one topic-and-angle winner, confidence, one-sentence reason, and strongest package direction; otherwise it uses the exact incomplete/no-winner fields.
 
 - [ ] **Step 2: Define exact tables and fields**
 
@@ -410,10 +411,10 @@ The final audit must answer yes or no to all of these:
 4. multiple independent signals used per finalist or reduced confidence disclosed;
 5. volatile evidence dated and contextualized;
 6. Trends, raw views, outliers, and missing data interpreted correctly;
-7. scores total correctly and include grades plus uncertainty;
+7. scores total correctly and every finalist has seven matching criterion records with cited rationale, uncertainty, caps, and evidence-reuse treatment;
 8. three packages supplied for each top-three finalist;
 9. package promise matches delivered payoff;
-10. one winner named before the analysis;
+10. one final topic selected before the analysis only when at least two responsibly supported winner-eligible finalists remain; otherwise exact incomplete/no-winner wording and any sole supported finalist;
 11. runner-up loss explained directly; and
 12. no fabricated observation, guarantee, or unsupported load-bearing claim.
 
@@ -500,6 +501,23 @@ git commit -m "test(skill): verify WHP topic selection workflow"
 
 Expected: evaluation evidence and only test-driven refinements are committed.
 
+### Review-correction addendum: rebase and edge behavior
+
+Before final status, rebase the task commits onto current `main` and verify the range-diff. Add the
+smallest contract changes required by final review:
+
+- seven compact criterion records per finalist, each exposing score, grade, cited rationale or
+  ledger pointer, largest uncertainty, score cap/boundary, and cross-criterion evidence reuse;
+- exact incomplete behavior when fewer than two responsibly supported finalists remain, including
+  `Winner: No winner responsibly supportable` and a separate sole-supported-finalist field; and
+- preserved provisional selection for a supported two-way tie after package rescoring.
+
+Use the exact setup in
+`docs/research/2026-07-20-whp-topic-skill-rerun-protocol.md`. Run two focused edge scenarios plus
+fresh A/B/C forward scenarios against the corrected current-main tree. Preserve exact responses,
+hashes, revision, and observable results; mark claims pending until the real runs complete. Treat
+raw `/tmp` captures as ephemeral and make the committed evaluation record self-contained.
+
 ### Task 6: Final verification, review, and implementation status
 
 **Files:**
@@ -550,7 +568,7 @@ Expected: no diff-check output and a clean `feat/whp-video-topic-skill` branch.
 
 - [ ] **Step 2: Review against the approved specification**
 
-Check every acceptance criterion in `docs/superpowers/specs/2026-07-20-whp-video-topic-skill-design.md` against a concrete skill section or evaluation result. Verify especially broad actual-game eligibility, 60 reach-facing points, current research, missing-data honesty, top-three package testing, and one decisive winner.
+Check every acceptance criterion in `docs/superpowers/specs/2026-07-20-whp-video-topic-skill-design.md` against a concrete skill section or evaluation result. Verify especially broad actual-game eligibility, 60 reach-facing points, current research, missing-data honesty, top-three package testing, and decisive winner-versus-incomplete behavior.
 
 - [ ] **Step 3: Request an independent code/documentation review**
 
