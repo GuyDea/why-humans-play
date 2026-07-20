@@ -53,12 +53,12 @@ executive summary, method note, or preamble before `## Decision`.
 ## Completeness audit
 ```
 
-Use the same structure when the evidence cannot responsibly support a winner. Always retain the
-exact `## Decision` heading and set **Decision status** to `Incomplete research result`; do not
-rename the heading or fabricate a winner. State the minimum missing evidence and mark the affected
-audit items `no`. If at least three responsibly supported, winner-eligible finalists remain but do
-not separate, name one provisional winner and the smallest decisive test; a supported tie among a
-complete top three is not an incomplete result.
+If fewer than two responsibly supported, gate-passing, winner-eligible finalists remain, use the
+same structure, retain the exact `## Decision` heading, and set **Decision status** to `Incomplete
+research result`; do not rename the heading or fabricate a winner. State the minimum missing
+evidence and mark the affected audit items `no`. If two or more such finalists remain tied after
+package rescoring, set **Decision status** to `Provisional winner`, name one provisional winner, and
+state the smallest decisive test. A supported two-way tie is not an incomplete result.
 
 ## Decision
 
@@ -146,8 +146,9 @@ research-trail rows rather than repeating the underlying evidence.
 For an incomplete result, include only the responsibly supported, gate-passing finalists that
 actually exist. If none exist, state `No responsibly supported, gate-passing finalists`, emit no
 fabricated placeholder rows, identify the minimum missing evidence, and mark the affected audit
-items `no`. If lack of independent corroboration leaves no winner-eligible finalist, return an
-incomplete result.
+items `no`. If exactly one exists, include only its supported row, emit no fabricated comparison
+rows, identify the minimum missing evidence, and do not claim a winner. If lack of independent
+corroboration leaves fewer than two winner-eligible finalists, return an incomplete result.
 
 ## Packaging stress test
 
@@ -164,13 +165,20 @@ Mark `survives honestly?` as `yes` or `no`, explain a `no` briefly, and visibly 
 strongest surviving direction for each finalist. Synonym swaps and cosmetic thumbnail changes do
 not count as different directions.
 
-For an incomplete result, test packages only for responsibly supported, gate-passing finalists. If
-none exist, state that explicitly, emit no fabricated placeholder packages, identify the minimum
-missing evidence, and mark the affected audit items, including items 8 and 9, `no`. If fewer than
-three such finalists exist, provide three directions for each one that exists, explicitly state why
-the full top-three test is incomplete, identify the minimum missing evidence, and mark item 8 `no`.
-Do not invent candidates to reach nine rows. An incomplete result with fewer than three responsibly
-supported finalists cannot claim a winner.
+When fewer than three responsibly supported, gate-passing finalists exist, test three directions
+only for each finalist that actually exists; do not invent candidates or packages to reach nine
+rows. Handle each case explicitly:
+
+- With none, state that none exist, emit no placeholder packages, identify the minimum missing
+  evidence, mark audit items 8 and 9 `no`, and return an incomplete result.
+- With one, provide three directions only for that finalist, identify the minimum missing evidence,
+  mark the affected audit items, including items 8 and 9, `no`, and return an incomplete result
+  without a winner.
+- With two, provide three directions for each finalist, explicitly state that the top-three test is
+  incomplete, identify the minimum evidence needed to complete it, mark item 8 `no`, disclose the
+  limitation, and lower confidence. If both remain winner-eligible and tied after package rescoring,
+  set **Decision status** to `Provisional winner`, name one provisional winner, and state the
+  smallest decisive test.
 
 For a complete recommendation, immediately after the nine-row table, expose the post-test adjustment
 in a compact table:
@@ -181,8 +189,8 @@ package score before -> after | satisfaction score before -> after
 post-test rank | winner-eligible?
 ```
 
-For an incomplete result with one or two tested finalists, use the same adjustment columns for only
-those finalists. If none exist, state that no post-test adjustment is possible and mark item 9 `no`.
+For a report with one or two tested finalists, use the same adjustment columns for only those
+finalists. If none exist, state that no post-test adjustment is possible and mark item 9 `no`.
 
 If a package changes the thesis, intended audience, evidence path, or payoff, rerun all gates before
 rescoring it. Rescore package and satisfaction from the strongest honest surviving direction, then
@@ -307,8 +315,9 @@ winner, return an incomplete research result rather than weakening the audit or 
 decision.
 
 Reduced confidence does not satisfy item 4. Require independent corroboration for every
-winner-eligible finalist; when it is unavailable, mark the finalist ineligible. If that leaves no
-responsible winner, keep the affected audit items `no` and return an incomplete result.
+winner-eligible finalist; when it is unavailable, mark the finalist ineligible. If that leaves fewer
+than two responsibly supported, gate-passing, winner-eligible finalists, keep the affected audit
+items `no` and return an incomplete result.
 
 ## Boundaries
 
