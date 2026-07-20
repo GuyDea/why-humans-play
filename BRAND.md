@@ -9,27 +9,35 @@
 >
 > *Committed 2026-07-13. Sharpens — does not replace — the umbrella framing "extending
 > human intellect, playfully."*
+>
+> *Expanded 2026-07-20: hidden games remain a defining lens, not an exclusive boundary;
+> explicit games are also in scope when examined with WHP depth and rigor.*
 
 ---
 
 ## The core idea — the lens
 
-**Human life is made of games — most of them invisible.** Not "games" as trivial, but in
-the rigorous sense: players, goals, rules, incentives, strategies. Money, status, dating,
-careers, attention, politics, even morality run on game-like structures we play every day
-without ever seeing the board.
+**Human life is made of games — some hidden, some explicit.** Hidden games operate through
+players, goals, rules, incentives, and strategies we rarely see: money, status, dating,
+careers, attention, politics, even morality. Explicit games put their rules in the open,
+then accumulate histories, cultures, design traditions, mathematics, and distinctive ways
+of thinking.
 
-WHP has **one move, applied everywhere: make the hidden game visible.** The instant you can
+Making the hidden game visible remains **one of WHP's defining moves.** The instant you can
 see the rules, two things happen — you understand *why people (and you) do what they do*,
-and you get to *play on purpose instead of being played.*
+and you get to *play on purpose instead of being played.* But visibility is not the brand's
+boundary: WHP also asks why explicit games endure, how their systems work, and what humans reveal
+through making and playing them.
 
-The name works on two levels, and we use both:
+The name opens three doors, and we use all three:
 - ***Why humans play*** — the deep science of play (play as nature's learning engine).
 - ***The games humans are always playing*** — the hidden rules of real life.
+- ***The games humans made*** — explicit games examined through history, design,
+  mathematics, culture, psychology, and their effects on thought.
 
-Same word, two doors. The brand is the **lens**, not any single format — so it can flex
-in register (rigorous explainer, life-philosophy essay, game↔life metaphor, playable
-challenge) without losing its identity.
+Same word, three doors. The brand is the **field of inquiry**, not any single format — so it
+can flex in register (rigorous explainer, life-philosophy essay, game↔life metaphor,
+explicit-game deep dive, playable challenge) without losing its identity.
 
 ## What we mean by "play" (the definition we stake)
 
@@ -49,12 +57,16 @@ that frame is drawn around it and whether you've **voluntarily accepted its rule
 lusory attitude). This is the disciplined form of "almost anything *can be* play": not
 everything *is* play, but almost anything can be *framed* as play.
 
-**A game is simply a play-frame whose rules have hardened into the open.** That is why "make
+**A game is a play-frame organized by rules, whether those rules are stated openly or hidden inside ordinary life.** That is why "make
 the hidden game visible" is literal: the work is to spot where a play-frame has been drawn,
 what its rules are, and — the useful part — **who drew it.** You draw them on yourself (a run
 becomes a race, a chore becomes a streak); others draw them around you (a job styled as a
 mission, an app styled as a game — the gamification/"playbour" edge). Seeing the frame is the
 first move toward playing on purpose — or stepping out.
+
+This frame-based definition does not exclude soccer, chess, Sudoku, or video games from
+study. It lets WHP ask two layers of an explicit game at once: how its formal system works,
+and what play-frame humans build around it.
 
 **The honest tension (held as a lens, not a proven fact):** Huizinga says play is *bounded*,
 sealed inside a "magic circle"; Sicart says it *leaks everywhere.* We stand with Sicart —
@@ -63,29 +75,33 @@ humility: this is the most *useful* way to see play, not the last word on it.
 
 ## Vision
 
-> **A world where people can see the invisible games shaping their lives — and get to
-> choose how they play.**
+> **A world where people can see the games shaping their lives, understand the games
+> humans have made, and choose how they play.**
 >
-> *(Where reading the hidden rules of human life is common literacy, not a hidden advantage.)*
+> *(Where reading rules, systems, players, and play itself is common literacy, not a hidden
+> advantage.)*
 
 ## Mission
 
-> **We make the hidden games of human life visible and playable — using game theory, the
-> science of play, and learning to decode why people do what they do, and hand people the
-> rules so they can play deliberately.** Across video, shorts, and playable tools.
+> **We make games legible — exposing the hidden games of human life, investigating the
+> explicit games humans create, and exploring why play matters — so people can understand
+> the rules, the players, and their own choices.** Across video, shorts, and playable tools.
 
 ## What people get (the recognized value)
 
 The bar this brand holds itself to: **new, useful, and human — value a stranger recognizes
-immediately.** Concretely, every piece should leave a person able to:
+immediately.** Concretely, every piece should leave a person able to do one or more of the following:
 
 1. **See a hidden game they're in** — the invisible rules of a real situation (work, money,
    status, relationships, the products they use), named and mapped.
 2. **Understand why people do what they do** — their own and others' behavior made legible.
+3. **Understand an explicit game in depth** — where it came from, why its rules work, how
+   people shaped it, and what playing it asks of the mind.
 
-Not abstract theory ("here's the Prisoner's Dilemma") and not shallow life-hacks. A
-*repeatable lens* aimed at the specific, recognizable games people are already playing —
-handed back to them so they can act.
+Not abstract theory ("here's the Prisoner's Dilemma"), shallow life-hacks, or trivia recaps.
+Every piece must use a rigorous lens on a recognizable hidden game, the human fact of play,
+or an explicit game worth understanding — then hand the insight back so the viewer can see or act
+differently.
 
 ## What's genuinely new (the wedge)
 
@@ -94,11 +110,12 @@ handed back to them so they can act.
   self-help lane — and trust is what converts an audience into a following.
 - **Useful, not just interesting.** Every piece changes how you *see or act*, not only what
   you know.
-- **One lens, many registers.** The range is a feature; the lens keeps it coherent.
+- **One field, several lenses.** Hidden games, the science of play, and explicit games all
+  serve the same inquiry into how humans think, learn, choose, and play.
 
 ## The format modes (how the range works)
 
-One lens, a few recurring modes — range without identity drift:
+One field, a few recurring modes — range without identity drift:
 
 | Mode | What it is | Register |
 |---|---|---|
@@ -106,6 +123,11 @@ One lens, a few recurring modes — range without identity drift:
 | **Playable Idea** | A sharp game↔life metaphor that reframes something ("you're playing your career as a finite game — it's an infinite one") | Life-philosophy / essay |
 | **Why We Play** | The deep origin science of play itself | Wonder / explainer *(e.g. the parked "evolutionary paradox of play" draft)* |
 | **Play It** | An actual challenge/experiment the viewer can try | Interactive → bridges to the apps |
+
+These modes are not an exhaustive boundary. WHP may also publish deep examinations of
+explicit games — for example, how Sudoku emerged, why its constraint system is compelling,
+how cultures shaped it, and what solving it demands of the mind. A recurring label for that
+work remains deliberately unset until the format is proven.
 
 ## Relationship to the apps
 
@@ -130,6 +152,9 @@ Brand work must not displace active app-launch priorities.
 
 ## What this changes downstream
 
+- **Hidden Game is a pillar, not the full editorial boundary.** Deep, rigorously framed
+  studies of explicit games are also on-brand; each still has to meet the useful, human,
+  evidence-aware bar above.
 - **The pilot must be a *Hidden Game*** episode about a situation everyone recognizes —
   maximally human and useful. (Pilot topic selection is the next task.)
 - **The "evolutionary paradox of play" script becomes a *Why We Play* candidate**, not the

@@ -18,10 +18,12 @@ brand by default.
 
 ## Thesis
 
-Humans learn by playing. WHP explores and exploits that — the human condition,
-intellect, and growth seen through games, game theory, and play. Rigor is the
-differentiator; keep the framing literal and grounded ("why humans play,"
-intellect, learning) and avoid "woo" / consciousness drift.
+Humans learn by playing. WHP investigates the human condition, intellect, and growth
+through hidden games, game theory, the science of play, and explicit games with rich
+histories and systems of their own. An explicit game such as Sudoku is in scope when treated
+with depth — history, design, mathematics, culture, psychology, and what it asks of the
+mind — rather than as trivia. Rigor is the differentiator; keep the framing literal and
+grounded and avoid "woo" / consciousness drift.
 
 ## Portfolio (apps under the brand)
 
@@ -57,3 +59,10 @@ packaging, or planning any video.
   Apexwit launch).
 - Consistency over cleverness: reuse the mark, wordmark, and palette above
   across every app and surface.
+
+## Decision reconciliation
+
+After every definite WHP decision, read and follow
+[`reconcile-whp`](.agents/skills/reconcile-whp/SKILL.md) immediately. A definite decision
+is a settled user direction or explicit acceptance of a concrete proposal, not
+brainstorming or an unresolved suggestion.
