@@ -150,42 +150,45 @@ VALID_DOCUMENT = """# Why Bees Roll Balls
 - **Title:** The Bee That Chose a Toy
 - **Thumbnail promise:** A bee rolling a wooden ball
 - **Viewer promise:** See why one tiny detour changed the case for animal play.
-- **Central question:** Can an insect play without a reward?
+- **Central question:** Can an insect play without an external reward?
 - **Thesis:** The behavior meets established play criteria, with interpretive limits.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
 - **Evidence review:** Primary paper checked; interpretation remains bounded.
-- **Rights review:** Candidate paper figure usable under CC BY 4.0; video unresolved.
+- **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
 ## Beat 01 — The detour
 _Time: 00:00–00:20 · Target: ~52 words_
 
 ### Narration
-> A bumblebee can walk straight to food. In a 2022 experiment, some turned aside,
-> gripped wooden balls, and rolled them repeatedly without a food reward. The
-> researchers argued that the behavior met their criteria for play. That does not
-> tell us what a bee feels—but it makes the detour hard to dismiss.
+> In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
+> into an object area, contacted wooden balls, and rolled them repeatedly without a
+> food reward. The researchers said this met their operational play criteria. That
+> does not tell us what a bee feels—but makes the detour hard to dismiss.
 
 ### Story function
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
 
 ### Claims
-- `F-001` — Repeated unrewarded ball rolling met the study's play criteria (`VERIFIED`).
+- `F-001` — Ball rolling without a food reward met the study's play criteria (`VERIFIED`).
 
 ### Visual
 - Use the paper's experimental-layout figure as `A-001`.
 - Fallback: recreate the arena as a labeled diagram using only reported dimensions.
 
 ### Motion / edit
-- Trace the direct route to food, then reveal the bee's detour toward the balls.
-- **Animation purpose:** Make the unnecessary detour and repeated choice spatially clear.
+- Label the route overlay “schematic”; trace the unobstructed path to food, reveal the
+  detour into the object area, then use repeated path pulses to show repetition.
+- **Animation purpose:** Make the food path, detour, and repeated choice spatially clear
+  without presenting the overlay as a recorded trajectory.
 
 ### On-screen text
-- “Galpayage Dona et al., 2022 · Fig. 1”
+- “Adapted from Galpayage Dona et al. (2022) · CC BY 4.0”
 
 ### Audio / accessibility
 - Let the music pause at the detour.
-- Descriptive transcript: the bee leaves the direct food path and approaches a ball.
+- Descriptive transcript: a schematic route leaves the unobstructed food path, enters
+  the object area, and pulses repeatedly as a bee contacts and rolls a ball.
 
 ### Assets
 - `A-001` — Experimental-layout figure (`CC-BY-4.0`).
@@ -194,19 +197,19 @@ bee's motives.
 
 ### Evidence references
 
-#### F-001 — Unrewarded ball rolling
-- **Exact claim:** Ball rolling was repeated, unrewarded, and fulfilled the authors' operational criteria for animal play.
+#### F-001 — Ball rolling without a food reward
+- **Exact claim:** In experiment 1, bumblebees had an unobstructed path to food; some detoured into the object area, contacted and rolled wooden balls, and repeated the action without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.
 - **Original URL:** https://doi.org/10.1016/j.anbehav.2022.08.013
 - **Source / author:** Galpayage Dona et al., Animal Behaviour 194
 - **Date:** 2022-12
 - **Locator:** Abstract; Methods, experiment 1; Discussion, criteria 1–5
 - **Accessed:** 2026-07-20
 - **Scope:** Laboratory study of Bombus terrestris; the conclusion concerns operational play criteria, not proof of subjective enjoyment.
-- **Cross-checks:** https://www.qmul.ac.uk/news/latest-news/2022/se/first-ever-study-shows-bumble-bees-play.html
+- **Cross-checks:** No independent corroborating source located; institutional study summary: https://www.qmul.ac.uk/news/latest-news/2022/se/first-ever-study-shows-bumble-bees-play.html
 - **Contradictions:** No direct contradiction located; alternative functional explanations are discussed by the paper.
 - **Status:** VERIFIED
 - **Caveat:** Do not turn behavioral criteria into a claim about conscious emotion.
-- **Approved wording:** In a 2022 experiment, bumblebees repeatedly rolled wooden balls without a food reward, meeting the authors' behavioral criteria for play.
+- **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.
 
 ### Visual and archival sources
 
@@ -217,8 +220,8 @@ bee's motives.
 - **Rights basis:** Article published open access under Creative Commons Attribution 4.0.
 - **License and version:** CC BY 4.0
 - **Commercial use / adaptation:** Allowed with attribution; mark adaptations.
-- **Planned changes:** Crop Figure 1 and animate a separately drawn route overlay.
-- **Required attribution:** Galpayage Dona et al. (2022), CC BY 4.0, DOI on screen and in description.
+- **Planned changes:** Crop Figure 1 and animate a separately drawn, labeled schematic route with repeated path pulses.
+- **Required attribution:** Show compact creator, year, and license on screen. In the description, provide full TASL: creator, title, year, DOI, CC BY 4.0 license link, and a notice that the figure was cropped and overlaid with a labeled schematic route.
 - **Intended beat:** Beat 01
 - **Accessed:** 2026-07-20
 - **Status:** CC-BY-4.0
@@ -229,7 +232,7 @@ bee's motives.
 
 ### Attribution copy
 
-- `A-001` — “Figure adapted from Galpayage Dona et al. (2022), CC BY 4.0, https://doi.org/10.1016/j.anbehav.2022.08.013.”
+- `A-001` — “Figure 1 adapted from Galpayage Dona et al., ‘Do bumble bees play?’ (2022), https://doi.org/10.1016/j.anbehav.2022.08.013. Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Adapted by Why Humans Play: cropped and overlaid with a labeled schematic route.”
 """
 
 

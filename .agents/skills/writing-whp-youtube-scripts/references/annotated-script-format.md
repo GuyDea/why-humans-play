@@ -36,11 +36,11 @@ labels and order shown:
 - **Title:** The Bee That Chose a Toy
 - **Thumbnail promise:** A bee rolling a wooden ball
 - **Viewer promise:** See why one tiny detour changed the case for animal play.
-- **Central question:** Can an insect play without a reward?
+- **Central question:** Can an insect play without an external reward?
 - **Thesis:** The behavior meets established play criteria, with interpretive limits.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
 - **Evidence review:** Primary paper checked; interpretation remains bounded.
-- **Rights review:** Candidate paper figure usable under CC BY 4.0; video unresolved.
+- **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 ```
 
 Give every field a non-empty, assignment-specific value:
@@ -91,7 +91,7 @@ What changes for the viewer and which promise or question this serves.
 
 ### Motion / edit
 - Exact reveal, transition, comparison, or movement.
-- Animation purpose: what motion makes easier to understand.
+- **Animation purpose:** What motion makes easier to understand.
 
 ### On-screen text
 - Minimal labels, numbers, quotation, and compact citation.
@@ -115,11 +115,13 @@ decorative instruction.
 Use `F-###` for evidence claims and `A-###` for visual or archival assets. Use exactly
 three digits, starting with forms such as `F-001` and `A-001`. Keep every ID unique
 within its type. Never reuse an ID for a different claim or asset, including after
-deletion. Preserve IDs while revising the claim wording, asset treatment, or beat
-placement. Assign a new ID whenever new evidence or a new asset enters the document.
+deletion. Preserve IDs while revising the same claim's wording, evidence, locators,
+or cross-checks, and while revising the same asset's treatment or beat placement.
+Assign a new `F-###` ID for a new factual claim and a new `A-###` ID for a new asset.
 
 Reference each ID in a beat before defining its single matching record in the end
-ledgers. Do not leave orphan records or references without records.
+ledgers. Make every beat-level claim or asset status exactly match the status in its
+ledger record. Do not leave orphan records or references without records.
 
 ## Evidence and asset records
 
@@ -256,6 +258,10 @@ Treat the validator as a structural check only. Preserve its limitation exactly:
 ```text
 Structural validation only: this does not verify factual truth, source trustworthiness, copyright ownership, fair use, or editorial quality.
 ```
+
+The validator does not compare narration with `Approved wording`, verify beat-level
+and ledger status consistency, or assess whether records are substantively complete.
+Check those requirements separately.
 
 Do not use a passing result as evidence that facts, sources, rights, fair use,
 storytelling, visuals, or editorial judgment are sound.
