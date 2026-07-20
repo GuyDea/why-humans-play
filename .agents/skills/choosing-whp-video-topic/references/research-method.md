@@ -236,7 +236,7 @@ The three reach-facing criteria—audience demand and reachable market, competit
 
 For each of the top-three finalists, create **three genuinely different title/thumbnail promises**. Do not count synonym swaps or cosmetic thumbnail variations as different directions.
 
-Create directions from the available facts when the task asks for package development. When a supplied decision state says only that an honest package exists, record the original directions as unavailable. Do not invent package details—titles, thumbnails, audiences, tensions, payoffs, or test outcomes—to stand in for missing test records. If the task separately asks for new directions from the supplied facts, label them as new editorial proposals rather than evidence of the earlier package test.
+Create directions from the available facts when the task asks for package development. When a supplied decision state confirms a completed package test and its row count but omits the contents, preserve that count with numbered `details unavailable` records. Mark titles, thumbnails, audiences, tensions, payoffs, and direction-level outcomes `unavailable` rather than inventing them. If the supplied state says one honest package survived but does not identify it, retain that as a finalist-level fact and do not map it to a placeholder direction. If the task separately asks for new directions from the supplied facts, label them as new editorial proposals rather than evidence of the earlier package test.
 
 For every direction, state:
 

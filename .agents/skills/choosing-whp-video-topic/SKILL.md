@@ -107,7 +107,7 @@ If an actual numeric criterion value is absent or unavailable, record it as `not
 
 For each of the top three finalists, create three materially distinct title/thumbnail package promises. Test who each attracts, what is familiar and surprising, the open tension and visual promise, and whether the video can honestly deliver the promised payoff. Reject bait whose attracted audience would not be satisfied by the episode.
 
-Do not invent package details when a supplied decision state says only that an honest package exists. Record the directions as unavailable unless the task asks you to create packages from the available facts, and never present newly created directions as evidence of an earlier test.
+Do not invent package contents when a supplied decision state says only that an honest package exists. If a completed package-test count is known but row contents are absent, preserve the known package-test row count with placeholders such as `Recorded direction 1 — details unavailable`. Mark every unsupplied package field as `unavailable`; retain a supplied aggregate survival fact without mapping it to a direction, and do not infer which placeholder survived. Only create new package contents when the task asks for package development from available facts, and never present them as evidence of an earlier test.
 
 ## Decide
 

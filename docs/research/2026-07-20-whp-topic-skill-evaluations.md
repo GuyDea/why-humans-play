@@ -51,6 +51,17 @@ total`, and `Do not invent package details` each returned exit `1`. The minimal 
 those five static assertions GREEN while leaving behavioral acceptance pending a pristine focused
 rerun; no rerun artifact is embedded or accepted here.
 
+The pristine focused-one rerun at revision `9267890` corrected the score behavior but exposed the
+remaining package-count ambiguity: it rendered zero package rows because the contract forbade
+invented content without separately requiring known completed-test row identities. Before this fix,
+exact searches for `preserve the known package-test row count`, `Recorded direction 1 — details
+unavailable`, `Mark every unsupplied package field as \`unavailable\``, `Do not infer which
+placeholder survived`, and `placeholder records do not make completeness items 8 or 9 \`yes\`` each
+returned exit `1`. The minimal clarification makes those structural assertions GREEN and
+updates the focused cases to require three and six unavailable-detail placeholder records
+respectively. Behavioral acceptance still requires pristine reruns; no artifact is embedded or
+accepted here.
+
 ## Purpose and method
 
 This document preserves the no-skill baseline and the first historical forward campaign for the WHP

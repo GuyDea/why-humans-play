@@ -189,27 +189,35 @@ surprise/tension | visual promise | delivered payoff | survives honestly?
 
 Mark `survives honestly?` as `yes` or `no`, explain a `no` briefly, and visibly identify the
 strongest surviving direction for each finalist. Synonym swaps and cosmetic thumbnail changes do
-not count as different directions.
+not count as different directions. For the unavailable-record exception below, use `unavailable`
+instead of inferring a direction-level survival result or strongest direction.
 
 When fewer than three responsibly supported, gate-passing finalists exist, test three directions
 only for each finalist that actually exists; do not invent candidates or packages to reach nine
 rows. These counts apply to directions actually created during the task or present in the supplied
-record. If a supplied end state says only that a viable or honest package exists, state that the
-recorded directions are unavailable and emit no invented package rows. Unless the task asks for new
-package development from the available facts, mark audit items 8 and 9 `no`. Handle each case
-explicitly:
+record. If a supplied end state confirms that package testing was completed and its count is known
+but row contents are absent, preserve the known package-test row count with numbered placeholders:
+`Recorded direction 1 — details unavailable`, `Recorded direction 2 — details unavailable`, and
+`Recorded direction 3 — details unavailable` for each tested finalist. Mark every unsupplied package
+field as `unavailable`; do not synthesize a title, promise,
+audience, visual, payoff, or result. If the supplied state says one honest package survived without
+identifying it, state that finalist-level fact outside the rows. Do not infer which placeholder survived
+or label one strongest. These placeholder records do not make completeness items 8 or 9 `yes`;
+both remain `no` until the actual package details and post-test rescore records are available.
+Handle each case explicitly:
 
 - With none, state that none exist, emit no placeholder packages, identify the minimum missing
   evidence, mark audit items 8 and 9 `no`, and return an incomplete result.
-- With one, provide three directions only for that finalist when they are available or the task asks
-  for their creation. Otherwise state that the recorded directions are unavailable. Identify the
-  minimum missing evidence, mark the affected audit items, including items 8 and 9, `no`, and return
-  an incomplete result without a winner.
-- With two, provide three directions for each finalist, explicitly state that the top-three test is
-  incomplete, identify the minimum evidence needed to complete it, mark item 8 `no`, disclose the
-  limitation, and lower confidence. If both remain winner-eligible and tied after package rescoring,
-  set **Decision status** to `Provisional winner`, name one provisional winner, and state the
-  smallest decisive test.
+- With one, provide exactly three direction records for that finalist; use placeholders when the
+  completed-test count is known but contents are unavailable. Identify the minimum missing evidence,
+  mark the affected audit items, including items 8 and 9, `no`, and return an incomplete result
+  without a winner.
+- With two, provide exactly six direction records—three for each finalist—and use placeholders for
+  unavailable contents. Explicitly state that the top-three test is incomplete, identify the minimum
+  evidence needed to complete it, mark item 8 `no`, and mark item 9 `no` when package details or
+  rescore records are unavailable. Lower confidence. If both remain winner-eligible and tied after
+  package rescoring, set **Decision status** to `Provisional winner`, name one provisional winner,
+  and state the smallest decisive test.
 
 For a complete recommendation, immediately after the nine-row table, expose the post-test adjustment
 in a compact table:
