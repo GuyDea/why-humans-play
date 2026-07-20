@@ -41,6 +41,16 @@ two-way provisional rule. A negative check for `Name exactly one winner`, `Name 
 and `None responsibly supported` under the skill directory returns no matches. These are structural
 GREEN checks only; behavioral GREEN remains pending the five fresh runs in the protocol.
 
+The exact-prompt focused-one RED at revision `51403c1` exposed a second ambiguity without being
+accepted as campaign evidence: seven unavailable numeric criterion values were rendered as
+`0/unknown`, combined into a fabricated `0/100`, and then used to mark audit item 7 `yes`; three
+package titles were also synthesized even though only package viability, not the recorded
+directions, was supplied. Before the fix, exact `rg -F` searches of the three governing skill files
+for `not scored/unknown`, `Do not compute a total`, `item 7 must be \`no\``, `supplied aggregate
+total`, and `Do not invent package details` each returned exit `1`. The minimal contract edit makes
+those five static assertions GREEN while leaving behavioral acceptance pending a pristine focused
+rerun; no rerun artifact is embedded or accepted here.
+
 ## Purpose and method
 
 This document preserves the no-skill baseline and the first historical forward campaign for the WHP

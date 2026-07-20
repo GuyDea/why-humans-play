@@ -138,14 +138,21 @@ satisfaction /15 | WHP /10 | evidence /10 | feasibility /5
 total /100 | overall confidence | decisive risk
 ```
 
-In the rendered Markdown table, keep all thirteen columns in that order. Show every criterion as
-`integer score/evidence grade`, for example `19/B`, so all seven criterion-level grades remain
-visible. Use `0/unknown` for a wholly unsupported component; for a partly supported criterion, score
-only the supported case and name the unknown component in the cell or rationale.
+In the rendered Markdown table, keep all thirteen columns in that order. Show every scored criterion
+as `integer score/evidence grade`, for example `19/B`, so all seven criterion-level grades remain
+visible. Use `0/unknown` only when the current run actually applied the rubric and scored a wholly
+unsupported criterion zero. When the actual numeric criterion value is absent or unavailable, use
+`not scored/unknown`, never zero, while retaining the criterion's separate `unknown` grade; for a
+partly supported criterion scored during the run, score only the supported case and name the unknown
+evidence in the cell or rationale.
 
 Check every `/100` total arithmetically against its seven component scores. Do not average letter
-grades, convert them to numbers, or imply fake precision. Immediately below the shortlist, provide
-one compact record for every finalist and each of the seven criteria using these exact columns:
+grades, convert them to numbers, or imply fake precision. Do not compute a total when any component
+value is `not scored/unknown`. Render the total as `not scored/unknown`; if a supplied aggregate total
+exists without component splits, preserve it only as explicitly supplied and state that its component
+arithmetic is unverified. In either case, completeness item 7 must be `no`. Immediately below the
+shortlist, provide one compact record for every finalist and each of the seven criteria using these
+exact columns:
 
 ```text
 finalist | criterion | score/weight | evidence grade
@@ -164,8 +171,10 @@ For an incomplete result, include only the responsibly supported, gate-passing f
 actually exist. If none exist, state `No responsibly supported, gate-passing finalists`, emit no
 fabricated placeholder rows, identify the minimum missing evidence, and mark the affected audit
 items `no`. If exactly one exists, include only its supported row, emit no fabricated comparison
-rows, identify the minimum missing evidence, and do not claim a winner. If lack of independent
-corroboration leaves fewer than two winner-eligible finalists, return an incomplete result.
+rows, identify the minimum missing evidence, and do not claim a winner. Missing numeric values still
+require seven nonnumeric criterion records; they do not authorize zero placeholders or a computed
+total. If lack of independent corroboration leaves fewer than two winner-eligible finalists, return
+an incomplete result.
 
 ## Packaging stress test
 
@@ -184,13 +193,18 @@ not count as different directions.
 
 When fewer than three responsibly supported, gate-passing finalists exist, test three directions
 only for each finalist that actually exists; do not invent candidates or packages to reach nine
-rows. Handle each case explicitly:
+rows. These counts apply to directions actually created during the task or present in the supplied
+record. If a supplied end state says only that a viable or honest package exists, state that the
+recorded directions are unavailable and emit no invented package rows. Unless the task asks for new
+package development from the available facts, mark audit items 8 and 9 `no`. Handle each case
+explicitly:
 
 - With none, state that none exist, emit no placeholder packages, identify the minimum missing
   evidence, mark audit items 8 and 9 `no`, and return an incomplete result.
-- With one, provide three directions only for that finalist, identify the minimum missing evidence,
-  mark the affected audit items, including items 8 and 9, `no`, and return an incomplete result
-  without a winner.
+- With one, provide three directions only for that finalist when they are available or the task asks
+  for their creation. Otherwise state that the recorded directions are unavailable. Identify the
+  minimum missing evidence, mark the affected audit items, including items 8 and 9, `no`, and return
+  an incomplete result without a winner.
 - With two, provide three directions for each finalist, explicitly state that the top-three test is
   incomplete, identify the minimum evidence needed to complete it, mark item 8 `no`, disclose the
   limitation, and lower confidence. If both remain winner-eligible and tied after package rescoring,
@@ -324,6 +338,11 @@ table, row, source, or calculation pointer for every check.
 | 10 | Exactly one final topic selected only with at least two responsibly supported winner-eligible finalists; otherwise exact no-winner wording and any sole supported finalist are shown |  |  |
 | 11 | Runner-up loss explained directly |  |  |
 | 12 | No fabricated observation, guarantee, or unsupported load-bearing claim |  |  |
+
+Item 7 is `yes` only when all seven numeric criterion values for every listed finalist are present,
+their records match, and every total can be recomputed. Missing component values require
+`not scored/unknown` and item 7 `no`. A supplied aggregate total without component splits does not
+verify component arithmetic and cannot make item 7 `yes`.
 
 Correct every `no` before delivery unless genuinely unavailable evidence makes correction
 impossible. In that exception, disclose the limitation, lower confidence, list the minimum evidence

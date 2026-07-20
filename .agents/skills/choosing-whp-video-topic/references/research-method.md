@@ -226,13 +226,17 @@ cap/boundary applied | reused evidence and distinct criterion-specific use, or n
 
 Keep each record to one concise row and point to ledger identifiers instead of repeating source detail. State `none` when no cap applies or no evidence is reused. These records must make every criterion score and grade traceable, show whether an evidence cap or hard boundary constrained the score, and expose any cross-criterion reuse so the anti-double-counting rule can be audited. A high editorial score can carry a weak evidence grade; expose that difference instead of using the score as a confidence proxy.
 
-If evidence is unknown, award no unsupported points. Mark the missing component and grade explicitly as `unknown`, lower overall confidence, and distinguish “zero points awarded pending evidence” from observed evidence that the opportunity is absent. If a criterion has both supported and unknown components, score only the supported case and state how the unknown limits the result. Never hide unknown inputs inside a precise-looking total.
+If evidence is unknown in a criterion being scored during the current run, award no unsupported points. Mark the missing evidence and grade explicitly as `unknown`, lower overall confidence, and distinguish an actual rubric score of zero from observed evidence that the opportunity is absent. Use `0/unknown` only when the current run actually applied the rubric and scored the criterion zero; it is not a placeholder for a missing numeric value. If a criterion has both supported and unknown evidence, score only the supported case and state how the unknown limits the result.
+
+If an actual numeric criterion value is absent or unavailable—especially when rendering a supplied end-state record—use `not scored/unknown`, never zero. Do not compute a total from missing component values or hide them inside a precise-looking total. A supplied aggregate total without component splits may be preserved only as explicitly supplied, for example `82/100 — supplied aggregate; components unavailable`; do not reverse-engineer component values or claim its arithmetic verified, and completeness item 7 must be `no`.
 
 The three reach-facing criteria—audience demand and reachable market, competitive opening or content gap, and packaging strength and immediate appeal—total **60 points**. This reach emphasis structures editorial judgment; it does not forecast views, and it can never override a failed hard gate.
 
 ## Packaging stress test
 
 For each of the top-three finalists, create **three genuinely different title/thumbnail promises**. Do not count synonym swaps or cosmetic thumbnail variations as different directions.
+
+Create directions from the available facts when the task asks for package development. When a supplied decision state says only that an honest package exists, record the original directions as unavailable. Do not invent package details—titles, thumbnails, audiences, tensions, payoffs, or test outcomes—to stand in for missing test records. If the task separately asks for new directions from the supplied facts, label them as new editorial proposals rather than evidence of the earlier package test.
 
 For every direction, state:
 

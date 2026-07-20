@@ -103,7 +103,11 @@ After deep research, produce a ranked shortlist of roughly five exact angles. Ke
 
 Apply the exact 100-point weights and anchors in `references/research-method.md`; do not invent or rebalance a rubric. For every shortlisted candidate, attach criterion rationales, evidence grades, cited observations, confidence, and uncertainty. A numeric score structures editorial judgment and is not a performance forecast; no score can override a failed hard gate.
 
+If an actual numeric criterion value is absent or unavailable, record it as `not scored/unknown`, never as zero, and do not compute a total from missing components. Preserve a supplied aggregate only as explicitly supplied; it does not verify missing component arithmetic.
+
 For each of the top three finalists, create three materially distinct title/thumbnail package promises. Test who each attracts, what is familiar and surprising, the open tension and visual promise, and whether the video can honestly deliver the promised payoff. Reject bait whose attracted audience would not be satisfied by the episode.
+
+Do not invent package details when a supplied decision state says only that an honest package exists. Record the directions as unavailable unless the task asks you to create packages from the available facts, and never present newly created directions as evidence of an earlier test.
 
 ## Decide
 

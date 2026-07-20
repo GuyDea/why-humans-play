@@ -86,9 +86,11 @@ Required observable assertions:
 2. The exact line `**Winner:** No winner responsibly supportable` appears.
 3. Sudoku history appears separately as `Supported finalist`, never as winner.
 4. Only the supported finalist appears in the ranked shortlist and receives exactly seven criterion
-   records and three package directions; no comparison row is invented.
-5. Audit items 4, 7, 8, 9, 10, and 11 are honest `yes` or `no` under the contract, with missing
-   comparison/top-three evidence left `no` where required.
+   records. Because numeric criterion values and recorded package directions were not supplied, the
+   values use `not scored/unknown`, no total is computed, and package directions are reported as
+   unavailable; no comparison row or package detail is invented.
+5. Audit items 4, 7, 8, 9, 10, and 11 are respectively `yes`, `no`, `no`, `no`, `yes`, and `no`;
+   missing score arithmetic, package records, top-three evidence, and comparison remain `no`.
 
 ### Focused case 2 — supported two-way tie
 
@@ -102,12 +104,14 @@ Required observable assertions:
 
 1. `Decision status` is `Provisional winner`, with exactly one of the two supported finalists named.
 2. The other supported finalist is the runner-up and is compared directly on the same frame.
-3. Each listed finalist has exactly seven criterion records and three package directions; no third
-   finalist is invented.
+3. Each listed finalist has exactly seven criterion records and three newly requested package
+   directions; no third finalist is invented. The supplied `82/100` aggregates may be preserved as
+   supplied, but missing component values use `not scored/unknown` and no component arithmetic is
+   claimed.
 4. The blinded package test is named as the smallest decisive test.
-5. Audit item 8 remains `no` because the contract's top-three test is incomplete, while item 10 is
-   `yes` because a supported two-way provisional selection is allowed; other items reflect the
-   actual supplied state.
+5. Audit items 7 and 8 remain `no` because component splits and the contract's top-three test are
+   incomplete, while item 10 is `yes` because a supported two-way provisional selection is allowed;
+   other items reflect the actual supplied state.
 
 ## Acceptance record
 
