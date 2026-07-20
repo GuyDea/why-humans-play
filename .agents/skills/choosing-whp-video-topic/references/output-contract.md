@@ -18,10 +18,10 @@
 
 ## Output rules
 
-Use this contract only to compose and audit the user-facing recommendation. Use
-[research-method.md](research-method.md) for research procedure, source and query rules, hard-gate
-application, score calibration, packaging evaluation, and evidence confidence. Keep canonical WHP
-doctrine in the repository files that own it.
+Use this contract only to compose and audit the user-facing recommendation. Keep research procedure,
+source and query rules, hard-gate application, score calibration, packaging evaluation, and evidence
+confidence outside this formatting and completeness contract. Keep canonical WHP doctrine in the
+repository files that own it.
 
 Make the answer decision-first and scannable. Put the decision before method, tables, or caveats,
 then retain enough provenance for a reader to inspect every load-bearing judgment. Use the required
