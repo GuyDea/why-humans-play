@@ -109,7 +109,8 @@ multiple weaknesses within one dimension.
   fallback remains unresolved.
 - **2:** Every external asset is traceable to a concrete original page and reviewed
   rights basis, uses an allowed exact status, records intended changes and terms,
-  and has a production-safe fallback when clearance is uncertain.
+  confirms that the planned use is compatible with those terms, and has a
+  production-safe fallback when clearance is uncertain.
 
 ### 9. Accessibility of essential visual information
 
@@ -141,6 +142,8 @@ Require all of the following:
 
 - a score of at least **16/20**;
 - no zero in dimension 1, 2, 7, or 8; and
+- documented approval of the narration and story direction by an authorized human
+  editor; and
 - an honest record of every unresolved issue.
 
 Do not promote a draft that reaches 16 by compensating for a zero in a protected
@@ -150,14 +153,28 @@ dimension.
 
 Require the `EDITORIAL-DRAFT` gate and all of the following:
 
-- explicit human editorial approval;
+- renewed final approval by an authorized human editor after evidence, rights, and
+  production dependencies are closed;
 - complete readiness under
   [Annotated Script Format](annotated-script-format.md#record-ready-gate);
 - completed evidence and rights review;
+- substantive human confirmation that each planned Creative Commons use is
+  compatible with its license terms;
 - no `REJECTED` claims;
 - no uncertainty voiced without the qualification required by its status;
 - no blocked required asset; and
 - no failed, missing, or unusable fallback for a required visual.
+
+Treat these as two distinct approval moments. The first accepts narration and story
+direction for `EDITORIAL-DRAFT` while unresolved work remains documented. The second
+rechecks the final script only after evidence, rights, and production dependencies
+are closed; never carry the earlier approval forward automatically.
+
+A versioned `CC-*` status records a license, not clearance of the planned use. If NC
+conflicts with monetized or commercial use, ND conflicts with crop, overlay,
+animation, or adaptation, or SA/attribution obligations cannot be met, change the
+treatment or require a usable fallback. Prohibit `RECORD-READY` until the conflict is
+resolved. Treat this as substantive human review beyond structural validation.
 
 Treat human approval and substantive review as requirements, not score bonuses. A
 total score never overrides a hard gate. A validator pass never promotes readiness;
@@ -188,7 +205,7 @@ failure:
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,
-    format gate, substantive blockers, and human-approval requirement.
+    format gate, substantive blockers, and both authorized-human approval moments.
 
 Do not combine these into a single “looks good” read.
 

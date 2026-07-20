@@ -58,10 +58,17 @@ Score every candidate from 0 to 2 on each criterion:
 | Evidence strength | Rejected, hidden uncertainty, or no source | Qualified or incomplete support | Strong support with status-matched wording |
 | Payoff connection | Opens an unrelated loop | Indirect connection | Makes the promised answer necessary |
 
-Add the six scores for a maximum of 12. Recommend the highest-scoring candidate only
-after reviewing the individual dimensions. Break a tie first by promise relevance,
-then evidence strength, then payoff connection, then visual feasibility. If the tie
-remains, choose the clearer and shorter route into the body.
+Add the six scores for a maximum of 12. Disqualify any candidate with a 0 in Promise
+relevance, Evidence strength, or Payoff connection, regardless of its total. Select
+the highest-total candidate only among eligible candidates. Break a tie first by
+promise relevance, then evidence strength, then payoff connection, then visual
+feasibility. If the tie remains, choose the clearer and shorter route into the body.
+
+Do not let `UNVERIFIED-EXAMPLE` material establish the central question, thesis, or
+payoff. If it remains near an opening, removing it must change no conclusion;
+qualify it audibly and connect it immediately to stronger evidence. For example, a
+vivid unsourced anecdote with a 0 in Evidence strength remains ineligible even when
+surprise, stakes, and visuality produce a high total.
 
 Do not let the total conceal a fatal flaw. Reject any candidate that depends on a
 rejected claim, invented scene detail, or a loop the script cannot explicitly pay

@@ -5,6 +5,7 @@
 - [Keep two separate ledgers](#keep-two-separate-ledgers)
 - [Run the claim workflow](#run-the-claim-workflow)
 - [Apply the confidence-to-wording ladder](#apply-the-confidence-to-wording-ladder)
+- [Match source hierarchy to claim type](#match-source-hierarchy-to-claim-type)
 - [Search and cross-check](#search-and-cross-check)
 - [Separate proof from example](#separate-proof-from-example)
 - [Make a visual decision for every important claim](#make-a-visual-decision-for-every-important-claim)
@@ -65,6 +66,27 @@ an interested institution.
 Use a weaker formulation whenever the source, locator, scope, or cross-check does not
 support the stronger one. Present a `DISPUTED` claim as a real disagreement with its
 material boundaries, or omit it. Never paraphrase uncertainty out of a source.
+
+## Match source hierarchy to claim type
+
+Match the source to the exact claim it can establish:
+
+- Treat a direct statement as verification only that the named person or
+  organization made the statement, not that the underlying event occurred.
+- Use an original study for its bounded population, method, comparison, and result;
+  do not turn it into an unscoped generalization.
+- Require appropriate synthesis, replication, or authoritative consensus for a
+  broader scientific claim. Prefer a high-quality systematic review over one primary
+  study when the claim concerns the broader state of evidence.
+- Keep an originating but independently unconfirmed account `REPORTED`, even when
+  its provenance is clear.
+- Use `CORROBORATED` when genuinely independent credible sources support the same
+  bounded approved wording. That independent support supersedes a merely
+  single-source `REPORTED` status for that wording; a repost, common press release,
+  or source that depends on the origin does not.
+
+Do not assign status by source prestige alone. Assign it to the smallest approved
+wording after checking whether the source type can establish that kind of claim.
 
 ## Search and cross-check
 
@@ -176,6 +198,19 @@ Use only these statuses:
   it only to guide research or an ownable replacement.
 - `UNKNOWN-BLOCKED` — Treat the asset as blocked until a valid basis is documented or
   a fallback replaces it.
+
+A versioned `CC-*` status records the asset's license; it does not by itself clear the
+planned use. Require substantive human review of license compatibility beyond
+structural validation. Treat these as blocking conflicts:
+
+- an NC term conflicts with monetized or other commercial use;
+- an ND term conflicts with a crop, overlay, animation, excerpt, or other adaptation;
+  or
+- SA or attribution obligations cannot be met in the planned publication.
+
+When a conflict exists, change the treatment to comply or supply a usable fallback.
+Prohibit `RECORD-READY` while the conflict or fallback remains unresolved. Do not ask
+the validator to decide license compatibility; its pass remains structural only.
 
 Do not let a validator, score, attribution line, or production deadline promote a
 fair-use candidate to cleared. Fair use is context-specific legal analysis and
