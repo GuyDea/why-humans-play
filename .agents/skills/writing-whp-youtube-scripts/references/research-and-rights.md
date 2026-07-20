@@ -179,10 +179,11 @@ built from supported facts, an attributed reenactment, restrained text, or no ad
 visual if clearance does not arrive.
 
 Never invent an example, placeholder, or `.invalid` URL to satisfy an asset record or
-validator. When a discovery lead has no concrete page URL, do not assign it an
-`A-###` production-asset ID or propose it for use; record it as an unnumbered blocked
-lead under `Unverified or disputed material`, and make the ownable or no-external
-fallback the beat's actual visual treatment.
+validator. When a discovery lead has no concrete original asset-page URL, do not
+assign it an `A-###` production-asset ID or propose it for use; record it as an
+unnumbered blocked lead under `Unverified or disputed material`, and make the ownable
+or no-external fallback the beat's actual visual treatment. Repost and search-result
+URLs remain discovery metadata only, never the `Original asset page`.
 
 ## Use rights statuses exactly
 
