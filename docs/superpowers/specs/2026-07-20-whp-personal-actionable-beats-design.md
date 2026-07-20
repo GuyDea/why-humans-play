@@ -1,6 +1,7 @@
 # WHP Personal Voice and Viewer Application Design
 
-- **Status:** Proposed
+- **Status:** Approved
+- **Approved:** 2026-07-20
 - **Date:** 2026-07-20
 - **Owner:** Why Humans Play
 - **Branch:** `feat/whp-personal-actionable-beats`

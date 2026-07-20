@@ -50,3 +50,19 @@ workflow, and auditability without premature mechanical enforcement.
 
 **Documents:** `AGENTS.md`, `.agents/skills/reconcile-whp/SKILL.md`,
 `.agents/skills/reconcile-whp/agents/openai.yaml`, and this ledger.
+
+## 2026-07-20 — Make personal voice deliberate and insights actionable
+
+**Decision:** Every complete WHP script must explicitly request, use, or omit an
+authentic personal-experience sequence and must include one specific,
+evidence-bounded viewer application with an observable signal, a limitation, and a
+larger benefit.
+
+**Rationale:** Personal material should feel like part of the story rather than filler,
+and each episode should help viewers use its knowledge without inventing Martin's
+experience or drifting into unsupported self-help certainty.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-20-whp-personal-actionable-beats-design.md`, and this
+ledger. `BRAND.md` already requires useful, evidence-aware viewer change and needed no
+content change.
