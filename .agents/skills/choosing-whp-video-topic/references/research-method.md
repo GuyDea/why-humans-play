@@ -28,9 +28,9 @@ Recommendations are time-sensitive. Research current conditions, record the rese
 
 In **channel-aware mode**, prioritize supplied evidence in this order:
 
-1. YouTube Studio Trends signals relevant to the target market and language;
-2. Audience tab evidence, including what the supplied audience watches and searches for;
-3. Advanced Mode comparisons by video, format, geography, traffic source, and time where supplied;
+1. YouTube Studio Trends evidence, including supplied search signals relevant to the target market and language;
+2. Audience tab evidence, including supplied watched content, channels, formats, and viewer characteristics;
+3. Advanced Mode comparisons using consistent groups and equal-lifespan windows across video, format, geography, traffic source, and time where supplied;
 4. comments, community polls, and repeated audience questions in the supplied material; and
 5. prior WHP patterns in appeal, engagement, and satisfaction, interpreted in the context of topic, package, format, age, and distribution.
 
@@ -151,14 +151,15 @@ After deep research, re-audit the gates and rank a shortlist of roughly **five e
 
 ## Evidence ledger
 
-For every volatile observation, capture:
+For every decision-relevant observation, capture one ledger row:
 
 ```text
 claim or signal | source URL/file | observed value | observation date
 geography | language | format | comparison window | fact/estimate/inference
+counterevidence | caveat | unavailable evidence | claim-to-verify | supported score criterion
 ```
 
-Also record the observation's contradiction or counterevidence, caveat, unavailable evidence, `claim-to-verify`, and the score criterion it supports. Timestamp the research run and every volatile metric or result sufficiently to make later checking possible.
+Record observation date, geography, language, format, and comparison window wherever they affect interpretation, especially for volatile observations. Mark a field `not applicable` or `unknown` rather than inventing it. Timestamp the research run and every volatile metric or result sufficiently to make later checking possible. Do not omit durable, contradictory, or unavailable evidence when it affects the decision.
 
 Keep **observation** separate from **interpretation**. For example, record the visible count, upload date, and channel cohort as observations; record “possible demand for this angle” as an inference. Label estimates and editorial judgments explicitly.
 
@@ -188,14 +189,32 @@ Use these exact integer anchors:
 | 10 | 0 | 3 | 5 | 8 | 10 |
 | 5 | 0 | 1 | 3 | 4 | 5 |
 
+### Criterion calibration
+
+Calibrate the criteria independently:
+
+| Criterion | Core question | Qualifying evidence | Exclusions and double-counting boundary | Cap or gate boundary |
+|---|---|---|---|---|
+| Audience demand and reachable market | Will people in the target market choose this exact angle, and can WHP plausibly reach them? | Current channel signals, audience language, search trajectory, and comparable cohorts that support credible audience transfer to the angle. | General subject demand alone cannot earn full points; do not reuse topic popularity as packaging or competitive-opening evidence. | Without credible reachability or audience-transfer evidence, cap at **Mixed (13)**. |
+| Competitive opening or content gap | Is there demonstrated demand that existing supply serves poorly for this audience and angle? | Demand plus a documented quality, angle, freshness, format, or audience mismatch in existing coverage. | Absent supply alone is not an opening; do not count the popularity already scored under demand. | Without both demand and a documented mismatch, award no opening points. |
+| Packaging strength and immediate appeal | Does a tested, honest promise communicate clear tension and a compelling visual idea immediately? | Distinct title/thumbnail directions whose familiar element, surprise, open question, and visual promise are clear and whose promised payoff is honest. | Judge communication of the promise, clarity, tension, and visual—not topic popularity or the payoff's post-view value. | A finalist with no viable honest package is ineligible to win; package changes to the thesis trigger a fresh gate audit. |
+| Likely satisfaction, usefulness, and shareability | Will the delivered episode provide a useful payoff and an earned reframe worth remembering or sharing? | Evidence-backed payoff, practical or explanatory use, earned reframe, and a credible reason to share after viewing. | Do not score click appeal, title tension, or thumbnail clarity here; those belong to packaging. | An unrecognizable or undeliverable payoff fails the recognized-payoff gate and is not scored. |
+| Strength of the WHP lens | After minimum WHP eligibility, how distinctive and central is the game/play mechanism in explaining humanity? | A specific, non-interchangeable play mechanism that produces a recognizably WHP human insight. | Do not score popularity, demand, or a decorative game reference. | The hard gate is the binary minimum; score distinctiveness and centrality only after it passes. |
+| Evidence quality and defensibility | How defensible are the load-bearing thesis, claim scope, and caveat coverage overall? | Directly relevant primary or first-party evidence, corroboration, counterevidence, appropriate comparisons, and explicit caveats. | Per-criterion grades describe support for that criterion; do not count the same fact twice merely because it is primary. | An unsupported central promise fails the evidence-path gate; provenance alone cannot rescue it. |
+| Production feasibility and sequence | After basic feasibility, how reliably and efficiently can WHP execute this episode now and place it in the portfolio? | Confirmed access, visuals, expertise, schedule, rights, production simplicity, timing, and sequence value. | Do not count demand, popularity, or mere follow-up appeal as feasibility evidence. | The gate rejects impossible or currently irresponsible work; score execution ease, access, timing, and portfolio sequence only after it passes. |
+
+Assign each observation to the question it actually answers. Cross-cite one ledger row across criteria only when it provides distinct criterion-specific evidence and explain the distinction; never multiply points merely because one fact is popular, primary, or convenient.
+
 Use an intermediate integer only when the rationale explains why the evidence falls between two anchors. Do not use decimals or adjust the weights for a preferred candidate.
 
 Grade evidence independently from score:
 
-- **A:** direct first-party or primary evidence, or several strong convergent observations;
+- **A:** directly relevant evidence—first-party or primary, or several strong convergent observations—that is current where necessary, appropriately comparable, and adequately corroborated wherever audience transfer or causality is inferred;
 - **B:** credible indirect evidence with a meaningful limitation;
 - **C:** weak proxy, sparse evidence, unresolved conflict, or editorial inference; and
 - **unknown:** unavailable evidence, never silently converted to zero.
+
+Provenance alone does not establish strength. A single first-party or primary metric can still be graded `B` or `C` when it is indirect, stale, poorly comparable, or uncorroborated for the claim.
 
 For every criterion, record the integer score, evidence grade, one-sentence rationale, cited ledger observations, and largest uncertainty. A high editorial score can carry a weak evidence grade; expose that difference instead of using the score as a confidence proxy.
 
@@ -220,6 +239,8 @@ Reject bait that would attract a materially different audience from the episode'
 
 For each top-three finalist, also write a one-sentence **earned reframe** and at least **two plausible follow-up episodes**. Use series potential only as a tiebreaker and coherence check; it cannot rescue weaker reach evidence, failed gates, or an undeliverable package.
 
+After stress testing, rescore packaging and satisfaction using each finalist's strongest honest direction, then rerank the finalists. If package development changes the thesis, intended audience, evidence path, or payoff, rerun all six hard gates before scoring it. A finalist with no viable honest package is ineligible to win.
+
 ## Error handling and confidence
 
 Assign confidence as `high`, `medium`, or `low` from evidence convergence and availability, not from total score:
@@ -230,7 +251,9 @@ Assign confidence as `high`, `medium`, or `low` from evidence convergence and av
 
 Timestamp volatile data, display conflicts, and reduce confidence when evidence depends on personalized results, a small comparable cohort, third-party estimates, or uncertain audience transfer. Do not inflate confidence because a candidate has the highest score.
 
-If finalists tie or the evidence is inconclusive, still choose one **provisional winner**. Name the smallest decisive test or missing datum that could reverse the decision, such as a targeted audience poll, a broader comparable cohort, a factual-source check, or a package test.
+When two or more gate-passing, responsibly supported finalists remain tied after package rescoring, choose one **provisional winner** and name the smallest decisive test or missing datum that could reverse the decision, such as a targeted audience poll, a broader comparable cohort, a factual-source check, or a package test.
+
+When evidence is fundamentally insufficient to support any gate-passing finalist or its central promise responsibly, return an incomplete, reduced-confidence research result and list the evidence needed to finish the decision. Do not manufacture a winner. This is different from a supported tie among viable finalists.
 
 The central title-and-thesis promise must survive reasonable verification before scripting. Do not guarantee views, imply causal certainty from correlations, or use false precision in reach, performance, or confidence claims.
 
