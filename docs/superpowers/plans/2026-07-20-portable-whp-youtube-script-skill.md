@@ -119,9 +119,10 @@ implemented skill.
 
 - [ ] **Step 2: Write the unit-test module before the validator exists**
 
-Use a self-contained valid document fixture and mutations so the expected contract is
-visible in the tests. The module must import the future validator through its sibling
-directory and include these test cases:
+Use a self-contained valid document fixture and diagnostic mutations so the expected
+contract is visible in the tests. The module must import the future validator through
+its sibling directory. Every mutation helper must assert that the old text occurs the
+expected number of times before replacing it. Use this canonical fixture:
 
 ```python
 from __future__ import annotations
@@ -142,8 +143,8 @@ VALID_DOCUMENT = """# Why Bees Roll Balls
 
 - **Status:** RESEARCH-DRAFT
 - **Version:** 0.1
-- **Target runtime:** 00:45
-- **Word count:** 97
+- **Target runtime:** 00:20
+- **Word count:** 52
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy
@@ -156,7 +157,7 @@ VALID_DOCUMENT = """# Why Bees Roll Balls
 - **Rights review:** Candidate paper figure usable under CC BY 4.0; video unresolved.
 
 ## Beat 01 — The detour
-_Time: 00:00–00:20 · Target: ~45 words_
+_Time: 00:00–00:20 · Target: ~52 words_
 
 ### Narration
 > A bumblebee can walk straight to food. In a 2022 experiment, some turned aside,
@@ -232,107 +233,44 @@ bee's motives.
 """
 
 
-class ValidatorTests(unittest.TestCase):
-    def assert_error(self, text: str, fragment: str) -> None:
-        errors = validate_document(text)
-        self.assertTrue(
-            any(fragment in error for error in errors),
-            f"Expected {fragment!r} in {errors!r}",
-        )
-
-    def test_valid_research_draft_passes(self) -> None:
-        self.assertEqual(validate_document(VALID_DOCUMENT), [])
-
-    def test_required_header_field_is_reported(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace("- **Viewer promise:**", "- **Removed:**", 1),
-            "Viewer promise",
-        )
-
-    def test_duplicate_beat_id_is_reported(self) -> None:
-        duplicate = VALID_DOCUMENT.replace(
-            "## References and source materials",
-            "## Beat 01 — Duplicate\n\n### Narration\n> Copy.\n\n"
-            "### Story function\nDuplicate.\n\n### Claims\n- None.\n\n"
-            "### Visual\n- None.\n\n### Motion / edit\n"
-            "- No animation — a still is sufficient.\n\n"
-            "## References and source materials",
-        )
-        self.assert_error(duplicate, "Duplicate beat ID")
-
-    def test_missing_fact_record_is_reported(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace("`F-001`", "`F-002`", 1),
-            "F-002",
-        )
-
-    def test_missing_asset_record_is_reported(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace("`A-001`", "`A-002`", 1),
-            "A-002",
-        )
-
-    def test_invalid_claim_status_is_reported(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace("- **Status:** VERIFIED", "- **Status:** PROBABLY", 1),
-            "PROBABLY",
-        )
-
-    def test_motion_requires_explanatory_purpose_or_explicit_none(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace(
-                "- **Animation purpose:** Make the unnecessary detour and repeated choice spatially clear.",
-                "- Add a cool zoom.",
-            ),
-            "animation purpose",
-        )
-
-    def test_urls_must_be_web_urls(self) -> None:
-        self.assert_error(
-            VALID_DOCUMENT.replace(
-                "https://doi.org/10.1016/j.anbehav.2022.08.013",
-                "doi:10.1016/j.anbehav.2022.08.013",
-                1,
-            ),
-            "http:// or https://",
-        )
-
-    def test_record_ready_rejects_blocked_asset(self) -> None:
-        blocked = VALID_DOCUMENT.replace("RESEARCH-DRAFT", "RECORD-READY", 1).replace(
-            "- **Status:** CC-BY-4.0",
-            "- **Status:** UNKNOWN-BLOCKED",
-            1,
-        )
-        self.assert_error(blocked, "RECORD-READY")
-
-    def test_cli_states_its_limits(self) -> None:
-        with tempfile.TemporaryDirectory() as directory:
-            path = Path(directory) / "script.md"
-            path.write_text(VALID_DOCUMENT, encoding="utf-8")
-            result = subprocess.run(
-                [sys.executable, str(SCRIPT_DIR / "validate_annotated_script.py"), str(path)],
-                check=False,
-                capture_output=True,
-                text=True,
-            )
-        self.assertEqual(result.returncode, 0)
-        self.assertIn("does not verify factual truth", result.stdout)
-
-
-if __name__ == "__main__":
-    unittest.main()
 ```
+
+The executable test module must contain 31 focused test methods, using table-driven
+subtests where several vocabulary values or fields share one rule family. It must
+cover:
+
+1. fixture narration word-count coherence and a valid `RESEARCH-DRAFT`;
+2. every required header field, beat section, and end heading;
+3. unique and ascending beat IDs, with complete beats duplicated or reordered;
+4. both valid motion paths: a non-empty animation purpose and explicit
+   `No animation — ...`;
+5. exactly one evidence/asset record for every reference, plus duplicate and orphan
+   evidence/asset records;
+6. every required evidence and asset field;
+7. web-URL requirements for `Original URL`, `Original asset page`, and non-empty
+   `Direct production file`, while accepting an empty direct-file value;
+8. every readiness and claim status, every fixed asset status, versioned CC statuses,
+   and `PUBLIC-DOMAIN` only with a stated basis and jurisdiction;
+9. invalid readiness, claim, asset, unversioned CC, and under-specified public-domain
+   statuses;
+10. a valid `RECORD-READY`, a rejected claim, and each of the three blocked referenced
+    asset statuses; and
+11. CLI exit codes 0, 1, and 2 for valid, invalid, and nonexistent/unreadable input.
+    Each subprocess must have a short timeout, run outside the script directory, and
+    print the complete structural-validation limitation sentence.
 
 - [ ] **Step 3: Run the test and verify RED**
 
 Run:
 
 ```bash
+PYTHONPYCACHEPREFIX=/tmp/why-humans-play-pycache python3 -m py_compile .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
 ```
 
-Expected: ERROR with `ModuleNotFoundError: No module named 'validate_annotated_script'`.
-This proves the tests execute before the validator exists.
+Expected: compilation succeeds, then direct execution ends with
+`ModuleNotFoundError: No module named 'validate_annotated_script'`. This proves the
+test module is syntactically valid and executes before the validator exists.
 
 - [ ] **Step 4: Commit the failing specification**
 
@@ -481,7 +419,8 @@ Implement the following deterministic rules without making network requests:
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
 ```
 
-Expected: 10 tests run and all pass.
+Expected: 31 test methods run and all pass, including the table-driven field and
+vocabulary subtests and all three CLI exit paths.
 
 - [ ] **Step 3: Exercise the invalid CLI path**
 
