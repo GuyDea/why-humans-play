@@ -23,6 +23,11 @@ That is a gift: Episode 1 doesn't need to invent an identity, it needs to *answe
 name of the channel* in a way that plants the brand thesis (**play is nature's learning
 engine**) for everything that follows.
 
+The channel's editorial territory is broader than that opening thesis. It includes hidden
+games in ordinary life, the science of why humans play, and explicit games whose histories,
+systems, cultures, and cognitive demands reward deep examination. A game such as Sudoku is
+eligible because of the richer human story inside it, not merely because it is a game.
+
 The competitive research produces one strategic fact that dictates everything:
 
 > **The single biggest video that directly answers "why do humans play" is Vsauce's
@@ -165,6 +170,11 @@ millions on junk science).
 # PART 2 — The competitive map
 
 `[scraped 2026-07-13]` — verdicts on where WHP should and shouldn't plant its flag.
+
+**Scope note (2026-07-20):** this research maps the launch lanes studied on 2026-07-13; it
+does not define WHP's full editorial boundary. Deep dives into explicit games such as
+Sudoku are in scope, but each needs current topic-specific competitive research before a
+packaging or sequencing verdict.
 
 | Sub-topic | Verdict | Evidence |
 |---|---|---|
@@ -363,6 +373,11 @@ compounds. All inherit Part 1.
 5. **EP5 — Why some games are impossible to put down (without the anti-gaming panic).**
    The addiction/dopamine topic reclaimed *on-thesis* — design & motivation, not moral panic.
 
+**Explicit-game candidates (unsequenced):** a deep examination of Sudoku — its emergence,
+constraint design, global spread, solving psychology, and what its popularity reveals about
+human play. Research its competitive lane and packaging before assigning an episode number.
+This is a scope seed, not a locked title or series name.
+
 ---
 
 # PART 5 — The editing & repurposing stack (tooling)
@@ -482,4 +497,4 @@ run hit its model limit mid-verification, so these were collected but not vote-c
 the breakout precedents (Alastair, Blank Rascal, Howtown, Curiosity Code) — pulled from
 YouTube search/watch/channel pages during research.
 
-*Last updated: 2026-07-13.*
+*Research and tooling data last updated: 2026-07-13. Editorial scope reconciled: 2026-07-20.*
