@@ -240,11 +240,13 @@ asset, header, or end-ledger notes in the narration-only copy.
 
 ## Validation
 
-From the skill directory, run:
+Resolve the target script path to an absolute path at runtime before changing to the skill directory. Resolve the skill directory from the loaded `SKILL.md`, change to it, and run:
 
 ```bash
-python3 scripts/validate_annotated_script.py <script-path>
+python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"
 ```
+
+Do not hardcode the skill package path or use a vendor-specific environment variable. The dynamically resolved target path may be absolute; pass it as one quoted argument after `--`.
 
 Use the validator to check that required header fields and end sections exist; beat
 IDs are well formed, unique, and ascending; every beat contains all required

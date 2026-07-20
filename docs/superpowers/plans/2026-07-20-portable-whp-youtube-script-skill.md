@@ -481,7 +481,10 @@ The reference must define, in this order:
 6. The four readiness states and who may promote a document.
 7. Narration-only extraction: concatenate blockquotes under `### Narration`; never
    include notes in a teleprompter export.
-8. A reminder that the validator proves structure only and cannot make an output
+8. Portable validator guidance: resolve the target script path to an absolute path at
+   runtime before changing to the skill directory, then pass it as one quoted
+   argument after `--`. Do not hardcode the skill package path.
+9. A reminder that the validator proves structure only and cannot make an output
    `RECORD-READY` by itself.
 
 Include this exact readiness gate:
@@ -699,6 +702,9 @@ class SkillPackageTests(unittest.TestCase):
 
     def test_core_has_no_required_vendor_specific_syntax_or_local_paths(self) -> None:
         text = SKILL_MD.read_text(encoding="utf-8")
+        format_text = (
+            SKILL_ROOT / "references" / "annotated-script-format.md"
+        ).read_text(encoding="utf-8")
         forbidden = (
             "/home/",
             "/Users/",
@@ -720,9 +726,25 @@ class SkillPackageTests(unittest.TestCase):
         safe_command = (
             'python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"'
         )
-        self.assertIn(resolve_instruction, text)
-        self.assertIn(safe_command, text)
-        self.assertLess(text.index(resolve_instruction), text.index(safe_command))
+        legacy_command = "python3 scripts/validate_annotated_script.py <script-path>"
+        dynamic_target_instruction = (
+            "The dynamically resolved target path may be absolute; pass it as one "
+            "quoted argument after `--`."
+        )
+        for source_name, source_text in (
+            ("SKILL.md", text),
+            ("references/annotated-script-format.md", format_text),
+        ):
+            with self.subTest(source=source_name):
+                self.assertNotIn(legacy_command, source_text)
+                self.assertIn(resolve_instruction, source_text)
+                self.assertIn(safe_command, source_text)
+                self.assertIn("Do not hardcode the skill package path", source_text)
+                self.assertIn(dynamic_target_instruction, source_text)
+                self.assertLess(
+                    source_text.index(resolve_instruction),
+                    source_text.index(safe_command),
+                )
 
     def test_relative_markdown_resources_exist(self) -> None:
         text = SKILL_MD.read_text(encoding="utf-8")
