@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import subprocess
 import sys
 import tempfile
@@ -133,6 +134,32 @@ def extract_exact(text: str, start: str, end: str) -> str:
     if text.count(start) != 1 or text.count(end) != 1:
         raise AssertionError(f"Expected unique boundaries {start!r} and {end!r}")
     return text[text.index(start) : text.index(end)]
+
+
+def blank_markdown_field(text: str, field: str) -> str:
+    pattern = re.compile(
+        rf"^(?P<label>[ \t]*-[ \t]+\*\*{re.escape(field)}:\*\*)[^\n]*$",
+        re.MULTILINE,
+    )
+    matches = list(pattern.finditer(text))
+    if len(matches) != 1:
+        raise AssertionError(
+            f"Expected field {field!r} exactly once, found {len(matches)}"
+        )
+    match = matches[0]
+    return text[: match.start()] + match.group("label") + "   " + text[match.end() :]
+
+
+def blank_beat_section(block: str, section: str) -> str:
+    heading = f"### {section}\n"
+    if block.count(heading) != 1:
+        raise AssertionError(
+            f"Expected beat section {section!r} exactly once, found {block.count(heading)}"
+        )
+    body_start = block.index(heading) + len(heading)
+    next_heading = block.find("\n### ", body_start)
+    body_end = len(block) if next_heading == -1 else next_heading + 1
+    return block[:body_start] + "   \n" + block[body_end:]
 
 
 VALID_DOCUMENT = """# Why Bees Roll Balls
@@ -309,6 +336,23 @@ class ValidatorTests(unittest.TestCase):
                     field,
                 )
 
+    def test_all_required_header_fields_reject_whitespace_only_values(self) -> None:
+        for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
+            for field in HEADER_FIELDS:
+                with self.subTest(readiness=readiness, field=field):
+                    header = replace_exact(
+                        HEADER_BLOCK,
+                        "- **Status:** RESEARCH-DRAFT",
+                        f"- **Status:** {readiness}",
+                    )
+                    document = replace_exact(VALID_DOCUMENT, HEADER_BLOCK, header)
+                    self.assert_error(
+                        replace_exact(
+                            document, header, blank_markdown_field(header, field)
+                        ),
+                        f"header field {field} must have a non-whitespace value",
+                    )
+
     def test_duplicate_beat_id_is_reported_from_complete_beats(self) -> None:
         duplicate = replace_exact(
             VALID_DOCUMENT,
@@ -371,6 +415,22 @@ class ValidatorTests(unittest.TestCase):
                     section,
                 )
 
+    def test_all_required_beat_sections_reject_whitespace_only_bodies(self) -> None:
+        for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
+            for section in BEAT_SECTIONS:
+                with self.subTest(readiness=readiness, section=section):
+                    document = replace_exact(
+                        VALID_DOCUMENT,
+                        "- **Status:** RESEARCH-DRAFT",
+                        f"- **Status:** {readiness}",
+                    )
+                    beat = blank_beat_section(BEAT_BLOCK, section)
+                    document = replace_exact(document, BEAT_BLOCK, beat)
+                    self.assert_error(
+                        document,
+                        f"Beat 01 section {section} must have non-whitespace content",
+                    )
+
     def test_all_required_end_headings_are_reported(self) -> None:
         for heading in END_HEADINGS:
             with self.subTest(heading=heading):
@@ -382,6 +442,44 @@ class ValidatorTests(unittest.TestCase):
                     ),
                     heading,
                 )
+
+    def test_required_end_headings_must_appear_in_exact_order(self) -> None:
+        document = replace_exact(
+            VALID_DOCUMENT,
+            "### Unverified or disputed material",
+            "### Temporary ledger heading",
+        )
+        document = replace_exact(
+            document,
+            "### Attribution copy",
+            "### Unverified or disputed material",
+        )
+        document = replace_exact(
+            document,
+            "### Temporary ledger heading",
+            "### Attribution copy",
+        )
+        self.assert_error(document, "exact order")
+
+    def test_evidence_and_asset_records_must_use_their_exact_ledgers(self) -> None:
+        document = replace_exact(VALID_DOCUMENT, EVIDENCE_RECORD, "__EVIDENCE__")
+        document = replace_exact(document, ASSET_RECORD, EVIDENCE_RECORD)
+        document = replace_exact(document, "__EVIDENCE__", ASSET_RECORD)
+        errors = validate_document(document)
+        self.assertTrue(
+            any(
+                "Record F-001 must be under Evidence references" in error
+                for error in errors
+            ),
+            errors,
+        )
+        self.assertTrue(
+            any(
+                "Record A-001 must be under Visual and archival sources" in error
+                for error in errors
+            ),
+            errors,
+        )
 
     def test_fenced_fields_and_headings_do_not_satisfy_requirements(self) -> None:
         for fence in ("```", "~~~"):
@@ -503,6 +601,22 @@ class ValidatorTests(unittest.TestCase):
                     field,
                 )
 
+    def test_required_evidence_fields_reject_whitespace_only_values(self) -> None:
+        for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
+            for field in EVIDENCE_FIELDS:
+                with self.subTest(readiness=readiness, field=field):
+                    document = replace_exact(
+                        VALID_DOCUMENT,
+                        "- **Status:** RESEARCH-DRAFT",
+                        f"- **Status:** {readiness}",
+                    )
+                    record = blank_markdown_field(EVIDENCE_RECORD, field)
+                    document = replace_exact(document, EVIDENCE_RECORD, record)
+                    self.assert_error(
+                        document,
+                        f"Record F-001 field {field} must have a non-whitespace value",
+                    )
+
     def test_all_required_asset_fields_are_reported(self) -> None:
         for field in ASSET_FIELDS:
             with self.subTest(field=field):
@@ -515,6 +629,25 @@ class ValidatorTests(unittest.TestCase):
                     replace_exact(VALID_DOCUMENT, ASSET_RECORD, record),
                     field,
                 )
+
+    def test_required_asset_fields_reject_whitespace_only_values(self) -> None:
+        required_values = tuple(
+            field for field in ASSET_FIELDS if field != "Direct production file"
+        )
+        for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
+            for field in required_values:
+                with self.subTest(readiness=readiness, field=field):
+                    document = replace_exact(
+                        VALID_DOCUMENT,
+                        "- **Status:** RESEARCH-DRAFT",
+                        f"- **Status:** {readiness}",
+                    )
+                    record = blank_markdown_field(ASSET_RECORD, field)
+                    document = replace_exact(document, ASSET_RECORD, record)
+                    self.assert_error(
+                        document,
+                        f"Record A-001 field {field} must have a non-whitespace value",
+                    )
 
     def test_source_url_fields_require_web_urls(self) -> None:
         cases = (
@@ -546,15 +679,18 @@ class ValidatorTests(unittest.TestCase):
                 )
 
     def test_empty_direct_production_file_passes(self) -> None:
-        record = replace_exact(
-            ASSET_RECORD,
-            "- **Direct production file:** https://oulurepo.oulu.fi/bitstream/handle/10024/43665/nbnfi-fe2023062057117.pdf",
-            "- **Direct production file:**",
-        )
-        self.assertEqual(
-            validate_document(replace_exact(VALID_DOCUMENT, ASSET_RECORD, record)),
-            [],
-        )
+        for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
+            with self.subTest(readiness=readiness):
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    "- **Status:** RESEARCH-DRAFT",
+                    f"- **Status:** {readiness}",
+                )
+                record = blank_markdown_field(ASSET_RECORD, "Direct production file")
+                self.assertEqual(
+                    validate_document(replace_exact(document, ASSET_RECORD, record)),
+                    [],
+                )
 
     def test_readiness_status_vocabulary_passes(self) -> None:
         for status in READINESS_STATES:

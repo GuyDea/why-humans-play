@@ -109,6 +109,9 @@ REFERENCES_HEADING_RE = re.compile(
 )
 REFERENCE_ID_RE = re.compile(r"`([FA]-\d{3})`")
 RECORD_HEADING_RE = re.compile(r"^#### ([FA]-\d{3})(?:\s|$)", re.MULTILINE)
+LEVEL_THREE_HEADING_RE = re.compile(
+    r"^### ([^#\r\n].*?)[ \t]*$", re.MULTILINE
+)
 FIELD_RE = re.compile(
     r"^[ \t]*-[ \t]+\*\*(.+?):\*\*[ \t]*(.*)$", re.MULTILINE
 )
@@ -123,6 +126,7 @@ class Record:
 
     record_id: str
     body: str
+    heading_start: int
 
 
 @dataclass(frozen=True)
@@ -260,8 +264,28 @@ def _parse_records(references_text: str) -> list[Record]:
             else len(references_text)
         )
         end = min(next_record, next_section)
-        records.append(Record(match.group(1), references_text[match.end() : end]))
+        records.append(
+            Record(match.group(1), references_text[match.end() : end], match.start())
+        )
     return records
+
+
+def _end_section_ranges(references_text: str) -> dict[str, tuple[int, int]]:
+    """Return body ranges for required end sections found in the references region."""
+
+    headings = list(LEVEL_THREE_HEADING_RE.finditer(references_text))
+    ranges: dict[str, tuple[int, int]] = {}
+    for index, heading in enumerate(headings):
+        name = heading.group(1).rstrip()
+        if name not in END_HEADINGS or name in ranges:
+            continue
+        end = (
+            headings[index + 1].start()
+            if index + 1 < len(headings)
+            else len(references_text)
+        )
+        ranges[name] = (heading.end(), end)
+    return ranges
 
 
 def _has_web_url(value: str) -> bool:
@@ -309,14 +333,15 @@ def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
     for field in HEADER_FIELDS:
         if field not in fields:
             errors.append(f"Missing required header field: {field}.")
+        elif not fields[field]:
+            errors.append(
+                f"Required header field {field} must have a non-whitespace value."
+            )
 
     status = fields.get("Status")
     if status is not None and status not in READINESS_STATES:
         errors.append(f"Invalid readiness Status: {status!r}.")
 
-    for field in ("Target runtime", "Word count"):
-        if field in fields and not fields[field]:
-            errors.append(f"Header field {field} must have a value.")
     return fields
 
 
@@ -344,6 +369,10 @@ def _validate_beats(text: str, errors: list[str]) -> None:
                 errors.append(f"Beat {beat_id} is missing required section: {section}.")
             else:
                 section_bodies[section] = body
+                if not body.strip():
+                    errors.append(
+                        f"Beat {beat_id} section {section} must have non-whitespace content."
+                    )
 
         motion = section_bodies.get("Motion / edit")
         if motion is None:
@@ -369,6 +398,11 @@ def _validate_record_fields(record: Record, errors: list[str]) -> dict[str, str]
     for field in required:
         if field not in fields:
             errors.append(f"Record {record.record_id} is missing required field: {field}.")
+        elif field != "Direct production file" and not fields[field]:
+            errors.append(
+                f"Record {record.record_id} field {field} must have a "
+                "non-whitespace value."
+            )
     return fields
 
 
@@ -430,10 +464,35 @@ def _validate_references(
 ) -> None:
     referenced_ids = set(REFERENCE_ID_RE.findall(reference_text))
     records = _parse_records(references_text)
+    required_heading_order = tuple(
+        match.group(1).rstrip()
+        for match in LEVEL_THREE_HEADING_RE.finditer(references_text)
+        if match.group(1).rstrip() in END_HEADINGS
+    )
+    if required_heading_order != END_HEADINGS:
+        errors.append(
+            "Required end headings must appear exactly once in this exact order: "
+            + ", ".join(END_HEADINGS)
+            + "."
+        )
+
+    section_ranges = _end_section_ranges(references_text)
     records_by_id: dict[str, list[Record]] = {}
     fields_by_record: dict[int, dict[str, str]] = {}
     for record in records:
         records_by_id.setdefault(record.record_id, []).append(record)
+        expected_section = (
+            "Evidence references"
+            if record.record_id.startswith("F-")
+            else "Visual and archival sources"
+        )
+        expected_range = section_ranges.get(expected_section)
+        if expected_range is not None and not (
+            expected_range[0] <= record.heading_start < expected_range[1]
+        ):
+            errors.append(
+                f"Record {record.record_id} must be under {expected_section}."
+            )
         fields = _validate_record_fields(record, errors)
         fields_by_record[id(record)] = fields
         if record.record_id.startswith("F-"):
