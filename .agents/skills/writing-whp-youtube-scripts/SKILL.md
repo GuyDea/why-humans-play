@@ -61,12 +61,12 @@ Do not draft until the packaging, opening, and payoff describe the same video.
 
 ## Validation and completion
 
-Resolve the skill directory from the loaded `SKILL.md`, change to that directory, and run:
+Resolve the target script path to an absolute path at runtime before changing to the skill directory. Resolve the skill directory from the loaded `SKILL.md`, change to it, and run:
 
 ```bash
-python3 scripts/validate_annotated_script.py <script-path>
+python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"
 ```
 
-Do not hardcode an absolute path or a vendor-specific environment variable. Treat the validator as structural only; factual truth, rights clearance, editorial judgment, and production approval still require human review.
+Do not hardcode the skill package path or use a vendor-specific environment variable. The dynamically resolved target path may be absolute; pass it as one quoted argument after `--`. Treat the validator as structural only; factual truth, rights clearance, editorial judgment, and production approval still require human review.
 
 Report readiness honestly. List every unresolved fact, rights, and production item, and do not infer `RECORD-READY` from automated validation alone.

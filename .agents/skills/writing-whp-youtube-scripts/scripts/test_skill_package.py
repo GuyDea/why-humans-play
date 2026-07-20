@@ -25,6 +25,17 @@ class SkillPackageTests(unittest.TestCase):
         }
         missing = sorted(path for path in required if not (SKILL_ROOT / path).is_file())
         self.assertEqual(missing, [])
+        expected_openai = (
+            b"interface:\n"
+            b'  display_name: "WHP YouTube Script Writer"\n'
+            b'  short_description: "Write rigorous, production-annotated WHP scripts"\n'
+            b'  default_prompt: "Use $writing-whp-youtube-scripts to develop a '
+            b'story-led, source-audited Why Humans Play episode script."\n'
+        )
+        self.assertEqual(
+            (SKILL_ROOT / "agents" / "openai.yaml").read_bytes(),
+            expected_openai,
+        )
 
     def test_frontmatter_is_portable_and_description_is_trigger_only(self) -> None:
         text = SKILL_MD.read_text(encoding="utf-8")
@@ -43,6 +54,9 @@ class SkillPackageTests(unittest.TestCase):
         text = SKILL_MD.read_text(encoding="utf-8")
         forbidden = (
             "/home/",
+            "/Users/",
+            "~/",
+            "file://",
             ".codex/",
             "functions.",
             "mcp__",
@@ -51,24 +65,58 @@ class SkillPackageTests(unittest.TestCase):
             "context: fork",
         )
         self.assertEqual([token for token in forbidden if token in text], [])
+        self.assertIsNone(re.search(r"(?i)\b[a-z]:[\\/]", text))
+        resolve_instruction = (
+            "Resolve the target script path to an absolute path at runtime before "
+            "changing to the skill directory."
+        )
+        safe_command = (
+            'python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"'
+        )
+        self.assertIn(resolve_instruction, text)
+        self.assertIn(safe_command, text)
+        self.assertLess(text.index(resolve_instruction), text.index(safe_command))
 
     def test_relative_markdown_resources_exist(self) -> None:
         text = SKILL_MD.read_text(encoding="utf-8")
         targets = re.findall(r"\[[^]]+\]\(([^)]+)\)", text)
-        local = [target for target in targets if "://" not in target and not target.startswith("#")]
-        self.assertGreaterEqual(len(local), 5)
-        self.assertEqual(
-            [target for target in local if not (SKILL_ROOT / target).is_file()],
-            [],
-        )
+        local = [
+            target
+            for target in targets
+            if "://" not in target and not target.startswith("#")
+        ]
+        expected = [
+            "references/story-and-hook-method.md",
+            "references/research-and-rights.md",
+            "references/annotated-script-format.md",
+            "assets/annotated-script-template.md",
+            "references/quality-rubric.md",
+        ]
+        self.assertEqual(local, expected)
+        resolved_skill_root = SKILL_ROOT.resolve(strict=True)
+        for target in local:
+            relative_target = Path(target)
+            self.assertFalse(relative_target.is_absolute())
+            self.assertNotIn("..", relative_target.parts)
+            resolved_target = (SKILL_ROOT / relative_target).resolve(strict=True)
+            self.assertTrue(resolved_target.is_file())
+            self.assertTrue(resolved_target.is_relative_to(resolved_skill_root))
 
     def test_skill_entrypoint_stays_below_progressive_disclosure_limit(self) -> None:
         self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 500)
 
     def test_claude_discovery_is_one_relative_symlink_to_the_canonical_package(self) -> None:
         self.assertTrue(CLAUDE_LINK.is_symlink())
-        self.assertFalse(CLAUDE_LINK.readlink().is_absolute())
-        self.assertEqual(CLAUDE_LINK.resolve(), SKILL_ROOT.resolve())
+        link_target = CLAUDE_LINK.readlink()
+        self.assertEqual(
+            link_target.as_posix(),
+            "../../.agents/skills/writing-whp-youtube-scripts",
+        )
+        self.assertFalse(link_target.is_absolute())
+        self.assertEqual(
+            CLAUDE_LINK.resolve(strict=True),
+            SKILL_ROOT.resolve(strict=True),
+        )
 
 
 if __name__ == "__main__":
