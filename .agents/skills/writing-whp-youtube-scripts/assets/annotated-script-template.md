@@ -5,7 +5,7 @@
 > live source, locator, license, and claim before production.
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.1
+- **Version:** 0.2
 - **Target runtime:** 00:20
 - **Word count:** 52
 - **Audience:** Curious adults

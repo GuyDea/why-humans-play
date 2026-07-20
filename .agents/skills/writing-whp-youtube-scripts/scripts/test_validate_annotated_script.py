@@ -138,7 +138,7 @@ def extract_exact(text: str, start: str, end: str) -> str:
 VALID_DOCUMENT = """# Why Bees Roll Balls
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.1
+- **Version:** 0.2
 - **Target runtime:** 00:20
 - **Word count:** 52
 - **Audience:** Curious adults
@@ -388,8 +388,8 @@ class ValidatorTests(unittest.TestCase):
             with self.subTest(fence=fence):
                 document = replace_exact(
                     VALID_DOCUMENT,
-                    "- **Version:** 0.1",
-                    "- **Removed:** 0.1",
+                    "- **Version:** 0.2",
+                    "- **Removed:** 0.2",
                 )
                 document = replace_exact(
                     document,
@@ -399,7 +399,7 @@ class ValidatorTests(unittest.TestCase):
                 document = replace_exact(
                     document,
                     "\n## Beat 01 — The detour",
-                    f"\n{fence}markdown\n- **Version:** 0.1\n{fence}\n\n"
+                    f"\n{fence}markdown\n- **Version:** 0.2\n{fence}\n\n"
                     "## Beat 01 — The detour",
                 )
                 document = replace_exact(
