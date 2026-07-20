@@ -201,16 +201,22 @@ Use only these statuses:
 
 A versioned `CC-*` status records the asset's license; it does not by itself clear the
 planned use. Require substantive human review of license compatibility beyond
-structural validation. Treat these as blocking conflicts:
+structural validation. Treat a crop, excerpt, overlay, animation, or similar
+modification under an ND license as a mandatory human-review trigger, not as a
+categorical determination that Adapted Material has been created. Treat these as
+blocking conflicts:
 
 - an NC term conflicts with monetized or other commercial use;
-- an ND term conflicts with a crop, overlay, animation, excerpt, or other adaptation;
-  or
+- the planned treatment constitutes or may constitute Adapted Material under the
+  applicable ND license, and no permission, non-adapted compliant treatment, or
+  usable fallback exists; or
 - SA or attribution obligations cannot be met in the planned publication.
 
 When a conflict exists, change the treatment to comply or supply a usable fallback.
 Prohibit `RECORD-READY` while the conflict or fallback remains unresolved. Do not ask
 the validator to decide license compatibility; its pass remains structural only.
+Refer interpretation to an authorized rights reviewer or counsel; this workflow does
+not provide legal advice.
 
 Do not let a validator, score, attribution line, or production deadline promote a
 fair-use candidate to cleared. Fair use is context-specific legal analysis and

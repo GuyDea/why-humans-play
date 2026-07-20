@@ -171,10 +171,15 @@ rechecks the final script only after evidence, rights, and production dependenci
 are closed; never carry the earlier approval forward automatically.
 
 A versioned `CC-*` status records a license, not clearance of the planned use. If NC
-conflicts with monetized or commercial use, ND conflicts with crop, overlay,
-animation, or adaptation, or SA/attribution obligations cannot be met, change the
-treatment or require a usable fallback. Prohibit `RECORD-READY` until the conflict is
-resolved. Treat this as substantive human review beyond structural validation.
+conflicts with monetized or commercial use, or SA/attribution obligations cannot be
+met, change the treatment or require a usable fallback. Treat crop, excerpt, overlay,
+animation, and similar modification under an ND license as mandatory human-review
+triggers. When the planned treatment constitutes or may constitute Adapted Material
+under the applicable ND license, prohibit `RECORD-READY` unless permission or a
+non-adapted compliant treatment or usable fallback exists. Treat this as substantive
+human review beyond structural validation. Refer license interpretation to an
+authorized rights reviewer or counsel; this rubric does not provide legal advice and
+the validator does not decide compatibility.
 
 Treat human approval and substantive review as requirements, not score bonuses. A
 total score never overrides a hard gate. A validator pass never promotes readiness;
