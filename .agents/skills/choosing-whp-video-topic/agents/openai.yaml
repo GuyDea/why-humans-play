@@ -1,0 +1,7 @@
+interface:
+  display_name: "Choosing WHP Video Topics"
+  short_description: "Find WHP's best next video topic"
+  default_prompt: "Use $choosing-whp-video-topic to research and recommend the single best topic and angle for WHP's next YouTube video."
+
+policy:
+  allow_implicit_invocation: true
