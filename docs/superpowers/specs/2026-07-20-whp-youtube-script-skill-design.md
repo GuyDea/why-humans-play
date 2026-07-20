@@ -28,7 +28,7 @@ academic paper.
 
 ## Goals
 
-Create a repository-scoped Codex skill that can:
+Create a repository-scoped, Agent Skills-compatible skill that can:
 
 1. Generate or substantially revise long-form WHP YouTube scripts.
 2. Read and obey the canonical brand and channel steering documents.
@@ -42,6 +42,8 @@ Create a repository-scoped Codex skill that can:
 6. End every script with complete evidence and visual-source ledgers.
 7. Validate the document structure and readiness claims deterministically.
 8. Improve through before/after evaluations on realistic WHP assignments.
+9. Run from Codex, Claude Code, and other compatible agent clients without changing
+   its editorial workflow or maintaining divergent copies.
 
 ## Non-goals
 
@@ -53,6 +55,7 @@ The first version will not:
 - mechanically predict a retention curve or promise virality;
 - require a different picture for every sentence;
 - replace human fact, rights, or editorial review; or
+- guarantee identical output or tool access across different models and clients; or
 - generate unrelated social posts, thumbnails, or general-purpose marketing copy.
 
 It may propose actual source materials and direct links, but asset acquisition and
@@ -148,15 +151,47 @@ Source:
 
 ## Decision
 
-### Skill location and name
+### Portable core and discovery adapters
 
-Create the skill at:
+The skill itself will follow the open Agent Skills specification: a portable folder
+with a standards-compliant `SKILL.md`, relative resource links, and optional
+`scripts/`, `references/`, and `assets/`. Instructions will describe capabilities
+such as searching, reading project files, and running a validator rather than naming
+Codex-only or Claude-only tools. Vendor extensions must not be required to execute
+the editorial workflow.
+
+Keep the single canonical package at:
 
 ```text
 .agents/skills/writing-whp-youtube-scripts/
 ```
 
-Use this structure:
+Expose that same directory to Claude Code with a committed relative directory
+symlink at:
+
+```text
+.claude/skills/writing-whp-youtube-scripts
+```
+
+Claude Code officially follows project-skill directory symlinks in version 2.1.203
+and later. On a filesystem or Git checkout that cannot preserve symlinks, copying
+the canonical directory into the client's project skill location is the documented
+installation fallback; the repository will not maintain two editable copies.
+
+Other Agent Skills-compatible clients can consume the canonical folder through
+their own discovery path. A raw language-model API does not discover filesystem
+skills by itself; its agent host must load `SKILL.md` and make the required research
+and file capabilities available.
+
+Sources:
+
+- [Agent Skills specification](https://agentskills.io/specification)
+- [Claude Code skills documentation](https://code.claude.com/docs/en/slash-commands)
+- [OpenAI build-skills documentation](https://learn.chatgpt.com/docs/build-skills)
+
+### Package structure
+
+Use this structure for the canonical package:
 
 ```text
 writing-whp-youtube-scripts/
@@ -178,8 +213,9 @@ writing-whp-youtube-scripts/
 Detailed methods will load only when needed. The Markdown template is an output asset.
 The validator exists only for deterministic structural checks.
 
-This follows Codex's progressive-disclosure model and repository skill location:
-[OpenAI build-skills documentation](https://learn.chatgpt.com/docs/build-skills).
+`agents/openai.yaml` is optional OpenAI presentation metadata. It may improve the
+Codex experience, but the core `SKILL.md`, assets, references, scripts, and workflow
+must remain complete without it. Claude Code and other clients may ignore it.
 
 ## Workflow
 
@@ -434,6 +470,14 @@ Evaluate triggering, brand fidelity, promise alignment, factual precision, narra
 momentum, spoken quality, visual usefulness, animation purpose, reference completeness,
 rights honesty, and readiness labeling.
 
+Run the same representative generation and revision prompts through every locally
+available compatible client. At minimum, perform a static portability audit that
+rejects required vendor-specific commands, absolute skill paths, unsupported
+frontmatter, and references that escape the canonical package. If Claude Code is
+installed at a version that supports directory symlinks, verify discovery and one
+end-to-end prompt there. Record unavailable clients as untested rather than claiming
+behavior that was not observed.
+
 ### Automated checks
 
 - Run the skill creator's `quick_validate.py`.
@@ -442,6 +486,11 @@ rights honesty, and readiness labeling.
 - Run Markdown link and placeholder scans where tooling permits.
 - Confirm `agents/openai.yaml` matches the final skill and declares no unavailable
   dependencies.
+- Validate the canonical package against the Agent Skills schema.
+- Resolve the Claude Code discovery symlink and confirm it reaches the canonical
+  package without duplicating files.
+- Scan the core workflow for required Codex- or Claude-specific tool names and
+  absolute local paths.
 
 ## Security, Legal, and Operational Consequences
 
@@ -460,18 +509,22 @@ rights honesty, and readiness labeling.
 The design is implemented when current branch evidence proves all of the following:
 
 1. The repo-scoped skill exists at the decided path and passes schema validation.
-2. Its trigger description covers WHP long-form scripting and revision without claiming
+2. The canonical package follows the Agent Skills specification, uses portable core
+   instructions, and is exposed to Claude Code without a second editable copy.
+3. Its trigger description covers WHP long-form scripting and revision without claiming
    unrelated writing tasks.
-3. It reads brand and channel steering in the required order.
-4. It implements the confidence ladder and status-matched narration.
-5. It distinguishes evidence, visual provenance, and publication rights.
-6. It produces stacked annotated beat blocks and complete end references.
-7. It includes a realistic output template showing the intended final format.
-8. Its validator was developed test-first and correctly handles valid, invalid, and
+4. It reads brand and channel steering in the required order.
+5. It implements the confidence ladder and status-matched narration.
+6. It distinguishes evidence, visual provenance, and publication rights.
+7. It produces stacked annotated beat blocks and complete end references.
+8. It includes a realistic output template showing the intended final format.
+9. Its validator was developed test-first and correctly handles valid, invalid, and
    record-ready documents.
-9. Independent before/after tests show material improvement over the captured baseline
+10. Independent before/after tests show material improvement over the captured baseline
    on the stated failure modes.
-10. All required checks pass, diffs are reviewed, and no unrelated user work changes.
+11. Portability checks pass, and any client not exercised end to end is explicitly
+    recorded as untested.
+12. All required checks pass, diffs are reviewed, and no unrelated user work changes.
 
 ## Deferred Follow-ups
 
