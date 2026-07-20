@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reconcile WHP"
+  short_description: "Keep WHP docs aligned after definite decisions"
+  default_prompt: "Use $reconcile-whp to propagate the latest definite WHP decision across the repository."
