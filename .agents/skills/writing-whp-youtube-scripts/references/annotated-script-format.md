@@ -194,6 +194,10 @@ is allowed when it still states both elements explicitly.
 End the document with one `## References and source materials` heading. Place these
 four level-three sections under it in this exact order:
 
+Apply this structure even when the requested artifact is only a targeted beat,
+insert, audit, or revision excerpt; use an explicit none-needed statement in any
+section that has no records.
+
 1. `### Evidence references`
 2. `### Visual and archival sources`
 3. `### Unverified or disputed material`
