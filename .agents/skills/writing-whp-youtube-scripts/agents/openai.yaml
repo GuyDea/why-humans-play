@@ -1,0 +1,4 @@
+interface:
+  display_name: "WHP YouTube Script Writer"
+  short_description: "Write rigorous, production-annotated WHP scripts"
+  default_prompt: "Use $writing-whp-youtube-scripts to develop a story-led, source-audited Why Humans Play episode script."
