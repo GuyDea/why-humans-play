@@ -53,11 +53,12 @@ executive summary, method note, or preamble before `## Decision`.
 ## Completeness audit
 ```
 
-Use the same structure when the evidence cannot responsibly support a winner. Label the first
-section **Incomplete research result**, do not fabricate a winner, state the minimum missing
-evidence, and mark the affected audit items `no`. If evidence supports two or more viable finalists
-but does not separate them, name one provisional winner and the smallest decisive test; a supported
-tie is not an incomplete result.
+Use the same structure when the evidence cannot responsibly support a winner. Always retain the
+exact `## Decision` heading and set **Decision status** to `Incomplete research result`; do not
+rename the heading or fabricate a winner. State the minimum missing evidence and mark the affected
+audit items `no`. If at least three responsibly supported, winner-eligible finalists remain but do
+not separate, name one provisional winner and the smallest decisive test; a supported tie among a
+complete top three is not an incomplete result.
 
 ## Decision
 
@@ -120,8 +121,11 @@ collapsing to hide a short pool or missing rejections.
 
 ## Ranked shortlist
 
-Rank roughly five gate-passing finalists **after** package-driven rescoring and reranking. Use these
-exact columns:
+Rank roughly five responsibly supported, gate-passing finalists **after** package-driven rescoring
+and reranking. Include only responsibly supported, gate-passing finalists. A winner-eligible
+finalist must have multiple independent decision-relevant signals; reduced confidence alone cannot
+excuse a single-source candidate. When independent corroboration is unavailable, mark that finalist
+ineligible. Use these exact columns:
 
 ```text
 rank | subject | exact angle | demand /25 | opening /15 | package /20
@@ -139,10 +143,17 @@ grades, convert them to numbers, or imply fake precision. Put one concise, cited
 finalist immediately below the table, naming the decisive support and largest uncertainty. Point to
 research-trail rows rather than repeating the underlying evidence.
 
+For an incomplete result, include only the responsibly supported, gate-passing finalists that
+actually exist. If none exist, state `No responsibly supported, gate-passing finalists`, emit no
+fabricated placeholder rows, identify the minimum missing evidence, and mark the affected audit
+items `no`. If lack of independent corroboration leaves no winner-eligible finalist, return an
+incomplete result.
+
 ## Packaging stress test
 
-Provide exactly three genuinely different title/thumbnail directions for each of the top-three
-finalists: **nine directions total**. Use these exact columns:
+For a complete recommendation, provide exactly three genuinely different title/thumbnail directions
+for each of the top-three responsibly supported, gate-passing finalists: **nine directions total**.
+Use these exact columns:
 
 ```text
 finalist | direction | working title | intended viewer | familiar element
@@ -153,7 +164,16 @@ Mark `survives honestly?` as `yes` or `no`, explain a `no` briefly, and visibly 
 strongest surviving direction for each finalist. Synonym swaps and cosmetic thumbnail changes do
 not count as different directions.
 
-Immediately after the nine-row table, expose the post-test adjustment in a compact table:
+For an incomplete result, test packages only for responsibly supported, gate-passing finalists. If
+none exist, state that explicitly, emit no fabricated placeholder packages, identify the minimum
+missing evidence, and mark the affected audit items, including items 8 and 9, `no`. If fewer than
+three such finalists exist, provide three directions for each one that exists, explicitly state why
+the full top-three test is incomplete, identify the minimum missing evidence, and mark item 8 `no`.
+Do not invent candidates to reach nine rows. An incomplete result with fewer than three responsibly
+supported finalists cannot claim a winner.
+
+For a complete recommendation, immediately after the nine-row table, expose the post-test adjustment
+in a compact table:
 
 ```text
 finalist | strongest surviving direction | thesis changed? / gate rerun result
@@ -161,14 +181,17 @@ package score before -> after | satisfaction score before -> after
 post-test rank | winner-eligible?
 ```
 
+For an incomplete result with one or two tested finalists, use the same adjustment columns for only
+those finalists. If none exist, state that no post-test adjustment is possible and mark item 9 `no`.
+
 If a package changes the thesis, intended audience, evidence path, or payoff, rerun all gates before
 rescoring it. Rescore package and satisfaction from the strongest honest surviving direction, then
 rerank. A finalist with no viable honest package is ineligible to win. Never silently preserve its
 pre-test score or rank.
 
-For each top-three finalist, add one sentence stating the earned reframe and at least two plausible
-adjacent follow-up episodes. Treat series potential only as a tiebreaker and coherence check, never
-as a score override.
+For each tested finalist—each top-three finalist in a complete recommendation—add one sentence
+stating the earned reframe and at least two plausible adjacent follow-up episodes. Treat series
+potential only as a tiebreaker and coherence check, never as a score override.
 
 ## Winner brief
 
@@ -267,7 +290,7 @@ table, row, source, or calculation pointer for every check.
 | 1 | At least 30 diverse subjects considered |  |  |
 | 2 | Subjects converted into materially different angles |  |  |
 | 3 | All six hard gates applied at angle level |  |  |
-| 4 | Multiple independent signals used per finalist, or reduced confidence disclosed |  |  |
+| 4 | Multiple independent signals used for every winner-eligible finalist; any uncorroborated finalist marked ineligible |  |  |
 | 5 | Volatile evidence dated and contextualized |  |  |
 | 6 | Trends, raw views, outliers, and missing data interpreted correctly |  |  |
 | 7 | Scores total correctly and include grades plus uncertainty |  |  |
@@ -282,6 +305,10 @@ impossible. In that exception, disclose the limitation, lower confidence, list t
 needed, and leave the affected item `no`. If the remaining evidence cannot support any responsible
 winner, return an incomplete research result rather than weakening the audit or fabricating a
 decision.
+
+Reduced confidence does not satisfy item 4. Require independent corroboration for every
+winner-eligible finalist; when it is unavailable, mark the finalist ineligible. If that leaves no
+responsible winner, keep the affected audit items `no` and return an incomplete result.
 
 ## Boundaries
 
