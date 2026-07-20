@@ -30,13 +30,10 @@ rights findings.
 
 1. Write the smallest exact claim the script needs.
 2. Trace search results and reposts to the earliest practical originating source.
-3. Record the author, publisher, date, context, and precise page, table, figure,
-   section, paragraph, or timestamp locator.
-4. Seek independent corroborating evidence and evidence that could contradict the
-   claim.
-5. Compare retellings for changed denominators, species, dates, causality,
-   chronology, or scope.
-6. Assign confidence before drafting narration.
+3. Record author, publisher, date, context, and a precise page, table, figure, or timestamp locator.
+4. Seek an independent corroborating or contradicting source.
+5. Compare retellings for changed denominators, species, dates, causality, chronology, or scope.
+6. Assign one confidence status before drafting narration.
 7. Use only the approved wording or a weaker formulation.
 
 Preserve the population, denominator, comparison, time period, direction of effect,
@@ -56,7 +53,7 @@ audibly match that status.
 | `REPORTED` | One identifiable plausible source. | `According to a 2019 report…` |
 | `UNVERIFIED-EXAMPLE` | Provenance or corroboration remains incomplete. | `There is an unconfirmed account that…` |
 | `DISPUTED` | Credible sources conflict. | `Researchers disagree about…` |
-| `REJECTED` | Fabricated, contradicted, or materially misleading. | Omit. |
+| `REJECTED` | Fabricated, contradicted, or materially misleading. | `Omit from narration.` |
 
 Treat “not obviously fake” as a reason to keep checking, never as verification. Do
 not upgrade a claim because it is widely repeated, plausible, vivid, or published by

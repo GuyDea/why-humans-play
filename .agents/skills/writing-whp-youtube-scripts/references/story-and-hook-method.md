@@ -169,10 +169,7 @@ information into narration, captions, or the descriptive transcript.
 
 Apply this rule exactly:
 
-> Animate only to reveal temporal change, causality, spatial transformation, scale,
-> comparison, or an evidence trail. Write the explanatory purpose before motion.
-> Synchronize and cue one relation. Pause on the resolved state. Use a still if it is
-> equally clear.
+> Animate only when motion clarifies temporal change, causality, spatial transformation, scale, comparison, or an evidence trail. Write the explanatory purpose before the movement. If a still communicates the relationship as well, use the still.
 
 Write the explanatory purpose in the beat before specifying movement. Identify the
 single relationship the animation clarifies, then cue the viewer's attention as that
