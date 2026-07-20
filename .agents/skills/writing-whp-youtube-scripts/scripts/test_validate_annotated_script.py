@@ -323,6 +323,38 @@ class ValidatorTests(unittest.TestCase):
         )
         self.assert_error(out_of_order, "ascending")
 
+    def test_complete_beat_after_references_is_reported(self) -> None:
+        trailing_beat = replace_exact(BEAT_BLOCK, "## Beat 01", "## Beat 02")
+        trailing_beat = replace_exact(trailing_beat, "`F-001`", "`F-999`")
+        trailing_beat = replace_exact(
+            trailing_beat,
+            "`A-001`",
+            "`A-999`",
+            expected_count=2,
+        )
+        self.assert_error(
+            VALID_DOCUMENT.rstrip() + "\n\n" + trailing_beat,
+            "after the references heading",
+        )
+
+    def test_beat_id_requires_a_boundary_after_two_digits(self) -> None:
+        for malformed_heading in (
+            "## Beat 010 — The detour",
+            "## Beat 01junk — The detour",
+        ):
+            with self.subTest(heading=malformed_heading):
+                malformed_beat = replace_exact(
+                    BEAT_BLOCK,
+                    "## Beat 01 — The detour",
+                    malformed_heading,
+                )
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    BEAT_BLOCK,
+                    BEAT_BLOCK + malformed_beat,
+                )
+                self.assert_error(document, "Malformed beat heading")
+
     def test_all_required_beat_sections_are_reported(self) -> None:
         for section in BEAT_SECTIONS:
             with self.subTest(section=section):
@@ -346,6 +378,53 @@ class ValidatorTests(unittest.TestCase):
                         f"### Removed {heading}\n",
                     ),
                     heading,
+                )
+
+    def test_fenced_fields_and_headings_do_not_satisfy_requirements(self) -> None:
+        for fence in ("```", "~~~"):
+            with self.subTest(fence=fence):
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    "- **Version:** 0.1",
+                    "- **Removed:** 0.1",
+                )
+                document = replace_exact(
+                    document,
+                    "### Story function\n",
+                    "### Removed Story function\n",
+                )
+                document = replace_exact(
+                    document,
+                    "\n## Beat 01 — The detour",
+                    f"\n{fence}markdown\n- **Version:** 0.1\n{fence}\n\n"
+                    "## Beat 01 — The detour",
+                )
+                document = replace_exact(
+                    document,
+                    "_Time: 00:00–00:20 · Target: ~52 words_\n\n### Narration",
+                    "_Time: 00:00–00:20 · Target: ~52 words_\n\n"
+                    f"{fence}markdown\n### Story function\n{fence}\n\n"
+                    "### Narration",
+                )
+                errors = validate_document(document)
+                self.assertTrue(any("Version" in error for error in errors), errors)
+                self.assertTrue(
+                    any("Story function" in error for error in errors), errors
+                )
+
+    def test_fenced_beats_and_records_do_not_create_structural_errors(self) -> None:
+        for fence in ("```", "~~~"):
+            with self.subTest(fence=fence):
+                fenced_example = (
+                    f"\n{fence}markdown\n"
+                    "## Beat 00 — Example only\n"
+                    "#### F-999 — Example evidence\n"
+                    "#### A-999 — Example asset\n"
+                    f"{fence}\n"
+                )
+                self.assertEqual(
+                    validate_document(VALID_DOCUMENT.rstrip() + fenced_example),
+                    [],
                 )
 
     def test_motion_requires_explanatory_purpose_or_explicit_none(self) -> None:
@@ -560,21 +639,54 @@ class ValidatorTests(unittest.TestCase):
             [],
         )
 
-    def test_public_domain_without_jurisdiction_is_reported(self) -> None:
-        record = replace_exact(
-            ASSET_RECORD,
-            "- **Rights basis:** Article published open access under Creative Commons Attribution 4.0.",
-            "- **Rights basis:** Believed to be in the public domain.",
-        )
-        record = replace_exact(
-            record,
-            "- **Status:** CC-BY-4.0",
-            "- **Status:** PUBLIC-DOMAIN",
-        )
-        self.assert_error(
-            replace_exact(VALID_DOCUMENT, ASSET_RECORD, record),
-            "PUBLIC-DOMAIN",
-        )
+    def test_public_domain_accepts_jurisdiction_before_basis(self) -> None:
+        for rights_basis in (
+            "Jurisdiction: United States; basis: U.S. federal government work.",
+            "The basis is a U.S. federal government work under United States jurisdiction.",
+        ):
+            with self.subTest(rights_basis=rights_basis):
+                record = replace_exact(
+                    ASSET_RECORD,
+                    "- **Rights basis:** Article published open access under Creative Commons Attribution 4.0.",
+                    f"- **Rights basis:** {rights_basis}",
+                )
+                record = replace_exact(
+                    record,
+                    "- **License and version:** CC BY 4.0",
+                    "- **License and version:** Public domain in the United States",
+                )
+                record = replace_exact(
+                    record,
+                    "- **Status:** CC-BY-4.0",
+                    "- **Status:** PUBLIC-DOMAIN",
+                )
+                self.assertEqual(
+                    validate_document(
+                        replace_exact(VALID_DOCUMENT, ASSET_RECORD, record)
+                    ),
+                    [],
+                )
+
+    def test_public_domain_without_basis_or_jurisdiction_is_reported(self) -> None:
+        for rights_basis in (
+            "Believed to be in the public domain.",
+            "Jurisdiction: United States.",
+        ):
+            with self.subTest(rights_basis=rights_basis):
+                record = replace_exact(
+                    ASSET_RECORD,
+                    "- **Rights basis:** Article published open access under Creative Commons Attribution 4.0.",
+                    f"- **Rights basis:** {rights_basis}",
+                )
+                record = replace_exact(
+                    record,
+                    "- **Status:** CC-BY-4.0",
+                    "- **Status:** PUBLIC-DOMAIN",
+                )
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, ASSET_RECORD, record),
+                    "PUBLIC-DOMAIN",
+                )
 
     def test_invalid_asset_statuses_are_reported(self) -> None:
         for status in ("CC-BY", "PROBABLY"):

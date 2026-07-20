@@ -102,7 +102,8 @@ LIMITATION_SENTENCE = (
     "trustworthiness, copyright ownership, fair use, or editorial quality."
 )
 
-BEAT_HEADING_RE = re.compile(r"^## Beat (\d{2})", re.MULTILINE)
+BEAT_HEADING_RE = re.compile(r"^## Beat (\d{2})(?=[ \t]|$)", re.MULTILINE)
+BEAT_CANDIDATE_RE = re.compile(r"^## Beat(?:[ \t].*)?$", re.MULTILINE)
 REFERENCES_HEADING_RE = re.compile(
     r"^## References and source materials\s*$", re.MULTILINE
 )
@@ -124,6 +125,87 @@ class Record:
     body: str
 
 
+@dataclass(frozen=True)
+class DocumentRegions:
+    """Structural regions split around the document's references heading."""
+
+    header: str
+    beats: str
+    before_references: str
+    references: str
+    reference_heading_count: int
+    malformed_beat_headings: tuple[str, ...]
+    post_reference_beat_ids: tuple[str, ...]
+
+
+def _mask_fenced_blocks(text: str) -> str:
+    """Mask fenced Markdown blocks while preserving character and line positions."""
+
+    masked_lines: list[str] = []
+    fence_character: str | None = None
+    fence_length = 0
+    for line in text.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        if fence_character is None:
+            opening = re.match(r"^[ ]{0,3}(`{3,}|~{3,}).*$", content)
+            if opening is None:
+                masked_lines.append(line)
+                continue
+            marker = opening.group(1)
+            fence_character = marker[0]
+            fence_length = len(marker)
+        else:
+            candidate = content.lstrip(" ")
+            if len(content) - len(candidate) <= 3:
+                candidate = candidate.rstrip(" \t")
+                if (
+                    len(candidate) >= fence_length
+                    and set(candidate) == {fence_character}
+                ):
+                    fence_character = None
+                    fence_length = 0
+        masked_lines.append(re.sub(r"[^\r\n]", " ", line))
+    return "".join(masked_lines)
+
+
+def _document_regions(text: str) -> DocumentRegions:
+    """Split masked text once so all parsers use the same document boundaries."""
+
+    reference_headings = list(REFERENCES_HEADING_RE.finditer(text))
+    if reference_headings:
+        reference_heading = reference_headings[0]
+        before_references = text[: reference_heading.start()]
+        references = text[reference_heading.end() :]
+    else:
+        before_references = text
+        references = ""
+
+    first_beat = BEAT_HEADING_RE.search(before_references)
+    if first_beat is None:
+        header = before_references
+        beats = ""
+    else:
+        header = before_references[: first_beat.start()]
+        beats = before_references[first_beat.start() :]
+
+    valid_beat_starts = {match.start() for match in BEAT_HEADING_RE.finditer(text)}
+    malformed_beat_headings = tuple(
+        match.group(0)
+        for match in BEAT_CANDIDATE_RE.finditer(text)
+        if match.start() not in valid_beat_starts
+    )
+
+    return DocumentRegions(
+        header=header,
+        beats=beats,
+        before_references=before_references,
+        references=references,
+        reference_heading_count=len(reference_headings),
+        malformed_beat_headings=malformed_beat_headings,
+        post_reference_beat_ids=tuple(BEAT_HEADING_RE.findall(references)),
+    )
+
+
 def _parse_fields(text: str) -> dict[str, str]:
     """Return the first value found for each Markdown field in *text*."""
 
@@ -137,12 +219,9 @@ def _beat_blocks(text: str) -> list[tuple[str, str]]:
     """Return beat IDs and their bodies in document order."""
 
     matches = list(BEAT_HEADING_RE.finditer(text))
-    references_match = REFERENCES_HEADING_RE.search(text)
     blocks: list[tuple[str, str]] = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        if references_match and match.start() < references_match.start() < end:
-            end = references_match.start()
         blocks.append((match.group(1), text[match.start() : end]))
     return blocks
 
@@ -190,13 +269,39 @@ def _has_web_url(value: str) -> bool:
 
 
 def _has_public_domain_basis_and_jurisdiction(rights_basis: str) -> bool:
-    jurisdiction = re.search(
-        r"\bjurisdiction\s*:\s*([^.;\n]+)", rights_basis, re.IGNORECASE
-    )
-    if jurisdiction is None or not jurisdiction.group(1).strip():
+    """Check for separate basis and jurisdiction wording, not legal validity."""
+
+    if not rights_basis.strip():
         return False
-    basis = rights_basis[: jurisdiction.start()].strip(" \t;,.:-")
-    return bool(basis)
+    jurisdiction_after = re.search(
+        r"\bjurisdiction\b[ \t]*"
+        r"(?:(?:is|of|in|for|under)\b[ \t]*|[:=-][ \t]*)?"
+        r"([^;\n]+)",
+        rights_basis,
+        re.IGNORECASE,
+    )
+    jurisdiction_span: tuple[int, int] | None = None
+    if jurisdiction_after is not None and jurisdiction_after.group(1).strip(
+        " \t;,.:-"
+    ):
+        jurisdiction_span = jurisdiction_after.span()
+    else:
+        jurisdiction_before = re.search(
+            r"\b(?:under|in|for|of)[ \t]+([^;\n]+?)[ \t]+jurisdiction\b",
+            rights_basis,
+            re.IGNORECASE,
+        )
+        if jurisdiction_before is not None and jurisdiction_before.group(1).strip(
+            " \t;,.:-"
+        ):
+            jurisdiction_span = jurisdiction_before.span()
+
+    if jurisdiction_span is None:
+        return False
+    basis_statement = (
+        rights_basis[: jurisdiction_span[0]] + rights_basis[jurisdiction_span[1] :]
+    ).strip(" \t;,.:-")
+    return bool(basis_statement)
 
 
 def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
@@ -318,16 +423,11 @@ def _validate_asset_record(
 
 
 def _validate_references(
-    text: str, readiness_status: str | None, errors: list[str]
+    reference_text: str,
+    references_text: str,
+    readiness_status: str | None,
+    errors: list[str],
 ) -> None:
-    references_match = REFERENCES_HEADING_RE.search(text)
-    if references_match is None:
-        reference_text = text
-        references_text = ""
-    else:
-        reference_text = text[: references_match.start()]
-        references_text = text[references_match.end() :]
-
     referenced_ids = set(REFERENCE_ID_RE.findall(reference_text))
     records = _parse_records(references_text)
     records_by_id: dict[str, list[Record]] = {}
@@ -382,12 +482,28 @@ def _validate_references(
 def validate_document(text: str) -> list[str]:
     """Return human-readable structural errors; an empty list means structurally valid."""
 
+    regions = _document_regions(_mask_fenced_blocks(text))
     errors: list[str] = []
-    first_beat = BEAT_HEADING_RE.search(text)
-    header_text = text[: first_beat.start()] if first_beat else text
-    header_fields = _validate_headers(header_text, errors)
-    _validate_beats(text, errors)
-    _validate_references(text, header_fields.get("Status"), errors)
+    if regions.reference_heading_count != 1:
+        errors.append(
+            "Document must contain exactly one References and source materials "
+            f"heading; found {regions.reference_heading_count}."
+        )
+    for heading in regions.malformed_beat_headings:
+        errors.append(
+            "Malformed beat heading must use exactly two digits followed by "
+            f"whitespace or end of line: {heading!r}."
+        )
+    header_fields = _validate_headers(regions.header, errors)
+    _validate_beats(regions.beats, errors)
+    for beat_id in regions.post_reference_beat_ids:
+        errors.append(f"Beat {beat_id} appears after the references heading.")
+    _validate_references(
+        regions.before_references,
+        regions.references,
+        header_fields.get("Status"),
+        errors,
+    )
     return errors
 
 

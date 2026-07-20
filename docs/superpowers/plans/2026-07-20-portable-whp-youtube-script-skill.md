@@ -235,13 +235,15 @@ bee's motives.
 
 ```
 
-The executable test module must contain 31 focused test methods, using table-driven
+The executable test module must contain 36 focused test methods, using table-driven
 subtests where several vocabulary values or fields share one rule family. It must
 cover:
 
 1. fixture narration word-count coherence and a valid `RESEARCH-DRAFT`;
 2. every required header field, beat section, and end heading;
-3. unique and ascending beat IDs, with complete beats duplicated or reordered;
+3. unique and ascending beat IDs, with complete beats duplicated or reordered,
+   malformed suffixes after two-digit IDs, and complete beats rejected after the
+   references heading;
 4. both valid motion paths: a non-empty animation purpose and explicit
    `No animation — ...`;
 5. exactly one evidence/asset record for every reference, plus duplicate and orphan
@@ -250,12 +252,15 @@ cover:
 7. web-URL requirements for `Original URL`, `Original asset page`, and non-empty
    `Direct production file`, while accepting an empty direct-file value;
 8. every readiness and claim status, every fixed asset status, versioned CC statuses,
-   and `PUBLIC-DOMAIN` only with a stated basis and jurisdiction;
+   and `PUBLIC-DOMAIN` only with a stated basis and jurisdiction in either natural
+   clause order;
 9. invalid readiness, claim, asset, unversioned CC, and under-specified public-domain
    statuses;
 10. a valid `RECORD-READY`, a rejected claim, and each of the three blocked referenced
     asset statuses; and
-11. CLI exit codes 0, 1, and 2 for valid, invalid, and nonexistent/unreadable input.
+11. fenced backtick and tilde examples ignored for fields, beats, sections, and
+    records while inline backticked references remain active; and
+12. CLI exit codes 0, 1, and 2 for valid, invalid, and nonexistent/unreadable input.
     Each subprocess must have a short timeout, run outside the script directory, and
     print the complete structural-validation limitation sentence.
 
@@ -419,7 +424,7 @@ Implement the following deterministic rules without making network requests:
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
 ```
 
-Expected: 31 test methods run and all pass, including the table-driven field and
+Expected: 36 test methods run and all pass, including the table-driven field and
 vocabulary subtests and all three CLI exit paths.
 
 - [ ] **Step 3: Exercise the invalid CLI path**
