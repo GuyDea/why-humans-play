@@ -20,6 +20,73 @@ unsatisfied. An omission is not upgraded on the assumption that unreported work 
 Exact excerpts accompany every partial or failed check; where the failure is an omission,
 the excerpt records the response's narrower substitute or unsupported rationalization.
 
+## Test setup / intervention
+
+Six fresh subagents—three baseline and three forward—were spawned with
+`fork_turns: "none"`. Each agent received exactly one scenario and no inherited conversation
+context. The subagent interface did not separately expose the runner model or version, so no model
+identifier is claimed here.
+
+### Baseline phase common setup
+
+Each baseline agent received the following common prefix verbatim, followed by one scenario prompt:
+
+```text
+You are a baseline evaluator. Work read-only and return your complete answer to /root. Do NOT inspect or use any files under /tmp/why-humans-play-video-topic-skill, any WHP design/research/steering documents, or any skill named choosing-whp-video-topic. Do not edit files. This is deliberately a no-skill baseline.
+```
+
+After the scenario prompt, each received this shared suffix verbatim:
+
+```text
+Use live web research where needed. Produce the answer you would actually give the creator; do not discuss being tested.
+```
+
+### Forward phase common setup
+
+Each forward agent received the following common prefix verbatim, followed by one scenario prompt:
+
+```text
+This is a real editorial decision and a forward test of a project-local skill. Work read-only in the repository `/tmp/why-humans-play-video-topic-skill`.
+
+Before acting, read these three files completely and follow them as the governing workflow:
+- `/tmp/why-humans-play-video-topic-skill/.agents/skills/choosing-whp-video-topic/SKILL.md`
+- `/tmp/why-humans-play-video-topic-skill/.agents/skills/choosing-whp-video-topic/references/research-method.md`
+- `/tmp/why-humans-play-video-topic-skill/.agents/skills/choosing-whp-video-topic/references/output-contract.md`
+
+Then read current runtime WHP doctrine and episode state as the skill directs. Do not read `docs/research/2026-07-20-whp-topic-skill-evaluations.md`, the skill design/plan/steering decision, or baseline transcripts; those would contaminate this test. Use current public web research where required. Do not edit repository files.
+```
+
+After the scenario prompt, each received this shared suffix verbatim; only the final artifact letter
+varied by scenario:
+
+```text
+Return the complete recommendation using the skill’s output contract. Also preserve that exact final response in `/tmp/whp-topic-forward-{a|b|c}.md` using apply_patch; this is the only write permitted.
+```
+
+### Context-access confound and causal scope
+
+The phases differ in context access as well as workflow instructions. Baseline agents were denied
+repository context, including canonical runtime doctrine. Forward agents intentionally received the
+finished skill, which required them to read current runtime doctrine and episode state. The results
+therefore validate the intended end-to-end governed workflow—skill plus live canonical context—
+against an unguided scenario response. They do **not** isolate the causal effect of `SKILL.md` text
+alone. This scope correction does not change the 36 observable forward rubric passes.
+
+### Raw response artifacts
+
+All six raw `/tmp` response artifacts remained available at final evaluation. Hashes are SHA-256 of
+the raw files, before the trailing-space normalizations documented in the embedded transcript
+sections.
+
+| Phase | Scenario | Raw artifact | SHA-256 |
+|---|:---:|---|---|
+| Baseline | A | `/tmp/whp-topic-baseline-a.md` | `4f25f774af3d601ae7532eb78c81ed5cd4743d7831f8bd77af31ddfe77ee06e9` |
+| Baseline | B | `/tmp/whp-topic-baseline-b.md` | `ae53f7712367bb36c97c0479438b12e9fe296039c59831cdb89cbe4766770612` |
+| Baseline | C | `/tmp/whp-topic-baseline-c.md` | `615ce519b8f860831e2679faabdcc0617818063209d3798b2078062bfc47efc2` |
+| Forward | A | `/tmp/whp-topic-forward-a.md` | `ff027ee22e1e95253614dc0f3adfcaffa28450955f7bc2387ef4a2454ba4435f` |
+| Forward | B | `/tmp/whp-topic-forward-b.md` | `f08e67cab0c7a5d6826547be3fb2cca0bc53803fb82d4ead5b4717ac85bed148` |
+| Forward | C | `/tmp/whp-topic-forward-c.md` | `b33a925faeaf73e4469f44a8d9763ab026803a3c7cbcac1fbdaede64a5ef6143` |
+
 ## Fixed twelve-check rubric
 
 | # | Check |
@@ -529,12 +596,12 @@ Even with that uncertainty, Sudoku is the best next bet: the promise is cleaner,
 
 ## Forward-test results
 
-Three fresh agents received the same fixed prompts after the complete skill at repository revision
-`d33e106`. The evaluator read each full response and rechecked observable behavior rather than
-accepting its completeness audit. Candidate counts, angle rows, six-gate records, independent
-signals, source classifications, score weights and arithmetic, package counts and differences,
-post-package rescoring, confidence, uncertainty, and winner/runner-up language were all checked
-directly.
+Three fresh agents received the same fixed prompts under the governed forward intervention at
+repository revision `d33e106`. The evaluator read each full response and rechecked observable
+behavior rather than accepting its completeness audit. Candidate counts, angle rows, six-gate
+records, independent signals, source classifications, score weights and arithmetic, package counts
+and differences, post-package rescoring, confidence, uncertainty, and winner/runner-up language
+were all checked directly.
 
 All three source artifacts ended with a newline. To satisfy `git diff --check`, the embedded copies
 remove the two trailing ASCII spaces used for Markdown hard breaks after each of the first five
@@ -550,7 +617,7 @@ wording, punctuation, link, table row, or other byte was changed.
 
 ### Scenario A — cold start and actual games
 
-#### Exact prompt
+#### Scenario prompt
 
 ```text
 Act as the editorial researcher for a new English-language YouTube channel called Why Humans Play. The channel has no useful private analytics yet, is made by one presenter, and can publish one researched 8–12 minute video in three weeks. The creator likes Sudoku and thinks its history could work, but does not want that preference rubber-stamped. Research current public evidence and decide the single best topic and angle for the next video. Topics may range broadly across actual games, puzzles, play, and what they reveal about humans. Show how you considered alternatives, cite current evidence, and choose one winner. Do not ask follow-up questions.
@@ -831,7 +898,7 @@ runner-up rather than a preference either accepted or dismissed impressionistica
 
 ### Scenario B — trend bait and misleading metrics
 
-#### Exact prompt
+#### Scenario prompt
 
 ```text
 Act as the editorial researcher for Why Humans Play, an ideas channel using games and play to explain humanity. A collaborator insists the next video should be "AI is changing everything" because one AI video has 20 million views and Google Trends briefly reached 100 this week. The only proposed play connection is that some AI agents were evaluated in games. There is a five-day deadline and pressure to chase the spike. Research the opportunity, compare it with broader games/play/human candidates, and choose the single best next topic and angle. Explain whether the raw view count and trend peak are decision-worthy. Do not ask follow-up questions.
@@ -1128,7 +1195,7 @@ cited demand, supply, evidence, feasibility, and package tests.
 
 ### Scenario C — conflicting evidence and forced choice
 
-#### Exact prompt
+#### Scenario prompt
 
 ```text
 Act as the editorial researcher for Why Humans Play. The current finalists are a video about how Sudoku conquered the world and a video about why humans turn work into status games. Public signals are mixed: Sudoku appears evergreen and visually clear, while workplace status is broader but more competitive and harder to prove. There is no reliable channel analytics history. Research both plus credible alternatives, apply a transparent comparison, and choose exactly one next video. Include an honest package direction, the decisive uncertainty, and why the runner-up lost. Do not return an unordered menu and do not ask follow-up questions.
@@ -1405,7 +1472,7 @@ and names the blind package test that could reverse the choice.
 
 ## Cross-scenario before/after
 
-| Dimension | No-skill baseline | Skill-guided forward tests | Observable change |
+| Dimension | No-skill baseline | Governed-workflow forward tests | Observable change |
 |---|---|---|---|
 | Candidate breadth | A: 5 subjects; B: 5; C: 4 | A: 34; B: 35; C: 34, with 10 shallow survivors and 5 deep finalists each | All runs diverge beyond 30 across literal games, history, hidden games, play/learning, institutions, AI/digital culture, and philosophy before narrowing. |
 | Decision frame / mode | A partly implied cold start; B and C omitted the named mode; market, constraints, or dates were incomplete | All record 2026-07-20, target language/market or its absence, publication/production constraints, unavailable inputs, and `cold-start` rationale | Missing context becomes explicit `unknown` rather than an assumption. |
@@ -1429,8 +1496,9 @@ behavioral failure would weaken the test-driven boundary rather than refine it.
 |---|---|---|
 | **None** | No material partial or fail appeared in A, B, or C | No rerun was required; the original fresh runs all scored 12/12 |
 
-**Final verdict: pass.** The skill converts the baseline's recurring breadth, context, gate,
-competition, provenance, scoring, and package-testing gaps into consistent observable behavior
-across all three adversarial scenarios. This verdict is limited to workflow compliance and decision
-quality visible in these reports; it is not a claim that any selected topic will achieve a
-particular performance result.
+**Final verdict: pass.** The governed workflow produced consistent observable breadth, context,
+gate, competition, provenance, scoring, and package-testing behavior across all three adversarial
+scenarios, relative to the context-denied unguided baseline. This verdict covers the intended
+end-to-end workflow and the decision quality visible in these reports; it neither isolates the
+causal effect of `SKILL.md` text alone nor claims that any selected topic will achieve a particular
+performance result.
