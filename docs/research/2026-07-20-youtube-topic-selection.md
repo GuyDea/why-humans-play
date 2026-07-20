@@ -6,7 +6,8 @@
 - **Conclusion:** Use a staged evidence funnel. Generate broadly from independent signals,
   convert subjects into specific promises, gate for WHP/rigor/payoff/feasibility, triangulate
   demand and competition, stress-test packaging, and choose one winner with explicit
-  uncertainty. No single keyword, trend, outlier, or AI suggestion can answer the question.
+  uncertainty only when a responsible comparison exists. Otherwise return an explicit
+  incomplete result. No single keyword, trend, outlier, or AI suggestion can answer the question.
 
 ## Executive findings
 
@@ -229,9 +230,11 @@ the package cannot honestly express and deliver the idea.
 
 ### Stage G: decide and expose uncertainty
 
-Return one winner, explain why the runner-up lost, state what could change the decision, and
-identify factual claims requiring verification before scripting. A lower-confidence answer
-is acceptable; fabricated certainty is not.
+Return one winner and explain why the runner-up lost when at least two responsibly supported
+finalists remain. If only one or none remains, state that no winner is responsibly supportable,
+identify any sole supported finalist separately, and list the evidence needed for a valid
+comparison. State what could change the decision and identify factual claims requiring
+verification before scripting. A lower-confidence answer is acceptable; fabricated certainty is not.
 
 ## Common failure modes the skill should prevent
 
@@ -245,7 +248,7 @@ is acceptable; fabricated certainty is not.
 | Generating many near-duplicate AI ideas | Seed from independent sources and enforce topic lanes |
 | Choosing clickability over delivery | Stress-test package/payoff alignment |
 | Letting breadth turn into channel randomness | Apply the human-through-games coherence and adjacency tests |
-| Returning five “great options” | Require one winner and a runner-up comparison |
+| Returning five “great options” | Require one winner and runner-up comparison when supported; otherwise require an explicit incomplete/no-winner result |
 | Inventing unavailable analytics | Mark unknown, switch research mode, and lower confidence |
 
 ## How this research changes the skill

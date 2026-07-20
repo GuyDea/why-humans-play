@@ -8,8 +8,10 @@
 ## Purpose
 
 Create a project-local Codex skill that performs fresh research and recommends the single
-best topic and angle for WHP's next YouTube video. Optimize strongly for reachable audience
-while preserving the channel's identity, rigor, useful payoff, and solo-production reality.
+best topic and angle for WHP's next YouTube video when a responsible comparison is possible.
+Return an explicit incomplete result rather than a false winner when it is not. Optimize strongly
+for reachable audience while preserving the channel's identity, rigor, useful payoff, and
+solo-production reality.
 
 The skill must work now, when WHP has little or no useful channel history, and later, when
 private YouTube Analytics can become the strongest audience-specific signal.
@@ -23,7 +25,8 @@ A successful run:
 3. rejects candidates that are popular but not recognizably WHP;
 4. evaluates reach through several signals rather than one proxy;
 5. tests whether finalists can support an honest, compelling package and payoff;
-6. names one winner with a clear comparison against the runner-up; and
+6. names one winner with a clear comparison against the runner-up when at least two
+   responsibly supported finalists remain, otherwise names no winner and the missing evidence; and
 7. cites evidence, dates volatile observations, and states uncertainty.
 
 ## Non-goals
@@ -115,7 +118,7 @@ WHP doctrine + episode state + production constraints
        top-three packaging and payoff stress test
                        |
                        v
-       one winner + runner-up comparison + sources
+       winner decision or explicit incomplete result + sources
 ```
 
 ### 1. Establish the decision frame
@@ -216,12 +219,15 @@ Apply the hard gates before scoring. Score remaining candidates on a 100-point r
 Demand, opportunity, and packaging together control 60 points, making reach a major
 determinant without allowing off-brand or indefensible subjects through the gates.
 
-For every criterion, attach:
+For every finalist and every criterion, attach one compact record with:
 
 - a score with a one-sentence rationale;
 - an evidence grade (`A` direct/strong, `B` useful but incomplete, `C` weak/inferred);
 - source links and observation dates; and
-- the most important uncertainty.
+- the most important uncertainty;
+- any cap or boundary applied; and
+- any reused evidence plus its distinct criterion-specific use, so double counting can be
+  audited.
 
 Scores structure editorial judgment; they are not performance forecasts. Do not use decimal
 precision unsupported by the evidence.
@@ -246,7 +252,8 @@ potential is a tiebreaker and coherence check, not permission to recommend a wea
 
 ### 8. Make the decision
 
-Choose exactly one winner. Explain:
+Choose exactly one winner only when at least two responsibly supported, gate-passing,
+winner-eligible finalists remain. Explain:
 
 - why it is the best next episode now;
 - which evidence matters most;
@@ -256,8 +263,11 @@ Choose exactly one winner. Explain:
 - what must be verified before scripting; and
 - why the runner-up lost.
 
-If the evidence is genuinely tied, still make a provisional choice and name the smallest
-decisive test or missing datum. Do not return an unordered menu as the answer.
+If two or more supported finalists are genuinely tied, still make a provisional choice and
+name the smallest decisive test or missing datum. If fewer than two supported finalists
+remain, return an incomplete result using `Winner: No winner responsibly supportable`; when
+exactly one exists, identify it separately without promoting it to winner. Do not return an
+unordered menu or invent a comparison candidate.
 
 ## Output contract
 
@@ -266,7 +276,8 @@ Every complete run must include:
 1. **Decision frame** — date, market, mode, constraints, and files read.
 2. **Candidate landscape** — broad subjects by lane and the angles surviving the gates.
 3. **Ranked shortlist** — roughly five finalists with scores, grades, confidence, risks,
-   and concise rationale.
+   and seven compact criterion records per finalist, including uncertainty, caps, and
+   evidence-reuse treatment.
 4. **Packaging stress test** — three package directions for each top-three finalist.
 5. **Winner brief** — exact topic/angle, working logline, intended viewer, why now, human
    payoff, WHP fit, reach evidence, production implications, evidence risks, runner-up
@@ -328,7 +339,7 @@ Scenarios must cover:
 - two close finalists that require a decisive recommendation.
 
 Review outputs for diversity, evidence provenance, appropriate uncertainty, correct gating,
-score consistency, package/payoff alignment, and a genuine single winner.
+score consistency, package/payoff alignment, and a genuine single winner when supported.
 
 ## Acceptance criteria
 
@@ -338,5 +349,7 @@ score consistency, package/payoff alignment, and a genuine single winner.
 - Reach has decisive weight while WHP identity and rigor remain hard gates.
 - A complete run uses multiple independent signals or clearly reports reduced confidence.
 - No unsupported performance, search-volume, or factual claims appear as observations.
-- The output names one winner and explains why it beat the runner-up.
+- The output selects exactly one final topic only when at least two responsibly supported
+  winner-eligible finalists remain; otherwise it uses the required incomplete/no-winner
+  behavior and identifies any sole supported finalist separately.
 - The skill passes structural validation and all forward-test scenarios.

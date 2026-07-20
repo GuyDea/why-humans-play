@@ -7,7 +7,7 @@ description: Researches and selects the best next Why Humans Play YouTube video 
 
 ## Outcome
 
-Return one cited recommendation for WHP's next video: a specific subject, filmable angle, package direction, and research brief. A complete run is a decision, not brainstorming alone, and never guarantees performance.
+Return one cited decision for WHP's next video: a specific subject, filmable angle, package direction, and research brief when a winner is responsibly supportable, or an explicit incomplete result when it is not. Never guarantee performance.
 
 ## Required progress checklist
 
@@ -23,7 +23,7 @@ Track this checklist during the run. Do not compose the recommendation until eve
 - [ ] Deeply research the finalists with multiple signals.
 - [ ] Rank a shortlist of roughly five with the required scorecard.
 - [ ] Test three package promises for each top-three finalist.
-- [ ] Name exactly one winner and compare it directly with the runner-up.
+- [ ] Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.
 - [ ] Complete the output and evidence audit.
 
 ## Read current WHP context
@@ -107,7 +107,9 @@ For each of the top three finalists, create three materially distinct title/thum
 
 ## Decide
 
-Name exactly one winner, even when the choice is provisional. Lead with the exact topic and angle, strongest package direction, and confidence. Explain why it is the best next episode now, which evidence is decisive, why it can reach beyond current followers, and why it is recognizably WHP.
+Select exactly one final topic only when at least two responsibly supported, gate-passing, winner-eligible finalists remain. Lead with the exact topic and angle, strongest package direction, and confidence. Explain why it is the best next episode now, which evidence is decisive, why it can reach beyond current followers, and why it is recognizably WHP.
+
+If two or more supported finalists remain tied after package rescoring, select one provisional winner and name the smallest decisive test that could reverse it. If fewer than two supported finalists remain, return an incomplete result with the exact line `**Winner:** No winner responsibly supportable`. When exactly one supported finalist exists, identify it separately as the supported finalist, but do not promote it to winner without a responsibly supported comparison. Never invent a runner-up to force a decision.
 
 Compare the winner against the same-frame runner-up and state directly why the runner-up loses. Name the recommendation's most important falsifier and the smallest pre-script verification or decisive test still needed. End with two adjacent follow-up episodes that strengthen a coherent sequence.
 
@@ -115,7 +117,7 @@ Compare the winner against the same-frame runner-up and state directly why the r
 
 Mark missing, ambiguous, conflicting, or inaccessible data as `unknown`, state its decision impact, and lower confidence. Never fabricate files, analytics, metrics, dates, sources, quotes, or certainty.
 
-If live research is unavailable, use accessible public and repository evidence as a reduced-confidence fallback, disclose which required signals could not be checked, and keep the research trail auditable. If the remaining evidence cannot support a responsible winner, label the run incomplete instead of manufacturing one.
+If live research is unavailable, use accessible public and repository evidence as a reduced-confidence fallback, disclose which required signals could not be checked, and keep the research trail auditable. If the remaining evidence cannot support the required winner-eligible pair, label the run incomplete instead of manufacturing a winner or comparison.
 
 ## Boundaries
 

@@ -55,7 +55,9 @@ executive summary, method note, or preamble before `## Decision`.
 
 If fewer than two responsibly supported, gate-passing, winner-eligible finalists remain, use the
 same structure, retain the exact `## Decision` heading, and set **Decision status** to `Incomplete
-research result`; do not rename the heading or fabricate a winner. State the minimum missing
+research result`; do not rename the heading or fabricate a winner. Use the exact winner value
+`No winner responsibly supportable`. If exactly one supported finalist exists, identify it in a
+separate **Supported finalist** field without promoting it to winner. State the minimum missing
 evidence and mark the affected audit items `no`. If two or more such finalists remain tied after
 package rescoring, set **Decision status** to `Provisional winner`, name one provisional winner, and
 state the smallest decisive test. A supported two-way tie is not an incomplete result.
@@ -66,7 +68,7 @@ Lead with a compact decision block containing every field below:
 
 ```markdown
 **Decision status:** Winner selected | Provisional winner | Incomplete research result
-**Winner:** [exact subject — exact angle] | None responsibly supported
+**Winner:** [exact subject — exact angle] | No winner responsibly supportable
 **Confidence:** high | medium | low
 **Why it wins now:** [one sentence]
 **Strongest honest title/thumbnail promise:** [working title + visual promise]
@@ -74,8 +76,11 @@ Lead with a compact decision block containing every field below:
 ```
 
 For an incomplete result, replace the winning reason and package promise with the reason no
-gate-passing winner can yet be supported. Add **Minimum missing evidence** immediately below the
-block. Keep the limitation specific enough to resolve.
+gate-passing winner can yet be supported. Immediately after **Winner**, add `**Supported
+finalist:** [exact subject — exact angle]` when exactly one responsibly supported finalist exists,
+or `**Supported finalist:** None` when none exists. Add **Minimum missing evidence** immediately
+below the block. Keep the limitation specific enough to resolve. Do not emit **Supported finalist**
+for a selected or provisional winner.
 
 ## Decision frame
 
@@ -139,9 +144,21 @@ visible. Use `0/unknown` for a wholly unsupported component; for a partly suppor
 only the supported case and name the unknown component in the cell or rationale.
 
 Check every `/100` total arithmetically against its seven component scores. Do not average letter
-grades, convert them to numbers, or imply fake precision. Put one concise, cited rationale for each
-finalist immediately below the table, naming the decisive support and largest uncertainty. Point to
-research-trail rows rather than repeating the underlying evidence.
+grades, convert them to numbers, or imply fake precision. Immediately below the shortlist, provide
+one compact record for every finalist and each of the seven criteria using these exact columns:
+
+```text
+finalist | criterion | score/weight | evidence grade
+cited rationale or ledger pointer | largest uncertainty
+cap/boundary applied | reused evidence and distinct use, or none
+```
+
+This is seven records per finalist. Keep each rationale to one clause plus stable research-ledger
+pointers; do not repeat source details. Use `none` when no cap/boundary applies or no evidence is
+reused. When one ledger row supports more than one criterion, state the distinct question it answers
+in each record so double counting is auditable. The score/grade in each record must match the
+shortlist cell. After the records, one concise finalist-level synthesis may name the decisive support
+and overall largest uncertainty, but it cannot replace any criterion record.
 
 For an incomplete result, include only the responsibly supported, gate-passing finalists that
 actually exist. If none exist, state `No responsibly supported, gate-passing finalists`, emit no
@@ -301,10 +318,10 @@ table, row, source, or calculation pointer for every check.
 | 4 | Multiple independent signals used for every winner-eligible finalist; any uncorroborated finalist marked ineligible |  |  |
 | 5 | Volatile evidence dated and contextualized |  |  |
 | 6 | Trends, raw views, outliers, and missing data interpreted correctly |  |  |
-| 7 | Scores total correctly and include grades plus uncertainty |  |  |
+| 7 | Scores total correctly; every finalist has seven criterion records with matching scores/grades, cited rationale, largest uncertainty, and auditable cap/evidence-reuse treatment |  |  |
 | 8 | Three packages supplied for each top-three finalist |  |  |
 | 9 | Package promise matches delivered payoff and post-test reranking occurred |  |  |
-| 10 | One winner named before analysis, unless responsibly insufficient evidence is explicitly marked incomplete |  |  |
+| 10 | Exactly one final topic selected only with at least two responsibly supported winner-eligible finalists; otherwise exact no-winner wording and any sole supported finalist are shown |  |  |
 | 11 | Runner-up loss explained directly |  |  |
 | 12 | No fabricated observation, guarantee, or unsupported load-bearing claim |  |  |
 
@@ -317,7 +334,8 @@ decision.
 Reduced confidence does not satisfy item 4. Require independent corroboration for every
 winner-eligible finalist; when it is unavailable, mark the finalist ineligible. If that leaves fewer
 than two responsibly supported, gate-passing, winner-eligible finalists, keep the affected audit
-items `no` and return an incomplete result.
+items `no`, use `**Winner:** No winner responsibly supportable`, separately identify the sole
+supported finalist when one exists, and return an incomplete result.
 
 ## Boundaries
 

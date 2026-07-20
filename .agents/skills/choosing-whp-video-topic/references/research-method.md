@@ -216,7 +216,15 @@ Grade evidence independently from score:
 
 Provenance alone does not establish strength. A single first-party or primary metric can still be graded `B` or `C` when it is indirect, stale, poorly comparable, or uncorroborated for the claim.
 
-For every criterion, record the integer score, evidence grade, one-sentence rationale, cited ledger observations, and largest uncertainty. A high editorial score can carry a weak evidence grade; expose that difference instead of using the score as a confidence proxy.
+For every finalist and every one of the seven criteria, create one compact criterion record containing:
+
+```text
+finalist | criterion | integer score/weight | A/B/C/unknown grade
+cited rationale or evidence-ledger pointer | largest uncertainty
+cap/boundary applied | reused evidence and distinct criterion-specific use, or none
+```
+
+Keep each record to one concise row and point to ledger identifiers instead of repeating source detail. State `none` when no cap applies or no evidence is reused. These records must make every criterion score and grade traceable, show whether an evidence cap or hard boundary constrained the score, and expose any cross-criterion reuse so the anti-double-counting rule can be audited. A high editorial score can carry a weak evidence grade; expose that difference instead of using the score as a confidence proxy.
 
 If evidence is unknown, award no unsupported points. Mark the missing component and grade explicitly as `unknown`, lower overall confidence, and distinguish “zero points awarded pending evidence” from observed evidence that the opportunity is absent. If a criterion has both supported and unknown components, score only the supported case and state how the unknown limits the result. Never hide unknown inputs inside a precise-looking total.
 
@@ -253,7 +261,7 @@ Timestamp volatile data, display conflicts, and reduce confidence when evidence 
 
 When two or more gate-passing, responsibly supported finalists remain tied after package rescoring, choose one **provisional winner** and name the smallest decisive test or missing datum that could reverse the decision, such as a targeted audience poll, a broader comparable cohort, a factual-source check, or a package test.
 
-When evidence is fundamentally insufficient to support any gate-passing finalist or its central promise responsibly, return an incomplete, reduced-confidence research result and list the evidence needed to finish the decision. Do not manufacture a winner. This is different from a supported tie among viable finalists.
+When fewer than two responsibly supported, gate-passing, winner-eligible finalists remain, return an incomplete, reduced-confidence research result and list the evidence needed to finish the decision. Use `**Winner:** No winner responsibly supportable`; if exactly one supported finalist remains, identify it separately without promoting it to winner. Do not manufacture a comparison candidate. This is different from a supported tie among two or more viable finalists.
 
 The central title-and-thesis promise must survive reasonable verification before scripting. Do not guarantee views, imply causal certainty from correlations, or use false precision in reach, performance, or confidence claims.
 

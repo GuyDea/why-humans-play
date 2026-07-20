@@ -29,7 +29,9 @@ become useful.
   confidence rather than be invented.
 - Public view totals, search trends, and AI-generated ideas are clues, not standalone
   proof of opportunity.
-- The result must name one winner and explain why it beat the runner-up.
+- The result must name one winner and explain why it beat the runner-up when at least two
+  responsibly supported finalists remain. With fewer than two, it must return an explicit
+  incomplete/no-winner result rather than invent a comparison.
 
 ## Decision
 
@@ -43,8 +45,9 @@ evidence-funnel workflow:
 4. Apply WHP, rigor, payoff, duplication, and feasibility gates.
 5. Research surviving candidates through multiple independent signals.
 6. Rank them with a reach-weighted scorecard and explicit evidence confidence.
-7. Stress-test the top three as title/thumbnail promises before choosing one winner.
-8. Return a dated, cited recommendation with risks, runner-up comparison, and follow-ups.
+7. Stress-test the top three as title/thumbnail promises before resolving winner status.
+8. Return a dated, cited winner decision—or an explicit incomplete result—with risks,
+   comparison evidence, and follow-ups where supported.
 
 Keep the core procedure in `SKILL.md`. Put the detailed research protocol and output
 contract in directly linked reference files. Read canonical WHP documents at run time
@@ -86,8 +89,9 @@ winner by itself.
 - **Inputs:** repository doctrine and episode files; optional YouTube Studio observations
   or exports; current public web evidence; stated geography, language, timing, and
   production constraints.
-- **Output:** one topic-and-angle winner, a ranked shortlist, packaging stress test,
-  evidence trail, confidence, and follow-up topics.
+- **Output:** one topic-and-angle winner when a supported comparison exists, otherwise an
+  explicit incomplete result; plus a ranked shortlist, packaging stress test, evidence
+  trail, confidence, and supported follow-up topics.
 - **Not included:** full script, thumbnail production, unverifiable performance forecast,
   automated access to private accounts, or changes to canonical brand/channel doctrine.
 
