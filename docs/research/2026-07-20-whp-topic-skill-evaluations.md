@@ -2,9 +2,9 @@
 
 - **Date:** 2026-07-20
 - **Branch:** `feat/whp-video-topic-skill`
-- **Current acceptance status:** Pending review-correction reruns against the corrected current-main tree
+- **Current acceptance status:** Corrected-tree campaign captured and mechanically checked; independent final review pending
 
-## Current review-correction status
+## Corrected-tree campaign capture
 
 The original 13 task commits were rebased without patch changes from stale merge-base `b579f43`
 onto current `main` at `2a30c83`; `git range-diff` matched all 13 patches. Final review then exposed
@@ -19,10 +19,71 @@ winner and decisive test.
 
 The earlier A/B/C results below are retained as a complete historical test record, but they do not
 validate the corrected current-main tree. Their `36/36` result is superseded as a current acceptance
-claim. Fresh A/B/C runs and the two focused edge cases are pending under the exact protocol in
-[`2026-07-20-whp-topic-skill-rerun-protocol.md`](2026-07-20-whp-topic-skill-rerun-protocol.md).
-Do not mark the design implemented until those exact responses, hashes, and honest results replace
-this pending notice.
+claim. The five accepted corrected-tree outputs are now preserved byte-for-byte under
+[`artifacts/2026-07-20-whp-topic-skill/`](artifacts/2026-07-20-whp-topic-skill/) and follow the exact
+prompts in [`2026-07-20-whp-topic-skill-rerun-protocol.md`](2026-07-20-whp-topic-skill-rerun-protocol.md).
+The committed files have the same SHA-256 as their `/tmp` transport captures; no byte normalization
+was applied. This record reports mechanical observations and focused assertions, not a new `36/36`
+rubric award. Independent final review remains pending, so do not mark the design `Implemented and
+verified` yet.
+
+### Dispatch integrity and discarded runs
+
+- The first attempted Scenario A was discarded because that agent also received the Scenario B and
+  C prompts after dispatch. It is contaminated and is not linked, hashed, or counted here. The
+  accepted A is a new exact-prompt-only run at final skill revision `28f52fa`; it received no
+  post-dispatch messages or other scenarios. Its artifact became complete and stable, but the child
+  terminal handoff lagged, so the root independently validated the finished file and then interrupted
+  the child.
+- Accepted B and C were fresh `fork_turns: "none"` runs at `51403c1`. Each received only neutral
+  progress/finalization coordination after dispatch—no other scenario, output, reviewer finding, or
+  expected winner. Both artifacts and self-audits were complete before terminal-handoff lag led to
+  interruption.
+- The first focused-one run at `51403c1` exposed fabricated zero components and package content. A
+  pristine rerun at `9267890` corrected the scores but emitted zero package rows. Both RED iterations
+  were discarded and overwritten; no discarded transcript or hash is retained or implied here.
+  Accepted focused-one and focused-tie are fresh exact-prompt-only `fork_turns: "none"` runs at
+  `28f52fa`, received no post-dispatch contact, and completed terminal handoff normally.
+
+### Exact accepted-artifact record
+
+| Run | Target revision | Fresh-agent and coordination record | Durable artifact | SHA-256 | Lines / words / bytes | Normalization |
+|---|---|---|---|---|---:|---|
+| A | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | `fork_turns: "none"`; `/root/.../scenario_a_forward`; exact prompt only; no post-dispatch contact; stable artifact independently checked before terminal-lag interruption | [forward-a.md](artifacts/2026-07-20-whp-topic-skill/forward-a.md) | `f8ebb916dec917ab78cf11a0eb9c4f6b7c8f0973e7b823d74ab765cf8e01503a` | 274 / 11,044 / 74,644 | none; byte-identical to transport |
+| B | `51403c1f7b979a8f36fb36c9ac7e36745369031d` | `fork_turns: "none"`; `/root/rerun_a/scenario_b_forward`; neutral progress/finalization only; complete before terminal-lag interruption | [forward-b.md](artifacts/2026-07-20-whp-topic-skill/forward-b.md) | `7fab6f53f30c399baecec65f2b8fa59082400a77e171fb9e2a59472f49092c09` | 275 / 9,933 / 65,048 | none; byte-identical to transport |
+| C | `51403c1f7b979a8f36fb36c9ac7e36745369031d` | `fork_turns: "none"`; `/root/forward_b/scenario_c_forward`; neutral progress/finalization only; complete before terminal-lag interruption | [forward-c.md](artifacts/2026-07-20-whp-topic-skill/forward-c.md) | `74e0d5025573bce7f4f124405d82a9f37d30f23723875ea1252413eecc7036e4` | 273 / 9,473 / 63,490 | none; byte-identical to transport |
+| Focused one | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | `fork_turns: "none"`; exact prompt only; no post-dispatch contact; terminal completed; canonical child path was not supplied in the capture handoff | [focused-one.md](artifacts/2026-07-20-whp-topic-skill/focused-one.md) | `252597daccc8cd5c99c09b7c40ed631c0bd51422a8704dbd0b4209ca54485ee6` | 144 / 2,699 / 18,861 | none; byte-identical to transport |
+| Focused tie | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | `fork_turns: "none"`; exact prompt only; no post-dispatch contact; terminal completed; canonical child path was not supplied in the capture handoff | [focused-tie.md](artifacts/2026-07-20-whp-topic-skill/focused-tie.md) | `3af722a40a2b8ed13ef7d60d4f1cfe1887031cd1bfdf7cc19447365860bf27bf` | 172 / 3,679 / 25,540 | none; byte-identical to transport |
+
+`/tmp/whp-topic-review-*.md` paths are transport only. The linked committed files, not duplicated
+transcripts in this evaluation document, are the durable evidence.
+
+### Revision coverage and impact analysis
+
+A and both focused cases ran at final skill revision `28f52fa`. B and C ran at `51403c1`, before the
+two edge-case fixes in `9267890` and `28f52fa`. Those later patches govern supplied end states where
+numeric criterion splits or package-direction contents are absent: they require nonnumeric score
+markers, block unverified totals, and preserve known package counts with unavailable-detail rows.
+B and C instead contain all 35 numeric criterion records, recomputable totals, and nine fully
+specified package directions. It is therefore a scoped inference from the patch content and artifact
+shape that those two outputs do not exercise the later missing-detail branches. This is not a claim
+that B or C ran at final HEAD. Final-head A exercises the complete-data path, while final-head focused
+one and focused tie exercise the two corrected absent-detail paths.
+
+### Mechanically observed results
+
+| Run | Decision observation | Structure and arithmetic observation |
+|---|---|---|
+| A | App streaks selected at 88; Sudoku runner-up at 81 | 39 subjects; 5 scored finalists; 35 criterion records; 9 package rows; 12 audit rows; all five shortlist totals recompute |
+| B | App streaks selected at 89 | 36 subjects; 5 scored finalists; 35 criterion records; 9 package rows; 12 audit rows; all five shortlist totals recompute |
+| C | Workplace status selected at 82 | 40 subjects; 5 scored finalists; 35 criterion records; 9 package rows; 12 audit rows; all five shortlist totals recompute; Sudoku is the strongest non-advancer because of the current Hidden Game pilot sequence, explicitly not because it is outside WHP scope |
+| Focused one | Exact incomplete result; no winner; sole supported finalist is Sudoku | 7 `not scored` criterion records; no total; 3 unavailable-detail package placeholders; audit items 7, 8, 9, and 11 are `no`, item 10 is `yes` |
+| Focused tie | Sudoku provisional winner; workplace status runner-up; supplied totals remain 82 | 14 unknown-component criterion records; 6 unavailable-detail package placeholders; blinded package test named; audit items 4, 10, and 11 are `yes`, items 7, 8, and 9 are `no` |
+
+These are deterministic structure, content-presence, and arithmetic observations. An independent
+reviewer must still map A/B/C to the unchanged twelve-check rubric and recheck the focused assertions
+against the durable files. Until that review is recorded, there is no final corrected-tree aggregate
+score or final verified-design status.
 
 ### Review-correction static RED/GREEN
 
@@ -39,7 +100,8 @@ After the minimal contract edit, fresh static checks find the seven-record schem
 evidence-reuse fields, exact no-winner value, separate supported-finalist behavior, and supported
 two-way provisional rule. A negative check for `Name exactly one winner`, `Name one winner, even`,
 and `None responsibly supported` under the skill directory returns no matches. These are structural
-GREEN checks only; behavioral GREEN remains pending the five fresh runs in the protocol.
+GREEN checks only. The accepted artifacts above now exercise the corrected contract; independent
+rubric review remains pending.
 
 The exact-prompt focused-one RED at revision `51403c1` exposed a second ambiguity without being
 accepted as campaign evidence: seven unavailable numeric criterion values were rendered as
@@ -48,8 +110,8 @@ package titles were also synthesized even though only package viability, not the
 directions, was supplied. Before the fix, exact `rg -F` searches of the three governing skill files
 for `not scored/unknown`, `Do not compute a total`, `item 7 must be \`no\``, `supplied aggregate
 total`, and `Do not invent package details` each returned exit `1`. The minimal contract edit makes
-those five static assertions GREEN while leaving behavioral acceptance pending a pristine focused
-rerun; no rerun artifact is embedded or accepted here.
+those five static assertions GREEN. The `9267890` focused rerun confirmed the score correction but
+was discarded after exposing the separate package-count ambiguity described next.
 
 The pristine focused-one rerun at revision `9267890` corrected the score behavior but exposed the
 remaining package-count ambiguity: it rendered zero package rows because the contract forbade
@@ -59,8 +121,8 @@ unavailable`, `Mark every unsupplied package field as \`unavailable\``, `Do not 
 placeholder survived`, and `placeholder records do not make completeness items 8 or 9 \`yes\`` each
 returned exit `1`. The minimal clarification makes those structural assertions GREEN and
 updates the focused cases to require three and six unavailable-detail placeholder records
-respectively. Behavioral acceptance still requires pristine reruns; no artifact is embedded or
-accepted here.
+respectively. The accepted final-head focused artifacts linked above exercise both corrected edge
+states; independent final review remains pending.
 
 ## Purpose and method
 
@@ -130,7 +192,7 @@ finished skill, which required them to read current runtime doctrine and episode
 therefore validate the intended end-to-end governed workflow—skill plus live canonical context—
 against an unguided scenario response. They do **not** isolate the causal effect of `SKILL.md` text
 alone. This scope correction does not change the 36 observable passes in that historical campaign;
-those passes are not the pending corrected-tree acceptance result.
+those passes are superseded and are not the corrected-tree acceptance result.
 
 ### Raw response artifacts
 
@@ -655,7 +717,7 @@ Even with that uncertainty, Sudoku is the best next bet: the promise is cleaner,
   and explain why the nearest alternative loses. Scenario B also rejects both the raw
   20-million-view count and normalized Trends peak as sufficient decision evidence.
 
-## Historical forward-test results — superseded pending corrected-tree rerun
+## Historical forward-test results — superseded by corrected-tree campaign
 
 Three fresh agents received the same fixed prompts under the governed forward intervention at
 repository revision `d33e106`. The evaluator read each full response and rechecked observable
@@ -1544,9 +1606,9 @@ and names the blind package test that could reverse the choice.
 | Uncertainty | Caveats appeared, but unknown analytics and material competitive uncertainty were not systematically carried through the decision | All three use medium confidence, list missing private/Trends/cohort data, expose decisive risk and counterevidence, and name falsifiers plus pre-script checks | Missing evidence lowers confidence and creates a test; it is never converted into invented precision. |
 | Decisiveness | All baseline runs selected one winner and explained a nearest alternative, their strongest shared behavior | All forward runs lead with one winner, compare the runner-up on the same score/evidence/package frame, and give a concrete reversal condition | Decisiveness is preserved while the reason becomes reproducible and testable. |
 
-## Refinements and final verdict
+## Historical refinements and verdict
 
-**No Task 5 skill refinement was made.** Behavioral testing produced 36 passes, 0 partials, and
+**No Task 5 skill refinement was made in the historical campaign.** Behavioral testing produced 36 passes, 0 partials, and
 0 failures on the unchanged twelve-check rubric. The independently checked counts, arithmetic,
 packages, provenance, uncertainty handling, and winner/runner-up language matched the artifacts;
 therefore no observable failure justified changing `SKILL.md`, `references/research-method.md`,
@@ -1557,11 +1619,13 @@ behavioral failure would weaken the test-driven boundary rather than refine it.
 |---|---|---|
 | **None** | No material partial or fail appeared in A, B, or C | No rerun was required; the original fresh runs all scored 12/12 |
 
-**Historical verdict: pass; current corrected-tree verdict: pending.** The first governed workflow
+**Historical verdict: pass but superseded; corrected-tree campaign captured; independent final
+review pending.** The first governed workflow
 produced consistent observable breadth, context, gate, competition, provenance, scoring, and
 package-testing behavior across all three adversarial scenarios, relative to the context-denied
 unguided baseline. This historical verdict covers the first end-to-end workflow and the decision
 quality visible in those reports; it neither isolates the causal effect of `SKILL.md` text alone nor
 claims that any selected topic will achieve a particular performance result. It must not be used as
-final acceptance evidence for the rebased and corrected skill until the reruns named in the current
-status section are completed.
+final acceptance evidence for the rebased and corrected skill. The current evidence is the five
+durable artifacts linked in the corrected-tree capture section; no final `36/36` or
+`Implemented and verified` status is assigned until their independent rubric review is recorded.

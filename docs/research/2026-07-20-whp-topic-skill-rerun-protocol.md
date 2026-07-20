@@ -1,8 +1,8 @@
 # WHP Topic Skill Review-Correction Rerun Protocol
 
 - **Date:** 2026-07-20
-- **Status:** Exact prompts ready; outputs and results pending fresh-agent execution
-- **Target:** the corrected `feat/whp-video-topic-skill` revision recorded at dispatch
+- **Status:** Executed; accepted artifacts captured; independent final review pending
+- **Target:** per-run `feat/whp-video-topic-skill` revision recorded in the completed capture
 
 ## Integrity rules
 
@@ -14,11 +14,13 @@ Each agent may read the three skill files named in its prefix and the live runti
 episode state those files direct it to read. A/B/C agents may use current public web research.
 Focused agents must use only their supplied end-state facts and must not browse.
 
-Preserve each exact final response in the named `/tmp` capture. These paths are ephemeral transport,
-not durable evidence. Before accepting a result, embed the complete response in
-`2026-07-20-whp-topic-skill-evaluations.md`, record its SHA-256, and document any byte normalization.
-Repository references in responses must be backticked repository-relative paths, not absolute
-worktree links, so the committed transcript remains portable.
+Preserve each exact final response first in the named `/tmp` capture. Those paths are transport only.
+For durable evidence, commit a byte-identical copy under
+`docs/research/artifacts/2026-07-20-whp-topic-skill/`, link it from the evaluation record, record its
+SHA-256 and line/word/byte counts, compare source and committed copy, and disclose any normalization.
+Do not duplicate the complete transcript inside the evaluation document when a linked committed
+artifact provides the exact bytes. Repository references in responses must be backticked
+repository-relative paths, not absolute worktree links, so the committed transcript remains portable.
 
 ## A/B/C common prefix
 
@@ -62,7 +64,8 @@ Act as the editorial researcher for Why Humans Play. The current finalists are a
 Score A/B/C against the unchanged twelve-check rubric in the evaluation record plus the corrected
 criterion-record requirement: each shortlisted finalist must have seven matching score/grade records
 with cited rationale, largest uncertainty, and explicit cap/evidence-reuse treatment. Recompute every
-total. Do not preserve an earlier `36/36` claim unless all three fresh outputs independently earn it.
+total. Do not carry forward the historical `36/36` claim or assign a new aggregate score without an
+explicit, mechanically supported rubric mapping for all three accepted outputs.
 
 ## Focused common prefix
 
@@ -115,10 +118,45 @@ Required observable assertions:
    records, and the contract's top-three test are incomplete, while item 10 is `yes` because a
    supported two-way provisional selection is allowed; other items reflect the actual supplied state.
 
-## Acceptance record
+## Completed capture record
 
-For each run, record: target revision; exact prompt components; agent isolation (`fork_turns:
-"none"`); raw ephemeral path; SHA-256; response byte/line count; any normalization; criterion-record
-count; package count; recomputed totals; decision status; winner eligibility; rubric/assertion result;
-and exact failure excerpts. A failed focused assertion or A/B/C check requires a minimal contract fix
-and a fresh rerun of the affected scenario.
+The `/tmp` transports were copied byte-for-byte to the linked durable files. All five source/copy
+comparisons returned equal and no normalization was applied.
+
+| Run | Target revision | Durable artifact | SHA-256 | Lines / words / bytes | Observable result |
+|---|---|---|---|---:|---|
+| A | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | [forward-a.md](artifacts/2026-07-20-whp-topic-skill/forward-a.md) | `f8ebb916dec917ab78cf11a0eb9c4f6b7c8f0973e7b823d74ab765cf8e01503a` | 274 / 11,044 / 74,644 | App streaks 88; Sudoku 81; 39 subjects / 5 finalists / 35 criterion records / 9 packages / 12 audit rows; totals recompute |
+| B | `51403c1f7b979a8f36fb36c9ac7e36745369031d` | [forward-b.md](artifacts/2026-07-20-whp-topic-skill/forward-b.md) | `7fab6f53f30c399baecec65f2b8fa59082400a77e171fb9e2a59472f49092c09` | 275 / 9,933 / 65,048 | App streaks 89; 36 / 5 / 35 / 9 / 12; totals recompute |
+| C | `51403c1f7b979a8f36fb36c9ac7e36745369031d` | [forward-c.md](artifacts/2026-07-20-whp-topic-skill/forward-c.md) | `74e0d5025573bce7f4f124405d82a9f37d30f23723875ea1252413eecc7036e4` | 273 / 9,473 / 63,490 | Workplace status 82; 40 / 5 / 35 / 9 / 12; totals recompute; Sudoku is sequenced after the Hidden Game pilot, not out of WHP scope |
+| Focused one | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | [focused-one.md](artifacts/2026-07-20-whp-topic-skill/focused-one.md) | `252597daccc8cd5c99c09b7c40ed631c0bd51422a8704dbd0b4209ca54485ee6` | 144 / 2,699 / 18,861 | Exact incomplete/no-winner result; sole supported Sudoku; 7 unscored records; 3 unavailable placeholders; audits 7/8/9/11 no and 10 yes |
+| Focused tie | `28f52faf7f9d20bb480c3c780adbc69e75b5ce10` | [focused-tie.md](artifacts/2026-07-20-whp-topic-skill/focused-tie.md) | `3af722a40a2b8ed13ef7d60d4f1cfe1887031cd1bfdf7cc19447365860bf27bf` | 172 / 3,679 / 25,540 | Sudoku provisional; workplace runner-up; supplied 82 totals; 14 unknown components; 6 unavailable placeholders; blinded package test; audits 4/10/11 yes and 7/8/9 no |
+
+### Isolation, coordination, and exclusions
+
+- Accepted A used `fork_turns: "none"` at `/root/.../scenario_a_forward`, received the exact A prompt
+  only and no post-dispatch contact, and was independently validated before interruption solely
+  because its terminal handoff lagged. The earlier A attempt that received B/C prompts is discarded;
+  no discarded artifact or hash is retained.
+- Accepted B and C used `fork_turns: "none"` at `/root/rerun_a/scenario_b_forward` and
+  `/root/forward_b/scenario_c_forward`. Post-dispatch contact was limited to neutral progress and
+  finalization messages. Neither received another scenario/output or an expected winner; each
+  artifact and self-audit was complete before terminal-lag interruption.
+- Accepted focused-one and focused-tie used `fork_turns: "none"` at final target `28f52fa`, received
+  their exact prompt only with no post-dispatch contact, and completed terminal handoff. Canonical
+  child paths were not supplied in the capture handoff. The earlier focused-one RED outputs at
+  `51403c1` and `9267890` were discarded and overwritten; their hashes are not retained.
+
+### Revision-impact boundary
+
+B and C are evidence from `51403c1`, not final-HEAD runs. Commits `9267890` and `28f52fa` change only
+the absent-component and absent-package-detail branches. B and C contain complete numeric components
+and full package rows, so treating them as unaffected is an explicit scoped inference, not a claim
+of final-HEAD execution. Final-head A covers the complete-data path; the two final-head focused runs
+cover the corrected absent-detail paths.
+
+### Remaining review gate
+
+Mechanical capture, structure, counts, focused assertions, and shortlist arithmetic are recorded.
+An independent reviewer still must map A/B/C against the unchanged twelve-check rubric and confirm
+the focused assertions from the durable files. No new `36/36` or `Implemented and verified` status is
+assigned until that review is documented.

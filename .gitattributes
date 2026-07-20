@@ -1,0 +1,2 @@
+# Preserve byte-exact research captures, including intentional Markdown hard breaks.
+docs/research/artifacts/2026-07-20-whp-topic-skill/*.md -whitespace
