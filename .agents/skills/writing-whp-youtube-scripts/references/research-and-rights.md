@@ -178,6 +178,12 @@ final-cut clearance. Replace it with original footage, licensed stock, a diagram
 built from supported facts, an attributed reenactment, restrained text, or no added
 visual if clearance does not arrive.
 
+Never invent an example, placeholder, or `.invalid` URL to satisfy an asset record or
+validator. When a discovery lead has no concrete page URL, do not assign it an
+`A-###` production-asset ID or propose it for use; record it as an unnumbered blocked
+lead under `Unverified or disputed material`, and make the ownable or no-external
+fallback the beat's actual visual treatment.
+
 ## Use rights statuses exactly
 
 Use only these statuses:
