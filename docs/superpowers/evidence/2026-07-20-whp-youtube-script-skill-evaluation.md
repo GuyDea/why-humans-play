@@ -9,17 +9,19 @@
 - **Client/model:** Codex multi-agent runtime, GPT-5 family; the exact deployed model identifier was not exposed.
 - **Evaluation isolation:** Each scenario was given to a fresh, fork-none evaluator with only the portable skill path and the natural assignment. Evaluators were not shown expected answers, the rubric, baseline failures, other outputs, or planned fixes. Bulk artifacts remain under `/tmp/whp-script-skill-evals/` and are not committed.
 - **Web availability:** Live web retrieval was available but uneven. DOI metadata, PubMed/PMC text, a Frontiers article page, a Duke publication record, and a Wikimedia Commons file page were spot-checked. One institutional PDF endpoint returned HTTP 500, so inaccessible primary wording was not upgraded on the strength of an evaluator's claim.
-- **Static status:** The 42-test suite, skill `quick_validate`, worked-asset validation, and `git diff --check` passed after each refinement.
+- **Current static status:** The 48-test suite, skill `quick_validate`, worked-asset validation, and `git diff --check` passed in final verification. The historical refinement checks below accurately record the then-current 42-test suite.
 - **End-to-end status:** Codex behavioral runs were completed. `command -v claude` returned `/home/martin/.local/bin/claude`, and `claude --version` returned `2.1.214 (Claude Code)`. A sandboxed non-interactive E3 run did not complete, and no retained model response or skill-invocation evidence supports a behavioral result. **Claude Code end-to-end: untested.** Static package and symlink compatibility tests remain separate from end-to-end behavior. No other client was tested end to end.
 
-Scores use the ten 0–2 dimensions in `references/quality-rubric.md`. A pass requires at least 16/20 and no applicable binary-gate failure. Scores do not confer `EDITORIAL-DRAFT` or `RECORD-READY` status.
+Scores use the ten 0–2 dimensions in `references/quality-rubric.md`. A pass requires at least 16/20, no applicable binary-gate failure, and adherence to the assignment's requested deliverable type, scope, runtime, and required content. A high rubric total cannot rescue an assignment/deliverable miss or another hard-gate failure. Scores do not confer `EDITORIAL-DRAFT` or `RECORD-READY` status.
 
 ## Results matrix
 
 | Scenario | Score | Binary gates | Validator | Result |
 |---|---:|---|---|---|
 | E1 — Hidden Game | 19/20 | Pass: observable demonstration; bounded slot/phone distinction; important-fact visuals; explanatory motion; owned treatment; four end sections | PASS | PASS |
-| E2 — Contested science | 18/20 | Pass: male-rat/species/manipulation scope preserved; human inference rejected; important-fact visuals; asset pages/statuses/fallbacks; explanatory motion; four end sections | PASS | PASS |
+| E2 — Contested science, original | 18/20 | **Fail — assignment/deliverable adherence:** the requested 90-second script was replaced by a 00:50/111-word opening. The evidence, visual, rights, and species-boundary gates otherwise passed. | PASS, structural only | FAIL |
+| E2 — Model-output rerun 1 | 18/20 | **Fail — denominator/source meaning:** the F-002 scope attached the paper-wide `N=96` to an Experiment 1 morphology result that used 18 female focal subjects. Runtime and other applicable gates passed. | PASS, structural only; it did not detect the denominator error | FAIL |
+| E2 — Final model-output rerun | 17/20 | Pass: full 213-word/plausible-90-second deliverable; rat/human boundary; important-fact visuals; asset statuses/fallbacks; explanatory motion; four end sections. No narrated denominator or ratio was changed, and remaining scope and origin defects are documented as `RESEARCH-DRAFT` limits. | PASS, structural only | PASS |
 | E3 — Existing draft revision | 18/20 | Pass: exact 26 taken → 22 of those 26 playing relationship; `REPORTED` wording; asset page/status/fallback; explanatory motion; four end sections | N/A for the requested audit/two-beat excerpt. An advisory full-document run failed only the nine omitted header fields. | PASS |
 | E4 — Unverified account | 17/20 | Pass: `UNVERIFIED-EXAMPLE` is audibly qualified and non-load-bearing; no external visual; owned still; four end sections | FAIL recorded honestly: the assignment supplied no originating blog URL and the evaluator did not invent one | PASS |
 | E5 — Unclear rights, original | 11/20 | **Fail:** safe rights decision, but the targeted plan omitted packaging, a concrete WHP lens, and the unified four-section end ledger | N/A as returned; an advisory run failed the absent document structure | FAIL |
@@ -27,7 +29,7 @@ Scores use the ten 0–2 dimensions in `references/quality-rubric.md`. A pass re
 | E5 — Final rerun | 19/20 | Pass: repost is an unnumbered `REFERENCE-ONLY-RIGHTS-UNVERIFIED` lead; no external asset is proposed; owned visual and fallback; explanatory motion; four end sections | PASS, structural only | PASS |
 | E6 — Negative trigger | N/A | Pass: exactly three ordinary ad headlines; no WHP apparatus, imitation, or skill-activation claim | N/A | PASS |
 
-E1 lost one point because performed timing remained open. E2 lost both spoken-runtime points because it returned a 00:50/111-word opening rather than the requested 90-second script; this was a substantial assignment miss even though the evidence behavior passed. E3 lost one spoken-runtime point and one evidence-completeness point because performed timing and full-publisher wording/locator confirmation remained pending. E4 lost one spoken-runtime point and both evidence-completeness points because the originating blog URL, author, date, and locator were unavailable. The final E5 rerun lost one visual-treatment point because its production-owned visual has not yet been created.
+E1 lost one point because performed timing remained open. The original E2 lost both spoken-runtime points and failed the assignment/deliverable gate because it returned a 00:50/111-word opening instead of the requested 90-second script. E2 model-output rerun 1 reached a plausible 90-second length but failed the denominator/source-meaning gate. The final E2 model-output rerun delivered exactly 213 narration words, a plausible 90-second budget, and passed every hard gate; its 17/20 score preserves factual-wording, runtime, and evidence-ledger shortcomings described below. E3 lost one spoken-runtime point and one evidence-completeness point because performed timing and full-publisher wording/locator confirmation remained pending. E4 lost one spoken-runtime point and both evidence-completeness points because the originating blog URL, author, date, and locator were unavailable. The final E5 rerun lost one visual-treatment point because its production-owned visual has not yet been created.
 
 ## Score vectors and retained artifacts
 
@@ -36,7 +38,9 @@ Vectors below are ordered `D1` through `D10` and use the rubric's integer anchor
 | Run | D1–D10 vector | Total | Internal version | Exact retained artifact | SHA-256 |
 |---|---|---:|---|---|---|
 | E1 | `2,2,2,1,2,2,2,2,2,2` | 19 | 0.1 | `/tmp/whp-script-skill-evals/E1.md` | `781ca7a9c45771d9738e65c2eacc4d95ca9bbd0e7081c2f44842063eaa347fd6` |
-| E2 | `2,2,2,0,2,2,2,2,2,2` | 18 | 0.1 | `/tmp/whp-script-skill-evals/E2.md` | `8437b950e6c988f78332f76d26608a060154500c3d65b9b8a5ab3fdb2d0ae52d` |
+| E2 original | `2,2,2,0,2,2,2,2,2,2` | 18 | 0.1 | `/tmp/whp-script-skill-evals/E2.md` | `8437b950e6c988f78332f76d26608a060154500c3d65b9b8a5ab3fdb2d0ae52d` |
+| E2 model-output rerun 1 | `2,2,2,1,2,2,1,2,2,2` | 18 | 0.1 | `/tmp/whp-script-skill-evals/E2-rerun.md` | `a3d09d02f8ea77e87e6aa4b4bd1f5ad20746e97b996c41bfebc1c9f85b4313a1` |
+| E2 final model-output rerun | `2,1,2,1,2,2,1,2,2,2` | 17 | 0.1 | `/tmp/whp-script-skill-evals/E2-rerun2.md` | `4b45805e154ca55f4ffed0859ae81011d052878621efb72c99cbac13ea43bb8d` |
 | E3 | `2,2,2,1,2,2,1,2,2,2` | 18 | N/A | `/tmp/whp-script-skill-evals/E3.md` | `7cfcaa52d4493089236db2b246c137650ea430df19d2ab4c2f84783ba6690c56` |
 | E4 | `2,2,2,1,2,2,0,2,2,2` | 17 | 0.1 | `/tmp/whp-script-skill-evals/E4.md` | `f86b9b1c6e18577ee36519975fddb90bf61a990d6ce82917afa4de6931807c12` |
 | E5 baseline | `0,2,1,0,2,2,0,1,2,1` | 11 | N/A | `/tmp/whp-script-skill-evals/E5.md` | `46da719203e6e71f6cac1ebd332c366f508fecbd796f14f7d72363c16251f1f4` |
@@ -48,7 +52,12 @@ Every sub-2 score has this recorded basis:
 | Run | Sub-2 dimension | Rationale |
 |---|---|---|
 | E1 | D4 = 1 | Word budget was credible, but Martin's performed timed read remained open. |
-| E2 | D4 = 0 | The artifact delivered 00:50/111 words instead of the requested 90-second script. |
+| E2 original | D4 = 0 | The artifact delivered 00:50/111 words instead of the requested 90-second script and therefore also failed the assignment/deliverable hard gate. |
+| E2 model-output rerun 1 | D4 = 1 | Its 199 narration words form a credible paper budget for 90 seconds, but no performed table read was recorded. |
+| E2 model-output rerun 1 | D7 = 1 | F-002's scope attached the paper-wide `N=96` to the Experiment 1 morphology result, whose endpoint analysis used 18 female focal subjects. That denominator/source-meaning defect also failed a hard gate despite the 18/20 total and structural validator pass. |
+| E2 final model-output rerun | D2 = 1 | `F-005` is `REPORTED`, but “the brain circuitry rats use” is narrated as fact rather than audibly attributed; “largest reduction” omits “relative to controls”; narration broadens male Lister Hooded physiology and female Long-Evans morphology to “rats” without audibly preserving strain and sex; and “play experience is part of how these circuits are refined” is firmer than the all-physical-contact manipulation warrants. |
+| E2 final model-output rerun | D4 = 1 | Exactly 213 narration words make a credible approximately 90-second budget, but no performed table read was recorded and Beat 04 packs 64 words into 25 seconds. |
+| E2 final model-output rerun | D7 = 1 | The records are traceable, but applicable animal/cell denominators are absent, and F-001 calls a 2022 Frontiers reprint the `Original URL` even though its figure was reprinted from Pellis and Pellis (1987). |
 | E3 | D4 = 1 | No performed aloud timing was recorded for the revised excerpt. |
 | E3 | D7 = 1 | The DOI and article pages were recorded, but full-publisher wording and a more exact primary locator remained pending. |
 | E4 | D4 = 1 | The 63-word insert had a calculated budget but no performed timed read. |
@@ -79,12 +88,10 @@ Every sub-2 score has this recorded basis:
 
 ### E2 — Contested science
 
-- The manipulation keeps species, sex, and chronology: “For three weeks, these young male rats could see, smell, and hear their cage-mates. But a Plexiglas divider stopped them from touching—and from rough-and-tumble play. Then the wall came down, and the pairs lived together again until adulthood.”
-- The measured result stays narrow: “the play-deprived rats had reduced inhibitory input onto layer-five cells in the medial prefrontal cortex. Excitatory input was unchanged.”
-- The human boundary is audible: “That is not ‘play made rats smarter.’ And it is definitely not proof that play builds the human prefrontal cortex.” It adds that “the barrier removed physical contact, not play alone.”
-- The primary DOI is [Bijlsma et al.](https://doi.org/10.1523/JNEUROSCI.0524-22.2022). PubMed/PMC spot-checks confirmed young male rats, P21–P42 deprivation/resocialization, the Plexiglas contact boundary, adult medial-prefrontal layer-five recordings, reduced inhibitory currents, and unchanged excitatory currents.
-- `A-001` uses the concrete [Frontiers article/figure page](https://www.frontiersin.org/articles/10.3389/fnbeh.2022.1076765/full) as a clearly labeled related-study candidate under `CC-BY-4.0`; the live page showed Figure 1 and a CC BY statement. `A-002`, the exact-study figure, is `REFERENCE-ONLY-RIGHTS-UNVERIFIED` because the article carries an SfN exclusive license. The required final treatment is an original schematic.
-- Validator: PASS. Runtime remained a major miss: the evaluator reframed the deliverable as a 50-second opening despite the 90-second assignment.
+- **Original — 18/20, FAIL:** The manipulation kept species, sex, and chronology; the measured result stayed narrow; and the human boundary was audible. The primary [Bijlsma et al. DOI](https://doi.org/10.1523/JNEUROSCI.0524-22.2022), visual decisions, asset statuses, fallbacks, and four end sections were present. The structural validator passed. Nevertheless, the evaluator replaced the requested 90-second script with a 00:50/111-word opening, so assignment/deliverable adherence failed. Artifact: `/tmp/whp-script-skill-evals/E2.md`, version 0.1, SHA-256 `8437b950e6c988f78332f76d26608a060154500c3d65b9b8a5ab3fdb2d0ae52d`.
+- **Model-output rerun 1 — 18/20, FAIL:** The rerun produced a complete 01:30/199-word script, maintained the rat-to-human boundary, and passed the structural validator. Its F-002 scope nevertheless said “Ninety-six female Long-Evans rats” for the narrated Experiment 1 medial-prefrontal morphology result. `N=96` was the paper-wide allocation; that endpoint result used 18 female focal subjects. Attaching the paper-wide denominator to the narrower result changed source meaning, so the denominator hard gate failed. Artifact: `/tmp/whp-script-skill-evals/E2-rerun.md`, version 0.1, SHA-256 `a3d09d02f8ea77e87e6aa4b4bd1f5ad20746e97b996c41bfebc1c9f85b4313a1`.
+- **Final model-output rerun — 17/20, PASS:** The final rerun contains exactly 213 narration words and a plausible 01:30 budget, separates rat findings from a human hypothesis, assigns useful visual and motion decisions, records candid rights statuses and fallbacks, includes all four end sections, and passes the structural validator. No narrated denominator or ratio is changed; species and sex remain identifiable in the records; and uncertainty is documented. Artifact: `/tmp/whp-script-skill-evals/E2-rerun2.md`, version 0.1, SHA-256 `4b45805e154ca55f4ffed0859ae81011d052878621efb72c99cbac13ea43bb8d`.
+- The final pass remains `RESEARCH-DRAFT`. D2 remains 1 because `REPORTED` F-005 is voiced without audible attribution, “largest reduction” omits “relative to controls,” strain/sex scope is generalized in narration, and one cross-study synthesis is firmer than the divider manipulation warrants. D4 remains 1 because there is no performed table read and Beat 04 is dense at 64 words/25 seconds. D7 remains 1 because applicable animal/cell denominators are absent and F-001 labels the 2022 Frontiers reprint as the original URL despite its Pellis and Pellis (1987) source. Authorized editorial approval, owned-graphic production, presenter timing, and any human-positive claim remain open.
 
 ### E3 — Existing draft revision
 
@@ -181,11 +188,18 @@ All five baseline behaviors are corrected in E3. The word `REPORTED` and the pen
 - **Deterministic result after change:** 42/42 unit tests passed; `quick_validate` passed; the worked annotated asset passed; `git diff --check` passed. The validator contract did not change.
 - **Fresh rerun 2:** One run was discarded because a follow-up accidentally named the expected placeholder behavior. A separate clean fork-none rerun with only the natural assignment scored 19/20, passed every binary gate, and passed the structural validator.
 
-No other instruction refinement was made. In particular, E2's duration miss did not expose a documentation gap: `SKILL.md` already requires runtime in the assignment contract and timing spoken delivery against it, while `story-and-hook-method.md` requires an aloud read, honest timing, and revision. Duplicating that rule would not be an evidence-driven fix; the miss remains recorded as model variance.
+### E2 model-output reruns — no instruction change
+
+- **Original observed failure:** The 18/20 original output failed assignment/deliverable adherence by replacing the requested 90-second script with a 00:50/111-word opening.
+- **Model-output rerun 1:** A fresh run produced a complete 01:30/199-word artifact but failed the denominator/source-meaning gate by attaching the paper-wide `N=96` to an Experiment 1 morphology result based on 18 female focal subjects. The structural validator passed because it does not evaluate factual truth or denominator meaning.
+- **Final model-output rerun:** A separate fresh output produced exactly 213 narration words, a plausible 90-second deliverable, passed the structural validator, and passed every hard gate at 17/20. The D2, D4, and D7 deficiencies remain recorded rather than promoted away; it is a `RESEARCH-DRAFT` pending human editorial review, performed timing, ledger correction, and production work.
+- **Instruction decision:** These were model-output reruns, not instruction refinements. `SKILL.md` already requires runtime in the assignment contract and spoken timing against it. `research-and-rights.md` and `quality-rubric.md` already require exact denominators, source meaning, scope, and locators. Adding duplicate instructions would not be an evidence-driven fix.
+
+No other instruction refinement was made. The only skill-instruction refinements in this evaluation remain the two E5 changes documented above.
 
 ## Remaining limits
 
-- Model behavior varies. One evaluator ignored an explicit 90-second target and produced 50 seconds; future runs still require human runtime review.
+- Model behavior varies. The original E2 evaluator ignored an explicit 90-second target and produced 50 seconds; model-output reruns corrected duration but exposed a separate denominator defect before the final pass. Future runs still require assignment-adherence and human runtime review.
 - Links, hosted files, captions, and license statements can change. Access-date spot checks do not freeze later provenance or rights conditions.
 - Some primary material was inaccessible during the run. E3 appropriately remains `REPORTED`; a source URL or secondary reproduction is not independent factual verification.
 - The validator checks structure, not truth, source quality, identity, copyright, fair use, license compatibility, spoken performance, or editorial quality.

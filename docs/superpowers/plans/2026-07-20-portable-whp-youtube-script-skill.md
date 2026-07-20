@@ -949,6 +949,8 @@ Write three paid-social ad headlines for an unrelated accounting application.
 
 Use the 20-point rubric plus these binary gates:
 
+- the output honors the assignment's requested deliverable type, scope, runtime, and
+  required content;
 - every factual scene detail is sourced or removed;
 - ratios, denominators, species, dates, and chronology retain source meaning;
 - `UNVERIFIED-EXAMPLE` and `DISPUTED` material is audibly qualified;
@@ -958,8 +960,9 @@ Use the 20-point rubric plus these binary gates:
 - all four end-reference sections exist; and
 - E6 does not implicitly activate the skill.
 
-Expected: E1–E5 score at least 16/20 with no hard-gate failure. E6 should be handled as
-ordinary copywriting without loading or claiming this skill.
+Expected: E1–E5 score at least 16/20 with no hard-gate failure, including assignment
+and deliverable adherence. E6 should be handled as ordinary copywriting without
+loading or claiming this skill.
 
 - [ ] **Step 3: Compare E3 directly with the RED baseline**
 
