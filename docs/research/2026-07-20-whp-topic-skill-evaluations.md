@@ -2,7 +2,7 @@
 
 - **Date:** 2026-07-20
 - **Branch:** `feat/whp-video-topic-skill`
-- **Current acceptance status:** Corrected-tree campaign captured and mechanically checked; independent final review pending
+- **Current acceptance status:** Implemented and verified at reviewed HEAD `40feec8`; corrected-tree A/B/C `36/36`, focused cases `10/10`
 
 ## Corrected-tree campaign capture
 
@@ -23,9 +23,8 @@ claim. The five accepted corrected-tree outputs are now preserved byte-for-byte 
 [`artifacts/2026-07-20-whp-topic-skill/`](artifacts/2026-07-20-whp-topic-skill/) and follow the exact
 prompts in [`2026-07-20-whp-topic-skill-rerun-protocol.md`](2026-07-20-whp-topic-skill-rerun-protocol.md).
 The committed files have the same SHA-256 as their `/tmp` transport captures; no byte normalization
-was applied. This record reports mechanical observations and focused assertions, not a new `36/36`
-rubric award. Independent final review remains pending, so do not mark the design `Implemented and
-verified` yet.
+was applied. The independent whole-branch acceptance review and its corrected-tree rubric results
+are recorded below.
 
 ### Dispatch integrity and discarded runs
 
@@ -80,10 +79,22 @@ one and focused tie exercise the two corrected absent-detail paths.
 | Focused one | Exact incomplete result; no winner; sole supported finalist is Sudoku | 7 `not scored` criterion records; no total; 3 unavailable-detail package placeholders; audit items 7, 8, 9, and 11 are `no`, item 10 is `yes` |
 | Focused tie | Sudoku provisional winner; workplace status runner-up; supplied totals remain 82 | 14 unknown-component criterion records; 6 unavailable-detail package placeholders; blinded package test named; audit items 4, 10, and 11 are `yes`, items 7, 8, and 9 are `no` |
 
-These are deterministic structure, content-presence, and arithmetic observations. An independent
-reviewer must still map A/B/C to the unchanged twelve-check rubric and recheck the focused assertions
-against the durable files. Until that review is recorded, there is no final corrected-tree aggregate
-score or final verified-design status.
+These are deterministic structure, content-presence, and arithmetic observations.
+
+### Final independent acceptance review
+
+A fresh independent whole-branch review evaluated final reviewed HEAD
+`40feec8c1584b2a8400f4800ac1279895a1204cf` while retaining the per-run target revisions in the
+accepted-artifact record above.
+
+| Review item | Independent result |
+|---|---|
+| Corrected-tree A/B/C rubric | A `12/12`; B `12/12`; C `12/12`; aggregate `36/36` |
+| Focused edge assertions | Focused one `5/5`; focused tie `5/5`; aggregate `10/10` |
+| Findings | 0 Critical, 0 Important, 0 Minor |
+| Integrity and topology | Artifact hashes, branch topology, and the artifact-scoped `.gitattributes` rule verified |
+| Revision-impact judgment | Accepted the scoped B/C inference below without relabeling either run as final-HEAD evidence |
+| Final verdict | Ready to mark `Implemented and verified`: **Yes** |
 
 ### Review-correction static RED/GREEN
 
@@ -100,8 +111,8 @@ After the minimal contract edit, fresh static checks find the seven-record schem
 evidence-reuse fields, exact no-winner value, separate supported-finalist behavior, and supported
 two-way provisional rule. A negative check for `Name exactly one winner`, `Name one winner, even`,
 and `None responsibly supported` under the skill directory returns no matches. These are structural
-GREEN checks only. The accepted artifacts above now exercise the corrected contract; independent
-rubric review remains pending.
+GREEN checks only. The accepted artifacts above exercise the corrected contract, and the independent
+final review at `40feec8` accepted the resulting behavior.
 
 The exact-prompt focused-one RED at revision `51403c1` exposed a second ambiguity without being
 accepted as campaign evidence: seven unavailable numeric criterion values were rendered as
@@ -122,7 +133,7 @@ placeholder survived`, and `placeholder records do not make completeness items 8
 returned exit `1`. The minimal clarification makes those structural assertions GREEN and
 updates the focused cases to require three and six unavailable-detail placeholder records
 respectively. The accepted final-head focused artifacts linked above exercise both corrected edge
-states; independent final review remains pending.
+states; the independent final review accepted each focused case at `5/5`.
 
 ## Purpose and method
 
@@ -1619,13 +1630,14 @@ behavioral failure would weaken the test-driven boundary rather than refine it.
 |---|---|---|
 | **None** | No material partial or fail appeared in A, B, or C | No rerun was required; the original fresh runs all scored 12/12 |
 
-**Historical verdict: pass but superseded; corrected-tree campaign captured; independent final
-review pending.** The first governed workflow
+**Historical verdict: pass but superseded; corrected-tree verdict: independently verified.** The first governed workflow
 produced consistent observable breadth, context, gate, competition, provenance, scoring, and
 package-testing behavior across all three adversarial scenarios, relative to the context-denied
 unguided baseline. This historical verdict covers the first end-to-end workflow and the decision
 quality visible in those reports; it neither isolates the causal effect of `SKILL.md` text alone nor
 claims that any selected topic will achieve a particular performance result. It must not be used as
 final acceptance evidence for the rebased and corrected skill. The current evidence is the five
-durable artifacts linked in the corrected-tree capture section; no final `36/36` or
-`Implemented and verified` status is assigned until their independent rubric review is recorded.
+durable artifacts linked in the corrected-tree capture section. At reviewed HEAD `40feec8`, the
+independent final review scored A/B/C `36/36` and the focused cases `10/10`, reported no findings,
+accepted the scoped B/C revision-impact inference, and verified the hashes and branch topology. The
+design is therefore `Implemented and verified`.

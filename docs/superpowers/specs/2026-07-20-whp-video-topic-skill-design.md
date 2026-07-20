@@ -1,6 +1,6 @@
 # WHP Video Topic Selection Skill — Design
 
-- **Status:** Approved for written-spec review
+- **Status:** Implemented and verified
 - **Date:** 2026-07-20
 - **Target:** `.agents/skills/choosing-whp-video-topic/`
 - **Research summary:** [`2026-07-20-youtube-topic-selection.md`](../../research/2026-07-20-youtube-topic-selection.md)

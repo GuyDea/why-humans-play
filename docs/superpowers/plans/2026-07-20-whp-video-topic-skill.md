@@ -30,7 +30,7 @@ No script, asset, persistent topic ledger, paid data source, or API integration 
 
 - Create: `docs/research/2026-07-20-whp-topic-skill-evaluations.md`
 
-- [ ] **Step 1: Confirm the task branch and clean starting state**
+- [x] **Step 1: Confirm the task branch and clean starting state**
 
 Run:
 
@@ -41,7 +41,7 @@ git status --short
 
 Expected: branch `feat/whp-video-topic-skill`; only the committed design package is present and there are no uncommitted skill files.
 
-- [ ] **Step 2: Dispatch three fresh baseline agents without the proposed skill**
+- [x] **Step 2: Dispatch three fresh baseline agents without the proposed skill**
 
 Use fresh agents with no forked conversation context. Tell each agent not to read the approved design, research, steering record, or any future `choosing-whp-video-topic` skill. Give each one exactly one scenario and require a final answer rather than questions.
 
@@ -63,7 +63,7 @@ Scenario C — conflicting evidence and forced choice:
 Act as the editorial researcher for Why Humans Play. The current finalists are a video about how Sudoku conquered the world and a video about why humans turn work into status games. Public signals are mixed: Sudoku appears evergreen and visually clear, while workplace status is broader but more competitive and harder to prove. There is no reliable channel analytics history. Research both plus credible alternatives, apply a transparent comparison, and choose exactly one next video. Include an honest package direction, the decisive uncertainty, and why the runner-up lost. Do not return an unordered menu and do not ask follow-up questions.
 ```
 
-- [ ] **Step 3: Evaluate baseline outputs against one fixed rubric**
+- [x] **Step 3: Evaluate baseline outputs against one fixed rubric**
 
 For each response, record `pass`, `partial`, or `fail` for all twelve checks:
 
@@ -82,7 +82,7 @@ For each response, record `pass`, `partial`, or `fail` for all twelve checks:
 
 Capture exact excerpts for each meaningful failure or rationalization. Do not summarize a failure more favorably than the agent's actual response.
 
-- [ ] **Step 4: Write the baseline evaluation record**
+- [x] **Step 4: Write the baseline evaluation record**
 
 Create the evaluation document with these concrete sections:
 
@@ -102,7 +102,7 @@ Create the evaluation document with these concrete sections:
 
 The last two sections initially state that forward testing follows implementation; they must be replaced with actual results before final handoff.
 
-- [ ] **Step 5: Verify and commit the baseline evidence**
+- [x] **Step 5: Verify and commit the baseline evidence**
 
 Run:
 
@@ -129,7 +129,7 @@ Expected: one commit containing only the evaluation record.
 - Create: `.agents/skills/choosing-whp-video-topic/agents/openai.yaml`
 - Create directory: `.agents/skills/choosing-whp-video-topic/references/`
 
-- [ ] **Step 1: Scaffold with the system skill creator**
+- [x] **Step 1: Scaffold with the system skill creator**
 
 Run:
 
@@ -139,7 +139,7 @@ python3 /home/martin/.codex/skills/.system/skill-creator/scripts/init_skill.py c
 
 Expected: a new skill directory containing `SKILL.md`, `agents/openai.yaml`, and an empty `references/` directory, with no scripts or assets.
 
-- [ ] **Step 2: Inspect the generated files before replacement**
+- [x] **Step 2: Inspect the generated files before replacement**
 
 Run:
 
@@ -151,7 +151,7 @@ sed -n '1,120p' .agents/skills/choosing-whp-video-topic/agents/openai.yaml
 
 Expected: only generated scaffolding; confirm the interface strings before editing.
 
-- [ ] **Step 3: Replace `SKILL.md` with the discovery and decision workflow**
+- [x] **Step 3: Replace `SKILL.md` with the discovery and decision workflow**
 
 Use this exact frontmatter:
 
@@ -188,7 +188,7 @@ familiar game, event, person, institution, or trend
 
 Also include the specific warning that a broad sentence such as “AI is changing everything” or one viral view count is not a filmable, evidenced WHP angle.
 
-- [ ] **Step 4: Normalize `agents/openai.yaml`**
+- [x] **Step 4: Normalize `agents/openai.yaml`**
 
 Ensure the generated file contains exactly this metadata and no nonexistent dependencies or icons:
 
@@ -202,7 +202,7 @@ policy:
   allow_implicit_invocation: true
 ```
 
-- [ ] **Step 5: Run the first structural check and commit**
+- [x] **Step 5: Run the first structural check and commit**
 
 Run:
 
@@ -228,7 +228,7 @@ Expected: the core skill and UI metadata are committed; the reference directory 
 
 - Create: `.agents/skills/choosing-whp-video-topic/references/research-method.md`
 
-- [ ] **Step 1: Write the research method with direct navigation**
+- [x] **Step 1: Write the research method with direct navigation**
 
 Start with a contents list because this reference will exceed 100 lines. Use these top-level sections:
 
@@ -257,7 +257,7 @@ Start with a contents list because this reference will exceed 100 lines. Use the
 ## Error handling and confidence
 ```
 
-- [ ] **Step 2: Specify source priorities and comparison rules**
+- [x] **Step 2: Specify source priorities and comparison rules**
 
 Require current research because recommendations are time-sensitive. Define channel-aware sources as supplied YouTube Studio Trends, Audience, Advanced Mode, comments/polls, and prior WHP appeal/engagement/satisfaction patterns. Define cold-start sources as public YouTube results, age- and format-aware relative outliers, Google Trends in YouTube Search mode, adjacent creators, audience-language evidence, current events/releases/anniversaries, and evergreen durability.
 
@@ -281,7 +281,7 @@ Encode these non-negotiable comparison rules:
 - Prefer first-party platform documentation and primary factual sources for load-bearing claims.
 - Never present a third-party estimate or editorial inference as an observed fact.
 
-- [ ] **Step 3: Define deliberate breadth and angle formation**
+- [x] **Step 3: Define deliberate breadth and angle formation**
 
 Require the initial pool to cover multiple lanes rather than quota-filling one theme:
 
@@ -298,7 +298,7 @@ philosophy, ethics, meaning, cooperation, competition, and the future of play
 
 For each promising subject, require at least two angles that each identify familiar entry point, tension or misconception, human stake, earned payoff, evidence backbone, and intended viewer beyond current followers. Include Sudoku as the canonical example of subject versus angle, while explicitly preventing it from becoming a default recommendation.
 
-- [ ] **Step 4: Encode the 100-point scorecard and evidence grades**
+- [x] **Step 4: Encode the 100-point scorecard and evidence grades**
 
 Use the exact weights:
 
@@ -331,13 +331,13 @@ Permit an intermediate integer only when the rationale explains why it falls bet
 
 Every finalist must have one compact record for each of the seven criteria. Each record must have score, grade, cited one-sentence rationale or ledger pointer, largest uncertainty, any cap/boundary applied, and any reused evidence with its distinct criterion-specific use. The three reach-facing criteria total 60 points, but none can override a failed hard gate.
 
-- [ ] **Step 5: Define packaging and confidence tests**
+- [x] **Step 5: Define packaging and confidence tests**
 
 For every top-three finalist, require three materially different title/thumbnail promises. Each direction identifies intended viewer, familiar element, unexpected element, open question, visual promise, and delivered payoff. Reject bait that attracts a different audience from the finished video.
 
 Define confidence as `high`, `medium`, or `low` based on evidence convergence and availability, not score alone. When evidence is tied, require a provisional winner plus the smallest decisive test; never return only a menu.
 
-- [ ] **Step 6: Validate reference links and commit**
+- [x] **Step 6: Validate reference links and commit**
 
 Run:
 
@@ -362,7 +362,7 @@ git commit -m "feat(skill): add WHP topic research method"
 
 - Create: `.agents/skills/choosing-whp-video-topic/references/output-contract.md`
 
-- [ ] **Step 1: Write the exact report structure**
+- [x] **Step 1: Write the exact report structure**
 
 Start with a contents list and require these sections in every complete run:
 
@@ -383,7 +383,7 @@ Start with a contents list and require these sections in every complete run:
 
 The `Decision` section leads with winner status. When a supported comparison exists, it names one topic-and-angle winner, confidence, one-sentence reason, and strongest package direction; otherwise it uses the exact incomplete/no-winner fields.
 
-- [ ] **Step 2: Define exact tables and fields**
+- [x] **Step 2: Define exact tables and fields**
 
 Require the decision-frame table to include date, target market/language, publication window, mode, constraints, WHP files read, analytics supplied/unavailable, and research limitations.
 
@@ -401,7 +401,7 @@ Require the winner brief to include exact angle, logline, intended viewer, why n
 
 Require the research trail to list direct links/files, observation dates, metrics with context, whether each item is fact/estimate/inference, contradictory evidence, unavailable evidence, and claims requiring deeper verification.
 
-- [ ] **Step 3: Add a strict completeness audit**
+- [x] **Step 3: Add a strict completeness audit**
 
 The final audit must answer yes or no to all of these:
 
@@ -420,7 +420,7 @@ The final audit must answer yes or no to all of these:
 
 Any `no` must be corrected before delivery unless it reflects genuinely unavailable evidence; in that case disclose the limitation and lower confidence.
 
-- [ ] **Step 4: Validate the complete skill and commit**
+- [x] **Step 4: Validate the complete skill and commit**
 
 Run:
 
@@ -448,7 +448,7 @@ git commit -m "feat(skill): add WHP topic decision report"
 - Modify when justified by a failed check: `.agents/skills/choosing-whp-video-topic/references/research-method.md`
 - Modify when justified by a failed check: `.agents/skills/choosing-whp-video-topic/references/output-contract.md`
 
-- [ ] **Step 1: Dispatch three fresh forward-test agents**
+- [x] **Step 1: Dispatch three fresh forward-test agents**
 
 Use new agents with no forked conversation context. Give them the same Scenario A, B, and C prompts from Task 1, preceded by this instruction:
 
@@ -461,11 +461,11 @@ This is a real editorial decision. Before acting, read all of the following file
 Work read-only. Use current public research where the workflow requires it. Return the complete recommendation and do not edit repository files.
 ```
 
-- [ ] **Step 2: Score forward outputs with the unchanged rubric**
+- [x] **Step 2: Score forward outputs with the unchanged rubric**
 
 Apply the same twelve checks from Task 1. Record complete outputs, pass/partial/fail results, exact failure excerpts, and comparison with baseline. A forward pass requires all hard-gate, evidence-integrity, scoring, package-alignment, and single-winner checks to pass; formatting omissions may be repaired, but they are still recorded.
 
-- [ ] **Step 3: Refactor only against observed failures**
+- [x] **Step 3: Refactor only against observed failures**
 
 For each failed or partial check:
 
@@ -477,11 +477,11 @@ For each failed or partial check:
 
 Continue until the affected scenario passes or the remaining limitation is external and explicitly lowers confidence. Do not expand the skill for hypothetical edge cases that did not appear.
 
-- [ ] **Step 4: Finish the evaluation record**
+- [x] **Step 4: Finish the evaluation record**
 
 Replace the initial forward-test note with actual outputs and results. In `Refinements and final verdict`, list every skill change caused by testing, the failure it addressed, the rerun outcome, and whether all acceptance checks passed.
 
-- [ ] **Step 5: Validate and commit the tested behavior**
+- [x] **Step 5: Validate and commit the tested behavior**
 
 Run:
 
@@ -524,7 +524,7 @@ raw `/tmp` captures as ephemeral and make the committed evaluation record self-c
 
 - Modify: `docs/superpowers/specs/2026-07-20-whp-video-topic-skill-design.md`
 
-- [ ] **Step 1: Run mechanical verification from a clean index**
+- [x] **Step 1: Run mechanical verification from a clean index**
 
 Run:
 
@@ -566,15 +566,15 @@ git status --short --branch
 
 Expected: no diff-check output and a clean `feat/whp-video-topic-skill` branch.
 
-- [ ] **Step 2: Review against the approved specification**
+- [x] **Step 2: Review against the approved specification**
 
 Check every acceptance criterion in `docs/superpowers/specs/2026-07-20-whp-video-topic-skill-design.md` against a concrete skill section or evaluation result. Verify especially broad actual-game eligibility, 60 reach-facing points, current research, missing-data honesty, top-three package testing, and decisive winner-versus-incomplete behavior.
 
-- [ ] **Step 3: Request an independent code/documentation review**
+- [x] **Step 3: Request an independent code/documentation review**
 
 Use the `superpowers:requesting-code-review` skill. Give the reviewer the diff from `main`, the design specification, the evaluation record, and the four skill artifacts. Resolve any correctness issue and rerun the mechanical checks plus the affected behavioral scenario.
 
-- [ ] **Step 4: Mark the design implemented and commit**
+- [x] **Step 4: Mark the design implemented and commit**
 
 Change only the design status line from:
 
@@ -595,7 +595,7 @@ git add docs/superpowers/specs/2026-07-20-whp-video-topic-skill-design.md
 git commit -m "docs(skill): mark WHP topic skill verified"
 ```
 
-- [ ] **Step 5: Perform final branch and original-checkout audit**
+- [x] **Step 5: Perform final branch and original-checkout audit**
 
 Run in the task worktree:
 

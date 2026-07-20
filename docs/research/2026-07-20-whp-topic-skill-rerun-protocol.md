@@ -1,8 +1,9 @@
 # WHP Topic Skill Review-Correction Rerun Protocol
 
 - **Date:** 2026-07-20
-- **Status:** Executed; accepted artifacts captured; independent final review pending
+- **Status:** Completed and independently reviewed
 - **Target:** per-run `feat/whp-video-topic-skill` revision recorded in the completed capture
+- **Final reviewed HEAD:** `40feec8c1584b2a8400f4800ac1279895a1204cf`
 
 ## Integrity rules
 
@@ -154,9 +155,11 @@ and full package rows, so treating them as unaffected is an explicit scoped infe
 of final-HEAD execution. Final-head A covers the complete-data path; the two final-head focused runs
 cover the corrected absent-detail paths.
 
-### Remaining review gate
+### Independent acceptance review
 
-Mechanical capture, structure, counts, focused assertions, and shortlist arithmetic are recorded.
-An independent reviewer still must map A/B/C against the unchanged twelve-check rubric and confirm
-the focused assertions from the durable files. No new `36/36` or `Implemented and verified` status is
-assigned until that review is documented.
+At final reviewed HEAD `40feec8c1584b2a8400f4800ac1279895a1204cf`, a fresh independent
+whole-branch review scored A, B, and C `12/12` each (`36/36`) and both focused cases `5/5` each
+(`10/10`). It reported zero Critical, Important, or Minor findings; verified the artifact hashes,
+branch topology, and scoped `.gitattributes` rule; and accepted the B/C revision-impact inference
+without treating those runs as final-HEAD executions. The final verdict permits the design status
+`Implemented and verified`.
