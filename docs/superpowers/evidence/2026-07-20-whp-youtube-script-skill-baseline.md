@@ -10,7 +10,7 @@ Create an approximately 80-second Why Humans Play script excerpt about the evolu
 
 ## Observed output
 
-Record that the output was engaging and organized, but changed the mortality observation from “26 pups were taken; 22 had been playing immediately before the attack” into wording making “22” sound like a separate subset that died after a different sequence. It supplied general evidence links without precise claim locators, visual concepts such as “licensed archival footage” without actual asset-page links or rights bases, and attractive motion without always stating what relationship it explained.
+The output was engaging and organized, but changed the mortality observation from “26 pups were taken; 22 had been playing immediately before the attack” into wording making “22” sound like a separate subset that died after a different sequence. It supplied general evidence links without precise claim locators, visual concepts such as “licensed archival footage” without actual asset-page links or rights bases, and attractive motion without always stating what relationship it explained.
 
 ## Failing behaviors
 
@@ -22,4 +22,4 @@ Record that the output was engaging and organized, but changed the mortality obs
 
 ## Required improvement
 
-State that forward tests pass only if claim wording preserves denominators and event order, evidence and asset records remain separate, visual candidates have provenance and rights statuses, uncertain material is qualified in narration, animation states its explanatory purpose, and the completed script ends with both evidence and visual source ledgers.
+Forward tests pass only if claim wording preserves denominators and event order, evidence and asset records remain separate, visual candidates have provenance and rights statuses, uncertain material is qualified in narration, animation states its explanatory purpose, and the completed script ends with both evidence and visual source ledgers.
