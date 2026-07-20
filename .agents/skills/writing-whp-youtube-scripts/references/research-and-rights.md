@@ -30,11 +30,14 @@ rights findings.
 
 1. Write the smallest exact claim the script needs.
 2. Trace search results and reposts to the earliest practical originating source.
-3. Record author, publisher, date, context, and a precise page, table, figure, or timestamp locator.
+3. Record author, publisher, date, context, and a precise locator.
 4. Seek an independent corroborating or contradicting source.
-5. Compare retellings for changed denominators, species, dates, causality, chronology, or scope.
+5. Compare retellings for changed denominators, species, dates, causality, or scope.
 6. Assign one confidence status before drafting narration.
 7. Use only the approved wording or a weaker formulation.
+
+Record the precise page, table, figure, section, paragraph, or timestamp where
+available, and check chronology separately when comparing retellings.
 
 Preserve the population, denominator, comparison, time period, direction of effect,
 and uncertainty that make the claim true. Split compound claims when their parts
