@@ -328,7 +328,7 @@ if __name__ == "__main__":
 Run:
 
 ```bash
-python3 -m unittest .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
+python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
 ```
 
 Expected: ERROR with `ModuleNotFoundError: No module named 'validate_annotated_script'`.
@@ -478,7 +478,7 @@ Implement the following deterministic rules without making network requests:
 - [ ] **Step 2: Run the focused unit tests and verify GREEN**
 
 ```bash
-python3 -m unittest .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
+python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py -v
 ```
 
 Expected: 10 tests run and all pass.
@@ -778,7 +778,7 @@ if __name__ == "__main__":
 - [ ] **Step 2: Run the package tests and verify RED**
 
 ```bash
-python3 -m unittest .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py -v
+python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py -v
 ```
 
 Expected: failures because the generated entrypoint still contains scaffold text,
@@ -858,7 +858,7 @@ readlink .claude/skills/writing-whp-youtube-scripts
 - [ ] **Step 6: Run static tests and schema validation**
 
 ```bash
-python3 -m unittest .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py -v
+python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py -v
 python3 /home/martin/.codex/skills/.system/skill-creator/scripts/quick_validate.py .agents/skills/writing-whp-youtube-scripts
 ```
 
