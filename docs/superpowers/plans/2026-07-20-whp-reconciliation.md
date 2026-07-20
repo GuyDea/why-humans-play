@@ -20,7 +20,8 @@
 - Modify `BRAND.md`: make hidden games a defining lens rather than an exclusive boundary and explicitly include deep studies of real games.
 - Modify `whp-youtube/STEERING.md`: admit explicit-game deep dives to channel scope without inventing a series name or unsupported competitive evidence.
 - Preserve `whp-youtube/drafts/evolutionary-paradox-of-play.md`: parked historical artifact.
-- Preserve `whp-youtube/EP1-SYNOPSIS.md`: pre-existing, untracked user work that is outside this task.
+- Preserve `whp-youtube/EP1-SYNOPSIS.md`: pre-existing, untracked user work in the
+  original checkout, outside the isolated implementation worktree and outside this task.
 
 ### Task 1: Establish the protected baseline
 
@@ -34,25 +35,32 @@ Run:
 
 ```bash
 test "$(git branch --show-current)" = "feat/whp-reconciliation"
+git_dir="$(cd "$(git rev-parse --git-dir)" && pwd -P)"
+git_common="$(cd "$(git rev-parse --git-common-dir)" && pwd -P)"
+test "$git_dir" != "$git_common"
 git status --short
 ```
 
-Expected: the branch assertion exits `0`; status shows only the pre-existing
-`?? whp-youtube/EP1-SYNOPSIS.md`.
+Expected: both assertions exit `0`, proving this is the task branch in a linked
+worktree; status prints nothing because unrelated untracked files remain in the original
+checkout.
 
 - [ ] **Step 2: Record preservation hashes outside the repository**
 
 Run:
 
 ```bash
+original_checkout="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")"
+printf '%s\n' "$original_checkout" > /tmp/whp-reconciliation-original-checkout
 sha256sum \
-  whp-youtube/drafts/evolutionary-paradox-of-play.md \
-  whp-youtube/EP1-SYNOPSIS.md \
+  "$original_checkout/whp-youtube/drafts/evolutionary-paradox-of-play.md" \
+  "$original_checkout/whp-youtube/EP1-SYNOPSIS.md" \
   > /tmp/whp-reconciliation-preserved.sha256
 wc -l /tmp/whp-reconciliation-preserved.sha256
+sha256sum -c /tmp/whp-reconciliation-preserved.sha256
 ```
 
-Expected: `2 /tmp/whp-reconciliation-preserved.sha256`.
+Expected: `2 /tmp/whp-reconciliation-preserved.sha256`, followed by two `OK` results.
 
 - [ ] **Step 3: Run the discovery acceptance check before implementation**
 
@@ -815,6 +823,8 @@ git diff --name-status main...HEAD
 sha256sum -c /tmp/whp-reconciliation-preserved.sha256
 ! git diff --name-only main...HEAD | rg 'whp-youtube/EP1-SYNOPSIS.md|whp-youtube/drafts/evolutionary-paradox-of-play.md'
 git status --short
+original_checkout="$(cat /tmp/whp-reconciliation-original-checkout)"
+git -C "$original_checkout" status --short -- whp-youtube/EP1-SYNOPSIS.md
 ```
 
 Expected:
@@ -824,7 +834,8 @@ Expected:
   guidance documents;
 - both preservation hashes report `OK`;
 - neither protected path appears in the branch diff;
-- status shows only `?? whp-youtube/EP1-SYNOPSIS.md`.
+- isolated-worktree status prints nothing;
+- original-checkout status still shows `?? whp-youtube/EP1-SYNOPSIS.md`.
 
 - [ ] **Step 4: Review commit boundaries**
 
@@ -837,7 +848,8 @@ git status --short
 ```
 
 Expected: focused commits for the design, plan, skill, ledger, canonical scope, and channel
-scope; the live worktree still contains only the pre-existing untracked synopsis.
+scope; the isolated worktree is clean and the original checkout retains the pre-existing
+untracked synopsis.
 
 - [ ] **Step 5: Commit validation fixes only when validation changed tracked files**
 
