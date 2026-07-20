@@ -22,8 +22,8 @@ Scores use the ten 0–2 dimensions in `references/quality-rubric.md`. A pass re
 | E2 — Contested science | 18/20 | Pass: male-rat/species/manipulation scope preserved; human inference rejected; important-fact visuals; asset pages/statuses/fallbacks; explanatory motion; four end sections | PASS | PASS |
 | E3 — Existing draft revision | 18/20 | Pass: exact 26 taken → 22 of those 26 playing relationship; `REPORTED` wording; asset page/status/fallback; explanatory motion; four end sections | N/A for the requested audit/two-beat excerpt. An advisory full-document run failed only the nine omitted header fields. | PASS |
 | E4 — Unverified account | 17/20 | Pass: `UNVERIFIED-EXAMPLE` is audibly qualified and non-load-bearing; no external visual; owned still; four end sections | FAIL recorded honestly: the assignment supplied no originating blog URL and the evaluator did not invent one | PASS |
-| E5 — Unclear rights, original | 14/20 | **Fail:** safe rights decision, but the targeted plan omitted the unified four-section end ledger | N/A as returned; an advisory run failed the absent document structure | FAIL |
-| E5 — Rerun 1 | 17/20 | **Fail:** four end sections were fixed, but `example.invalid` was substituted for a real asset page | PASS structurally, but the URL-shape pass supplied no provenance | FAIL |
+| E5 — Unclear rights, original | 11/20 | **Fail:** safe rights decision, but the targeted plan omitted packaging, a concrete WHP lens, and the unified four-section end ledger | N/A as returned; an advisory run failed the absent document structure | FAIL |
+| E5 — Rerun 1 | 14/20 | **Fail:** inherited packaging placeholders and no concrete WHP lens; `example.invalid` was substituted for a real asset page | PASS structurally, but the URL-shape pass supplied no provenance | FAIL |
 | E5 — Final rerun | 19/20 | Pass: repost is an unnumbered `REFERENCE-ONLY-RIGHTS-UNVERIFIED` lead; no external asset is proposed; owned visual and fallback; explanatory motion; four end sections | PASS, structural only | PASS |
 | E6 — Negative trigger | N/A | Pass: exactly three ordinary ad headlines; no WHP apparatus, imitation, or skill-activation claim | N/A | PASS |
 
@@ -39,8 +39,8 @@ Vectors below are ordered `D1` through `D10` and use the rubric's integer anchor
 | E2 | `2,2,2,0,2,2,2,2,2,2` | 18 | 0.1 | `/tmp/whp-script-skill-evals/E2.md` | `8437b950e6c988f78332f76d26608a060154500c3d65b9b8a5ab3fdb2d0ae52d` |
 | E3 | `2,2,2,1,2,2,1,2,2,2` | 18 | N/A | `/tmp/whp-script-skill-evals/E3.md` | `7cfcaa52d4493089236db2b246c137650ea430df19d2ab4c2f84783ba6690c56` |
 | E4 | `2,2,2,1,2,2,0,2,2,2` | 17 | 0.1 | `/tmp/whp-script-skill-evals/E4.md` | `f86b9b1c6e18577ee36519975fddb90bf61a990d6ce82917afa4de6931807c12` |
-| E5 baseline | `1,2,1,0,2,2,0,2,2,2` | 14 | N/A | `/tmp/whp-script-skill-evals/E5.md` | `46da719203e6e71f6cac1ebd332c366f508fecbd796f14f7d72363c16251f1f4` |
-| E5 rerun 1 | `2,2,2,0,2,2,2,1,2,2` | 17 | 0.1 | `/tmp/whp-script-skill-evals/E5-rerun.md` | `324390ae668fc37f6381fe647efb307863e2ebc1707a04638702593271b6eabb` |
+| E5 baseline | `0,2,1,0,2,2,0,1,2,1` | 11 | N/A | `/tmp/whp-script-skill-evals/E5.md` | `46da719203e6e71f6cac1ebd332c366f508fecbd796f14f7d72363c16251f1f4` |
+| E5 rerun 1 | `1,2,1,0,2,2,2,1,2,1` | 14 | 0.1 | `/tmp/whp-script-skill-evals/E5-rerun.md` | `324390ae668fc37f6381fe647efb307863e2ebc1707a04638702593271b6eabb` |
 | E5 final rerun | `2,2,2,2,1,2,2,2,2,2` | 19 | 0.1 | `/tmp/whp-script-skill-evals/E5-rerun3.md` | `524e547796100c15aea34e084cd4d7df927cab53520948d42dbb93847e34afe8` |
 
 Every sub-2 score has this recorded basis:
@@ -53,12 +53,17 @@ Every sub-2 score has this recorded basis:
 | E3 | D7 = 1 | The DOI and article pages were recorded, but full-publisher wording and a more exact primary locator remained pending. |
 | E4 | D4 = 1 | The 63-word insert had a calculated budget but no performed timed read. |
 | E4 | D7 = 0 | The material claim has no original URL, identified author, date, or locator. Honest `UNVERIFIED-EXAMPLE` status does not satisfy the rubric's original-source requirement. |
-| E5 baseline | D1 = 1 | The targeted plan states a production decision but does not establish a complete title/thumbnail/opening/payoff contract. |
+| E5 baseline | D1 = 0 | Packaging is absent: there is no concrete title, thumbnail, opening, or payoff contract to align. |
 | E5 baseline | D3 = 1 | The rights plan is usable, but it is not a complete story beat with a resolved narrative change. |
 | E5 baseline | D4 = 0 | It contains no spoken narration or timed delivery. |
 | E5 baseline | D7 = 0 | The evidence ledger and unified four-section reference structure are missing. |
+| E5 baseline | D8 = 1 | The fallback is safe, but the original page, photographer/rightsholder, and license remain unresolved. |
+| E5 baseline | D10 = 1 | It gives a generic rights-safe treatment without a concrete WHP, play, or hidden-game viewer lens. |
+| E5 rerun 1 | D1 = 1 | Title, thumbnail, mode, and related packaging are inherited-parent placeholders rather than a concrete aligned contract. |
+| E5 rerun 1 | D3 = 1 | It supplies no actual narration or resolved story sequence for the visual insert. |
 | E5 rerun 1 | D4 = 0 | It intentionally supplies zero new narration and therefore no spoken-performance evidence. |
 | E5 rerun 1 | D8 = 1 | Rights treatment and fallback are candid, but `example.invalid` is not a concrete original asset page. |
+| E5 rerun 1 | D10 = 1 | It remains a generic rights plan without a concrete WHP, play, or hidden-game viewer lens. |
 | E5 final rerun | D5 = 1 | The visual treatment and fallback are concrete, but the planned owned production asset does not yet exist. |
 
 ## Per-scenario evidence
@@ -121,7 +126,7 @@ The original run made the safe editorial decision but failed the required end-le
 - **Exact fallback:** “The presenter shot and the from-scratch WHP graphic are the fallback, not a temporary placeholder.”
 - **Publication boundary:** no crop, trace, animation, public cut, thumbnail, teaser, or Short use of the repost.
 
-The first fresh rerun after the format clarification fixed the four end sections and excluded the repost from the cut, but failed the asset-page gate by writing `https://example.invalid/original-not-located` in a numbered asset record. Calling it a reserved placeholder did not make it an original page. That output was scored 17/20 but failed its hard gate.
+The first fresh rerun after the format clarification fixed the four end sections and excluded the repost from the cut, but failed the asset-page gate by writing `https://example.invalid/original-not-located` in a numbered asset record. Calling it a reserved placeholder did not make it an original page. That output was scored 14/20 and failed its hard gate.
 
 The final fresh rerun after the placeholder-URL correction records:
 
@@ -165,7 +170,7 @@ All five baseline behaviors are corrected in E3. The word `REPORTED` and the pen
 - **Smallest change:** Added one clarification to `references/annotated-script-format.md`: targeted beats, inserts, audits, and revision excerpts still use the four-section end structure, with explicit none-needed statements where a section has no records.
 - **Commit:** `f367152 fix: require ledgers in targeted script artifacts`
 - **Deterministic result after change:** 42/42 unit tests passed; `quick_validate` passed; the worked annotated asset passed; `git diff --check` passed.
-- **Fresh rerun 1:** E5 improved from 14/20 to 17/20 and the validator passed, but the output still failed the real-asset-page gate by inserting a labeled `example.invalid` placeholder.
+- **Fresh rerun 1:** E5 improved from 11/20 to 14/20 and the validator passed, but the output still failed the real-asset-page gate by inserting a labeled `example.invalid` placeholder.
 
 ### E5 placeholder asset URL
 
