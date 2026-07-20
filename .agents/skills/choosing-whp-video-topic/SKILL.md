@@ -15,7 +15,7 @@ Track this checklist during the run. Do not compose the recommendation until eve
 
 - [ ] Record the decision frame and current WHP context.
 - [ ] Select and state the evidence mode.
-- [ ] Collect independent audience and timing signals.
+- [ ] Collect independent audience-demand, competitive-supply, and timing signals.
 - [ ] Record at least 30 distinct, diverse subjects before ranking.
 - [ ] Develop materially different angles for promising subjects.
 - [ ] Audit every advancing angle against all six hard gates.
@@ -41,7 +41,7 @@ Keep canonical doctrine in those files; do not reproduce or silently revise it h
 
 State one mode before collecting signals:
 
-- Use **channel-aware mode** when the user supplies meaningful private YouTube data. Use only the data supplied for the run and treat it as private.
+- Use **channel-aware mode** when the user supplies meaningful private YouTube data. Use only private analytics supplied for the run, treat them as private, and combine them with current public and repository evidence.
 - Use **cold-start mode** when private data is absent, too sparse, or not decision-useful. Rely on current public and repository evidence and lower confidence where audience-specific evidence is missing.
 
 Never request credentials, require authenticated access, or block solely because analytics are unavailable.
@@ -56,7 +56,7 @@ Do not substitute an improvised rubric or ad hoc report for either reference.
 
 ## Generate before judging
 
-Collect multiple independent internal and external signals appropriate to the evidence mode. Use them to seed at least 30 distinct subjects before ranking or pruning. Deliberately span WHP's broad eligible universe:
+Collect multiple independent audience-demand, competitive-supply, and timing signals appropriate to the evidence mode. Use them to seed at least 30 distinct subjects before ranking or pruning. Deliberately span WHP's broad eligible universe:
 
 - actual games such as Sudoku, puzzles, sports, and other play forms;
 - game history, rules, design, strategy, and culture;
