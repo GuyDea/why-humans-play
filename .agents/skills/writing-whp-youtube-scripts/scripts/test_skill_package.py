@@ -178,6 +178,55 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(contract=source_name):
                 self.assertIn(contract, sources[source_name])
 
+    def test_reverse_claim_audit_contract_is_explicit(self) -> None:
+        research_text = (
+            SKILL_ROOT / "references/research-and-rights.md"
+        ).read_text(encoding="utf-8")
+        research = " ".join(research_text.split())
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        with self.subTest(contract="contents-link"):
+            self.assertIn(
+                "- [Run the reverse claim audit](#run-the-reverse-claim-audit)",
+                research_text,
+            )
+
+        research_contracts = (
+            "Before finalizing, reverse-audit every narrated material claim against "
+            "its evidence record.",
+            "Compare the narration word for word with `Exact claim`, `Scope`, "
+            "`Caveat`, and `Approved wording`. Retain every limiting scope or modal "
+            "term; if it does not fit, weaken the narration rather than strengthening "
+            "the record.",
+            "Open every `Cross-checks` source and scan it for material wording that "
+            "conflicts on origin, date, chronology, causality, or scope, even when "
+            "that source supports a different subclaim. Write `No contradiction "
+            "found` only after this source-wide conflict scan.",
+            "For `CORROBORATED`, trace whether the sources have genuinely independent "
+            "evidence chains. If they converge on the same originating investigation, "
+            "record the dependence and lower the status unless another independent "
+            "chain supports the exact approved wording.",
+            "Use stable, source-native locators: page, section, table, figure, "
+            "timestamp, or a descriptive paragraph anchor. Never use browser-rendered "
+            "or search-result line numbers as source locators.",
+        )
+        for contract in research_contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, research)
+
+        rubric_reminder = (
+            "Reverse-audit narration against its claim cards and every cross-check "
+            "source: preserve limiting scope and modal terms, expose material "
+            "contradictions or dependent evidence chains, and require stable "
+            "source-native locators."
+        )
+        with self.subTest(contract="rubric-reminder"):
+            self.assertIn(rubric_reminder, rubric)
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
