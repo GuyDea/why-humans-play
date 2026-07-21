@@ -12,6 +12,33 @@ CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_unresolved_template_personal_scaffold_stays_conditional(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        personal_input = template.split("### Personal input\n", 1)[1].split(
+            "\n### Viewer application", 1
+        )[0]
+
+        conditional_contract = (
+            "- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.",
+            "- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.",
+            "- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?",
+            "- **Bridge in:** A real encounter can make that abstract question concrete.",
+            "- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.",
+        )
+        for line in conditional_contract:
+            with self.subTest(contract=line):
+                self.assertIn(line, personal_input)
+
+        invented_phrases = (
+            "Martin initially dismissed insect play",
+            "My first reaction was to call this random movement",
+        )
+        for phrase in invented_phrases:
+            with self.subTest(forbidden=phrase):
+                self.assertNotIn(phrase, personal_input)
+
     def test_personal_and_application_contract_is_distributed(self) -> None:
         sources = {
             "skill": SKILL_MD.read_text(encoding="utf-8"),
