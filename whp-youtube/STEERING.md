@@ -147,6 +147,14 @@ millions on junk science).
   developed brains — *but* the evidence doesn't prove play is *vital*; exercise or teaching
   might do the same thing." `[verified]` **Honesty about limits is on-brand and it builds
   the trust that turns a first-time viewer into a subscriber.**
+- **Make personal material authentic and necessary.** Every complete script makes an
+  explicit decision to request, use, or omit Martin's experience. Never invent a memory,
+  and cut autobiographical material that does not create stakes, test the idea, reveal a
+  misconception, or change the viewer's route through the story.
+- **Hand the insight back.** Every complete script gives the viewer one specific,
+  evidence-bounded action, observation, or reflection, names what to notice, preserves a
+  real limitation, and connects the exercise to a larger benefit. Do not disguise generic
+  self-help or certainty as usefulness.
 - **The Apexwit conflict is an asset, not a liability.** "I build brain games — here's the
   honest answer to whether they work" is a *credibility* frame, not an ad. Use it. Never
   let a WHP video read as a commercial for a portfolio app (brand principle: structural,

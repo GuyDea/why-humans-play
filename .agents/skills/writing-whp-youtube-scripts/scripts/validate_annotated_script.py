@@ -15,6 +15,8 @@ READINESS_STATES = {
     "RECORD-READY",
     "PICTURE-LOCKED",
 }
+DELIVERABLE_VALUES = {"FULL-SCRIPT", "TARGETED-ARTIFACT"}
+PERSONAL_DECISIONS = {"INPUT-REQUESTED", "COMPLETED", "OMIT"}
 CLAIM_STATUSES = {
     "VERIFIED",
     "CORROBORATED",
@@ -35,6 +37,7 @@ FIXED_ASSET_STATUSES = {
 HEADER_FIELDS = (
     "Status",
     "Version",
+    "Deliverable",
     "Target runtime",
     "Word count",
     "Audience",
@@ -42,6 +45,7 @@ HEADER_FIELDS = (
     "Title",
     "Thumbnail promise",
     "Viewer promise",
+    "Useful viewer change",
     "Central question",
     "Thesis",
     "Payoff",
@@ -85,6 +89,24 @@ ASSET_FIELDS = (
     "Accessed",
     "Status",
 )
+PERSONAL_INPUT_FIELDS = (
+    "ID",
+    "Decision",
+    "Story purpose",
+    "Primary prompt",
+    "Follow-up prompts",
+    "Bridge in",
+    "Bridge out",
+    "Personal visuals",
+    "Omit when",
+)
+VIEWER_APPLICATION_FIELDS = (
+    "Insight",
+    "Try",
+    "Observe",
+    "Boundary",
+    "Larger benefit",
+)
 
 END_HEADINGS = (
     "Evidence references",
@@ -118,6 +140,12 @@ FIELD_RE = re.compile(
 VERSIONED_CC_RE = re.compile(
     r"^CC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d+(?:\.\d+)+$"
 )
+PERSONAL_ID_RE = re.compile(r"^PI-\d{3}$")
+PERSONAL_MARKER_RE = re.compile(r"<!-- PI-(\d{3}): Martin input -->")
+FENCE_LINE_RE = re.compile(
+    r"^[ ]{0,3}(?P<quote>>[ \t]?[ ]{0,3})?"
+    r"(?P<fence>`{3,}|~{3,})(?P<rest>.*)$"
+)
 
 
 @dataclass(frozen=True)
@@ -148,26 +176,31 @@ def _mask_fenced_blocks(text: str) -> str:
     masked_lines: list[str] = []
     fence_character: str | None = None
     fence_length = 0
+    fence_in_blockquote = False
     for line in text.splitlines(keepends=True):
         content = line.rstrip("\r\n")
         if fence_character is None:
-            opening = re.match(r"^[ ]{0,3}(`{3,}|~{3,}).*$", content)
+            opening = FENCE_LINE_RE.match(content)
             if opening is None:
                 masked_lines.append(line)
                 continue
-            marker = opening.group(1)
+            marker = opening.group("fence")
             fence_character = marker[0]
             fence_length = len(marker)
+            fence_in_blockquote = opening.group("quote") is not None
         else:
-            candidate = content.lstrip(" ")
-            if len(content) - len(candidate) <= 3:
-                candidate = candidate.rstrip(" \t")
+            closing = FENCE_LINE_RE.match(content)
+            if closing is not None:
+                marker = closing.group("fence")
                 if (
-                    len(candidate) >= fence_length
-                    and set(candidate) == {fence_character}
+                    (closing.group("quote") is not None) == fence_in_blockquote
+                    and marker[0] == fence_character
+                    and len(marker) >= fence_length
+                    and not closing.group("rest").strip()
                 ):
                     fence_character = None
                     fence_length = 0
+                    fence_in_blockquote = False
         masked_lines.append(re.sub(r"[^\r\n]", " ", line))
     return "".join(masked_lines)
 
@@ -210,13 +243,19 @@ def _document_regions(text: str) -> DocumentRegions:
     )
 
 
+def _field_values(text: str) -> dict[str, list[str]]:
+    """Return every value found for each Markdown field in *text*."""
+
+    fields: dict[str, list[str]] = {}
+    for match in FIELD_RE.finditer(text):
+        fields.setdefault(match.group(1), []).append(match.group(2).strip())
+    return fields
+
+
 def _parse_fields(text: str) -> dict[str, str]:
     """Return the first value found for each Markdown field in *text*."""
 
-    fields: dict[str, str] = {}
-    for match in FIELD_RE.finditer(text):
-        fields.setdefault(match.group(1), match.group(2).strip())
-    return fields
+    return {field: values[0] for field, values in _field_values(text).items()}
 
 
 def _beat_blocks(text: str) -> list[tuple[str, str]]:
@@ -230,18 +269,104 @@ def _beat_blocks(text: str) -> list[tuple[str, str]]:
     return blocks
 
 
-def _section_body(block: str, section: str) -> str | None:
-    """Return a beat section body, excluding the next level-three heading."""
+def _section_bodies(block: str, section: str) -> list[str]:
+    """Return every exact level-three section body in document order."""
 
-    heading = re.search(
-        rf"^### {re.escape(section)}[ \t]*$", block, re.MULTILINE
+    headings = list(
+        re.finditer(rf"^### {re.escape(section)}[ \t]*$", block, re.MULTILINE)
     )
-    if heading is None:
-        return None
-    next_heading = re.search(r"^### .+$", block[heading.end() :], re.MULTILINE)
-    if next_heading is None:
-        return block[heading.end() :]
-    return block[heading.end() : heading.end() + next_heading.start()]
+    bodies: list[str] = []
+    for heading in headings:
+        next_heading = re.search(r"^### .+$", block[heading.end() :], re.MULTILINE)
+        end = (
+            heading.end() + next_heading.start()
+            if next_heading is not None
+            else len(block)
+        )
+        bodies.append(block[heading.end() : end])
+    return bodies
+
+
+def _section_body(block: str, section: str) -> str | None:
+    """Return the first exact beat section body, when present."""
+
+    bodies = _section_bodies(block, section)
+    return bodies[0] if bodies else None
+
+
+def _extract_narration_from_masked(masked_text: str) -> str:
+    """Extract narration from text whose fenced blocks are already masked."""
+
+    regions = _document_regions(masked_text)
+    paragraphs: list[str] = []
+    for _, block in _beat_blocks(regions.beats):
+        body = _section_body(block, "Narration")
+        if body is None:
+            continue
+        current: list[str] = []
+        for line in body.splitlines():
+            match = re.match(r"^[ ]{0,3}>[ \t]?(.*)$", line)
+            if match is None:
+                if current:
+                    paragraphs.append(" ".join(current))
+                    current = []
+                continue
+            quoted = match.group(1)
+            spoken = PERSONAL_MARKER_RE.sub("", quoted).strip()
+            if spoken:
+                current.append(spoken)
+            elif not PERSONAL_MARKER_RE.search(quoted) and current:
+                paragraphs.append(" ".join(current))
+                current = []
+        if current:
+            paragraphs.append(" ".join(current))
+    return "\n\n".join(paragraphs)
+
+
+def extract_narration(text: str) -> str:
+    """Return spoken blockquote copy under Narration headings, without input markers."""
+
+    return _extract_narration_from_masked(_mask_fenced_blocks(text))
+
+
+def count_narration_words(text: str) -> int:
+    """Count whitespace-delimited spoken words after narration extraction."""
+
+    return len(extract_narration(text).split())
+
+
+def _validate_structured_fields(
+    beat_id: str,
+    section: str,
+    body: str,
+    required: tuple[str, ...],
+    errors: list[str],
+) -> dict[str, str]:
+    matches: dict[str, list[str]] = {}
+    for match in FIELD_RE.finditer(body):
+        matches.setdefault(match.group(1), []).append(match.group(2).strip())
+    for field in required:
+        values = matches.get(field, [])
+        if not values:
+            errors.append(f"Beat {beat_id} {section} is missing required field: {field}.")
+        elif len(values) > 1:
+            errors.append(f"Beat {beat_id} {section} repeats required field: {field}.")
+        elif not values[0]:
+            errors.append(
+                f"Beat {beat_id} {section} field {field} must have a non-whitespace value."
+            )
+    return {field: values[0] for field, values in matches.items() if values}
+
+
+def _structured_blocks(
+    beats_text: str, section: str
+) -> list[tuple[str, str]]:
+    blocks: list[tuple[str, str]] = []
+    for beat_id, beat in _beat_blocks(beats_text):
+        blocks.extend(
+            (beat_id, body) for body in _section_bodies(beat, section)
+        )
+    return blocks
 
 
 def _parse_records(references_text: str) -> list[Record]:
@@ -329,11 +454,15 @@ def _has_public_domain_basis_and_jurisdiction(rights_basis: str) -> bool:
 
 
 def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
+    field_values = _field_values(header_text)
     fields = _parse_fields(header_text)
     for field in HEADER_FIELDS:
-        if field not in fields:
+        values = field_values.get(field, [])
+        if not values:
             errors.append(f"Missing required header field: {field}.")
-        elif not fields[field]:
+        elif len(values) > 1:
+            errors.append(f"Header repeats required field: {field}.")
+        elif not values[0]:
             errors.append(
                 f"Required header field {field} must have a non-whitespace value."
             )
@@ -341,6 +470,10 @@ def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
     status = fields.get("Status")
     if status is not None and status not in READINESS_STATES:
         errors.append(f"Invalid readiness Status: {status!r}.")
+
+    deliverable = fields.get("Deliverable")
+    if deliverable is not None and deliverable not in DELIVERABLE_VALUES:
+        errors.append(f"Invalid Deliverable: {deliverable!r}.")
 
     return fields
 
@@ -392,13 +525,150 @@ def _validate_beats(text: str, errors: list[str]) -> None:
             )
 
 
+def _validate_personal_and_application_blocks(
+    beats_text: str,
+    masked_text: str,
+    deliverable: str | None,
+    readiness_status: str | None,
+    errors: list[str],
+) -> None:
+    personal_blocks = [
+        (beat_id, beat, body)
+        for beat_id, beat in _beat_blocks(beats_text)
+        for body in _section_bodies(beat, "Personal input")
+    ]
+    application_blocks = _structured_blocks(beats_text, "Viewer application")
+    personal_count = len(_section_bodies(masked_text, "Personal input"))
+    application_count = len(_section_bodies(masked_text, "Viewer application"))
+    personal_outside_beats = personal_count - len(personal_blocks)
+    application_outside_beats = application_count - len(application_blocks)
+
+    if deliverable == "FULL-SCRIPT" and personal_count != 1:
+        errors.append(
+            "FULL-SCRIPT requires exactly one Personal input block; "
+            f"found {personal_count}."
+        )
+    if deliverable == "FULL-SCRIPT" and application_count != 1:
+        errors.append(
+            "FULL-SCRIPT requires exactly one Viewer application block; "
+            f"found {application_count}."
+        )
+    if personal_outside_beats:
+        errors.append(
+            "Personal input block outside a beat: "
+            f"found {personal_outside_beats}."
+        )
+    if application_outside_beats:
+        errors.append(
+            "Viewer application block outside a beat: "
+            f"found {application_outside_beats}."
+        )
+
+    all_markers = [
+        f"PI-{match.group(1)}" for match in PERSONAL_MARKER_RE.finditer(masked_text)
+    ]
+    consumed_markers: list[str] = []
+    seen_personal_ids: set[str] = set()
+    for beat_id, beat, body in personal_blocks:
+        fields = _validate_structured_fields(
+            beat_id,
+            "Personal input",
+            body,
+            PERSONAL_INPUT_FIELDS,
+            errors,
+        )
+        personal_id = fields.get("ID")
+        if personal_id:
+            if PERSONAL_ID_RE.fullmatch(personal_id) is None:
+                errors.append(
+                    f"Beat {beat_id} Personal input has invalid ID: {personal_id!r}."
+                )
+            if personal_id in seen_personal_ids:
+                errors.append(f"Duplicate personal input ID: {personal_id}.")
+            else:
+                seen_personal_ids.add(personal_id)
+
+        decision = fields.get("Decision")
+        if decision and decision not in PERSONAL_DECISIONS:
+            errors.append(
+                f"Beat {beat_id} Personal input has invalid Decision: {decision!r}."
+            )
+
+        narration = _section_body(beat, "Narration") or ""
+        narration_markers = [
+            f"PI-{match.group(1)}"
+            for match in PERSONAL_MARKER_RE.finditer(narration)
+        ]
+        if decision == "INPUT-REQUESTED":
+            matching_count = narration_markers.count(personal_id)
+            if matching_count != 1:
+                errors.append(
+                    f"Beat {beat_id} INPUT-REQUESTED requires exactly one matching "
+                    f"narration marker for {personal_id}; found {matching_count}."
+                )
+            elif PERSONAL_ID_RE.fullmatch(personal_id or "") is not None:
+                consumed_markers.append(personal_id)
+            if readiness_status != "RESEARCH-DRAFT":
+                errors.append(
+                    f"Beat {beat_id} INPUT-REQUESTED is allowed only in "
+                    "RESEARCH-DRAFT."
+                )
+        elif decision in {"COMPLETED", "OMIT"} and narration_markers:
+            errors.append(
+                f"Beat {beat_id} Decision {decision} must not retain a personal "
+                "input marker."
+            )
+
+    remaining_markers = list(all_markers)
+    for marker in consumed_markers:
+        if marker in remaining_markers:
+            remaining_markers.remove(marker)
+    for marker in sorted(set(remaining_markers)):
+        errors.append(f"Found orphan personal input marker: {marker}.")
+
+    for beat_id, body in application_blocks:
+        _validate_structured_fields(
+            beat_id,
+            "Viewer application",
+            body,
+            VIEWER_APPLICATION_FIELDS,
+            errors,
+        )
+
+
+def _validate_word_count(
+    masked_text: str,
+    header_fields: dict[str, str],
+    errors: list[str],
+) -> None:
+    stated = header_fields.get("Word count")
+    if stated is None or not stated:
+        return
+    if re.fullmatch(r"\d+", stated) is None:
+        errors.append("Word count must be a non-negative integer.")
+        return
+    actual = len(_extract_narration_from_masked(masked_text).split())
+    normalized_stated = stated.lstrip("0") or "0"
+    if normalized_stated != str(actual):
+        errors.append(
+            f"Word count metadata {stated} does not match extracted narration "
+            f"count {actual}."
+        )
+
+
 def _validate_record_fields(record: Record, errors: list[str]) -> dict[str, str]:
+    field_values = _field_values(record.body)
     fields = _parse_fields(record.body)
     required = EVIDENCE_FIELDS if record.record_id.startswith("F-") else ASSET_FIELDS
     for field in required:
-        if field not in fields:
+        values = field_values.get(field, [])
+        if not values:
             errors.append(f"Record {record.record_id} is missing required field: {field}.")
-        elif field != "Direct production file" and not fields[field]:
+        elif len(values) > 1:
+            errors.append(
+                f"Record {record.record_id} repeats required field: {field}."
+            )
+        elif field != "Direct production file" and not values[0]:
             errors.append(
                 f"Record {record.record_id} field {field} must have a "
                 "non-whitespace value."
@@ -541,7 +811,8 @@ def _validate_references(
 def validate_document(text: str) -> list[str]:
     """Return human-readable structural errors; an empty list means structurally valid."""
 
-    regions = _document_regions(_mask_fenced_blocks(text))
+    masked_text = _mask_fenced_blocks(text)
+    regions = _document_regions(masked_text)
     errors: list[str] = []
     if regions.reference_heading_count != 1:
         errors.append(
@@ -555,6 +826,14 @@ def validate_document(text: str) -> list[str]:
         )
     header_fields = _validate_headers(regions.header, errors)
     _validate_beats(regions.beats, errors)
+    _validate_personal_and_application_blocks(
+        regions.beats,
+        masked_text,
+        header_fields.get("Deliverable"),
+        header_fields.get("Status"),
+        errors,
+    )
+    _validate_word_count(masked_text, header_fields, errors)
     for beat_id in regions.post_reference_beat_ids:
         errors.append(f"Beat {beat_id} appears after the references heading.")
     _validate_references(

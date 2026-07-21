@@ -31,18 +31,39 @@ Do not draft until the packaging, opening, and payoff describe the same video.
 
 ## Mandatory workflow
 
-1. Write an assignment contract that fixes the episode mode, audience, promise, scope, deliverable, runtime, and constraints.
+1. Write an assignment contract that fixes the episode mode, audience, promise,
+   `Deliverable`, `Useful viewer change`, scope, runtime, and constraints.
 2. Build the evidence packet. Assign confidence to every material claim and approve only wording that its evidence supports.
 3. Develop three eligible opening candidates. Recommend the strongest candidate, but do not force a micro-story when another opening better serves the promise and evidence.
-4. Map a narrative spine in terms of how the viewer's understanding changes from opening question to final payoff.
-5. Draft for spoken delivery. Read the narration aloud, revise it for speech, and time it against the runtime.
-6. Add an adjacent treatment for visuals, candidate assets, motion, on-screen text, audio, and accessibility without contaminating the narration.
-7. Run separate story, evidence, fact, rights, visual, animation, accessibility, and format audits, then run the deterministic validator.
+4. Map a narrative spine in terms of how the viewer's understanding changes from the
+   opening question to the final payoff.
+5. For a `FULL-SCRIPT`, choose one personal-input decision: request authentic input with
+   specific prompts and bridges, integrate only material Martin supplied, or omit the
+   sequence when it does no narrative work.
+6. For a `FULL-SCRIPT`, build one viewer application in this order:
+   `insight → try → observe → boundary → larger benefit`. Keep the try no stronger than
+   its evidence. Voice all five elements in narration—the insight; the low-risk action,
+   observation, or reflection; the observable signal; the boundary; and the larger
+   benefit—not only in the structured block.
+7. Draft for spoken delivery. Read the narration aloud, revise it for speech, and time
+   it against the runtime.
+8. Add an adjacent treatment for visuals, candidate assets, motion, on-screen text,
+   audio, and accessibility without contaminating the narration.
+9. Run separate story, personal-authenticity, evidence, fact, rights, visual, animation,
+   application-boundary, accessibility, and format audits, then run the deterministic
+   validator.
 
 ## Non-negotiable rules
 
 - Never invent factual scene details such as dialogue, weather, motives, thoughts, chronology, or sensory detail.
 - Let confidence control narration. Omit rejected claims. Use an unverified example only when it is attributed, explicitly caveated, and non-load-bearing.
+- For every `FULL-SCRIPT`, choose exactly one personal-input decision:
+  `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use
+  it as proof of prevalence, causality, or mechanism.
+- For every `FULL-SCRIPT`, voice all five viewer-application elements in narration:
+  evidence-bounded insight; low-risk action, observation, or reflection; observable
+  signal; real boundary; and larger benefit. The structured block does not substitute
+  for spoken copy.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique image.
 - Provide actual candidate asset pages when practical. Record the rights status and an ownable fallback, and never call an asset cleared without a documented basis.

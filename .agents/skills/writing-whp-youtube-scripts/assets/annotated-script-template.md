@@ -5,14 +5,16 @@
 > live source, locator, license, and claim before production.
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.2
-- **Target runtime:** 00:20
-- **Word count:** 52
+- **Version:** 0.3
+- **Deliverable:** FULL-SCRIPT
+- **Target runtime:** 00:30
+- **Word count:** 80
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy
 - **Thumbnail promise:** A bee rolling a wooden ball
 - **Viewer promise:** See why one tiny detour changed the case for animal play.
+- **Useful viewer change:** Notice when behavior meets operational play criteria without assuming subjective experience.
 - **Central question:** Can an insect play without an external reward?
 - **Thesis:** The behavior meets established play criteria, with interpretive limits.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
@@ -20,17 +22,40 @@
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
 ## Beat 01 — The detour
-_Time: 00:00–00:20 · Target: ~52 words_
+_Time: 00:00–00:30 · Target: ~80 words_
 
 ### Narration
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
-> food reward. The researchers said this met their operational play criteria. That
+> food reward.
+> <!-- PI-001: Martin input -->
+> The researchers said this met their operational play criteria. That
 > does not tell us what a bee feels—but makes the detour hard to dismiss.
+> Next time an animal seems to play, look for repetition, choice, and no immediate
+> reward. Those clues can sharpen the question; they cannot reveal the animal's inner
+> experience.
 
 ### Story function
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
+
+### Personal input
+- **ID:** PI-001
+- **Decision:** INPUT-REQUESTED
+- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.
+- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.
+- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?
+- **Bridge in:** A real encounter can make that abstract question concrete.
+- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.
+- **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
+- **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
+
+### Viewer application
+- **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
+- **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
+- **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
+- **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
+- **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
 
 ### Claims
 - `F-001` — Ball rolling without a food reward met the study's play criteria (`VERIFIED`).
@@ -69,7 +94,7 @@ bee's motives.
 - **Accessed:** 2026-07-20
 - **Scope:** Laboratory study of Bombus terrestris; the conclusion concerns operational play criteria, not proof of subjective enjoyment.
 - **Cross-checks:** No independent corroborating source located; institutional study summary: https://www.qmul.ac.uk/news/latest-news/2022/se/first-ever-study-shows-bumble-bees-play.html
-- **Contradictions:** No direct contradiction located; alternative functional explanations are discussed by the paper.
+- **Contradictions:** Galpayage Dona et al. paper (Original URL) — COMPLETE — [full paper checked, including Abstract, Methods experiment 1, and Discussion criteria 1–5; supports the bounded procedure and the authors' operational-criteria conclusion while discussing alternative functional explanations; keep VERIFIED wording limited to the experiment and do not claim subjective enjoyment]; Queen Mary University of London study summary (Cross-check) — COMPLETE — [full article body checked; reports the same study account and no material conflict with the approved wording was found; do not treat this institution-dependent summary as independent corroboration or upgrade the status]
 - **Status:** VERIFIED
 - **Caveat:** Do not turn behavioral criteria into a claim about conscious emotion.
 - **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.

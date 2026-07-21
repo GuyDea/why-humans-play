@@ -12,6 +12,338 @@ CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_unresolved_template_personal_scaffold_stays_conditional(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        personal_input = template.split("### Personal input\n", 1)[1].split(
+            "\n### Viewer application", 1
+        )[0]
+
+        conditional_contract = (
+            "- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.",
+            "- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.",
+            "- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?",
+            "- **Bridge in:** A real encounter can make that abstract question concrete.",
+            "- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.",
+        )
+        for line in conditional_contract:
+            with self.subTest(contract=line):
+                self.assertIn(line, personal_input)
+
+        invented_phrases = (
+            "Martin initially dismissed insect play",
+            "My first reaction was to call this random movement",
+        )
+        for phrase in invented_phrases:
+            with self.subTest(forbidden=phrase):
+                self.assertNotIn(phrase, personal_input)
+
+    def test_template_personal_marker_precedes_the_evidence_turn(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        narration = template.split("### Narration\n", 1)[1].split(
+            "\n### Story function", 1
+        )[0]
+        marker = "> <!-- PI-001: Martin input -->"
+        evidence_turn = (
+            "The researchers said this met their operational play criteria."
+        )
+
+        self.assertEqual(narration.count(marker), 1)
+        self.assertLess(narration.index("food reward."), narration.index(marker))
+        self.assertLess(narration.index(marker), narration.index(evidence_turn))
+
+    def test_personal_and_application_contract_is_distributed(self) -> None:
+        sources = {
+            "skill": SKILL_MD.read_text(encoding="utf-8"),
+            "story": (SKILL_ROOT / "references/story-and-hook-method.md").read_text(encoding="utf-8"),
+            "research": (SKILL_ROOT / "references/research-and-rights.md").read_text(encoding="utf-8"),
+            "format": (SKILL_ROOT / "references/annotated-script-format.md").read_text(encoding="utf-8"),
+            "rubric": (SKILL_ROOT / "references/quality-rubric.md").read_text(encoding="utf-8"),
+        }
+        required = {
+            "skill": ("INPUT-REQUESTED", "COMPLETED", "OMIT", "viewer application"),
+            "story": ("Primary prompt", "Bridge in", "Bridge out", "larger benefit"),
+            "research": ("first-person source", "personal photos", "observation-only"),
+            "format": ("Deliverable", "Useful viewer change", "### Personal input", "### Viewer application"),
+            "rubric": ("personal", "application", "INPUT-REQUESTED"),
+        }
+        for source, tokens in required.items():
+            with self.subTest(source=source):
+                for token in tokens:
+                    self.assertIn(token, sources[source])
+
+    def test_editorial_guidance_scopes_deliverables_and_explains_omit_fields(self) -> None:
+        rubric = (
+            SKILL_ROOT / "references/quality-rubric.md"
+        ).read_text(encoding="utf-8")
+        format_text = (
+            SKILL_ROOT / "references/annotated-script-format.md"
+        ).read_text(encoding="utf-8")
+        story = (
+            SKILL_ROOT / "references/story-and-hook-method.md"
+        ).read_text(encoding="utf-8")
+
+        normalized_rubric = " ".join(rubric.split())
+        scope_contract = (
+            "Apply personal-input and viewer-application requirements in full to a "
+            "`FULL-SCRIPT`. Review a `TARGETED-ARTIFACT` only against its assigned or "
+            "inherited scope. The absence of optional personal-input or "
+            "viewer-application blocks is not itself a deficiency and must not lower "
+            "a score or trigger insertion of out-of-scope content. When a targeted "
+            "artifact includes either block, or is assigned to preserve an inherited "
+            "personal-input or viewer-application contract, evaluate the in-scope "
+            "material against every applicable anchor. A targeted artifact cannot "
+            "promote the parent script's readiness."
+        )
+        with self.subTest(contract="deliverable-scope"):
+            self.assertIn(scope_contract, normalized_rubric)
+
+        dimensions = re.findall(r"^### (\d+)\. ", rubric, re.MULTILINE)
+        with self.subTest(contract="ten-dimensions"):
+            self.assertEqual(dimensions, [str(number) for number in range(1, 11)])
+
+        omit_contract = (
+            "For `OMIT`, keep every field non-empty. In `Primary prompt`, `Follow-up "
+            "prompts`, `Bridge in`, `Bridge out`, and `Personal visuals`, give a "
+            "concise, story-specific explanation of why that field is not applicable. "
+            "Do not use generic `N/A` or placeholder copy, invent a memory, or write a "
+            "transition that will be narrated."
+        )
+        for source_name, source_text in (
+            ("format", format_text),
+            ("story", story),
+        ):
+            with self.subTest(source=source_name):
+                self.assertIn(omit_contract, " ".join(source_text.split()))
+
+    def test_guidance_closes_personal_input_and_spoken_application_loopholes(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        personal_input_default = (
+            "Missing supplied personal material, or a short runtime, is not by itself "
+            "a reason to choose `OMIT`. When a specific truthful memory could "
+            "plausibly do real story work, choose `INPUT-REQUESTED`. Reserve `OMIT` "
+            "for an assignment-established lack of personal connection or a "
+            "story-specific removal-test conclusion that no personal sequence would "
+            "improve the story."
+        )
+        with self.subTest(contract="missing-input-default"):
+            self.assertIn(personal_input_default, story)
+
+        spoken_application_contracts = {
+            "skill-workflow": (
+                "Voice all five elements in narration—the insight; the low-risk "
+                "action, observation, or reflection; the observable signal; the "
+                "boundary; and the larger benefit—not only in the structured block."
+            ),
+            "skill-non-negotiable": (
+                "For every `FULL-SCRIPT`, voice all five viewer-application elements "
+                "in narration: evidence-bounded insight; low-risk action, observation, "
+                "or reflection; observable signal; real boundary; and larger benefit. "
+                "The structured block does not substitute for spoken copy."
+            ),
+            "story": (
+                "Narration—not only the structured block—must voice all five "
+                "application elements: the insight; the action, observation, or "
+                "reflection to try; the observable signal; the boundary; and the "
+                "larger benefit."
+            ),
+            "format": (
+                "Voice all five application elements in narration: insight; action, "
+                "observation, or reflection; observable signal; boundary; and larger "
+                "benefit. The structured block is the production contract, not a "
+                "substitute for spoken copy."
+            ),
+        }
+        sources = {
+            "skill-workflow": skill,
+            "skill-non-negotiable": skill,
+            "story": story,
+            "format": format_text,
+        }
+        for source_name, contract in spoken_application_contracts.items():
+            with self.subTest(contract=source_name):
+                self.assertIn(contract, sources[source_name])
+
+    def test_reverse_claim_audit_contract_is_explicit(self) -> None:
+        research_text = (
+            SKILL_ROOT / "references/research-and-rights.md"
+        ).read_text(encoding="utf-8")
+        research = " ".join(research_text.split())
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        with self.subTest(contract="contents-link"):
+            self.assertIn(
+                "- [Run the reverse claim audit](#run-the-reverse-claim-audit)",
+                research_text,
+            )
+
+        research_contracts = (
+            "Before finalizing, reverse-audit every narrated material claim against "
+            "its evidence record.",
+            "Compare the narration word for word with `Exact claim`, `Scope`, "
+            "`Caveat`, and `Approved wording`. Retain every limiting scope or modal "
+            "term; if it does not fit, weaken the narration rather than strengthening "
+            "the record.",
+            "Open every `Cross-checks` source and scan it for material wording that "
+            "conflicts on origin, date, chronology, causality, or scope, even when "
+            "that source supports a different subclaim. Record every discovered "
+            "material conflict in `Contradictions` and explain how it changes or "
+            "bounds the status or wording.",
+            "For `CORROBORATED`, trace whether the sources have genuinely independent "
+            "evidence chains. If they converge on the same originating investigation, "
+            "record the dependence and re-evaluate the claim under the existing status "
+            "thresholds: use `VERIFIED` only when the primary or authoritative source "
+            "type can establish the exact claim and no unresolved credible conflict "
+            "remains; use `REPORTED` when one identifiable plausible account remains; "
+            "and retain `CORROBORATED` only when another genuinely independent chain "
+            "supports the exact wording. A material credible conflict takes precedence "
+            "over `VERIFIED`: resolve it by narrowing the wording, use `DISPUTED`, or "
+            "omit the claim; never assign `VERIFIED` while that conflict remains.",
+            "Use stable, source-native locators: page, section, table, figure, "
+            "timestamp, or a descriptive paragraph anchor. Never use browser-rendered "
+            "or search-result line numbers as source locators.",
+        )
+        for contract in research_contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, research)
+
+        rubric_reminder = (
+            "Across passes 2 and 8, reverse-audit narration against its claim cards "
+            "and every cross-check source: preserve limiting scope and modal terms, "
+            "record every material conflict in `Contradictions` and bound its "
+            "consequences, re-evaluate dependent evidence chains under the status "
+            "thresholds, and require stable source-native locators."
+        )
+        with self.subTest(contract="rubric-reminder"):
+            self.assertIn(rubric_reminder, rubric)
+
+        rubric_reference_fragments = (
+            "Open every cross-check and scan for conflicting origin, date, chronology, "
+            "causality, or scope wording, even when it supports another subclaim.",
+            "Record each material conflict in `Contradictions` and explain how it "
+            "changes or bounds status or wording.",
+            "A material credible conflict takes precedence over `VERIFIED`: narrow "
+            "and resolve the wording, use `DISPUTED`, or omit the claim; never retain "
+            "`VERIFIED` while that conflict remains.",
+        )
+        for fragment in rubric_reference_fragments:
+            with self.subTest(contract="rubric-reference-pass", fragment=fragment):
+                self.assertIn(fragment, rubric)
+
+    def test_source_audit_syntax_and_compound_split_rule_are_consistent(self) -> None:
+        sources = {
+            name: " ".join((SKILL_ROOT / path).read_text(encoding="utf-8").split())
+            for name, path in {
+                "research": "references/research-and-rights.md",
+                "rubric": "references/quality-rubric.md",
+                "format": "references/annotated-script-format.md",
+            }.items()
+        }
+        outcome_syntax = (
+            "`{source} — COMPLETE — [coverage or source-native locator checked; "
+            "concrete material support/conflict findings; consequence for "
+            "wording/status]`",
+            "`{source} — INCOMPLETE — [reason; portions/locators checked; unresolved "
+            "consequence]`",
+        )
+        unresolved_rule = (
+            "Any material `Original URL` or cross-check marked `INCOMPLETE` keeps the "
+            "conflict review unresolved and forbids a no-conflict assertion."
+        )
+        for source_name, source_text in sources.items():
+            for syntax in outcome_syntax:
+                with self.subTest(source=source_name, contract=syntax):
+                    self.assertIn(syntax, source_text)
+            with self.subTest(source=source_name, contract="incomplete-blocks"):
+                self.assertIn(unresolved_rule, source_text)
+            with self.subTest(source=source_name, contract="one-syntax-only"):
+                self.assertNotIn("Conflict scan incomplete —", source_text)
+
+        split_rule = (
+            "If narrated subclaims do not all meet the normal threshold for the same "
+            "status, split the compound claim into separate evidence records."
+        )
+        corroborated_rule = (
+            "Assign `CORROBORATED` only when every narrated subclaim independently "
+            "meets the `CORROBORATED` threshold."
+        )
+        for source_name in ("research", "rubric"):
+            with self.subTest(source=source_name, contract="split-compound"):
+                self.assertIn(split_rule, sources[source_name])
+            with self.subTest(source=source_name, contract="corroborated-compound"):
+                self.assertIn(corroborated_rule, sources[source_name])
+            with self.subTest(source=source_name, contract="no-weakest-status"):
+                self.assertNotIn(
+                    "assign the whole record the weakest applicable status",
+                    sources[source_name].lower(),
+                )
+
+    def test_annotated_format_requires_named_per_source_audit_outcomes(self) -> None:
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        self.assertIn(
+            "- **Contradictions:** Named `COMPLETE` or `INCOMPLETE` outcomes for the "
+            "`Original URL` and every listed `Cross-checks` source",
+            format_text,
+        )
+        self.assertIn(
+            "Blanket statements such as `none found` or `all sources agree` do not "
+            "substitute for named per-source outcomes.",
+            format_text,
+        )
+        self.assertNotIn(
+            "Conflicting evidence or an explicit record that none were found",
+            format_text,
+        )
+
+    def test_worked_template_demonstrates_auditable_source_outcomes(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        evidence = template.split("#### F-001", 1)[1].split(
+            "\n### Visual and archival sources", 1
+        )[0]
+        match = re.search(r"^- \*\*Contradictions:\*\* (.+)$", evidence, re.MULTILINE)
+        self.assertIsNotNone(match)
+        outcomes = match.group(1)
+
+        expected_sources = (
+            "Galpayage Dona et al. paper (Original URL)",
+            "Queen Mary University of London study summary (Cross-check)",
+        )
+        self.assertEqual(outcomes.count("— COMPLETE — ["), len(expected_sources))
+        self.assertNotIn("Conflict scan incomplete —", outcomes)
+        self.assertNotIn("No direct contradiction located", outcomes)
+        for source in expected_sources:
+            with self.subTest(source=source):
+                self.assertRegex(
+                    outcomes,
+                    rf"{re.escape(source)} — COMPLETE — "
+                    rf"\[[^\]\n]+;[^\]\n]+;[^\]\n]+\]",
+                )
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",

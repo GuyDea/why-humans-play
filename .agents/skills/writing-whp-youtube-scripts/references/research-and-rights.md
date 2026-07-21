@@ -7,7 +7,10 @@
 - [Apply the confidence-to-wording ladder](#apply-the-confidence-to-wording-ladder)
 - [Match source hierarchy to claim type](#match-source-hierarchy-to-claim-type)
 - [Search and cross-check](#search-and-cross-check)
+- [Run the reverse claim audit](#run-the-reverse-claim-audit)
 - [Separate proof from example](#separate-proof-from-example)
+- [Treat personal experience as a first-person source](#treat-personal-experience-as-a-first-person-source)
+- [Bound the viewer application to the evidence](#bound-the-viewer-application-to-the-evidence)
 - [Make a visual decision for every important claim](#make-a-visual-decision-for-every-important-claim)
 - [Run the rights workflow](#run-the-rights-workflow)
 - [Use rights statuses exactly](#use-rights-statuses-exactly)
@@ -111,6 +114,47 @@ Look for corrections, retractions, version history, methodological limitations, 
 credible criticism. When a secondary source changes a number or conclusion, resolve
 the discrepancy against the origin before drafting.
 
+## Run the reverse claim audit
+
+Before finalizing, reverse-audit every narrated material claim against its evidence
+record.
+
+1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and
+   `Approved wording`. Retain every limiting scope or modal term; if it does not fit,
+   weaken the narration rather than strengthening the record.
+2. Open the `Original URL` and review its full relevant scope. Open every
+   `Cross-checks` source and scan it for material wording that conflicts on origin,
+   date, chronology, causality, or scope, even when that source supports a different
+   subclaim. Record every discovered material conflict in `Contradictions` and explain
+   how it changes or bounds the status or wording. Within that existing field, name
+   every source and use exactly one of these outcomes per source:
+
+   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
+   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
+
+   A `COMPLETE` outcome may say that no material conflict was found only after the
+   complete source-wide scan. Blanket statements such as `none found` or `all sources
+   agree` do not replace named per-source outcomes. Every material conflict discovered
+   anywhere in a source must appear in its outcome with the consequence for narration
+   wording or status. Any material `Original URL` or cross-check marked `INCOMPLETE`
+   keeps the conflict review unresolved and forbids a no-conflict assertion.
+3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
+   chains. If they converge on the same originating investigation, record the
+   dependence and re-evaluate the claim under the existing status thresholds: use
+   `VERIFIED` only when the primary or authoritative source type can establish the
+   exact claim and no unresolved credible conflict remains; use `REPORTED` when one
+   identifiable plausible account remains; and retain
+   `CORROBORATED` only when another genuinely independent chain supports the exact
+   wording. A material credible conflict takes precedence over `VERIFIED`: resolve it
+   by narrowing the wording, use `DISPUTED`, or omit the claim; never assign `VERIFIED`
+   while that conflict remains.
+   If narrated subclaims do not all meet the normal threshold for the same status,
+   split the compound claim into separate evidence records. Assign `CORROBORATED` only
+   when every narrated subclaim independently meets the `CORROBORATED` threshold.
+4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
+   descriptive paragraph anchor. Never use browser-rendered or search-result line
+   numbers as source locators.
+
 ## Separate proof from example
 
 Ask what job a claim performs.
@@ -126,6 +170,32 @@ Do not let an example quietly become proof through placement, visuals, music, or
 confident delivery. If the viewer would reasonably hear “this story shows the pattern
 is common” or “this caused the outcome,” the example is carrying an argument and
 needs commensurate evidence.
+
+## Treat personal experience as a first-person source
+
+Martin is the first-person source for his own experience. Use only details he supplied
+and approved. Confirm names, dates, chronology, quoted speech, and other externally
+checkable details when they matter to the story; label reconstructions. Personal
+testimony may illustrate a question, possibility, or change in perspective, but it does
+not independently prove prevalence, causality, or a scientific mechanism.
+
+Treat personal photos, recordings, screenshots, locations, and objects as separate asset
+decisions. Before marking one `OWNED`, check ownership, releases, depicted works, private
+information, and every component right needed for the planned edit. Always preserve a
+presenter-only or newly created fallback. Do not send private personal material to a
+public service without authority to disclose it.
+
+## Bound the viewer application to the evidence
+
+The application cannot be more confident than the claim packet. Animal evidence cannot
+by itself support a human prescription. Correlational evidence cannot establish that the
+suggested action causes an outcome. A personal anecdote, `REPORTED` account,
+`UNVERIFIED-EXAMPLE`, or `DISPUTED` claim cannot carry a general recommendation.
+
+When evidence is weak, indirect, or high-stakes, use an observation-only lens or a
+reflection question and voice the limitation. Do not give medical, therapeutic, legal,
+or financial direction. A structurally complete application is not proof that it is
+wise, safe, lawful, or effective; those judgments remain with qualified human review.
 
 ## Make a visual decision for every important claim
 

@@ -34,6 +34,14 @@ Use the same scale on every dimension:
 Choose the lowest anchor that accurately describes the work. Do not average across
 multiple weaknesses within one dimension.
 
+Apply personal-input and viewer-application requirements in full to a `FULL-SCRIPT`.
+Review a `TARGETED-ARTIFACT` only against its assigned or inherited scope. The absence
+of optional personal-input or viewer-application blocks is not itself a deficiency and
+must not lower a score or trigger insertion of out-of-scope content. When a targeted
+artifact includes either block, or is assigned to preserve an inherited personal-input
+or viewer-application contract, evaluate the in-scope material against every applicable
+anchor. A targeted artifact cannot promote the parent script's readiness.
+
 ## Score the ten dimensions
 
 ### 1. Title, thumbnail, opening, and payoff alignment
@@ -48,20 +56,28 @@ multiple weaknesses within one dimension.
 ### 2. Factual precision and status-matched wording
 
 - **0:** A material claim is unsupported, rejected, materially overstated, or voiced
-  more confidently than its status permits.
+  more confidently than its status permits. When a viewer application is in scope, it
+  also scores 0 if it prescribes more than the evidence can establish.
 - **1:** Core claims are supportable, but a scope term, denominator, causal boundary,
   caveat, attribution, or approved wording needs revision.
 - **2:** Every material narration claim preserves scope and causality, uses approved
-  or weaker wording, and audibly matches its confidence status.
+  or weaker wording, and audibly matches its confidence status. When a viewer
+  application is in scope, its action, observation, or reflection audibly preserves
+  the same population, causal, confidence, and applicability limits as its supporting
+  evidence.
 
 ### 3. Story momentum without invented details
 
 - **0:** The narrative depends on invented dialogue, motives, thoughts, feelings,
-  weather, chronology, sensory detail, or misleading reconstruction.
+  weather, chronology, sensory detail, or misleading reconstruction. First-person
+  material is invented, forced, or used as proof.
 - **1:** The sequence is honest and usable, but includes a stalled beat, trivia
   detour, weak consequence, vague loop, or scene that needs clearer attribution.
 - **2:** Each beat changes viewer understanding, causes the next question, and builds
-  momentum without invention; reconstructions and reenactments are unmistakable.
+  momentum without invention; reconstructions and reenactments are unmistakable. When
+  personal input is in scope, the work makes one explicit personal decision, uses only
+  authentic supplied material, and the sequence performs necessary narrative work or
+  gives a specific reason for `OMIT`.
 
 ### 4. Spoken quality and credible runtime
 
@@ -125,23 +141,30 @@ multiple weaknesses within one dimension.
 ### 10. WHP brand fidelity
 
 - **0:** The script uses hype, woo, fabricated shock, shallow self-help certainty,
-  childish framing, or product promotion that displaces the inquiry.
+  childish framing, or product promotion that displaces the inquiry. The useful viewer
+  change is missing, generic, or unsupported; or an in-scope application is missing,
+  generic, or unsupported.
 - **1:** The piece is broadly on-brand but lacks a clear hidden-game/play lens,
   useful viewer change, steelmanned caveat, grounded tone, or Martin's natural voice.
 - **2:** The script makes a hidden game or the nature of play legible, changes how the
   viewer can see or act, and stays rigorous, useful, grounded, human, and
-  non-promotional.
+  non-promotional. The declared change and WHP lens form one grounded payoff; when a
+  viewer application is in scope, its voiced application, observable signal, boundary,
+  and larger benefit form part of that same payoff.
 
 ## Enforce readiness gates
 
-Apply score and gate requirements separately.
+Apply score and gate requirements separately. Use these promotion gates only for a
+`FULL-SCRIPT`; a `TARGETED-ARTIFACT` may report findings but cannot promote the parent
+script's readiness.
 
 ### `EDITORIAL-DRAFT`
 
 Require all of the following:
 
 - a score of at least **16/20**;
-- no zero in dimension 1, 2, 7, or 8; and
+- no zero in dimension 1, 2, 7, or 8;
+- no `INPUT-REQUESTED` personal block or unresolved input marker; and
 - documented approval of the narration and story direction by an authorized human
   editor; and
 - an honest record of every unresolved issue.
@@ -162,6 +185,7 @@ Require the `EDITORIAL-DRAFT` gate and all of the following:
   compatible with its license terms;
 - no `REJECTED` claims;
 - no uncertainty voiced without the qualification required by its status;
+- no `INPUT-REQUESTED` personal block or unresolved input marker;
 - no blocked required asset; and
 - no failed, missing, or unusable fallback for a required visual.
 
@@ -188,14 +212,26 @@ it confirms structure only.
 ## Run separate final audit passes
 
 Run each pass independently so one kind of fluency does not conceal another kind of
-failure:
+failure. Apply each pass only to the assigned or inherited scope; for a targeted
+artifact, record parent-script issues without inserting or scoring out-of-scope content:
+
+Across passes 2 and 8, reverse-audit narration against its claim cards and every
+cross-check source: preserve limiting scope and modal terms, record every material
+conflict in `Contradictions` and bound its consequences, re-evaluate dependent evidence
+chains under the status thresholds, and require stable source-native locators.
 
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
-   and final answer word for word.
-2. **Factual wording and confidence:** Compare narration with each exact claim,
-   approved wording, status, scope, and caveat.
-3. **Invented scene detail:** Challenge dialogue, chronology, motives, thoughts,
-   feelings, weather, sensory detail, and reconstruction labels.
+   useful viewer change, and final answer word for word. When application is in scope,
+   also compare its voiced application, observable signal, boundary, and larger benefit.
+2. **Factual wording and confidence:** Compare every narrated material claim word for
+   word with its exact claim, approved wording, status, scope, and caveat. Retain every
+   limiting scope or modal term, or weaken the narration. When application is in scope,
+   confirm that its action, observation, or reflection preserves those evidence limits.
+3. **Story and personal authenticity:** Challenge dialogue, chronology, motives,
+   thoughts, feelings, weather, sensory detail, and reconstruction labels. When personal
+   input is in scope, verify one explicit decision, supplied-and-approved material,
+   necessary narrative work or a specific `OMIT` reason, and no invented first-person
+   detail.
 4. **Spoken flow and runtime:** Read aloud, time the narration, and revise density,
    pronunciation, transitions, and breaths.
 5. **Visual relevance and identity accuracy:** Verify that each visual advances its
@@ -204,15 +240,49 @@ failure:
    relationship, resolved state, production feasibility, and whether a still is
    clearer.
 7. **Provenance and rights:** Trace every external asset to its original page,
-   rightsholder, exact terms, intended changes, status, and fallback.
-8. **Complete references:** Check claim and asset IDs, required fields, locators,
-   URLs, access dates, contradictions, attribution copy, and unresolved material.
+   rightsholder, exact terms, intended changes, status, and fallback. When personal
+   media is in scope, review it separately for ownership, releases, depicted works,
+   privacy, component rights, and an ownable fallback.
+8. **Complete references:** Open the `Original URL`. Open every cross-check and scan
+   for conflicting origin, date, chronology, causality, or scope wording, even when it
+   supports another subclaim. Record each material conflict in `Contradictions` and
+   explain how it changes or bounds status or wording. In each evidence record, require
+   one named outcome for the `Original URL` and every listed `Cross-checks` source,
+   using exactly:
+
+   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
+   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
+
+   Permit a no-conflict finding only inside a named `COMPLETE` outcome after a full
+   source-wide scan; `none found`, `all sources agree`, and similar blanket summaries
+   do not substitute for per-source accounting. Every discovered material conflict
+   must appear in that source's outcome with its wording or status consequence. Any
+   material `Original URL` or cross-check marked `INCOMPLETE` keeps the conflict review
+   unresolved and forbids a no-conflict assertion. For dependent evidence chains,
+   record the dependence and re-evaluate under the existing status thresholds: use
+   `VERIFIED` only when the primary or authoritative source type can establish the exact
+   claim and no unresolved credible conflict remains; use `REPORTED` when one
+   identifiable plausible account remains; and retain `CORROBORATED` only with another
+   genuinely independent chain. A material credible conflict takes precedence over
+   `VERIFIED`: narrow and resolve the wording, use `DISPUTED`, or omit the claim; never
+   retain `VERIFIED` while that conflict remains. If narrated subclaims do not all meet
+   the normal threshold for the same status, split the compound claim into separate
+   evidence records. Assign `CORROBORATED` only when every narrated subclaim
+   independently meets the `CORROBORATED` threshold. Require stable source-native
+   locators rather than browser-rendered or search-result line numbers, then check
+   claim and asset IDs, required fields, URLs, access dates, attribution copy, and
+   unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,
-    format gate, substantive blockers, and both authorized-human approval moments.
+    format gate, and substantive blockers. For a `FULL-SCRIPT`, also reapply
+    personal-input resolution, absence of unresolved input markers, and both
+    authorized-human approval moments; for a targeted artifact, verify that it does not
+    claim to promote the parent script.
 
-Do not combine these into a single “looks good” read.
+Do not combine these into a single “looks good” read. These are human editorial audits;
+structural validation cannot judge personal authenticity, application quality, safety,
+rights, or evidentiary fit.
 
 ## Maintain an issue ledger
 

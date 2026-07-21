@@ -9,6 +9,8 @@
 - [Build a narrative spine from changed understanding](#build-a-narrative-spine-from-changed-understanding)
 - [Open and close specific loops](#open-and-close-specific-loops)
 - [Write and test for speech](#write-and-test-for-speech)
+- [Design personal experience as a story beat](#design-personal-experience-as-a-story-beat)
+- [Hand the insight back to the viewer](#hand-the-insight-back-to-the-viewer)
 - [Choose visual treatment claim by claim](#choose-visual-treatment-claim-by-claim)
 - [Animate only to explain](#animate-only-to-explain)
 - [Reject weak openings](#reject-weak-openings)
@@ -146,6 +148,69 @@ Preserve Martin's natural delivery and the WHP voice: grounded, rigorous, useful
 curious, and respectful of the viewer's intelligence. Do not imitate another
 creator's verbal tics. Let uncertainty sound confident in its limits rather than
 apologetic or evasive.
+
+## Design personal experience as a story beat
+
+For every `FULL-SCRIPT`, choose exactly one personal-input decision. Use
+`INPUT-REQUESTED` when Martin has not supplied the experience, `COMPLETED` only when he
+has supplied and approved it, and `OMIT` when autobiography would not improve the story.
+Never infer or invent first-person facts.
+
+The sequence must create stakes, reveal why Martin cared, test the episode's claim
+against experience, surface a misconception, or show how the insight changed a choice.
+Apply the removal test: if deleting it changes nothing for the viewer, choose `OMIT`.
+
+Missing supplied personal material, or a short runtime, is not by itself a reason to
+choose `OMIT`. When a specific truthful memory could plausibly do real story work,
+choose `INPUT-REQUESTED`. Reserve `OMIT` for an assignment-established lack of personal
+connection or a story-specific removal-test conclusion that no personal sequence would
+improve the story.
+
+For `INPUT-REQUESTED`, write one `Primary prompt` as a question about a specific moment,
+then two to four `Follow-up prompts` about observable details, the initial assumption,
+the consequence, and what changed. Supply a narration-safe `Bridge in`, a narration-safe
+`Bridge out`, owned or separately reviewed personal-visual ideas, and a concrete
+`Omit when` condition. A prompt helps Martin remember; it never supplies the memory for
+him.
+
+For `OMIT`, keep every field non-empty. In `Primary prompt`, `Follow-up prompts`,
+`Bridge in`, `Bridge out`, and `Personal visuals`, give a concise, story-specific
+explanation of why that field is not applicable. Do not use generic `N/A` or placeholder
+copy, invent a memory, or write a transition that will be narrated.
+
+These are structural examples, not reusable autobiographical facts:
+
+- `INPUT-REQUESTED`: “When did you first notice the rule changing your behavior?”
+  Follow with what happened, what Martin expected, what he chose, and what changed.
+- `COMPLETED`: use only Martin's supplied wording or a paraphrase he approves, then
+  bridge back with “That experience illustrates the question; it does not prove the
+  pattern is common or causal.”
+- `OMIT`: state a story-specific reason such as “Martin has no direct connection, and
+  a first-person detour would delay the documented historical turn,” and remove the
+  input marker.
+
+## Hand the insight back to the viewer
+
+Translate the supported thesis into one application:
+
+`insight → action, observation, or reflection → observable signal → boundary → larger benefit`
+
+Choose an action only when the evidence supports a low-risk action in the stated scope.
+Choose an observation lens when evidence explains a pattern but cannot justify advice.
+Choose reflection when the useful change is a better question or decision frame. Name
+the situation, what the viewer should try or notice, the signal to watch, what that signal
+cannot establish, and how the exercise helps the viewer see, choose, learn, or play more
+deliberately.
+
+Observation-only example shape: “The next time a rule pulls you toward one choice, map
+the available moves and notice which incentive becomes salient. That cannot diagnose
+your motive or prove the rule caused the choice; it can help you see the game before
+deciding how to play it.”
+
+Reject endings such as “be more mindful,” “use this knowledge,” or “try it yourself.”
+Narration—not only the structured block—must voice all five application elements: the
+insight; the action, observation, or reflection to try; the observable signal; the
+boundary; and the larger benefit.
 
 ## Choose visual treatment claim by claim
 

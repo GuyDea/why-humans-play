@@ -10,6 +10,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
+import validate_annotated_script as validator
 from validate_annotated_script import validate_document
 
 
@@ -21,6 +22,7 @@ LIMITATION_SENTENCE = (
 HEADER_FIELDS = (
     "Status",
     "Version",
+    "Deliverable",
     "Target runtime",
     "Word count",
     "Audience",
@@ -28,6 +30,7 @@ HEADER_FIELDS = (
     "Title",
     "Thumbnail promise",
     "Viewer promise",
+    "Useful viewer change",
     "Central question",
     "Thesis",
     "Payoff",
@@ -150,6 +153,10 @@ def blank_markdown_field(text: str, field: str) -> str:
     return text[: match.start()] + match.group("label") + "   " + text[match.end() :]
 
 
+def blank_structured_field(block: str, field: str) -> str:
+    return blank_markdown_field(block, field)
+
+
 def blank_beat_section(block: str, section: str) -> str:
     heading = f"### {section}\n"
     if block.count(heading) != 1:
@@ -162,17 +169,39 @@ def blank_beat_section(block: str, section: str) -> str:
     return block[:body_start] + "   \n" + block[body_end:]
 
 
+def indent_narration_blockquotes(text: str, spaces: int) -> str:
+    narration = extract_exact(text, "### Narration\n", "\n### Story function")
+    indented = "".join(
+        " " * spaces + line if line.startswith(">") else line
+        for line in narration.splitlines(keepends=True)
+    )
+    return replace_exact(text, narration, indented)
+
+
+def replace_personal_marker_with_blockquote_fence(text: str, fence: str) -> str:
+    marker = "> <!-- PI-001: Martin input -->\n"
+    nested_fence = (
+        f"> {fence}markdown\n"
+        "> hidden fenced words\n"
+        + marker
+        + f"> {fence}\n"
+    )
+    return replace_exact(text, marker, nested_fence)
+
+
 VALID_DOCUMENT = """# Why Bees Roll Balls
 
 - **Status:** RESEARCH-DRAFT
 - **Version:** 0.2
-- **Target runtime:** 00:20
-- **Word count:** 52
+- **Deliverable:** FULL-SCRIPT
+- **Target runtime:** 00:30
+- **Word count:** 80
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy
 - **Thumbnail promise:** A bee rolling a wooden ball
 - **Viewer promise:** See why one tiny detour changed the case for animal play.
+- **Useful viewer change:** Notice when behavior meets operational play criteria without assuming subjective experience.
 - **Central question:** Can an insect play without an external reward?
 - **Thesis:** The behavior meets established play criteria, with interpretive limits.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
@@ -180,17 +209,39 @@ VALID_DOCUMENT = """# Why Bees Roll Balls
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
 ## Beat 01 — The detour
-_Time: 00:00–00:20 · Target: ~52 words_
+_Time: 00:00–00:30 · Target: ~80 words_
 
 ### Narration
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
 > food reward. The researchers said this met their operational play criteria. That
 > does not tell us what a bee feels—but makes the detour hard to dismiss.
+> <!-- PI-001: Martin input -->
+> Next time an animal seems to play, look for repetition, choice, and no immediate
+> reward. Those clues can sharpen the question; they cannot reveal the animal's inner
+> experience.
 
 ### Story function
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
+
+### Personal input
+- **ID:** PI-001
+- **Decision:** INPUT-REQUESTED
+- **Story purpose:** Reveal why Martin initially dismissed insect play and let the evidence revise that intuition.
+- **Primary prompt:** When did an animal behavior first make you reconsider what counts as play?
+- **Follow-up prompts:** What did you see; what did you assume at first; what changed your mind; which detail do you remember clearly?
+- **Bridge in:** My first reaction was to call this random movement.
+- **Bridge out:** That reaction is not evidence, so the experiment has to do the real work.
+- **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch of the initial assumption.
+- **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
+
+### Viewer application
+- **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
+- **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
+- **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
+- **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
+- **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
 
 ### Claims
 - `F-001` — Ball rolling without a food reward met the study's play criteria (`VERIFIED`).
@@ -279,6 +330,104 @@ ASSET_RECORD = extract_exact(
     "### Unverified or disputed material",
 )
 
+PERSONAL_INPUT_FIELDS = (
+    "ID",
+    "Decision",
+    "Story purpose",
+    "Primary prompt",
+    "Follow-up prompts",
+    "Bridge in",
+    "Bridge out",
+    "Personal visuals",
+    "Omit when",
+)
+
+VIEWER_APPLICATION_FIELDS = (
+    "Insight",
+    "Try",
+    "Observe",
+    "Boundary",
+    "Larger benefit",
+)
+
+PERSONAL_INPUT_BLOCK = extract_exact(
+    BEAT_BLOCK,
+    "### Personal input\n",
+    "\n### Viewer application",
+)
+VIEWER_APPLICATION_BLOCK = extract_exact(
+    BEAT_BLOCK,
+    "### Viewer application\n",
+    "\n### Claims",
+)
+
+COMPLETED_DOCUMENT = replace_exact(
+    replace_exact(VALID_DOCUMENT, "INPUT-REQUESTED", "COMPLETED"),
+    "> <!-- PI-001: Martin input -->\n",
+    "",
+)
+OMIT_DOCUMENT = replace_exact(
+    replace_exact(VALID_DOCUMENT, "INPUT-REQUESTED", "OMIT"),
+    "> <!-- PI-001: Martin input -->\n",
+    "",
+)
+TARGETED_DOCUMENT = replace_exact(
+    replace_exact(
+        replace_exact(VALID_DOCUMENT, "FULL-SCRIPT", "TARGETED-ARTIFACT"),
+        PERSONAL_INPUT_BLOCK + "\n",
+        "",
+    ),
+    VIEWER_APPLICATION_BLOCK + "\n",
+    "",
+)
+TARGETED_DOCUMENT = replace_exact(
+    TARGETED_DOCUMENT,
+    "> <!-- PI-001: Martin input -->\n",
+    "",
+)
+
+SECOND_PERSONAL_INPUT_BLOCK = replace_exact(
+    replace_exact(
+        PERSONAL_INPUT_BLOCK,
+        "- **ID:** PI-001",
+        "- **ID:** PI-002",
+    ),
+    "- **Decision:** INPUT-REQUESTED",
+    "- **Decision:** COMPLETED",
+)
+SECOND_BEAT = replace_exact(
+    BEAT_BLOCK,
+    "## Beat 01 — The detour",
+    "## Beat 02 — The detour",
+)
+SECOND_BEAT = replace_exact(
+    SECOND_BEAT,
+    "_Time: 00:00–00:30 · Target: ~80 words_",
+    "_Time: 00:30–01:00 · Target: ~80 words_",
+)
+SECOND_BEAT = replace_exact(SECOND_BEAT, PERSONAL_INPUT_BLOCK + "\n", "")
+SECOND_BEAT = replace_exact(SECOND_BEAT, VIEWER_APPLICATION_BLOCK + "\n", "")
+SECOND_BEAT = replace_exact(
+    SECOND_BEAT,
+    "> <!-- PI-001: Martin input -->\n",
+    "",
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    VALID_DOCUMENT,
+    BEAT_BLOCK,
+    BEAT_BLOCK + SECOND_BEAT,
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    TWO_BEAT_DOCUMENT,
+    "- **Target runtime:** 00:30",
+    "- **Target runtime:** 01:00",
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    TWO_BEAT_DOCUMENT,
+    "- **Word count:** 80",
+    "- **Word count:** 160",
+)
+
 
 class ValidatorTests(unittest.TestCase):
     def assert_error(self, text: str, fragment: str) -> None:
@@ -312,16 +461,529 @@ class ValidatorTests(unittest.TestCase):
         words = [
             word
             for line in narration.splitlines()
-            if line.startswith("> ")
+            if line.startswith("> ") and "<!--" not in line
             for word in line.removeprefix("> ").split()
         ]
-        self.assertEqual(len(words), 52)
-        self.assertIn("- **Target runtime:** 00:20", HEADER_BLOCK)
-        self.assertIn("- **Word count:** 52", HEADER_BLOCK)
-        self.assertIn("_Time: 00:00–00:20 · Target: ~52 words_", BEAT_BLOCK)
+        self.assertEqual(len(words), 80)
+        self.assertIn("- **Target runtime:** 00:30", HEADER_BLOCK)
+        self.assertIn("- **Word count:** 80", HEADER_BLOCK)
+        self.assertIn("_Time: 00:00–00:30 · Target: ~80 words_", BEAT_BLOCK)
 
     def test_valid_research_draft_passes(self) -> None:
         self.assertEqual(validate_document(VALID_DOCUMENT), [])
+
+    def test_full_script_contract_is_document_wide_across_beats(self) -> None:
+        self.assertEqual(validate_document(TWO_BEAT_DOCUMENT), [])
+
+    def test_deliverable_requires_exact_vocabulary(self) -> None:
+        for value in ("", "SCRIPT", "FULL SCRIPT"):
+            with self.subTest(value=value):
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    "- **Deliverable:** FULL-SCRIPT",
+                    f"- **Deliverable:** {value}",
+                )
+                self.assert_error(document, "Deliverable")
+
+    def test_targeted_artifact_does_not_require_personal_or_application_blocks(
+        self,
+    ) -> None:
+        self.assertEqual(validate_document(TARGETED_DOCUMENT), [])
+
+    def test_targeted_artifact_validates_a_personal_block_that_appears(self) -> None:
+        malformed = replace_exact(
+            PERSONAL_INPUT_BLOCK,
+            "- **Primary prompt:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Claims\n",
+            malformed + "\n\n### Claims\n",
+        )
+        self.assert_error(document, "Primary prompt")
+
+    def test_targeted_artifact_validates_an_application_block_that_appears(self) -> None:
+        malformed = replace_exact(
+            VIEWER_APPLICATION_BLOCK,
+            "- **Try:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Claims\n",
+            malformed + "\n\n### Claims\n",
+        )
+        self.assert_error(document, "Try")
+
+    def test_targeted_artifact_accepts_each_optional_block_combination(self) -> None:
+        personal = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Narration\n",
+            "### Narration\n> <!-- PI-001: Martin input -->\n",
+        )
+        personal = replace_exact(
+            personal,
+            "### Claims\n",
+            PERSONAL_INPUT_BLOCK + "\n\n### Claims\n",
+        )
+        application = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Claims\n",
+            VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
+        )
+        both = replace_exact(
+            personal,
+            "### Claims\n",
+            VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
+        )
+        for blocks, document in (
+            ("personal", personal),
+            ("application", application),
+            ("personal-and-application", both),
+        ):
+            with self.subTest(blocks=blocks):
+                self.assertEqual(validate_document(document), [])
+
+    def test_full_script_counts_structured_blocks_outside_beats(self) -> None:
+        document = (
+            VALID_DOCUMENT.rstrip()
+            + "\n\n"
+            + PERSONAL_INPUT_BLOCK
+            + "\n\n"
+            + VIEWER_APPLICATION_BLOCK
+            + "\n"
+        )
+        for fragment in (
+            "FULL-SCRIPT requires exactly one Personal input block; found 2",
+            "FULL-SCRIPT requires exactly one Viewer application block; found 2",
+            "Personal input block outside a beat",
+            "Viewer application block outside a beat",
+        ):
+            with self.subTest(fragment=fragment):
+                self.assert_error(document, fragment)
+
+    def test_targeted_artifact_rejects_malformed_personal_input_before_beats(
+        self,
+    ) -> None:
+        malformed = replace_exact(
+            PERSONAL_INPUT_BLOCK,
+            "- **Primary prompt:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "## Beat 01",
+            malformed + "\n\n## Beat 01",
+        )
+        self.assert_error(document, "Personal input block outside a beat")
+
+    def test_targeted_artifact_rejects_malformed_application_before_beats(
+        self,
+    ) -> None:
+        malformed = replace_exact(
+            VIEWER_APPLICATION_BLOCK,
+            "- **Try:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "## Beat 01",
+            malformed + "\n\n## Beat 01",
+        )
+        self.assert_error(document, "Viewer application block outside a beat")
+
+    def test_fenced_structured_blocks_outside_beats_are_ignored(self) -> None:
+        document = (
+            TARGETED_DOCUMENT.rstrip()
+            + "\n\n```markdown\n"
+            + PERSONAL_INPUT_BLOCK
+            + "\n\n"
+            + VIEWER_APPLICATION_BLOCK
+            + "\n```\n"
+        )
+        self.assertEqual(validate_document(document), [])
+
+    def test_full_script_requires_exactly_one_personal_input_block(self) -> None:
+        without = replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK + "\n", "")
+        duplicate = replace_exact(
+            VALID_DOCUMENT,
+            PERSONAL_INPUT_BLOCK,
+            PERSONAL_INPUT_BLOCK + "\n" + PERSONAL_INPUT_BLOCK,
+        )
+        for case, document in (("missing", without), ("duplicate", duplicate)):
+            with self.subTest(case=case):
+                self.assert_error(document, "exactly one Personal input")
+
+    def test_full_script_requires_exactly_one_viewer_application_block(self) -> None:
+        without = replace_exact(VALID_DOCUMENT, VIEWER_APPLICATION_BLOCK + "\n", "")
+        duplicate = replace_exact(
+            VALID_DOCUMENT,
+            VIEWER_APPLICATION_BLOCK,
+            VIEWER_APPLICATION_BLOCK + "\n" + VIEWER_APPLICATION_BLOCK,
+        )
+        for case, document in (("missing", without), ("duplicate", duplicate)):
+            with self.subTest(case=case):
+                self.assert_error(document, "exactly one Viewer application")
+
+    def test_full_script_rejects_a_personal_input_duplicate_across_beats(self) -> None:
+        second_beat = replace_exact(
+            SECOND_BEAT,
+            "### Claims\n",
+            SECOND_PERSONAL_INPUT_BLOCK + "\n\n### Claims\n",
+        )
+        document = replace_exact(TWO_BEAT_DOCUMENT, SECOND_BEAT, second_beat)
+        self.assert_error(document, "exactly one Personal input")
+
+    def test_full_script_rejects_an_application_duplicate_across_beats(self) -> None:
+        second_beat = replace_exact(
+            SECOND_BEAT,
+            "### Claims\n",
+            VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
+        )
+        document = replace_exact(TWO_BEAT_DOCUMENT, SECOND_BEAT, second_beat)
+        self.assert_error(document, "exactly one Viewer application")
+
+    def test_every_personal_input_field_is_required_nonempty_and_unique(self) -> None:
+        for field in PERSONAL_INPUT_FIELDS:
+            with self.subTest(field=field, case="missing"):
+                block = replace_exact(
+                    PERSONAL_INPUT_BLOCK,
+                    f"- **{field}:**",
+                    "- **Removed:**",
+                )
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK, block),
+                    field,
+                )
+            with self.subTest(field=field, case="blank"):
+                block = blank_structured_field(PERSONAL_INPUT_BLOCK, field)
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK, block),
+                    f"field {field} must have a non-whitespace value",
+                )
+            with self.subTest(field=field, case="duplicate"):
+                field_line = next(
+                    line
+                    for line in PERSONAL_INPUT_BLOCK.splitlines()
+                    if line.startswith(f"- **{field}:**")
+                )
+                block = replace_exact(
+                    PERSONAL_INPUT_BLOCK,
+                    field_line,
+                    field_line + "\n" + field_line,
+                )
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK, block),
+                    f"repeats required field: {field}",
+                )
+
+    def test_every_viewer_application_field_is_required_nonempty_and_unique(
+        self,
+    ) -> None:
+        for field in VIEWER_APPLICATION_FIELDS:
+            with self.subTest(field=field, case="missing"):
+                block = replace_exact(
+                    VIEWER_APPLICATION_BLOCK,
+                    f"- **{field}:**",
+                    "- **Removed:**",
+                )
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, VIEWER_APPLICATION_BLOCK, block),
+                    field,
+                )
+            with self.subTest(field=field, case="blank"):
+                block = blank_structured_field(VIEWER_APPLICATION_BLOCK, field)
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, VIEWER_APPLICATION_BLOCK, block),
+                    f"field {field} must have a non-whitespace value",
+                )
+            with self.subTest(field=field, case="duplicate"):
+                field_line = next(
+                    line
+                    for line in VIEWER_APPLICATION_BLOCK.splitlines()
+                    if line.startswith(f"- **{field}:**")
+                )
+                block = replace_exact(
+                    VIEWER_APPLICATION_BLOCK,
+                    field_line,
+                    field_line + "\n" + field_line,
+                )
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, VIEWER_APPLICATION_BLOCK, block),
+                    f"repeats required field: {field}",
+                )
+
+    def test_personal_decision_requires_exact_vocabulary(self) -> None:
+        for decision, document in (
+            ("INPUT-REQUESTED", VALID_DOCUMENT),
+            ("COMPLETED", COMPLETED_DOCUMENT),
+            ("OMIT", OMIT_DOCUMENT),
+        ):
+            with self.subTest(decision=decision):
+                self.assertEqual(validate_document(document), [])
+        self.assert_error(
+            replace_exact(VALID_DOCUMENT, "INPUT-REQUESTED", "PERSONALIZED"),
+            "invalid Decision",
+        )
+
+    def test_all_personal_decisions_have_valid_fixture_paths(self) -> None:
+        for decision, document in (
+            ("INPUT-REQUESTED", VALID_DOCUMENT),
+            ("COMPLETED", COMPLETED_DOCUMENT),
+            ("OMIT", OMIT_DOCUMENT),
+        ):
+            with self.subTest(decision=decision):
+                self.assertEqual(validate_document(document), [])
+
+    def test_input_requested_requires_one_matching_marker_in_its_narration(
+        self,
+    ) -> None:
+        self.assert_error(
+            replace_exact(VALID_DOCUMENT, "> <!-- PI-001: Martin input -->\n", ""),
+            "matching narration marker",
+        )
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "PI-001: Martin input",
+                "PI-002: Martin input",
+            ),
+            "matching narration marker",
+        )
+
+    def test_unresolved_personal_input_is_research_draft_only(self) -> None:
+        for status in ("EDITORIAL-DRAFT", "RECORD-READY", "PICTURE-LOCKED"):
+            with self.subTest(status=status):
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, "RESEARCH-DRAFT", status),
+                    "INPUT-REQUESTED is allowed only in RESEARCH-DRAFT",
+                )
+
+    def test_completed_and_omit_reject_personal_markers(self) -> None:
+        for document in (COMPLETED_DOCUMENT, OMIT_DOCUMENT):
+            with self.subTest(document=document):
+                marked = replace_exact(
+                    document,
+                    "### Story function\n",
+                    "> <!-- PI-001: Martin input -->\n\n### Story function\n",
+                )
+                self.assert_error(
+                    marked,
+                    "must not retain a personal input marker",
+                )
+
+    def test_personal_marker_is_excluded_from_extraction_and_word_count(
+        self,
+    ) -> None:
+        extract_narration = getattr(validator, "extract_narration", None)
+        count_narration_words = getattr(validator, "count_narration_words", None)
+        self.assertTrue(callable(extract_narration), "extract_narration must exist")
+        self.assertTrue(
+            callable(count_narration_words),
+            "count_narration_words must exist",
+        )
+        narration = extract_narration(VALID_DOCUMENT)
+        self.assertNotIn("PI-001", narration)
+        self.assertNotIn("<!--", narration)
+        self.assertEqual(count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_duplicate_personal_markers_are_rejected(self) -> None:
+        marker = "> <!-- PI-001: Martin input -->\n"
+        self.assert_error(
+            replace_exact(VALID_DOCUMENT, marker, marker + marker),
+            "exactly one matching narration marker",
+        )
+
+    def test_marker_outside_narration_does_not_satisfy_input_request(self) -> None:
+        document = replace_exact(
+            VALID_DOCUMENT,
+            "> <!-- PI-001: Martin input -->\n",
+            "",
+        )
+        document = replace_exact(
+            document,
+            "### Story function\n",
+            "### Story function\n<!-- PI-001: Martin input -->\n",
+        )
+        self.assert_error(document, "matching narration marker")
+
+    def test_orphan_personal_marker_is_rejected(self) -> None:
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Narration\n",
+            "### Narration\n> <!-- PI-001: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker")
+
+    def test_orphan_personal_marker_in_header_is_rejected(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "# Why Bees Roll Balls\n",
+            "# Why Bees Roll Balls\n<!-- PI-777: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-777")
+
+    def test_orphan_personal_marker_in_references_is_rejected(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "## References and source materials\n",
+            "## References and source materials\n<!-- PI-777: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-777")
+
+    def test_fenced_personal_markers_outside_beats_are_ignored(self) -> None:
+        fenced_marker = "```markdown\n<!-- PI-777: Martin input -->\n```\n"
+        for region, anchor, replacement in (
+            (
+                "header",
+                "# Why Bees Roll Balls\n",
+                "# Why Bees Roll Balls\n" + fenced_marker,
+            ),
+            (
+                "references",
+                "## References and source materials\n",
+                "## References and source materials\n" + fenced_marker,
+            ),
+        ):
+            with self.subTest(region=region):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    anchor,
+                    replacement,
+                )
+                self.assertEqual(validate_document(document), [])
+
+    def test_fenced_personal_marker_is_ignored(self) -> None:
+        fenced = (
+            VALID_DOCUMENT.rstrip()
+            + "\n\n```markdown\n> <!-- PI-999: Martin input -->\n```\n"
+        )
+        self.assertEqual(validate_document(fenced), [])
+
+    def test_blockquote_nested_fenced_marker_does_not_satisfy_input(
+        self,
+    ) -> None:
+        for fence in ("```", "~~~"):
+            with self.subTest(fence=fence):
+                document = replace_personal_marker_with_blockquote_fence(
+                    VALID_DOCUMENT,
+                    fence,
+                )
+                self.assert_error(document, "matching narration marker")
+
+    def test_blockquote_nested_fence_is_excluded_from_narration(self) -> None:
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        for fence in ("```", "~~~"):
+            document = replace_personal_marker_with_blockquote_fence(
+                VALID_DOCUMENT,
+                fence,
+            )
+            with self.subTest(fence=fence, contract="extraction"):
+                narration = validator.extract_narration(document)
+                self.assertNotIn(fence, narration)
+                self.assertNotIn("hidden fenced words", narration)
+                self.assertEqual(narration.split(), expected.split())
+            with self.subTest(fence=fence, contract="word-count"):
+                self.assertEqual(validator.count_narration_words(document), 80)
+
+    def test_commonmark_indented_blockquotes_are_spoken_narration(self) -> None:
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        for spaces in (1, 2, 3):
+            with self.subTest(spaces=spaces):
+                document = indent_narration_blockquotes(
+                    COMPLETED_DOCUMENT,
+                    spaces,
+                )
+                self.assertEqual(validator.extract_narration(document), expected)
+                self.assertEqual(validator.count_narration_words(document), 80)
+                self.assertEqual(validate_document(document), [])
+
+    def test_four_space_indentation_is_not_spoken_blockquote_copy(self) -> None:
+        document = indent_narration_blockquotes(COMPLETED_DOCUMENT, 4)
+        document = replace_exact(
+            document,
+            "- **Word count:** 80",
+            "- **Word count:** 0",
+        )
+        self.assertEqual(validator.extract_narration(document), "")
+        self.assertEqual(validator.count_narration_words(document), 0)
+        self.assertEqual(validate_document(document), [])
+
+    def test_marker_in_a_different_beat_does_not_satisfy_ownership(self) -> None:
+        marker = "> <!-- PI-001: Martin input -->\n"
+        document = replace_exact(TWO_BEAT_DOCUMENT, marker, "")
+        second_narration = (
+            "## Beat 02 — The detour\n"
+            "_Time: 00:30–01:00 · Target: ~80 words_\n\n"
+            "### Narration\n"
+        )
+        document = replace_exact(
+            document,
+            second_narration,
+            second_narration + marker,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 INPUT-REQUESTED requires exactly one matching narration marker",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-001")
+
+    def test_word_count_must_match_extracted_narration(self) -> None:
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "- **Word count:** 80",
+                "- **Word count:** 79",
+            ),
+            "does not match extracted narration count 80",
+        )
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "- **Word count:** 80",
+                "- **Word count:** about 80",
+            ),
+            "Word count must be a non-negative integer",
+        )
+
+    def test_extremely_long_numeric_word_count_returns_an_error(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "- **Word count:** 80",
+            "- **Word count:** " + "9" * 5000,
+        )
+        try:
+            errors = validate_document(document)
+        except ValueError as exc:
+            self.fail(
+                "validate_document must return a deterministic word-count error "
+                f"instead of raising ValueError: {exc}"
+            )
+        self.assertTrue(
+            any(
+                "does not match extracted narration count 80" in error
+                for error in errors
+            ),
+            errors,
+        )
+
+    def test_personal_input_id_requires_pi_three_digit_form(self) -> None:
+        self.assertEqual(validate_document(COMPLETED_DOCUMENT), [])
+        for invalid_id in (
+            "PI-01",
+            "PI-0001",
+            "pi-001",
+            "PI-001-extra",
+            "PERSONAL-1",
+        ):
+            with self.subTest(invalid_id=invalid_id):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    "- **ID:** PI-001",
+                    f"- **ID:** {invalid_id}",
+                )
+                self.assert_error(document, "invalid ID")
 
     def test_all_required_header_fields_are_reported(self) -> None:
         for field in HEADER_FIELDS:
@@ -352,6 +1014,32 @@ class ValidatorTests(unittest.TestCase):
                         ),
                         f"header field {field} must have a non-whitespace value",
                     )
+
+    def test_duplicate_required_header_fields_are_reported(self) -> None:
+        cases = (
+            (
+                "Deliverable",
+                "- **Deliverable:** FULL-SCRIPT",
+                "- **Deliverable:** TARGETED-ARTIFACT",
+            ),
+            (
+                "Useful viewer change",
+                "- **Useful viewer change:** Notice when behavior meets operational "
+                "play criteria without assuming subjective experience.",
+                "- **Useful viewer change:** Treat every repeated action as play.",
+            ),
+        )
+        for field, original, conflicting in cases:
+            with self.subTest(field=field):
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    original,
+                    original + "\n" + conflicting,
+                )
+                self.assert_error(
+                    document,
+                    f"Header repeats required field: {field}",
+                )
 
     def test_duplicate_beat_id_is_reported_from_complete_beats(self) -> None:
         duplicate = replace_exact(
@@ -502,8 +1190,8 @@ class ValidatorTests(unittest.TestCase):
                 )
                 document = replace_exact(
                     document,
-                    "_Time: 00:00–00:20 · Target: ~52 words_\n\n### Narration",
-                    "_Time: 00:00–00:20 · Target: ~52 words_\n\n"
+                    "_Time: 00:00–00:30 · Target: ~80 words_\n\n### Narration",
+                    "_Time: 00:00–00:30 · Target: ~80 words_\n\n"
                     f"{fence}markdown\n### Story function\n{fence}\n\n"
                     "### Narration",
                 )
@@ -649,6 +1337,34 @@ class ValidatorTests(unittest.TestCase):
                         f"Record A-001 field {field} must have a non-whitespace value",
                     )
 
+    def test_duplicate_required_evidence_and_asset_fields_are_reported(self) -> None:
+        cases = (
+            (
+                "F-001",
+                EVIDENCE_RECORD,
+                "- **Status:** VERIFIED",
+                "- **Status:** REPORTED",
+            ),
+            (
+                "A-001",
+                ASSET_RECORD,
+                "- **Status:** CC-BY-4.0",
+                "- **Status:** OWNED",
+            ),
+        )
+        for record_id, record, original, conflicting in cases:
+            with self.subTest(record_id=record_id):
+                duplicated = replace_exact(
+                    record,
+                    original,
+                    original + "\n" + conflicting,
+                )
+                document = replace_exact(VALID_DOCUMENT, record, duplicated)
+                self.assert_error(
+                    document,
+                    f"Record {record_id} repeats required field: Status",
+                )
+
     def test_source_url_fields_require_web_urls(self) -> None:
         cases = (
             (
@@ -681,8 +1397,13 @@ class ValidatorTests(unittest.TestCase):
     def test_empty_direct_production_file_passes(self) -> None:
         for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
             with self.subTest(readiness=readiness):
+                base_document = (
+                    COMPLETED_DOCUMENT
+                    if readiness == "RECORD-READY"
+                    else VALID_DOCUMENT
+                )
                 document = replace_exact(
-                    VALID_DOCUMENT,
+                    base_document,
                     "- **Status:** RESEARCH-DRAFT",
                     f"- **Status:** {readiness}",
                 )
@@ -696,7 +1417,7 @@ class ValidatorTests(unittest.TestCase):
         for status in READINESS_STATES:
             with self.subTest(status=status):
                 document = replace_exact(
-                    VALID_DOCUMENT,
+                    COMPLETED_DOCUMENT,
                     "- **Status:** RESEARCH-DRAFT",
                     f"- **Status:** {status}",
                 )
@@ -849,7 +1570,7 @@ class ValidatorTests(unittest.TestCase):
 
     def test_valid_record_ready_document_passes(self) -> None:
         ready = replace_exact(
-            VALID_DOCUMENT,
+            COMPLETED_DOCUMENT,
             "- **Status:** RESEARCH-DRAFT",
             "- **Status:** RECORD-READY",
         )
@@ -861,7 +1582,7 @@ class ValidatorTests(unittest.TestCase):
             "- **Status:** VERIFIED",
             "- **Status:** REJECTED",
         )
-        ready = replace_exact(VALID_DOCUMENT, EVIDENCE_RECORD, record)
+        ready = replace_exact(COMPLETED_DOCUMENT, EVIDENCE_RECORD, record)
         ready = replace_exact(
             ready,
             "- **Status:** RESEARCH-DRAFT",
@@ -877,7 +1598,7 @@ class ValidatorTests(unittest.TestCase):
                     "- **Status:** CC-BY-4.0",
                     f"- **Status:** {status}",
                 )
-                ready = replace_exact(VALID_DOCUMENT, ASSET_RECORD, record)
+                ready = replace_exact(COMPLETED_DOCUMENT, ASSET_RECORD, record)
                 ready = replace_exact(
                     ready,
                     "- **Status:** RESEARCH-DRAFT",
