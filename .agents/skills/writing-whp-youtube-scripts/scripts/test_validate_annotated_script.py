@@ -534,6 +534,65 @@ class ValidatorTests(unittest.TestCase):
             with self.subTest(blocks=blocks):
                 self.assertEqual(validate_document(document), [])
 
+    def test_full_script_counts_structured_blocks_outside_beats(self) -> None:
+        document = (
+            VALID_DOCUMENT.rstrip()
+            + "\n\n"
+            + PERSONAL_INPUT_BLOCK
+            + "\n\n"
+            + VIEWER_APPLICATION_BLOCK
+            + "\n"
+        )
+        for fragment in (
+            "FULL-SCRIPT requires exactly one Personal input block; found 2",
+            "FULL-SCRIPT requires exactly one Viewer application block; found 2",
+            "Personal input block outside a beat",
+            "Viewer application block outside a beat",
+        ):
+            with self.subTest(fragment=fragment):
+                self.assert_error(document, fragment)
+
+    def test_targeted_artifact_rejects_malformed_personal_input_before_beats(
+        self,
+    ) -> None:
+        malformed = replace_exact(
+            PERSONAL_INPUT_BLOCK,
+            "- **Primary prompt:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "## Beat 01",
+            malformed + "\n\n## Beat 01",
+        )
+        self.assert_error(document, "Personal input block outside a beat")
+
+    def test_targeted_artifact_rejects_malformed_application_before_beats(
+        self,
+    ) -> None:
+        malformed = replace_exact(
+            VIEWER_APPLICATION_BLOCK,
+            "- **Try:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "## Beat 01",
+            malformed + "\n\n## Beat 01",
+        )
+        self.assert_error(document, "Viewer application block outside a beat")
+
+    def test_fenced_structured_blocks_outside_beats_are_ignored(self) -> None:
+        document = (
+            TARGETED_DOCUMENT.rstrip()
+            + "\n\n```markdown\n"
+            + PERSONAL_INPUT_BLOCK
+            + "\n\n"
+            + VIEWER_APPLICATION_BLOCK
+            + "\n```\n"
+        )
+        self.assertEqual(validate_document(document), [])
+
     def test_full_script_requires_exactly_one_personal_input_block(self) -> None:
         without = replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK + "\n", "")
         duplicate = replace_exact(
