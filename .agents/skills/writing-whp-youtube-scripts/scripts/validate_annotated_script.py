@@ -519,16 +519,30 @@ def _validate_personal_and_application_blocks(
         for body in _section_bodies(beat, "Personal input")
     ]
     application_blocks = _structured_blocks(beats_text, "Viewer application")
+    personal_count = len(_section_bodies(masked_text, "Personal input"))
+    application_count = len(_section_bodies(masked_text, "Viewer application"))
+    personal_outside_beats = personal_count - len(personal_blocks)
+    application_outside_beats = application_count - len(application_blocks)
 
-    if deliverable == "FULL-SCRIPT" and len(personal_blocks) != 1:
+    if deliverable == "FULL-SCRIPT" and personal_count != 1:
         errors.append(
             "FULL-SCRIPT requires exactly one Personal input block; "
-            f"found {len(personal_blocks)}."
+            f"found {personal_count}."
         )
-    if deliverable == "FULL-SCRIPT" and len(application_blocks) != 1:
+    if deliverable == "FULL-SCRIPT" and application_count != 1:
         errors.append(
             "FULL-SCRIPT requires exactly one Viewer application block; "
-            f"found {len(application_blocks)}."
+            f"found {application_count}."
+        )
+    if personal_outside_beats:
+        errors.append(
+            "Personal input block outside a beat: "
+            f"found {personal_outside_beats}."
+        )
+    if application_outside_beats:
+        errors.append(
+            "Viewer application block outside a beat: "
+            f"found {application_outside_beats}."
         )
 
     all_markers = [
