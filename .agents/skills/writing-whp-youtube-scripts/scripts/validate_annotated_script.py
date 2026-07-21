@@ -234,13 +234,19 @@ def _document_regions(text: str) -> DocumentRegions:
     )
 
 
+def _field_values(text: str) -> dict[str, list[str]]:
+    """Return every value found for each Markdown field in *text*."""
+
+    fields: dict[str, list[str]] = {}
+    for match in FIELD_RE.finditer(text):
+        fields.setdefault(match.group(1), []).append(match.group(2).strip())
+    return fields
+
+
 def _parse_fields(text: str) -> dict[str, str]:
     """Return the first value found for each Markdown field in *text*."""
 
-    fields: dict[str, str] = {}
-    for match in FIELD_RE.finditer(text):
-        fields.setdefault(match.group(1), match.group(2).strip())
-    return fields
+    return {field: values[0] for field, values in _field_values(text).items()}
 
 
 def _beat_blocks(text: str) -> list[tuple[str, str]]:
@@ -439,11 +445,15 @@ def _has_public_domain_basis_and_jurisdiction(rights_basis: str) -> bool:
 
 
 def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
+    field_values = _field_values(header_text)
     fields = _parse_fields(header_text)
     for field in HEADER_FIELDS:
-        if field not in fields:
+        values = field_values.get(field, [])
+        if not values:
             errors.append(f"Missing required header field: {field}.")
-        elif not fields[field]:
+        elif len(values) > 1:
+            errors.append(f"Header repeats required field: {field}.")
+        elif not values[0]:
             errors.append(
                 f"Required header field {field} must have a non-whitespace value."
             )
@@ -638,12 +648,18 @@ def _validate_word_count(
 
 
 def _validate_record_fields(record: Record, errors: list[str]) -> dict[str, str]:
+    field_values = _field_values(record.body)
     fields = _parse_fields(record.body)
     required = EVIDENCE_FIELDS if record.record_id.startswith("F-") else ASSET_FIELDS
     for field in required:
-        if field not in fields:
+        values = field_values.get(field, [])
+        if not values:
             errors.append(f"Record {record.record_id} is missing required field: {field}.")
-        elif field != "Direct production file" and not fields[field]:
+        elif len(values) > 1:
+            errors.append(
+                f"Record {record.record_id} repeats required field: {field}."
+            )
+        elif field != "Direct production file" and not values[0]:
             errors.append(
                 f"Record {record.record_id} field {field} must have a "
                 "non-whitespace value."
