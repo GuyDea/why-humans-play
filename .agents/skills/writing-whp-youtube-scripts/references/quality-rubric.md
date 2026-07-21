@@ -215,12 +215,17 @@ Run each pass independently so one kind of fluency does not conceal another kind
 failure. Apply each pass only to the assigned or inherited scope; for a targeted
 artifact, record parent-script issues without inserting or scoring out-of-scope content:
 
+Reverse-audit narration against its claim cards and every cross-check source: preserve
+limiting scope and modal terms, expose material contradictions or dependent evidence
+chains, and require stable source-native locators.
+
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
    useful viewer change, and final answer word for word. When application is in scope,
    also compare its voiced application, observable signal, boundary, and larger benefit.
-2. **Factual wording and confidence:** Compare narration with each exact claim,
-   approved wording, status, scope, and caveat. When application is in scope, confirm
-   that its action, observation, or reflection preserves those evidence limits.
+2. **Factual wording and confidence:** Compare every narrated material claim word for
+   word with its exact claim, approved wording, status, scope, and caveat. Retain every
+   limiting scope or modal term, or weaken the narration. When application is in scope,
+   confirm that its action, observation, or reflection preserves those evidence limits.
 3. **Story and personal authenticity:** Challenge dialogue, chronology, motives,
    thoughts, feelings, weather, sensory detail, and reconstruction labels. When personal
    input is in scope, verify one explicit decision, supplied-and-approved material,
@@ -237,8 +242,12 @@ artifact, record parent-script issues without inserting or scoring out-of-scope 
    rightsholder, exact terms, intended changes, status, and fallback. When personal
    media is in scope, review it separately for ownership, releases, depicted works,
    privacy, component rights, and an ownable fallback.
-8. **Complete references:** Check claim and asset IDs, required fields, locators,
-   URLs, access dates, contradictions, attribution copy, and unresolved material.
+8. **Complete references:** Open every cross-check and scan for conflicting origin,
+   date, chronology, causality, or scope wording, even when it supports another
+   subclaim. For `CORROBORATED`, confirm genuinely independent evidence chains; record
+   dependence or lower the status. Require stable source-native locators rather than
+   browser-rendered or search-result line numbers, then check claim and asset IDs,
+   required fields, URLs, access dates, attribution copy, and unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,

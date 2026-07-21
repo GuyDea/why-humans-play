@@ -7,6 +7,7 @@
 - [Apply the confidence-to-wording ladder](#apply-the-confidence-to-wording-ladder)
 - [Match source hierarchy to claim type](#match-source-hierarchy-to-claim-type)
 - [Search and cross-check](#search-and-cross-check)
+- [Run the reverse claim audit](#run-the-reverse-claim-audit)
 - [Separate proof from example](#separate-proof-from-example)
 - [Treat personal experience as a first-person source](#treat-personal-experience-as-a-first-person-source)
 - [Bound the viewer application to the evidence](#bound-the-viewer-application-to-the-evidence)
@@ -112,6 +113,26 @@ originating institution's press release as separate evidence for its own study.
 Look for corrections, retractions, version history, methodological limitations, and
 credible criticism. When a secondary source changes a number or conclusion, resolve
 the discrepancy against the origin before drafting.
+
+## Run the reverse claim audit
+
+Before finalizing, reverse-audit every narrated material claim against its evidence
+record.
+
+1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and
+   `Approved wording`. Retain every limiting scope or modal term; if it does not fit,
+   weaken the narration rather than strengthening the record.
+2. Open every `Cross-checks` source and scan it for material wording that conflicts on
+   origin, date, chronology, causality, or scope, even when that source supports a
+   different subclaim. Write `No contradiction found` only after this source-wide
+   conflict scan.
+3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
+   chains. If they converge on the same originating investigation, record the
+   dependence and lower the status unless another independent chain supports the
+   exact approved wording.
+4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
+   descriptive paragraph anchor. Never use browser-rendered or search-result line
+   numbers as source locators.
 
 ## Separate proof from example
 
