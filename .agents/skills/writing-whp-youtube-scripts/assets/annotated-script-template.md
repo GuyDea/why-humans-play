@@ -41,11 +41,11 @@ bee's motives.
 ### Personal input
 - **ID:** PI-001
 - **Decision:** INPUT-REQUESTED
-- **Story purpose:** Reveal why Martin initially dismissed insect play and let the evidence revise that intuition.
-- **Primary prompt:** When did an animal behavior first make you reconsider what counts as play?
-- **Follow-up prompts:** What did you see; what did you assume at first; what changed your mind; which detail do you remember clearly?
-- **Bridge in:** My first reaction was to call this random movement.
-- **Bridge out:** That reaction is not evidence, so the experiment has to do the real work.
+- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.
+- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.
+- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?
+- **Bridge in:** A real encounter can make that abstract question concrete.
+- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.
 - **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
 - **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
 
