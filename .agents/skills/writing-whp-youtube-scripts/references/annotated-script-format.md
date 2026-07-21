@@ -170,9 +170,15 @@ the three-digit ID to match the block:
 
 `INPUT-REQUESTED` requires exactly one matching marker in the same beat's narration
 and is allowed only while `Status` is `RESEARCH-DRAFT`. Use `COMPLETED` only for
-material Martin supplied and approved, and remove the marker. For `OMIT`, keep the
-required fields non-empty with a story-specific omission decision and remove the
-marker. Do not leave orphaned, duplicate, or mismatched personal-input markers.
+material Martin supplied and approved, and remove the marker.
+
+For `OMIT`, keep every field non-empty. In `Primary prompt`, `Follow-up prompts`,
+`Bridge in`, `Bridge out`, and `Personal visuals`, give a concise, story-specific
+explanation of why that field is not applicable. Do not use generic `N/A` or placeholder
+copy, invent a memory, or write a transition that will be narrated.
+
+Remove the marker for `OMIT`. Do not leave orphaned, duplicate, or mismatched
+personal-input markers.
 
 Build the viewer application as `insight → try → observe → boundary → larger benefit`.
 Voice the essential application and limitation in narration; the structured block is

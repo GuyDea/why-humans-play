@@ -34,6 +34,14 @@ Use the same scale on every dimension:
 Choose the lowest anchor that accurately describes the work. Do not average across
 multiple weaknesses within one dimension.
 
+Apply personal-input and viewer-application requirements in full to a `FULL-SCRIPT`.
+Review a `TARGETED-ARTIFACT` only against its assigned or inherited scope. The absence
+of optional personal-input or viewer-application blocks is not itself a deficiency and
+must not lower a score or trigger insertion of out-of-scope content. When a targeted
+artifact includes either block, or is assigned to preserve an inherited personal-input
+or viewer-application contract, evaluate the in-scope material against every applicable
+anchor. A targeted artifact cannot promote the parent script's readiness.
+
 ## Score the ten dimensions
 
 ### 1. Title, thumbnail, opening, and payoff alignment
@@ -48,14 +56,15 @@ multiple weaknesses within one dimension.
 ### 2. Factual precision and status-matched wording
 
 - **0:** A material claim is unsupported, rejected, materially overstated, or voiced
-  more confidently than its status permits. The viewer application prescribes more
-  than the evidence can establish.
+  more confidently than its status permits. When a viewer application is in scope, it
+  also scores 0 if it prescribes more than the evidence can establish.
 - **1:** Core claims are supportable, but a scope term, denominator, causal boundary,
   caveat, attribution, or approved wording needs revision.
 - **2:** Every material narration claim preserves scope and causality, uses approved
-  or weaker wording, and audibly matches its confidence status. Its action,
-  observation, or reflection audibly preserves the same population, causal, confidence,
-  and applicability limits as its supporting evidence.
+  or weaker wording, and audibly matches its confidence status. When a viewer
+  application is in scope, its action, observation, or reflection audibly preserves
+  the same population, causal, confidence, and applicability limits as its supporting
+  evidence.
 
 ### 3. Story momentum without invented details
 
@@ -65,10 +74,10 @@ multiple weaknesses within one dimension.
 - **1:** The sequence is honest and usable, but includes a stalled beat, trivia
   detour, weak consequence, vague loop, or scene that needs clearer attribution.
 - **2:** Each beat changes viewer understanding, causes the next question, and builds
-  momentum without invention; reconstructions and reenactments are unmistakable. The
-  script makes one explicit personal decision, uses only authentic supplied material,
-  and the sequence performs necessary narrative work or gives a specific reason for
-  `OMIT`.
+  momentum without invention; reconstructions and reenactments are unmistakable. When
+  personal input is in scope, the work makes one explicit personal decision, uses only
+  authentic supplied material, and the sequence performs necessary narrative work or
+  gives a specific reason for `OMIT`.
 
 ### 4. Spoken quality and credible runtime
 
@@ -132,18 +141,22 @@ multiple weaknesses within one dimension.
 ### 10. WHP brand fidelity
 
 - **0:** The script uses hype, woo, fabricated shock, shallow self-help certainty,
-  childish framing, or product promotion that displaces the inquiry. The useful
-  viewer change or application is missing, generic, or unsupported.
+  childish framing, or product promotion that displaces the inquiry. The useful viewer
+  change is missing, generic, or unsupported; or an in-scope application is missing,
+  generic, or unsupported.
 - **1:** The piece is broadly on-brand but lacks a clear hidden-game/play lens,
   useful viewer change, steelmanned caveat, grounded tone, or Martin's natural voice.
 - **2:** The script makes a hidden game or the nature of play legible, changes how the
   viewer can see or act, and stays rigorous, useful, grounded, human, and
-  non-promotional. The declared change, voiced application, observable signal,
-  boundary, larger benefit, and WHP lens form one grounded payoff.
+  non-promotional. The declared change and WHP lens form one grounded payoff; when a
+  viewer application is in scope, its voiced application, observable signal, boundary,
+  and larger benefit form part of that same payoff.
 
 ## Enforce readiness gates
 
-Apply score and gate requirements separately.
+Apply score and gate requirements separately. Use these promotion gates only for a
+`FULL-SCRIPT`; a `TARGETED-ARTIFACT` may report findings but cannot promote the parent
+script's readiness.
 
 ### `EDITORIAL-DRAFT`
 
@@ -199,18 +212,20 @@ it confirms structure only.
 ## Run separate final audit passes
 
 Run each pass independently so one kind of fluency does not conceal another kind of
-failure:
+failure. Apply each pass only to the assigned or inherited scope; for a targeted
+artifact, record parent-script issues without inserting or scoring out-of-scope content:
 
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
-   useful viewer change, voiced application, observable signal, boundary, larger
-   benefit, and final answer word for word.
+   useful viewer change, and final answer word for word. When application is in scope,
+   also compare its voiced application, observable signal, boundary, and larger benefit.
 2. **Factual wording and confidence:** Compare narration with each exact claim,
-   approved wording, status, scope, and caveat; confirm that the application's action,
-   observation, or reflection preserves those evidence limits.
+   approved wording, status, scope, and caveat. When application is in scope, confirm
+   that its action, observation, or reflection preserves those evidence limits.
 3. **Story and personal authenticity:** Challenge dialogue, chronology, motives,
-   thoughts, feelings, weather, sensory detail, and reconstruction labels. Verify one
-   explicit personal decision, supplied-and-approved material, necessary narrative
-   work or a specific `OMIT` reason, and no invented first-person detail.
+   thoughts, feelings, weather, sensory detail, and reconstruction labels. When personal
+   input is in scope, verify one explicit decision, supplied-and-approved material,
+   necessary narrative work or a specific `OMIT` reason, and no invented first-person
+   detail.
 4. **Spoken flow and runtime:** Read aloud, time the narration, and revise density,
    pronunciation, transitions, and breaths.
 5. **Visual relevance and identity accuracy:** Verify that each visual advances its
@@ -219,16 +234,18 @@ failure:
    relationship, resolved state, production feasibility, and whether a still is
    clearer.
 7. **Provenance and rights:** Trace every external asset to its original page,
-   rightsholder, exact terms, intended changes, status, and fallback. Review personal
-   media separately for ownership, releases, depicted works, privacy, component rights,
-   and an ownable fallback.
+   rightsholder, exact terms, intended changes, status, and fallback. When personal
+   media is in scope, review it separately for ownership, releases, depicted works,
+   privacy, component rights, and an ownable fallback.
 8. **Complete references:** Check claim and asset IDs, required fields, locators,
    URLs, access dates, contradictions, attribution copy, and unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,
-    format gate, substantive blockers, personal-input resolution, absence of unresolved
-    input markers, and both authorized-human approval moments.
+    format gate, and substantive blockers. For a `FULL-SCRIPT`, also reapply
+    personal-input resolution, absence of unresolved input markers, and both
+    authorized-human approval moments; for a targeted artifact, verify that it does not
+    claim to promote the parent script.
 
 Do not combine these into a single “looks good” read. These are human editorial audits;
 structural validation cannot judge personal authenticity, application quality, safety,

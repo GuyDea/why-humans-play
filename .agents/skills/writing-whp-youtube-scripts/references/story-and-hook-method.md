@@ -167,6 +167,11 @@ the consequence, and what changed. Supply a narration-safe `Bridge in`, a narrat
 `Omit when` condition. A prompt helps Martin remember; it never supplies the memory for
 him.
 
+For `OMIT`, keep every field non-empty. In `Primary prompt`, `Follow-up prompts`,
+`Bridge in`, `Bridge out`, and `Personal visuals`, give a concise, story-specific
+explanation of why that field is not applicable. Do not use generic `N/A` or placeholder
+copy, invent a memory, or write a transition that will be narrated.
+
 These are structural examples, not reusable autobiographical facts:
 
 - `INPUT-REQUESTED`: “When did you first notice the rule changing your behavior?”
@@ -175,8 +180,8 @@ These are structural examples, not reusable autobiographical facts:
   bridge back with “That experience illustrates the question; it does not prove the
   pattern is common or causal.”
 - `OMIT`: state a story-specific reason such as “Martin has no direct connection, and
-  a first-person detour would delay the documented historical turn.” Keep all required
-  fields non-empty and remove the input marker.
+  a first-person detour would delay the documented historical turn,” and remove the
+  input marker.
 
 ## Hand the insight back to the viewer
 
