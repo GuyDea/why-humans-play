@@ -169,6 +169,15 @@ def blank_beat_section(block: str, section: str) -> str:
     return block[:body_start] + "   \n" + block[body_end:]
 
 
+def indent_narration_blockquotes(text: str, spaces: int) -> str:
+    narration = extract_exact(text, "### Narration\n", "\n### Story function")
+    indented = "".join(
+        " " * spaces + line if line.startswith(">") else line
+        for line in narration.splitlines(keepends=True)
+    )
+    return replace_exact(text, narration, indented)
+
+
 VALID_DOCUMENT = """# Why Bees Roll Balls
 
 - **Status:** RESEARCH-DRAFT
@@ -737,12 +746,92 @@ class ValidatorTests(unittest.TestCase):
         )
         self.assert_error(document, "orphan personal input marker")
 
+    def test_orphan_personal_marker_in_header_is_rejected(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "# Why Bees Roll Balls\n",
+            "# Why Bees Roll Balls\n<!-- PI-777: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-777")
+
+    def test_orphan_personal_marker_in_references_is_rejected(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "## References and source materials\n",
+            "## References and source materials\n<!-- PI-777: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-777")
+
+    def test_fenced_personal_markers_outside_beats_are_ignored(self) -> None:
+        fenced_marker = "```markdown\n<!-- PI-777: Martin input -->\n```\n"
+        for region, anchor, replacement in (
+            (
+                "header",
+                "# Why Bees Roll Balls\n",
+                "# Why Bees Roll Balls\n" + fenced_marker,
+            ),
+            (
+                "references",
+                "## References and source materials\n",
+                "## References and source materials\n" + fenced_marker,
+            ),
+        ):
+            with self.subTest(region=region):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    anchor,
+                    replacement,
+                )
+                self.assertEqual(validate_document(document), [])
+
     def test_fenced_personal_marker_is_ignored(self) -> None:
         fenced = (
             VALID_DOCUMENT.rstrip()
             + "\n\n```markdown\n> <!-- PI-999: Martin input -->\n```\n"
         )
         self.assertEqual(validate_document(fenced), [])
+
+    def test_commonmark_indented_blockquotes_are_spoken_narration(self) -> None:
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        for spaces in (1, 2, 3):
+            with self.subTest(spaces=spaces):
+                document = indent_narration_blockquotes(
+                    COMPLETED_DOCUMENT,
+                    spaces,
+                )
+                self.assertEqual(validator.extract_narration(document), expected)
+                self.assertEqual(validator.count_narration_words(document), 80)
+                self.assertEqual(validate_document(document), [])
+
+    def test_four_space_indentation_is_not_spoken_blockquote_copy(self) -> None:
+        document = indent_narration_blockquotes(COMPLETED_DOCUMENT, 4)
+        document = replace_exact(
+            document,
+            "- **Word count:** 80",
+            "- **Word count:** 0",
+        )
+        self.assertEqual(validator.extract_narration(document), "")
+        self.assertEqual(validator.count_narration_words(document), 0)
+        self.assertEqual(validate_document(document), [])
+
+    def test_marker_in_a_different_beat_does_not_satisfy_ownership(self) -> None:
+        marker = "> <!-- PI-001: Martin input -->\n"
+        document = replace_exact(TWO_BEAT_DOCUMENT, marker, "")
+        second_narration = (
+            "## Beat 02 — The detour\n"
+            "_Time: 00:30–01:00 · Target: ~80 words_\n\n"
+            "### Narration\n"
+        )
+        document = replace_exact(
+            document,
+            second_narration,
+            second_narration + marker,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 INPUT-REQUESTED requires exactly one matching narration marker",
+        )
+        self.assert_error(document, "orphan personal input marker: PI-001")
 
     def test_word_count_must_match_extracted_narration(self) -> None:
         self.assert_error(
@@ -760,6 +849,27 @@ class ValidatorTests(unittest.TestCase):
                 "- **Word count:** about 80",
             ),
             "Word count must be a non-negative integer",
+        )
+
+    def test_extremely_long_numeric_word_count_returns_an_error(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "- **Word count:** 80",
+            "- **Word count:** " + "9" * 5000,
+        )
+        try:
+            errors = validate_document(document)
+        except ValueError as exc:
+            self.fail(
+                "validate_document must return a deterministic word-count error "
+                f"instead of raising ValueError: {exc}"
+            )
+        self.assertTrue(
+            any(
+                "does not match extracted narration count 80" in error
+                for error in errors
+            ),
+            errors,
         )
 
     def test_personal_input_id_requires_pi_three_digit_form(self) -> None:
