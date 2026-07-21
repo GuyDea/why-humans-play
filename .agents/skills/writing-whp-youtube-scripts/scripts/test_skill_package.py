@@ -206,15 +206,22 @@ class SkillPackageTests(unittest.TestCase):
             "conflicts on origin, date, chronology, causality, or scope, even when "
             "that source supports a different subclaim. Record every discovered "
             "material conflict in `Contradictions` and explain how it changes or "
-            "bounds the status or wording. Write `No contradiction found` only after "
-            "this source-wide conflict scan.",
+            "bounds the status or wording. Treat `No contradiction found`, `none "
+            "found`, and any equivalent no-conflict assertion as allowed only after "
+            "this source-wide conflict scan. If a cross-check is inaccessible, "
+            "truncated, or too large to scan completely, write `Conflict scan "
+            "incomplete — [source, reason, portions checked]` and keep the conflict "
+            "review unresolved; do not assert that none was found.",
             "For `CORROBORATED`, trace whether the sources have genuinely independent "
             "evidence chains. If they converge on the same originating investigation, "
             "record the dependence and re-evaluate the claim under the existing status "
-            "thresholds: use `VERIFIED` when a primary or authoritative origin supports "
-            "the exact wording, `REPORTED` when one identifiable plausible account "
-            "remains, and retain `CORROBORATED` only when another genuinely independent "
-            "chain supports the exact wording.",
+            "thresholds: use `VERIFIED` only when the primary or authoritative source "
+            "type can establish the exact claim and no unresolved credible conflict "
+            "remains; use `REPORTED` when one identifiable plausible account remains; "
+            "and retain `CORROBORATED` only when another genuinely independent chain "
+            "supports the exact wording. A material credible conflict takes precedence "
+            "over `VERIFIED`: resolve it by narrowing the wording, use `DISPUTED`, or "
+            "omit the claim; never assign `VERIFIED` while that conflict remains.",
             "Use stable, source-native locators: page, section, table, figure, "
             "timestamp, or a descriptive paragraph anchor. Never use browser-rendered "
             "or search-result line numbers as source locators.",
@@ -224,24 +231,31 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(contract, research)
 
         rubric_reminder = (
-            "Reverse-audit narration against its claim cards and every cross-check "
-            "source: preserve limiting scope and modal terms, record every material "
-            "conflict in `Contradictions` and bound its consequences, re-evaluate "
-            "dependent evidence chains under the status thresholds, and require "
-            "stable source-native locators."
+            "Across passes 2 and 8, reverse-audit narration against its claim cards "
+            "and every cross-check source: preserve limiting scope and modal terms, "
+            "record every material conflict in `Contradictions` and bound its "
+            "consequences, re-evaluate dependent evidence chains under the status "
+            "thresholds, and require stable source-native locators."
         )
         with self.subTest(contract="rubric-reminder"):
             self.assertIn(rubric_reminder, rubric)
 
         rubric_reference_pass = (
-            "Write `No contradiction found` only after the complete source-wide "
-            "cross-check scan. Record each material conflict in `Contradictions` and "
-            "explain how it changes or bounds status or wording. For dependent evidence "
-            "chains, record the dependence and re-evaluate under the existing status "
-            "thresholds: use `VERIFIED` for exact wording supported by a primary or "
-            "authoritative origin, `REPORTED` when one identifiable plausible account "
-            "remains, and retain `CORROBORATED` only with another genuinely independent "
-            "chain."
+            "Treat `No contradiction found`, `none found`, and equivalent no-conflict "
+            "wording as allowed only after the complete source-wide cross-check scan. "
+            "If a cross-check is inaccessible, truncated, or too large to scan "
+            "completely, write `Conflict scan incomplete — [source, reason, portions "
+            "checked]`, keep the review unresolved, and do not assert that none was "
+            "found. Record each material conflict in `Contradictions` and explain how "
+            "it changes or bounds status or wording. For dependent evidence chains, "
+            "record the dependence and re-evaluate under the existing status "
+            "thresholds: use `VERIFIED` only when the primary or authoritative source "
+            "type can establish the exact claim and no unresolved credible conflict "
+            "remains; use `REPORTED` when one identifiable plausible account remains; "
+            "and retain `CORROBORATED` only with another genuinely independent chain. "
+            "A material credible conflict takes precedence over `VERIFIED`: narrow and "
+            "resolve the wording, use `DISPUTED`, or omit the claim; never retain "
+            "`VERIFIED` while that conflict remains."
         )
         with self.subTest(contract="rubric-reference-pass"):
             self.assertIn(rubric_reference_pass, rubric)
