@@ -12,6 +12,26 @@ CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_personal_and_application_contract_is_distributed(self) -> None:
+        sources = {
+            "skill": SKILL_MD.read_text(encoding="utf-8"),
+            "story": (SKILL_ROOT / "references/story-and-hook-method.md").read_text(encoding="utf-8"),
+            "research": (SKILL_ROOT / "references/research-and-rights.md").read_text(encoding="utf-8"),
+            "format": (SKILL_ROOT / "references/annotated-script-format.md").read_text(encoding="utf-8"),
+            "rubric": (SKILL_ROOT / "references/quality-rubric.md").read_text(encoding="utf-8"),
+        }
+        required = {
+            "skill": ("INPUT-REQUESTED", "COMPLETED", "OMIT", "viewer application"),
+            "story": ("Primary prompt", "Bridge in", "Bridge out", "larger benefit"),
+            "research": ("first-person source", "personal photos", "observation-only"),
+            "format": ("Deliverable", "Useful viewer change", "### Personal input", "### Viewer application"),
+            "rubric": ("personal", "application", "INPUT-REQUESTED"),
+        }
+        for source, tokens in required.items():
+            with self.subTest(source=source):
+                for token in tokens:
+                    self.assertIn(token, sources[source])
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
