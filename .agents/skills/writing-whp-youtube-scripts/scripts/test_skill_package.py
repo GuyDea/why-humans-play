@@ -234,9 +234,10 @@ class SkillPackageTests(unittest.TestCase):
             self.assertIn(rubric_reminder, rubric)
 
         rubric_reference_pass = (
-            "Record each material conflict in `Contradictions` and explain how it "
-            "changes or bounds status or wording. For dependent evidence chains, "
-            "record the dependence and re-evaluate under the existing status "
+            "Write `No contradiction found` only after the complete source-wide "
+            "cross-check scan. Record each material conflict in `Contradictions` and "
+            "explain how it changes or bounds status or wording. For dependent evidence "
+            "chains, record the dependence and re-evaluate under the existing status "
             "thresholds: use `VERIFIED` for exact wording supported by a primary or "
             "authoritative origin, `REPORTED` when one identifiable plausible account "
             "remains, and retain `CORROBORATED` only with another genuinely independent "
