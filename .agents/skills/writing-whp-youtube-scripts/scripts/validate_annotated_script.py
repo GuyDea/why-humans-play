@@ -15,6 +15,8 @@ READINESS_STATES = {
     "RECORD-READY",
     "PICTURE-LOCKED",
 }
+DELIVERABLE_VALUES = {"FULL-SCRIPT", "TARGETED-ARTIFACT"}
+PERSONAL_DECISIONS = {"INPUT-REQUESTED", "COMPLETED", "OMIT"}
 CLAIM_STATUSES = {
     "VERIFIED",
     "CORROBORATED",
@@ -35,6 +37,7 @@ FIXED_ASSET_STATUSES = {
 HEADER_FIELDS = (
     "Status",
     "Version",
+    "Deliverable",
     "Target runtime",
     "Word count",
     "Audience",
@@ -42,6 +45,7 @@ HEADER_FIELDS = (
     "Title",
     "Thumbnail promise",
     "Viewer promise",
+    "Useful viewer change",
     "Central question",
     "Thesis",
     "Payoff",
@@ -85,6 +89,24 @@ ASSET_FIELDS = (
     "Accessed",
     "Status",
 )
+PERSONAL_INPUT_FIELDS = (
+    "ID",
+    "Decision",
+    "Story purpose",
+    "Primary prompt",
+    "Follow-up prompts",
+    "Bridge in",
+    "Bridge out",
+    "Personal visuals",
+    "Omit when",
+)
+VIEWER_APPLICATION_FIELDS = (
+    "Insight",
+    "Try",
+    "Observe",
+    "Boundary",
+    "Larger benefit",
+)
 
 END_HEADINGS = (
     "Evidence references",
@@ -118,6 +140,7 @@ FIELD_RE = re.compile(
 VERSIONED_CC_RE = re.compile(
     r"^CC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d+(?:\.\d+)+$"
 )
+PERSONAL_ID_RE = re.compile(r"^PI-\d{3}$")
 
 
 @dataclass(frozen=True)
@@ -230,18 +253,63 @@ def _beat_blocks(text: str) -> list[tuple[str, str]]:
     return blocks
 
 
-def _section_body(block: str, section: str) -> str | None:
-    """Return a beat section body, excluding the next level-three heading."""
+def _section_bodies(block: str, section: str) -> list[str]:
+    """Return every exact level-three section body in document order."""
 
-    heading = re.search(
-        rf"^### {re.escape(section)}[ \t]*$", block, re.MULTILINE
+    headings = list(
+        re.finditer(rf"^### {re.escape(section)}[ \t]*$", block, re.MULTILINE)
     )
-    if heading is None:
-        return None
-    next_heading = re.search(r"^### .+$", block[heading.end() :], re.MULTILINE)
-    if next_heading is None:
-        return block[heading.end() :]
-    return block[heading.end() : heading.end() + next_heading.start()]
+    bodies: list[str] = []
+    for heading in headings:
+        next_heading = re.search(r"^### .+$", block[heading.end() :], re.MULTILINE)
+        end = (
+            heading.end() + next_heading.start()
+            if next_heading is not None
+            else len(block)
+        )
+        bodies.append(block[heading.end() : end])
+    return bodies
+
+
+def _section_body(block: str, section: str) -> str | None:
+    """Return the first exact beat section body, when present."""
+
+    bodies = _section_bodies(block, section)
+    return bodies[0] if bodies else None
+
+
+def _validate_structured_fields(
+    beat_id: str,
+    section: str,
+    body: str,
+    required: tuple[str, ...],
+    errors: list[str],
+) -> dict[str, str]:
+    matches: dict[str, list[str]] = {}
+    for match in FIELD_RE.finditer(body):
+        matches.setdefault(match.group(1), []).append(match.group(2).strip())
+    for field in required:
+        values = matches.get(field, [])
+        if not values:
+            errors.append(f"Beat {beat_id} {section} is missing required field: {field}.")
+        elif len(values) > 1:
+            errors.append(f"Beat {beat_id} {section} repeats required field: {field}.")
+        elif not values[0]:
+            errors.append(
+                f"Beat {beat_id} {section} field {field} must have a non-whitespace value."
+            )
+    return {field: values[0] for field, values in matches.items() if values}
+
+
+def _structured_blocks(
+    beats_text: str, section: str
+) -> list[tuple[str, str]]:
+    blocks: list[tuple[str, str]] = []
+    for beat_id, beat in _beat_blocks(beats_text):
+        blocks.extend(
+            (beat_id, body) for body in _section_bodies(beat, section)
+        )
+    return blocks
 
 
 def _parse_records(references_text: str) -> list[Record]:
@@ -342,6 +410,10 @@ def _validate_headers(header_text: str, errors: list[str]) -> dict[str, str]:
     if status is not None and status not in READINESS_STATES:
         errors.append(f"Invalid readiness Status: {status!r}.")
 
+    deliverable = fields.get("Deliverable")
+    if deliverable is not None and deliverable not in DELIVERABLE_VALUES:
+        errors.append(f"Invalid Deliverable: {deliverable!r}.")
+
     return fields
 
 
@@ -390,6 +462,61 @@ def _validate_beats(text: str, errors: list[str]) -> None:
                 f"Beat {beat_id} Motion / edit requires a non-empty animation purpose "
                 "or an explicit 'No animation —' explanation."
             )
+
+
+def _validate_personal_and_application_blocks(
+    beats_text: str,
+    deliverable: str | None,
+    errors: list[str],
+) -> None:
+    personal_blocks = _structured_blocks(beats_text, "Personal input")
+    application_blocks = _structured_blocks(beats_text, "Viewer application")
+
+    if deliverable == "FULL-SCRIPT" and len(personal_blocks) != 1:
+        errors.append(
+            "FULL-SCRIPT requires exactly one Personal input block; "
+            f"found {len(personal_blocks)}."
+        )
+    if deliverable == "FULL-SCRIPT" and len(application_blocks) != 1:
+        errors.append(
+            "FULL-SCRIPT requires exactly one Viewer application block; "
+            f"found {len(application_blocks)}."
+        )
+
+    seen_personal_ids: set[str] = set()
+    for beat_id, body in personal_blocks:
+        fields = _validate_structured_fields(
+            beat_id,
+            "Personal input",
+            body,
+            PERSONAL_INPUT_FIELDS,
+            errors,
+        )
+        personal_id = fields.get("ID")
+        if personal_id:
+            if PERSONAL_ID_RE.fullmatch(personal_id) is None:
+                errors.append(
+                    f"Beat {beat_id} Personal input has invalid ID: {personal_id!r}."
+                )
+            if personal_id in seen_personal_ids:
+                errors.append(f"Duplicate personal input ID: {personal_id}.")
+            else:
+                seen_personal_ids.add(personal_id)
+
+        decision = fields.get("Decision")
+        if decision and decision not in PERSONAL_DECISIONS:
+            errors.append(
+                f"Beat {beat_id} Personal input has invalid Decision: {decision!r}."
+            )
+
+    for beat_id, body in application_blocks:
+        _validate_structured_fields(
+            beat_id,
+            "Viewer application",
+            body,
+            VIEWER_APPLICATION_FIELDS,
+            errors,
+        )
 
 
 def _validate_record_fields(record: Record, errors: list[str]) -> dict[str, str]:
@@ -555,6 +682,11 @@ def validate_document(text: str) -> list[str]:
         )
     header_fields = _validate_headers(regions.header, errors)
     _validate_beats(regions.beats, errors)
+    _validate_personal_and_application_blocks(
+        regions.beats,
+        header_fields.get("Deliverable"),
+        errors,
+    )
     for beat_id in regions.post_reference_beat_ids:
         errors.append(f"Beat {beat_id} appears after the references heading.")
     _validate_references(
