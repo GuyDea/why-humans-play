@@ -141,6 +141,7 @@ VERSIONED_CC_RE = re.compile(
     r"^CC-[A-Z0-9]+(?:-[A-Z0-9]+)*-\d+(?:\.\d+)+$"
 )
 PERSONAL_ID_RE = re.compile(r"^PI-\d{3}$")
+PERSONAL_MARKER_RE = re.compile(r"<!-- PI-(\d{3}): Martin input -->")
 
 
 @dataclass(frozen=True)
@@ -276,6 +277,41 @@ def _section_body(block: str, section: str) -> str | None:
 
     bodies = _section_bodies(block, section)
     return bodies[0] if bodies else None
+
+
+def extract_narration(text: str) -> str:
+    """Return spoken blockquote copy under Narration headings, without input markers."""
+
+    regions = _document_regions(_mask_fenced_blocks(text))
+    paragraphs: list[str] = []
+    for _, block in _beat_blocks(regions.beats):
+        body = _section_body(block, "Narration")
+        if body is None:
+            continue
+        current: list[str] = []
+        for line in body.splitlines():
+            match = re.match(r"^>[ \t]?(.*)$", line)
+            if match is None:
+                if current:
+                    paragraphs.append(" ".join(current))
+                    current = []
+                continue
+            quoted = match.group(1)
+            spoken = PERSONAL_MARKER_RE.sub("", quoted).strip()
+            if spoken:
+                current.append(spoken)
+            elif not PERSONAL_MARKER_RE.search(quoted) and current:
+                paragraphs.append(" ".join(current))
+                current = []
+        if current:
+            paragraphs.append(" ".join(current))
+    return "\n\n".join(paragraphs)
+
+
+def count_narration_words(text: str) -> int:
+    """Count whitespace-delimited spoken words after narration extraction."""
+
+    return len(extract_narration(text).split())
 
 
 def _validate_structured_fields(
@@ -467,6 +503,7 @@ def _validate_beats(text: str, errors: list[str]) -> None:
 def _validate_personal_and_application_blocks(
     beats_text: str,
     deliverable: str | None,
+    readiness_status: str | None,
     errors: list[str],
 ) -> None:
     personal_blocks = _structured_blocks(beats_text, "Personal input")
@@ -483,6 +520,13 @@ def _validate_personal_and_application_blocks(
             f"found {len(application_blocks)}."
         )
 
+    beat_lookup = {
+        beat_id: beat for beat_id, beat in _beat_blocks(beats_text)
+    }
+    all_markers = [
+        f"PI-{match.group(1)}" for match in PERSONAL_MARKER_RE.finditer(beats_text)
+    ]
+    consumed_markers: list[str] = []
     seen_personal_ids: set[str] = set()
     for beat_id, body in personal_blocks:
         fields = _validate_structured_fields(
@@ -509,6 +553,38 @@ def _validate_personal_and_application_blocks(
                 f"Beat {beat_id} Personal input has invalid Decision: {decision!r}."
             )
 
+        narration = _section_body(beat_lookup.get(beat_id, ""), "Narration") or ""
+        narration_markers = [
+            f"PI-{match.group(1)}"
+            for match in PERSONAL_MARKER_RE.finditer(narration)
+        ]
+        if decision == "INPUT-REQUESTED":
+            matching_count = narration_markers.count(personal_id)
+            if matching_count != 1:
+                errors.append(
+                    f"Beat {beat_id} INPUT-REQUESTED requires exactly one matching "
+                    f"narration marker for {personal_id}; found {matching_count}."
+                )
+            elif PERSONAL_ID_RE.fullmatch(personal_id or "") is not None:
+                consumed_markers.append(personal_id)
+            if readiness_status != "RESEARCH-DRAFT":
+                errors.append(
+                    f"Beat {beat_id} INPUT-REQUESTED is allowed only in "
+                    "RESEARCH-DRAFT."
+                )
+        elif decision in {"COMPLETED", "OMIT"} and narration_markers:
+            errors.append(
+                f"Beat {beat_id} Decision {decision} must not retain a personal "
+                "input marker."
+            )
+
+    remaining_markers = list(all_markers)
+    for marker in consumed_markers:
+        if marker in remaining_markers:
+            remaining_markers.remove(marker)
+    for marker in sorted(set(remaining_markers)):
+        errors.append(f"Found orphan personal input marker: {marker}.")
+
     for beat_id, body in application_blocks:
         _validate_structured_fields(
             beat_id,
@@ -516,6 +592,25 @@ def _validate_personal_and_application_blocks(
             body,
             VIEWER_APPLICATION_FIELDS,
             errors,
+        )
+
+
+def _validate_word_count(
+    text: str,
+    header_fields: dict[str, str],
+    errors: list[str],
+) -> None:
+    stated = header_fields.get("Word count")
+    if stated is None or not stated:
+        return
+    if re.fullmatch(r"\d+", stated) is None:
+        errors.append("Word count must be a non-negative integer.")
+        return
+    actual = count_narration_words(text)
+    if int(stated) != actual:
+        errors.append(
+            f"Word count metadata {stated} does not match extracted narration "
+            f"count {actual}."
         )
 
 
@@ -685,8 +780,10 @@ def validate_document(text: str) -> list[str]:
     _validate_personal_and_application_blocks(
         regions.beats,
         header_fields.get("Deliverable"),
+        header_fields.get("Status"),
         errors,
     )
+    _validate_word_count(text, header_fields, errors)
     for beat_id in regions.post_reference_beat_ids:
         errors.append(f"Beat {beat_id} appears after the references heading.")
     _validate_references(
