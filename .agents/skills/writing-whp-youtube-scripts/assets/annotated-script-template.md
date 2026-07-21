@@ -5,14 +5,16 @@
 > live source, locator, license, and claim before production.
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.2
-- **Target runtime:** 00:20
-- **Word count:** 52
+- **Version:** 0.3
+- **Deliverable:** FULL-SCRIPT
+- **Target runtime:** 00:30
+- **Word count:** 80
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy
 - **Thumbnail promise:** A bee rolling a wooden ball
 - **Viewer promise:** See why one tiny detour changed the case for animal play.
+- **Useful viewer change:** Notice when behavior meets operational play criteria without assuming subjective experience.
 - **Central question:** Can an insect play without an external reward?
 - **Thesis:** The behavior meets established play criteria, with interpretive limits.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
@@ -20,17 +22,39 @@
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
 ## Beat 01 — The detour
-_Time: 00:00–00:20 · Target: ~52 words_
+_Time: 00:00–00:30 · Target: ~80 words_
 
 ### Narration
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
 > food reward. The researchers said this met their operational play criteria. That
 > does not tell us what a bee feels—but makes the detour hard to dismiss.
+> <!-- PI-001: Martin input -->
+> Next time an animal seems to play, look for repetition, choice, and no immediate
+> reward. Those clues can sharpen the question; they cannot reveal the animal's inner
+> experience.
 
 ### Story function
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
+
+### Personal input
+- **ID:** PI-001
+- **Decision:** INPUT-REQUESTED
+- **Story purpose:** Reveal why Martin initially dismissed insect play and let the evidence revise that intuition.
+- **Primary prompt:** When did an animal behavior first make you reconsider what counts as play?
+- **Follow-up prompts:** What did you see; what did you assume at first; what changed your mind; which detail do you remember clearly?
+- **Bridge in:** My first reaction was to call this random movement.
+- **Bridge out:** That reaction is not evidence, so the experiment has to do the real work.
+- **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
+- **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
+
+### Viewer application
+- **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
+- **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
+- **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
+- **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
+- **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
 
 ### Claims
 - `F-001` — Ball rolling without a food reward met the study's play criteria (`VERIFIED`).
