@@ -95,10 +95,10 @@ explicit games, and rigorous play science.
 `whp-youtube/drafts/evolutionary-paradox-of-play.md`, and this ledger. The parked draft
 remains unchanged apart from its current-status note.
 
-## 2026-07-22 — Lock the AI pilot research-draft contract
+## 2026-07-22 — Lock the AI pilot package and story contract
 
 **Decision:** Episode 1 uses the verified block-flip reconstruction as its opening and
-the exact research-draft package *Why AI Cheats—Even When It Follows Every Rule* with
+the exact package *Why AI Cheats—Even When It Follows Every Rule* with
 **100% WRONG**; it closes with a conditional inspection of one everyday score, without
 changing the accepted launch order.
 
@@ -110,4 +110,5 @@ empirical result.
 **Documents:** `whp-youtube/STEERING.md` and this ledger. `BRAND.md`, `CLAUDE.md`, and
 `whp-youtube/drafts/evolutionary-paradox-of-play.md` already state the correct doctrine,
 authority chain, launch order, and parked status and needed no content change. The active
-script remains v0.7 `RESEARCH-DRAFT` at `whp-youtube/episodes/01-why-ai-cheats.md`.
+script at `whp-youtube/episodes/01-why-ai-cheats.md` is authoritative for its current
+working state.
