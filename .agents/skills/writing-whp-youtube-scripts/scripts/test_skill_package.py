@@ -204,12 +204,17 @@ class SkillPackageTests(unittest.TestCase):
             "the record.",
             "Open every `Cross-checks` source and scan it for material wording that "
             "conflicts on origin, date, chronology, causality, or scope, even when "
-            "that source supports a different subclaim. Write `No contradiction "
-            "found` only after this source-wide conflict scan.",
+            "that source supports a different subclaim. Record every discovered "
+            "material conflict in `Contradictions` and explain how it changes or "
+            "bounds the status or wording. Write `No contradiction found` only after "
+            "this source-wide conflict scan.",
             "For `CORROBORATED`, trace whether the sources have genuinely independent "
             "evidence chains. If they converge on the same originating investigation, "
-            "record the dependence and lower the status unless another independent "
-            "chain supports the exact approved wording.",
+            "record the dependence and re-evaluate the claim under the existing status "
+            "thresholds: use `VERIFIED` when a primary or authoritative origin supports "
+            "the exact wording, `REPORTED` when one identifiable plausible account "
+            "remains, and retain `CORROBORATED` only when another genuinely independent "
+            "chain supports the exact wording.",
             "Use stable, source-native locators: page, section, table, figure, "
             "timestamp, or a descriptive paragraph anchor. Never use browser-rendered "
             "or search-result line numbers as source locators.",
@@ -220,12 +225,25 @@ class SkillPackageTests(unittest.TestCase):
 
         rubric_reminder = (
             "Reverse-audit narration against its claim cards and every cross-check "
-            "source: preserve limiting scope and modal terms, expose material "
-            "contradictions or dependent evidence chains, and require stable "
-            "source-native locators."
+            "source: preserve limiting scope and modal terms, record every material "
+            "conflict in `Contradictions` and bound its consequences, re-evaluate "
+            "dependent evidence chains under the status thresholds, and require "
+            "stable source-native locators."
         )
         with self.subTest(contract="rubric-reminder"):
             self.assertIn(rubric_reminder, rubric)
+
+        rubric_reference_pass = (
+            "Record each material conflict in `Contradictions` and explain how it "
+            "changes or bounds status or wording. For dependent evidence chains, "
+            "record the dependence and re-evaluate under the existing status "
+            "thresholds: use `VERIFIED` for exact wording supported by a primary or "
+            "authoritative origin, `REPORTED` when one identifiable plausible account "
+            "remains, and retain `CORROBORATED` only with another genuinely independent "
+            "chain."
+        )
+        with self.subTest(contract="rubric-reference-pass"):
+            self.assertIn(rubric_reference_pass, rubric)
 
     def test_required_package_files_exist(self) -> None:
         required = {
