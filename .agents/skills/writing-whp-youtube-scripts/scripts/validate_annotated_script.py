@@ -142,6 +142,10 @@ VERSIONED_CC_RE = re.compile(
 )
 PERSONAL_ID_RE = re.compile(r"^PI-\d{3}$")
 PERSONAL_MARKER_RE = re.compile(r"<!-- PI-(\d{3}): Martin input -->")
+FENCE_LINE_RE = re.compile(
+    r"^[ ]{0,3}(?P<quote>>[ \t]?[ ]{0,3})?"
+    r"(?P<fence>`{3,}|~{3,})(?P<rest>.*)$"
+)
 
 
 @dataclass(frozen=True)
@@ -172,26 +176,31 @@ def _mask_fenced_blocks(text: str) -> str:
     masked_lines: list[str] = []
     fence_character: str | None = None
     fence_length = 0
+    fence_in_blockquote = False
     for line in text.splitlines(keepends=True):
         content = line.rstrip("\r\n")
         if fence_character is None:
-            opening = re.match(r"^[ ]{0,3}(`{3,}|~{3,}).*$", content)
+            opening = FENCE_LINE_RE.match(content)
             if opening is None:
                 masked_lines.append(line)
                 continue
-            marker = opening.group(1)
+            marker = opening.group("fence")
             fence_character = marker[0]
             fence_length = len(marker)
+            fence_in_blockquote = opening.group("quote") is not None
         else:
-            candidate = content.lstrip(" ")
-            if len(content) - len(candidate) <= 3:
-                candidate = candidate.rstrip(" \t")
+            closing = FENCE_LINE_RE.match(content)
+            if closing is not None:
+                marker = closing.group("fence")
                 if (
-                    len(candidate) >= fence_length
-                    and set(candidate) == {fence_character}
+                    (closing.group("quote") is not None) == fence_in_blockquote
+                    and marker[0] == fence_character
+                    and len(marker) >= fence_length
+                    and not closing.group("rest").strip()
                 ):
                     fence_character = None
                     fence_length = 0
+                    fence_in_blockquote = False
         masked_lines.append(re.sub(r"[^\r\n]", " ", line))
     return "".join(masked_lines)
 
