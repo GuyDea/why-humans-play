@@ -125,15 +125,22 @@ record.
 2. Open every `Cross-checks` source and scan it for material wording that conflicts on
    origin, date, chronology, causality, or scope, even when that source supports a
    different subclaim. Record every discovered material conflict in `Contradictions`
-   and explain how it changes or bounds the status or wording. Write `No contradiction
-   found` only after this source-wide conflict scan.
+   and explain how it changes or bounds the status or wording. Treat `No contradiction
+   found`, `none found`, and any equivalent no-conflict assertion as allowed only after
+   this source-wide conflict scan. If a cross-check is inaccessible, truncated, or too
+   large to scan completely, write `Conflict scan incomplete — [source, reason,
+   portions checked]` and keep the conflict review unresolved; do not assert that none
+   was found.
 3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
    chains. If they converge on the same originating investigation, record the
    dependence and re-evaluate the claim under the existing status thresholds: use
-   `VERIFIED` when a primary or authoritative origin supports the exact wording,
-   `REPORTED` when one identifiable plausible account remains, and retain
+   `VERIFIED` only when the primary or authoritative source type can establish the
+   exact claim and no unresolved credible conflict remains; use `REPORTED` when one
+   identifiable plausible account remains; and retain
    `CORROBORATED` only when another genuinely independent chain supports the exact
-   wording.
+   wording. A material credible conflict takes precedence over `VERIFIED`: resolve it
+   by narrowing the wording, use `DISPUTED`, or omit the claim; never assign `VERIFIED`
+   while that conflict remains.
 4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
    descriptive paragraph anchor. Never use browser-rendered or search-result line
    numbers as source locators.
