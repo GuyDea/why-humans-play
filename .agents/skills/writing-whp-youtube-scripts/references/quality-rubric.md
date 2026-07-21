@@ -260,7 +260,16 @@ chains under the status thresholds, and require stable source-native locators.
    the claim; never retain `VERIFIED` while that conflict remains. Require stable
    source-native locators rather than browser-rendered or search-result line numbers,
    then check claim and asset IDs, required fields, URLs, access dates, attribution
-   copy, and unresolved material.
+   copy, and unresolved material. Within each evidence record's existing
+   `Contradictions` field, record one auditable outcome for the `Original URL` and for
+   every listed `Cross-checks` source. Name each source and mark it `COMPLETE —
+   [material support/conflict findings]` or `INCOMPLETE — [reason and portions
+   checked]`. A blanket summary such as `all sources agree` never substitutes for
+   source-by-source accounting. Every material conflict discovered anywhere in a
+   source must appear in the same field with its consequence for narration wording or
+   status. For a compound claim, assign `CORROBORATED` only when every narrated
+   subclaim has genuinely independent support. Otherwise split the record by subclaim
+   or assign the whole record the weakest applicable status and narration stance.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,

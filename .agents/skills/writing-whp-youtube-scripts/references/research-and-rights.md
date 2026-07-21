@@ -131,6 +131,13 @@ record.
    large to scan completely, write `Conflict scan incomplete — [source, reason,
    portions checked]` and keep the conflict review unresolved; do not assert that none
    was found.
+   Within each evidence record's existing `Contradictions` field, record one auditable
+   outcome for the `Original URL` and for every listed `Cross-checks` source. Name each
+   source and mark it `COMPLETE — [material support/conflict findings]` or `INCOMPLETE
+   — [reason and portions checked]`. A blanket summary such as `all sources agree`
+   never substitutes for source-by-source accounting. Every material conflict
+   discovered anywhere in a source must appear in the same field with its consequence
+   for narration wording or status.
 3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
    chains. If they converge on the same originating investigation, record the
    dependence and re-evaluate the claim under the existing status thresholds: use
@@ -141,6 +148,9 @@ record.
    wording. A material credible conflict takes precedence over `VERIFIED`: resolve it
    by narrowing the wording, use `DISPUTED`, or omit the claim; never assign `VERIFIED`
    while that conflict remains.
+   For a compound claim, assign `CORROBORATED` only when every narrated subclaim has
+   genuinely independent support. Otherwise split the record by subclaim or assign the
+   whole record the weakest applicable status and narration stance.
 4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
    descriptive paragraph anchor. Never use browser-rendered or search-result line
    numbers as source locators.
