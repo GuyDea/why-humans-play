@@ -27,9 +27,10 @@ _Time: 00:00–00:30 · Target: ~80 words_
 ### Narration
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
-> food reward. The researchers said this met their operational play criteria. That
-> does not tell us what a bee feels—but makes the detour hard to dismiss.
+> food reward.
 > <!-- PI-001: Martin input -->
+> The researchers said this met their operational play criteria. That
+> does not tell us what a bee feels—but makes the detour hard to dismiss.
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
 > experience.
