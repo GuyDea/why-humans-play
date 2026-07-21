@@ -39,6 +39,22 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(forbidden=phrase):
                 self.assertNotIn(phrase, personal_input)
 
+    def test_template_personal_marker_precedes_the_evidence_turn(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        narration = template.split("### Narration\n", 1)[1].split(
+            "\n### Story function", 1
+        )[0]
+        marker = "> <!-- PI-001: Martin input -->"
+        evidence_turn = (
+            "The researchers said this met their operational play criteria."
+        )
+
+        self.assertEqual(narration.count(marker), 1)
+        self.assertLess(narration.index("food reward."), narration.index(marker))
+        self.assertLess(narration.index(marker), narration.index(evidence_turn))
+
     def test_personal_and_application_contract_is_distributed(self) -> None:
         sources = {
             "skill": SKILL_MD.read_text(encoding="utf-8"),
