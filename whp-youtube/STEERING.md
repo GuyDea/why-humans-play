@@ -19,11 +19,20 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
+> **Active Episode 1 source (2026-07-22):**
+> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) is the single editable
+> pilot source, currently v0.7 `RESEARCH-DRAFT`. That document controls its current
+> count, runtime, evidence, rights, score, and readiness gates.
+
 1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
    specification gaming to reveal the hidden incentive game created whenever a score is
-   used as a proxy for a real goal. Working title: *Why AI Cheats—Even When It Follows
-   Every Rule*. Working thumbnail promise: an obviously wrong outcome beside a green
-   `100%` score and the words **100% WRONG**.
+   used as a proxy for a real goal. Research-draft title: *Why AI Cheats—Even When It
+   Follows Every Rule*. Research-draft thumbnail promise: an obviously wrong outcome
+   beside a green `100%` score and the words **100% WRONG**. The selected opening is an
+   original WHP reconstruction of the verified block-flip example, with the green
+   `100%` labeled conceptual rather than reported. Its application asks viewers to
+   inspect one everyday score conditionally and treats any apparent distortion as a
+   hypothesis, not a diagnosis or causal finding.
 2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
    distinguish evidence of job performance from performance inside the interview.
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
