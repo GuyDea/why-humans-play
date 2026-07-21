@@ -279,10 +279,10 @@ def _section_body(block: str, section: str) -> str | None:
     return bodies[0] if bodies else None
 
 
-def extract_narration(text: str) -> str:
-    """Return spoken blockquote copy under Narration headings, without input markers."""
+def _extract_narration_from_masked(masked_text: str) -> str:
+    """Extract narration from text whose fenced blocks are already masked."""
 
-    regions = _document_regions(_mask_fenced_blocks(text))
+    regions = _document_regions(masked_text)
     paragraphs: list[str] = []
     for _, block in _beat_blocks(regions.beats):
         body = _section_body(block, "Narration")
@@ -290,7 +290,7 @@ def extract_narration(text: str) -> str:
             continue
         current: list[str] = []
         for line in body.splitlines():
-            match = re.match(r"^>[ \t]?(.*)$", line)
+            match = re.match(r"^[ ]{0,3}>[ \t]?(.*)$", line)
             if match is None:
                 if current:
                     paragraphs.append(" ".join(current))
@@ -306,6 +306,12 @@ def extract_narration(text: str) -> str:
         if current:
             paragraphs.append(" ".join(current))
     return "\n\n".join(paragraphs)
+
+
+def extract_narration(text: str) -> str:
+    """Return spoken blockquote copy under Narration headings, without input markers."""
+
+    return _extract_narration_from_masked(_mask_fenced_blocks(text))
 
 
 def count_narration_words(text: str) -> int:
@@ -502,11 +508,16 @@ def _validate_beats(text: str, errors: list[str]) -> None:
 
 def _validate_personal_and_application_blocks(
     beats_text: str,
+    masked_text: str,
     deliverable: str | None,
     readiness_status: str | None,
     errors: list[str],
 ) -> None:
-    personal_blocks = _structured_blocks(beats_text, "Personal input")
+    personal_blocks = [
+        (beat_id, beat, body)
+        for beat_id, beat in _beat_blocks(beats_text)
+        for body in _section_bodies(beat, "Personal input")
+    ]
     application_blocks = _structured_blocks(beats_text, "Viewer application")
 
     if deliverable == "FULL-SCRIPT" and len(personal_blocks) != 1:
@@ -520,15 +531,12 @@ def _validate_personal_and_application_blocks(
             f"found {len(application_blocks)}."
         )
 
-    beat_lookup = {
-        beat_id: beat for beat_id, beat in _beat_blocks(beats_text)
-    }
     all_markers = [
-        f"PI-{match.group(1)}" for match in PERSONAL_MARKER_RE.finditer(beats_text)
+        f"PI-{match.group(1)}" for match in PERSONAL_MARKER_RE.finditer(masked_text)
     ]
     consumed_markers: list[str] = []
     seen_personal_ids: set[str] = set()
-    for beat_id, body in personal_blocks:
+    for beat_id, beat, body in personal_blocks:
         fields = _validate_structured_fields(
             beat_id,
             "Personal input",
@@ -553,7 +561,7 @@ def _validate_personal_and_application_blocks(
                 f"Beat {beat_id} Personal input has invalid Decision: {decision!r}."
             )
 
-        narration = _section_body(beat_lookup.get(beat_id, ""), "Narration") or ""
+        narration = _section_body(beat, "Narration") or ""
         narration_markers = [
             f"PI-{match.group(1)}"
             for match in PERSONAL_MARKER_RE.finditer(narration)
@@ -596,7 +604,7 @@ def _validate_personal_and_application_blocks(
 
 
 def _validate_word_count(
-    text: str,
+    masked_text: str,
     header_fields: dict[str, str],
     errors: list[str],
 ) -> None:
@@ -606,8 +614,9 @@ def _validate_word_count(
     if re.fullmatch(r"\d+", stated) is None:
         errors.append("Word count must be a non-negative integer.")
         return
-    actual = count_narration_words(text)
-    if int(stated) != actual:
+    actual = len(_extract_narration_from_masked(masked_text).split())
+    normalized_stated = stated.lstrip("0") or "0"
+    if normalized_stated != str(actual):
         errors.append(
             f"Word count metadata {stated} does not match extracted narration "
             f"count {actual}."
@@ -763,7 +772,8 @@ def _validate_references(
 def validate_document(text: str) -> list[str]:
     """Return human-readable structural errors; an empty list means structurally valid."""
 
-    regions = _document_regions(_mask_fenced_blocks(text))
+    masked_text = _mask_fenced_blocks(text)
+    regions = _document_regions(masked_text)
     errors: list[str] = []
     if regions.reference_heading_count != 1:
         errors.append(
@@ -779,11 +789,12 @@ def validate_document(text: str) -> list[str]:
     _validate_beats(regions.beats, errors)
     _validate_personal_and_application_blocks(
         regions.beats,
+        masked_text,
         header_fields.get("Deliverable"),
         header_fields.get("Status"),
         errors,
     )
-    _validate_word_count(text, header_fields, errors)
+    _validate_word_count(masked_text, header_fields, errors)
     for beat_id in regions.post_reference_beat_ids:
         errors.append(f"Beat {beat_id} appears after the references heading.")
     _validate_references(
