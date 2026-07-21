@@ -48,20 +48,27 @@ multiple weaknesses within one dimension.
 ### 2. Factual precision and status-matched wording
 
 - **0:** A material claim is unsupported, rejected, materially overstated, or voiced
-  more confidently than its status permits.
+  more confidently than its status permits. The viewer application prescribes more
+  than the evidence can establish.
 - **1:** Core claims are supportable, but a scope term, denominator, causal boundary,
   caveat, attribution, or approved wording needs revision.
 - **2:** Every material narration claim preserves scope and causality, uses approved
-  or weaker wording, and audibly matches its confidence status.
+  or weaker wording, and audibly matches its confidence status. Its action,
+  observation, or reflection audibly preserves the same population, causal, confidence,
+  and applicability limits as its supporting evidence.
 
 ### 3. Story momentum without invented details
 
 - **0:** The narrative depends on invented dialogue, motives, thoughts, feelings,
-  weather, chronology, sensory detail, or misleading reconstruction.
+  weather, chronology, sensory detail, or misleading reconstruction. First-person
+  material is invented, forced, or used as proof.
 - **1:** The sequence is honest and usable, but includes a stalled beat, trivia
   detour, weak consequence, vague loop, or scene that needs clearer attribution.
 - **2:** Each beat changes viewer understanding, causes the next question, and builds
-  momentum without invention; reconstructions and reenactments are unmistakable.
+  momentum without invention; reconstructions and reenactments are unmistakable. The
+  script makes one explicit personal decision, uses only authentic supplied material,
+  and the sequence performs necessary narrative work or gives a specific reason for
+  `OMIT`.
 
 ### 4. Spoken quality and credible runtime
 
@@ -125,12 +132,14 @@ multiple weaknesses within one dimension.
 ### 10. WHP brand fidelity
 
 - **0:** The script uses hype, woo, fabricated shock, shallow self-help certainty,
-  childish framing, or product promotion that displaces the inquiry.
+  childish framing, or product promotion that displaces the inquiry. The useful
+  viewer change or application is missing, generic, or unsupported.
 - **1:** The piece is broadly on-brand but lacks a clear hidden-game/play lens,
   useful viewer change, steelmanned caveat, grounded tone, or Martin's natural voice.
 - **2:** The script makes a hidden game or the nature of play legible, changes how the
   viewer can see or act, and stays rigorous, useful, grounded, human, and
-  non-promotional.
+  non-promotional. The declared change, voiced application, observable signal,
+  boundary, larger benefit, and WHP lens form one grounded payoff.
 
 ## Enforce readiness gates
 
@@ -141,7 +150,8 @@ Apply score and gate requirements separately.
 Require all of the following:
 
 - a score of at least **16/20**;
-- no zero in dimension 1, 2, 7, or 8; and
+- no zero in dimension 1, 2, 7, or 8;
+- no `INPUT-REQUESTED` personal block or unresolved input marker; and
 - documented approval of the narration and story direction by an authorized human
   editor; and
 - an honest record of every unresolved issue.
@@ -162,6 +172,7 @@ Require the `EDITORIAL-DRAFT` gate and all of the following:
   compatible with its license terms;
 - no `REJECTED` claims;
 - no uncertainty voiced without the qualification required by its status;
+- no `INPUT-REQUESTED` personal block or unresolved input marker;
 - no blocked required asset; and
 - no failed, missing, or unusable fallback for a required visual.
 
@@ -191,11 +202,15 @@ Run each pass independently so one kind of fluency does not conceal another kind
 failure:
 
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
-   and final answer word for word.
+   useful viewer change, voiced application, observable signal, boundary, larger
+   benefit, and final answer word for word.
 2. **Factual wording and confidence:** Compare narration with each exact claim,
-   approved wording, status, scope, and caveat.
-3. **Invented scene detail:** Challenge dialogue, chronology, motives, thoughts,
-   feelings, weather, sensory detail, and reconstruction labels.
+   approved wording, status, scope, and caveat; confirm that the application's action,
+   observation, or reflection preserves those evidence limits.
+3. **Story and personal authenticity:** Challenge dialogue, chronology, motives,
+   thoughts, feelings, weather, sensory detail, and reconstruction labels. Verify one
+   explicit personal decision, supplied-and-approved material, necessary narrative
+   work or a specific `OMIT` reason, and no invented first-person detail.
 4. **Spoken flow and runtime:** Read aloud, time the narration, and revise density,
    pronunciation, transitions, and breaths.
 5. **Visual relevance and identity accuracy:** Verify that each visual advances its
@@ -204,15 +219,20 @@ failure:
    relationship, resolved state, production feasibility, and whether a still is
    clearer.
 7. **Provenance and rights:** Trace every external asset to its original page,
-   rightsholder, exact terms, intended changes, status, and fallback.
+   rightsholder, exact terms, intended changes, status, and fallback. Review personal
+   media separately for ownership, releases, depicted works, privacy, component rights,
+   and an ownable fallback.
 8. **Complete references:** Check claim and asset IDs, required fields, locators,
    URLs, access dates, contradictions, attribution copy, and unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,
-    format gate, substantive blockers, and both authorized-human approval moments.
+    format gate, substantive blockers, personal-input resolution, absence of unresolved
+    input markers, and both authorized-human approval moments.
 
-Do not combine these into a single “looks good” read.
+Do not combine these into a single “looks good” read. These are human editorial audits;
+structural validation cannot judge personal authenticity, application quality, safety,
+rights, or evidentiary fit.
 
 ## Maintain an issue ledger
 

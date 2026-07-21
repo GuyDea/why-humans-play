@@ -8,6 +8,8 @@
 - [Match source hierarchy to claim type](#match-source-hierarchy-to-claim-type)
 - [Search and cross-check](#search-and-cross-check)
 - [Separate proof from example](#separate-proof-from-example)
+- [Treat personal experience as a first-person source](#treat-personal-experience-as-a-first-person-source)
+- [Bound the viewer application to the evidence](#bound-the-viewer-application-to-the-evidence)
 - [Make a visual decision for every important claim](#make-a-visual-decision-for-every-important-claim)
 - [Run the rights workflow](#run-the-rights-workflow)
 - [Use rights statuses exactly](#use-rights-statuses-exactly)
@@ -126,6 +128,32 @@ Do not let an example quietly become proof through placement, visuals, music, or
 confident delivery. If the viewer would reasonably hear “this story shows the pattern
 is common” or “this caused the outcome,” the example is carrying an argument and
 needs commensurate evidence.
+
+## Treat personal experience as a first-person source
+
+Martin is the first-person source for his own experience. Use only details he supplied
+and approved. Confirm names, dates, chronology, quoted speech, and other externally
+checkable details when they matter to the story; label reconstructions. Personal
+testimony may illustrate a question, possibility, or change in perspective, but it does
+not independently prove prevalence, causality, or a scientific mechanism.
+
+Treat personal photos, recordings, screenshots, locations, and objects as separate asset
+decisions. Before marking one `OWNED`, check ownership, releases, depicted works, private
+information, and every component right needed for the planned edit. Always preserve a
+presenter-only or newly created fallback. Do not send private personal material to a
+public service without authority to disclose it.
+
+## Bound the viewer application to the evidence
+
+The application cannot be more confident than the claim packet. Animal evidence cannot
+by itself support a human prescription. Correlational evidence cannot establish that the
+suggested action causes an outcome. A personal anecdote, `REPORTED` account,
+`UNVERIFIED-EXAMPLE`, or `DISPUTED` claim cannot carry a general recommendation.
+
+When evidence is weak, indirect, or high-stakes, use an observation-only lens or a
+reflection question and voice the limitation. Do not give medical, therapeutic, legal,
+or financial direction. A structurally complete application is not proof that it is
+wise, safe, lawful, or effective; those judgments remain with qualified human review.
 
 ## Make a visual decision for every important claim
 
