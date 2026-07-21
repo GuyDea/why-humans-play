@@ -228,11 +228,22 @@ Create one level-four record under `### Evidence references` for each referenced
 - **Accessed:** YYYY-MM-DD
 - **Scope:** Population, context, denominator, limits, and relevant applicability
 - **Cross-checks:** Independent source URLs or an explicit record that none were found
-- **Contradictions:** Conflicting evidence or an explicit record that none was found
+- **Contradictions:** Named `COMPLETE` or `INCOMPLETE` outcomes for the `Original URL` and every listed `Cross-checks` source
 - **Status:** VERIFIED
 - **Caveat:** Limitation the script must preserve
 - **Approved wording:** Exact narration-safe wording supported by this record
 ```
+
+In `Contradictions`, name every source and use exactly one outcome per source:
+
+- `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
+- `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
+
+Blanket statements such as `none found` or `all sources agree` do not substitute for
+named per-source outcomes. Record every material conflict discovered anywhere in a
+source and its consequence for narration wording or status. Any material `Original
+URL` or cross-check marked `INCOMPLETE` keeps the conflict review unresolved and
+forbids a no-conflict assertion.
 
 Set `Status` to one of `VERIFIED`, `CORROBORATED`, `REPORTED`,
 `UNVERIFIED-EXAMPLE`, `DISPUTED`, or `REJECTED`. Use an `http://` or `https://` URL

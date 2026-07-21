@@ -243,33 +243,35 @@ chains under the status thresholds, and require stable source-native locators.
    rightsholder, exact terms, intended changes, status, and fallback. When personal
    media is in scope, review it separately for ownership, releases, depicted works,
    privacy, component rights, and an ownable fallback.
-8. **Complete references:** Open every cross-check and scan for conflicting origin,
-   date, chronology, causality, or scope wording, even when it supports another
-   subclaim. Treat `No contradiction found`, `none found`, and equivalent no-conflict
-   wording as allowed only after the complete source-wide cross-check scan. If a
-   cross-check is inaccessible, truncated, or too large to scan completely, write
-   `Conflict scan incomplete — [source, reason, portions checked]`, keep the review
-   unresolved, and do not assert that none was found. Record each material conflict in
-   `Contradictions` and explain how it changes or bounds status or wording. For
-   dependent evidence chains, record the dependence and re-evaluate under the existing
-   status thresholds: use `VERIFIED` only when the primary or authoritative source type
-   can establish the exact claim and no unresolved credible conflict remains; use
-   `REPORTED` when one identifiable plausible account remains; and retain `CORROBORATED`
-   only with another genuinely independent chain. A material credible conflict takes
-   precedence over `VERIFIED`: narrow and resolve the wording, use `DISPUTED`, or omit
-   the claim; never retain `VERIFIED` while that conflict remains. Require stable
-   source-native locators rather than browser-rendered or search-result line numbers,
-   then check claim and asset IDs, required fields, URLs, access dates, attribution
-   copy, and unresolved material. Within each evidence record's existing
-   `Contradictions` field, record one auditable outcome for the `Original URL` and for
-   every listed `Cross-checks` source. Name each source and mark it `COMPLETE —
-   [material support/conflict findings]` or `INCOMPLETE — [reason and portions
-   checked]`. A blanket summary such as `all sources agree` never substitutes for
-   source-by-source accounting. Every material conflict discovered anywhere in a
-   source must appear in the same field with its consequence for narration wording or
-   status. For a compound claim, assign `CORROBORATED` only when every narrated
-   subclaim has genuinely independent support. Otherwise split the record by subclaim
-   or assign the whole record the weakest applicable status and narration stance.
+8. **Complete references:** Open the `Original URL`. Open every cross-check and scan
+   for conflicting origin, date, chronology, causality, or scope wording, even when it
+   supports another subclaim. Record each material conflict in `Contradictions` and
+   explain how it changes or bounds status or wording. In each evidence record, require
+   one named outcome for the `Original URL` and every listed `Cross-checks` source,
+   using exactly:
+
+   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
+   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
+
+   Permit a no-conflict finding only inside a named `COMPLETE` outcome after a full
+   source-wide scan; `none found`, `all sources agree`, and similar blanket summaries
+   do not substitute for per-source accounting. Every discovered material conflict
+   must appear in that source's outcome with its wording or status consequence. Any
+   material `Original URL` or cross-check marked `INCOMPLETE` keeps the conflict review
+   unresolved and forbids a no-conflict assertion. For dependent evidence chains,
+   record the dependence and re-evaluate under the existing status thresholds: use
+   `VERIFIED` only when the primary or authoritative source type can establish the exact
+   claim and no unresolved credible conflict remains; use `REPORTED` when one
+   identifiable plausible account remains; and retain `CORROBORATED` only with another
+   genuinely independent chain. A material credible conflict takes precedence over
+   `VERIFIED`: narrow and resolve the wording, use `DISPUTED`, or omit the claim; never
+   retain `VERIFIED` while that conflict remains. If narrated subclaims do not all meet
+   the normal threshold for the same status, split the compound claim into separate
+   evidence records. Assign `CORROBORATED` only when every narrated subclaim
+   independently meets the `CORROBORATED` threshold. Require stable source-native
+   locators rather than browser-rendered or search-result line numbers, then check
+   claim and asset IDs, required fields, URLs, access dates, attribution copy, and
+   unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Readiness label:** Reapply the score threshold, protected-dimension rules,

@@ -94,7 +94,7 @@ bee's motives.
 - **Accessed:** 2026-07-20
 - **Scope:** Laboratory study of Bombus terrestris; the conclusion concerns operational play criteria, not proof of subjective enjoyment.
 - **Cross-checks:** No independent corroborating source located; institutional study summary: https://www.qmul.ac.uk/news/latest-news/2022/se/first-ever-study-shows-bumble-bees-play.html
-- **Contradictions:** No direct contradiction located; alternative functional explanations are discussed by the paper.
+- **Contradictions:** Galpayage Dona et al. paper (Original URL) — COMPLETE — [full paper checked, including Abstract, Methods experiment 1, and Discussion criteria 1–5; supports the bounded procedure and the authors' operational-criteria conclusion while discussing alternative functional explanations; keep VERIFIED wording limited to the experiment and do not claim subjective enjoyment]; Queen Mary University of London study summary (Cross-check) — COMPLETE — [full article body checked; reports the same study account and no material conflict with the approved wording was found; do not treat this institution-dependent summary as independent corroboration or upgrade the status]
 - **Status:** VERIFIED
 - **Caveat:** Do not turn behavioral criteria into a claim about conscious emotion.
 - **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.

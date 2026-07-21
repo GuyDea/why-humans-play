@@ -122,22 +122,22 @@ record.
 1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and
    `Approved wording`. Retain every limiting scope or modal term; if it does not fit,
    weaken the narration rather than strengthening the record.
-2. Open every `Cross-checks` source and scan it for material wording that conflicts on
-   origin, date, chronology, causality, or scope, even when that source supports a
-   different subclaim. Record every discovered material conflict in `Contradictions`
-   and explain how it changes or bounds the status or wording. Treat `No contradiction
-   found`, `none found`, and any equivalent no-conflict assertion as allowed only after
-   this source-wide conflict scan. If a cross-check is inaccessible, truncated, or too
-   large to scan completely, write `Conflict scan incomplete — [source, reason,
-   portions checked]` and keep the conflict review unresolved; do not assert that none
-   was found.
-   Within each evidence record's existing `Contradictions` field, record one auditable
-   outcome for the `Original URL` and for every listed `Cross-checks` source. Name each
-   source and mark it `COMPLETE — [material support/conflict findings]` or `INCOMPLETE
-   — [reason and portions checked]`. A blanket summary such as `all sources agree`
-   never substitutes for source-by-source accounting. Every material conflict
-   discovered anywhere in a source must appear in the same field with its consequence
-   for narration wording or status.
+2. Open the `Original URL` and review its full relevant scope. Open every
+   `Cross-checks` source and scan it for material wording that conflicts on origin,
+   date, chronology, causality, or scope, even when that source supports a different
+   subclaim. Record every discovered material conflict in `Contradictions` and explain
+   how it changes or bounds the status or wording. Within that existing field, name
+   every source and use exactly one of these outcomes per source:
+
+   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
+   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
+
+   A `COMPLETE` outcome may say that no material conflict was found only after the
+   complete source-wide scan. Blanket statements such as `none found` or `all sources
+   agree` do not replace named per-source outcomes. Every material conflict discovered
+   anywhere in a source must appear in its outcome with the consequence for narration
+   wording or status. Any material `Original URL` or cross-check marked `INCOMPLETE`
+   keeps the conflict review unresolved and forbids a no-conflict assertion.
 3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
    chains. If they converge on the same originating investigation, record the
    dependence and re-evaluate the claim under the existing status thresholds: use
@@ -148,9 +148,9 @@ record.
    wording. A material credible conflict takes precedence over `VERIFIED`: resolve it
    by narrowing the wording, use `DISPUTED`, or omit the claim; never assign `VERIFIED`
    while that conflict remains.
-   For a compound claim, assign `CORROBORATED` only when every narrated subclaim has
-   genuinely independent support. Otherwise split the record by subclaim or assign the
-   whole record the weakest applicable status and narration stance.
+   If narrated subclaims do not all meet the normal threshold for the same status,
+   split the compound claim into separate evidence records. Assign `CORROBORATED` only
+   when every narrated subclaim independently meets the `CORROBORATED` threshold.
 4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
    descriptive paragraph anchor. Never use browser-rendered or search-result line
    numbers as source locators.
