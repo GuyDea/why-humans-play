@@ -1,13 +1,14 @@
 # WHP YouTube — Steering File
 
-The operating doctrine for the **Why Humans Play** YouTube channel: the strategy,
-the permanent rules that govern every episode, and the full Episode 1 plan.
+The operating doctrine for the **Why Humans Play** YouTube channel: permanent rules, the
+accepted current launch sequence, dated launch research, and historical episode proposals.
 
 - **Status:** pre-launch. Zero subscribers, zero videos. Martin presents on camera.
   Solo, organic-first, no ad budget.
 - **How to use this file:** Part 1 (permanent rules) applies to *every* episode —
-  read it before scripting anything. Part 3 is the concrete Episode 1 build.
-  Parts 2 and 4 are the map and the backlog.
+  read it before scripting anything. The current launch sequence immediately below is
+  accepted direction. Parts 2–4 preserve the 2026-07-13 research, Episode 1 proposal,
+  and backlog as historical inputs only.
 - **Confidence tags used below:** `[verified]` = adversarially fact-checked against a
   primary source; `[reported]` = from a reputable industry source (Paddy Galloway,
   YouTube official, retention benchmark reports) but not independently re-verified;
@@ -16,7 +17,32 @@ the permanent rules that govern every episode, and the full Episode 1 plan.
 
 ---
 
-## The bet
+## Current launch sequence — accepted 2026-07-21
+
+1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
+   specification gaming to reveal the hidden incentive game created whenever a score is
+   used as a proxy for a real goal. Working title: *Why AI Cheats—Even When It Follows
+   Every Rule*. Working thumbnail promise: an obviously wrong outcome beside a green
+   `100%` score and the words **100% WRONG**.
+2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
+   distinguish evidence of job performance from performance inside the interview.
+3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
+   what may transfer, and what the evidence does not support.
+4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a
+   credibility frame for an evidence audit, never as promotion or proof.
+
+This breadth-first sequence is deliberate: the first four episodes establish WHP's range
+across AI and incentives, a hidden institutional game, an explicit game, and the science
+of playful cognitive training. Current evidence and packaging still require verification
+inside each episode assignment; the sequence is direction, not a performance guarantee.
+
+---
+
+## The 2026-07-13 launch bet (historical input)
+
+> **Current launch status (2026-07-21):** the accepted pilot and opening sequence are
+> recorded above. The proposal below remains evidence that was reconsidered, not the
+> current decision.
 
 WHP is an **umbrella brand whose literal name is a question** — "why humans play."
 That is a gift: Episode 1 doesn't need to invent an identity, it needs to *answer the
@@ -175,7 +201,7 @@ millions on junk science).
 
 ---
 
-# PART 2 — The competitive map
+# PART 2 — The competitive map (dated research input)
 
 `[scraped 2026-07-13]` — verdicts on where WHP should and shouldn't plant its flag.
 
@@ -210,13 +236,16 @@ theory + brain training* into one thesis about **intelligence**. That synthesis 
 
 ---
 
-# PART 3 — Episode 1 plan
+# PART 3 — Historical Episode 1 proposal
 
-> **NOTE (2026-07-13): the pilot is being redefined** (human-focused, value-first — see
-> the brand doctrine [`BRAND.md`](../BRAND.md)). The "evolutionary paradox of play" episode below is now a
-> **parked draft candidate**, preserved in full at
+> **STATUS (2026-07-21): historical proposal, not the current Episode 1 decision.** The
+> accepted pilot and opening sequence are recorded in the **Current launch sequence —
+> accepted 2026-07-21** section above. [`BRAND.md`](../BRAND.md) remains the canonical
+> brand doctrine.
+> The "evolutionary paradox of play" episode below remains a **parked draft candidate**, preserved in full at
 > [`drafts/evolutionary-paradox-of-play.md`](drafts/evolutionary-paradox-of-play.md)
-> (verified science, beat-by-beat script). Treat Part 3 as a candidate, not the locked EP1.
+> (verified science, beat-by-beat script). Treat Part 3 as evidence to reconsider, not a
+> locked slot.
 
 ## Recommended topic: the evolutionary paradox of play
 
@@ -365,10 +394,11 @@ graphics aren't cropped. Publish S1–S5 spaced out *after* the long-form, each 
 
 ---
 
-# PART 4 — Episode backlog (seeds)
+# PART 4 — Historical episode backlog (seeds)
 
-Sequence chosen so each episode's forward-hook sets up the next, and the brand thesis
-compounds. All inherit Part 1.
+This dated sequence is an idea source, not the current launch plan. Re-rank or replace it
+using fresh topic, packaging, evidence, production, and sequence research. All retained
+ideas inherit Part 1 if they advance.
 
 1. **EP1 — The evolutionary paradox of play** *(this doc).* Thesis: play is nature's learning engine.
 2. **EP2 — Game theory as the cheat code to everyday life.** The "safe simulator" turned on

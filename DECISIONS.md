@@ -66,3 +66,31 @@ experience or drifting into unsupported self-help certainty.
 `docs/superpowers/specs/2026-07-20-whp-personal-actionable-beats-design.md`, and this
 ledger. `BRAND.md` already requires useful, evidence-aware viewer change and needed no
 content change.
+
+## 2026-07-21 — Select the launch sequence afresh
+
+**Decision:** Treat existing episode proposals, drafts, and backlog ordering as historical
+inputs, and select WHP's pilot and opening sequence afresh with the current topic-selection
+process.
+
+**Rationale:** The earlier material consists of old proposals and drafts, while the current
+topic-selection skill provides a richer basis for deciding what best serves the first few
+episodes.
+
+**Documents:** `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`,
+`whp-youtube/drafts/evolutionary-paradox-of-play.md`, and this ledger. The parked draft's
+content remains unchanged apart from a superseded-context note.
+
+## 2026-07-21 — Lead with AI reward hacking and establish breadth
+
+**Decision:** Launch WHP with an episode about AI reward hacking as a hidden incentive
+game, followed by episodes on job-interview signaling, chess and cognitive transfer, and
+an honest brain-games evidence audit.
+
+**Rationale:** This breadth-first sequence was accepted as the strongest way to show the
+range of the current WHP field across AI and incentives, hidden institutional games,
+explicit games, and rigorous play science.
+
+**Documents:** `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`,
+`whp-youtube/drafts/evolutionary-paradox-of-play.md`, and this ledger. The parked draft
+remains unchanged apart from its current-status note.

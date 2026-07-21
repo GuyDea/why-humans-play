@@ -1,6 +1,9 @@
 # WHY HUMANS PLAY — "The Waste of Time That Built Your Brain" (PARKED DRAFT)
 
 > **STATUS (2026-07-13): PARKED DRAFT — a strong candidate episode, NOT the pilot.**
+> **CONTEXT UPDATE (2026-07-21):** the human-focused Hidden Game pilot premise mentioned
+> below is also superseded. WHP has since accepted a different pilot and launch sequence;
+> this draft remains preserved as a historical candidate for a later slot.
 > The brand is being re-centered on a *human-focused* pilot that delivers recognizable,
 > useful value (see [`../../BRAND.md`](../../BRAND.md) for the vision/mission rethink). This
 > evolutionary-paradox script is preserved intact here as a top candidate for a later

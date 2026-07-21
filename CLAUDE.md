@@ -47,9 +47,10 @@ Located in [`whp-branding/`](whp-branding/):
 
 The channel is WHP's first-introduction distribution surface (long-form video
 cut into Shorts, founder-presented). Strategy, permanent operating rules, the
-Episode 1 build, and the episode backlog live in
+dated launch research, and historical episode proposals live in
 [`whp-youtube/STEERING.md`](whp-youtube/STEERING.md) — read it before scripting,
-packaging, or planning any video.
+packaging, or planning any video. Its top section records the accepted current pilot
+and opening sequence; the older proposals remain historical inputs only.
 
 ## Working principles
 

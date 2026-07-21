@@ -155,10 +155,13 @@ Brand work must not displace active app-launch priorities.
 - **Hidden Game is a pillar, not the full editorial boundary.** Deep, rigorously framed
   studies of explicit games are also on-brand; each still has to meet the useful, human,
   evidence-aware bar above.
-- **The pilot must be a *Hidden Game*** episode about a situation everyone recognizes —
-  maximally human and useful. (Pilot topic selection is the next task.)
+- **The current pilot examines AI reward hacking as a hidden incentive game:** why an AI
+  can appear to cheat while following every scored rule, and what that reveals about the
+  proxy goals shaping human behavior. The accepted opening sequence then moves through
+  job-interview signaling, chess and cognitive transfer, and an honest brain-games audit.
 - **The "evolutionary paradox of play" script becomes a *Why We Play* candidate**, not the
   pilot — preserved at
   [`whp-youtube/drafts/evolutionary-paradox-of-play.md`](whp-youtube/drafts/evolutionary-paradox-of-play.md).
 - **[`whp-youtube/STEERING.md`](whp-youtube/STEERING.md) Part 1 (packaging/retention laws)
-  still holds**; Parts 2–4 (which assumed the old pilot) are being revised to this doctrine.
+  still holds**; its dated topic research, Episode 1 proposal, and backlog are historical
+  inputs. The accepted current launch sequence lives at the top of that file.
