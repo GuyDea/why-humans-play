@@ -10,6 +10,7 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
+import validate_annotated_script as validator
 from validate_annotated_script import validate_document
 
 
@@ -647,6 +648,120 @@ class ValidatorTests(unittest.TestCase):
             "invalid Decision",
         )
 
+    def test_all_personal_decisions_have_valid_fixture_paths(self) -> None:
+        for decision, document in (
+            ("INPUT-REQUESTED", VALID_DOCUMENT),
+            ("COMPLETED", COMPLETED_DOCUMENT),
+            ("OMIT", OMIT_DOCUMENT),
+        ):
+            with self.subTest(decision=decision):
+                self.assertEqual(validate_document(document), [])
+
+    def test_input_requested_requires_one_matching_marker_in_its_narration(
+        self,
+    ) -> None:
+        self.assert_error(
+            replace_exact(VALID_DOCUMENT, "> <!-- PI-001: Martin input -->\n", ""),
+            "matching narration marker",
+        )
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "PI-001: Martin input",
+                "PI-002: Martin input",
+            ),
+            "matching narration marker",
+        )
+
+    def test_unresolved_personal_input_is_research_draft_only(self) -> None:
+        for status in ("EDITORIAL-DRAFT", "RECORD-READY", "PICTURE-LOCKED"):
+            with self.subTest(status=status):
+                self.assert_error(
+                    replace_exact(VALID_DOCUMENT, "RESEARCH-DRAFT", status),
+                    "INPUT-REQUESTED is allowed only in RESEARCH-DRAFT",
+                )
+
+    def test_completed_and_omit_reject_personal_markers(self) -> None:
+        for document in (COMPLETED_DOCUMENT, OMIT_DOCUMENT):
+            with self.subTest(document=document):
+                marked = replace_exact(
+                    document,
+                    "### Story function\n",
+                    "> <!-- PI-001: Martin input -->\n\n### Story function\n",
+                )
+                self.assert_error(
+                    marked,
+                    "must not retain a personal input marker",
+                )
+
+    def test_personal_marker_is_excluded_from_extraction_and_word_count(
+        self,
+    ) -> None:
+        extract_narration = getattr(validator, "extract_narration", None)
+        count_narration_words = getattr(validator, "count_narration_words", None)
+        self.assertTrue(callable(extract_narration), "extract_narration must exist")
+        self.assertTrue(
+            callable(count_narration_words),
+            "count_narration_words must exist",
+        )
+        narration = extract_narration(VALID_DOCUMENT)
+        self.assertNotIn("PI-001", narration)
+        self.assertNotIn("<!--", narration)
+        self.assertEqual(count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_duplicate_personal_markers_are_rejected(self) -> None:
+        marker = "> <!-- PI-001: Martin input -->\n"
+        self.assert_error(
+            replace_exact(VALID_DOCUMENT, marker, marker + marker),
+            "exactly one matching narration marker",
+        )
+
+    def test_marker_outside_narration_does_not_satisfy_input_request(self) -> None:
+        document = replace_exact(
+            VALID_DOCUMENT,
+            "> <!-- PI-001: Martin input -->\n",
+            "",
+        )
+        document = replace_exact(
+            document,
+            "### Story function\n",
+            "### Story function\n<!-- PI-001: Martin input -->\n",
+        )
+        self.assert_error(document, "matching narration marker")
+
+    def test_orphan_personal_marker_is_rejected(self) -> None:
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Narration\n",
+            "### Narration\n> <!-- PI-001: Martin input -->\n",
+        )
+        self.assert_error(document, "orphan personal input marker")
+
+    def test_fenced_personal_marker_is_ignored(self) -> None:
+        fenced = (
+            VALID_DOCUMENT.rstrip()
+            + "\n\n```markdown\n> <!-- PI-999: Martin input -->\n```\n"
+        )
+        self.assertEqual(validate_document(fenced), [])
+
+    def test_word_count_must_match_extracted_narration(self) -> None:
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "- **Word count:** 80",
+                "- **Word count:** 79",
+            ),
+            "does not match extracted narration count 80",
+        )
+        self.assert_error(
+            replace_exact(
+                VALID_DOCUMENT,
+                "- **Word count:** 80",
+                "- **Word count:** about 80",
+            ),
+            "Word count must be a non-negative integer",
+        )
+
     def test_personal_input_id_requires_pi_three_digit_form(self) -> None:
         self.assertEqual(validate_document(COMPLETED_DOCUMENT), [])
         for invalid_id in (
@@ -1022,8 +1137,13 @@ class ValidatorTests(unittest.TestCase):
     def test_empty_direct_production_file_passes(self) -> None:
         for readiness in ("RESEARCH-DRAFT", "RECORD-READY"):
             with self.subTest(readiness=readiness):
+                base_document = (
+                    COMPLETED_DOCUMENT
+                    if readiness == "RECORD-READY"
+                    else VALID_DOCUMENT
+                )
                 document = replace_exact(
-                    VALID_DOCUMENT,
+                    base_document,
                     "- **Status:** RESEARCH-DRAFT",
                     f"- **Status:** {readiness}",
                 )
@@ -1037,7 +1157,7 @@ class ValidatorTests(unittest.TestCase):
         for status in READINESS_STATES:
             with self.subTest(status=status):
                 document = replace_exact(
-                    VALID_DOCUMENT,
+                    COMPLETED_DOCUMENT,
                     "- **Status:** RESEARCH-DRAFT",
                     f"- **Status:** {status}",
                 )
@@ -1190,7 +1310,7 @@ class ValidatorTests(unittest.TestCase):
 
     def test_valid_record_ready_document_passes(self) -> None:
         ready = replace_exact(
-            VALID_DOCUMENT,
+            COMPLETED_DOCUMENT,
             "- **Status:** RESEARCH-DRAFT",
             "- **Status:** RECORD-READY",
         )
@@ -1202,7 +1322,7 @@ class ValidatorTests(unittest.TestCase):
             "- **Status:** VERIFIED",
             "- **Status:** REJECTED",
         )
-        ready = replace_exact(VALID_DOCUMENT, EVIDENCE_RECORD, record)
+        ready = replace_exact(COMPLETED_DOCUMENT, EVIDENCE_RECORD, record)
         ready = replace_exact(
             ready,
             "- **Status:** RESEARCH-DRAFT",
@@ -1218,7 +1338,7 @@ class ValidatorTests(unittest.TestCase):
                     "- **Status:** CC-BY-4.0",
                     f"- **Status:** {status}",
                 )
-                ready = replace_exact(VALID_DOCUMENT, ASSET_RECORD, record)
+                ready = replace_exact(COMPLETED_DOCUMENT, ASSET_RECORD, record)
                 ready = replace_exact(
                     ready,
                     "- **Status:** RESEARCH-DRAFT",
