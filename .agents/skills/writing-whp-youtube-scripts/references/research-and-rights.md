@@ -124,12 +124,16 @@ record.
    weaken the narration rather than strengthening the record.
 2. Open every `Cross-checks` source and scan it for material wording that conflicts on
    origin, date, chronology, causality, or scope, even when that source supports a
-   different subclaim. Write `No contradiction found` only after this source-wide
-   conflict scan.
+   different subclaim. Record every discovered material conflict in `Contradictions`
+   and explain how it changes or bounds the status or wording. Write `No contradiction
+   found` only after this source-wide conflict scan.
 3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
    chains. If they converge on the same originating investigation, record the
-   dependence and lower the status unless another independent chain supports the
-   exact approved wording.
+   dependence and re-evaluate the claim under the existing status thresholds: use
+   `VERIFIED` when a primary or authoritative origin supports the exact wording,
+   `REPORTED` when one identifiable plausible account remains, and retain
+   `CORROBORATED` only when another genuinely independent chain supports the exact
+   wording.
 4. Use stable, source-native locators: page, section, table, figure, timestamp, or a
    descriptive paragraph anchor. Never use browser-rendered or search-result line
    numbers as source locators.

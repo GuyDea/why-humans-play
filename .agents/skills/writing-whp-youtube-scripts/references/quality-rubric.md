@@ -216,8 +216,9 @@ failure. Apply each pass only to the assigned or inherited scope; for a targeted
 artifact, record parent-script issues without inserting or scoring out-of-scope content:
 
 Reverse-audit narration against its claim cards and every cross-check source: preserve
-limiting scope and modal terms, expose material contradictions or dependent evidence
-chains, and require stable source-native locators.
+limiting scope and modal terms, record every material conflict in `Contradictions` and
+bound its consequences, re-evaluate dependent evidence chains under the status
+thresholds, and require stable source-native locators.
 
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
    useful viewer change, and final answer word for word. When application is in scope,
@@ -244,8 +245,12 @@ chains, and require stable source-native locators.
    privacy, component rights, and an ownable fallback.
 8. **Complete references:** Open every cross-check and scan for conflicting origin,
    date, chronology, causality, or scope wording, even when it supports another
-   subclaim. For `CORROBORATED`, confirm genuinely independent evidence chains; record
-   dependence or lower the status. Require stable source-native locators rather than
+   subclaim. Record each material conflict in `Contradictions` and explain how it
+   changes or bounds status or wording. For dependent evidence chains, record the
+   dependence and re-evaluate under the existing status thresholds: use `VERIFIED` for
+   exact wording supported by a primary or authoritative origin, `REPORTED` when one
+   identifiable plausible account remains, and retain `CORROBORATED` only with another
+   genuinely independent chain. Require stable source-native locators rather than
    browser-rendered or search-result line numbers, then check claim and asset IDs,
    required fields, URLs, access dates, attribution copy, and unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
