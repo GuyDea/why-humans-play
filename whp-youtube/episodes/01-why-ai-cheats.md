@@ -1,7 +1,7 @@
 # Why AI Cheats—Even When It Follows Every Rule
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.4
+- **Version:** 0.5
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 08:30
 - **Word count:** 1117
@@ -14,8 +14,8 @@
 - **Central question:** Why do optimized systems find strategies their designers consider cheating?
 - **Thesis:** An optimizer targets the literal reward it can affect; an incomplete proxy leaves unmeasured dimensions it can exploit, without implying intent, consciousness, or moral dishonesty.
 - **Payoff:** What looks like cheating can be perfect obedience to the wrong scoreboard; seeing who chose the score can be a first move toward asking whether the game should be kept, supplemented, redesigned, or left.
-- **Evidence review:** The v0.4 narration uses the approved wording or weaker formulations from five unchanged complete claim records: `F-001`–`F-004` are `VERIFIED`, and `F-005` is `REPORTED` with the consent order's no-admission limitation. The sixth, current-research claim remains omitted; human editorial approval and the final independent audits remain open.
-- **Rights review:** The v0.4 treatment uses only original WHP diagrams, typography, presenter shots, tabletop elements, and conceptual reconstructions; source media remains evidence/reference only, so no `A` record is required. Audio production and final production/rights review remain open: use only audio newly recorded or created by WHP, with presenter/direct sound or silence as the fallback; any later external selection requires an `A` record before use.
+- **Evidence review:** The v0.5 narration uses the approved wording or weaker formulations from five unchanged complete claim records: `F-001`–`F-004` are `VERIFIED`, and `F-005` is `REPORTED` with the consent order's no-admission limitation. The sixth, current-research claim remains omitted; human editorial approval and the final independent audits remain open.
+- **Rights review:** The v0.5 treatment uses only original WHP diagrams, typography, presenter shots, tabletop elements, and conceptual reconstructions; source media remains evidence/reference only, so no `A` record is required. Audio production and final production/rights review remain open: use only audio newly recorded or created by WHP, with presenter/direct sound or silence as the fallback; any later external selection requires an `A` record before use.
 
 ## Beat 01 — The wrong perfect score
 _Time: 00:00–00:32 · Target: ~78 words_
@@ -48,7 +48,7 @@ Deliver the title and thumbnail paradox immediately, bound “cheated” as huma
 - No external asset is planned or required. The diagram, labels, scorecard, and blocks are newly created or recorded by WHP; the paper, review, and supplementary video remain evidence/reference only and will not be reproduced, traced, screened, or heard.
 
 ## Beat 02 — The block-manipulation exploit
-_Time: 00:32–01:35 · Target: ~145 words_
+_Time: 00:32–01:35 · Target: ~144 words_
 
 ### Narration
 > Here is the causal chain. The intended end state was red on blue. But the grasping reward tracked the wrong brick-height reference. DeepMind’s later review describes it as the red brick’s bottom face. Turning the brick over could raise that point. In Popov and colleagues’ simulation, the agent flipped the brick, received the reward, and never completed the stack.
@@ -119,7 +119,7 @@ Turn the case into a reusable hidden-game lens—designer, scoreboard, available
 - No external asset is planned or required. The diagram and card demonstration use original WHP-owned shapes, labels, typography, and physical cards; no source diagram is traced or reproduced.
 
 ## Beat 04 — Hide-and-seek escalation
-_Time: 02:45–04:05 · Target: ~145 words plus held stage diagrams_
+_Time: 02:45–04:05 · Target: ~134 words plus held stage diagrams_
 
 ### Narration
 > Now put that lens inside Baker and colleagues’ simulated hide-and-seek game.
@@ -157,7 +157,7 @@ Keep the source-checked later-stage chronology accurate, distinguish stages acro
 - No external asset is planned or required. The reconstruction uses original WHP-owned shapes, labels, typography, and motion; the project page, figures, and videos remain evidence/reference only and will not be reproduced, traced, screened, or heard.
 
 ## Beat 05 — What “cheating” does not mean
-_Time: 04:05–04:55 · Target: ~120 words_
+_Time: 04:05–04:55 · Target: ~122 words_
 
 ### Narration
 > So is that cheating? Only as human shorthand for a mismatch between the scored result and the intended job. These task-specific examples establish no intent, consciousness, or moral dishonesty. They do not show that exploitation is inevitable across all AI systems, or that every more capable system must exploit more.
@@ -240,7 +240,7 @@ Present `F-004` as a bounded multitask model, then hard-cut to `F-005` as a comp
 - No external asset is planned or required. Both panels and their fallbacks use original WHP-owned shapes, labels, typography, and cards; no corporate logo, regulator screenshot, source-document image, or external audio will appear.
 
 ## Beat 07 — Inspect an everyday score
-_Time: 06:15–07:55 · Target: ~200 words_
+_Time: 06:15–07:55 · Target: ~194 words_
 
 ### Narration
 > Here is a low-risk way to inspect one scoreboard. When a score stands in for a broader goal, treat it as a model of the goal, not the goal itself.
@@ -287,7 +287,7 @@ Voice the complete application through one low-risk inbox-count illustration: sc
 - No external asset is planned or required. The worksheet and paper-card fallback use original WHP-owned shapes, labels, typography, and cards; no real inbox or third-party interface appears.
 
 ## Beat 08 — Who chose the score?
-_Time: 07:55–08:30 · Target: ~85 words_
+_Time: 07:55–08:30 · Target: ~80 words_
 
 ### Narration
 > Back to the blocks. Red is flipped, the stack unfinished, and green 100 percent still appears. That perfect score is our conceptual image, not an experimental number.
@@ -380,7 +380,25 @@ Score rationale: Candidate 1 keeps a 2 for central-question speed because its fi
 
 ## Editorial audit
 
-Five claims are ledger-approved at their stated statuses, and v0.4 contains a complete 1,117-word spoken draft plus a simplified, synchronized production treatment. The full ten-dimension audit is deliberately not scored in this pass. A human table read, authorized editorial approval, final evidence/application/accessibility audits, and audio/production review remain open.
+Five claims are ledger-approved at their stated statuses, and v0.5 contains a complete 1,117-word spoken draft plus a simplified, synchronized production treatment. The full ten-dimension audit is deliberately not scored in this pass. A human table read, authorized editorial approval, final evidence/application/accessibility audits, and audio/production review remain open.
+
+### Timing and extraction review
+
+Independent extraction of only the blockquotes directly under each beat's `### Narration` confirms 1,117 whitespace-delimited spoken words across the 08:30 program plan, or about 131 words per program minute. This is a production timing model that includes planned visual holds, not a human-timed aloud read or a claim about Martin's speaking rate.
+
+| Beat | Time range | Words | Approx. program-minute rate | Planned hold burden |
+|---:|---:|---:|---:|---|
+| 01 | 00:00–00:32 | 78 | ~146 wpm | Medium — score reveal and comparison freeze |
+| 02 | 00:32–01:35 | 144 | ~137 wpm | High — three held spatial states |
+| 03 | 01:35–02:45 | 180 | ~154 wpm | High — four-part model build and resolved hold |
+| 04 | 02:45–04:05 | 134 | ~101 wpm | High — three training-stage panels and physics inset |
+| 05 | 04:05–04:55 | 122 | ~146 wpm | Medium — boundary card and bridge state |
+| 06 | 04:55–06:15 | 185 | ~139 wpm | High — separate model and consent-order holds |
+| 07 | 06:15–07:55 | 194 | ~116 wpm | High — four-field application and decision state |
+| 08 | 07:55–08:30 | 80 | ~137 wpm | Medium — opening replay, widen, and final hold |
+| **Total** | **00:00–08:30** | **1,117** | **~131 wpm** | **Mixed; holds are included in the program-minute model** |
+
+### Ten-dimension review
 
 | # | Dimension | Score | Current basis |
 |---:|---|---|---|
@@ -401,9 +419,9 @@ Five claims are ledger-approved at their stated statuses, and v0.4 contains a co
 |---|---|---|---|---|---|
 | ISS-001 | Beats 01–05 | Critical | Convert the research-vetted AI findings into Task 4 claim records with approved wording and boundaries before drafting beat narration | Research/editorial | Resolved in v0.2; `F-001`–`F-003` complete |
 | ISS-002 | Beat 06 | Critical | Convert the research-vetted human-incentive mechanism and bounded institutional example into Task 4 claim records while preserving the non-identical-cognition boundary | Research/editorial | Resolved in v0.2; `F-004` and `F-005` complete |
-| ISS-003 | Beats 01–08 | Major | Human-table-read the complete narration aloud, time the performed delivery, and revise any stumbles or pacing drift without weakening evidence bounds | Script/editorial | In review in v0.4; compressed narration is extracted at 1,117 words, but human table read remains open |
-| ISS-004 | Beats 01–08 | Major | Complete production and rights review across visuals and audio; create an asset record before using any external material | Production/rights | In review in v0.4; the original-visual route remains resolved, while pronunciation confirmation, audio selection/creation, and final production review remain open |
-| ISS-005 | Beat 07 | Major | Voice all five application elements and confirm that the action and boundary remain no stronger than the evidence | Script/editorial | In review in v0.4; all five elements remain voiced in the compressed application, but the independent application-boundary audit and human approval remain open |
+| ISS-003 | Beats 01–08 | Major | Human-table-read the complete narration aloud at Martin's delivery pace, time the performance, and redistribute or trim any drift without weakening evidence bounds; check Beat 03 first (180 words in 70 seconds), then Beats 01 and 05 (~146 program wpm) and Beat 06 (185 words in 80 seconds with high hold burden) | Script/editorial | In review in v0.5; independent extraction confirms the 1,117-word production timing model, but human aloud delivery and performance timing remain open |
+| ISS-004 | Beats 01–08 | Major | Complete production and rights review across visuals and audio; create an asset record before using any external material | Production/rights | In review in v0.5; the original-visual route remains resolved, while pronunciation confirmation, audio selection/creation, and final production review remain open |
+| ISS-005 | Beat 07 | Major | Voice all five application elements and confirm that the action and boundary remain no stronger than the evidence | Script/editorial | In review in v0.5; all five elements remain voiced in the compressed application, but the independent application-boundary audit and human approval remain open |
 | ISS-006 | Development record | Major | Verify and score all three opening candidates using the same evidence, story, rights, production, and alignment criteria | Editorial | Resolved in v0.2; candidate 1 selected |
 | ISS-007 | Full document | Critical | Run ten independent audits and obtain authorized human approval before any readiness promotion | Authorized human editor | Open |
 
