@@ -178,6 +178,17 @@ def indent_narration_blockquotes(text: str, spaces: int) -> str:
     return replace_exact(text, narration, indented)
 
 
+def replace_personal_marker_with_blockquote_fence(text: str, fence: str) -> str:
+    marker = "> <!-- PI-001: Martin input -->\n"
+    nested_fence = (
+        f"> {fence}markdown\n"
+        "> hidden fenced words\n"
+        + marker
+        + f"> {fence}\n"
+    )
+    return replace_exact(text, marker, nested_fence)
+
+
 VALID_DOCUMENT = """# Why Bees Roll Balls
 
 - **Status:** RESEARCH-DRAFT
@@ -849,6 +860,32 @@ class ValidatorTests(unittest.TestCase):
             + "\n\n```markdown\n> <!-- PI-999: Martin input -->\n```\n"
         )
         self.assertEqual(validate_document(fenced), [])
+
+    def test_blockquote_nested_fenced_marker_does_not_satisfy_input(
+        self,
+    ) -> None:
+        for fence in ("```", "~~~"):
+            with self.subTest(fence=fence):
+                document = replace_personal_marker_with_blockquote_fence(
+                    VALID_DOCUMENT,
+                    fence,
+                )
+                self.assert_error(document, "matching narration marker")
+
+    def test_blockquote_nested_fence_is_excluded_from_narration(self) -> None:
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        for fence in ("```", "~~~"):
+            document = replace_personal_marker_with_blockquote_fence(
+                VALID_DOCUMENT,
+                fence,
+            )
+            with self.subTest(fence=fence, contract="extraction"):
+                narration = validator.extract_narration(document)
+                self.assertNotIn(fence, narration)
+                self.assertNotIn("hidden fenced words", narration)
+                self.assertEqual(narration.split(), expected.split())
+            with self.subTest(fence=fence, contract="word-count"):
+                self.assertEqual(validator.count_narration_words(document), 80)
 
     def test_commonmark_indented_blockquotes_are_spoken_narration(self) -> None:
         expected = validator.extract_narration(COMPLETED_DOCUMENT)
