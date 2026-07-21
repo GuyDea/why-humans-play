@@ -2,11 +2,11 @@
 
 ## Decision
 
-**Decision status:** Winner selected  
-**Winner:** AI reward hacking — why AI can appear to cheat while following every scored rule, and what that reveals about human incentive systems  
-**Confidence:** medium  
-**Why it wins now:** It combines a current AI question, repeated public demand for game-playing agents that discover exploits, a defensible evidence base, a clear solo-production concept, and a distinctly WHP payoff about the hidden game created by every proxy score.  
-**Strongest honest title/thumbnail promise:** *Why AI Cheats—Even When It Follows Every Rule* + an obviously wrong outcome beside a green `100%` score and the words **100% WRONG**  
+**Decision status:** Winner selected
+**Winner:** AI reward hacking — why AI can appear to cheat while following every scored rule, and what that reveals about human incentive systems
+**Confidence:** medium
+**Why it wins now:** It combines a current AI question, repeated public demand for game-playing agents that discover exploits, a defensible evidence base, a clear solo-production concept, and a distinctly WHP payoff about the hidden game created by every proxy score.
+**Strongest honest title/thumbnail promise:** *Why AI Cheats—Even When It Follows Every Rule* + an obviously wrong outcome beside a green `100%` score and the words **100% WRONG**
 **Mode:** cold-start
 
 The selected launch approach is breadth-first:
@@ -39,10 +39,10 @@ recognized payoff, evidence path, production reality, and portfolio fit.
 
 ## Candidate landscape
 
-**Pool:** 47 distinct subjects across eight WHP lanes.  
-**Promising subjects given two materially different angles:** 12.  
-**Shallow-scan survivors:** 12 exact angles.  
-**Deep-research finalists:** 5 exact angles.  
+**Pool:** 47 distinct subjects across eight WHP lanes.
+**Promising subjects given two materially different angles:** 12.
+**Shallow-scan survivors:** 12 exact angles.
+**Deep-research finalists:** 5 exact angles.
 **Conspicuous rejected trend-bait angles retained:** 4 — brain-rot panic, dating-app
 “collapse,” dementia-miracle claims, and a post-World-Cup penalty “hack.”
 
