@@ -260,6 +260,43 @@ class SkillPackageTests(unittest.TestCase):
         with self.subTest(contract="rubric-reference-pass"):
             self.assertIn(rubric_reference_pass, rubric)
 
+    def test_conflict_accounting_is_source_specific_and_compound_status_is_bounded(
+        self,
+    ) -> None:
+        research = " ".join(
+            (SKILL_ROOT / "references/research-and-rights.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        source_accounting_contract = (
+            "Within each evidence record's existing `Contradictions` field, record "
+            "one auditable outcome for the `Original URL` and for every listed "
+            "`Cross-checks` source. Name each source and mark it `COMPLETE — "
+            "[material support/conflict findings]` or `INCOMPLETE — [reason and "
+            "portions checked]`. A blanket summary such as `all sources agree` never "
+            "substitutes for source-by-source accounting. Every material conflict "
+            "discovered anywhere in a source must appear in the same field with its "
+            "consequence for narration wording or status."
+        )
+        compound_claim_contract = (
+            "For a compound claim, assign `CORROBORATED` only when every narrated "
+            "subclaim has genuinely independent support. Otherwise split the record "
+            "by subclaim or assign the whole record the weakest applicable status "
+            "and narration stance."
+        )
+
+        for source_name, source_text in (("research", research), ("rubric", rubric)):
+            with self.subTest(source=source_name, contract="source-accounting"):
+                self.assertIn(source_accounting_contract, source_text)
+            with self.subTest(source=source_name, contract="compound-claims"):
+                self.assertIn(compound_claim_contract, source_text)
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
