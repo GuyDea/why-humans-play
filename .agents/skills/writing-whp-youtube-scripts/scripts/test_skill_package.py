@@ -32,6 +32,50 @@ class SkillPackageTests(unittest.TestCase):
                 for token in tokens:
                     self.assertIn(token, sources[source])
 
+    def test_editorial_guidance_scopes_deliverables_and_explains_omit_fields(self) -> None:
+        rubric = (
+            SKILL_ROOT / "references/quality-rubric.md"
+        ).read_text(encoding="utf-8")
+        format_text = (
+            SKILL_ROOT / "references/annotated-script-format.md"
+        ).read_text(encoding="utf-8")
+        story = (
+            SKILL_ROOT / "references/story-and-hook-method.md"
+        ).read_text(encoding="utf-8")
+
+        normalized_rubric = " ".join(rubric.split())
+        scope_contract = (
+            "Apply personal-input and viewer-application requirements in full to a "
+            "`FULL-SCRIPT`. Review a `TARGETED-ARTIFACT` only against its assigned or "
+            "inherited scope. The absence of optional personal-input or "
+            "viewer-application blocks is not itself a deficiency and must not lower "
+            "a score or trigger insertion of out-of-scope content. When a targeted "
+            "artifact includes either block, or is assigned to preserve an inherited "
+            "personal-input or viewer-application contract, evaluate the in-scope "
+            "material against every applicable anchor. A targeted artifact cannot "
+            "promote the parent script's readiness."
+        )
+        with self.subTest(contract="deliverable-scope"):
+            self.assertIn(scope_contract, normalized_rubric)
+
+        dimensions = re.findall(r"^### (\d+)\. ", rubric, re.MULTILINE)
+        with self.subTest(contract="ten-dimensions"):
+            self.assertEqual(dimensions, [str(number) for number in range(1, 11)])
+
+        omit_contract = (
+            "For `OMIT`, keep every field non-empty. In `Primary prompt`, `Follow-up "
+            "prompts`, `Bridge in`, `Bridge out`, and `Personal visuals`, give a "
+            "concise, story-specific explanation of why that field is not applicable. "
+            "Do not use generic `N/A` or placeholder copy, invent a memory, or write a "
+            "transition that will be narrated."
+        )
+        for source_name, source_text in (
+            ("format", format_text),
+            ("story", story),
+        ):
+            with self.subTest(source=source_name):
+                self.assertIn(omit_contract, " ".join(source_text.split()))
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
