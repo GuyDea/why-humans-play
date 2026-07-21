@@ -119,6 +119,65 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(source=source_name):
                 self.assertIn(omit_contract, " ".join(source_text.split()))
 
+    def test_guidance_closes_personal_input_and_spoken_application_loopholes(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        personal_input_default = (
+            "Missing supplied personal material, or a short runtime, is not by itself "
+            "a reason to choose `OMIT`. When a specific truthful memory could "
+            "plausibly do real story work, choose `INPUT-REQUESTED`. Reserve `OMIT` "
+            "for an assignment-established lack of personal connection or a "
+            "story-specific removal-test conclusion that no personal sequence would "
+            "improve the story."
+        )
+        with self.subTest(contract="missing-input-default"):
+            self.assertIn(personal_input_default, story)
+
+        spoken_application_contracts = {
+            "skill-workflow": (
+                "Voice all five elements in narration—the insight; the low-risk "
+                "action, observation, or reflection; the observable signal; the "
+                "boundary; and the larger benefit—not only in the structured block."
+            ),
+            "skill-non-negotiable": (
+                "For every `FULL-SCRIPT`, voice all five viewer-application elements "
+                "in narration: evidence-bounded insight; low-risk action, observation, "
+                "or reflection; observable signal; real boundary; and larger benefit. "
+                "The structured block does not substitute for spoken copy."
+            ),
+            "story": (
+                "Narration—not only the structured block—must voice all five "
+                "application elements: the insight; the action, observation, or "
+                "reflection to try; the observable signal; the boundary; and the "
+                "larger benefit."
+            ),
+            "format": (
+                "Voice all five application elements in narration: insight; action, "
+                "observation, or reflection; observable signal; boundary; and larger "
+                "benefit. The structured block is the production contract, not a "
+                "substitute for spoken copy."
+            ),
+        }
+        sources = {
+            "skill-workflow": skill,
+            "skill-non-negotiable": skill,
+            "story": story,
+            "format": format_text,
+        }
+        for source_name, contract in spoken_application_contracts.items():
+            with self.subTest(contract=source_name):
+                self.assertIn(contract, sources[source_name])
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
