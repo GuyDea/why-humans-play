@@ -153,17 +153,7 @@ def blank_markdown_field(text: str, field: str) -> str:
 
 
 def blank_structured_field(block: str, field: str) -> str:
-    pattern = re.compile(
-        rf"^(?P<label>[ \t]*-[ \t]+\*\*{re.escape(field)}:\*\*)[^\n]*$",
-        re.MULTILINE,
-    )
-    matches = list(pattern.finditer(block))
-    if len(matches) != 1:
-        raise AssertionError(
-            f"Expected structured field {field!r} exactly once, found {len(matches)}"
-        )
-    match = matches[0]
-    return block[: match.start()] + match.group("label") + "   " + block[match.end() :]
+    return blank_markdown_field(block, field)
 
 
 def blank_beat_section(block: str, section: str) -> str:
@@ -375,6 +365,48 @@ TARGETED_DOCUMENT = replace_exact(
     "",
 )
 
+SECOND_PERSONAL_INPUT_BLOCK = replace_exact(
+    replace_exact(
+        PERSONAL_INPUT_BLOCK,
+        "- **ID:** PI-001",
+        "- **ID:** PI-002",
+    ),
+    "- **Decision:** INPUT-REQUESTED",
+    "- **Decision:** COMPLETED",
+)
+SECOND_BEAT = replace_exact(
+    BEAT_BLOCK,
+    "## Beat 01 — The detour",
+    "## Beat 02 — The detour",
+)
+SECOND_BEAT = replace_exact(
+    SECOND_BEAT,
+    "_Time: 00:00–00:30 · Target: ~80 words_",
+    "_Time: 00:30–01:00 · Target: ~80 words_",
+)
+SECOND_BEAT = replace_exact(SECOND_BEAT, PERSONAL_INPUT_BLOCK + "\n", "")
+SECOND_BEAT = replace_exact(SECOND_BEAT, VIEWER_APPLICATION_BLOCK + "\n", "")
+SECOND_BEAT = replace_exact(
+    SECOND_BEAT,
+    "> <!-- PI-001: Martin input -->\n",
+    "",
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    VALID_DOCUMENT,
+    BEAT_BLOCK,
+    BEAT_BLOCK + SECOND_BEAT,
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    TWO_BEAT_DOCUMENT,
+    "- **Target runtime:** 00:30",
+    "- **Target runtime:** 01:00",
+)
+TWO_BEAT_DOCUMENT = replace_exact(
+    TWO_BEAT_DOCUMENT,
+    "- **Word count:** 80",
+    "- **Word count:** 160",
+)
+
 
 class ValidatorTests(unittest.TestCase):
     def assert_error(self, text: str, fragment: str) -> None:
@@ -419,6 +451,9 @@ class ValidatorTests(unittest.TestCase):
     def test_valid_research_draft_passes(self) -> None:
         self.assertEqual(validate_document(VALID_DOCUMENT), [])
 
+    def test_full_script_contract_is_document_wide_across_beats(self) -> None:
+        self.assertEqual(validate_document(TWO_BEAT_DOCUMENT), [])
+
     def test_deliverable_requires_exact_vocabulary(self) -> None:
         for value in ("", "SCRIPT", "FULL SCRIPT"):
             with self.subTest(value=value):
@@ -447,7 +482,20 @@ class ValidatorTests(unittest.TestCase):
         )
         self.assert_error(document, "Primary prompt")
 
-    def test_targeted_artifact_accepts_each_optional_valid_block(self) -> None:
+    def test_targeted_artifact_validates_an_application_block_that_appears(self) -> None:
+        malformed = replace_exact(
+            VIEWER_APPLICATION_BLOCK,
+            "- **Try:**",
+            "- **Removed:**",
+        )
+        document = replace_exact(
+            TARGETED_DOCUMENT,
+            "### Claims\n",
+            malformed + "\n\n### Claims\n",
+        )
+        self.assert_error(document, "Try")
+
+    def test_targeted_artifact_accepts_each_optional_block_combination(self) -> None:
         personal = replace_exact(
             TARGETED_DOCUMENT,
             "### Narration\n",
@@ -463,28 +511,58 @@ class ValidatorTests(unittest.TestCase):
             "### Claims\n",
             VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
         )
-        self.assertEqual(validate_document(personal), [])
-        self.assertEqual(validate_document(application), [])
+        both = replace_exact(
+            personal,
+            "### Claims\n",
+            VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
+        )
+        for blocks, document in (
+            ("personal", personal),
+            ("application", application),
+            ("personal-and-application", both),
+        ):
+            with self.subTest(blocks=blocks):
+                self.assertEqual(validate_document(document), [])
 
     def test_full_script_requires_exactly_one_personal_input_block(self) -> None:
         without = replace_exact(VALID_DOCUMENT, PERSONAL_INPUT_BLOCK + "\n", "")
-        self.assert_error(without, "exactly one Personal input")
         duplicate = replace_exact(
             VALID_DOCUMENT,
             PERSONAL_INPUT_BLOCK,
             PERSONAL_INPUT_BLOCK + "\n" + PERSONAL_INPUT_BLOCK,
         )
-        self.assert_error(duplicate, "exactly one Personal input")
+        for case, document in (("missing", without), ("duplicate", duplicate)):
+            with self.subTest(case=case):
+                self.assert_error(document, "exactly one Personal input")
 
     def test_full_script_requires_exactly_one_viewer_application_block(self) -> None:
         without = replace_exact(VALID_DOCUMENT, VIEWER_APPLICATION_BLOCK + "\n", "")
-        self.assert_error(without, "exactly one Viewer application")
         duplicate = replace_exact(
             VALID_DOCUMENT,
             VIEWER_APPLICATION_BLOCK,
             VIEWER_APPLICATION_BLOCK + "\n" + VIEWER_APPLICATION_BLOCK,
         )
-        self.assert_error(duplicate, "exactly one Viewer application")
+        for case, document in (("missing", without), ("duplicate", duplicate)):
+            with self.subTest(case=case):
+                self.assert_error(document, "exactly one Viewer application")
+
+    def test_full_script_rejects_a_personal_input_duplicate_across_beats(self) -> None:
+        second_beat = replace_exact(
+            SECOND_BEAT,
+            "### Claims\n",
+            SECOND_PERSONAL_INPUT_BLOCK + "\n\n### Claims\n",
+        )
+        document = replace_exact(TWO_BEAT_DOCUMENT, SECOND_BEAT, second_beat)
+        self.assert_error(document, "exactly one Personal input")
+
+    def test_full_script_rejects_an_application_duplicate_across_beats(self) -> None:
+        second_beat = replace_exact(
+            SECOND_BEAT,
+            "### Claims\n",
+            VIEWER_APPLICATION_BLOCK + "\n\n### Claims\n",
+        )
+        document = replace_exact(TWO_BEAT_DOCUMENT, SECOND_BEAT, second_beat)
+        self.assert_error(document, "exactly one Viewer application")
 
     def test_every_personal_input_field_is_required_nonempty_and_unique(self) -> None:
         for field in PERSONAL_INPUT_FIELDS:
@@ -570,15 +648,21 @@ class ValidatorTests(unittest.TestCase):
         )
 
     def test_personal_input_id_requires_pi_three_digit_form(self) -> None:
-        self.assert_error(
-            replace_exact(
-                VALID_DOCUMENT,
-                "PI-001",
-                "PERSONAL-1",
-                expected_count=2,
-            ),
-            "invalid ID",
-        )
+        self.assertEqual(validate_document(COMPLETED_DOCUMENT), [])
+        for invalid_id in (
+            "PI-01",
+            "PI-0001",
+            "pi-001",
+            "PI-001-extra",
+            "PERSONAL-1",
+        ):
+            with self.subTest(invalid_id=invalid_id):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    "- **ID:** PI-001",
+                    f"- **ID:** {invalid_id}",
+                )
+                self.assert_error(document, "invalid ID")
 
     def test_all_required_header_fields_are_reported(self) -> None:
         for field in HEADER_FIELDS:
