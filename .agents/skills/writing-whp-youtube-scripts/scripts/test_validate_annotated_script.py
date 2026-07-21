@@ -978,6 +978,32 @@ class ValidatorTests(unittest.TestCase):
                         f"header field {field} must have a non-whitespace value",
                     )
 
+    def test_duplicate_required_header_fields_are_reported(self) -> None:
+        cases = (
+            (
+                "Deliverable",
+                "- **Deliverable:** FULL-SCRIPT",
+                "- **Deliverable:** TARGETED-ARTIFACT",
+            ),
+            (
+                "Useful viewer change",
+                "- **Useful viewer change:** Notice when behavior meets operational "
+                "play criteria without assuming subjective experience.",
+                "- **Useful viewer change:** Treat every repeated action as play.",
+            ),
+        )
+        for field, original, conflicting in cases:
+            with self.subTest(field=field):
+                document = replace_exact(
+                    VALID_DOCUMENT,
+                    original,
+                    original + "\n" + conflicting,
+                )
+                self.assert_error(
+                    document,
+                    f"Header repeats required field: {field}",
+                )
+
     def test_duplicate_beat_id_is_reported_from_complete_beats(self) -> None:
         duplicate = replace_exact(
             VALID_DOCUMENT,
@@ -1273,6 +1299,34 @@ class ValidatorTests(unittest.TestCase):
                         document,
                         f"Record A-001 field {field} must have a non-whitespace value",
                     )
+
+    def test_duplicate_required_evidence_and_asset_fields_are_reported(self) -> None:
+        cases = (
+            (
+                "F-001",
+                EVIDENCE_RECORD,
+                "- **Status:** VERIFIED",
+                "- **Status:** REPORTED",
+            ),
+            (
+                "A-001",
+                ASSET_RECORD,
+                "- **Status:** CC-BY-4.0",
+                "- **Status:** OWNED",
+            ),
+        )
+        for record_id, record, original, conflicting in cases:
+            with self.subTest(record_id=record_id):
+                duplicated = replace_exact(
+                    record,
+                    original,
+                    original + "\n" + conflicting,
+                )
+                document = replace_exact(VALID_DOCUMENT, record, duplicated)
+                self.assert_error(
+                    document,
+                    f"Record {record_id} repeats required field: Status",
+                )
 
     def test_source_url_fields_require_web_urls(self) -> None:
         cases = (
