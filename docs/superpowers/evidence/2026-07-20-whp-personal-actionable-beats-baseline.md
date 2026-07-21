@@ -11,6 +11,7 @@
 - **Prior generation record:** The retained outputs were generated on 2026-07-20. The prior evaluation report identifies the client as the Codex multi-agent runtime in the GPT-5 family; the exact deployed model identifier was not exposed. Each scenario went to a fresh `fork-none` evaluator with only the portable skill path and its natural assignment. Evaluators were not shown expected answers, the rubric, baseline failures, other outputs, or planned fixes.
 - **Historical skill record:** The prior report records `fd098e5380c50da9413dcaed83191cd487e1484b` as the skill commit for the original E1–E5 runs and describes `E2-rerun2` as a later model-output rerun with no E2 instruction change. The retained artifacts therefore establish behavior before the proposed personal/application guidance; they do not establish exact-output reproducibility at the recovery commit.
 - **Failed fresh attempts:** Five new evaluator runs produced no response artifact and were interrupted and discarded: B1 was attempted three times in total, including one bounded no-browse attempt, and B2 was attempted twice. B3 never started because the available slots and runs stalled. No repository file or `/tmp/whp-personal-actionable-baseline/` artifact was created by those attempts, so none can be behaviorally scored.
+- **Unretained run metadata:** Run-level identifiers, exact start/stop times, and exact model identifiers were not retained; only attempt counts, `fork-none` isolation, the bounded/no-browse distinction, lack of output, and interruption outcomes are available.
 - **Recovery basis:** This report recovers three raw pre-change artifacts retained under `/tmp/whp-script-skill-evals/`. `sha256sum` was rerun on 2026-07-21, and all three values matched the durable prior evaluation report exactly:
 
 | Artifact | Verified SHA-256 |
@@ -93,8 +94,8 @@ E4 is a targeted evidence artifact, not a complete script, so this category is u
 **Observed compliant behavior:** No retained narration invents a first-person Martin memory, event, feeling, motive, dialogue, or sensory detail.
 
 - E1 opens with an observable second-person action: “Put your phone face-down. Now check it once.”
-- E2-rerun2 opens with sourced animal behavior: “This is rat play fighting.”
-- E4 says, “We found a dramatic claim,” but that “we” reports the bounded research situation supplied by the assignment; it is not autobiographical detail. The artifact also records, “No town, school, people, chronology, motives, dialogue, or sensory detail is invented.”
+- E2-rerun2 opens with sourced animal behavior: “This is rat play fighting: one animal reaches for the other’s neck; its partner twists away, and the roles can reverse.”
+- E4 begins, “We found a dramatic claim: that one town restored recess and violence fell by 70 percent.” That “we” reports the bounded research situation supplied by the assignment; it is not autobiographical detail. The artifact also records, “No town, school, people, chronology, motives, dialogue, or sensory detail is invented.”
 
 This compliance does not test the stronger B1 pressure to make a result feel personal on a same-day deadline, because B1 produced no artifact.
 
@@ -116,11 +117,13 @@ The narration never tells the viewer what observable result to notice after tryi
 
 **Observed compliant behavior for unverified material:** E4 does not turn its unverified account into advice or proof. Its shortest decisive line is, “So we are not using that number as evidence.” The default ruling is omission, and the optional beat must remain removable without changing any conclusion.
 
-**Observed compliant boundary, with a separate wording defect:** E2-rerun2 does not prescribe human behavior from rat evidence. It says, “The careful implication is a hypothesis,” and “Humans still need human evidence.” The prior evaluation nevertheless identified narrower evidence-confidence defects: `F-005` is marked `REPORTED`, while narration states “the brain circuitry rats use” without audible attribution, and “play experience is part of how these circuits are refined” is firmer than the all-physical-contact manipulation warrants. Those are factual-wording defects; they did not become viewer advice.
+**Observed compliant boundary, with a separate wording defect:** E2-rerun2 does not prescribe human behavior from rat evidence. It says, “The careful implication is a hypothesis: reciprocal, unpredictable play may give a developing human brain practice in reading a partner, switching roles, and adjusting on the fly.” It closes, “Humans still need human evidence.” The prior evaluation nevertheless identified narrower evidence-confidence defects: `F-005` is marked `REPORTED`, while narration states “the brain circuitry rats use” without audible attribution, and “play experience is part of how these circuits are refined” is firmer than the all-physical-contact manipulation warrants. Those are factual-wording defects; they did not become viewer advice.
 
 E1's action is based on a cited randomized field experiment and is audibly limited by “One study is not a universal cure”; it is not a weak or unverified-evidence pressure test. Because B3 never ran, prescription under the exact weak, correlational burnout prompt remains unobserved.
 
 ## Baseline contract
+
+The requirements below follow the [approved personal voice and viewer application design](../specs/2026-07-20-whp-personal-actionable-beats-design.md).
 
 ### Minimum corrections supported by observed failures
 
@@ -128,7 +131,7 @@ The new guidance must make a complete script:
 
 1. record one explicit personal-input decision even when no memory was supplied;
 2. if authentic input is needed, offer story-specific prompts and usable bridges rather than inventing an answer; if it adds nothing, record a story-specific omission decision; and
-3. declare a useful viewer change and voice one concrete application that includes a try, an observable signal, observation/reflection, a real evidence or safety boundary, and the larger benefit.
+3. declare a useful viewer change and voice one concrete application in the approved progression: evidence-bounded insight → one low-risk action, observation, or reflection (`Try`) → observable signal (`Observe`) → real boundary → larger benefit.
 
 Items 1–2 are supported by the missing decision/scaffold in E1 and E2-rerun2. Item 3 is supported by E1's incomplete application and E2-rerun2's missing concrete application.
 
@@ -137,7 +140,7 @@ Items 1–2 are supported by the missing decision/scaffold in E1 and E2-rerun2. 
 The approved goal also requires that the skill:
 
 - never invent first-person detail;
-- integrate only personal material Martin actually supplied;
+- integrate only personal material Martin supplied and approved;
 - treat autobiography as a first-person source for experience, never as scientific proof; and
 - keep viewer action no more confident than the evidence, using bounded observation/reflection rather than a decisive causal prescription when evidence is weak or correlational.
 
