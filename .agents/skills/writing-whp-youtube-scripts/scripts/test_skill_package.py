@@ -206,12 +206,7 @@ class SkillPackageTests(unittest.TestCase):
             "conflicts on origin, date, chronology, causality, or scope, even when "
             "that source supports a different subclaim. Record every discovered "
             "material conflict in `Contradictions` and explain how it changes or "
-            "bounds the status or wording. Treat `No contradiction found`, `none "
-            "found`, and any equivalent no-conflict assertion as allowed only after "
-            "this source-wide conflict scan. If a cross-check is inaccessible, "
-            "truncated, or too large to scan completely, write `Conflict scan "
-            "incomplete — [source, reason, portions checked]` and keep the conflict "
-            "review unresolved; do not assert that none was found.",
+            "bounds the status or wording.",
             "For `CORROBORATED`, trace whether the sources have genuinely independent "
             "evidence chains. If they converge on the same originating investigation, "
             "record the dependence and re-evaluate the claim under the existing status "
@@ -240,62 +235,114 @@ class SkillPackageTests(unittest.TestCase):
         with self.subTest(contract="rubric-reminder"):
             self.assertIn(rubric_reminder, rubric)
 
-        rubric_reference_pass = (
-            "Treat `No contradiction found`, `none found`, and equivalent no-conflict "
-            "wording as allowed only after the complete source-wide cross-check scan. "
-            "If a cross-check is inaccessible, truncated, or too large to scan "
-            "completely, write `Conflict scan incomplete — [source, reason, portions "
-            "checked]`, keep the review unresolved, and do not assert that none was "
-            "found. Record each material conflict in `Contradictions` and explain how "
-            "it changes or bounds status or wording. For dependent evidence chains, "
-            "record the dependence and re-evaluate under the existing status "
-            "thresholds: use `VERIFIED` only when the primary or authoritative source "
-            "type can establish the exact claim and no unresolved credible conflict "
-            "remains; use `REPORTED` when one identifiable plausible account remains; "
-            "and retain `CORROBORATED` only with another genuinely independent chain. "
-            "A material credible conflict takes precedence over `VERIFIED`: narrow and "
-            "resolve the wording, use `DISPUTED`, or omit the claim; never retain "
-            "`VERIFIED` while that conflict remains."
+        rubric_reference_fragments = (
+            "Open every cross-check and scan for conflicting origin, date, chronology, "
+            "causality, or scope wording, even when it supports another subclaim.",
+            "Record each material conflict in `Contradictions` and explain how it "
+            "changes or bounds status or wording.",
+            "A material credible conflict takes precedence over `VERIFIED`: narrow "
+            "and resolve the wording, use `DISPUTED`, or omit the claim; never retain "
+            "`VERIFIED` while that conflict remains.",
         )
-        with self.subTest(contract="rubric-reference-pass"):
-            self.assertIn(rubric_reference_pass, rubric)
+        for fragment in rubric_reference_fragments:
+            with self.subTest(contract="rubric-reference-pass", fragment=fragment):
+                self.assertIn(fragment, rubric)
 
-    def test_conflict_accounting_is_source_specific_and_compound_status_is_bounded(
-        self,
-    ) -> None:
-        research = " ".join(
-            (SKILL_ROOT / "references/research-and-rights.md")
+    def test_source_audit_syntax_and_compound_split_rule_are_consistent(self) -> None:
+        sources = {
+            name: " ".join((SKILL_ROOT / path).read_text(encoding="utf-8").split())
+            for name, path in {
+                "research": "references/research-and-rights.md",
+                "rubric": "references/quality-rubric.md",
+                "format": "references/annotated-script-format.md",
+            }.items()
+        }
+        outcome_syntax = (
+            "`{source} — COMPLETE — [coverage or source-native locator checked; "
+            "concrete material support/conflict findings; consequence for "
+            "wording/status]`",
+            "`{source} — INCOMPLETE — [reason; portions/locators checked; unresolved "
+            "consequence]`",
+        )
+        unresolved_rule = (
+            "Any material `Original URL` or cross-check marked `INCOMPLETE` keeps the "
+            "conflict review unresolved and forbids a no-conflict assertion."
+        )
+        for source_name, source_text in sources.items():
+            for syntax in outcome_syntax:
+                with self.subTest(source=source_name, contract=syntax):
+                    self.assertIn(syntax, source_text)
+            with self.subTest(source=source_name, contract="incomplete-blocks"):
+                self.assertIn(unresolved_rule, source_text)
+            with self.subTest(source=source_name, contract="one-syntax-only"):
+                self.assertNotIn("Conflict scan incomplete —", source_text)
+
+        split_rule = (
+            "If narrated subclaims do not all meet the normal threshold for the same "
+            "status, split the compound claim into separate evidence records."
+        )
+        corroborated_rule = (
+            "Assign `CORROBORATED` only when every narrated subclaim independently "
+            "meets the `CORROBORATED` threshold."
+        )
+        for source_name in ("research", "rubric"):
+            with self.subTest(source=source_name, contract="split-compound"):
+                self.assertIn(split_rule, sources[source_name])
+            with self.subTest(source=source_name, contract="corroborated-compound"):
+                self.assertIn(corroborated_rule, sources[source_name])
+            with self.subTest(source=source_name, contract="no-weakest-status"):
+                self.assertNotIn(
+                    "assign the whole record the weakest applicable status",
+                    sources[source_name].lower(),
+                )
+
+    def test_annotated_format_requires_named_per_source_audit_outcomes(self) -> None:
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
             .read_text(encoding="utf-8")
             .split()
         )
-        rubric = " ".join(
-            (SKILL_ROOT / "references/quality-rubric.md")
-            .read_text(encoding="utf-8")
-            .split()
+
+        self.assertIn(
+            "- **Contradictions:** Named `COMPLETE` or `INCOMPLETE` outcomes for the "
+            "`Original URL` and every listed `Cross-checks` source",
+            format_text,
+        )
+        self.assertIn(
+            "Blanket statements such as `none found` or `all sources agree` do not "
+            "substitute for named per-source outcomes.",
+            format_text,
+        )
+        self.assertNotIn(
+            "Conflicting evidence or an explicit record that none were found",
+            format_text,
         )
 
-        source_accounting_contract = (
-            "Within each evidence record's existing `Contradictions` field, record "
-            "one auditable outcome for the `Original URL` and for every listed "
-            "`Cross-checks` source. Name each source and mark it `COMPLETE — "
-            "[material support/conflict findings]` or `INCOMPLETE — [reason and "
-            "portions checked]`. A blanket summary such as `all sources agree` never "
-            "substitutes for source-by-source accounting. Every material conflict "
-            "discovered anywhere in a source must appear in the same field with its "
-            "consequence for narration wording or status."
-        )
-        compound_claim_contract = (
-            "For a compound claim, assign `CORROBORATED` only when every narrated "
-            "subclaim has genuinely independent support. Otherwise split the record "
-            "by subclaim or assign the whole record the weakest applicable status "
-            "and narration stance."
-        )
+    def test_worked_template_demonstrates_auditable_source_outcomes(self) -> None:
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+        evidence = template.split("#### F-001", 1)[1].split(
+            "\n### Visual and archival sources", 1
+        )[0]
+        match = re.search(r"^- \*\*Contradictions:\*\* (.+)$", evidence, re.MULTILINE)
+        self.assertIsNotNone(match)
+        outcomes = match.group(1)
 
-        for source_name, source_text in (("research", research), ("rubric", rubric)):
-            with self.subTest(source=source_name, contract="source-accounting"):
-                self.assertIn(source_accounting_contract, source_text)
-            with self.subTest(source=source_name, contract="compound-claims"):
-                self.assertIn(compound_claim_contract, source_text)
+        expected_sources = (
+            "Galpayage Dona et al. paper (Original URL)",
+            "Queen Mary University of London study summary (Cross-check)",
+        )
+        self.assertEqual(outcomes.count("— COMPLETE — ["), len(expected_sources))
+        self.assertNotIn("Conflict scan incomplete —", outcomes)
+        self.assertNotIn("No direct contradiction located", outcomes)
+        for source in expected_sources:
+            with self.subTest(source=source):
+                self.assertRegex(
+                    outcomes,
+                    rf"{re.escape(source)} — COMPLETE — "
+                    rf"\[[^\]\n]+;[^\]\n]+;[^\]\n]+\]",
+                )
 
     def test_required_package_files_exist(self) -> None:
         required = {
