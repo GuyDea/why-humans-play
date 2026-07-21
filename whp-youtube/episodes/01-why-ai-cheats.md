@@ -1,7 +1,7 @@
 # Why AI Cheats—Even When It Follows Every Rule
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.5
+- **Version:** 0.7
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 08:30
 - **Word count:** 1117
@@ -14,8 +14,8 @@
 - **Central question:** Why do optimized systems find strategies their designers consider cheating?
 - **Thesis:** An optimizer targets the literal reward it can affect; an incomplete proxy leaves unmeasured dimensions it can exploit, without implying intent, consciousness, or moral dishonesty.
 - **Payoff:** What looks like cheating can be perfect obedience to the wrong scoreboard; seeing who chose the score can be a first move toward asking whether the game should be kept, supplemented, redesigned, or left.
-- **Evidence review:** The v0.5 narration uses the approved wording or weaker formulations from five unchanged complete claim records: `F-001`–`F-004` are `VERIFIED`, and `F-005` is `REPORTED` with the consent order's no-admission limitation. The sixth, current-research claim remains omitted; human editorial approval and the final independent audits remain open.
-- **Rights review:** The v0.5 treatment uses only original WHP diagrams, typography, presenter shots, tabletop elements, and conceptual reconstructions; source media remains evidence/reference only, so no `A` record is required. Audio production and final production/rights review remain open: use only audio newly recorded or created by WHP, with presenter/direct sound or silence as the fallback; any later external selection requires an `A` record before use.
+- **Evidence review:** The v0.7 ten-pass audit reverse-checked the unchanged narration, on-screen text, and visual claims against five complete claim records: `F-001`–`F-004` remain `VERIFIED`, and `F-005` remains `REPORTED` with the consent order's no-admission limitation. Complete dated copies were rechecked; two live-page refreshes were automation-blocked with no status effect (`ISS-008`). The sixth, current-research claim remains omitted, and authorized human editorial approval remains open.
+- **Rights review:** The v0.7 rights pass retains an original-only WHP visual plan and WHP-created audio, direct sound, or silence; source media remains evidence/reference only, and any future external visual or audio selection requires an `A` record. Final production/rights review remains open.
 
 ## Beat 01 — The wrong perfect score
 _Time: 00:00–00:32 · Target: ~78 words_
@@ -380,7 +380,97 @@ Score rationale: Candidate 1 keeps a 2 for central-question speed because its fi
 
 ## Editorial audit
 
-Five claims are ledger-approved at their stated statuses, and v0.5 contains a complete 1,117-word spoken draft plus a simplified, synchronized production treatment. The full ten-dimension audit is deliberately not scored in this pass. A human table read, authorized editorial approval, final evidence/application/accessibility audits, and audio/production review remain open.
+The ten passes below were run separately against v0.7. No pass required a narration change, so the exact 1,117-word extraction, beat targets, and 08:30 production model remain unchanged. These are version-specific editorial findings, not a substitute for Martin's human aloud read, authorized editorial approval, or final production and rights review.
+
+### Pass 1 — Promise and payoff
+
+**Finding:** The exact package contract stays on one question. The title is “Why AI Cheats—Even When It Follows Every Rule”; the thumbnail promises an obviously wrong result beside green `100%` and “100% WRONG”; and the first two sentences say, “An AI can seem to cheat while following its score exactly. Here, ‘cheat’ is human shorthand for a wrong result—not intent.” The header's central question asks why optimized systems find strategies their designers consider cheating, and Beat 08 answers it explicitly: “Apparent cheating can be literal obedience to an incomplete or wrong scoreboard: a strategy scores higher while the broader goal ranks it lower.” The conceptual-score qualification is voiced in Beats 01, 02, and 08, so the thumbnail does not become a reported experimental number.
+
+The useful change and application were also compared line by line. The header asks the viewer to notice behavior gaining attention and valuable activity being crowded out while treating the pattern as a hypothesis; Beat 07 voices both observations, says no distortion may appear, and says any pattern is “a hypothesis—not a diagnosis or causal proof.” The header payoff's choices—keep, supplement, redesign, or leave—are voiced in Beat 07, and Beat 08 closes on who chose the score, what it cannot see, and whether the viewer still wants to play.
+
+**Action:** No wording change. Preserve the opening and closing conceptual-score labels together in the edit.
+
+### Pass 2 — Factual wording and confidence
+
+**Finding:** A word-for-word reverse audit of every material narration, on-screen-text, and visual assertion found no formulation stronger than its record.
+
+| Record | Narration / treatment checked | Outcome and action |
+|---|---|---|
+| `F-001` | Beats 01–02 and 08: simulated task, flip, grasping reward, bottom-face detail, unfinished stack, and conceptual `100%` | Preserves simulation, dependent-review attribution, no numerical flip score, no physical-robot/general-policy claim, and no intent. No change. |
+| `F-002` | Beats 03, 05, and 08: proxy ordering, reward hacking, specification gaming, and title answer | Preserves the bounded-model attribution, uses “can,” states that hackability does not guarantee observed hacking, and rejects intent or universal metric failure. No change. |
+| `F-003` | Beats 04–05: ramp defense, box surfing, off-ground force, later box locking, and chronology | Preserves later training stages rather than one continuous episode, simulation specificity, proof-of-concept limits, and no general-intelligence or transfer claim. No change. |
+| `F-004` | Beats 06–07: competing duties, measured incentive, redirected attention, and viewer observation | Preserves “under its assumptions” and “can,” identifies theory rather than a frequency/effect estimate, and keeps the application conditional and non-causal. No change. |
+| `F-005` | Beat 06 narration and static order card | Preserves `REPORTED` attribution through “the order said,” includes the jurisdiction-limited no-admission clause, and states no effect estimate, model causation, omitted-duty inference, or identical-cognition claim. No change. |
+
+All conceptual diagrams and reconstructions are labeled as such; the `F-004` model and `F-005` order are separated by a hard cut and no causal arrow. The inbox example is explicitly hypothetical and makes no factual claim about the viewer. `F-005` remains `REPORTED`; no admission is implied.
+
+**Action:** No narration, on-screen-text, status, or scope change. Keep the Beat 06 source captions and hard separation in final production.
+
+### Pass 3 — Story and personal authenticity
+
+**Finding:** The chronology remains source-bounded: the block case is a reward-shaping failure in simulation; the hide-and-seek sequence distinguishes stages across training from chronological snapshots within a selected episode; and the model precedes, rather than causes, the separately reported consent-order example. No dialogue, weather, sensory detail, private thought, feeling, motive, or mental state is invented. Every reconstruction is identified in the treatment or on-screen text.
+
+The story chain advances by consequence: wrong perfect score → literal reward chain → four-part mechanism → second simulated case → mental-state/generalization boundary → bounded human analogy → observation-first application → return to the opening image. Each answer opens the next question rather than adding trivia.
+
+`PI-001` is the document's only personal-input block and remains exactly `OMIT`, with no input marker and no invented Martin material. Its story-specific removal test is explicit: autobiography would interrupt the verified mechanism-to-institution chain and would not change the viewer's understanding.
+
+**Action:** No story or personal-material change. Any later presenter-identity line requires factual and editorial review and must not become proof.
+
+### Pass 4 — Spoken flow and runtime
+
+**Finding:** An editorial and mental read found the transitions pronounceable and the evidence caveats placed beside the claims they limit. The densest production-model watchpoints remain Beat 03 at 180 words in 70 seconds (about 154 program wpm) and Beat 06 at 185 words in 80 seconds with two high-information held states; Beats 01 and 05 are also about 146 program wpm. Planned holds make the whole 1,117-word, 08:30 model about 131 words per program minute.
+
+No human aloud read or performed timing was conducted in this pass. Therefore this audit does not claim that Martin can deliver the narration at the planned pace, and dimension 4 cannot score above 1. Pronunciations of Skalse, Holmström, and Milgrom also remain unconfirmed; the existing voice-neutral fallbacks remain valid.
+
+**Action:** Keep `ISS-003` open. Martin's human table read must test Beat 03 first, then Beats 01, 05, and 06, and confirm the named pronunciations without trimming evidence bounds to solve timing.
+
+### Pass 5 — Visual relevance and identity
+
+**Finding:** Every visual advances its adjacent claim. Beats 01–02 show the correct red-on-blue intended stack, bottom-face reference, flip, reward, and incomplete result as an explicitly original reconstruction. Beat 03 is a conceptual model, not source evidence. Beat 04 separates the verified training stages and labels the off-ground simulation relation without reproducing source geometry. Beat 05 holds only the scope boundaries. Beat 06 keeps the theoretical model and reported order in different states, without a Wells Fargo logo, regulator screenshot, or document image. Beat 07 uses a fictional inbox worksheet with no real interface or personal data. Beat 08 reuses the exact opening object and conceptual score.
+
+The relevant experiment, model, and order dates and source context appear at first use; conceptual, reconstructed, theoretical, and reported roles are labeled. Every preferred treatment has a producible original fallback using WHP shapes, typography, presenter footage, blocks, or cards.
+
+**Action:** No visual-plan change. Production must preserve the identity labels and must not substitute source screenshots, footage, figures, or merely similar objects for the original plan.
+
+### Pass 6 — Animation purpose and feasibility
+
+**Finding:** Each motion instruction explains one relationship, cues it once, and pauses on a resolved state. Beat 01 reveals the wrong-outcome/perfect-score comparison; Beat 02 rotates the brick around the bottom-face relation; Beat 03 builds the proxy boundary; Beat 04 animates only the box-surfing physics relation while stage panels remain separate; Beat 05 explicitly declines animation; Beat 06 animates the conditional model and hard-cuts to a static order; Beat 07 fills the map before replacing it with one decision state; and Beat 08 widens the unchanged opening image to reveal the score-maker and blind spot.
+
+The proposed motion is feasible with basic original shapes or the documented tabletop fallbacks. No perpetual drift, decorative montage, causal merger, reward celebration, or rapid transition is required.
+
+**Action:** No motion change. If a resolved state cannot be held legibly in the actual edit, use its still/tabletop fallback rather than add faster motion.
+
+### Pass 7 — Provenance and rights
+
+**Finding:** The final-cut plan contains no external visual, archival, or audio asset and assigns no `A` ID. Papers, webpages, figures, and videos are evidence/reference only; the script explicitly prohibits reproducing, tracing, screening, or hearing them. All planned visuals are newly created or recorded by WHP, with an original presenter/card/diagram fallback. Any future external visual or audio selection must receive a complete `A` record before use.
+
+Audio is not yet created or selected. The allowed route is newly recorded or WHP-created audio, with presenter/direct sound or silence as the fallback. Composition, recording, synchronization, platform, depicted-work, release, and final-file checks remain part of final production review. This pass is a provenance and rights-planning audit, not legal advice or clearance certification.
+
+**Action:** Keep `ISS-004` open for audio creation or selection and final production/rights review. Dimension 8 scores 2 because the current plan has no required external asset, uses production-safe original/audio fallbacks, and requires a complete `A` record before any future external selection; the final rights review remains a separate `RECORD-READY` gate.
+
+### Pass 8 — Complete references
+
+**Finding:** The five authoritative claim records and all listed sources were refreshed for v0.7. Their `Contradictions` fields remain the authoritative per-source audit, with stable source-native locators and named `COMPLETE` outcomes. No new material conflict or consequence for narration, approved wording, or status was found; `F-001`–`F-004` remain `VERIFIED`, and `F-005` remains `REPORTED`.
+
+Two live-page exceptions remain transparent. HTTP and headless-browser attempts at the OpenAI project page met a Cloudflare challenge, and the Oxford DOI resolved while automated full-text access was challenged. The complete source-native copies accessed on 2026-07-21 were revalidated instead, with no conflict or status consequence. Popov/video/DeepMind, Baker/OpenAI, and order/press-release chains remain dependent rather than independent corroboration; the evidence records retain the full findings and consequences.
+
+**Action:** Keep `ISS-008` open for the scheduled final evidence review: retry the live OpenAI and Oxford URLs; if access remains blocked, revalidate the durably located dated complete copies and record the limitation. Live automated access is not mandatory for closure.
+
+### Pass 9 — Accessibility
+
+**Finding:** Essential relationships are voiced in narration and repeated, rather than introduced only, in visuals. Full captions carry the conceptual-score qualification, evidence status, chronology, model/order separation, no-admission language, non-identical-cognition boundary, application signals, and uncertainty. Descriptive-transcript notes identify the object, state change, score, training-stage order, conditional attention relation, and final choice in every beat.
+
+Beats 05–08 hold two to four short content labels per state. The earlier mechanism and chronology diagrams introduce their additional labels sequentially and schedule a resolved hold, so they do not require a rapid text scan. Meaning is duplicated through words, headings, positions, shapes, and sequence rather than green/red color alone. No essential claim depends on sight, color, sound, or motion, and silence remains a valid audio fallback.
+
+**Action:** No accessibility-plan change. Caption pacing and the actual contrast/hold implementation remain part of the human table read and final production review.
+
+### Pass 10 — Readiness
+
+**Finding:** The v0.7 score is 19/20. Protected dimensions 1, 2, 7, and 8 are each 2. The format is structurally complete, `PI-001` is resolved as `OMIT`, the application voices all five elements, and no rejected claim or blocked required external asset is present.
+
+The score does not promote readiness. Authorized human approval of narration and story direction, Martin's human table read and performed timing, pronunciation confirmation, completed final evidence review, audio creation or selection, and final production/rights review remain open. `EDITORIAL-DRAFT` therefore fails its authorized-human approval gate, and `RECORD-READY` also fails the renewed final approval and closed evidence, rights, and production-dependency gates. Status remains `RESEARCH-DRAFT`.
+
+**Action:** Do not change the status. Reapply the gates after the open human, final-evidence, and production issues are completed; structural validation cannot certify factual truth, editorial quality, personal authenticity, accessibility, or rights.
 
 ### Timing and extraction review
 
@@ -402,16 +492,17 @@ Independent extraction of only the blockquotes directly under each beat's `### N
 
 | # | Dimension | Score | Current basis |
 |---:|---|---|---|
-| 1 | Title, thumbnail, opening, and payoff alignment | Not scored | The draft opens and closes on the same flipped-block/conceptual-`100%` image and resolves the title; independent promise/payoff audit remains open |
-| 2 | Factual precision and status-matched wording | Not scored | The draft was checked against `F-001`–`F-005` approved wording and caveats; Task 7's independent factual-wording audit and authorized review remain open |
-| 3 | Story momentum without invented details | Not scored | All eight beats now form a causal spine, preserve the training-stage chronology, and keep `PI-001` `OMIT`; independent story/authenticity audit remains open |
-| 4 | Spoken quality and credible runtime | Not scored | Deterministic extraction is 1,117 words for the 08:30 plan, about 131 words per program minute with deliberate visual holds; no human aloud table read or performance timing has occurred |
-| 5 | Useful visual treatment and concrete candidates | Not scored | Every beat has an original-only treatment and fallback synchronized to the narration; Beats 05–07 now limit held states to two to four short labels, while production feasibility review remains open |
-| 6 | Explanatory animation purpose | Not scored | Each motion beat cues one relation and pauses on a legible state, while Beat 05 explicitly uses no animation; independent feasibility review remains open |
-| 7 | Evidence-reference completeness | Not scored | Five unchanged claim records contain the required evidence fields and are referenced at status-matched beats; Task 7's complete-reference audit remains open |
-| 8 | Visual provenance and rights honesty | Not scored | No external asset is planned; source media is reference-only, audio production remains open, and any later external selection requires an `A` record |
-| 9 | Accessibility of essential visual information | Not scored | Narration, full captions, and descriptive notes carry essential relations while held states use two to four short labels and do not rely on sight, color, or rapid text; human accessibility and pacing review remains open |
-| 10 | WHP brand fidelity | Not scored | The draft uses the hidden-game lens, states the rigor boundary, and voices a bounded application; authorized editorial review remains open |
+| 1 | Title, thumbnail, opening, and payoff alignment | 2 | The exact wrong-perfect-score package opens immediately, the title answer is explicit in Beat 08, and the complete application/payoff is voiced across Beats 07–08. |
+| 2 | Factual precision and status-matched wording | 2 | Every material narration, on-screen, and visual claim is approved wording or weaker; `F-004` remains conditional and `F-005` remains audibly `REPORTED` with no admission or causal merger. |
+| 3 | Story momentum without invented details | 2 | Every beat changes the viewer's model and causes the next question; chronology and reconstruction labels are explicit, with one exact `PI-001` `OMIT` decision and no invented personal material. |
+| 4 | Spoken quality and credible runtime | 1 | The editorial read and 1,117-word production model are usable, but Martin has not read or timed it aloud; Beat 03 and the Beat 06 hold burden remain performance watchpoints. |
+| 5 | Useful visual treatment and concrete candidates | 2 | Every important claim has a context-accurate original WHP treatment, clear conceptual/reported labeling, and a concrete tabletop or diagram fallback. |
+| 6 | Explanatory animation purpose | 2 | Every motion beat explains one temporal, spatial, comparison, or evidence-role relation and holds a resolved state; Beat 05 correctly uses a still. |
+| 7 | Evidence-reference completeness | 2 | All five records are complete and traceable with stable locators, named source outcomes, dependent-chain accounting, statuses, caveats, and approved wording; live refresh limitations are explicit. |
+| 8 | Visual provenance and rights honesty | 2 | No external asset is required; the plan uses original WHP visuals and WHP-created audio, direct sound, or silence, and requires a complete `A` record before any future external visual or audio selection. |
+| 9 | Accessibility of essential visual information | 2 | Narration, captions, descriptive notes, short held labels, and redundant non-color cues carry every essential relation without sight or rapid-reading dependence. |
+| 10 | WHP brand fidelity | 2 | The hidden scoreboard becomes a rigorous, useful game lens; the bounded application changes how a viewer can inspect a score without hype, woo, or promotion. |
+| **Total** |  | **19/20** | Protected dimensions **1/2/7/8 = 2/2/2/2**; the score threshold cannot override the open human and production gates. |
 
 ### Issue ledger
 
@@ -419,11 +510,18 @@ Independent extraction of only the blockquotes directly under each beat's `### N
 |---|---|---|---|---|---|
 | ISS-001 | Beats 01–05 | Critical | Convert the research-vetted AI findings into Task 4 claim records with approved wording and boundaries before drafting beat narration | Research/editorial | Resolved in v0.2; `F-001`–`F-003` complete |
 | ISS-002 | Beat 06 | Critical | Convert the research-vetted human-incentive mechanism and bounded institutional example into Task 4 claim records while preserving the non-identical-cognition boundary | Research/editorial | Resolved in v0.2; `F-004` and `F-005` complete |
-| ISS-003 | Beats 01–08 | Major | Human-table-read the complete narration aloud at Martin's delivery pace, time the performance, and redistribute or trim any drift without weakening evidence bounds; check Beat 03 first (180 words in 70 seconds), then Beats 01 and 05 (~146 program wpm) and Beat 06 (185 words in 80 seconds with high hold burden) | Script/editorial | In review in v0.5; independent extraction confirms the 1,117-word production timing model, but human aloud delivery and performance timing remain open |
-| ISS-004 | Beats 01–08 | Major | Complete production and rights review across visuals and audio; create an asset record before using any external material | Production/rights | In review in v0.5; the original-visual route remains resolved, while pronunciation confirmation, audio selection/creation, and final production review remain open |
-| ISS-005 | Beat 07 | Major | Voice all five application elements and confirm that the action and boundary remain no stronger than the evidence | Script/editorial | In review in v0.5; all five elements remain voiced in the compressed application, but the independent application-boundary audit and human approval remain open |
+| ISS-003 | Beats 01–08 | Major | Human-table-read the complete narration aloud at Martin's delivery pace, time the performance, confirm the pronunciations of Skalse, Holmström, and Milgrom, and redistribute or trim any drift without weakening evidence bounds; check Beat 03 first (180 words in 70 seconds), then Beats 01 and 05 (~146 program wpm) and Beat 06 (185 words in 80 seconds with high hold burden) | Martin / script editorial | Open in v0.7; extraction confirms the 1,117-word production model, but no human aloud delivery, performed timing, or pronunciation confirmation has occurred |
+| ISS-004 | Beats 01–08 | Major | Create or select compliant audio; complete final production and rights review; create a complete asset record before selecting any external visual or audio for the final cut | Producer / authorized rights reviewer | Open in v0.7; the original-only visual plan and safe audio fallbacks pass the current rights-honesty audit, while audio creation or selection and final production/rights review remain unresolved |
+| ISS-005 | Beat 07 | Major | Voice all five application elements and confirm that the action and boundary remain no stronger than the evidence | Script/editorial | Resolved in v0.7; Pass 2 confirms the insight, low-risk inspection, observable signals, hypothesis boundary, possible no-distortion result, test question, and deliberate choice remain within `F-004` |
 | ISS-006 | Development record | Major | Verify and score all three opening candidates using the same evidence, story, rights, production, and alignment criteria | Editorial | Resolved in v0.2; candidate 1 selected |
-| ISS-007 | Full document | Critical | Run ten independent audits and obtain authorized human approval before any readiness promotion | Authorized human editor | Open |
+| ISS-007 | Full document | Critical | Obtain authorized human approval of narration and story direction before `EDITORIAL-DRAFT`, then obtain renewed final approval after evidence, rights, and production dependencies close before `RECORD-READY` | Authorized human editor | Open in v0.7; ten independent audits are complete, but neither authorized-human approval moment has occurred |
+| ISS-008 | `F-003` cross-check and `F-004` Original URL | Minor | During the final evidence review, retry the live OpenAI and Oxford URLs; if access remains blocked, revalidate the durably located dated complete copies and record the limitation; do not require live automated access itself | Research/editorial | Open in v0.7 as a scheduled final-review action; current HTTP and headless-browser attempts met Cloudflare/403 challenges, while complete copies accessed 2026-07-21 were revalidated with no conflict or claim-status consequence |
+| ISS-009 | Pass 8 audit prose | Minor | Describe the omitted current-research scope decision without writing an unused evidence-ID token that the structural validator would interpret as a reference | Script/editorial | Resolved in v0.7; the audit says “no sixth evidence ID,” and no orphan claim reference remains |
+
+### Authorized human approval gates
+
+- **Narration and story-direction approval for `EDITORIAL-DRAFT`: OPEN.** The score and audits do not supply this approval.
+- **Renewed final approval for `RECORD-READY`: OPEN.** It must occur only after the table read, performed timing, pronunciation, completed final evidence review, audio, and final production/rights dependencies are closed; it cannot be carried forward from the earlier approval.
 
 ## References and source materials
 
