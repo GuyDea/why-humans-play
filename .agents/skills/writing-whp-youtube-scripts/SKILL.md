@@ -42,7 +42,9 @@ Do not draft until the packaging, opening, and payoff describe the same video.
    sequence when it does no narrative work.
 6. For a `FULL-SCRIPT`, build one viewer application in this order:
    `insight → try → observe → boundary → larger benefit`. Keep the try no stronger than
-   its evidence and voice the essential application in narration.
+   its evidence. Voice all five elements in narration—the insight; the low-risk action,
+   observation, or reflection; the observable signal; the boundary; and the larger
+   benefit—not only in the structured block.
 7. Draft for spoken delivery. Read the narration aloud, revise it for speech, and time
    it against the runtime.
 8. Add an adjacent treatment for visuals, candidate assets, motion, on-screen text,
@@ -58,9 +60,10 @@ Do not draft until the packaging, opening, and payoff describe the same video.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
   `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use
   it as proof of prevalence, causality, or mechanism.
-- For every `FULL-SCRIPT`, voice one specific viewer application whose action,
-  observation, or reflection is no stronger than its evidence; include what to
-  observe, a real boundary, and the larger benefit.
+- For every `FULL-SCRIPT`, voice all five viewer-application elements in narration:
+  evidence-bounded insight; low-risk action, observation, or reflection; observable
+  signal; real boundary; and larger benefit. The structured block does not substitute
+  for spoken copy.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique image.
 - Provide actual candidate asset pages when practical. Record the rights status and an ownable fallback, and never call an asset cleared without a documented basis.

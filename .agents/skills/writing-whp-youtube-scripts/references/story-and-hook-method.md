@@ -160,6 +160,12 @@ The sequence must create stakes, reveal why Martin cared, test the episode's cla
 against experience, surface a misconception, or show how the insight changed a choice.
 Apply the removal test: if deleting it changes nothing for the viewer, choose `OMIT`.
 
+Missing supplied personal material, or a short runtime, is not by itself a reason to
+choose `OMIT`. When a specific truthful memory could plausibly do real story work,
+choose `INPUT-REQUESTED`. Reserve `OMIT` for an assignment-established lack of personal
+connection or a story-specific removal-test conclusion that no personal sequence would
+improve the story.
+
 For `INPUT-REQUESTED`, write one `Primary prompt` as a question about a specific moment,
 then two to four `Follow-up prompts` about observable details, the initial assumption,
 the consequence, and what changed. Supply a narration-safe `Bridge in`, a narration-safe
@@ -202,8 +208,9 @@ your motive or prove the rule caused the choice; it can help you see the game be
 deciding how to play it.”
 
 Reject endings such as “be more mindful,” “use this knowledge,” or “try it yourself.”
-The narration must voice the essential application and its real limitation; do not hide
-either only in production notes.
+Narration—not only the structured block—must voice all five application elements: the
+insight; the action, observation, or reflection to try; the observable signal; the
+boundary; and the larger benefit.
 
 ## Choose visual treatment claim by claim
 

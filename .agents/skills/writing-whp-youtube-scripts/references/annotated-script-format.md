@@ -181,7 +181,8 @@ Remove the marker for `OMIT`. Do not leave orphaned, duplicate, or mismatched
 personal-input markers.
 
 Build the viewer application as `insight → try → observe → boundary → larger benefit`.
-Voice the essential application and limitation in narration; the structured block is
+Voice all five application elements in narration: insight; action, observation, or
+reflection; observable signal; boundary; and larger benefit. The structured block is
 the production contract, not a substitute for spoken copy. Determining whether the
 application is useful, evidence-bounded, safe, or editorially strong remains a human
 review task.
