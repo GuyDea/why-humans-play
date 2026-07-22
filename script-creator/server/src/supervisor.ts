@@ -19,6 +19,7 @@ export class JobSupervisor {
   private readonly pollMs: number;
   private readonly extraEnv: Record<string, string>;
   private readonly timer: ReturnType<typeof setInterval>;
+  private stopped = false;
 
   constructor(opts: { store: JobStore; jobsRoot: string; pollMs?: number; env?: Record<string, string> }) {
     this.store = opts.store;
@@ -66,10 +67,29 @@ export class JobSupervisor {
       // alive → periodic tick keeps tailing; nothing else to do
     }
   }
-  cancel(_jobId: string): void { throw new Error('not implemented'); }
+  cancel(jobId: string): void {
+    const job = this.store.get(jobId);
+    if (!job || !['running', 'queued'].includes(job.state)) return;
+    if (job.state === 'queued') { this.store.setState(jobId, 'cancelled', 'cancelled before start'); return; }
+    const status = readStatus(jobPaths(job.jobDir).statusFile);
+    if (!status) { this.store.setState(jobId, 'cancelled', 'no runner status'); return; }
+    this.store.setState(jobId, 'cancelling');
+    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+    const grace = (env.graceMs ?? 5000) * 2;
+    try { process.kill(-status.pgid, 'SIGINT'); } catch { /* group already gone */ }
+    setTimeout(() => {
+      if (this.stopped) return;
+      const rec = this.store.get(jobId);
+      if (rec && rec.state === 'cancelling') {
+        try { process.kill(-status.pgid, 'SIGKILL'); } catch { /* gone */ }
+        this.store.setState(jobId, 'cancelled', 'escalated to SIGKILL');
+      }
+    }, grace).unref?.();
+  }
   resume(_interruptedJobId: string): string { throw new Error('not implemented'); }
 
   stop(): void {
+    this.stopped = true;
     clearInterval(this.timer);
     this.store.close();
   }
