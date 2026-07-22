@@ -1,6 +1,7 @@
 import type { Node as ProseMirrorNode } from 'prosemirror-model';
 import type { EditorState } from 'prosemirror-state';
 import { newBeatId } from './ids.js';
+import { pendingProposalIds } from './proposals.js';
 import { schema } from './schema.js';
 
 export type MarkdownExportResult =
@@ -104,7 +105,10 @@ export function exportMarkdown(
     }
   });
 
-  blocked.push(...pendingProposals.map((id) => `proposal ${id} unresolved`));
+  const unresolved = 'doc' in source
+    ? [...pendingProposalIds(source), ...pendingProposals]
+    : pendingProposals;
+  blocked.push(...unresolved.map((id) => `proposal ${id} unresolved`));
   if (blocked.length > 0) return { ok: false, blocked };
 
   const format: MarkdownFormat = doc.attrs.format === 'narration' ? 'narration' : 'annotated';
