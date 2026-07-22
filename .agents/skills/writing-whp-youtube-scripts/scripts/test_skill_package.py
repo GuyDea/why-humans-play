@@ -533,7 +533,7 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertIn(
             "Do not replace a known attribution with generic ‘scientists’ or invent "
-            "a university, city, or lab.",
+            "a university, city, lab, location, or affiliation.",
             rapid,
         )
 
@@ -575,6 +575,14 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn(
             "Supports narration: “In a 2022 experiment, bumblebees had an "
             "unobstructed path to food.",
+            template,
+        )
+        self.assertIn(
+            "That does not tell us what a bee feels",
+            template,
+        )
+        self.assertIn(
+            "they cannot reveal the animal's inner experience",
             template,
         )
 

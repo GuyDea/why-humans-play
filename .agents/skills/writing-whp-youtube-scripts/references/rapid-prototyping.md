@@ -98,7 +98,7 @@ Use either flexible spine:
   of the first beat.
 - For a research-event opening, include the supplied or verified year and responsible
   institution or team when available. Do not replace a known attribution with generic
-  ‘scientists’ or invent a university, city, or lab.
+  ‘scientists’ or invent a university, city, lab, location, or affiliation.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
 - State the paradox in plain language only as far as the supplied facts support. When the
   causal link is unavailable, ask whether the visible result exposed a scoring mismatch

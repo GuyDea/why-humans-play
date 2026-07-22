@@ -61,7 +61,8 @@ bee's motives.
 - `F-001` — Supports narration: “In a 2022 experiment, bumblebees had an unobstructed
   path to food. Some detoured into an object area, contacted wooden balls, and rolled them
   repeatedly without a food reward. The researchers said this met their operational play
-  criteria.” — `VERIFIED`.
+  criteria. That does not tell us what a bee feels. Those clues can sharpen the question;
+  they cannot reveal the animal's inner experience.” — `VERIFIED`.
 
 ### Visual
 - Use the paper's experimental-layout figure as `A-001`.
@@ -100,7 +101,7 @@ bee's motives.
 - **Contradictions:** Galpayage Dona et al. paper (Original URL) — COMPLETE — [full paper checked, including Abstract, Methods experiment 1, and Discussion criteria 1–5; supports the bounded procedure and the authors' operational-criteria conclusion while discussing alternative functional explanations; keep VERIFIED wording limited to the experiment and do not claim subjective enjoyment]; Queen Mary University of London study summary (Cross-check) — COMPLETE — [full article body checked; reports the same study account and no material conflict with the approved wording was found; do not treat this institution-dependent summary as independent corroboration or upgrade the status]
 - **Status:** VERIFIED
 - **Caveat:** Do not turn behavioral criteria into a claim about conscious emotion.
-- **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.
+- **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play. Meeting those criteria does not establish what a bee feels or reveal its subjective experience.
 
 ### Visual and archival sources
 

@@ -177,7 +177,7 @@ workbench can capture it without contaminating the script artifact.
    shorthand.
    When a research-event opening has a supplied or verified year and responsible
    institution or team, name them; do not substitute generic “scientists” or invent a
-   university, city, or lab.
+   university, city, lab, location, or affiliation.
 3. **Build the complete hook.** Move through:
    `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`
    or `question → event → joke → paradox → meaning → viewer relevance → by-end promise`.

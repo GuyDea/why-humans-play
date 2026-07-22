@@ -191,9 +191,10 @@ the authority chain, or the old production narration.
 ## 2026-07-22 — Make research events specific and final facts traceable
 
 **Decision:** A research-event opening names the supplied or verified year and responsible
-institution or team when available, without inventing a university or location; Phase 2
-maps every factual narration statement to an adjacent, non-spoken `F-###` source entry,
-while initial rapid prototypes remain free of citation markup unless explicitly requested.
+institution or team when available, without inventing a university, location, or
+affiliation; Phase 2 maps every factual narration statement to an adjacent, non-spoken
+`F-###` source entry, while initial rapid prototypes remain free of citation markup unless
+explicitly requested.
 
 **Rationale:** A dated, attributed event sounds like something that actually happened, and
 every factual statement in the final production script should be directly traceable without

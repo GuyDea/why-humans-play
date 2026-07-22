@@ -139,7 +139,8 @@ These are laws, not suggestions. They apply to every WHP video forever.
   first; hold experimental qualifiers and mechanism detail until after the hook.
 - **Make research events sound real because they are specific.** When supplied or verified,
   name the year and responsible institution or team in the opening. Do not flatten a known
-  attribution into generic “scientists,” and never invent a university, city, or lab.
+  attribution into generic “scientists,” and never invent a university, city, lab,
+  location, or affiliation.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
