@@ -4,7 +4,15 @@ import { annotationPlugin } from './annotations.js';
 import { lockGuardPlugin } from './lock-guard.js';
 import { proposalPlugin } from './proposals.js';
 import { revisionPlugin } from './revision.js';
+import { variantPlugin } from './variants.js';
 
 export function corePlugins(): Plugin[] {
-  return [revisionPlugin(), annotationPlugin(), proposalPlugin(), lockGuardPlugin(), history()];
+  return [
+    revisionPlugin(),
+    annotationPlugin(),
+    proposalPlugin(),
+    variantPlugin(),
+    lockGuardPlugin(),
+    history(),
+  ];
 }

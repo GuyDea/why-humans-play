@@ -15,9 +15,11 @@ export const schema = new Schema({
         timeTargetMs: { default: 30000 },
       },
       content: '(paragraph | variantSet | opaqueSection)+',
+      toDOM: () => ['section', 0] as const,
     },
     paragraph: {
       content: 'inline*',
+      toDOM: () => ['p', 0] as const,
     },
     text: {
       group: 'inline',
