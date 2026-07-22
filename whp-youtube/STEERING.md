@@ -243,6 +243,10 @@ millions on junk science).
   explicit decision to request, use, or omit Martin's experience. Never invent a memory,
   and cut autobiographical material that does not create stakes, test the idea, reveal a
   misconception, or change the viewer's route through the story.
+- **Use compact informational rewards.** Once the viewer understands a pattern, add a
+  short verified fact when its origin, scale, reversal, or consequence makes the idea
+  more useful or memorable. Keep the tidbit fast and connected to the next thought;
+  decorative trivia that slows the story does not qualify.
 - **Hand the insight back.** Every complete script gives the viewer one specific,
   evidence-bounded action, observation, or reflection, names what to notice, preserves a
   real limitation, and connects the exercise to a larger benefit. Do not disguise generic

@@ -209,3 +209,18 @@ turning the narration into a citation readout.
 this ledger. `BRAND.md`, `CLAUDE.md`, and the superseded Episode 1 production scaffold remain
 unchanged because the decision refines script attribution and evidence annotation without
 changing brand doctrine, repository authority, or the old production narration.
+
+## 2026-07-22 — Add compact informational rewards
+
+**Decision:** When a short verified fact about a concept's origin, scale, reversal, or
+consequence can deepen a WHP script without slowing it, include it as an informational
+reward after the viewer understands the pattern; omit decorative trivia.
+
+**Rationale:** A quick fact such as the original context of Goodhart's law can make an idea
+more memorable and useful while preserving the narration's momentum.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`, and this ledger.
+`BRAND.md` and `CLAUDE.md` already state the correct doctrine and authority chain and needed
+no content change. The Episode 1 production scaffold will be rebuilt separately from the
+approved rapid prototype during evidence-backed finalization.

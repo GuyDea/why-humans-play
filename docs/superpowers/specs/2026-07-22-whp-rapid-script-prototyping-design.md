@@ -191,15 +191,18 @@ workbench can capture it without contaminating the script artifact.
    or consequence the viewer can immediately picture.
 7. **Use terminology as a reward.** Demonstrate the pattern first; name concepts such as
    specification gaming or Goodhart's law only after the viewer understands them.
-8. **Make humor do explanatory work.** Build jokes from the mechanism, pursue the stronger
+8. **Add useful informational rewards.** When a compact verified fact can deepen the
+   concept without slowing the story, add one about its origin, scale, reversal, or
+   consequence. Keep it connected to the next thought; omit decorative trivia.
+9. **Make humor do explanatory work.** Build jokes from the mechanism, pursue the stronger
    second or third beat, and prefer specific consequences over cryptic cleverness.
-9. **Escalate the stakes.** Move from the funny incident to ordinary experience and then
+10. **Escalate the stakes.** Move from the funny incident to ordinary experience and then
    to the larger system without abandoning the central idea.
-10. **Write for speech.** Use short sentences, controlled density, contrast, repetition,
+11. **Write for speech.** Use short sentences, controlled density, contrast, repetition,
     callbacks, and recurring language that gives the narration a spine.
-11. **Make every paragraph earn its place.** It must create curiosity, laughter, or
+12. **Make every paragraph earn its place.** It must create curiosity, laughter, or
     insight; the strongest paragraphs do more than one.
-12. **Let research support the story.** Evidence determines what may be claimed, not the
+13. **Let research support the story.** Evidence determines what may be claimed, not the
     order in which the viewer must hear the research process.
 
 ## Rapid quality check
@@ -219,6 +222,8 @@ Before returning a prototype or refinement, check only:
 - Does a research-event opening name the known year and institution without inventing a
   location or affiliation?
 - Does each substantial abstraction receive a concrete example?
+- When a compact origin, scale, reversal, or consequence fact would deepen the idea, is
+  it included briefly and connected to the story rather than used as decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
 - Would the copy sound natural aloud?
 - Did any factual specificity get invented?
@@ -267,6 +272,8 @@ then pass after implementation.
   team when available without inventing a location or affiliation.
 - Phase 2 maps every factual narration statement to an adjacent, non-spoken `F-###` claim
   entry while Phase 1 remains free of source markup by default.
+- The rapid method adds a compact verified informational tidbit when it deepens a concept
+  without slowing the story and rejects decorative trivia.
 - Requested iteration telemetry reports per-task elapsed time and runtime token usage when
   exposed, otherwise `unavailable`, without entering the narration.
 - Phase 2 still routes every existing evidence, rights, format, rubric, and validation
