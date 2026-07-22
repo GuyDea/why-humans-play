@@ -3,6 +3,9 @@ import { Schema } from 'prosemirror-model';
 export const schema = new Schema({
   nodes: {
     doc: {
+      attrs: {
+        format: { default: 'annotated' },
+      },
       content: 'beat+',
     },
     beat: {
