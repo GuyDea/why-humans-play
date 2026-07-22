@@ -63,6 +63,15 @@ export const schema = new Schema({
       },
       inclusive: false,
       excludes: '',
+      parseDOM: [{
+        tag: 'span.locked[data-lock-id]',
+        getAttrs: (element) => ({ lockId: element.getAttribute('data-lock-id') }),
+      }],
+      toDOM: (mark) => [
+        'span',
+        { class: 'locked', 'data-lock-id': mark.attrs.lockId },
+        0,
+      ] as const,
     },
   },
 });

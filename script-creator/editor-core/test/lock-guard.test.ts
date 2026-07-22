@@ -1,6 +1,8 @@
 import { undo } from 'prosemirror-history';
+import { EditorView } from 'prosemirror-view';
 import { describe, expect, it } from 'vitest';
 import { getLocks, lockRange, lockedText, unlockRange } from '../src/lock-guard.js';
+import { variantNodeViews } from '../src/node-views.js';
 import { getRevision } from '../src/revision.js';
 import { beatNode, docOf, deleteRange, insertText, para, posOfText, stateOf } from './builders.js';
 
@@ -13,6 +15,15 @@ function locked(stateDoc = docOf(beatNode('B', para('alpha beta gamma'), para('d
 }
 
 describe('LockGuard', () => {
+  it('renders a locked range with its lock id', () => {
+    const { state } = locked();
+    const view = new EditorView(document.createElement('div'), { state, nodeViews: variantNodeViews });
+    const lock = view.dom.querySelector('span.locked');
+    expect(lock).not.toBeNull();
+    expect(lock?.getAttribute('data-lock-id')).toBe('L1');
+    view.destroy();
+  });
+
   it('locks a cross-paragraph range and rejects edits inside it', () => {
     let { state } = locked();
     const before = lockedText(state, 'L1');
