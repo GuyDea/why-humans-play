@@ -846,6 +846,8 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn("Beat-matched production appendix", format_text)
         self.assertRegex(template, r"(?m)^## 1\. ")
         self.assertIn("\n## Appendix\n", template)
+        appendix = template.split("\n## Appendix\n", 1)[1]
+        self.assertTrue(appendix.lstrip().startswith("### Script metadata\n"))
         main_script = template.split("\n## Appendix\n", 1)[0]
         for forbidden in (
             "**Status:**",

@@ -14,12 +14,6 @@
 
 ## Appendix
 
-### Template note
-
-This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,
-replace its assignment-specific content, and independently recheck every live source,
-locator, license, and claim before production.
-
 ### Script metadata
 
 - **Status:** RESEARCH-DRAFT
@@ -38,6 +32,12 @@ locator, license, and claim before production.
 - **Payoff:** Play-like behavior does not require a mammalian brain.
 - **Evidence review:** Primary paper checked; interpretation remains bounded.
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
+
+### Template note
+
+This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,
+replace its assignment-specific content, and independently recheck every live source,
+locator, license, and claim before production.
 
 ### Beat 01 — The detour
 - **Time:** 00:00–00:30

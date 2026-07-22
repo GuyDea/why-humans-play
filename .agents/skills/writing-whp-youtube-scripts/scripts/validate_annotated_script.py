@@ -257,6 +257,9 @@ def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
     appendix_text = text[appendix_heading.end() :]
     masked_appendix = masked[appendix_heading.end() :]
 
+    if re.search(r"^## [^#\r\n]", masked_appendix, re.MULTILINE):
+        errors.append("Appendix may not contain additional level-two headings.")
+
     beat_matches = list(NUMBERED_BEAT_HEADING_RE.finditer(masked_narration))
     candidate_starts = {
         match.start() for match in NUMBERED_BEAT_CANDIDATE_RE.finditer(masked_narration)
@@ -276,7 +279,19 @@ def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
         return text, errors
 
     preamble = narration_text[: beat_matches[0].start()]
-    preamble_without_h1 = re.sub(r"^# [^\r\n]+\r?\n?", "", preamble, count=1)
+    h1_matches = list(re.finditer(r"^# [^#\r\n]\S?.*$", preamble, re.MULTILINE))
+    first_non_whitespace = re.search(r"\S", preamble)
+    if (
+        len(h1_matches) != 1
+        or first_non_whitespace is None
+        or h1_matches[0].start() != first_non_whitespace.start()
+    ):
+        errors.append("Document must begin with exactly one H1 episode heading.")
+    preamble_without_h1 = (
+        preamble[: h1_matches[0].start()] + preamble[h1_matches[0].end() :]
+        if h1_matches
+        else preamble
+    )
     if preamble_without_h1.strip():
         errors.append(
             "Only the episode H1 may appear before the first numbered narration beat."
@@ -319,6 +334,16 @@ def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
         errors.append("Numbered narration beats must be strictly ascending.")
 
     appendix_blocks = _level_three_blocks(appendix_text, masked_appendix)
+    appendix_names = [name for name, _ in appendix_blocks]
+    if not appendix_names or appendix_names[0] != "Script metadata":
+        errors.append("Script metadata must be the first appendix section.")
+    if (
+        "References and source materials" in appendix_names
+        and appendix_names[-1] != "References and source materials"
+    ):
+        errors.append(
+            "References and source materials must be the final appendix section."
+        )
     metadata_blocks = [body for name, body in appendix_blocks if name == "Script metadata"]
     reference_blocks = [
         body for name, body in appendix_blocks if name == "References and source materials"

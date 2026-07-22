@@ -530,6 +530,58 @@ class ValidatorTests(unittest.TestCase):
             "Appendix beat mappings must match the narration beat numbers and titles",
         )
 
+    def test_appendix_format_requires_episode_h1(self) -> None:
+        document = replace_exact(APPENDIX_DOCUMENT, "# Why Bees Roll Balls\n\n", "")
+        self.assert_error(
+            document,
+            "Document must begin with exactly one H1 episode heading",
+        )
+
+    def test_script_metadata_must_be_first_appendix_section(self) -> None:
+        metadata = extract_exact(
+            APPENDIX_DOCUMENT,
+            "### Script metadata\n",
+            "\n### Beat 01",
+        )
+        document = replace_exact(APPENDIX_DOCUMENT, metadata + "\n", "")
+        document = replace_exact(
+            document,
+            "\n### References and source materials",
+            "\n" + metadata + "\n### References and source materials",
+        )
+        self.assert_error(
+            document,
+            "Script metadata must be the first appendix section",
+        )
+
+    def test_references_must_end_appendix_after_beat_entries(self) -> None:
+        references = extract_exact(
+            APPENDIX_DOCUMENT,
+            "### References and source materials\n",
+            "\n#### Evidence references",
+        )
+        document = replace_exact(APPENDIX_DOCUMENT, references, "")
+        document = replace_exact(
+            document,
+            "### Beat 01 — The detour",
+            references + "\n### Beat 01 — The detour",
+        )
+        self.assert_error(
+            document,
+            "References and source materials must be the final appendix section",
+        )
+
+    def test_appendix_rejects_nested_level_two_headings(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "## Appendix\n\n",
+            "## Appendix\n\n## Rogue production section\n\n",
+        )
+        self.assert_error(
+            document,
+            "Appendix may not contain additional level-two headings",
+        )
+
     def test_full_script_contract_is_document_wide_across_beats(self) -> None:
         self.assertEqual(validate_document(TWO_BEAT_DOCUMENT), [])
 

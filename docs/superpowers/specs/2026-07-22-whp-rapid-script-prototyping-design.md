@@ -96,9 +96,9 @@ could cost context requires Martin's review; the audit does not authorize the re
 Extract the material factual claims from the approved prototype, gather or refresh their
 evidence, and let confidence control the final wording. Remove, narrow, or replace claims
 that cannot be supported while preserving the approved rhythm and point whenever possible.
-Map every factual narration sentence or separable factual clause to an adjacent `F-###`
-claim entry that quotes the supported wording. Keep these source markers outside spoken
-narration and omit them from Phase 1 unless Martin explicitly requests them.
+Map every factual narration sentence or separable factual clause to an `F-###` claim entry
+in the matching appendix beat that quotes the supported wording. Keep these source markers
+outside spoken narration and omit them from Phase 1 unless Martin explicitly requests them.
 
 Then add the production structure, resolve personal input and viewer application, plan
 visuals and rights, run the editorial audits, inspect runtime and retention, validate the
