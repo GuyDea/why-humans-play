@@ -1196,3 +1196,38 @@ a hypothetical fallback from preferred evidence, or consistently complete the ch
 the improved number to the specific damaged goal and person who absorbed the cost. This was
 the failing behavior used to write the new deterministic consequence-chain contracts before
 the guidance changed.
+
+### Post-change semantic forward test
+
+A fresh agent then received the same neutral request, with no access to the baseline,
+evaluation record, implementation diff, or Episode 1:
+
+```text
+Imagine a school wants students to learn, so it tracks test scores. Sensible.
+
+Then the score becomes the target. Teachers drill the exact test format. Students master the ancient scholarly art of guessing “C.” Scores rise, understanding doesn’t, and the school produces world-class bubble-coloring specialists.
+
+Now imagine a customer-service team measured by call length. The real goal is solving problems. But if shorter calls earn rewards, agents learn that fixing your bill is optional; getting you off the phone is essential.
+
+“Have you tried turning your entire life off and on again?”
+
+Click.
+
+Call times fall. The dashboard glows green. Customers call back furious, and the agents inherit the fury.
+
+That’s Goodhart’s law: when a measure becomes a target, it stops being a good measure. The test score was meant to represent learning. Call length was meant to represent efficiency. Once rewards were attached, people started playing for the number instead of the goal.
+
+So whenever a metric looks spectacular, ask: what was this number supposed to represent—and what behavior does rewarding it invite?
+
+If the score is winning while the real goal is losing, you’re keeping score of the wrong game.
+```
+
+**Verdict:** PASS for the intended refinement. Because the neutral prompt supplied no factual
+anchor for a named school or customer-service case and rapid mode forbids invented
+specificity, the agent correctly used and twice labeled hypothetical fallbacks with
+“Imagine.” Each example now completes the
+consequence chain: learning or resolution is the goal; test score or call length is the
+measure; drilling or ending calls is the changed behavior; the number improves; and students,
+customers, and agents absorb the stated cost. Humor remains attached to the mechanism, and a
+declarative final line closes the lesson. This single run demonstrates the revised behavior;
+it does not guarantee compliance by every future model.

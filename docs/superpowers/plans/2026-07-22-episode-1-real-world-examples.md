@@ -73,14 +73,14 @@ Run the annotated-script validator against the absolute episode path. Expected: 
 **Files:**
 - Modify if needed: `docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`
 
-- [ ] **Step 1: Repeat the neutral semantic scenario with the revised skill**
+- [x] **Step 1: Repeat the neutral semantic scenario with the revised skill**
 
 Use the same request as the baseline: explain Goodhart's law through funny school and customer-service examples without explicitly requesting impacts. Confirm the output now seeks or flags real-world grounding and states the damaged goal and affected person rather than stopping at the joke.
 
-- [ ] **Step 2: Run full deterministic verification**
+- [x] **Step 2: Run full deterministic verification**
 
 Run the full skill-package tests, all annotated-script validator tests, the skill-creator validator, the Episode 1 structural validator, `git diff --check`, and a stale-language search for the old promise, opaque callback, and question-only ending.
 
-- [ ] **Step 3: Review and commit any evaluation update**
+- [x] **Step 3: Review and commit any evaluation update**
 
 Inspect the full task diff, preserve unrelated files, and commit the semantic result separately if the evidence record changed.
