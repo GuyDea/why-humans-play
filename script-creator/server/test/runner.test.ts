@@ -7,7 +7,6 @@ import { EventLog } from '../src/event-log.js';
 import { jobPaths, readStatus } from '../src/runner-status.js';
 import type { JobEnvelope } from '../src/types.js';
 
-const TSX = join(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx');
 const RUNNER = join(import.meta.dirname, '..', 'src', 'runner.ts');
 const FAKE = join(import.meta.dirname, 'fake-codex.mjs');
 
@@ -23,7 +22,7 @@ export function makeJobDir(envelope: Partial<JobEnvelope>): string {
 
 export function runRunner(jobDir: string, mode = 'happy'): Promise<number> {
   return new Promise((resolve) => {
-    const child = spawn(TSX, [RUNNER, jobDir], {
+    const child = spawn(process.execPath, ['--import', 'tsx', RUNNER, jobDir], {
       env: { ...process.env, FAKE_CODEX_MODE: mode },
       stdio: 'ignore',
     });

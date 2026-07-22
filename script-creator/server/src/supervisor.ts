@@ -7,8 +7,11 @@ import type { JobStore } from './job-store.js';
 import { jobPaths, readStatus } from './runner-status.js';
 import type { CodexEvent, JobEnvelope, JobRecord } from './types.js';
 
-const TSX = join(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx');
 const RUNNER = join(import.meta.dirname, 'runner.ts');
+
+function isPidAlive(pid: number): boolean {
+  try { process.kill(pid, 0); return true; } catch { return false; }
+}
 
 export class JobSupervisor {
   readonly store: JobStore;
@@ -54,7 +57,15 @@ export class JobSupervisor {
     }
   }
 
-  reattach(): void { throw new Error('not implemented'); }
+  reattach(): void {
+    for (const job of this.store.runningJobs()) {
+      const status = readStatus(jobPaths(job.jobDir).statusFile);
+      if (!status) { this.store.setState(job.id, 'interrupted', 'no status file'); continue; }
+      if (status.state !== 'running') continue; // next tick reconciles terminal states
+      if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
+      // alive → periodic tick keeps tailing; nothing else to do
+    }
+  }
   cancel(_jobId: string): void { throw new Error('not implemented'); }
   resume(_interruptedJobId: string): string { throw new Error('not implemented'); }
 
@@ -71,7 +82,7 @@ export class JobSupervisor {
   private launchNext(): void {
     const next = this.store.nextQueued();
     if (!next) return;
-    const child = spawn(TSX, [RUNNER, next.jobDir], {
+    const child = spawn(process.execPath, ['--import', 'tsx', RUNNER, next.jobDir], {
       detached: true, stdio: 'ignore',
       env: { ...process.env, ...this.extraEnv },
     });
@@ -84,7 +95,10 @@ export class JobSupervisor {
       const status = readStatus(jobPaths(job.jobDir).statusFile);
       if (!status) continue;
       if (status.threadId && !job.threadId) this.store.setThreadId(job.id, status.threadId);
-      if (status.state === 'running') continue;
+      if (status.state === 'running') {
+        if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
+        continue;
+      }
       this.store.recordUsage(job.id, status.usage);
       if (status.state === 'completed') this.store.setState(job.id, 'completed');
       else if (status.state === 'cancelled') this.store.setState(job.id, 'cancelled');

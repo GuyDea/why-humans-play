@@ -3,9 +3,8 @@ import { join } from 'node:path';
 
 const jobDir = process.argv[2];
 const mode = process.argv[3] ?? 'slow';
-const tsx = join(import.meta.dirname, '..', 'node_modules', '.bin', 'tsx');
 const runner = join(import.meta.dirname, '..', 'src', 'runner.ts');
-const child = spawn(tsx, [runner, jobDir], {
+const child = spawn(process.execPath, ['--import', 'tsx', runner, jobDir], {
   detached: true, stdio: 'ignore',
   env: { ...process.env, FAKE_CODEX_MODE: mode },
 });

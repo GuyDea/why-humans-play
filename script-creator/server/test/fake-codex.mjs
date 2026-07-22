@@ -38,7 +38,7 @@ for (const e of lines) {
   writeSync(process.stdout.fd, JSON.stringify(e) + '\n');
   emitted += 1;
   if (mode === 'malformed-json' && emitted === 2) writeSync(process.stdout.fd, '{broken\n');
-  if (mode === 'hang' && emitted === 2) { await new Promise(() => {}); }
+  if (mode === 'hang' && emitted === 2) { setInterval(() => {}, 60_000); await new Promise(() => {}); }
   await new Promise((r) => setTimeout(r, delay));
   if (mode === 'ignore-sigint' && emitted === 2) {
     await new Promise((r) => setTimeout(r, 60_000)); // survives SIGINT; SIGKILL only
