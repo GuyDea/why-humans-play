@@ -19,6 +19,17 @@ interface InsertBlockVariantSetOptions {
   options: BlockVariantOptionInput[];
 }
 
+interface InlineVariantOptionInput {
+  label: string;
+  text: string;
+}
+
+interface InsertInlineVariantSetOptions {
+  variantId: string;
+  at: number;
+  options: InlineVariantOptionInput[];
+}
+
 interface LocatedVariantSet {
   node: ProseMirrorNode;
   pos: number;
@@ -33,12 +44,15 @@ type Dispatch = (transaction: Transaction) => void;
 
 const parkingLotKey = new PluginKey<readonly ParkingLotEntry[]>('variantParkingLot');
 
-function findBlockVariantSet(state: EditorState, variantId: string): LocatedVariantSet | undefined {
+function findVariantSet(state: EditorState, variantId: string): LocatedVariantSet | undefined {
   let found: LocatedVariantSet | undefined;
 
   state.doc.descendants((node, pos) => {
     if (found !== undefined) return false;
-    if (node.type.name === 'variantSet' && node.attrs.variantId === variantId) {
+    if (
+      (node.type.name === 'variantSet' || node.type.name === 'inlineVariantSet')
+      && node.attrs.variantId === variantId
+    ) {
       found = { node, pos };
       return false;
     }
@@ -48,10 +62,26 @@ function findBlockVariantSet(state: EditorState, variantId: string): LocatedVari
   return found;
 }
 
-function activeOption(node: ProseMirrorNode): ProseMirrorNode | undefined {
+function inlineOptions(node: ProseMirrorNode): InlineVariantOptionInput[] | undefined {
+  const options: unknown = node.attrs.options;
+  if (!Array.isArray(options) || !options.every((option) => (
+    typeof option === 'object' && option !== null
+    && 'label' in option && typeof option.label === 'string'
+    && 'text' in option && typeof option.text === 'string'
+  ))) return undefined;
+  return options;
+}
+
+function optionCount(node: ProseMirrorNode): number {
+  return node.type.name === 'inlineVariantSet'
+    ? inlineOptions(node)?.length ?? 0
+    : node.childCount;
+}
+
+function activeIndex(node: ProseMirrorNode): number | undefined {
   const activeIndex = node.attrs.activeIndex;
-  return Number.isInteger(activeIndex) && activeIndex >= 0 && activeIndex < node.childCount
-    ? node.child(activeIndex)
+  return Number.isInteger(activeIndex) && activeIndex >= 0 && activeIndex < optionCount(node)
+    ? activeIndex as number
     : undefined;
 }
 
@@ -103,15 +133,38 @@ export function insertBlockVariantSet(
   return true;
 }
 
+export function insertInlineVariantSet(
+  state: EditorState,
+  dispatch: Dispatch | undefined,
+  input: InsertInlineVariantSetOptions,
+): boolean {
+  const inlineVariantSetType = state.schema.nodes.inlineVariantSet;
+  if (inlineVariantSetType === undefined || input.at < 0 || input.at > state.doc.content.size ||
+      input.options.length === 0) return false;
+
+  const $at = state.doc.resolve(input.at);
+  if (!$at.parent.canReplaceWith($at.index(), $at.index(), inlineVariantSetType)) return false;
+
+  const inlineVariantSet = inlineVariantSetType.createChecked({
+    variantId: input.variantId,
+    activeIndex: 0,
+    settled: false,
+    options: input.options.map((option) => ({ ...option })),
+  });
+
+  dispatch?.(state.tr.insert(input.at, inlineVariantSet));
+  return true;
+}
+
 export function setActive(
   state: EditorState,
   dispatch: Dispatch | undefined,
   variantId: string,
   index: number,
 ): boolean {
-  const variant = findBlockVariantSet(state, variantId);
+  const variant = findVariantSet(state, variantId);
   if (variant === undefined || !Number.isInteger(index) || index < 0 ||
-      index >= variant.node.childCount) return false;
+      index >= optionCount(variant.node)) return false;
 
   if (variant.node.attrs.activeIndex !== index) {
     dispatch?.(state.tr.setNodeMarkup(variant.pos, undefined, {
@@ -127,26 +180,44 @@ export function pickActive(
   dispatch: Dispatch | undefined,
   variantId: string,
 ): boolean {
-  const variant = findBlockVariantSet(state, variantId);
+  const variant = findVariantSet(state, variantId);
   if (variant === undefined) return false;
 
-  const chosen = activeOption(variant.node);
-  if (chosen === undefined) return false;
+  const selectedIndex = activeIndex(variant.node);
+  if (selectedIndex === undefined) return false;
 
-  const activeIndex = variant.node.attrs.activeIndex as number;
   const entries: ParkingLotEntry[] = [];
-  variant.node.forEach((option, _offset, index) => {
-    if (index !== activeIndex) {
-      entries.push({
-        variantId,
-        label: String(option.attrs.label ?? ''),
-        text: option.textContent,
-      });
-    }
-  });
+  let replacement: ProseMirrorNode | ProseMirrorNode['content'] | readonly ProseMirrorNode[];
+
+  if (variant.node.type.name === 'inlineVariantSet') {
+    const options = inlineOptions(variant.node);
+    const chosen = options?.[selectedIndex];
+    if (options === undefined || chosen === undefined) return false;
+
+    options.forEach((option, index) => {
+      if (index !== selectedIndex) {
+        entries.push({ variantId, label: option.label, text: option.text });
+      }
+    });
+    replacement = chosen.text === '' ? [] : state.schema.text(chosen.text);
+  } else {
+    const chosen = variant.node.maybeChild(selectedIndex);
+    if (chosen === null) return false;
+
+    variant.node.forEach((option, _offset, index) => {
+      if (index !== selectedIndex) {
+        entries.push({
+          variantId,
+          label: String(option.attrs.label ?? ''),
+          text: option.textContent,
+        });
+      }
+    });
+    replacement = chosen.content;
+  }
 
   const transaction = closeHistory(state.tr
-    .replaceWith(variant.pos, variant.pos + variant.node.nodeSize, chosen.content)
+    .replaceWith(variant.pos, variant.pos + variant.node.nodeSize, replacement)
     .setMeta(parkingLotKey, {
       variantId,
       entries,
