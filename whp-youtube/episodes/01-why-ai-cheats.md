@@ -18,8 +18,8 @@
 >
 > So how do you catch that gap before a polished answer sends you in the wrong direction?
 >
-> By the end, you’ll know four questions you can ask an AI to make sure its answer solved
-> your real problem.
+> By the end, you’ll know four questions you can ask an AI to check whether its answer
+> addresses your real problem.
 
 ## 2. The rule beneath the joke
 
@@ -62,7 +62,7 @@
 > In 2011, a Georgia investigation found cheating at 44 of the 56 Atlanta schools it
 > examined. Teachers and principals had altered answer sheets.
 >
-> The schools promised critical thinking. The adults became extremely good at critically
+> The multiple-choice joke had become a real scandal. This time, the adults were critically
 > choosing between A, B, C, and D.
 >
 > Scores looked better. But some children who should have received extra help missed it.
@@ -108,6 +108,8 @@
 > Try those questions on one low-risk request. Use the replies to make your hidden goal
 > visible: “Keep it warm. Preserve my meaning. Flag uncertainty. Do not invent facts.”
 >
+> Then ask the AI to revise its original answer around that clearer goal.
+>
 > Compare the answers. Notice what changes when you name the missing goal.
 >
 > Treat the AI’s replies as clues, not proof. A fluent self-review does not prove
@@ -128,12 +130,12 @@
 - **Version:** 1.3
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 03:00
-- **Word count:** 808
+- **Word count:** 823
 - **Audience:** Curious adults who use AI but do not need AI-safety jargon
 - **Episode mode:** The Hidden Game
 - **Title:** Why AI Cheats—Even When It Follows Every Rule
 - **Thumbnail promise:** A flipped block beside a conceptual green pass and the words “100% WRONG”
-- **Viewer promise:** Learn four questions to ask an AI to make sure its answer addresses the real problem rather than only satisfying the visible instruction.
+- **Viewer promise:** Learn four questions to ask an AI to check whether its answer addresses the real problem rather than only satisfying the visible instruction.
 - **Useful viewer change:** Ask an AI to surface its interpretation, assumptions, missing constraints, and likely shortcut; make the hidden goal explicit; then verify the result rather than treating the AI’s self-review as proof.
 - **Central question:** How can an AI follow the rule it was given and still produce the wrong result?
 - **Thesis:** A system can satisfy a measurable instruction while missing an intended outcome that the instruction failed to capture.
@@ -203,7 +205,7 @@ concept after demonstrating it, and pivot from AI to human incentives.
 - “SIMULATION” · “GOAL: FINISHED STACK” · “TRACKED: BOTTOM-FACE HEIGHT” · “SPECIFICATION GAMING.”
 
 #### Audio / accessibility
-- Use presenter voice and direct tabletop sound; give “The reward arrived. The stack did not.” a clean pause.
+- Use presenter voice and direct tabletop sound; give “The humans had written an incomplete stand-in for the real goal” a clean pause.
 - Descriptive transcript: the diagram marks the tracked bottom face and holds the rewarded flip beside the incomplete target state, with shape labels independent of color.
 
 #### Assets
@@ -324,7 +326,7 @@ question.
 
 #### Viewer application
 - **Insight:** An AI answer can satisfy the visible instruction while missing an important goal that remained unstated.
-- **Try:** Ask the four questions on one low-risk request, then add the desired outcome, qualities to preserve, uncertainty behavior, and factual boundary.
+- **Try:** Ask the four questions on one low-risk request, add the desired outcome, qualities to preserve, uncertainty behavior, and factual boundary, then ask the AI to revise its original answer around that clearer goal.
 - **Observe:** Compare the first and revised answers, noticing what changes when the missing goal becomes explicit.
 - **Boundary:** The AI’s self-review is a clue, not proof of correctness, intent, or hidden reasoning; the comparison cannot guarantee a correct answer or diagnose why it changed.
 - **Larger benefit:** The viewer can verify the result against reality and stop, revise, or choose another method before relying on an answer that still misses the goal.
@@ -414,7 +416,7 @@ question.
 - **Accessed:** 2026-07-22
 - **Scope:** Campbell addressed quantitative social indicators used in consequential decision-making and described susceptibility to corruption pressure and process distortion. The wording does not make corruption inevitable in every measure or by itself prove the mechanism of the Atlanta or Wells Fargo cases.
 - **Cross-checks:** https://jmde.journals.publicknowledgeproject.org/index.php/jmde_1/article/download/297/292/988 — full 41-page authorized reprint; https://eric.ed.gov/?id=ED303512 — ERIC catalog record for the December 1976 occasional paper.
-- **Contradictions:** JMDE article record (Original URL) — COMPLETE — [article metadata and abstract checked; establishes Campbell, the title, December 1976 origin, authorized-reprint status, and article pagination; retain `VERIFIED` for attribution and publication context]; JMDE full-text reprint (Cross-check) — COMPLETE — [all 41 PDF pages checked, especially reprint pages 34–36; directly supports corruption pressure, indicator distortion, and process distortion, while Campbell labels his evidence predominantly anecdotal; retain bounded paraphrase and no inevitability claim]; ERIC record (Cross-check) — COMPLETE — [full catalog entry checked; independently supports author, title, December 1976 date, occasional-paper number, and length, but not the exact wording; no conflict located in the metadata].
+- **Contradictions:** JMDE article record (Original URL) — COMPLETE — [article metadata and abstract checked; establishes Campbell, the title, December 1976 origin, authorized-reprint status, and article pagination; retain `VERIFIED` for attribution and publication context]; JMDE full-text reprint (Cross-check) — COMPLETE — [complete PDF text searched for conflicting origin, date, scope, and causality wording, with reprint pages 34–36 checked directly; supports corruption pressure, indicator distortion, and process distortion, while Campbell labels his evidence predominantly anecdotal; retain bounded paraphrase and no inevitability claim]; ERIC record (Cross-check) — COMPLETE — [full catalog entry checked; independently supports author, title, December 1976 date, occasional-paper number, and length, but not the exact wording; no conflict located in the metadata].
 - **Status:** VERIFIED
 - **Caveat:** Narration paraphrases the law and says pressure “can” corrupt the number and process. It does not claim that every consequential metric fails or that Campbell analyzed the two modern cases used in the episode.
 - **Approved wording:** “Donald Campbell warned about this harsher version: when a social measure controls decisions, pressure can corrupt the number and the process behind it.”
@@ -442,7 +444,7 @@ question.
 - **Accessed:** 2026-07-22
 - **Scope:** The order covers Wells Fargo’s Community Bank Regional Bank Branch Network from January 1, 2011 through September 8, 2016. Wells Fargo consented to the order without admitting or denying the factual findings and legal conclusions except jurisdiction; narration therefore attributes the account, incentives, and harm to the CFPB.
 - **Cross-checks:** https://www.consumerfinance.gov/archive/newsroom/consumer-financial-protection-bureau-fines-wells-fargo-100-million-widespread-illegal-practice-secretly-opening-unauthorized-accounts/ — CFPB release summarizing the same enforcement action, including sales targets, compensation incentives, unauthorized accounts, transferred funds, and fees. It is dependent on the consent order, not an independent evidence chain.
-- **Contradictions:** CFPB consent order (Original URL) — COMPLETE — [all 26 pages checked, especially pages 1–6; supports the attributed sales goals, incentive program, unauthorized accounts, transferred funds, and fee findings, while paragraph 2 preserves the no-admission/no-denial stipulation; retain `REPORTED` and audible CFPB attribution]; CFPB release (Cross-check) — COMPLETE — [full release checked; supports the same attributed incentive, account, transfer, and fee claims; it summarizes the same action and adds no independent chain].
+- **Contradictions:** CFPB consent order (Original URL) — COMPLETE — [complete order text searched for conflicting date, scope, causality, and admission wording, with pages 1–9 and the relevant stipulation and findings checked directly; supports the attributed sales goals, incentive program, unauthorized accounts, transferred funds, and fee findings, while paragraph 2 preserves the no-admission/no-denial stipulation; retain `REPORTED` and audible CFPB attribution]; CFPB release (Cross-check) — COMPLETE — [full release checked; supports the same attributed incentive, account, transfer, and fee claims; it summarizes the same action and adds no independent chain].
 - **Status:** REPORTED
 - **Caveat:** Keep “the Consumer Financial Protection Bureau reported” audible. Do not state that every employee participated, that every customer paid a fee, or that the consent order was an admission of all findings.
 - **Approved wording:** “In 2016, the Consumer Financial Protection Bureau reported a Wells Fargo version. The goal was more customer business. The target was more accounts. Sales incentives pushed employees to open accounts customers had not authorized. Some had money moved without permission and paid fees.”

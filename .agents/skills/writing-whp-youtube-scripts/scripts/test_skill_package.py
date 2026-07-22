@@ -621,9 +621,15 @@ class SkillPackageTests(unittest.TestCase):
             if line.startswith(">")
         )
         self.assertIn(
-            "By the end, you will know four questions you can ask an AI to make "
-            "sure its answer solved your real problem.",
+            "By the end, you will know four questions you can ask an AI to check "
+            "whether its answer addresses your real problem.",
             spoken_example,
+        )
+        self.assertIn(
+            "When the promise asks an AI to help audit its own answer, describe the "
+            "questions as a way to surface gaps or help check the result, not as proof "
+            "that the answer is correct.",
+            " ".join(rapid.split()),
         )
 
     def test_phase_two_maps_each_factual_statement_to_an_adjacent_source(self) -> None:

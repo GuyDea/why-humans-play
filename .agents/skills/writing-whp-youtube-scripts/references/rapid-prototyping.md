@@ -115,6 +115,10 @@ Write the by-end promise as a literal learning contract. Keep jokes, comic image
 metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
 promise, but it must not complicate what the viewer will learn.
 
+When the promise asks an AI to help audit its own answer, describe the questions as a way to
+surface gaps or help check the result, not as proof that the answer is correct. Preserve that
+boundary when the application later explains what the viewer still has to verify.
+
 For every generated episode opening or full narration, state the by-end promise inside the
 opening; a later takeaway does not substitute for it.
 
@@ -232,7 +236,7 @@ The supplied facts establish the outcome mismatch, not its mechanism.
 > Funny. But those facts leave a serious question: if an AI can receive a reward without
 > completing the intended task, how often can a polished AI answer solve the sentence you
 > typed while quietly missing the thing you meant? By the end, you will know four questions
-> you can ask an AI to make sure its answer solved your real problem.
+> you can ask an AI to check whether its answer addresses your real problem.
 
 The example demonstrates structure, not an independently verified source. Do not carry its
 year or event into another script unless the user's brief or the evidence phase supplies it.
