@@ -151,3 +151,21 @@ without duplicating the editorial workflow outside the skills.
 ledger. No application files were created. `BRAND.md` and `CLAUDE.md` needed no change
 because this is an internal authoring workflow, not a new portfolio product or a change to
 the repository authority chain.
+
+## 2026-07-22 — Permit a plain question-first opening
+
+**Decision:** A WHP episode may begin with a precise viewer-level question when it states
+the exact paradox the episode can answer, then ground that question immediately in a
+concrete event; its first two spoken sentences use simple, one-idea syntax, and provocative
+terms do not imply an unsupported mental state.
+
+**Rationale:** “How can an AI follow every rule—and still give you exactly the wrong
+result?” created immediate viewer stakes more cleanly than technical setup language while
+remaining supportable by the episode's score-versus-goal argument.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`, and this
+ledger. `BRAND.md` and `CLAUDE.md` already state the correct doctrine and authority chain.
+The active Episode 1 production scaffold remains unchanged because its narration is
+creatively superseded.

@@ -128,6 +128,13 @@ These are laws, not suggestions. They apply to every WHP video forever.
   - **5–15s — the payoff/value claim + the open loop.** Tell them what they'll walk
     away understanding, and plant the specific gap the video will close.
   - **15–30s — enter the body or deepen the loop.** Never a preamble.
+- **Use the strongest honest entry: question-first or event-first.** A precise
+  viewer-level question may be the first spoken line when it states the exact paradox the
+  episode can answer; ground it immediately in the concrete event. Do not use words such
+  as “lies,” “cheats,” or “wants” as literal claims of intent unless the evidence
+  establishes that mental state or the narration clearly marks the term as shorthand.
+- **Keep the first two spoken sentences plain.** Give each sentence one idea, use everyday
+  syntax, and replace technical compound phrases with simpler words when meaning survives.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able

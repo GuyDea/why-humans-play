@@ -154,14 +154,24 @@ Do not define a JSON protocol or stable API in this refactor. Preserve semantic 
 now so the later app design can choose transport and storage without rewriting the
 editorial workflow.
 
+When Martin requests iteration telemetry, record each visible task's elapsed time and the
+runtime-reported token usage. If the runtime exposes no token metadata, say `unavailable`;
+never manufacture a precise count. Keep telemetry outside the narration so a future
+workbench can capture it without contaminating the script artifact.
+
 ## Core creative tenets
 
 1. **Story and voice before verification.** Find a narration worth protecting before
    building its evidence and production package.
-2. **Open with a real event.** State who did what and what unexpectedly happened with
-   enough concrete detail to feel factual, but without a mechanism lecture.
+2. **Use the strongest honest entry.** Open with either the real event or a precise
+   viewer-level question the episode can answer, then ground a question-first opening
+   immediately in the event. Keep the first two spoken sentences to one idea each, use
+   everyday syntax, and avoid technical compound phrasing when simpler words preserve the
+   meaning. Do not use provocative terms as literal claims of intent unless the evidence
+   establishes that state or the narration clearly marks the term as shorthand.
 3. **Build the complete hook.** Move through:
-   `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`.
+   `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`
+   or `question → event → joke → paradox → meaning → viewer relevance → by-end promise`.
 4. **Promise an answer.** State what the viewer will understand, recognize, identify, or
    be able to do by the end. A generic tease is not a promise.
 5. **Make the human connection early.** Do not postpone why the idea matters in ordinary
@@ -186,6 +196,9 @@ editorial workflow.
 Before returning a prototype or refinement, check only:
 
 - Does the first sentence feel like a concrete event or irresistible proposition?
+- If the opening starts with a question, can the episode answer it, and does the concrete
+  event follow immediately?
+- Do the first two spoken sentences each carry one idea in plain syntax?
 - Does the opening contain a sharp comic or surprising turn?
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?
@@ -233,6 +246,10 @@ then pass after implementation.
 - The creative approval gate precedes evidence and production work.
 - The complete hook includes the consequential question, viewer relevance, and explicit
   by-end promise.
+- Question-first openings ask a supportable question, ground it immediately in the event,
+  and keep the first two spoken sentences syntactically simple.
+- Requested iteration telemetry reports per-task elapsed time and runtime token usage when
+  exposed, otherwise `unavailable`, without entering the narration.
 - Phase 2 still routes every existing evidence, rights, format, rubric, and validation
   requirement.
 - Existing validator behavior and all current package tests remain green.
