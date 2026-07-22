@@ -85,6 +85,106 @@ describe('supervisor hardening', () => {
     expect(secondStartedWhileFirstAlive).toBe(false);
   }, 30000);
 
+  it('keeps a pre-status cancellation exclusive across supervisor restart until the process group dies', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'hard-cancel-restart-'));
+    const db = join(root, 'state.sqlite3');
+    const jobsRoot = join(root, 'jobs');
+    const options = {
+      jobsRoot,
+      pollMs: 10,
+      startupGraceMs: 300,
+      env: { FAKE_CODEX_MODE: 'happy', RUNNER_STATUS_DELAY_MS: '3000' },
+    };
+    const s1 = new JobSupervisor({ store: new JobStore(db), ...options });
+    const first = s1.enqueue({
+      jobId: 'restart-cancel-first', prompt: 'p', cwd: tmpdir(), sandbox: 'read-only',
+      codexBin: FAKE, graceMs: 100,
+    });
+    const second = s1.enqueue({
+      jobId: 'restart-cancel-second', prompt: 'p', cwd: tmpdir(), sandbox: 'read-only',
+      codexBin: FAKE,
+    });
+    const runnerPid = (s1 as unknown as { spawnedPids: Map<string, number> }).spawnedPids.get(first)!;
+    expect(runnerPid).toBeGreaterThan(0);
+    process.kill(-runnerPid, 'SIGSTOP');
+
+    let s2: JobSupervisor | undefined;
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(existsSync(jobPaths(s1.store.get(first)!.jobDir).statusFile)).toBe(false);
+      s1.cancel(first);
+      expect(s1.store.get(first)!.state).toBe('cancelling');
+      s1.stop();
+
+      s2 = new JobSupervisor({ store: new JobStore(db), ...options });
+      sup = s2;
+      s2.reattach();
+
+      let observedAliveCancellation = false;
+      const deadline = Date.now() + 5000;
+      while (Date.now() < deadline) {
+        const groupAlive = isGroupAlive(runnerPid);
+        const firstState = s2.store.get(first)!.state;
+        const secondState = s2.store.get(second)!.state;
+        if (groupAlive) {
+          observedAliveCancellation = true;
+          expect(firstState).toBe('cancelling');
+          expect(secondState).toBe('queued');
+        }
+        if (!groupAlive && firstState === 'cancelled') break;
+        await new Promise((resolve) => setTimeout(resolve, 10));
+      }
+
+      expect(observedAliveCancellation).toBe(true);
+      expect((await s2.waitForTerminal(first, 5000)).state).toBe('cancelled');
+      expect(isGroupAlive(runnerPid)).toBe(false);
+    } finally {
+      try { process.kill(-runnerPid, 'SIGKILL'); } catch { /* already dead */ }
+      const secondPid = s2
+        ? (s2 as unknown as { spawnedPids: Map<string, number> }).spawnedPids.get(second)
+        : undefined;
+      if (secondPid !== undefined) {
+        try { process.kill(-secondPid, 'SIGKILL'); } catch { /* already dead */ }
+      }
+    }
+  }, 15000);
+
+  it('keeps a pre-status running job attached across supervisor restart while its launch pid is alive', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'hard-running-restart-'));
+    const db = join(root, 'state.sqlite3');
+    const jobsRoot = join(root, 'jobs');
+    const options = {
+      jobsRoot,
+      pollMs: 10,
+      startupGraceMs: 300,
+      env: { FAKE_CODEX_MODE: 'happy', RUNNER_STATUS_DELAY_MS: '3000' },
+    };
+    const s1 = new JobSupervisor({ store: new JobStore(db), ...options });
+    const id = s1.enqueue({
+      jobId: 'restart-running', prompt: 'p', cwd: tmpdir(), sandbox: 'read-only', codexBin: FAKE,
+    });
+    const runnerPid = (s1 as unknown as { spawnedPids: Map<string, number> }).spawnedPids.get(id)!;
+    expect(runnerPid).toBeGreaterThan(0);
+
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      expect(existsSync(jobPaths(s1.store.get(id)!.jobDir).statusFile)).toBe(false);
+      s1.stop();
+
+      const s2 = new JobSupervisor({ store: new JobStore(db), ...options });
+      sup = s2;
+      s2.reattach();
+      await new Promise((resolve) => setTimeout(resolve, 600));
+
+      expect(isGroupAlive(runnerPid)).toBe(true);
+      expect(existsSync(jobPaths(s2.store.get(id)!.jobDir).statusFile)).toBe(false);
+      expect(s2.store.get(id)!.state).toBe('running');
+      expect((await s2.waitForTerminal(id, 10000)).state).toBe('completed');
+    } finally {
+      try { process.kill(-runnerPid, 'SIGKILL'); } catch { /* already dead */ }
+    }
+  }, 15000);
+
   it('persists partial turn usage as wholly unavailable', async () => {
     const s = makeSupervisor({ mode: 'partial-usage' });
     const id = s.enqueue({ prompt: 'p', cwd: tmpdir(), sandbox: 'read-only', codexBin: FAKE });

@@ -40,6 +40,12 @@ const status: RunnerStatus = {
   state: 'running', pid: process.pid, pgid: process.pid,
   startedAt: new Date().toISOString(),
 };
+// Test-only hook for exercising the interval before the initial status exists.
+const requestedStatusDelayMs = Number(process.env.RUNNER_STATUS_DELAY_MS ?? 0);
+const statusDelayMs = Number.isInteger(requestedStatusDelayMs) && requestedStatusDelayMs > 0
+  ? requestedStatusDelayMs
+  : 0;
+if (statusDelayMs > 0) await new Promise<void>((resolve) => setTimeout(resolve, statusDelayMs));
 writeStatus(paths.statusFile, status);
 
 const child = spawn(bin!, args, { stdio: ['pipe', 'pipe', 'pipe'] });

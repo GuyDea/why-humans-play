@@ -4,7 +4,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { EventLog } from './event-log.js';
 import type { JobStore } from './job-store.js';
-import { jobPaths, readStatus } from './runner-status.js';
+import { jobPaths, readLaunch, readStatus, writeLaunch } from './runner-status.js';
 import { validateAgainstSchema } from './schema-validate.js';
 import type { CodexEvent, JobEnvelope, JobRecord } from './types.js';
 
@@ -43,6 +43,7 @@ export class JobSupervisor {
   private readonly timer: ReturnType<typeof setInterval>;
   private readonly spawnedPids = new Map<string, number>();
   private readonly cancellationSignals = new Set<string>();
+  private readonly cancellationEscalations = new Set<string>();
   private stopped = false;
 
   constructor(opts: {
@@ -101,18 +102,8 @@ export class JobSupervisor {
     if (job.state === 'queued') { this.store.setState(jobId, 'cancelled', 'cancelled before start'); return; }
     const status = readStatus(jobPaths(job.jobDir).statusFile);
     this.store.setState(jobId, 'cancelling');
-    this.signalCancellation(jobId, status?.pgid ?? this.spawnedPids.get(jobId));
-    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
-    const grace = (env.graceMs ?? 5000) * 2;
-    setTimeout(() => {
-      if (this.stopped) return;
-      const rec = this.store.get(jobId);
-      if (rec && rec.state === 'cancelling') {
-        const latest = readStatus(jobPaths(rec.jobDir).statusFile);
-        const pgid = latest?.pgid ?? this.spawnedPids.get(jobId);
-        if (pgid !== undefined) signalProcessGroup(pgid, 'SIGKILL');
-      }
-    }, grace).unref?.();
+    const pgid = status?.pgid ?? this.preStatusPid(job);
+    this.ensureCancellation(job, pgid);
   }
   resume(interruptedJobId: string): string {
     const job = this.store.get(interruptedJobId);
@@ -148,11 +139,15 @@ export class JobSupervisor {
       detached: true, stdio: 'ignore',
       env: { ...process.env, ...this.extraEnv },
     });
-    if (child.pid !== undefined) this.spawnedPids.set(next.id, child.pid);
+    if (child.pid !== undefined) {
+      writeLaunch(next.jobDir, { pid: child.pid, launchedAt: new Date().toISOString() });
+      this.spawnedPids.set(next.id, child.pid);
+    }
     child.on('error', (error) => {
       if (this.stopped) return;
       this.spawnedPids.delete(next.id);
       this.cancellationSignals.delete(next.id);
+      this.cancellationEscalations.delete(next.id);
       const current = this.store.get(next.id);
       if (current && ['running', 'cancelling'].includes(current.state)) {
         this.store.setState(next.id, 'failed', error.message);
@@ -166,15 +161,16 @@ export class JobSupervisor {
     for (const job of this.store.runningJobs()) {
       const status = readStatus(jobPaths(job.jobDir).statusFile);
       if (!status) {
-        const mappedPid = this.spawnedPids.get(job.id);
+        const pid = this.preStatusPid(job);
         if (job.state === 'cancelling') {
-          if (mappedPid !== undefined && !isProcessGroupAlive(mappedPid)) {
-            this.finishCancellation(job.id);
-          } else if (mappedPid === undefined && this.startupGraceExpired(job)) {
+          if (pid !== undefined) {
+            if (isProcessGroupAlive(pid)) this.ensureCancellation(job, pid);
+            else this.finishCancellation(job.id);
+          } else if (this.startupGraceExpired(job)) {
             this.finishCancellation(job.id);
           }
-        } else if (mappedPid !== undefined) {
-          if (!isPidAlive(mappedPid)) {
+        } else if (pid !== undefined) {
+          if (!isPidAlive(pid)) {
             this.spawnedPids.delete(job.id);
             this.store.setState(job.id, 'interrupted', 'runner died before writing status');
           }
@@ -186,13 +182,9 @@ export class JobSupervisor {
       if (status.threadId && !job.threadId) this.store.setThreadId(job.id, status.threadId);
 
       if (job.state === 'cancelling') {
-        if (status.state === 'running') {
-          this.signalCancellation(job.id, status.pgid);
-          if (!isProcessGroupAlive(status.pgid)) this.finishCancellation(job.id);
-        } else {
-          this.store.recordUsage(job.id, status.usage);
-          if (!isProcessGroupAlive(status.pgid)) this.finishCancellation(job.id);
-        }
+        if (status.state !== 'running') this.store.recordUsage(job.id, status.usage);
+        if (isProcessGroupAlive(status.pgid)) this.ensureCancellation(job, status.pgid);
+        else this.finishCancellation(job.id);
         continue;
       }
 
@@ -227,6 +219,27 @@ export class JobSupervisor {
     return Date.now() - Date.parse(job.startedAt ?? job.createdAt) > this.startupGraceMs;
   }
 
+  private preStatusPid(job: JobRecord): number | undefined {
+    return this.spawnedPids.get(job.id) ?? readLaunch(job.jobDir)?.pid;
+  }
+
+  private ensureCancellation(job: JobRecord, pgid: number | undefined): void {
+    if (pgid === undefined) return;
+    this.signalCancellation(job.id, pgid);
+    if (this.cancellationEscalations.has(job.id)) return;
+    this.cancellationEscalations.add(job.id);
+    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+    const grace = (env.graceMs ?? 5000) * 2;
+    setTimeout(() => {
+      if (this.stopped) return;
+      const current = this.store.get(job.id);
+      if (!current || current.state !== 'cancelling') return;
+      const status = readStatus(jobPaths(current.jobDir).statusFile);
+      const currentPgid = status?.pgid ?? this.preStatusPid(current);
+      if (currentPgid !== undefined) signalProcessGroup(currentPgid, 'SIGKILL');
+    }, grace).unref?.();
+  }
+
   private signalCancellation(jobId: string, pgid: number | undefined): void {
     if (pgid === undefined || this.cancellationSignals.has(jobId)) return;
     this.cancellationSignals.add(jobId);
@@ -236,6 +249,7 @@ export class JobSupervisor {
   private finishCancellation(jobId: string): void {
     this.spawnedPids.delete(jobId);
     this.cancellationSignals.delete(jobId);
+    this.cancellationEscalations.delete(jobId);
     this.store.setState(jobId, 'cancelled');
   }
 
