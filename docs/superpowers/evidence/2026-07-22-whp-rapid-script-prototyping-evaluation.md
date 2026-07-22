@@ -1164,3 +1164,35 @@ Runtime-reported model token counts were unavailable for every task.
 
 The token counts are marked unavailable rather than estimated. Artifact word counts are
 reported separately and are not presented as model-usage telemetry.
+
+## Real-world consequence-chain refinement
+
+### Pre-change semantic baseline
+
+Before changing the example guidance, a fresh agent received this neutral request:
+
+```text
+Write a short WHP narration explaining Goodhart's law through a school and a
+customer-service example. Make examples funny.
+```
+
+Its complete output was:
+
+```text
+A school wants students to learn, so it measures test scores. Sensible. Then it makes higher scores the target.
+
+Now the hidden game changes. The goal is no longer “understand the subject.” It’s “make the number go up.” Lessons become exam rehearsals. Students master the ancient academic art of remembering everything until 10:02 on Tuesday. Scores rise; understanding quietly exits through the fire door.
+
+A customer-service team can get caught in the same trap. Management measures how quickly calls end, hoping faster means more efficient. Then short calls become the target. Suddenly, the best way to “win” isn’t to fix your broken internet. It’s to end the call at Olympic speed. Congratulations: your Wi-Fi still thinks it’s 1998, but the spreadsheet is having a fantastic quarter.
+
+That’s Goodhart’s law: when a measure becomes a target, it often stops being a good measure. The number was meant to represent the real goal. Once rewards attach to it, people learn to play the number instead.
+
+So whenever a score looks impressively green, ask: what was it supposed to measure—and what does this system actually reward?
+```
+
+**Observed result:** The unmodified skill produced clear, funny hypotheticals and showed that
+the real goal remained unmet. It did not seek a documented real-world case, clearly distinguish
+a hypothetical fallback from preferred evidence, or consistently complete the chain through
+the improved number to the specific damaged goal and person who absorbed the cost. This was
+the failing behavior used to write the new deterministic consequence-chain contracts before
+the guidance changed.

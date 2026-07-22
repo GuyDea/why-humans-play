@@ -60,6 +60,10 @@ specificity to make a draft sound authoritative. Preserve accepted language and 
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+Prefer a documented real-world case for each substantial point and make its damaged goal
+and human cost explicit. When the available factual boundary does not contain a suitable
+case, label a hypothetical clearly instead of making one sound historical.
+
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or
 timing audit. Treat timing as a post-draft
@@ -117,6 +121,9 @@ For evidence-backed finalization:
   chronology, or sensory detail.
 - Let confidence control narration. Omit rejected claims. Use an unverified example only
   when it is attributed, explicitly caveated, and non-load-bearing.
+- For incentive-failure examples, show the intended goal, the measure or target, the changed
+  behavior, the number that improved, and the damaged goal and human cost. Direct humor at
+  the mechanism or institution, then say plainly what got worse and who paid.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
   `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it as
   proof of prevalence, causality, or mechanism.

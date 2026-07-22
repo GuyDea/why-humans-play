@@ -19,27 +19,27 @@
 - Modify: `.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`
 - Modify: `docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`
 
-- [ ] **Step 1: Add failing contract tests**
+- [x] **Step 1: Add failing contract tests**
 
 Assert that the skill prefers documented real-world examples, requires the chain `goal → measure or target → changed behavior → improved number → damaged goal and human cost`, separates the joke from the negative implication, closes complete narration with a declarative lesson, and phrases the compact promise as questions the viewer can ask AI.
 
-- [ ] **Step 2: Verify the focused tests fail for the missing contract**
+- [x] **Step 2: Verify the focused tests fail for the missing contract**
 
 Run: `python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 
 Expected: FAIL because the new contract language is absent from the unmodified skill.
 
-- [ ] **Step 3: Implement the minimum reusable guidance**
+- [x] **Step 3: Implement the minimum reusable guidance**
 
 Strengthen the main skill router and the two relevant references without duplicating detailed instructions. Preserve the factual boundary: rapid drafts may use supplied or project-available facts, while Phase 2 must source every factual case.
 
-- [ ] **Step 4: Verify the package tests pass**
+- [x] **Step 4: Verify the package tests pass**
 
 Run: `python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 
 Expected: PASS with all skill-package tests green.
 
-- [ ] **Step 5: Record the semantic baseline and commit**
+- [x] **Step 5: Record the semantic baseline and commit**
 
 Add the unmodified-skill output and diagnosed gap to the evaluation record. Stage only the five task-owned files and commit with `feat(script-skill): require real-world consequence chains`.
 
@@ -84,4 +84,3 @@ Run the full skill-package tests, all annotated-script validator tests, the skil
 - [ ] **Step 3: Review and commit any evaluation update**
 
 Inspect the full task diff, preserve unrelated files, and commit the semantic result separately if the evidence record changed.
-

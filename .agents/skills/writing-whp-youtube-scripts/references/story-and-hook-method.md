@@ -125,6 +125,14 @@ only repeats context, showcases research effort, or delays the next consequence.
 Make caveats advance the inquiry: use a limitation to sharpen what remains unknown,
 rule out an attractive explanation, or motivate the next piece of evidence.
 
+When a beat teaches through a metric, target, or incentive failure, map the full chain:
+
+`goal → measure or target → changed behavior → improved number → damaged goal and human cost`
+
+Prefer a compact documented case over a generic hypothetical when the evidence supports
+one. Earn humor from the mechanism or institution without aiming it at the people who absorb
+the harm, then state the damaged goal and human cost plainly before moving on.
+
 ## Open and close specific loops
 
 Write every open loop as a specific unresolved question, contradiction, comparison,
@@ -215,6 +223,10 @@ Reject endings such as “be more mindful,” “use this knowledge,” or “tr
 Narration—not only the structured block—must voice all five application elements: the
 insight; the action, observation, or reflection to try; the observable signal; the
 boundary; and the larger benefit.
+
+Close a complete narration with a declarative line that resolves the central question and
+states the lesson; do not end on an unanswered question alone. Make that final line an earned
+payoff to the opening, not a new slogan or a fresh idea.
 
 ## Choose visual treatment claim by claim
 

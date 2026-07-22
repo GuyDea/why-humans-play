@@ -142,6 +142,17 @@ sentence says someone can raise a number while making the real goal worse, show 
 a support agent ends calls faster while customers still need help, or a student memorizes the
 answer pattern without learning the idea.
 
+For each substantial point, prefer a compact documented real-world case already available
+within the factual boundary. Build an incentive-failure example as a complete consequence
+chain:
+
+`goal → measure or target → changed behavior → improved number → damaged goal and human cost`
+
+Earn humor from the mechanism, incentive, or institution, then state plainly what got worse
+and who absorbed the cost. The punchline does not discharge the explanatory debt. If no
+suitable verified case is available, use a clearly labeled hypothetical; never make a
+plausible example sound historical.
+
 Demonstrate the pattern before naming the concept. Let a term such as Goodhart's law or
 specification gaming feel like a useful label for something the viewer already understands,
 not an entrance exam.
@@ -190,6 +201,10 @@ After Martin reviews the complete narration, report audit concerns separately be
 proposing a rewrite. Name the passage, the concern, and the likely tradeoff. Do not silently
 replace the script or treat an audit as permission to cut the context that made it work.
 
+Close a complete narration with a declarative line that resolves the central question and
+states the lesson; do not end on an unanswered question alone. The final line should feel
+earned by the opening and put a period behind the viewer's useful change.
+
 ## Measure requested iterations
 
 When Martin requests iteration telemetry, record each visible task's elapsed time. Use
@@ -217,7 +232,7 @@ The supplied facts establish the outcome mismatch, not its mechanism.
 > Funny. But those facts leave a serious question: if an AI can receive a reward without
 > completing the intended task, how often can a polished AI answer solve the sentence you
 > typed while quietly missing the thing you meant? By the end, you will know four questions
-> for checking whether an AI answer actually solved your problem.
+> you can ask an AI to make sure its answer solved your real problem.
 
 The example demonstrates structure, not an independently verified source. Do not carry its
 year or event into another script unless the user's brief or the evidence phase supplies it.
@@ -239,6 +254,10 @@ Before returning rapid work, check internally:
 - Does it promise what the viewer will gain by the end?
 - Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does each substantial abstraction receive a concrete example?
+- Does each substantial point prefer a documented case, or clearly label a hypothetical when
+  no suitable verified case is available?
+- Does each incentive-failure example finish the full consequence chain and say what got
+  worse and who absorbed the cost?
 - When a compact verified tidbit would deepen the concept, is it brief and connected to the
   next thought rather than decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
@@ -255,7 +274,9 @@ Keep this audit internal unless Martin asks to see it.
 - Returning three drafts when one was requested.
 - Naming a concept before making its pattern visible.
 - Adding jokes that could be removed without changing the explanation.
+- Letting a punchline replace the damaged goal or human consequence.
 - Putting a punchline or colorful metaphor inside the by-end learning promise.
+- Ending a complete narration on an unanswered question instead of its lesson.
 - Replacing accepted copy outside the selected scope.
 - Mistaking approval of one line for approval of the creative direction.
 - Dragging assignment contracts, ledgers, visual plans, or validator output into Phase 1.

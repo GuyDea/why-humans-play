@@ -552,6 +552,80 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, rapid)
 
+    def test_examples_follow_a_real_world_consequence_chain(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        consequence_chain = (
+            "goal → measure or target → changed behavior → improved number → "
+            "damaged goal and human cost"
+        )
+
+        self.assertIn(
+            "For each substantial point, prefer a compact documented real-world "
+            "case already available within the factual boundary.",
+            rapid,
+        )
+        self.assertIn(consequence_chain, rapid)
+        self.assertIn(consequence_chain, story)
+        self.assertIn(
+            "Earn humor from the mechanism, incentive, or institution, then state "
+            "plainly what got worse and who absorbed the cost.",
+            rapid,
+        )
+        self.assertIn(
+            "If no suitable verified case is available, use a clearly labeled "
+            "hypothetical; never make a plausible example sound historical.",
+            rapid,
+        )
+        self.assertIn(
+            "Prefer a documented real-world case for each substantial point and make "
+            "its damaged goal and human cost explicit.",
+            skill,
+        )
+
+    def test_complete_narration_closes_with_a_declarative_lesson(self) -> None:
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        contract = (
+            "Close a complete narration with a declarative line that resolves the "
+            "central question and states the lesson; do not end on an unanswered "
+            "question alone."
+        )
+        self.assertIn(contract, story)
+        self.assertIn(contract, rapid)
+
+    def test_compact_promise_gives_questions_the_viewer_can_ask_ai(self) -> None:
+        rapid = (
+            SKILL_ROOT / "references/rapid-prototyping.md"
+        ).read_text(encoding="utf-8")
+        spoken_example = " ".join(
+            line.removeprefix("> ").strip()
+            for line in rapid.splitlines()
+            if line.startswith(">")
+        )
+        self.assertIn(
+            "By the end, you will know four questions you can ask an AI to make "
+            "sure its answer solved your real problem.",
+            spoken_example,
+        )
+
     def test_phase_two_maps_each_factual_statement_to_an_adjacent_source(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         research = " ".join(
