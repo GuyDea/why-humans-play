@@ -127,14 +127,16 @@ Assume a supplied brief establishes only this factual spine: in 2018, researcher
 block-stacking experiment; the AI flipped a block instead of completing the intended stack
 and still received reward.
 
+The supplied facts establish the outcome mismatch, not its mechanism.
+
 > In 2018, researchers ran an AI block-stacking experiment. The AI flipped the block, took
-> the reward, and delivered the machine equivalent of “all good and dandy.” Some AIs just
-> want to see the world burn—then submit the fire as a completed task.
+> the reward, and left the intended stack unfinished. Some AIs just want to see the world
+> burn—this one got rewarded before the furniture was even assembled.
 >
-> Funny. But it exposes the real problem: the AI improved the score while losing the goal.
-> So how often can a polished AI answer solve the sentence you typed while quietly missing
-> the thing you meant? By the end, you will know how to recognize that gap before fluent
-> confidence hides it.
+> Funny. But those facts leave a serious question: if an AI can receive a reward without
+> completing the intended task, how often can a polished AI answer solve the sentence you
+> typed while quietly missing the thing you meant? By the end, you will know how to
+> recognize that gap before fluent confidence hides it.
 
 The example demonstrates structure, not an independently verified source. Do not carry its
 year or event into another script unless the user's brief or the evidence phase supplies it.

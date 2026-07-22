@@ -458,6 +458,24 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, rapid)
 
+    def test_compact_example_does_not_assert_an_unsupplied_mechanism(self) -> None:
+        rapid = (
+            SKILL_ROOT / "references/rapid-prototyping.md"
+        ).read_text(encoding="utf-8")
+        example = rapid.split("## Compact worked example\n", 1)[1].split(
+            "\n## Rapid quality check", 1
+        )[0]
+        normalized_example = " ".join(example.split())
+        self.assertIn(
+            "The supplied facts establish the outcome mismatch, not its mechanism.",
+            normalized_example,
+        )
+        self.assertIn("if an AI can receive a reward without", normalized_example)
+        self.assertIn("completing the intended task", normalized_example)
+        self.assertIsNone(
+            re.search(r"(?i)\b(?:score|metric)\b", normalized_example)
+        )
+
     def test_creative_approval_gate_precedes_production(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         gate = (
