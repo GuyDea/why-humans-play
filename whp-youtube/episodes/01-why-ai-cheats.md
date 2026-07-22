@@ -17,6 +17,11 @@
 - **Evidence review:** The v0.7 ten-pass audit reverse-checked the unchanged narration, on-screen text, and visual claims against five complete claim records: `F-001`–`F-004` remain `VERIFIED`, and `F-005` remains `REPORTED` with the consent order's no-admission limitation. Complete dated copies were rechecked; two live-page refreshes were automation-blocked with no status effect (`ISS-008`). The sixth, current-research claim remains omitted, and authorized human editorial approval remains open.
 - **Rights review:** The v0.7 rights pass retains an original-only WHP visual plan and WHP-created audio, direct sound, or silence; source media remains evidence/reference only, and any future external visual or audio selection requires an `A` record. Final production/rights review remains open.
 
+> **Creative status (2026-07-22):** The v0.7 narration was rejected as too
+> summary-driven and is superseded for creative development. Preserve this document as
+> an evidence and production reference until a rapid narration prototype earns approval;
+> do not treat its narration as the current voice baseline.
+
 ## Beat 01 — The wrong perfect score
 _Time: 00:00–00:32 · Target: ~78 words_
 

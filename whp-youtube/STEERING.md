@@ -19,10 +19,11 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
-> **Active Episode 1 source (2026-07-22):**
-> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) is the single editable
-> pilot source, currently v0.7 `RESEARCH-DRAFT`. That document controls its current
-> count, runtime, evidence, rights, score, and readiness gates.
+> **Episode 1 working state (2026-07-22):**
+> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) preserves the v0.7
+> research, evidence, rights, and production scaffold, but its narration is creatively
+> superseded and is not the current voice baseline. Develop replacement narration through
+> rapid prototyping and line-level refinement before rebuilding the final annotated script.
 
 1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
    specification gaming to reveal the hidden incentive game created whenever a score is
@@ -127,6 +128,10 @@ These are laws, not suggestions. They apply to every WHP video forever.
   - **5–15s — the payoff/value claim + the open loop.** Tell them what they'll walk
     away understanding, and plant the specific gap the video will close.
   - **15–30s — enter the body or deepen the loop.** Never a preamble.
+- **Open a consequential question and promise its answer.** The opening must move from
+  the concrete surprise to the larger unresolved question, explain why that question can
+  matter to the viewer, and state what the viewer will understand, recognize, or be able
+  to do by the end. A generic "keep watching" tease is not a viewer promise.
 - **The Vsauce template `[verified]` (steal this exact shape):** question → concrete
   absurdity reframe ("games are weird — why would I invite a goalie to make scoring
   *harder*?") → intellectual anchor (a named idea / researcher). It lands the hook in
@@ -134,6 +139,24 @@ These are laws, not suggestions. They apply to every WHP video forever.
 - **Small-channel credibility move:** state your standing early — "I build brain-training
   games for a living, and the honest science surprised me." `[reported]` Authority in
   the hook buys retention when you have no subscriber base.
+
+### Develop the voice before the production package
+
+Use this order for WHP scripts:
+
+1. Write one rapid narration prototype that tests the hook, humor, human connection,
+   central idea, and ending.
+2. Refine it with Martin at line level, preserving approved language and changing only
+   the requested scope.
+3. Obtain explicit approval of the premise, voice, hook, and story direction.
+4. Only then gather or refresh evidence, expand the runtime, add production structure,
+   audit claims and rights, and validate the final annotated script.
+
+Before creative approval, do not require an evidence packet, three-opening comparison,
+annotated-script scaffolding, visual or rights ledger, full rubric, or validator unless
+Martin explicitly requests that work. Rapid does not mean fabricated: use supplied or
+already-available facts, never invent a date, person, experiment, quotation, or mechanism,
+and write around an unavailable detail until the evidence phase.
 
 ## Law 3 — Duration and retention pacing
 

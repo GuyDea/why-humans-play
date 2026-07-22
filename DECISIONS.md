@@ -112,3 +112,23 @@ empirical result.
 authority chain, launch order, and parked status and needed no content change. The active
 script at `whp-youtube/episodes/01-why-ai-cheats.md` is authoritative for its current
 working state.
+
+## 2026-07-22 — Prototype WHP narration before evidence production
+
+**Decision:** Develop WHP scripts through a rapid narration prototype and line-level
+creative refinement first; every opening must turn its concrete surprise into a
+consequential question, explain why it can matter to the viewer, and promise what the
+viewer will understand, recognize, or be able to do by the end. Begin evidence gathering,
+runtime expansion, production annotation, rights work, and final validation only after
+Martin explicitly approves the premise, voice, hook, and story direction.
+
+**Rationale:** The evidence-first pilot was rigorous but slow, summary-driven, short on
+humor, and weak in its early AI–human connection. Rapid refinement produced a stronger
+hook and voice; rigor remains essential after the story earns approval rather than before
+the creative direction is proven.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`whp-youtube/episodes/01-why-ai-cheats.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`, and this
+ledger. `BRAND.md` and `CLAUDE.md` already state the correct brand doctrine and authority
+chain and needed no content change.
