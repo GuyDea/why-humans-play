@@ -105,7 +105,20 @@ export class JobSupervisor {
       }
     }, grace).unref?.();
   }
-  resume(_interruptedJobId: string): string { throw new Error('not implemented'); }
+  resume(interruptedJobId: string): string {
+    const job = this.store.get(interruptedJobId);
+    if (!job || job.state !== 'interrupted') throw new Error('only interrupted jobs can be resumed');
+    if (!job.threadId) throw new Error('interrupted job has no thread id; relaunch fresh instead');
+    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+    const resumedId = randomUUID();
+    const jobDir = join(this.jobsRoot, resumedId);
+    mkdirSync(jobDir, { recursive: true });
+    const resumedEnv: JobEnvelope = { ...env, jobId: resumedId, resumeThreadId: job.threadId };
+    writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(resumedEnv));
+    this.store.create(resumedEnv, jobDir, { resumedFrom: job.id });
+    this.tick();
+    return resumedId;
+  }
 
   stop(): void {
     this.stopped = true;
