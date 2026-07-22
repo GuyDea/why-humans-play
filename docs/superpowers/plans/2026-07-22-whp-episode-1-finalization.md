@@ -16,7 +16,7 @@
 - Modify: `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 - Modify: `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Add a test that normalizes the rapid reference and requires these behaviors:
 
@@ -35,23 +35,23 @@ def test_rapid_adds_useful_informational_tidbits_without_trivia(self) -> None:
         self.assertIn(contract, rapid)
 ```
 
-- [ ] **Step 2: Run the focused test to verify RED**
+- [x] **Step 2: Run the focused test to verify RED**
 
 Run: `python3 -m unittest .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py -k informational_tidbits`
 
 Expected: `FAIL` because the three contracts are absent.
 
-- [ ] **Step 3: Add the minimal rapid-method instruction**
+- [x] **Step 3: Add the minimal rapid-method instruction**
 
 Add a short section after concept naming that requires a verified origin, scale, reversal, or consequence fact only when it deepens the idea without slowing the story; explicitly reject decorative trivia.
 
-- [ ] **Step 4: Verify GREEN and regressions**
+- [x] **Step 4: Verify GREEN and regressions**
 
 Run: `python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 
 Expected: all package tests pass.
 
-- [ ] **Step 5: Commit the skill behavior**
+- [x] **Step 5: Commit the skill behavior**
 
 ```bash
 git add .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py .agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md
@@ -63,19 +63,19 @@ git commit -m "feat(skill): add useful informational tidbits"
 **Files:**
 - Modify: `whp-youtube/episodes/01-why-ai-cheats.md`
 
-- [ ] **Step 1: Reopen the primary block-stacking paper and dependent DeepMind explanation**
+- [x] **Step 1: Reopen the primary block-stacking paper and dependent DeepMind explanation**
 
 Confirm the year, team attribution, simulated task, observed flip, received reward, unfinished stack, and bottom-face description. Preserve the dependence between the paper and DeepMind explanation.
 
-- [ ] **Step 2: Locate the primary Goodhart source and an authoritative historical cross-check**
+- [x] **Step 2: Locate the primary Goodhart source and an authoritative historical cross-check**
 
 Confirm the original policy context and distinguish Goodhart's original formulation from the later popular paraphrase. Use only wording supported by the checked sources.
 
-- [ ] **Step 3: Build the bounded claim records**
+- [x] **Step 3: Build the bounded claim records**
 
 Retain stable IDs `F-001` and `F-002` for their existing claims. Assign `F-006` to the new Goodhart-history claim; never recycle deleted IDs `F-003`–`F-005`.
 
-- [ ] **Step 4: Reverse-audit all factual narration**
+- [x] **Step 4: Reverse-audit all factual narration**
 
 Map every factual sentence or separable clause to an adjacent beat-level claim entry, and leave jokes, opinions, and clearly signaled hypotheticals unmapped.
 
@@ -84,19 +84,19 @@ Map every factual sentence or separable clause to an adjacent beat-level claim e
 **Files:**
 - Modify: `whp-youtube/episodes/01-why-ai-cheats.md`
 
-- [ ] **Step 1: Preserve the approved voice baseline**
+- [x] **Step 1: Preserve the approved voice baseline**
 
 Use the approved question-first opening, block-flip joke, literal four-question promise, brutal mechanism-derived examples, professional-email application, flipped-brick callback, and final question.
 
-- [ ] **Step 2: Fit the narration to approximately three minutes**
+- [x] **Step 2: Fit the narration to approximately three minutes**
 
 Keep the narration around 450–500 spoken words, with the first two sentences plain and the mechanism explanation outside them.
 
-- [ ] **Step 3: Complete the production annotations**
+- [x] **Step 3: Complete the production annotations**
 
 Give each beat all eight required subsections, choose exactly one story-specific personal-input decision, voice all five viewer-application elements, use original WHP visual treatments, and finish all four end-reference sections.
 
-- [ ] **Step 4: Set an honest readiness state**
+- [x] **Step 4: Set an honest readiness state**
 
 Keep the script at `RESEARCH-DRAFT` until Martin approves this final narration. Do not infer `EDITORIAL-DRAFT` or `RECORD-READY` from completeness or validation.
 
@@ -106,7 +106,7 @@ Keep the script at `RESEARCH-DRAFT` until Martin approves this final narration. 
 - Modify if needed: `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
 - Modify if needed: `whp-youtube/episodes/01-why-ai-cheats.md`
 
-- [ ] **Step 1: Run the skill and validator suites**
+- [x] **Step 1: Run the skill and validator suites**
 
 Run:
 
@@ -117,7 +117,7 @@ python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotat
 
 Expected: all tests pass.
 
-- [ ] **Step 2: Run the episode validator**
+- [x] **Step 2: Run the episode validator**
 
 Run from `.agents/skills/writing-whp-youtube-scripts` with the resolved absolute episode path:
 
@@ -127,15 +127,15 @@ python3 scripts/validate_annotated_script.py -- "/tmp/why-humans-play-episode-1-
 
 Expected: `PASS`, with the structural-validation limitation preserved.
 
-- [ ] **Step 3: Run skill-package validation and repository checks**
+- [x] **Step 3: Run skill-package validation and repository checks**
 
 Run the available `quick_validate.py` against the skill package, then run `git diff --check`, narration word-count extraction, and `git status --short`.
 
-- [ ] **Step 4: Perform an independent forward review**
+- [x] **Step 4: Perform an independent forward review**
 
 Give a fresh reviewer only the updated skill and episode artifact. Fix any Critical or Important issue, then rerun the relevant tests.
 
-- [ ] **Step 5: Commit the final episode**
+- [x] **Step 5: Commit the final episode**
 
 ```bash
 git add docs/superpowers/plans/2026-07-22-whp-episode-1-finalization.md whp-youtube/episodes/01-why-ai-cheats.md
