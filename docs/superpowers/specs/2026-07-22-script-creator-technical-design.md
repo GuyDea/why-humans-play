@@ -347,7 +347,11 @@ React vs Angular, post-production data model).
 ## Appendix — normative operation result schemas
 
 Production schemas apply `additionalProperties: false` recursively. Prose stays in
-single Markdown strings. Core four:
+single Markdown strings. **Strict structured-output rule (verified against the live
+backend in Spike 1):** every key in `properties` must also appear in `required`;
+optional semantics are expressed as nullable types (`"type": ["string", "null"]`),
+never by omission from `required` — a schema violating this is rejected with
+`invalid_json_schema` before the model runs. Core four:
 
 ```json
 {
@@ -356,11 +360,11 @@ single Markdown strings. Core four:
     "properties": {
       "status": {"enum": ["complete", "narrowed", "declined"]},
       "findings": {"type": "array", "items": {"type": "object",
-        "required": ["anchor", "severity", "finding_markdown"],
+        "required": ["anchor", "severity", "finding_markdown", "optional_direction_markdown"],
         "properties": {"anchor": {"type": "string"},
           "severity": {"enum": ["blocking", "important", "optional"]},
           "finding_markdown": {"type": "string"},
-          "optional_direction_markdown": {"type": "string"}}}},
+          "optional_direction_markdown": {"type": ["string", "null"]}}}},
       "guardrail_markdown": {"type": ["string", "null"]}
     }
   },
