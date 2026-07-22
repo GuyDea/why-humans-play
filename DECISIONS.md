@@ -132,3 +132,22 @@ the creative direction is proven.
 `docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`, and this
 ledger. `BRAND.md` and `CLAUDE.md` already state the correct brand doctrine and authority
 chain and needed no content change.
+
+## 2026-07-22 — Keep script workflows ready for a local editing workbench
+
+**Decision:** Plan a future local script-ideation and editing app inside this repository
+that uses the local agent to orchestrate topic ideation and selection, script generation,
+selection-scoped review and rewriting, alternative generation, and later production
+finalization. Shape the current script-skill refactor as independently invocable editorial
+operations, but defer the app's framework, persistence, agent transport, exact data
+contract, UI, and implementation to a separate future design.
+
+**Rationale:** Martin wants to prototype and select topics quickly, brainstorm script
+structure, highlight passages, request reviews or alternative wording, and iterate locally
+without duplicating the editorial workflow outside the skills.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`, and this
+ledger. No application files were created. `BRAND.md` and `CLAUDE.md` needed no change
+because this is an internal authoring workflow, not a new portfolio product or a change to
+the repository authority chain.

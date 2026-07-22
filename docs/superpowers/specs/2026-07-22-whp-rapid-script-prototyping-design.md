@@ -34,6 +34,8 @@ by those failures.
 - Preserve the approved voice when moving into research and production.
 - Retain the existing evidence, rights, annotated-format, rubric, and validator system for
   final scripts.
+- Keep the workflow independently invocable by a future local script-ideation and editing
+  app without duplicating editorial logic in the app.
 
 ## Non-goals
 
@@ -42,6 +44,9 @@ by those failures.
 - Do not require a prototype to carry production annotations or an evidence ledger.
 - Do not split prototyping and production into separate discoverable skills.
 - Do not rewrite the rejected Episode 1 narration as part of the skill refactor.
+- Do not choose an application framework, persistence layer, local-agent transport, or UI
+  design in this refactor.
+- Do not scaffold placeholder application code before the workbench feature is designed.
 
 ## Phase router
 
@@ -83,6 +88,71 @@ Then expand to the target runtime, add the annotated production structure, resol
 input and viewer application, plan visuals and rights, run the editorial audits, validate
 the document, and report every remaining gate. The existing research, format, rubric,
 template, and validator resources govern this phase.
+
+## Future local workbench compatibility
+
+The planned script-ideation and editing app will run locally inside this repository and use
+the local agent for LLM work. It will eventually support this path:
+
+`initialize topic ideation → compare and select a topic → brainstorm structure → generate narration → review or rewrite a selection → request alternatives → approve creative direction → build the evidence-backed production script`
+
+This refactor lays only the editorial and operation boundaries needed by that future app.
+It does not implement the app.
+
+### Responsibility boundaries
+
+- The existing topic-selection skill owns topic discovery, comparison, package testing,
+  and selection.
+- The script-writing skill consumes a selected topic brief and owns structure, narration,
+  refinement, creative approval, and evidence-backed finalization.
+- The future app owns local interaction state, selection ranges, revision history, and UI.
+- The local agent invokes the skills. The app must not copy their editorial rules into a
+  second prompt system that can drift.
+- Approved Markdown artifacts remain portable repository sources of truth. Temporary
+  ideation state may remain app-local when that feature is designed.
+
+### Selected topic brief handoff
+
+The script skill must accept a selected topic brief without rerunning topic discovery. The
+brief may be conversational or file-backed; no fixed serialization is required yet. When
+available, carry these semantic fields forward:
+
+- selected topic and angle;
+- intended audience;
+- title and thumbnail promise;
+- core tension or open question;
+- explicit by-end viewer promise;
+- intended payoff;
+- known factual anchors; and
+- important unknowns still awaiting evidence.
+
+Missing nonessential fields must not block a useful rapid prototype. Ask only when the
+missing choice would materially change the requested artifact.
+
+### Operation-shaped behavior
+
+Write the revised skill so a caller can invoke each behavior independently, whether the
+caller is Martin in chat or a future local UI:
+
+- **Generate:** create one topic-informed structure, opening, passage, or narration at the
+  requested scope.
+- **Review:** analyze the supplied script or selection and return findings without
+  rewriting it.
+- **Rewrite selection:** return a replacement for only the supplied selection, preserving
+  surrounding approved language and the selection's narrative job.
+- **Generate alternatives:** only when requested, return clearly separated alternatives
+  for the same selected job rather than silently choosing or replacing the script.
+- **Promote:** after explicit creative approval, preserve the approved voice baseline and
+  enter the evidence and production phase.
+
+Do not make these behaviors depend on invisible conversational state. Accept the relevant
+topic brief, artifact or selection, surrounding context, requested operation, and creative
+status when they are supplied. In ordinary chat, infer those inputs from the conversation;
+in the future app, its local state will supply them explicitly.
+
+Do not define a JSON protocol or stable API in this refactor. Preserve semantic boundaries
+now so the later app design can choose transport and storage without rewriting the
+editorial workflow.
 
 ## Core creative tenets
 
@@ -138,6 +208,10 @@ Do not turn this check into a visible audit unless Martin asks for one.
 - Keep `references/research-and-rights.md`, `references/annotated-script-format.md`,
   `references/quality-rubric.md`, the template, and the validator as Phase 2 resources.
 - Update `agents/openai.yaml` to describe both rapid narration and production finalization.
+- Express rapid generation, review, selection rewrite, alternatives, and promotion as
+  separable behaviors in the skill and rapid-prototyping reference.
+- Treat a selected topic brief as the handoff from topic ideation; do not rerun topic
+  selection inside the script skill unless explicitly asked.
 
 ## Test strategy
 
@@ -152,6 +226,10 @@ then pass after implementation.
   scaffolding, production ledgers, rubric passes, and validation.
 - Rapid mode forbids invented factual atoms while allowing verification to be deferred.
 - Line-level requests preserve accepted language and change only the requested scope.
+- Review-only requests return findings without rewriting the supplied text.
+- Alternative requests return distinct labeled choices for the same narrative job and do
+  not mutate the source selection.
+- The script skill accepts a selected topic brief without rerunning topic discovery.
 - The creative approval gate precedes evidence and production work.
 - The complete hook includes the consequential question, viewer relevance, and explicit
   by-end promise.
@@ -161,15 +239,20 @@ then pass after implementation.
 
 ### Forward evaluations
 
-Re-run three fresh scenarios after implementation:
+Run five fresh scenarios after implementation:
 
 1. A time-pressured request for one funny three-minute narration with no verification.
 2. A request to sharpen only an existing opening while preserving its factual spine.
 3. An approved prototype moving into an evidence-backed eight-minute production script.
+4. A local-workbench-style review request containing a selected passage, its surrounding
+   context, and an instruction not to rewrite.
+5. A local-workbench-style request for multiple replacement choices for one selected
+   passage.
 
 Success means the first two return immediate, scoped creative work without production
 overhead or fabricated facts, while the third preserves the voice baseline and correctly
-enters the existing rigorous workflow.
+enters the existing rigorous workflow. The final two must respect the requested operation
+and selection boundary without relying on hidden chat history.
 
 ## Reconciliation
 
@@ -177,6 +260,9 @@ Record the two-phase workflow and complete-hook promise in `whp-youtube/STEERING
 `DECISIONS.md`. `BRAND.md` already requires rigor, usefulness, humanity, and immediate
 recognized value, so it needs no change. `CLAUDE.md` already points script work to channel
 steering and needs no change.
+
+Record the future local-workbench boundary without selecting its stack or creating app
+files. The workbench is a later feature with its own design cycle.
 
 Preserve `whp-youtube/episodes/01-why-ai-cheats.md` as an evidence and production reference,
 but mark its v0.7 narration creatively superseded so it cannot be mistaken for the current

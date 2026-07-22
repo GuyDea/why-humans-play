@@ -158,6 +158,21 @@ Martin explicitly requests that work. Rapid does not mean fabricated: use suppli
 already-available facts, never invent a date, person, experiment, quotation, or mechanism,
 and write around an unavailable detail until the evidence phase.
 
+### Preserve the local-workbench boundary
+
+A future local script-ideation and editing app will orchestrate this workflow through the
+local agent. Keep the editorial capabilities independently invocable: topic ideation and
+selection; script-structure and narration generation; review of a selected passage;
+replacement of only that selection; generation of alternatives for the same narrative
+job; and promotion of an approved prototype into evidence-backed production.
+
+The topic-selection skill owns topic comparison and selection. The script-writing skill
+consumes the selected topic brief and owns narration onward. The future app will own local
+UI state, text selections, and revision history; it must call the skills rather than
+duplicate their editorial rules. Keep approved artifacts portable in repository Markdown.
+Choose the app framework, persistence, local-agent transport, and exact data contract only
+when that feature receives its own design; do not scaffold placeholder app code now.
+
 ## Law 3 — Duration and retention pacing
 
 - **Target 6–10 minutes for early episodes.** The 5–10 min band shows the highest
