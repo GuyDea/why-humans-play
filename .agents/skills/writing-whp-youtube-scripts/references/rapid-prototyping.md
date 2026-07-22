@@ -20,6 +20,18 @@ already present in current project material. Never invent a date, person, experi
 quotation, chronology, motive, or mechanism. Omit unavailable specificity or write around
 it; do not fill the gap.
 
+Confirmed factual anchors outrank assertions already present in a draft or selected passage.
+Preserving accepted language never protects a claim outside the supplied factual boundary.
+
+A reported reward outcome does not by itself establish the scoring mechanism, what the agent
+optimized, or why the reward was issued. Until evidence supplies that link, describe only the
+outcome and frame the mechanism as a question or hypothesis. Do not upgrade “received reward”
+into “the score said success,” “made the number go up,” or “the agent found a loophole” as a
+fact.
+
+When the mechanism is unknown, use no declarative score, metric, or optimization claim, even
+as a joke; turn it into a question.
+
 ## Choose the requested operation
 
 Identify the operation and requested scope before writing. Do not silently turn one operation
@@ -74,8 +86,9 @@ Use this flexible spine:
 - **Open with a concrete event.** Say who or what did what and what unexpectedly happened,
   using only supplied factual atoms. Keep mechanism explanation out of the first beat.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
-- State the paradox in plain language: the visible result can satisfy the score while
-  betraying the intended goal.
+- State the paradox in plain language only as far as the supplied facts support. When the
+  causal link is unavailable, ask whether the visible result exposed a scoring mismatch
+  rather than asserting that it did.
 - Explain why that event is emblematic rather than merely weird.
 - **State the big question.** Make the unresolved consequence large enough to carry the
   episode.
@@ -83,6 +96,9 @@ Use this flexible spine:
   choice, institution, game, or AI conversation.
 - **Promise what the viewer will understand, recognize, identify, or be able to do by the
   end.** A vague tease such as “it gets stranger” is not a viewer promise.
+
+For every generated episode opening or full narration, state the by-end promise inside the
+opening; a later takeaway does not substitute for it.
 
 Compress or reorder beats when speech demands it, but do not lose the question, relevance,
 or promise.

@@ -382,6 +382,33 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_reward_outcome_does_not_establish_the_scoring_mechanism(self) -> None:
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        self.assertIn(
+            "A reported reward outcome does not by itself establish the scoring "
+            "mechanism, what the agent optimized, or why the reward was issued.",
+            rapid,
+        )
+        self.assertIn(
+            "Until evidence supplies that link, describe only the outcome and frame "
+            "the mechanism as a question or hypothesis.",
+            rapid,
+        )
+        self.assertIn(
+            "Confirmed factual anchors outrank assertions already present in a draft "
+            "or selected passage.",
+            rapid,
+        )
+        self.assertIn(
+            "When the mechanism is unknown, use no declarative score, metric, or "
+            "optimization claim, even as a joke; turn it into a question.",
+            rapid,
+        )
+
     def test_rapid_operations_are_independent_and_selection_scoped(self) -> None:
         rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
         self.assertTrue(rapid_path.is_file())
@@ -457,6 +484,21 @@ class SkillPackageTests(unittest.TestCase):
         ):
             with self.subTest(contract=contract):
                 self.assertIn(contract, rapid)
+        self.assertIn(
+            "For every generated episode opening or full narration, state the by-end "
+            "promise inside the opening; a later takeaway does not substitute for it.",
+            rapid,
+        )
+
+    def test_supplied_selection_context_avoids_unnecessary_canonical_reload(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        self.assertIn(
+            "When a scoped review, selection rewrite, or alternatives request supplies "
+            "the artifact, selection, surrounding context, and narrative job, use "
+            "those inputs directly; do not reread canonical project files unless the "
+            "request changes channel policy or lacks needed context.",
+            skill,
+        )
 
     def test_compact_example_does_not_assert_an_unsupplied_mechanism(self) -> None:
         rapid = (

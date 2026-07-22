@@ -15,8 +15,13 @@ Do not use this skill for unrelated ads, social posts, or general marketing copy
 
 ## Required project context
 
-Locate the repository root. Read `BRAND.md` first and `whp-youtube/STEERING.md` second. If
-either file is absent, report the missing canonical context instead of inventing policy.
+Locate the repository root. For a new topic, structure, narration, production promotion, or
+policy-sensitive change, read `BRAND.md` first and `whp-youtube/STEERING.md` second. If either
+required file is absent, report the missing canonical context instead of inventing policy.
+
+When a scoped review, selection rewrite, or alternatives request supplies the artifact,
+selection, surrounding context, and narrative job, use those inputs directly; do not reread
+canonical project files unless the request changes channel policy or lacks needed context.
 
 Use a supplied selected topic brief as the handoff from topic selection. Do not rerun topic
 ideation unless Martin explicitly asks. Carry forward the available audience, packaging
