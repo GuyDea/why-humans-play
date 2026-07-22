@@ -499,6 +499,70 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_rapid_hook_supports_an_honest_question_first_entry(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "Use the strongest honest entry: question-first or event-first.",
+            rapid,
+        )
+        self.assertIn(
+            "A question-first opening asks a precise viewer-level question the "
+            "episode can answer",
+            rapid,
+        )
+        self.assertIn(
+            "Ground it immediately in the concrete event.",
+            rapid,
+        )
+        self.assertIn(
+            "question → event → joke → paradox → meaning → viewer relevance → "
+            "by-end promise",
+            rapid,
+        )
+        self.assertIn(
+            "Do not use words such as ‘lies,’ ‘cheats,’ or ‘wants’ as literal "
+            "claims of intent",
+            rapid,
+        )
+
+    def test_rapid_opening_uses_plain_syntax_in_its_first_two_sentences(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "For a generated episode opening or full narration, keep each of the "
+            "first two spoken sentences to one idea.",
+            rapid,
+        )
+        self.assertIn(
+            "Use everyday words and syntax; replace technical compound phrases when "
+            "simpler wording preserves meaning.",
+            rapid,
+        )
+
+    def test_requested_iteration_telemetry_is_honest_and_separate(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        for contract in (
+            "When Martin requests iteration telemetry, record each visible task's "
+            "elapsed time.",
+            "Use runtime-reported token usage when available; otherwise report "
+            "`unavailable`.",
+            "Do not estimate or invent a precise token count.",
+            "Keep telemetry separate from the requested artifact and narration.",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
     def test_supplied_selection_context_avoids_unnecessary_canonical_reload(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         self.assertIn(
@@ -517,10 +581,27 @@ class SkillPackageTests(unittest.TestCase):
             "\n## Rapid quality check", 1
         )[0]
         normalized_example = " ".join(example.split())
+        spoken_example = " ".join(
+            line[1:].lstrip()
+            for line in example.splitlines()
+            if line.startswith(">")
+        )
         self.assertIn(
             "The supplied facts establish the outcome mismatch, not its mechanism.",
             normalized_example,
         )
+        self.assertTrue(
+            spoken_example.startswith(
+                "How can an AI receive a reward—and still leave the intended job "
+                "unfinished?"
+            )
+        )
+        self.assertIn(
+            "In 2018, researchers gave an AI a simple job. Put one block on top of "
+            "another.",
+            spoken_example,
+        )
+        self.assertNotIn("block-stacking experiment", spoken_example)
         self.assertIn("if an AI can receive a reward without", normalized_example)
         self.assertIn("completing the intended task", normalized_example)
         self.assertIsNone(

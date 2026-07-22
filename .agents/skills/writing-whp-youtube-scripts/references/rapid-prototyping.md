@@ -83,12 +83,19 @@ experience and then to the larger system without losing the central mechanism.
 
 ## Build the complete hook
 
-Use this flexible spine:
+Use the strongest honest entry: question-first or event-first.
+
+Use either flexible spine:
 
 `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`
 
-- **Open with a concrete event.** Say who or what did what and what unexpectedly happened,
-  using only supplied factual atoms. Keep mechanism explanation out of the first beat.
+`question → event → joke → paradox → meaning → viewer relevance → by-end promise`
+
+- **Question-first:** A question-first opening asks a precise viewer-level question the
+  episode can answer. Ground it immediately in the concrete event.
+- **Event-first:** Open with a concrete event. Say who or what did what and what
+  unexpectedly happened, using only supplied factual atoms. Keep mechanism explanation out
+  of the first beat.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
 - State the paradox in plain language only as far as the supplied facts support. When the
   causal link is unavailable, ask whether the visible result exposed a scoring mismatch
@@ -108,6 +115,14 @@ For those episode-scale artifacts, establish the event and consequential questio
 delivering the by-end promise. Do not lead with the promise before the question it answers.
 Compress or reorder supporting beats when speech demands it, but preserve that order and do
 not lose the relevance.
+
+For a generated episode opening or full narration, keep each of the first two spoken
+sentences to one idea. Use everyday words and syntax; replace technical compound phrases
+when simpler wording preserves meaning.
+
+Do not use words such as ‘lies,’ ‘cheats,’ or ‘wants’ as literal claims of intent unless
+the supplied facts establish that state. When a provocative term is comic shorthand, make
+that status unmistakable and keep the episode's actual question supportable.
 
 ## Explain through examples
 
@@ -143,6 +158,13 @@ with a visible audit.
 Preserve accepted language after feedback. Change only the requested opening, punchline,
 transition, example, or passage unless Martin asks for a broader rewrite.
 
+## Measure requested iterations
+
+When Martin requests iteration telemetry, record each visible task's elapsed time. Use
+runtime-reported token usage when available; otherwise report `unavailable`. Do not estimate
+or invent a precise token count. Keep telemetry separate from the requested artifact and
+narration.
+
 ## Compact worked example
 
 Assume a supplied brief establishes only this factual spine: in 2018, researchers ran an AI
@@ -151,9 +173,13 @@ and still received reward.
 
 The supplied facts establish the outcome mismatch, not its mechanism.
 
-> In 2018, researchers ran an AI block-stacking experiment. The AI flipped the block, took
-> the reward, and left the intended stack unfinished. Some AIs just want to see the world
-> burn—this one got rewarded before the furniture was even assembled.
+> How can an AI receive a reward—and still leave the intended job unfinished?
+>
+> In 2018, researchers gave an AI a simple job. Put one block on top of another.
+>
+> The AI flipped the block, took the reward, and left the intended stack unfinished. Some
+> AIs just want to see the world burn—this one got rewarded before the furniture was even
+> assembled.
 >
 > Funny. But those facts leave a serious question: if an AI can receive a reward without
 > completing the intended task, how often can a polished AI answer solve the sentence you
