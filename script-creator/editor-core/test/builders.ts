@@ -1,12 +1,8 @@
-import { history } from 'prosemirror-history';
 import type { Node as ProseMirrorNode } from 'prosemirror-model';
-import { EditorState, type Plugin, type Transaction } from 'prosemirror-state';
+import { EditorState, type Transaction } from 'prosemirror-state';
+import { corePlugins } from '../src/core.js';
 import { newBeatId } from '../src/ids.js';
 import { schema } from '../src/schema.js';
-
-function corePlugins(): Plugin[] {
-  return [history()];
-}
 
 export function para(text: string): ProseMirrorNode {
   return schema.node('paragraph', null, text ? schema.text(text) : undefined);
