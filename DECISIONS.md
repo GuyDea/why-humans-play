@@ -249,3 +249,50 @@ layer after the readable script.
 `whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` and `CLAUDE.md`
 need no change because this is an authoring-order and document-presentation decision, not
 a brand or repository-authority change.
+## 2026-07-22 — Accept Script Creator business requirements
+
+**Decision:** Accept the Script Creator business requirements at
+`docs/superpowers/specs/2026-07-22-script-creator-requirements.md`: V1 is prototyping-first
+with a full topic-selection run UI, complete selection-scoped editing, first-class passage
+variations, and the creative approval gate with promotion; read-aloud support and the
+deeper production-phase UI are deferred, and the app's framework, persistence, agent
+transport, exact data contract, and UI design remain deferred to a separate technical
+design.
+
+**Rationale:** Line-level refinement is the demonstrated bottleneck for the EP1
+replacement narration and topic selection is the immediate next need, so both receive
+first-class V1 support; production-phase depth follows once prototyping proves out, and
+the requirements stay inside the recorded local-workbench boundary so the skills keep
+owning the editorial rules.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-requirements.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change
+because the requirements conform to the recorded workbench boundary and the app remains an
+internal authoring tool, not a portfolio product.
+
+## 2026-07-22 — Accept Script Creator technical design and learning loop
+
+**Decision:** Accept the Script Creator V1 technical design at
+`docs/superpowers/specs/2026-07-22-script-creator-technical-design.md` — an Angular +
+TipTap/ProseMirror localhost web app in `script-creator/` over a Node daemon that drives
+headless codex through stateless, schema-constrained skill operations with durable job
+runners, XDG SQLite working state, and repository Markdown milestones including
+`whp-youtube/topics/`, `whp-youtube/topic-runs/`, and `whp-youtube/PIPELINE.md` — and add
+requirement FR-8: the app retains each session's decisions, distills them into proposed
+lessons, and applies them only after approval, episode-local lessons as envelope context
+and durable lessons through the existing reconcile flow into skill and steering files;
+adopt guyditor-compatible beat IDs, millisecond planned timings, and a versioned JSON
+production handoff as boundary constraints while deferring actual guyditor integration.
+
+**Rationale:** Angular matches the stack Martin already maintains while the editor core is
+framework-agnostic ProseMirror; routing learned lessons through the repository's canonical
+steering and skill files keeps one editorial memory and prevents an app-owned prompt layer
+from drifting; guyditor is an internal alpha whose integration is premature, but immutable
+IDs, millisecond timings, and a serializable handoff are nearly free now and avoid
+remapping later.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/specs/2026-07-22-script-creator-requirements.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
+the design conforms to the recorded workbench boundary and the app remains an internal
+authoring tool.
