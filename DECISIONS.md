@@ -249,3 +249,37 @@ layer after the readable script.
 `whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` and `CLAUDE.md`
 need no change because this is an authoring-order and document-presentation decision, not
 a brand or repository-authority change.
+
+## 2026-07-22 — Ground substantial points in real-world consequences
+
+**Decision:** For each non-obvious WHP point, prefer a compact documented real-world case
+told with mechanism-derived humor, then state which number improved, which real goal was
+damaged, and who absorbed the cost; use a clearly labeled hypothetical only when a real
+case is unavailable, unverified, or would obscure the story.
+
+**Rationale:** A joke or abstract example can demonstrate how someone games a measure while
+still leaving the viewer asking why the gap matters. The negative implication must be part
+of the explanation rather than metadata the viewer has to infer.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`, and this
+ledger. `BRAND.md` and `CLAUDE.md` already require useful, rigorous, human storytelling and
+need no change.
+
+## 2026-07-22 — Make the AI check conversational and close the lesson
+
+**Decision:** Episode 1 promises four questions viewers can ask an AI to check whether its
+answer solved their real problem, integrates Goodhart's and Campbell's laws through funny
+examples with explicit human consequences, and ends on a declarative lesson rather than an
+unresolved question.
+
+**Rationale:** The check should be directly usable inside an AI conversation, and the
+episode's last sentence should put a clear period behind the insight the story earned.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`whp-youtube/episodes/01-why-ai-cheats.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`, and this
+ledger. Historical proposals and parked drafts remain unchanged.

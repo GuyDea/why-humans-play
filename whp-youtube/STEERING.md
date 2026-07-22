@@ -31,9 +31,12 @@ accepted current launch sequence, dated launch research, and historical episode 
    Follows Every Rule*. Research-draft thumbnail promise: an obviously wrong outcome
    beside a green `100%` score and the words **100% WRONG**. The selected opening is an
    original WHP reconstruction of the verified block-flip example, with the green
-   `100%` labeled conceptual rather than reported. Its application asks viewers to
-   inspect one everyday score conditionally and treats any apparent distortion as a
-   hypothesis, not a diagnosis or causal finding.
+   `100%` labeled conceptual rather than reported. The human bridge first shows Goodhart's
+   law through school and customer-service examples, then escalates to Campbell's law
+   through the reported Atlanta-schools and Wells Fargo cases. Each case must make the
+   damaged real goal and human cost explicit. The application gives viewers four questions
+   they can ask an AI to check whether its answer solved their real problem, without
+   treating the AI's self-assessment as proof of correctness or intent.
 2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
    distinguish evidence of job performance from performance inside the interview.
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
@@ -172,6 +175,8 @@ Use this order for WHP scripts:
    editorial, retention, timing, and format checks.
 6. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
+7. Close the central lesson with a short declarative button. A final question or forward
+   hook may follow only when it does not leave the episode's main answer unresolved.
 
 In the final production document, the readable script comes first as numbered beats that
 contain spoken narration only. Put all timestamps, targets, story functions, claims,
@@ -259,6 +264,13 @@ millions on junk science).
   short verified fact when its origin, scale, reversal, or consequence makes the idea
   more useful or memorable. Keep the tidbit fast and connected to the next thought;
   decorative trivia that slows the story does not qualify.
+- **Prove substantial points through consequence chains.** For each non-obvious point,
+  look first for a compact documented real-world case. Tell it as `goal → measure or
+  target → changed behavior → improved number → damaged goal and human cost`.
+  Earn humor from the absurd mechanism or institution, then state plainly what got worse
+  and who absorbed the cost; the punchline never substitutes for the implication. Use a
+  clearly labeled hypothetical when a real case is unavailable, unverified, or would
+  obscure the story rather than sharpen it.
 - **Hand the insight back.** Every complete script gives the viewer one specific,
   evidence-bounded action, observation, or reflection, names what to notice, preserves a
   real limitation, and connects the exercise to a larger benefit. Do not disguise generic

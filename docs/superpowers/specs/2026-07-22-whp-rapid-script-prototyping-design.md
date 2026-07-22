@@ -217,23 +217,31 @@ workbench can capture it without contaminating the script artifact.
    inside that sentence; humor may surround it without complicating the takeaway.
 5. **Make the human connection early.** Do not postpone why the idea matters in ordinary
    behavior or AI use.
-6. **Concretize every non-obvious claim.** Follow an abstraction with an example, image,
-   or consequence the viewer can immediately picture.
+6. **Concretize every non-obvious claim through a consequence chain.** Look first for a
+   compact documented real-world example. Show the intended goal, the measure or target,
+   the behavior it produced, the number that improved, the real goal that worsened, and
+   who absorbed the cost. Use a clearly labeled hypothetical when a real case is
+   unavailable, unverified, or would slow the story without deepening it.
 7. **Use terminology as a reward.** Demonstrate the pattern first; name concepts such as
    specification gaming or Goodhart's law only after the viewer understands them.
 8. **Add useful informational rewards.** When a compact verified fact can deepen the
    concept without slowing the story, add one about its origin, scale, reversal, or
    consequence. Keep it connected to the next thought; omit decorative trivia.
 9. **Make humor do explanatory work.** Build jokes from the mechanism, pursue the stronger
-   second or third beat, and prefer specific consequences over cryptic cleverness.
+   second or third beat, and aim them at absurd incentives, institutions, or outcomes.
+   State the concrete negative implication after the laugh; do not let the punchline stand
+   in for what happened to the real goal or the people affected.
 10. **Escalate the stakes.** Move from the funny incident to ordinary experience and then
    to the larger system without abandoning the central idea.
 11. **Write for speech.** Use short sentences, controlled density, contrast, repetition,
     callbacks, and recurring language that gives the narration a spine.
 12. **Make every paragraph earn its place.** It must create curiosity, laughter, or
     insight; the strongest paragraphs do more than one.
-13. **Let research support the story.** Evidence determines what may be claimed, not the
-    order in which the viewer must hear the research process.
+13. **Put a period behind the lesson.** End the central payoff on a short declarative line
+    that states what the story has established. Do not make the viewer reconstruct the
+    answer from a final rhetorical question.
+14. **Let research support the story.** Evidence determines what may be claimed, not the
+   order in which the viewer must hear the research process.
 
 ## Rapid quality check
 
@@ -251,10 +259,16 @@ Before returning a prototype or refinement, check only:
 - Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does a research-event opening name the known year and institution without inventing a
   location or affiliation?
-- Does each substantial abstraction receive a concrete example?
+- Does each substantial abstraction receive a real-world example when one is available
+  and story-worthy?
+- Does each example show the intended goal, the number that improved, the damaged goal,
+  and who absorbed the cost?
+- Does the joke expose the mechanism before the narration states the negative implication?
 - When a compact origin, scale, reversal, or consequence fact would deepen the idea, is
   it included briefly and connected to the story rather than used as decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
+- Does the final declarative line close the lesson rather than merely reopen it as a
+  question?
 - Would the copy sound natural aloud?
 - Did any factual specificity get invented?
 - Did the response stay inside the requested scope?
