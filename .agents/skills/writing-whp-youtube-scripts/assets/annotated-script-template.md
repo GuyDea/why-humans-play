@@ -1,11 +1,29 @@
 # Why Bees Roll Balls
 
-> This is a worked one-beat example, not a reusable factual conclusion. Copy its
-> structure, replace its assignment-specific content, and independently recheck every
-> live source, locator, license, and claim before production.
+## 1. The detour
+
+> In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
+> into an object area, contacted wooden balls, and rolled them repeatedly without a
+> food reward.
+> <!-- PI-001: Martin input -->
+> The researchers said this met their operational play criteria. That
+> does not tell us what a bee feels—but makes the detour hard to dismiss.
+> Next time an animal seems to play, look for repetition, choice, and no immediate
+> reward. Those clues can sharpen the question; they cannot reveal the animal's inner
+> experience.
+
+## Appendix
+
+### Template note
+
+This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,
+replace its assignment-specific content, and independently recheck every live source,
+locator, license, and claim before production.
+
+### Script metadata
 
 - **Status:** RESEARCH-DRAFT
-- **Version:** 0.3
+- **Version:** 0.4
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 00:30
 - **Word count:** 80
@@ -21,25 +39,17 @@
 - **Evidence review:** Primary paper checked; interpretation remains bounded.
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
-## Beat 01 — The detour
-_Time: 00:00–00:30 · Target: ~80 words_
+### Beat 01 — The detour
+- **Time:** 00:00–00:30
+- **Target:** ~80 words
 
-### Narration
-> In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
-> into an object area, contacted wooden balls, and rolled them repeatedly without a
-> food reward.
-> <!-- PI-001: Martin input -->
-> The researchers said this met their operational play criteria. That
-> does not tell us what a bee feels—but makes the detour hard to dismiss.
-> Next time an animal seems to play, look for repetition, choice, and no immediate
-> reward. Those clues can sharpen the question; they cannot reveal the animal's inner
-> experience.
+#### Story function
 
-### Story function
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
 
-### Personal input
+#### Personal input
+
 - **ID:** PI-001
 - **Decision:** INPUT-REQUESTED
 - **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.
@@ -50,46 +60,57 @@ bee's motives.
 - **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
 - **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
 
-### Viewer application
+#### Viewer application
+
 - **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
 - **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
 - **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
 - **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
 - **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
 
-### Claims
+#### Claims
+
 - `F-001` — Supports narration: “In a 2022 experiment, bumblebees had an unobstructed
   path to food. Some detoured into an object area, contacted wooden balls, and rolled them
   repeatedly without a food reward. The researchers said this met their operational play
   criteria. That does not tell us what a bee feels. Those clues can sharpen the question;
   they cannot reveal the animal's inner experience.” — `VERIFIED`.
 
-### Visual
+#### Visual
+
 - Use the paper's experimental-layout figure as `A-001`.
 - Fallback: recreate the arena as a labeled diagram using only reported dimensions.
 
-### Motion / edit
+#### Motion / edit
+
 - Label the route overlay “schematic”; trace the unobstructed path to food, reveal the
   detour into the object area, then use repeated path pulses to show repetition.
 - **Animation purpose:** Make the food path, detour, and repeated choice spatially clear
   without presenting the overlay as a recorded trajectory.
 
-### On-screen text
+#### On-screen text
+
 - “Adapted from Galpayage Dona et al. (2022) · CC BY 4.0”
 
-### Audio / accessibility
+#### Audio / accessibility
+
 - Let the music pause at the detour.
 - Descriptive transcript: a schematic route leaves the unobstructed food path, enters
   the object area, and pulses repeatedly as a bee contacts and rolls a ball.
 
-### Assets
+#### Assets
+
 - `A-001` — Experimental-layout figure (`CC-BY-4.0`).
 
-## References and source materials
+### Editorial audit
 
-### Evidence references
+- Not run in the worked template. Complete narration review comes first.
 
-#### F-001 — Ball rolling without a food reward
+### References and source materials
+
+#### Evidence references
+
+##### F-001 — Ball rolling without a food reward
 - **Exact claim:** In experiment 1, bumblebees had an unobstructed path to food; some detoured into the object area, contacted and rolled wooden balls, and repeated the action without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play.
 - **Original URL:** https://doi.org/10.1016/j.anbehav.2022.08.013
 - **Source / author:** Galpayage Dona et al., Animal Behaviour 194
@@ -103,9 +124,9 @@ bee's motives.
 - **Caveat:** Do not turn behavioral criteria into a claim about conscious emotion.
 - **Approved wording:** In a 2022 experiment, bumblebees had an unobstructed path to food; some detoured into the object area, contacted wooden balls, and rolled them repeatedly without receiving a food reward for ball rolling. The authors concluded that the behavior fulfilled their operational criteria for animal play. Meeting those criteria does not establish what a bee feels or reveal its subjective experience.
 
-### Visual and archival sources
+#### Visual and archival sources
 
-#### A-001 — Experimental layout
+##### A-001 — Experimental layout
 - **Original asset page:** https://doi.org/10.1016/j.anbehav.2022.08.013
 - **Direct production file:** https://oulurepo.oulu.fi/bitstream/handle/10024/43665/nbnfi-fe2023062057117.pdf
 - **Creator / rightsholder:** Galpayage Dona et al.
@@ -118,10 +139,10 @@ bee's motives.
 - **Accessed:** 2026-07-20
 - **Status:** CC-BY-4.0
 
-### Unverified or disputed material
+#### Unverified or disputed material
 
 - None used in this excerpt.
 
-### Attribution copy
+#### Attribution copy
 
 - `A-001` — “Figure 1 adapted from Galpayage Dona et al., ‘Do bumble bees play?’ (2022), https://doi.org/10.1016/j.anbehav.2022.08.013. Licensed under CC BY 4.0: https://creativecommons.org/licenses/by/4.0/. Adapted by Why Humans Play: cropped and overlaid with a labeled schematic route.”

@@ -41,7 +41,7 @@ rights findings.
 7. Use only the approved wording or a weaker formulation.
 
 Map every factual narration sentence or separable factual clause to at least one `F-###` ID
-in the adjacent `### Claims` section. A single ID may cover multiple nearby statements only
+in the matching appendix beat's `#### Claims` section. A single ID may cover multiple nearby statements only
 when its evidence record supports each one. Jokes, opinions, transitions, and clearly
 signaled hypotheticals do not need invented source markers.
 
@@ -125,7 +125,7 @@ Before finalizing, reverse-audit every narrated material claim against its evide
 record.
 
 Before the word-for-word checks, confirm that every factual narration sentence or separable
-factual clause has an adjacent beat-level `F-###` mapping. Treat an unmapped factual
+factual clause has a matching appendix-beat `F-###` mapping. Treat an unmapped factual
 statement as unresolved even when its source exists elsewhere in the document.
 
 1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and

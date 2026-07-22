@@ -146,6 +146,15 @@ FENCE_LINE_RE = re.compile(
     r"^[ ]{0,3}(?P<quote>>[ \t]?[ ]{0,3})?"
     r"(?P<fence>`{3,}|~{3,})(?P<rest>.*)$"
 )
+APPENDIX_HEADING_RE = re.compile(r"^## Appendix[ \t]*$", re.MULTILINE)
+NUMBERED_BEAT_HEADING_RE = re.compile(
+    r"^## ([1-9]\d*)\. ([^\r\n]+?)[ \t]*$", re.MULTILINE
+)
+NUMBERED_BEAT_CANDIDATE_RE = re.compile(r"^## \d+\..*$", re.MULTILINE)
+APPENDIX_LEVEL_THREE_RE = re.compile(
+    r"^### ([^#\r\n].*?)[ \t]*$", re.MULTILINE
+)
+APPENDIX_BEAT_NAME_RE = re.compile(r"^Beat (\d{2}) — (\S.*)$")
 
 
 @dataclass(frozen=True)
@@ -203,6 +212,193 @@ def _mask_fenced_blocks(text: str) -> str:
                     fence_in_blockquote = False
         masked_lines.append(re.sub(r"[^\r\n]", " ", line))
     return "".join(masked_lines)
+
+
+def _level_three_blocks(text: str, masked_text: str) -> list[tuple[str, str]]:
+    """Return appendix level-three names and original bodies in document order."""
+
+    matches = list(APPENDIX_LEVEL_THREE_RE.finditer(masked_text))
+    blocks: list[tuple[str, str]] = []
+    for index, match in enumerate(matches):
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        blocks.append((match.group(1).rstrip(), text[match.end() : end]))
+    return blocks
+
+
+def _promote_appendix_headings(body: str) -> str:
+    """Convert appendix level-four/five headings to the legacy validator levels."""
+
+    promoted: list[str] = []
+    for line in body.splitlines(keepends=True):
+        if line.startswith("##### "):
+            promoted.append(line[1:])
+        elif line.startswith("#### "):
+            promoted.append(line[1:])
+        else:
+            promoted.append(line)
+    return "".join(promoted)
+
+
+def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
+    """Translate the narration-first appendix format for the legacy rule engine."""
+
+    masked = _mask_fenced_blocks(text)
+    appendix_headings = list(APPENDIX_HEADING_RE.finditer(masked))
+    errors: list[str] = []
+    if len(appendix_headings) != 1:
+        errors.append(
+            f"Document must contain exactly one Appendix heading; found {len(appendix_headings)}."
+        )
+        return text, errors
+
+    appendix_heading = appendix_headings[0]
+    narration_text = text[: appendix_heading.start()]
+    masked_narration = masked[: appendix_heading.start()]
+    appendix_text = text[appendix_heading.end() :]
+    masked_appendix = masked[appendix_heading.end() :]
+
+    beat_matches = list(NUMBERED_BEAT_HEADING_RE.finditer(masked_narration))
+    candidate_starts = {
+        match.start() for match in NUMBERED_BEAT_CANDIDATE_RE.finditer(masked_narration)
+    }
+    valid_starts = {match.start() for match in beat_matches}
+    for start in sorted(candidate_starts - valid_starts):
+        line_end = masked_narration.find("\n", start)
+        if line_end == -1:
+            line_end = len(masked_narration)
+        errors.append(
+            "Malformed numbered beat heading: "
+            + narration_text[start:line_end].strip()
+            + "."
+        )
+    if not beat_matches:
+        errors.append("At least one numbered narration beat is required before Appendix.")
+        return text, errors
+
+    preamble = narration_text[: beat_matches[0].start()]
+    preamble_without_h1 = re.sub(r"^# [^\r\n]+\r?\n?", "", preamble, count=1)
+    if preamble_without_h1.strip():
+        errors.append(
+            "Only the episode H1 may appear before the first numbered narration beat."
+        )
+
+    narration_beats: list[tuple[str, str, str]] = []
+    narration_numbers: list[int] = []
+    for index, match in enumerate(beat_matches):
+        end = (
+            beat_matches[index + 1].start()
+            if index + 1 < len(beat_matches)
+            else len(narration_text)
+        )
+        number = int(match.group(1))
+        title = match.group(2).strip()
+        body = narration_text[match.end() : end]
+        if number > 99:
+            errors.append(f"Narration beat {number} exceeds the two-digit appendix range.")
+        narration_numbers.append(number)
+        for line in body.splitlines():
+            if line.strip() and re.match(r"^[ ]{0,3}>", line) is None:
+                errors.append(
+                    f"Beat {number:02d} narration body may contain only spoken "
+                    "blockquotes and blank lines."
+                )
+                break
+        if not any(
+            re.match(r"^[ ]{0,3}>[ \t]?\S", line)
+            for line in body.splitlines()
+        ):
+            errors.append(f"Beat {number:02d} narration must contain spoken blockquote text.")
+        narration_beats.append((f"{number:02d}", title, body))
+
+    if len(set(narration_numbers)) != len(narration_numbers):
+        errors.append("Numbered narration beat IDs must be unique.")
+    if any(
+        current <= previous
+        for previous, current in zip(narration_numbers, narration_numbers[1:])
+    ):
+        errors.append("Numbered narration beats must be strictly ascending.")
+
+    appendix_blocks = _level_three_blocks(appendix_text, masked_appendix)
+    metadata_blocks = [body for name, body in appendix_blocks if name == "Script metadata"]
+    reference_blocks = [
+        body for name, body in appendix_blocks if name == "References and source materials"
+    ]
+    if len(metadata_blocks) != 1:
+        errors.append(
+            "Appendix must contain exactly one Script metadata section; "
+            f"found {len(metadata_blocks)}."
+        )
+    if len(reference_blocks) != 1:
+        errors.append(
+            "Appendix must contain exactly one References and source materials section; "
+            f"found {len(reference_blocks)}."
+        )
+
+    appendix_beats: list[tuple[str, str, str]] = []
+    for name, body in appendix_blocks:
+        match = APPENDIX_BEAT_NAME_RE.fullmatch(name)
+        if match is not None:
+            appendix_beats.append((match.group(1), match.group(2).strip(), body))
+
+    narration_keys = [(beat_id, title) for beat_id, title, _ in narration_beats]
+    appendix_keys = [(beat_id, title) for beat_id, title, _ in appendix_beats]
+    if narration_keys != appendix_keys:
+        errors.append(
+            "Appendix beat mappings must match the narration beat numbers and titles "
+            "in the same order."
+        )
+
+    appendix_by_key = {
+        (beat_id, title): body for beat_id, title, body in appendix_beats
+    }
+    legacy_beats: list[str] = []
+    for beat_id, title, narration_body in narration_beats:
+        appendix_body = appendix_by_key.get((beat_id, title), "")
+        field_values = _field_values(appendix_body)
+        time_values = field_values.get("Time", [])
+        target_values = field_values.get("Target", [])
+        if len(time_values) != 1 or not time_values[0]:
+            errors.append(f"Appendix Beat {beat_id} requires exactly one non-empty Time field.")
+        if len(target_values) != 1 or not target_values[0]:
+            errors.append(f"Appendix Beat {beat_id} requires exactly one non-empty Target field.")
+        if re.search(r"^#### Narration[ \t]*$", appendix_body, re.MULTILINE):
+            errors.append(
+                f"Appendix Beat {beat_id} must not repeat a Narration section."
+            )
+        production_body = re.sub(
+            r"^[ \t]*-[ \t]+\*\*(?:Time|Target):\*\*[^\r\n]*(?:\r?\n)?",
+            "",
+            appendix_body,
+            flags=re.MULTILINE,
+        )
+        legacy_beats.append(
+            f"## Beat {beat_id} — {title}\n"
+            f"_Time: {time_values[0] if time_values else ''} · "
+            f"Target: {target_values[0] if target_values else ''}_\n\n"
+            "### Narration\n"
+            + narration_body.strip("\r\n")
+            + "\n\n"
+            + _promote_appendix_headings(production_body).strip()
+            + "\n"
+        )
+
+    metadata = metadata_blocks[0].strip() if metadata_blocks else ""
+    references = (
+        _promote_appendix_headings(reference_blocks[0]).strip()
+        if reference_blocks
+        else ""
+    )
+    legacy = (
+        preamble.rstrip()
+        + "\n\n"
+        + metadata
+        + "\n\n"
+        + "\n".join(legacy_beats)
+        + "\n## References and source materials\n\n"
+        + references
+        + "\n"
+    )
+    return legacy, errors
 
 
 def _document_regions(text: str) -> DocumentRegions:
@@ -326,7 +522,11 @@ def _extract_narration_from_masked(masked_text: str) -> str:
 def extract_narration(text: str) -> str:
     """Return spoken blockquote copy under Narration headings, without input markers."""
 
-    return _extract_narration_from_masked(_mask_fenced_blocks(text))
+    masked = _mask_fenced_blocks(text)
+    if APPENDIX_HEADING_RE.search(masked):
+        text, _ = _normalize_appendix_document(text)
+        masked = _mask_fenced_blocks(text)
+    return _extract_narration_from_masked(masked)
 
 
 def count_narration_words(text: str) -> int:
@@ -808,8 +1008,8 @@ def _validate_references(
                 )
 
 
-def validate_document(text: str) -> list[str]:
-    """Return human-readable structural errors; an empty list means structurally valid."""
+def _validate_legacy_document(text: str) -> list[str]:
+    """Run the original rule engine against the normalized annotated document."""
 
     masked_text = _mask_fenced_blocks(text)
     regions = _document_regions(masked_text)
@@ -843,6 +1043,16 @@ def validate_document(text: str) -> list[str]:
         errors,
     )
     return errors
+
+
+def validate_document(text: str) -> list[str]:
+    """Return human-readable structural errors; an empty list means structurally valid."""
+
+    masked_text = _mask_fenced_blocks(text)
+    if APPENDIX_HEADING_RE.search(masked_text):
+        normalized, format_errors = _normalize_appendix_document(text)
+        return format_errors + _validate_legacy_document(normalized)
+    return _validate_legacy_document(text)
 
 
 def main(argv: list[str] | None = None) -> int:

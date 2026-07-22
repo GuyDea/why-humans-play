@@ -176,6 +176,20 @@ with a visible audit.
 Preserve accepted language after feedback. Change only the requested opening, punchline,
 transition, example, or passage unless Martin asks for a broader rewrite.
 
+## Finish before auditing
+
+When the request is for a complete script, finish and show the whole narration before any
+editorial, retention, or timing audit. Judge the hook, explanation, humor, human connection,
+examples, and ending as one story before optimizing a clock.
+
+Do not remove setup, referents, causality, examples, humor, viewer relevance, or the
+learning promise merely to satisfy an unseen clock. Timing is a post-draft diagnostic, not
+a drafting gate.
+
+After Martin reviews the complete narration, report audit concerns separately before
+proposing a rewrite. Name the passage, the concern, and the likely tradeoff. Do not silently
+replace the script or treat an audit as permission to cut the context that made it work.
+
 ## Measure requested iterations
 
 When Martin requests iteration telemetry, record each visible task's elapsed time. Use

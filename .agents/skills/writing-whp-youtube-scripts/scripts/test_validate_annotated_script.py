@@ -429,6 +429,39 @@ TWO_BEAT_DOCUMENT = replace_exact(
 )
 
 
+def make_appendix_document() -> str:
+    narration = extract_exact(
+        BEAT_BLOCK,
+        "### Narration\n",
+        "\n### Story function",
+    ).removeprefix("### Narration\n")
+    appendix_beat = BEAT_BLOCK.split("### Story function\n", 1)[1]
+    appendix_beat = "#### Story function\n" + appendix_beat
+    appendix_beat = re.sub(r"(?m)^### ", "#### ", appendix_beat)
+    references = VALID_DOCUMENT.split("## References and source materials\n", 1)[1]
+    references = re.sub(r"(?m)^#### ", "##### ", references)
+    references = re.sub(r"(?m)^### ", "#### ", references)
+
+    return (
+        "# Why Bees Roll Balls\n\n"
+        "## 1. The detour\n\n"
+        + narration
+        + "\n## Appendix\n\n"
+        "### Script metadata\n\n"
+        + HEADER_BLOCK.strip()
+        + "\n\n### Beat 01 — The detour\n"
+        "- **Time:** 00:00–00:30\n"
+        "- **Target:** ~80 words\n\n"
+        + appendix_beat.strip()
+        + "\n\n### References and source materials\n\n"
+        + references.strip()
+        + "\n"
+    )
+
+
+APPENDIX_DOCUMENT = make_appendix_document()
+
+
 class ValidatorTests(unittest.TestCase):
     def assert_error(self, text: str, fragment: str) -> None:
         errors = validate_document(text)
@@ -471,6 +504,31 @@ class ValidatorTests(unittest.TestCase):
 
     def test_valid_research_draft_passes(self) -> None:
         self.assertEqual(validate_document(VALID_DOCUMENT), [])
+
+    def test_numbered_narration_beats_with_appendix_pass(self) -> None:
+        self.assertEqual(validate_document(APPENDIX_DOCUMENT), [])
+
+    def test_numbered_beat_rejects_metadata_inside_narration_layer(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "## 1. The detour\n\n",
+            "## 1. The detour\n\n- **Time:** 00:00–00:30\n\n",
+        )
+        self.assert_error(
+            document,
+            "Beat 01 narration body may contain only spoken blockquotes",
+        )
+
+    def test_appendix_beat_mapping_must_match_number_and_title(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "### Beat 01 — The detour",
+            "### Beat 02 — A different title",
+        )
+        self.assert_error(
+            document,
+            "Appendix beat mappings must match the narration beat numbers and titles",
+        )
 
     def test_full_script_contract_is_document_wide_across_beats(self) -> None:
         self.assertEqual(validate_document(TWO_BEAT_DOCUMENT), [])

@@ -60,13 +60,19 @@ specificity to make a draft sound authoritative. Preserve accepted language and 
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+When the request is for a complete script, follow the full-script review order below.
+Complete and show Martin the whole narration before running any editorial, retention, or
+timing audit. Treat timing as a post-draft
+diagnostic, not a drafting gate. Report audit concerns and tradeoffs separately before
+rewriting the narration; never silently cut context to satisfy an audit.
+
 Do not add these source markers to Phase 1 prototypes unless Martin explicitly asks.
 
 ## Creative approval gate
 
-Remain in Phase 1 until Martin explicitly approves the premise, voice, hook, and story
-direction or directly requests evidence-backed finalization. Positive feedback on one line
-or passage does not approve the complete narration.
+Remain in Phase 1 until Martin explicitly approves the premise, voice, hook, story
+direction, and complete narration or directly requests evidence-backed finalization.
+Positive feedback on one line or passage does not approve the complete narration.
 
 Preserve the approved prototype as the voice baseline; research may narrow claims but must
 not silently replace its structure or personality.
@@ -81,7 +87,7 @@ For evidence-backed finalization:
    assign confidence to every material claim, and approve only wording its evidence
    supports. Narrow or remove unsupported wording while preserving the approved voice. Map
    every factual narration sentence or separable factual clause to at least one `F-###` ID
-   in the adjacent `### Claims` section.
+   in the matching appendix beat's `#### Claims` section.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.
@@ -95,13 +101,15 @@ For evidence-backed finalization:
    its evidence. Voice all five elements in narration—the insight; the low-risk action,
    observation, or reflection; the observable signal; the boundary; and the larger
    benefit—not only in the structured block.
-7. Expand and draft for spoken delivery. Read the narration aloud, revise it for speech,
-   and time it against the target runtime without sanding away the approved personality.
-8. Add an adjacent treatment for visuals, candidate assets, motion, on-screen text, audio,
-   and accessibility without contaminating the narration.
-9. Run separate story, personal-authenticity, evidence, fact, rights, visual, animation,
-   application-boundary, accessibility, and format audits, then run the deterministic
-   validator.
+7. Complete the narration for spoken delivery and show it to Martin before auditing it.
+   Read it aloud and revise for speech without imposing a runtime cut first.
+8. The readable script comes first as numbered beats containing only the beat heading and
+   spoken blockquote narration. Put all metadata and production annotations in a final
+   appendix whose beat entries match the narration beat numbers and titles.
+9. After Martin reviews the complete narration, run separate story, personal-authenticity,
+   evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
+   retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
+   then run the deterministic validator on the production document.
 
 ## Production non-negotiables
 
@@ -123,8 +131,8 @@ For evidence-backed finalization:
   ownable fallback, and never call an asset cleared without a documented basis.
 - State the explanatory purpose of each animation. If motion adds no understanding, choose
   a still or no animation.
-- Keep production notes adjacent to the narration they support while keeping the narration
-  itself clean.
+- Keep production notes in the matching appendix beat so their relationship to narration
+  remains explicit without interrupting the readable script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or
   credits section.
 - Never self-promote a script to `RECORD-READY` from a validator result or rubric score.

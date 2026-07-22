@@ -43,8 +43,8 @@ class SkillPackageTests(unittest.TestCase):
         template = (
             SKILL_ROOT / "assets/annotated-script-template.md"
         ).read_text(encoding="utf-8")
-        narration = template.split("### Narration\n", 1)[1].split(
-            "\n### Story function", 1
+        narration = template.split("## 1. The detour\n", 1)[1].split(
+            "\n## Appendix", 1
         )[0]
         marker = "> <!-- PI-001: Martin input -->"
         evidence_turn = (
@@ -571,7 +571,8 @@ class SkillPackageTests(unittest.TestCase):
         )
         contract = (
             "Map every factual narration sentence or separable factual clause to at "
-            "least one `F-###` ID in the adjacent `### Claims` section."
+            "least one `F-###` ID in the matching appendix beat's `#### Claims` "
+            "section."
         )
         self.assertIn(contract, skill)
         self.assertIn(contract, research)
@@ -582,9 +583,8 @@ class SkillPackageTests(unittest.TestCase):
             skill,
         )
         self.assertIn(
-            "Quote the supported narration wording in each beat-level claim entry so "
-            "the source mapping stays visible in the script but outside the spoken "
-            "narration.",
+            "Quote the supported narration wording in each claim entry so the source "
+            "mapping stays visible outside the spoken narration.",
             format_text,
         )
         self.assertIn(
@@ -776,8 +776,8 @@ class SkillPackageTests(unittest.TestCase):
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         gate = (
             "Remain in Phase 1 until Martin explicitly approves the premise, voice, "
-            "hook, and story direction or directly requests evidence-backed "
-            "finalization."
+            "hook, story direction, and complete narration or directly requests "
+            "evidence-backed finalization."
         )
         preserve = (
             "Preserve the approved prototype as the voice baseline; research may "
@@ -789,6 +789,73 @@ class SkillPackageTests(unittest.TestCase):
             skill.index(gate),
             skill.index("## Phase 2 — Evidence and production"),
         )
+
+    def test_complete_narration_precedes_editorial_and_timing_audits(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        contracts = {
+            "skill": (
+                "Complete and show Martin the whole narration before running any "
+                "editorial, retention, or timing audit.",
+                "Treat timing as a post-draft diagnostic, not a drafting gate.",
+                "Report audit concerns and tradeoffs separately before rewriting the "
+                "narration; never silently cut context to satisfy an audit.",
+            ),
+            "rapid": (
+                "When the request is for a complete script, finish and show the whole "
+                "narration before any editorial, retention, or timing audit.",
+                "Do not remove setup, referents, causality, examples, humor, viewer "
+                "relevance, or the learning promise merely to satisfy an unseen clock.",
+                "After Martin reviews the complete narration, report audit concerns "
+                "separately before proposing a rewrite.",
+            ),
+        }
+        for source_name, source_contracts in contracts.items():
+            source = {"skill": skill, "rapid": rapid}[source_name]
+            for contract in source_contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source)
+
+    def test_final_format_separates_numbered_narration_from_appendix(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        template = (
+            SKILL_ROOT / "assets/annotated-script-template.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn(
+            "The readable script comes first as numbered beats containing only the "
+            "beat heading and spoken blockquote narration.",
+            skill,
+        )
+        self.assertIn(
+            "Put all metadata and production annotations in a final appendix whose "
+            "beat entries match the narration beat numbers and titles.",
+            skill,
+        )
+        self.assertIn("Numbered narration-only beats", format_text)
+        self.assertIn("Beat-matched production appendix", format_text)
+        self.assertRegex(template, r"(?m)^## 1\. ")
+        self.assertIn("\n## Appendix\n", template)
+        main_script = template.split("\n## Appendix\n", 1)[0]
+        for forbidden in (
+            "**Status:**",
+            "**Time:**",
+            "### Claims",
+            "### Visual",
+            "### Story function",
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, main_script)
 
     def test_phase_two_keeps_existing_production_resources(self) -> None:
         skill = SKILL_MD.read_text(encoding="utf-8")

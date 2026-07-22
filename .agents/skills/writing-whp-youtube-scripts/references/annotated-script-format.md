@@ -3,8 +3,9 @@
 ## Contents
 
 - [Purpose and source of truth](#purpose-and-source-of-truth)
-- [Header](#header)
-- [Beat blocks](#beat-blocks)
+- [Document layers](#document-layers)
+- [Numbered narration-only beats](#numbered-narration-only-beats)
+- [Beat-matched production appendix](#beat-matched-production-appendix)
 - [Personal input and viewer application](#personal-input-and-viewer-application)
 - [Stable IDs](#stable-ids)
 - [Evidence and asset records](#evidence-and-asset-records)
@@ -17,15 +18,47 @@
 
 ## Purpose and source of truth
 
-Keep one Markdown document as the source of truth for each script. Put clean spoken
-narration in blockquotes and keep the production notes for that narration in the same
-beat, directly beside it. Do not maintain separate editable narration and production
-documents that can drift out of sync.
+Keep one Markdown document as the source of truth for each script, but give it two reading
+layers. Put the complete readable narration first as numbered beats. Put all metadata,
+evidence, and production direction in a final appendix whose beat entries match those
+narration beats. Do not maintain separate editable narration and production documents that
+can drift out of sync.
 
-## Header
+## Document layers
 
-Place the H1 episode heading first. Follow it with these 16 fields, using the exact
-labels and order shown:
+Use this top-level order:
+
+1. H1 episode heading.
+2. Numbered narration-only beats.
+3. One `## Appendix` heading containing script metadata, production notes, editorial audit
+   results, and references.
+
+Do not put header fields, timestamps, targets, story-function labels, claims, citations,
+visuals, edit instructions, on-screen text, audio notes, accessibility notes, assets,
+personal-input fields, viewer-application fields, or editorial commentary in the numbered
+narration layer.
+
+## Numbered narration-only beats
+
+Use ordinary ascending numbers and a descriptive title. The beat body may contain only
+spoken blockquotes, blank lines, and unresolved personal-input markers inside blockquotes:
+
+```markdown
+## 1. Descriptive name
+
+> Clean spoken copy.
+>
+> A second spoken paragraph.
+```
+
+Each numbered beat must have exactly one matching appendix beat entry. Its number and title
+must match exactly; narration beat `## 1. Descriptive name` maps to appendix beat
+`### Beat 01 — Descriptive name`.
+
+## Beat-matched production appendix
+
+Begin the appendix with `### Script metadata`. Place these 16 fields beneath it, using the
+exact labels and order shown:
 
 ```markdown
 - **Status:** RESEARCH-DRAFT
@@ -71,7 +104,7 @@ Give every field a non-empty, assignment-specific value:
     production dependencies.
 
 Use `FULL-SCRIPT` for a complete episode or Short. It requires exactly one
-`### Personal input` block and exactly one `### Viewer application` block across the
+`#### Personal input` block and exactly one `#### Viewer application` block across the
 document. Use `TARGETED-ARTIFACT` for an audit, isolated beat, visual plan, or revision
 excerpt. It need not add either block, but every personal-input or viewer-application
 block that appears must follow the complete schema below.
@@ -80,65 +113,63 @@ Require a non-empty `Useful viewer change` for both deliverable values. A target
 artifact may name the inherited change it serves or state that it does not alter the
 parent script's approved change.
 
-Keep header metadata above the first beat. Update the word count, runtime, version,
-and review summaries whenever the script changes materially.
+Keep metadata inside the appendix rather than above or inside the narration beats. Update
+the word count, runtime, version, and review summaries whenever the script changes
+materially.
 
-## Beat blocks
-
-Use two-digit beat numbers in unique, strictly ascending order. Repeat this exact
-stacked structure for every beat:
+After script metadata, add one production entry for every narration beat. Use two-digit
+beat numbers in unique, strictly ascending order and repeat the exact narration title:
 
 ```markdown
-## Beat 01 — Descriptive name
-_Time: 00:00–00:18 · Target: ~42 words_
+### Beat 01 — Descriptive name
+- **Time:** 00:00–00:18
+- **Target:** ~42 words
 
-### Narration
-> Clean spoken copy.
-
-### Story function
+#### Story function
 What changes for the viewer and which promise or question this serves.
 
-### Claims
+#### Claims
 - `F-001` — Supports narration: “Exact factual wording from this beat.” — confidence status.
 
-### Visual
+#### Visual
 - Treatment and `A-001` asset reference.
 - Fallback if the preferred material cannot be used.
 
-### Motion / edit
+#### Motion / edit
 - Exact reveal, transition, comparison, or movement.
 - **Animation purpose:** What motion makes easier to understand.
 
-### On-screen text
+#### On-screen text
 - Minimal labels, numbers, quotation, and compact citation.
 
-### Audio / accessibility
+#### Audio / accessibility
 - Music or sound cue.
 - Essential visual information needed in a descriptive transcript.
 
-### Assets
+#### Assets
 - `A-001` — Intended use and rights status.
 ```
 
-Keep all eight level-three subsections, even when a subsection records an intentional
-choice to use no additional element. Under `Motion / edit`, include either a
+Keep all seven level-four production subsections, even when a subsection records an
+intentional choice to use no additional element. Narration exists only in the numbered
+beat layer and is not repeated in the appendix. Under `Motion / edit`, include either a
 non-empty `**Animation purpose:**` field or an explicit `No animation — ...`
 explanation. State what motion clarifies; do not use animation as an unsupported
 decorative instruction.
 
 Map every factual narration sentence or separable factual clause to at least one `F-###` ID
-in the adjacent `### Claims` section. Quote the supported narration wording in each
-beat-level claim entry so the source mapping stays visible in the script but outside the
-spoken narration. One entry may quote multiple nearby statements only when its evidence
-record supports all of them. Do not assign source markers to jokes, opinions, transitions,
-or clearly signaled hypotheticals merely to make the section look complete. This semantic
-coverage remains a human audit; the structural validator does not prove it.
+in the matching appendix beat's `#### Claims` section. Quote the supported narration wording
+in each claim entry so the source mapping stays visible outside the spoken narration. One
+entry may quote multiple nearby statements only when its evidence record supports all of
+them. Do not assign source markers to jokes, opinions, transitions, or clearly signaled
+hypotheticals merely to make the section look complete. This semantic coverage remains a
+human audit; the structural validator does not prove it.
 
 Place each required or optional structured block in the beat where it performs its
 narrative job. Use these exact schemas:
 
 ```markdown
-### Personal input
+#### Personal input
 - **ID:** PI-001
 - **Decision:** INPUT-REQUESTED
 - **Story purpose:** What changes for the viewer because this is personal.
@@ -149,7 +180,7 @@ narrative job. Use these exact schemas:
 - **Personal visuals:** Optional object, location, photo, screen, or demonstration ideas.
 - **Omit when:** The condition under which the sequence should be cut.
 
-### Viewer application
+#### Viewer application
 - **Insight:** The evidence-bounded idea being handed back.
 - **Try:** One low-risk action, observation, or reflection.
 - **Observe:** What signal, response, or pattern to notice.
@@ -169,8 +200,8 @@ decision: `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Apply the removal test: if 
 the sequence changes nothing for the viewer, choose `OMIT` and give the story-specific
 reason in `Omit when`. Never invent Martin's experience.
 
-Use this exact unresolved annotation in the personal beat's narration, changing only
-the three-digit ID to match the block:
+Use this exact unresolved annotation in the numbered personal beat's narration, changing
+only the three-digit ID to match the appendix block:
 
 ```markdown
 > <!-- PI-001: Martin input -->
@@ -223,11 +254,11 @@ page as evidence for a factual claim.
 
 ### Evidence records
 
-Create one level-four record under `### Evidence references` for each referenced
+Create one level-five record under `#### Evidence references` for each referenced
 `F-###` ID. Include all 12 fields with the exact labels below:
 
 ```markdown
-#### F-001 — Short claim name
+##### F-001 — Short claim name
 - **Exact claim:** The smallest factual statement the script needs.
 - **Original URL:** https://example.org/original-source
 - **Source / author:** Author or originating institution and publication
@@ -260,11 +291,11 @@ when deciding source quality, status, or wording.
 
 ### Asset records
 
-Create one level-four record under `### Visual and archival sources` for each
+Create one level-five record under `#### Visual and archival sources` for each
 referenced `A-###` ID. Include all 11 fields with the exact labels below:
 
 ```markdown
-#### A-001 — Short asset name
+##### A-001 — Short asset name
 - **Original asset page:** https://example.org/asset-page
 - **Direct production file:** https://example.org/production-file
 - **Creator / rightsholder:** Named creator or rightsholder
@@ -292,17 +323,17 @@ is allowed when it still states both elements explicitly.
 
 ## End-reference sections
 
-End the document with one `## References and source materials` heading. Place these
-four level-three sections under it in this exact order:
+End the appendix with one `### References and source materials` heading. Place these
+four level-four sections under it in this exact order:
 
 Apply this structure even when the requested artifact is only a targeted beat,
 insert, audit, or revision excerpt; use an explicit none-needed statement in any
 section that has no records.
 
-1. `### Evidence references`
-2. `### Visual and archival sources`
-3. `### Unverified or disputed material`
-4. `### Attribution copy`
+1. `#### Evidence references`
+2. `#### Visual and archival sources`
+3. `#### Unverified or disputed material`
+4. `#### Attribution copy`
 
 Put every `F-###` record in the first section and every `A-###` record in the second.
 Use the third section to identify unresolved or conflicting material and the checks
@@ -340,12 +371,10 @@ because its structure passes.
 
 ## Narration-only extraction
 
-Build table-read and teleprompter copy by concatenating only the blockquotes directly
-under each `### Narration`, in beat order. Preserve the spoken words and paragraph
-order, but remove personal-input marker annotations. Never include story, personal-input
-fields, viewer-application fields, claim, visual, motion, on-screen, audio,
-accessibility, asset, header, or end-ledger notes in the narration-only copy. Count
-only the extracted spoken words when updating `Word count`.
+Build table-read and teleprompter copy by concatenating only the blockquotes in numbered
+beats before `## Appendix`, in beat order. Preserve the spoken words and paragraph order,
+but remove personal-input marker annotations. Never include appendix material in the
+narration-only copy. Count only the extracted spoken words when updating `Word count`.
 
 ## Validation
 
@@ -357,9 +386,10 @@ python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"
 
 Do not hardcode the skill package path or use a vendor-specific environment variable. The dynamically resolved target path may be absolute; pass it as one quoted argument after `--`.
 
-Use the validator to check that required header fields and end sections exist; beat
-IDs are well formed, unique, and ascending; every beat contains all required
-subsections; deliverable-specific personal-input and viewer-application blocks have
+Use the validator to check that required metadata fields and end sections exist; narration
+and appendix beat IDs and titles match, are well formed, unique, and ascending; narration
+beats contain only spoken blockquotes; every appendix beat contains all required
+production subsections; deliverable-specific personal-input and viewer-application blocks have
 the required cardinality, fields, decision vocabulary, and marker lifecycle; stated
 word count matches extracted narration; motion notes state an animation purpose or
 explicitly decline animation; referenced fact and asset IDs have exactly one record;
@@ -385,6 +415,8 @@ storytelling, visuals, or editorial judgment are sound.
 Avoid these errors:
 
 - Putting production notes, citations, or directions inside narration blockquotes.
+- Putting metadata or production headings anywhere in the numbered narration layer.
+- Letting a narration beat number or title drift from its appendix entry.
 - Inventing first-person material instead of requesting, integrating, or omitting it.
 - Leaving an input marker unresolved after `RESEARCH-DRAFT`, or counting it as speech.
 - Keeping a generic viewer application only in production notes instead of voicing its
