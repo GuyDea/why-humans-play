@@ -100,6 +100,7 @@ For every promising subject, develop at least **two materially different angles*
 For each angle, identify:
 
 - the familiar entry point;
+- one documented opening proof case that is legible on first hearing;
 - the tension, puzzle, or misconception;
 - the recognizable human stake;
 - the earned payoff or reframe;
@@ -124,6 +125,18 @@ familiar game, event, person, institution, or trend
 
 A weak angle does not automatically disqualify its subject. Reframe it through a different tension, stake, or evidence path, then apply all six hard gates again to the new angle.
 
+Before an angle becomes a finalist, identify one documented opening proof case whose
+intended goal, visible measure, shortcut, and absurd outcome can be told in a few plain
+sentences. If a first-hearing listener would still ask why the measure improved, find a
+clearer case or lower the angle's opening potential; do not rescue a weak hook with a
+technical lecture. A technically exact case is not a strong opening merely because it is
+well sourced; causal clarity and visual legibility are part of production reality.
+
+For a long-lived mechanism, identify one compact current echo that shows the pattern still
+matters without opening a second full story or claiming that every system behaves the same
+way. Verify that both examples instantiate the same bounded mechanism. Use the historical
+case for story and the current echo for continuity rather than building two competing hooks.
+
 ## Shallow and deep research
 
 Use staged research so breadth is preserved before costly investigation.
@@ -140,6 +153,7 @@ Deeply research only the finalists. Seek independent evidence for:
 
 - audience interest, reachable market, and trajectory;
 - competitive supply, existing angle quality, and a credible opening;
+- a first-hearing causal spine for the opening proof case and, when relevant, a current echo;
 - comparable relative breakouts within valid cohorts;
 - audience language, recurring questions, and misconceptions;
 - multiple honest packaging directions;

@@ -63,6 +63,17 @@ factual boundary, and internal quality check.
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
 case, label a hypothetical clearly instead of making one sound historical.
+For a worldwide pattern, prefer a strong lesser-known case for the developed story when it
+offers useful surprise, then use a short montage of recognizable cases to demonstrate
+global scope.
+Prepare every unfamiliar proper name before first use, then identify it and explain its
+relevance; never drop a name as if the viewer missed an earlier introduction.
+Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
+outcome`. If that chain is not clear on first hearing, replace the example rather than
+defending it with extra setup.
+For an enduring failure pattern, pair one vivid early warning with one compact current echo
+that demonstrates persistence and present relevance. Carry the opening's concrete vocabulary
+into the application and ending only when it keeps the lesson clearer.
 
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or

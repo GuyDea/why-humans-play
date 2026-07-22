@@ -1,5 +1,11 @@
 # Episode 1 Real-World Examples Implementation Plan
 
+> **Status update (2026-07-22):** Completed implementation record. Its hypothetical-first
+> human bridge was superseded during line-level refinement: Episode 1 now begins that bridge
+> with attributed real-world cases. Its block-flip opening was later superseded by the
+> clearer CoastRunners opening and a compact current coding-agent echo. The tasks below
+> remain a historical record.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Integrate funny Goodhart and Campbell examples with explicit human consequences into Episode 1, make its four-question promise directly usable with AI, close on a declarative lesson, and encode the reusable editorial rule in the WHP script skill.

@@ -157,8 +157,11 @@ Brand work must not displace active app-launch priorities.
   evidence-aware bar above.
 - **The current pilot examines AI reward hacking as a hidden incentive game:** why an AI
   can appear to cheat while following every scored rule, and what that reveals about the
-  proxy goals shaping human behavior. The accepted opening sequence then moves through
-  job-interview signaling, chess and cognitive transfer, and an honest brain-games audit.
+  proxy goals shaping human behavior. Its selected opening uses OpenAI's 2016 CoastRunners
+  agent as a vivid early warning and a 2025 coding-agent test exploit as a compact current
+  echo of the same score-versus-goal failure. The accepted launch sequence then moves
+  through job-interview signaling, chess and cognitive transfer, and an honest brain-games
+  audit.
 - **The "evolutionary paradox of play" script becomes a *Why We Play* candidate**, not the
   pilot — preserved at
   [`whp-youtube/drafts/evolutionary-paradox-of-play.md`](whp-youtube/drafts/evolutionary-paradox-of-play.md).

@@ -18,6 +18,7 @@ Track this checklist during the run. Do not compose the recommendation until eve
 - [ ] Collect independent audience-demand, competitive-supply, and timing signals.
 - [ ] Record at least 30 distinct, diverse subjects before ranking.
 - [ ] Develop materially different angles for promising subjects.
+- [ ] Identify a first-hearing opening proof case and any needed current echo for each finalist.
 - [ ] Audit every advancing angle against all six hard gates.
 - [ ] Run a shallow scan and narrow to roughly 8–12 candidates.
 - [ ] Deeply research the finalists with multiple signals.
@@ -79,6 +80,17 @@ familiar game, event, person, institution, or trend
 ```
 
 Make the entry point, tension, human stake, earned payoff, evidence path, and intended viewer concrete. A broad sentence such as “AI is changing everything” or one viral view count is not a filmable, evidenced WHP angle.
+
+Before an angle becomes a finalist, identify one documented opening proof case whose
+intended goal, visible measure, shortcut, and absurd outcome can be told in a few plain
+sentences. If a first-hearing listener would still ask why the measure improved, find a
+clearer case or lower the angle's opening potential; do not rescue a weak hook with a
+technical lecture. Treat the example as replaceable even after research begins.
+
+For a long-lived mechanism, identify one compact current echo that shows the pattern still
+matters without opening a second full story or claiming that every system behaves the same
+way. The older case supplies the vivid story; the current echo supplies continuity and
+present relevance.
 
 ## Apply hard gates at angle level
 
