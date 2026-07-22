@@ -157,7 +157,9 @@ the repository authority chain.
 **Decision:** A WHP episode may begin with a precise viewer-level question when it states
 the exact paradox the episode can answer, then ground that question immediately in a
 concrete event; its first two spoken sentences use simple, one-idea syntax, and provocative
-terms do not imply an unsupported mental state.
+terms do not imply an unsupported mental state. Neither opening sentence should be spent on
+a technical setup label: state the human-readable premise first, then hold experimental
+qualifiers and mechanism detail until after the hook.
 
 **Rationale:** “How can an AI follow every rule—and still give you exactly the wrong
 result?” created immediate viewer stakes more cleanly than technical setup language while

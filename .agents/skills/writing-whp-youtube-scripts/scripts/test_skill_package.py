@@ -563,6 +563,29 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_rapid_quality_check_repeats_the_opening_guardrails(self) -> None:
+        rapid = (
+            SKILL_ROOT / "references/rapid-prototyping.md"
+        ).read_text(encoding="utf-8")
+        checklist = " ".join(
+            rapid.split("## Rapid quality check\n", 1)[1]
+            .split("\n## Common mistakes", 1)[0]
+            .split()
+        )
+        self.assertIn(
+            "If the opening starts with a question, can the episode answer it, and "
+            "does the concrete event follow immediately?",
+            checklist,
+        )
+        self.assertIn(
+            "Do the first two spoken sentences each carry one idea in plain syntax?",
+            checklist,
+        )
+        self.assertIn(
+            "Are technical setup labels and mechanism detail held until after the hook?",
+            checklist,
+        )
+
     def test_requested_iteration_telemetry_is_honest_and_separate(self) -> None:
         rapid = " ".join(
             (

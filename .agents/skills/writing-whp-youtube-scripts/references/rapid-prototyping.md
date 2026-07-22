@@ -198,6 +198,10 @@ year or event into another script unless the user's brief or the evidence phase 
 Before returning rapid work, check internally:
 
 - Does the first sentence feel like a concrete event or irresistible proposition?
+- If the opening starts with a question, can the episode answer it, and does the concrete
+  event follow immediately?
+- Do the first two spoken sentences each carry one idea in plain syntax?
+- Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?

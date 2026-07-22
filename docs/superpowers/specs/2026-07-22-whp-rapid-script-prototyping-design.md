@@ -167,8 +167,11 @@ workbench can capture it without contaminating the script artifact.
    viewer-level question the episode can answer, then ground a question-first opening
    immediately in the event. Keep the first two spoken sentences to one idea each, use
    everyday syntax, and avoid technical compound phrasing when simpler words preserve the
-   meaning. Do not use provocative terms as literal claims of intent unless the evidence
-   establishes that state or the narration clearly marks the term as shorthand.
+   meaning. Do not spend either sentence on a technical setup label: state the
+   human-readable premise first, then hold experimental qualifiers and mechanism detail
+   until after the hook. Do not use provocative terms as literal claims of intent unless
+   the evidence establishes that state or the narration clearly marks the term as
+   shorthand.
 3. **Build the complete hook.** Move through:
    `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`
    or `question → event → joke → paradox → meaning → viewer relevance → by-end promise`.
@@ -199,6 +202,7 @@ Before returning a prototype or refinement, check only:
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
 - Do the first two spoken sentences each carry one idea in plain syntax?
+- Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?
@@ -292,8 +296,8 @@ voice baseline.
 - The [evaluation record](../evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md)
   preserves three pre-change baselines, the superseded prompt-contaminated campaign, five
   matched control/skill pairs, observed failures, RED–GREEN refinements, and residual risks.
-- Deterministic verification passes 30 skill-package tests and 81 annotated-script validator
-  tests: 111 tests total.
+- Deterministic verification passes 31 skill-package tests and 81 annotated-script validator
+  tests: 112 tests total.
 - The skill-creator validator passes for both the canonical `.agents` package and its
   `.claude` discovery link. The annotated production template also passes structural
   validation.

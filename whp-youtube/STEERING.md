@@ -135,6 +135,8 @@ These are laws, not suggestions. They apply to every WHP video forever.
   establishes that mental state or the narration clearly marks the term as shorthand.
 - **Keep the first two spoken sentences plain.** Give each sentence one idea, use everyday
   syntax, and replace technical compound phrases with simpler words when meaning survives.
+  Do not spend either sentence on a technical setup label. State the human-readable premise
+  first; hold experimental qualifiers and mechanism detail until after the hook.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
