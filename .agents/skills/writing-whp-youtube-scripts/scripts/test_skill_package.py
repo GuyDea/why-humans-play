@@ -489,6 +489,15 @@ class SkillPackageTests(unittest.TestCase):
             "promise inside the opening; a later takeaway does not substitute for it.",
             rapid,
         )
+        self.assertIn(
+            "establish the event and consequential question before delivering the "
+            "by-end promise",
+            rapid,
+        )
+        self.assertIn(
+            "Do not lead with the promise before the question it answers.",
+            rapid,
+        )
 
     def test_supplied_selection_context_avoids_unnecessary_canonical_reload(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
@@ -516,6 +525,28 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn("completing the intended task", normalized_example)
         self.assertIsNone(
             re.search(r"(?i)\b(?:score|metric)\b", normalized_example)
+        )
+
+    def test_rapid_factual_boundary_forbids_inferred_cognition_and_result_state(
+        self,
+    ) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "Do not infer cognition, intent, understanding, or misunderstanding",
+            rapid,
+        )
+        self.assertIn(
+            "Do not infer a final physical state or orientation from an action verb",
+            rapid,
+        )
+        self.assertIn(
+            "Repeat only the supplied action and outcome unless another state is "
+            "explicitly established",
+            rapid,
         )
 
     def test_creative_approval_gate_precedes_production(self) -> None:

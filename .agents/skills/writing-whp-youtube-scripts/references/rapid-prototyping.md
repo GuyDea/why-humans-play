@@ -32,6 +32,10 @@ fact.
 When the mechanism is unknown, use no declarative score, metric, or optimization claim, even
 as a joke; turn it into a question.
 
+Do not infer cognition, intent, understanding, or misunderstanding from an observed action.
+Do not infer a final physical state or orientation from an action verb such as “flipped.”
+Repeat only the supplied action and outcome unless another state is explicitly established.
+
 ## Choose the requested operation
 
 Identify the operation and requested scope before writing. Do not silently turn one operation
@@ -100,8 +104,10 @@ Use this flexible spine:
 For every generated episode opening or full narration, state the by-end promise inside the
 opening; a later takeaway does not substitute for it.
 
-Compress or reorder beats when speech demands it, but do not lose the question, relevance,
-or promise.
+For those episode-scale artifacts, establish the event and consequential question before
+delivering the by-end promise. Do not lead with the promise before the question it answers.
+Compress or reorder supporting beats when speech demands it, but preserve that order and do
+not lose the relevance.
 
 ## Explain through examples
 
