@@ -1,7 +1,7 @@
 # WHP Rapid Script Prototyping Design
 
 **Date:** 2026-07-22
-**Status:** Approved design; implementation pending
+**Status:** Implemented and verified
 **Scope:** `.agents/skills/writing-whp-youtube-scripts`
 
 ## Decision
@@ -267,3 +267,24 @@ files. The workbench is a later feature with its own design cycle.
 Preserve `whp-youtube/episodes/01-why-ai-cheats.md` as an evidence and production reference,
 but mark its v0.7 narration creatively superseded so it cannot be mistaken for the current
 voice baseline.
+
+## Implementation evidence
+
+- The [implementation plan](../plans/2026-07-22-whp-rapid-script-prototyping.md) records the
+  documentation-TDD sequence, scope boundaries, and verification commands.
+- The [evaluation record](../evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md)
+  preserves three pre-change baselines, the superseded prompt-contaminated campaign, five
+  matched control/skill pairs, observed failures, RED–GREEN refinements, and residual risks.
+- Deterministic verification passes 26 skill-package tests and 81 annotated-script validator
+  tests: 107 tests total.
+- The skill-creator validator passes for both the canonical `.agents` package and its
+  `.claude` discovery link. The annotated production template also passes structural
+  validation.
+- The matched semantic runs support factual and hook guardrails while making conservative
+  compatibility—not superiority—claims for promotion, review, and alternatives. They are
+  semantic evidence, not deterministic proof.
+- Independent review found no remaining Critical or Important issue after the final factual
+  inference and hook-order regressions were fixed test-first and rerun in a fresh thread.
+- The implementation adds no app framework, transport, persistence contract, UI, or topic
+  selection code; it preserves only the semantic boundaries needed by the future local
+  workbench.
