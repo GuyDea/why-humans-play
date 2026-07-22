@@ -85,6 +85,23 @@ correctly recorded usage as unavailable (`null` columns, `usage_available = 0`).
 - Cancellation escalation deferred by a daemon stop during the grace window is
   reconciled at next boot rather than immediately.
 
+## Post-review hardening
+
+The final whole-branch review (fresh reviewer) raised nine findings; two fix waves
+resolved all of them: launch-time startup grace via a persisted `started_at`; durable
+`launch.json` process identity so supervisor restarts can never terminalize a live
+pre-status runner by age (the review's reproduced `groupAlive:true` case); cancellation
+that terminalizes only on confirmed process-group death, with per-instance re-signal
+and re-armed escalation; strict rowid FIFO; close-based runner finalization with spawn
+error handling; all-or-nothing four-field token capture; token columns nulled on
+unavailable usage; synchronous launcher pid handoff; and test helpers extracted from
+test modules. Suite grew to 13 files / 40 tests, green five consecutive host runs after
+each wave, typecheck clean. The real-codex E2E was rerun on the final code and again
+returned ALL CHECKS VERIFIED (review run `019f8b28-750f-7d72-aee2-dbd0fc3e4baa`,
+tokens in=43710 cached=19200 out=1574 reasoning=1132). Deferred to Plan 3, as recorded
+by the reviewer: the maintained `better-sqlite3` types package and persisted
+cancellation deadlines surviving simultaneous runner and supervisor failure.
+
 ## Verdict
 
 **The transport design is confirmed for the daemon phase.** Detached runners with an
