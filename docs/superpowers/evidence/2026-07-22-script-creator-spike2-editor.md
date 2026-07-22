@@ -74,6 +74,24 @@ The esbuild demo (`demo/index.html`, fake 2.5 s agent) was exercised live:
   variant options are attr-held plain text, so marks inside inline alternatives are not
   preserved — acceptable for spike scope, revisit with TipTap integration.
 
+## Post-review hardening
+
+The final whole-branch review (fresh reviewer) raised seven findings; one fix wave
+resolved all of them, and the confirmation review returned PASS / APPROVED with no new
+findings: safe text-only `opaqueSection` rendering (with an HTML-injection sentinel
+regression — the demo's browser pass had missed the path because its sample lacked
+production material); unforgeable module-private WeakSet capability authorization for
+lock and proposal commands, with forged-meta regressions; byte-preserved pre-beat
+preamble in both codec formats (the live file's H1 was previously lost on round-trip);
+a de-vacuoused property harness (guided prefixes constructing accept/conflict/export by
+construction, seeded annotation sentinel, document-change proofs, ready-proposal
+restoration on undo); a history-atomic parking lot in plugin state; the normative
+public API surface (`src/index.ts`, `lockPlugin`) with an import test; and a conforming
+demo beat id plus opaque demo content. Final suite: 11 files / 44 tests, green three
+consecutive host runs, typecheck clean, real-browser re-verification passed. Deferred
+to Plan 4 (reviewer-confirmed): mark-preserving inline alternatives and validation of
+malformed persisted inline-option attrs; the cross-paragraph lock envelope stays as-is.
+
 ## Verdict
 
 **The editor core is confirmed as the Script Studio foundation.** All five range-identity
