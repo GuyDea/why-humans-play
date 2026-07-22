@@ -537,6 +537,21 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_rapid_adds_useful_informational_tidbits_without_trivia(self) -> None:
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        for contract in (
+            "When a compact verified fact can deepen a concept without slowing the "
+            "story, add one short informational tidbit.",
+            "Use the tidbit to reveal an origin, scale, reversal, or consequence.",
+            "Do not add decorative trivia that merely interrupts the story.",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
     def test_phase_two_maps_each_factual_statement_to_an_adjacent_source(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         research = " ".join(

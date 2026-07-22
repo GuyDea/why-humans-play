@@ -146,6 +146,13 @@ Demonstrate the pattern before naming the concept. Let a term such as Goodhart's
 specification gaming feel like a useful label for something the viewer already understands,
 not an entrance exam.
 
+## Add useful informational rewards
+
+When a compact verified fact can deepen a concept without slowing the story, add one short
+informational tidbit. Use the tidbit to reveal an origin, scale, reversal, or consequence.
+Place it after the viewer understands the pattern and connect it to the next thought. Do not
+add decorative trivia that merely interrupts the story.
+
 ## Make humor carry meaning
 
 Build humor from the mechanism, incentive, or consequence. Push mechanism-derived humor to
@@ -218,6 +225,8 @@ Before returning rapid work, check internally:
 - Does it promise what the viewer will gain by the end?
 - Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does each substantial abstraction receive a concrete example?
+- When a compact verified tidbit would deepen the concept, is it brief and connected to the
+  next thought rather than decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
 - Would the copy sound natural aloud?
 - Did any factual specificity get invented?
