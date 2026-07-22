@@ -1,10 +1,11 @@
 import { spawn } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { EventLog } from './event-log.js';
 import type { JobStore } from './job-store.js';
 import { jobPaths, readStatus } from './runner-status.js';
+import { validateAgainstSchema } from './schema-validate.js';
 import type { CodexEvent, JobEnvelope, JobRecord } from './types.js';
 
 const RUNNER = join(import.meta.dirname, 'runner.ts');
@@ -13,18 +14,31 @@ function isPidAlive(pid: number): boolean {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
+function readFinalMessage(jobDir: string): string {
+  const f = jobPaths(jobDir).finalMessageFile;
+  return existsSync(f) ? readFileSync(f, 'utf8') : '';
+}
+
 export class JobSupervisor {
   readonly store: JobStore;
   private readonly jobsRoot: string;
   private readonly pollMs: number;
+  private readonly startupGraceMs: number;
   private readonly extraEnv: Record<string, string>;
   private readonly timer: ReturnType<typeof setInterval>;
   private stopped = false;
 
-  constructor(opts: { store: JobStore; jobsRoot: string; pollMs?: number; env?: Record<string, string> }) {
+  constructor(opts: {
+    store: JobStore;
+    jobsRoot: string;
+    pollMs?: number;
+    startupGraceMs?: number;
+    env?: Record<string, string>;
+  }) {
     this.store = opts.store;
     this.jobsRoot = opts.jobsRoot;
     this.pollMs = opts.pollMs ?? 500;
+    this.startupGraceMs = opts.startupGraceMs ?? 10_000;
     this.extraEnv = opts.env ?? {};
     mkdirSync(this.jobsRoot, { recursive: true });
     this.timer = setInterval(() => this.tick(), this.pollMs);
@@ -61,7 +75,12 @@ export class JobSupervisor {
   reattach(): void {
     for (const job of this.store.runningJobs()) {
       const status = readStatus(jobPaths(job.jobDir).statusFile);
-      if (!status) { this.store.setState(job.id, 'interrupted', 'no status file'); continue; }
+      if (!status) {
+        if (Date.now() - Date.parse(job.createdAt) > this.startupGraceMs) {
+          this.store.setState(job.id, 'interrupted', 'no status file');
+        }
+        continue;
+      }
       if (status.state !== 'running') continue; // next tick reconciles terminal states
       if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
       // alive → periodic tick keeps tailing; nothing else to do
@@ -113,16 +132,43 @@ export class JobSupervisor {
   private reconcileRunning(): void {
     for (const job of this.store.runningJobs()) {
       const status = readStatus(jobPaths(job.jobDir).statusFile);
-      if (!status) continue;
+      if (!status) {
+        if (Date.now() - Date.parse(job.createdAt) > this.startupGraceMs) {
+          this.store.setState(job.id, 'interrupted', 'no status file');
+        }
+        continue;
+      }
       if (status.threadId && !job.threadId) this.store.setThreadId(job.id, status.threadId);
       if (status.state === 'running') {
         if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
         continue;
       }
       this.store.recordUsage(job.id, status.usage);
-      if (status.state === 'completed') this.store.setState(job.id, 'completed');
+      if (status.state === 'completed') {
+        const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+        if (env.outputSchema) {
+          const text = readFinalMessage(job.jobDir);
+          const result = validateAgainstSchema(env.outputSchema, text);
+          if (!result.ok) {
+            this.store.setState(job.id, 'invalid-output', result.reason);
+            if (!job.retryOf) this.retryFresh(job);
+            continue;
+          }
+        }
+        this.store.setState(job.id, 'completed');
+      }
       else if (status.state === 'cancelled') this.store.setState(job.id, 'cancelled');
       else this.store.setState(job.id, 'failed', status.errorMessage);
     }
+  }
+
+  private retryFresh(job: JobRecord): void {
+    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+    const retryId = randomUUID();
+    const jobDir = join(this.jobsRoot, retryId);
+    mkdirSync(jobDir, { recursive: true });
+    const fresh: JobEnvelope = { ...env, jobId: retryId, resumeThreadId: undefined };
+    writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(fresh));
+    this.store.create(fresh, jobDir, { retryOf: job.id });
   }
 }

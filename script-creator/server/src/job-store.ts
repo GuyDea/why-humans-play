@@ -95,6 +95,10 @@ export class JobStore {
       .all() as Record<string, unknown>[]).map(toRecord);
   }
 
+  jobsRetriedFrom(id: string): JobRecord[] {
+    return (this.db.prepare('SELECT * FROM jobs WHERE retry_of = ?').all(id) as Record<string, unknown>[]).map(toRecord);
+  }
+
   close(): void {
     this.db.close();
   }

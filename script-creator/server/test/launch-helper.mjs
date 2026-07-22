@@ -8,6 +8,5 @@ const child = spawn(process.execPath, ['--import', 'tsx', runner, jobDir], {
   detached: true, stdio: 'ignore',
   env: { ...process.env, FAKE_CODEX_MODE: mode },
 });
-console.log(String(child.pid));
+process.stdout.write(String(child.pid) + '\n', () => process.exit(0)); // launcher dies; runner must live on
 child.unref();
-process.exit(0); // launcher dies; runner must live on
