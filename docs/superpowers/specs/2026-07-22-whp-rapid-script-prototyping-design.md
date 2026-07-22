@@ -292,8 +292,8 @@ voice baseline.
 - The [evaluation record](../evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md)
   preserves three pre-change baselines, the superseded prompt-contaminated campaign, five
   matched control/skill pairs, observed failures, RED–GREEN refinements, and residual risks.
-- Deterministic verification passes 26 skill-package tests and 81 annotated-script validator
-  tests: 107 tests total.
+- Deterministic verification passes 30 skill-package tests and 81 annotated-script validator
+  tests: 111 tests total.
 - The skill-creator validator passes for both the canonical `.agents` package and its
   `.claude` discovery link. The annotated production template also passes structural
   validation.
