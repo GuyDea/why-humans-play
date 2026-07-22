@@ -120,6 +120,10 @@ For a generated episode opening or full narration, keep each of the first two sp
 sentences to one idea. Use everyday words and syntax; replace technical compound phrases
 when simpler wording preserves meaning.
 
+Do not spend either opening sentence on a technical setup label such as ‘simulated
+block-stacking experiment.’ State the human-readable premise first; move experimental
+qualifiers and mechanism detail after the hook.
+
 Do not use words such as ‘lies,’ ‘cheats,’ or ‘wants’ as literal claims of intent unless
 the supplied facts establish that state. When a provocative term is comic shorthand, make
 that status unmistakable and keep the episode's actual question supportable.

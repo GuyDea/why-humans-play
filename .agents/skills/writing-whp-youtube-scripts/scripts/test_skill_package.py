@@ -546,6 +546,23 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_rapid_opening_does_not_front_load_technical_setup_labels(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "Do not spend either opening sentence on a technical setup label such "
+            "as ‘simulated block-stacking experiment.’",
+            rapid,
+        )
+        self.assertIn(
+            "State the human-readable premise first; move experimental qualifiers "
+            "and mechanism detail after the hook.",
+            rapid,
+        )
+
     def test_requested_iteration_telemetry_is_honest_and_separate(self) -> None:
         rapid = " ".join(
             (
