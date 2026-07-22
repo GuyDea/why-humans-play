@@ -74,16 +74,20 @@ codec, not live storage.**
 
 ```text
 ScriptDocument
-  metadata: id, schemaVersion, creativeStatus, topicBrief
+  metadata: id, schemaVersion, creativeStatus, topicBrief, format (annotated | narration)
   beats[]
     id (beat_[a-z2-7]{10}), ordinal, title, timeTargetMs, narrativeJob
     narration[]: paragraph(id, inline content) | variantSet(id, alternatives[], activeId, settled)
     productionSections[] (Phase 2; opaque pass-through where unrecognized)
 ```
 
-A deterministic codec parses and emits the repository format (beats as
-`## Beat NN — …`, narration paragraphs as blockquotes under `### Narration`, Phase 2
-subsections in required order). Unrecognized production Markdown round-trips as opaque
+A deterministic codec auto-detects and preserves both repository script formats per
+document. Annotated scripts use beat headings with blockquoted narration under
+`### Narration`; narration-first scripts use the full verbatim `## …` beat heading and
+place blockquoted narration directly beneath it, with production material in an opaque
+appendix. Wrapped blockquote lines join into narration paragraphs and blockquote-only
+blank lines separate them. The detected `annotated | narration` format is stored on the
+document and controls emission. Unrecognized production Markdown round-trips as opaque
 nodes. Locks, proposals, annotations, unresolved variants, history, and parking-lot
 content never contaminate exported Markdown; export is blocked until variants are
 settled and proposals resolved. External file edits are detected by content hash and

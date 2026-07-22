@@ -114,7 +114,7 @@ describe('schema', () => {
 
 **Files:** Create `src/markdown-codec.ts`; test `test/codec-export.test.ts`.
 
-**Interfaces:** `exportMarkdown(state: EditorState | Node): { ok: true; markdown: string } | { ok: false; blocked: string[] }`. Emission per beat: `## Beat NN — <title>` (NN = 2-digit ordinal), blank line, `### Narration`, blank line, one `> <paragraph text>` blockquote line per paragraph (blank line between), opaqueSection `md` attr emitted verbatim. Settled `variantSet`/`inlineVariantSet` emit only the active option's text. Blocked when: any `settled: false` variant (`variant <id> unsettled`), any pending/ready proposal (`proposal <id> unresolved` — wire in Task 8; until then the codec accepts an injectable `pendingProposals: string[]` second argument defaulting to `[]`). Locks and annotations never affect output.
+**Interfaces:** `exportMarkdown(state: EditorState | Node): { ok: true; markdown: string } | { ok: false; blocked: string[] }`. Emission honors `doc.attrs.format`: `annotated` (the default) emits each beat as `## Beat NN — <title>` (NN = 2-digit ordinal), blank line, `### Narration`, blank line, and one `> <paragraph text>` blockquote line per paragraph; `narration` emits `## <title>` with no `### Narration` subsection and one unwrapped `> <paragraph text>` line per narration paragraph. Both use blank lines between paragraphs and emit opaqueSection `md` attrs verbatim. Settled `variantSet`/`inlineVariantSet` emit only the active option's text. Blocked when: any `settled: false` variant (`variant <id> unsettled`), any pending/ready proposal (`proposal <id> unresolved` — wire in Task 8; until then the codec accepts an injectable `pendingProposals: string[]` second argument defaulting to `[]`). Locks and annotations never affect output.
 
 - [ ] **Step 1: failing tests** (verbatim):
 
@@ -171,7 +171,7 @@ describe('exportMarkdown', () => {
 
 **Files:** Modify `src/markdown-codec.ts` (add `parseMarkdown(md: string): Node`); test `test/codec-roundtrip.test.ts`.
 
-**Behavior:** `parseMarkdown` inverts `exportMarkdown` for exportable documents: `## Beat NN — title` headers open beats (fresh `newBeatId()`; title preserved; `timeTargetMs` defaults 30000), `### Narration` introduces blockquote paragraphs, every other block between beats round-trips as an `opaqueSection` with byte-identical `md`. Variants never appear in exported markdown, so parse never produces them.
+**Behavior:** `parseMarkdown` inverts `exportMarkdown` for exportable documents and auto-detects format per beat heading, accepting `##` headings plus existing `###` compatibility. The beat title is the full heading text after the marker, preserved verbatim; each beat receives a fresh `newBeatId()` and `timeTargetMs` defaults to 30000. In `annotated` format, `### Narration` introduces blockquote narration. In `narration` format, blockquotes directly under the beat heading are narration without that subsection; wrapped blockquote lines join with one space and a blockquote-only blank line separates paragraphs. The document stores `format: 'annotated' | 'narration'` (default `annotated`), and every non-narration block remains a byte-identical `opaqueSection`. Variants never appear in exported markdown, so parse never produces them.
 
 - [ ] **Step 1: failing tests** (verbatim):
 

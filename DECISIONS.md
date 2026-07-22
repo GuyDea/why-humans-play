@@ -296,3 +296,21 @@ remapping later.
 `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
 the design conforms to the recorded workbench boundary and the app remains an internal
 authoring tool.
+
+## 2026-07-22 — Support both Script Creator episode formats
+
+**Decision:** The Script Creator V1 Markdown codec auto-detects, stores, and emits both
+the annotated beat format with a `### Narration` subsection and the Phase-1 narration
+format with full verbatim `## …` beat headings, direct blockquotes, and an opaque
+production appendix; wrapped blockquote lines form one narration paragraph, while a
+blockquote-only blank line separates paragraphs.
+
+**Rationale:** The live Episode 1 source now uses the Phase-1 narration format, while
+the existing constructed round-trip and production workflow still require annotated
+format compatibility.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/plans/2026-07-22-script-creator-spike2-editor.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, the accepted requirements, and the
+live episode needed no content change because they already state the correct brand,
+authority, narration-first, and opaque-appendix direction.
