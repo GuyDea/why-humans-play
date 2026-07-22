@@ -224,3 +224,28 @@ more memorable and useful while preserving the narration's momentum.
 `BRAND.md` and `CLAUDE.md` already state the correct doctrine and authority chain and needed
 no content change. The Episode 1 production scaffold will be rebuilt separately from the
 approved rapid prototype during evidence-backed finalization.
+
+## 2026-07-22 — Finish the narration before auditing it
+
+**Decision:** Complete and show Martin the whole narration before running editorial,
+retention, or timing audits. After that review, audits report concerns and tradeoffs
+separately; they do not silently shorten or rewrite the creative baseline. Runtime remains
+a post-draft production constraint, not a reason to remove context from an unseen script.
+The final production document begins with numbered beats containing spoken narration only;
+all metadata, evidence, production direction, and audit material belongs in an appendix at
+the end, matched back to the beat numbers and titles.
+
+**Rationale:** A premature timing pass removed the causal setup, clear referents, and
+viewer stakes that made the Episode 1 opening work. Martin needs to judge the complete
+story first, while the production team still needs a traceable evidence and execution
+layer after the readable script.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`,
+`.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`,
+`whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` and `CLAUDE.md`
+need no change because this is an authoring-order and document-presentation decision, not
+a brand or repository-authority change.

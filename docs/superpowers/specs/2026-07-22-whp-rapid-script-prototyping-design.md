@@ -9,7 +9,9 @@
 Keep one WHP script-writing skill with two explicit phases. Default to rapid creative
 prototyping for ideas, openings, rough narration, and line-level refinement. Enter the
 evidence and production phase only after Martin explicitly approves the premise, voice,
-hook, and story direction.
+hook, and story direction. Complete and show the narration as a whole before running
+editorial, retention, or timing audits; audits then report concerns without silently
+rewriting or shortening the creative baseline.
 
 ## Problem
 
@@ -32,6 +34,8 @@ by those failures.
 - Support precise line-level collaboration without restarting the whole workflow.
 - Prevent invented factual atoms even when verification is intentionally deferred.
 - Preserve the approved voice when moving into research and production.
+- Protect causal and explanatory context from premature timing cuts.
+- Make the final script easy to read as narration before exposing production metadata.
 - Retain the existing evidence, rights, annotated-format, rubric, and validator system for
   final scripts.
 - Keep the workflow independently invocable by a future local script-ideation and editing
@@ -60,6 +64,11 @@ contract or evidence packet, force three opening candidates, create annotated-sc
 scaffolding, plan visuals or rights, run the production rubric, or invoke the validator
 unless Martin explicitly asks for that work.
 
+When the request is for a complete script, finish and show the whole narration before any
+editorial, retention, or timing audit. Runtime is a post-draft diagnostic, not a drafting
+gate. Do not remove setup, referents, causality, examples, humor, viewer relevance, or the
+learning promise merely to satisfy an unseen clock.
+
 Use facts Martin supplies or facts already available in current project materials. Never
 invent a date, person, experiment, quotation, chronology, motive, or mechanism. When a
 specific fact is unavailable, omit the specificity or write around it rather than filling
@@ -78,6 +87,10 @@ line or passage does not approve the complete narration.
 At the gate, preserve the approved prototype as the voice baseline. Do not silently replace
 its structure or personality during research.
 
+After the complete narration has been shown, audits may identify concerns and tradeoffs.
+Return those concerns separately before rewriting the script. Any cut or compression that
+could cost context requires Martin's review; the audit does not authorize the rewrite.
+
 ### Phase 2 — Evidence and production
 
 Extract the material factual claims from the approved prototype, gather or refresh their
@@ -87,10 +100,27 @@ Map every factual narration sentence or separable factual clause to an adjacent 
 claim entry that quotes the supported wording. Keep these source markers outside spoken
 narration and omit them from Phase 1 unless Martin explicitly requests them.
 
-Then expand to the target runtime, add the annotated production structure, resolve personal
-input and viewer application, plan visuals and rights, run the editorial audits, validate
-the document, and report every remaining gate. The existing research, format, rubric,
-template, and validator resources govern this phase.
+Then add the production structure, resolve personal input and viewer application, plan
+visuals and rights, run the editorial audits, inspect runtime and retention, validate the
+document, and report every remaining gate. The readable document begins with numbered
+beats containing spoken narration only. Put all metadata and production annotations in a
+final appendix. The existing research, format, rubric, template, and validator resources
+govern this phase.
+
+## Final document structure
+
+The production document has two reading layers:
+
+1. **Numbered beats:** one heading and the spoken narration for each beat, with no timing,
+   claims, source markers, production notes, labels, or editorial commentary mixed into
+   the beat text.
+2. **Appendix:** script metadata plus beat-matched timing, targets, story functions,
+   factual claims and sources, visuals, motion and edit direction, on-screen text, audio
+   and accessibility notes, assets and rights, personal input, viewer application, audit
+   results, and reference ledgers.
+
+This preserves traceability without making Martin reconstruct the script from an audit
+form. Every appendix beat entry uses the same number and title as its narration beat.
 
 ## Future local workbench compatibility
 
@@ -264,6 +294,11 @@ then pass after implementation.
   not mutate the source selection.
 - The script skill accepts a selected topic brief without rerunning topic discovery.
 - The creative approval gate precedes evidence and production work.
+- A complete narration is shown before editorial, retention, or timing audits.
+- Timing is a post-draft diagnostic that reports concerns without automatically rewriting
+  or removing context.
+- The final document uses numbered, narration-only beats followed by a metadata appendix
+  whose beat entries match the narration beat numbers and titles.
 - The complete hook includes the consequential question, viewer relevance, and explicit
   by-end promise.
 - Question-first openings ask a supportable question, ground it immediately in the event,

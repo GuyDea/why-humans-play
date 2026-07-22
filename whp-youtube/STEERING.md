@@ -20,10 +20,10 @@ accepted current launch sequence, dated launch research, and historical episode 
 ## Current launch sequence — accepted 2026-07-21
 
 > **Episode 1 working state (2026-07-22):**
-> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) preserves the v0.7
-> research, evidence, rights, and production scaffold, but its narration is creatively
-> superseded and is not the current voice baseline. Develop replacement narration through
-> rapid prototyping and line-level refinement before rebuilding the final annotated script.
+> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) is in script-first
+> refinement. Complete and show the whole narration before running editorial or timing
+> audits. Keep its numbered beat section narration-only and place evidence, production,
+> timing, and editorial metadata in the appendix after the script.
 
 1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
    specification gaming to reveal the hidden incentive game created whenever a score is
@@ -113,21 +113,23 @@ These are laws, not suggestions. They apply to every WHP video forever.
   - *Life cheat-code* — "X is the Cheat Code to Life" (Blank Rascal, 1.5M on 85K subs).
   - *Counterintuitive reversal* — "The most useless thing in nature made you smart."
 
-## Law 2 — Win the first 15 seconds or lose the video
+## Law 2 — Make the opening clear before making it short
 
-- **Over half of viewers who click are gone before 60 seconds; the stay/leave decision
-  is made in ~8 seconds.** `[reported]` The steepest drop is between seconds 10–20, so
-  the real hook deadline is **15 seconds, not 30.** `[reported]`
-- Typical videos fall to 65–80% retention by second 30. `[reported]` **Retaining 70%+
-  past the 30-second mark materially improves algorithmic distribution.** `[reported]`
-- Stating a concrete value/payoff claim within the first 15 seconds is associated with
-  ~8 percentage points higher average retention (≈52% vs 44%). `[reported]`
-- **The proven first-30-seconds structure** `[reported]`:
-  - **0–5s — pattern interrupt.** A question, a jarring image, or a flat contrarian
-    statement. No logo, no "hey guys," no channel intro.
-  - **5–15s — the payoff/value claim + the open loop.** Tell them what they'll walk
-    away understanding, and plant the specific gap the video will close.
-  - **15–30s — enter the body or deepen the loop.** Never a preamble.
+- Viewers decide quickly whether an episode is worth their attention, so the opening must
+  earn its place immediately. Treat retention benchmarks as post-draft production evidence,
+  not as a clock that is allowed to erase the event, causal setup, referents, viewer stakes,
+  or learning promise from an unfinished script.
+- **Complete and show the whole narration before any editorial or timing audit.** The first
+  creative review evaluates whether the story, explanation, humor, human connection, and
+  payoff work as one piece. Do not shorten an unseen draft to satisfy a timing target.
+- After Martin has reviewed the whole narration, run timing and retention checks as
+  diagnostics. Report the exact concern and the tradeoff separately; do not silently
+  compress, reorder, or rewrite the approved script. Any proposed cut must preserve the
+  meaning that made the passage work and awaits Martin's review before replacing it.
+- **The opening still has a required narrative job:** interrupt the expected pattern,
+  establish the concrete event or paradox, explain why it matters to the viewer, open the
+  consequential question, and state the literal by-end learning promise. It does not have
+  a mandatory second-by-second sentence template.
 - **Use the strongest honest entry: question-first or event-first.** A precise
   viewer-level question may be the first spoken line when it states the exact paradox the
   episode can answer; ground it immediately in the concrete event. Do not use words such
@@ -159,13 +161,23 @@ These are laws, not suggestions. They apply to every WHP video forever.
 
 Use this order for WHP scripts:
 
-1. Write one rapid narration prototype that tests the hook, humor, human connection,
-   central idea, and ending.
-2. Refine it with Martin at line level, preserving approved language and changing only
+1. Write one complete narration prototype that tests the hook, humor, human connection,
+   central idea, and ending as one continuous story.
+2. Show Martin the complete narration before running editorial, retention, or timing
+   audits. Do not pre-cut context from a version he has not seen.
+3. Refine it with Martin at line level, preserving approved language and changing only
    the requested scope.
-3. Obtain explicit approval of the premise, voice, hook, and story direction.
-4. Only then gather or refresh evidence, expand the runtime, add production structure,
-   audit claims and rights, and validate the final annotated script.
+4. Obtain explicit approval of the complete narration and creative direction.
+5. Only then gather or refresh evidence, add production structure, and run claims, rights,
+   editorial, retention, timing, and format checks.
+6. Present audit concerns separately before making any context-losing rewrite. An audit
+   diagnoses a tradeoff; it does not silently become the author.
+
+In the final production document, the readable script comes first as numbered beats that
+contain spoken narration only. Put all timestamps, targets, story functions, claims,
+sources, visuals, edit notes, on-screen text, audio and accessibility direction, asset and
+rights notes, personal-input prompts, viewer-application notes, and editorial audit results
+in an appendix after the narration.
 
 Before creative approval, do not require an evidence packet, three-opening comparison,
 annotated-script scaffolding, visual or rights ledger, full rubric, or validator unless
@@ -361,8 +373,9 @@ and that's why humans, who never stop playing, are the smartest players of all.*
 | **6. The human twist + brand button** | 6:30–8:00 | Humans took it further than any species: we play with *invented rules* (games, sport, game theory) long into adulthood — we never stop rehearsing. Soft brand landing: *this channel is about that — why humans play, and what it does to the mind.* One-line, non-promotional Apexwit nod optional ("it's also why I build the games I do"). | Payoff the "smartest players" promise; convert curiosity into a subscribe reason. |
 | **7. Forward hook** | 8:00–end | Tease Episode 2's open loop ("if play is rehearsal, the most interesting game we play is against each other — that's game theory, and it changes how you'd act in an elevator…"). One line. | Session time / return viewer. |
 
-**Retention checkpoints to protect:** the 0:15 and 0:30 marks (Law 2), and the 2:30 and
-4:00 transitions (biggest mid-video sag risk — make those the sharpest cuts).
+**Post-draft retention checkpoints to inspect:** the opening, the first body transition,
+and the two major mid-video turns. Diagnose these only after the whole narration works;
+do not pre-cut causal or explanatory context to meet a timestamp.
 
 ## Hook options (write more, test these first)
 
@@ -453,13 +466,14 @@ graphics aren't cropped. Publish S1–S5 spaced out *after* the long-form, each 
 
 ## Production notes for a solo first-timer
 
-- **Script tight, memorise the hook.** The first 15 seconds carry the whole video — deliver
-  the cold-open hook to camera without reading.
+- **Finish the script, then rehearse the hook.** Once the complete narration works and has
+  been reviewed, rehearse the cold open until it sounds direct rather than read.
 - **Record vertical-safe.** Frame with headroom and centre-weighting so Shorts crops work.
 - **B-roll is cheap retention.** Public-domain / stock footage of animals playing, simple
   motion-graphic for the rat study and the "who plays" lineup. You don't need Kurzgesagt
   animation — clarity beats polish.
-- **Cut ruthlessly to 7–9 min.** If a beat doesn't open or close a loop, delete it.
+- **Use runtime as a post-draft constraint.** Flag beats that do not advance or resolve a
+  loop, then review proposed cuts without sacrificing the context that makes them clear.
 - **Ship, then read the retention graph.** The dips are your Episode 2 script notes.
 
 ---
