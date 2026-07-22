@@ -48,23 +48,23 @@ Add the unmodified-skill output and diagnosed gap to the evaluation record. Stag
 **Files:**
 - Modify: `whp-youtube/episodes/01-why-ai-cheats.md`
 
-- [ ] **Step 1: Replace the human bridge with one causal escalation**
+- [x] **Step 1: Replace the human bridge with one causal escalation**
 
 Use school and customer-service examples for Goodhart's law, then Atlanta schools and Wells Fargo for Campbell's law. For every example, state the intended goal, the number that improved, the behavior, and the concrete cost.
 
-- [ ] **Step 2: Make the AI application conversational**
+- [x] **Step 2: Make the AI application conversational**
 
 Change the opening promise and payoff to four questions viewers can ask AI. Rewrite the four questions as direct prompts and preserve the limitation that the AI's response is not proof of correctness, intent, or internal reasoning.
 
-- [ ] **Step 3: Clarify the flipped-brick callback and close decisively**
+- [x] **Step 3: Clarify the flipped-brick callback and close decisively**
 
 Replace the opaque “flipped brick with better grammar” line with the concrete callback “The sentences are stacked. Your actual problem is still on the floor.” End on the lesson that winning the instruction-created game must mean solving the viewer's real problem.
 
-- [ ] **Step 4: Keep narration and appendix synchronized**
+- [x] **Step 4: Keep narration and appendix synchronized**
 
 Update beat titles and matching appendix entries, metadata, assignment contract, story functions, claim mappings, original-only visual treatments, evidence records for Campbell's law, Atlanta, and Wells Fargo, and the exact extracted narration word count. Leave timing and editorial audits pending until Martin reviews the complete narration.
 
-- [ ] **Step 5: Validate and commit the episode**
+- [x] **Step 5: Validate and commit the episode**
 
 Run the annotated-script validator against the absolute episode path. Expected: structural PASS with the standard limitation that it does not verify factual truth, rights, or editorial quality. Commit with `feat(script): add Goodhart and Campbell consequence stories`.
 
