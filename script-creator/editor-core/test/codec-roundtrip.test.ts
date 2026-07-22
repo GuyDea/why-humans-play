@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { EditorView } from 'prosemirror-view';
 import { describe, expect, it } from 'vitest';
 import { exportMarkdown, parseMarkdown } from '../src/markdown-codec.js';
-import { beatNode, docOf, para } from './builders.js';
+import { beatNode, docOf, para, stateOf } from './builders.js';
 
 describe('parseMarkdown round-trip', () => {
   it('is byte-identical on a constructed exportable document', () => {
@@ -21,6 +22,32 @@ describe('parseMarkdown round-trip', () => {
       '### Claims', '', '- `F-001` — x — VERIFIED.', ''].join('\n');
     const reEmitted = exportMarkdown(parseMarkdown(md));
     expect(reEmitted.ok && reEmitted.markdown.includes('- `F-001` — x — VERIFIED.')).toBe(true);
+  });
+
+  it('mounts parsed opaque production markdown as text, never HTML', () => {
+    const production = '<img src="x" onerror="globalThis.pwned = true">';
+    const md = ['## Beat 01 — T', '', '### Narration', '', '> Line.', '',
+      '### Production', '', production].join('\n');
+    const view = new EditorView(document.createElement('div'), { state: stateOf(parseMarkdown(md)) });
+
+    const opaque = [...view.dom.querySelectorAll<HTMLElement>('.opaque-section')]
+      .find((element) => element.textContent === production);
+    expect(opaque).toBeDefined();
+    expect(opaque?.querySelector('img')).toBeNull();
+    view.destroy();
+  });
+
+  it.each([
+    ['annotated', '## Beat 01 — T\n\n### Narration\n\n> Line.'],
+    ['narration', '## 1. T\n\n> Line.'],
+  ])('preserves pre-beat bytes verbatim in %s format', (_format, beats) => {
+    const preamble = '# Exact title\r\n<!-- production preamble -->\r\n\r\n';
+    const doc = parseMarkdown(`${preamble}${beats}`);
+    const out = exportMarkdown(doc);
+
+    expect(doc.attrs.preamble).toBe(preamble);
+    expect(out.ok).toBe(true);
+    if (out.ok) expect(out.markdown.startsWith(preamble)).toBe(true);
   });
 
   it('round-trips the narration format preserving content and format', () => {
@@ -68,6 +95,11 @@ describe('parseMarkdown round-trip', () => {
     const out = exportMarkdown(doc);
     expect(out.ok).toBe(true);
     if (out.ok) {
+      const titleLine = md.match(/^# [^\r\n]+/m)?.[0];
+      expect(titleLine).toBeDefined();
+      expect(String(doc.attrs.preamble)).toContain(titleLine);
+      expect(out.markdown.startsWith(String(doc.attrs.preamble))).toBe(true);
+      expect(out.markdown).toContain(titleLine);
       let firstNarration = '';
       const opaques: string[] = [];
       doc.descendants((n) => {

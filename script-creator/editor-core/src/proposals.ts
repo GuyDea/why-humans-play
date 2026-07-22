@@ -40,6 +40,7 @@ type ProposalTransactionMeta =
 type Dispatch = (transaction: Transaction) => void;
 
 const proposalKey = new PluginKey<ProposalPluginState>('proposals');
+const authorizedProposalTransactions = new WeakSet<Transaction>();
 
 function mapRange(from: number, to: number, map: StepMap): { from: number; to: number } {
   const mappedFrom = map.map(from, 1);
@@ -118,6 +119,53 @@ function overlapsLock(state: EditorState, proposal: StoredProposal): boolean {
     lock.from < proposal.to && lock.to > proposal.from);
 }
 
+function validAuthorizedAction(
+  transaction: Transaction,
+  meta: ProposalTransactionMeta,
+  pluginState: ProposalPluginState,
+  oldState: EditorState,
+  newState: EditorState,
+): boolean {
+  if (!authorizedProposalTransactions.has(transaction) || !transaction.before.eq(oldState.doc)) {
+    return false;
+  }
+
+  const existing = pluginState.proposals.find((proposal) => proposal.id === (
+    meta.action === 'request' ? meta.proposal.id : meta.id
+  ));
+  if (meta.action === 'request') {
+    const { proposal } = meta;
+    return transaction.steps.length === 0 && existing === undefined &&
+      proposal.status === 'pending' && proposal.replacement === undefined &&
+      proposal.from >= 0 && proposal.from < proposal.to && proposal.to <= oldState.doc.content.size &&
+      proposal.fingerprint === textForRange(oldState.doc, proposal.from, proposal.to) &&
+      proposal.baseRevision === getRevision(oldState);
+  }
+  if (meta.action === 'receive') {
+    return transaction.steps.length === 0 && existing !== undefined;
+  }
+  if (meta.action === 'reject') {
+    return transaction.steps.length === 0 && existing !== undefined;
+  }
+  if (existing?.status !== 'ready' || existing.replacement === undefined ||
+      transaction.steps.length !== 1 || overlapsLock(oldState, existing) ||
+      textForRange(oldState.doc, existing.from, existing.to) !== existing.fingerprint) {
+    return false;
+  }
+  const range = exactReplacementRange(transaction, existing.from, existing.to);
+  return range !== undefined &&
+    textForRange(newState.doc, range.from, range.to) === existing.replacement;
+}
+
+function dispatchAuthorized(
+  transaction: Transaction,
+  dispatch: Dispatch | undefined,
+): void {
+  if (dispatch === undefined) return;
+  authorizedProposalTransactions.add(transaction);
+  dispatch(transaction);
+}
+
 export function proposalPlugin(): Plugin<ProposalPluginState> {
   return new Plugin<ProposalPluginState>({
     key: proposalKey,
@@ -161,7 +209,14 @@ export function proposalPlugin(): Plugin<ProposalPluginState> {
         }
         proposals.push(...restored);
 
-        const meta = transaction.getMeta(proposalKey) as ProposalTransactionMeta | undefined;
+        const candidateMeta = transaction.getMeta(proposalKey) as ProposalTransactionMeta | undefined;
+        const meta = candidateMeta !== undefined && validAuthorizedAction(
+          transaction,
+          candidateMeta,
+          pluginState,
+          oldState,
+          newState,
+        ) ? candidateMeta : undefined;
         if (meta === undefined) return { proposals, accepted };
 
         if (meta.action === 'request') {
@@ -209,9 +264,10 @@ export function requestProposal(
     fingerprint: state.doc.textBetween(range.from, range.to),
     baseRevision: getRevision(state),
   };
-  dispatch?.(state.tr
+  const transaction = state.tr
     .setMeta(proposalKey, { action: 'request', proposal } satisfies ProposalTransactionMeta)
-    .setMeta('addToHistory', false));
+    .setMeta('addToHistory', false);
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 
@@ -222,9 +278,10 @@ export function receiveProposal(
 ): boolean {
   if (!(proposalKey.getState(state)?.proposals ?? []).some((proposal) => proposal.id === result.id)) return false;
 
-  dispatch?.(state.tr
+  const transaction = state.tr
     .setMeta(proposalKey, { action: 'receive', ...result } satisfies ProposalTransactionMeta)
-    .setMeta('addToHistory', false));
+    .setMeta('addToHistory', false);
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 
@@ -239,10 +296,11 @@ export function acceptProposal(
       overlapsLock(state, proposal)) return false;
 
   // Isolate acceptance from history events on both sides while dispatching only one transaction.
-  dispatch?.(closeHistory(state.tr
+  const transaction = closeHistory(state.tr
     .insertText(proposal.replacement, proposal.from, proposal.to)
     .setMeta(proposalKey, { action: 'accept', id } satisfies ProposalTransactionMeta)
-    .setTime(0)));
+    .setTime(0));
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 
@@ -253,9 +311,10 @@ export function rejectProposal(
 ): boolean {
   if (!(proposalKey.getState(state)?.proposals ?? []).some((proposal) => proposal.id === id)) return false;
 
-  dispatch?.(state.tr
+  const transaction = state.tr
     .setMeta(proposalKey, { action: 'reject', id } satisfies ProposalTransactionMeta)
-    .setMeta('addToHistory', false));
+    .setMeta('addToHistory', false);
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 

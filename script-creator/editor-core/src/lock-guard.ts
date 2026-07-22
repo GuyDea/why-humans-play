@@ -1,5 +1,6 @@
 import type { Node as ProseMirrorNode } from 'prosemirror-model';
 import { Plugin, PluginKey, type EditorState, type Transaction } from 'prosemirror-state';
+import { AddMarkStep, RemoveMarkStep } from 'prosemirror-transform';
 
 export interface LockRange {
   lockId: string;
@@ -15,6 +16,7 @@ interface LockTransactionMeta {
 type Dispatch = (transaction: Transaction) => void;
 
 const lockGuardKey = new PluginKey('lockGuard');
+const authorizedLockTransactions = new WeakSet<Transaction>();
 
 function locksInDocument(doc: ProseMirrorNode): LockRange[] {
   const locks = new Map<string, LockRange>();
@@ -76,9 +78,46 @@ function changesLockedContent(transaction: Transaction): boolean {
   });
 }
 
-function hasAuthorizedLockMeta(transaction: Transaction): boolean {
+function hasValidAuthorizedLockTransition(
+  transaction: Transaction,
+  state: EditorState,
+): boolean {
+  if (!authorizedLockTransactions.has(transaction) || !transaction.before.eq(state.doc) ||
+      transaction.steps.length === 0) return false;
+
   const meta = transaction.getMeta(lockGuardKey) as LockTransactionMeta | undefined;
-  return meta?.action === 'lock' || meta?.action === 'unlock';
+  if (meta === undefined) return false;
+
+  const validSteps = transaction.steps.every((step) => {
+    if (meta.action === 'lock' && !(step instanceof AddMarkStep)) return false;
+    if (meta.action === 'unlock' && !(step instanceof RemoveMarkStep)) return false;
+    if (!(step instanceof AddMarkStep || step instanceof RemoveMarkStep)) return false;
+    return step.mark.type === state.schema.marks.lock && step.mark.attrs.lockId === meta.lockId;
+  });
+  if (!validSteps) return false;
+
+  const before = locksInDocument(state.doc);
+  const after = locksInDocument(transaction.doc);
+  const beforeOthers = before.filter((lock) => lock.lockId !== meta.lockId);
+  const afterOthers = after.filter((lock) => lock.lockId !== meta.lockId);
+  if (!sameLocks(beforeOthers, afterOthers)) return false;
+
+  const previous = before.find((lock) => lock.lockId === meta.lockId);
+  const next = after.find((lock) => lock.lockId === meta.lockId);
+  if (meta.action === 'unlock') return previous !== undefined && next === undefined;
+  if (next === undefined) return false;
+  return previous === undefined ||
+    (next.from <= previous.from && next.to >= previous.to &&
+      (next.from !== previous.from || next.to !== previous.to));
+}
+
+function dispatchAuthorized(
+  transaction: Transaction,
+  dispatch: Dispatch | undefined,
+): void {
+  if (dispatch === undefined) return;
+  authorizedLockTransactions.add(transaction);
+  dispatch(transaction);
 }
 
 export function lockGuardPlugin(): Plugin {
@@ -86,11 +125,13 @@ export function lockGuardPlugin(): Plugin {
     key: lockGuardKey,
     filterTransaction(transaction, state) {
       if (changesLockedContent(transaction)) return false;
-      if (hasAuthorizedLockMeta(transaction)) return true;
+      if (hasValidAuthorizedLockTransition(transaction, state)) return true;
       return sameLocks(mappedLocks(state, transaction), locksInDocument(transaction.doc));
     },
   });
 }
+
+export const lockPlugin = lockGuardPlugin;
 
 export function lockRange(
   state: EditorState,
@@ -106,7 +147,7 @@ export function lockRange(
     .setMeta(lockGuardKey, { action: 'lock', lockId: range.lockId } satisfies LockTransactionMeta)
     .setMeta('addToHistory', false);
   if (transaction.steps.length === 0) return false;
-  dispatch?.(transaction);
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 
@@ -128,7 +169,7 @@ export function unlockRange(
     state.tr,
   ).setMeta(lockGuardKey, { action: 'unlock', lockId } satisfies LockTransactionMeta)
     .setMeta('addToHistory', false);
-  dispatch?.(transaction);
+  dispatchAuthorized(transaction, dispatch);
   return true;
 }
 

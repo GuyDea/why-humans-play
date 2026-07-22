@@ -114,7 +114,8 @@ export function exportMarkdown(
   const format: MarkdownFormat = doc.attrs.format === 'narration' ? 'narration' : 'annotated';
   const beats: string[] = [];
   doc.forEach((beat, _offset, index) => beats.push(renderBeat(beat, index + 1, format)));
-  return { ok: true, markdown: beats.join('\n\n') };
+  const preamble = typeof doc.attrs.preamble === 'string' ? doc.attrs.preamble : '';
+  return { ok: true, markdown: `${preamble}${beats.join('\n\n')}` };
 }
 
 interface BeatHeader {
@@ -262,5 +263,6 @@ export function parseMarkdown(markdown: string): ProseMirrorNode {
     );
   });
 
-  return schema.node('doc', { format }, beats);
+  const preamble = markdown.slice(0, headers[0]!.from);
+  return schema.node('doc', { format, preamble }, beats);
 }

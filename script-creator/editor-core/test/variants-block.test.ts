@@ -1,5 +1,5 @@
 import { EditorView } from 'prosemirror-view';
-import { undo } from 'prosemirror-history';
+import { redo, undo } from 'prosemirror-history';
 import { describe, expect, it } from 'vitest';
 import { variantNodeViews } from '../src/node-views.js';
 import { getParkingLot, insertBlockVariantSet, pickActive, setActive } from '../src/variants.js';
@@ -28,6 +28,10 @@ describe('block VariantSet', () => {
     expect(getParkingLot(state)).toEqual([{ variantId: 'V1', label: 'A', text: 'alpha take' }]);
     undo(state, (tr) => { state = state.apply(tr); });
     expect(state.doc.eq(before)).toBe(true);
+    expect(getParkingLot(state)).toEqual([]);
+    redo(state, (tr) => { state = state.apply(tr); });
+    expect(state.doc.textContent).toContain('beta take');
+    expect(getParkingLot(state)).toEqual([{ variantId: 'V1', label: 'A', text: 'alpha take' }]);
   });
 
   it('renders only the active option with a tab strip', () => {

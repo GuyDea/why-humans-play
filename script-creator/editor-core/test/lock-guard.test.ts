@@ -60,6 +60,21 @@ describe('LockGuard', () => {
     expect(edited.doc.textContent).toContain('XXgamma');
   });
 
+  it('rejects raw removeMark even with forged unlock metadata', () => {
+    const { state, from, to } = locked();
+    const plugin = state.plugins.find((candidate) => candidate.spec.filterTransaction !== undefined);
+    expect(plugin).toBeDefined();
+    if (plugin === undefined) return;
+
+    const forged = state.tr
+      .removeMark(from, to, state.schema.marks.lock!.create({ lockId: 'L1' }))
+      .setMeta(plugin, { action: 'unlock', lockId: 'L1' });
+    const after = state.apply(forged);
+
+    expect(after.doc.eq(state.doc)).toBe(true);
+    expect(lockedText(after, 'L1')).toBe(lockedText(state, 'L1'));
+  });
+
   it('blocks undo that would mutate a later-locked range, and counts revisions', () => {
     let state = stateOf(docOf(beatNode('B', para('one two three'))));
     const r0 = getRevision(state);

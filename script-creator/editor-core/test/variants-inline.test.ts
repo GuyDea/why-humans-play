@@ -1,4 +1,5 @@
 import { EditorView } from 'prosemirror-view';
+import { redo, undo } from 'prosemirror-history';
 import { describe, expect, it } from 'vitest';
 import { exportMarkdown } from '../src/markdown-codec.js';
 import { variantNodeViews } from '../src/node-views.js';
@@ -21,6 +22,12 @@ describe('inline VariantSet', () => {
     setActive(state, (tr) => { state = state.apply(tr); }, 'IV1', 1);
     pickActive(state, (tr) => { state = state.apply(tr); }, 'IV1');
     expect(state.doc.textContent).toContain('like furniture instructions');
+    expect(getParkingLot(state)).toContainEqual({ variantId: 'IV1', label: 'A', text: 'flatly' });
+    expect(exportMarkdown(state).ok).toBe(true);
+    undo(state, (tr) => { state = state.apply(tr); });
+    expect(getParkingLot(state)).toEqual([]);
+    expect(exportMarkdown(state).ok).toBe(false);
+    redo(state, (tr) => { state = state.apply(tr); });
     expect(getParkingLot(state)).toContainEqual({ variantId: 'IV1', label: 'A', text: 'flatly' });
     expect(exportMarkdown(state).ok).toBe(true);
   });

@@ -3,6 +3,7 @@ import { EditorState, type Transaction } from 'prosemirror-state';
 import { Decoration, DecorationSet, EditorView } from 'prosemirror-view';
 import { addAnnotation, getAnnotations } from '../src/annotations.js';
 import { corePlugins } from '../src/core.js';
+import { newBeatId } from '../src/ids.js';
 import { getLocks, lockRange } from '../src/lock-guard.js';
 import { exportMarkdown } from '../src/markdown-codec.js';
 import { variantNodeViews } from '../src/node-views.js';
@@ -57,9 +58,12 @@ function sampleDocument(): ProseMirrorNode {
     variantOption('Observation', 'The delight was not in winning. It was in discovering that the rule could bend.'),
     variantOption('Turn', 'The rule stopped being a wall and became something the players could push against.'),
   ]);
+  const opaqueProduction = schema.node('opaqueSection', {
+    md: '### Production note\n\n- Opaque demo material: render this as literal Markdown text.',
+  });
 
   const beat = schema.node('beat', {
-    beatId: 'beat_demo000001',
+    beatId: newBeatId(),
     title: 'The edge of the rule',
     timeTargetMs: 30000,
   }, [
@@ -75,6 +79,7 @@ function sampleDocument(): ProseMirrorNode {
     ),
     blockVariant,
     paragraph(schema.text('That is the useful pressure of play: it lets us test a possibility before we have to live with it.')),
+    opaqueProduction,
   ]);
 
   return schema.node('doc', { format: 'annotated' }, [beat]);

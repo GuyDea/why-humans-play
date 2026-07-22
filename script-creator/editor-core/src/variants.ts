@@ -1,5 +1,5 @@
-import type { Node as ProseMirrorNode } from 'prosemirror-model';
-import { closeHistory } from 'prosemirror-history';
+import { Fragment, type Node as ProseMirrorNode } from 'prosemirror-model';
+import { closeHistory, isHistoryTransaction } from 'prosemirror-history';
 import { Plugin, PluginKey, type EditorState, type Transaction } from 'prosemirror-state';
 
 export interface ParkingLotEntry {
@@ -36,13 +36,96 @@ interface LocatedVariantSet {
 }
 
 interface ParkingLotTransactionMeta {
+  action: 'pick';
   variantId: string;
   entries: ParkingLotEntry[];
+  from: number;
+  to: number;
+}
+
+interface PickHistoryEntry {
+  variantId: string;
+  entries: readonly ParkingLotEntry[];
+  original: ProseMirrorNode;
+  chosen: Fragment;
+  from: number;
+  to: number;
+}
+
+interface VariantPluginState {
+  entries: readonly ParkingLotEntry[];
+  picked: readonly PickHistoryEntry[];
+  undone: readonly PickHistoryEntry[];
 }
 
 type Dispatch = (transaction: Transaction) => void;
 
-const parkingLotKey = new PluginKey<readonly ParkingLotEntry[]>('variantParkingLot');
+const parkingLotKey = new PluginKey<VariantPluginState>('variantParkingLot');
+
+function mapRange(
+  from: number,
+  to: number,
+  transaction: Transaction,
+): { from: number; to: number } {
+  return {
+    from: transaction.mapping.map(from, 1),
+    to: transaction.mapping.map(to, -1),
+  };
+}
+
+function exactReplacementRange(
+  transaction: Transaction,
+  initialFrom: number,
+  initialTo: number,
+): { from: number; to: number } | undefined {
+  let range = { from: initialFrom, to: initialTo };
+  let replaced = false;
+
+  for (const step of transaction.steps) {
+    let replacement: { from: number; to: number } | undefined;
+    const map = step.getMap();
+    map.forEach((oldFrom, oldTo, newFrom, newTo) => {
+      if (oldFrom === range.from && oldTo === range.to) {
+        replacement = { from: newFrom, to: newTo };
+      }
+    });
+    if (replacement !== undefined) {
+      range = replacement;
+      replaced = true;
+    } else {
+      range = {
+        from: map.map(range.from, 1),
+        to: map.map(range.to, -1),
+      };
+    }
+  }
+
+  return replaced ? range : undefined;
+}
+
+function sliceEquals(
+  doc: ProseMirrorNode,
+  from: number,
+  to: number,
+  expected: Fragment,
+): boolean {
+  return from <= to && doc.slice(from, to).content.eq(expected);
+}
+
+function mappedEntry(entry: PickHistoryEntry, transaction: Transaction): PickHistoryEntry {
+  return { ...entry, ...mapRange(entry.from, entry.to, transaction) };
+}
+
+function replaceVariantEntries(
+  current: readonly ParkingLotEntry[],
+  variantId: string,
+  replacements: readonly ParkingLotEntry[],
+): ParkingLotEntry[] {
+  return [
+    ...current.filter((entry) => entry.variantId !== variantId),
+    ...replacements,
+  ];
+}
 
 function findVariantSet(state: EditorState, variantId: string): LocatedVariantSet | undefined {
   let found: LocatedVariantSet | undefined;
@@ -85,18 +168,63 @@ function activeIndex(node: ProseMirrorNode): number | undefined {
     : undefined;
 }
 
-export function variantPlugin(): Plugin<readonly ParkingLotEntry[]> {
-  return new Plugin<readonly ParkingLotEntry[]>({
+export function variantPlugin(): Plugin<VariantPluginState> {
+  return new Plugin<VariantPluginState>({
     key: parkingLotKey,
     state: {
-      init: () => [],
-      apply(transaction, entries) {
+      init: () => ({ entries: [], picked: [], undone: [] }),
+      apply(transaction, pluginState, oldState, newState) {
+        let entries = [...pluginState.entries];
+        const picked: PickHistoryEntry[] = [];
+        const undone: PickHistoryEntry[] = [];
+
+        for (const entry of pluginState.picked) {
+          const replacement = exactReplacementRange(transaction, entry.from, entry.to);
+          if (isHistoryTransaction(transaction) && replacement !== undefined &&
+              sliceEquals(oldState.doc, entry.from, entry.to, entry.chosen) &&
+              sliceEquals(newState.doc, replacement.from, replacement.to, Fragment.from(entry.original))) {
+            entries = replaceVariantEntries(entries, entry.variantId, []);
+            undone.push({ ...entry, ...replacement });
+          } else {
+            picked.push(mappedEntry(entry, transaction));
+          }
+        }
+
+        for (const entry of pluginState.undone) {
+          const replacement = exactReplacementRange(transaction, entry.from, entry.to);
+          if (isHistoryTransaction(transaction) && replacement !== undefined &&
+              sliceEquals(oldState.doc, entry.from, entry.to, Fragment.from(entry.original)) &&
+              sliceEquals(newState.doc, replacement.from, replacement.to, entry.chosen)) {
+            entries = replaceVariantEntries(entries, entry.variantId, entry.entries);
+            picked.push({ ...entry, ...replacement });
+          } else {
+            undone.push(mappedEntry(entry, transaction));
+          }
+        }
+
         const meta = transaction.getMeta(parkingLotKey) as ParkingLotTransactionMeta | undefined;
-        if (meta === undefined) return entries;
-        return [
-          ...entries.filter((entry) => entry.variantId !== meta.variantId),
-          ...meta.entries,
-        ];
+        if (meta?.action === 'pick') {
+          const original = oldState.doc.nodeAt(meta.from);
+          const replacement = exactReplacementRange(transaction, meta.from, meta.to);
+          if (original !== null && replacement !== undefined &&
+              (original.type.name === 'variantSet' || original.type.name === 'inlineVariantSet') &&
+              original.attrs.variantId === meta.variantId) {
+            entries = replaceVariantEntries(entries, meta.variantId, meta.entries);
+            picked.push({
+              variantId: meta.variantId,
+              entries: meta.entries.map((entry) => ({ ...entry })),
+              original,
+              chosen: newState.doc.slice(replacement.from, replacement.to).content,
+              ...replacement,
+            });
+            return {
+              entries,
+              picked,
+              undone: undone.filter((entry) => entry.variantId !== meta.variantId),
+            };
+          }
+        }
+        return { entries, picked, undone };
       },
     },
   });
@@ -219,8 +347,11 @@ export function pickActive(
   const transaction = closeHistory(state.tr
     .replaceWith(variant.pos, variant.pos + variant.node.nodeSize, replacement)
     .setMeta(parkingLotKey, {
+      action: 'pick',
       variantId,
       entries,
+      from: variant.pos,
+      to: variant.pos + variant.node.nodeSize,
     } satisfies ParkingLotTransactionMeta)
     .setTime(0));
   dispatch?.(transaction);
@@ -228,5 +359,5 @@ export function pickActive(
 }
 
 export function getParkingLot(state: EditorState): ParkingLotEntry[] {
-  return (parkingLotKey.getState(state) ?? []).map((entry) => ({ ...entry }));
+  return (parkingLotKey.getState(state)?.entries ?? []).map((entry) => ({ ...entry }));
 }

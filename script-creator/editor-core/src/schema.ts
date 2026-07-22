@@ -5,6 +5,7 @@ export const schema = new Schema({
     doc: {
       attrs: {
         format: { default: 'annotated' },
+        preamble: { default: '' },
       },
       content: 'beat+',
     },
@@ -29,6 +30,11 @@ export const schema = new Schema({
       attrs: {
         md: {},
       },
+      toDOM: (node) => [
+        'pre',
+        { class: 'opaque-section' },
+        String(node.attrs.md),
+      ] as const,
     },
     variantSet: {
       attrs: {

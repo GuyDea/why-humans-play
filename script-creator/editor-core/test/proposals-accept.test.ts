@@ -46,4 +46,20 @@ describe('accept/reject', () => {
     expect(getProposals(state)).toHaveLength(0);
     expect(exportMarkdown(state).ok).toBe(true);
   });
+
+  it('ignores forged reject metadata and keeps export blocked', () => {
+    const state = ready();
+    const plugin = state.plugins.find((candidate) => {
+      const pluginState: unknown = candidate.spec.key?.getState(state);
+      return typeof pluginState === 'object' && pluginState !== null && 'proposals' in pluginState;
+    });
+    expect(plugin).toBeDefined();
+    if (plugin === undefined) return;
+
+    const after = state.apply(state.tr.setMeta(plugin, { action: 'reject', id: 'P1' }));
+
+    expect(after.doc.eq(state.doc)).toBe(true);
+    expect(getProposals(after)).toHaveLength(1);
+    expect(exportMarkdown(after).ok).toBe(false);
+  });
 });
