@@ -257,8 +257,19 @@ def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
     appendix_text = text[appendix_heading.end() :]
     masked_appendix = masked[appendix_heading.end() :]
 
+    if re.search(r"^# [^#\r\n]", masked_appendix, re.MULTILINE):
+        errors.append("Appendix may not contain an H1 heading.")
     if re.search(r"^## [^#\r\n]", masked_appendix, re.MULTILINE):
         errors.append("Appendix may not contain additional level-two headings.")
+    first_appendix_section = APPENDIX_LEVEL_THREE_RE.search(masked_appendix)
+    if (
+        first_appendix_section is None
+        or masked_appendix[: first_appendix_section.start()].strip()
+    ):
+        errors.append(
+            "Appendix must begin directly with Script metadata; no heading or prose "
+            "may precede it."
+        )
 
     beat_matches = list(NUMBERED_BEAT_HEADING_RE.finditer(masked_narration))
     candidate_starts = {

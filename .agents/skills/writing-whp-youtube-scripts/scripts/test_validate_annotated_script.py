@@ -582,6 +582,25 @@ class ValidatorTests(unittest.TestCase):
             "Appendix may not contain additional level-two headings",
         )
 
+    def test_appendix_rejects_extra_h1(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "## Appendix\n\n",
+            "## Appendix\n\n# Rogue appendix title\n\n",
+        )
+        self.assert_error(document, "Appendix may not contain an H1 heading")
+
+    def test_appendix_metadata_must_begin_without_loose_prose(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "## Appendix\n\n",
+            "## Appendix\n\nLoose production note.\n\n",
+        )
+        self.assert_error(
+            document,
+            "Appendix must begin directly with Script metadata",
+        )
+
     def test_full_script_contract_is_document_wide_across_beats(self) -> None:
         self.assertEqual(validate_document(TWO_BEAT_DOCUMENT), [])
 
