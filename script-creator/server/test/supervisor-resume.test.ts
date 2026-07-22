@@ -1,10 +1,11 @@
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { JobStore } from '../src/job-store.js';
-import { jobPaths } from '../src/runner-status.js';
+import { jobPaths, readStatus } from '../src/runner-status.js';
 import { JobSupervisor } from '../src/supervisor.js';
+import { waitFor } from './helpers.js';
 
 const FAKE = `${process.execPath} ${join(import.meta.dirname, 'fake-codex.mjs')}`;
 const sups: JobSupervisor[] = [];
@@ -20,9 +21,11 @@ describe('resume', () => {
     });
     sups.push(s1);
     const id = s1.enqueue({ prompt: 'payload-original', cwd: tmpdir(), sandbox: 'read-only', codexBin: FAKE });
-    await new Promise((r) => setTimeout(r, 600)); // thread.started journaled, then hangs
-    const status = JSON.parse(readFileSync(jobPaths(s1.store.get(id)!.jobDir).statusFile, 'utf8'));
-    const originalThread = status.threadId as string;
+    const status = await waitFor(() => {
+      const current = readStatus(jobPaths(s1.store.get(id)!.jobDir).statusFile);
+      return current?.threadId ? current : undefined;
+    });
+    const originalThread = status.threadId!;
     expect(originalThread).toBeTruthy();
     process.kill(-status.pgid, 'SIGKILL');
     s1.stop();
@@ -33,7 +36,7 @@ describe('resume', () => {
     });
     sups.push(s2);
     s2.reattach();
-    await new Promise((r) => setTimeout(r, 300));
+    await waitFor(() => s2.store.get(id)!.state === 'interrupted');
     expect(s2.store.get(id)!.state).toBe('interrupted');
 
     const resumedId = s2.resume(id);

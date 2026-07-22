@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
 import { jobPaths, readStatus } from '../src/runner-status.js';
-import { makeJobDir } from './runner.test.js';
+import { makeJobDir } from './helpers.js';
 
 const run = promisify(execFile);
 

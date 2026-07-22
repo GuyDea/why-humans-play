@@ -1,34 +1,10 @@
-import { spawn } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { EventLog } from '../src/event-log.js';
 import { jobPaths, readStatus } from '../src/runner-status.js';
-import type { JobEnvelope } from '../src/types.js';
-
-const RUNNER = join(import.meta.dirname, '..', 'src', 'runner.ts');
-const FAKE = join(import.meta.dirname, 'fake-codex.mjs');
-
-export function makeJobDir(envelope: Partial<JobEnvelope>): string {
-  const jobDir = mkdtempSync(join(tmpdir(), 'job-'));
-  const env: JobEnvelope = {
-    jobId: 'j1', prompt: 'payload', cwd: jobDir, sandbox: 'read-only',
-    codexBin: `${process.execPath} ${FAKE}`, ...envelope,
-  };
-  writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(env));
-  return jobDir;
-}
-
-export function runRunner(jobDir: string, mode = 'happy'): Promise<number> {
-  return new Promise((resolve) => {
-    const child = spawn(process.execPath, ['--import', 'tsx', RUNNER, jobDir], {
-      env: { ...process.env, FAKE_CODEX_MODE: mode },
-      stdio: 'ignore',
-    });
-    child.on('exit', (code) => resolve(code ?? -1));
-  });
-}
+import { makeJobDir, runRunner } from './helpers.js';
 
 describe('runner', () => {
   it('journals events, captures thread id and usage, completes', async () => {
@@ -42,7 +18,12 @@ describe('runner', () => {
     const status = readStatus(p.statusFile)!;
     expect(status.state).toBe('completed');
     expect(status.threadId).toBeTruthy();
-    expect(status.usage!.input_tokens).toBeGreaterThan(0);
+    expect(status.usage).toEqual({
+      input_tokens: 17766,
+      cached_input_tokens: 6912,
+      output_tokens: 46,
+      reasoning_output_tokens: 39,
+    });
     expect(readFileSync(p.finalMessageFile, 'utf8')).toBe('OK');
   });
 
@@ -52,5 +33,27 @@ describe('runner', () => {
     const status = readStatus(jobPaths(jobDir).statusFile)!;
     expect(status.state).toBe('completed'); // exit 0; usage simply absent
     expect(status.usage).toBeUndefined();
+  });
+
+  it('waits for stdout close and captures usage written after the codex process exits', async () => {
+    const jobDir = makeJobDir({});
+    const code = await runRunner(jobDir, 'late-usage');
+    expect(code).toBe(0);
+    expect(readStatus(jobPaths(jobDir).statusFile)!.usage).toEqual({
+      input_tokens: 17766,
+      cached_input_tokens: 6912,
+      output_tokens: 46,
+      reasoning_output_tokens: 39,
+    });
+  });
+
+  it('records a missing codex executable as an explicit spawn failure', async () => {
+    const missing = join(tmpdir(), `missing-codex-${process.pid}-${Date.now()}`);
+    const jobDir = makeJobDir({ codexBin: missing });
+    const code = await runRunner(jobDir);
+    const status = readStatus(jobPaths(jobDir).statusFile)!;
+    expect(code).not.toBe(0);
+    expect(status.state).toBe('failed');
+    expect(status.errorMessage).toContain('ENOENT');
   });
 });

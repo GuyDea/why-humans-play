@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   retry_of TEXT,
   resumed_from TEXT,
   created_at TEXT NOT NULL,
+  started_at TEXT,
   finished_at TEXT,
   input_tokens INTEGER,
   cached_input_tokens INTEGER,
@@ -30,6 +31,7 @@ function toRecord(row: Record<string, unknown>): JobRecord {
     retryOf: (row.retry_of as string) ?? null,
     resumedFrom: (row.resumed_from as string) ?? null,
     createdAt: row.created_at as string,
+    startedAt: (row.started_at as string) ?? null,
     finishedAt: (row.finished_at as string) ?? null,
     inputTokens: (row.input_tokens as number) ?? null,
     cachedInputTokens: (row.cached_input_tokens as number) ?? null,
@@ -65,8 +67,12 @@ export class JobStore {
 
   setState(id: string, state: JobState, error?: string): void {
     const finished = ['completed', 'failed', 'cancelled', 'invalid-output', 'interrupted'].includes(state);
-    this.db.prepare('UPDATE jobs SET state = ?, error = COALESCE(?, error), finished_at = COALESCE(?, finished_at) WHERE id = ?')
-      .run(state, error ?? null, finished ? new Date().toISOString() : null, id);
+    const now = new Date().toISOString();
+    this.db.prepare(
+      `UPDATE jobs SET state = ?, error = COALESCE(?, error),
+       started_at = CASE WHEN ? = 'running' THEN COALESCE(started_at, ?) ELSE started_at END,
+       finished_at = COALESCE(?, finished_at) WHERE id = ?`,
+    ).run(state, error ?? null, state, now, finished ? now : null, id);
   }
 
   setThreadId(id: string, threadId: string): void {
@@ -75,17 +81,20 @@ export class JobStore {
 
   recordUsage(id: string, usage: RunnerUsage | undefined): void {
     if (!usage) {
-      this.db.prepare('UPDATE jobs SET usage_available = 0 WHERE id = ?').run(id);
+      this.db.prepare(
+        `UPDATE jobs SET usage_available = 0, input_tokens = NULL, cached_input_tokens = NULL,
+         output_tokens = NULL, reasoning_output_tokens = NULL WHERE id = ?`,
+      ).run(id);
       return;
     }
     this.db.prepare(
       `UPDATE jobs SET usage_available = 1, input_tokens = ?, cached_input_tokens = ?,
        output_tokens = ?, reasoning_output_tokens = ? WHERE id = ?`,
-    ).run(usage.input_tokens, usage.cached_input_tokens, usage.output_tokens, usage.reasoning_output_tokens ?? null, id);
+    ).run(usage.input_tokens, usage.cached_input_tokens, usage.output_tokens, usage.reasoning_output_tokens, id);
   }
 
   nextQueued(): JobRecord | null {
-    const row = this.db.prepare("SELECT * FROM jobs WHERE state = 'queued' ORDER BY created_at, id LIMIT 1")
+    const row = this.db.prepare("SELECT * FROM jobs WHERE state = 'queued' ORDER BY rowid LIMIT 1")
       .get() as Record<string, unknown> | undefined;
     return row ? toRecord(row) : null;
   }

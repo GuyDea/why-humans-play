@@ -14,6 +14,20 @@ function isPidAlive(pid: number): boolean {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
+function isProcessGroupAlive(pgid: number): boolean {
+  try { process.kill(-pgid, 0); return true; } catch { return false; }
+}
+
+function signalProcessGroup(pgid: number, signal: NodeJS.Signals): void {
+  try {
+    process.kill(-pgid, signal);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ESRCH') {
+      console.error(`failed to send ${signal} to process group ${pgid}:`, error);
+    }
+  }
+}
+
 function readFinalMessage(jobDir: string): string {
   const f = jobPaths(jobDir).finalMessageFile;
   return existsSync(f) ? readFileSync(f, 'utf8') : '';
@@ -25,7 +39,10 @@ export class JobSupervisor {
   private readonly pollMs: number;
   private readonly startupGraceMs: number;
   private readonly extraEnv: Record<string, string>;
+  private readonly runnerBin: string;
   private readonly timer: ReturnType<typeof setInterval>;
+  private readonly spawnedPids = new Map<string, number>();
+  private readonly cancellationSignals = new Set<string>();
   private stopped = false;
 
   constructor(opts: {
@@ -34,12 +51,14 @@ export class JobSupervisor {
     pollMs?: number;
     startupGraceMs?: number;
     env?: Record<string, string>;
+    runnerBin?: string;
   }) {
     this.store = opts.store;
     this.jobsRoot = opts.jobsRoot;
     this.pollMs = opts.pollMs ?? 500;
     this.startupGraceMs = opts.startupGraceMs ?? 10_000;
     this.extraEnv = opts.env ?? {};
+    this.runnerBin = opts.runnerBin ?? process.execPath;
     mkdirSync(this.jobsRoot, { recursive: true });
     this.timer = setInterval(() => this.tick(), this.pollMs);
     this.timer.unref?.();
@@ -73,35 +92,25 @@ export class JobSupervisor {
   }
 
   reattach(): void {
-    for (const job of this.store.runningJobs()) {
-      const status = readStatus(jobPaths(job.jobDir).statusFile);
-      if (!status) {
-        if (Date.now() - Date.parse(job.createdAt) > this.startupGraceMs) {
-          this.store.setState(job.id, 'interrupted', 'no status file');
-        }
-        continue;
-      }
-      if (status.state !== 'running') continue; // next tick reconciles terminal states
-      if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
-      // alive → periodic tick keeps tailing; nothing else to do
-    }
+    this.reconcileRunning();
   }
+
   cancel(jobId: string): void {
     const job = this.store.get(jobId);
     if (!job || !['running', 'queued'].includes(job.state)) return;
     if (job.state === 'queued') { this.store.setState(jobId, 'cancelled', 'cancelled before start'); return; }
     const status = readStatus(jobPaths(job.jobDir).statusFile);
-    if (!status) { this.store.setState(jobId, 'cancelled', 'no runner status'); return; }
     this.store.setState(jobId, 'cancelling');
+    this.signalCancellation(jobId, status?.pgid ?? this.spawnedPids.get(jobId));
     const env = JSON.parse(job.envelopeJson) as JobEnvelope;
     const grace = (env.graceMs ?? 5000) * 2;
-    try { process.kill(-status.pgid, 'SIGINT'); } catch { /* group already gone */ }
     setTimeout(() => {
       if (this.stopped) return;
       const rec = this.store.get(jobId);
       if (rec && rec.state === 'cancelling') {
-        try { process.kill(-status.pgid, 'SIGKILL'); } catch { /* gone */ }
-        this.store.setState(jobId, 'cancelled', 'escalated to SIGKILL');
+        const latest = readStatus(jobPaths(rec.jobDir).statusFile);
+        const pgid = latest?.pgid ?? this.spawnedPids.get(jobId);
+        if (pgid !== undefined) signalProcessGroup(pgid, 'SIGKILL');
       }
     }, grace).unref?.();
   }
@@ -121,6 +130,7 @@ export class JobSupervisor {
   }
 
   stop(): void {
+    if (this.stopped) return;
     this.stopped = true;
     clearInterval(this.timer);
     this.store.close();
@@ -134,9 +144,19 @@ export class JobSupervisor {
   private launchNext(): void {
     const next = this.store.nextQueued();
     if (!next) return;
-    const child = spawn(process.execPath, ['--import', 'tsx', RUNNER, next.jobDir], {
+    const child = spawn(this.runnerBin, ['--import', 'tsx', RUNNER, next.jobDir], {
       detached: true, stdio: 'ignore',
       env: { ...process.env, ...this.extraEnv },
+    });
+    if (child.pid !== undefined) this.spawnedPids.set(next.id, child.pid);
+    child.on('error', (error) => {
+      if (this.stopped) return;
+      this.spawnedPids.delete(next.id);
+      this.cancellationSignals.delete(next.id);
+      const current = this.store.get(next.id);
+      if (current && ['running', 'cancelling'].includes(current.state)) {
+        this.store.setState(next.id, 'failed', error.message);
+      }
     });
     child.unref();
     this.store.setState(next.id, 'running');
@@ -146,16 +166,44 @@ export class JobSupervisor {
     for (const job of this.store.runningJobs()) {
       const status = readStatus(jobPaths(job.jobDir).statusFile);
       if (!status) {
-        if (Date.now() - Date.parse(job.createdAt) > this.startupGraceMs) {
+        const mappedPid = this.spawnedPids.get(job.id);
+        if (job.state === 'cancelling') {
+          if (mappedPid !== undefined && !isProcessGroupAlive(mappedPid)) {
+            this.finishCancellation(job.id);
+          } else if (mappedPid === undefined && this.startupGraceExpired(job)) {
+            this.finishCancellation(job.id);
+          }
+        } else if (mappedPid !== undefined) {
+          if (!isPidAlive(mappedPid)) {
+            this.spawnedPids.delete(job.id);
+            this.store.setState(job.id, 'interrupted', 'runner died before writing status');
+          }
+        } else if (this.startupGraceExpired(job)) {
           this.store.setState(job.id, 'interrupted', 'no status file');
         }
         continue;
       }
       if (status.threadId && !job.threadId) this.store.setThreadId(job.id, status.threadId);
-      if (status.state === 'running') {
-        if (!isPidAlive(status.pid)) this.store.setState(job.id, 'interrupted', 'runner died');
+
+      if (job.state === 'cancelling') {
+        if (status.state === 'running') {
+          this.signalCancellation(job.id, status.pgid);
+          if (!isProcessGroupAlive(status.pgid)) this.finishCancellation(job.id);
+        } else {
+          this.store.recordUsage(job.id, status.usage);
+          if (!isProcessGroupAlive(status.pgid)) this.finishCancellation(job.id);
+        }
         continue;
       }
+
+      if (status.state === 'running') {
+        if (!isPidAlive(status.pid)) {
+          this.spawnedPids.delete(job.id);
+          this.store.setState(job.id, 'interrupted', 'runner died');
+        }
+        continue;
+      }
+      this.spawnedPids.delete(job.id);
       this.store.recordUsage(job.id, status.usage);
       if (status.state === 'completed') {
         const env = JSON.parse(job.envelopeJson) as JobEnvelope;
@@ -173,6 +221,22 @@ export class JobSupervisor {
       else if (status.state === 'cancelled') this.store.setState(job.id, 'cancelled');
       else this.store.setState(job.id, 'failed', status.errorMessage);
     }
+  }
+
+  private startupGraceExpired(job: JobRecord): boolean {
+    return Date.now() - Date.parse(job.startedAt ?? job.createdAt) > this.startupGraceMs;
+  }
+
+  private signalCancellation(jobId: string, pgid: number | undefined): void {
+    if (pgid === undefined || this.cancellationSignals.has(jobId)) return;
+    this.cancellationSignals.add(jobId);
+    signalProcessGroup(pgid, 'SIGINT');
+  }
+
+  private finishCancellation(jobId: string): void {
+    this.spawnedPids.delete(jobId);
+    this.cancellationSignals.delete(jobId);
+    this.store.setState(jobId, 'cancelled');
   }
 
   private retryFresh(job: JobRecord): void {

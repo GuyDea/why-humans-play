@@ -21,7 +21,7 @@ export interface RunnerUsage {
   input_tokens: number;
   cached_input_tokens: number;
   output_tokens: number;
-  reasoning_output_tokens?: number;
+  reasoning_output_tokens: number;
 }
 
 export type RunnerState = 'running' | 'completed' | 'failed' | 'cancelled';
@@ -57,6 +57,7 @@ export interface JobRecord {
   retryOf: string | null;
   resumedFrom: string | null;
   createdAt: string;
+  startedAt: string | null;
   finishedAt: string | null;
   inputTokens: number | null;
   cachedInputTokens: number | null;

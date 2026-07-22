@@ -29,7 +29,10 @@ describe('JobSupervisor', () => {
     expect(rec.state).toBe('completed');
     expect(rec.threadId).toBeTruthy();
     expect(rec.usageAvailable).toBe(1);
-    expect(rec.inputTokens).toBeGreaterThan(0);
+    expect(rec.inputTokens).toBe(17766);
+    expect(rec.cachedInputTokens).toBe(6912);
+    expect(rec.outputTokens).toBe(46);
+    expect(rec.reasoningOutputTokens).toBe(39);
     expect(s.events(id).at(-1)!.parsed!.type).toBe('turn.completed');
   });
 
