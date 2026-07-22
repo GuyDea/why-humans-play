@@ -1,7 +1,9 @@
 # WHP Script Creator — Business Requirements
 
 **Date:** 2026-07-22
-**Status:** Accepted — V1 scope decided; technical design deferred
+**Status:** Accepted — V1 scope decided; amended same day with FR-8 (learning loop) and
+resolved decisions 5–9 on acceptance of the
+[technical design](2026-07-22-script-creator-technical-design.md)
 **Scope:** Local script-ideation and editing app ("Script Creator") for the WHP editorial workflow
 
 ## 1. Purpose
@@ -45,8 +47,10 @@ invocable.
    system that can drift.
 2. **The topic skill owns topic comparison and selection; the script skill owns narration
    onward**, receiving a selected topic brief.
-3. **Approved artifacts are portable repo Markdown** — the source of truth. App-local
-   state only for ephemeral UI (selections, in-flight variants, view state).
+3. **Approved artifacts are portable repo Markdown** — the canonical source of truth.
+   App-local storage holds working and operational state (in-progress drafts, variants,
+   revisions, decision logs, telemetry, job records) — durable but noncanonical;
+   anything approved or milestone-worthy must land in repo Markdown.
 4. **Explicit human gates:** creative approval (premise, voice, hook, story direction)
    precedes Phase 2; `RECORD-READY` is never self-promoted by the app or agent.
 5. **Rapid mode never fabricates facts** — the app must surface the factual boundary
@@ -200,6 +204,29 @@ selection, its surrounding context, and its narrative job passed explicitly:
 - **FR-7.7 Search.** Search across episodes, topics, variants, and research. (Session
   resume is covered by the crash-safety requirement in §7.)
 
+### FR-8 — Learning loop (decision retention) — must-have
+
+- **FR-8.1 Decision capture.** Every operation disposition (accepted, rejected,
+  re-rolled, variant picked) is recorded automatically with its full context; rejecting
+  or re-rolling offers an optional one-keystroke "why" note.
+- **FR-8.2 Session distillation.** At session end or on demand, an agent operation
+  reviews the session's decision log and proposes lessons, each with evidence pointers
+  to the supporting decisions and a classification: episode-local taste versus durable
+  editorial doctrine. Previously approved lessons are supplied so distillation never
+  re-proposes or contradicts them.
+- **FR-8.3 Review queue.** No lesson applies without Martin's approval; a lessons view
+  supports approve, edit, reject, and later retire.
+- **FR-8.4 Application.** Approved episode-local lessons attach automatically to that
+  episode's future operation envelopes as supplied context. Approved durable lessons are
+  routed into the repository's canonical steering and skill files through the existing
+  reconcile flow (diff preview, deliberate milestone commit), so the skills read them
+  natively in every future session — in-app or in plain chat.
+- **FR-8.5 No shadow doctrine.** The app never maintains its own editorial prompt layer;
+  the learned state it stores is limited to the raw decision log, lesson workflow
+  metadata (proposals, dispositions, retirements), and approved episode-local context
+  riders. Durable lesson content lives in the repository's steering and skill files once
+  applied, and retiring a durable lesson is itself a reconcile-flow edit to those files.
+
 ### Later-version candidates (not in any committed scope)
 
 - **Retention loop-back:** import YouTube retention/CTR after publishing and map dips
@@ -212,6 +239,12 @@ selection, its surrounding context, and its narrative job passed explicitly:
 - **Channel-aware topic mode:** import private analytics to upgrade topic runs from
   cold-start mode.
 - **Comment mining** for future topic seeds.
+- **Guyditor handoff:** an importer in Martin's guyditor video editor consuming Script
+  Creator's versioned JSON production handoff (beat IDs, narration, target durations,
+  Shorts as beat ranges plus hook text). Deferred until guyditor's first real-episode
+  dogfood; V1 only preserves the cheap boundary constraints (immutable beat IDs in
+  guyditor's `beat_[a-z2-7]{10}` format, separately immutable planned-Short IDs,
+  millisecond planned timings, serializable handoff).
 
 ## 6. V1 scope (decided 2026-07-22)
 
@@ -230,6 +263,8 @@ UI in V1 rather than a minimal launcher.
   FR-6.4 validator integration only.
 - FR-7 — FR-7.1 revision history, FR-7.3 repo-native storage, FR-7.4 agent console,
   FR-7.5 telemetry, FR-7.6 guardrail transparency.
+- FR-8 Learning loop — complete (added 2026-07-22 at Martin's direction: the app must
+  retain the decisions taken each session and apply them in later sessions).
 
 **Deferred to v1.1+:** FR-2.7 read-aloud; FR-6.2 claims board; FR-6.5 readiness
 dashboard; FR-6.6 Shorts planner; FR-6.7 exports; FR-7.2 draft branching; FR-7.7 search.
@@ -269,6 +304,8 @@ full-pipeline V1 and an editor-only V1 were considered and rejected in review.
    panel doing its job).
 5. Topic decisions recorded with brief and reconciliation, with no hand-editing of ledger
    files.
+6. Approved lessons visibly stick: a pattern corrected by an approved lesson stops
+   recurring in later sessions without re-instruction.
 
 ## 9. Resolved decisions (2026-07-22)
 
@@ -276,13 +313,27 @@ full-pipeline V1 and an editor-only V1 were considered and rejected in review.
 2. **Topic runs:** full in-app run UI in V1.
 3. **Read-aloud / TTS:** deferred beyond V1.
 4. **This document** lives at
-   `docs/superpowers/specs/2026-07-22-script-creator-requirements.md`. The technical
-   design — framework, persistence, local-agent transport, exact data contract, UI
-   design — remains deferred to its own design cycle, per the 2026-07-22 "Keep script
-   workflows ready for a local editing workbench" ledger entry.
+   `docs/superpowers/specs/2026-07-22-script-creator-requirements.md`. At acceptance
+   time the technical design was deferred to its own design cycle per the 2026-07-22
+   "Keep script workflows ready for a local editing workbench" ledger entry; that design
+   was completed and accepted later the same day — see decisions 5–9 below and the
+   [technical design](2026-07-22-script-creator-technical-design.md).
+5. **Frontend framework:** Angular, matching Martin's maintained stack; the editor core
+   is framework-agnostic ProseMirror either way.
+6. **Repository layout:** `whp-youtube/topics/`, `whp-youtube/topic-runs/`, and
+   `whp-youtube/PIPELINE.md` are approved additions.
+7. **Validator:** a backward-compatible `--json` diagnostic mode is added to
+   `validate_annotated_script.py` itself, test-first; validation rules are never
+   reproduced in the app.
+8. **Guyditor:** future handoff target only; V1 adopts the three cheap boundary
+   constraints and defers all integration (see later-version candidates).
+9. **Learning loop:** FR-8 added as a V1 must-have; durable lessons flow through the
+   repository's canonical reconcile path, never an app-owned prompt layer.
 
 ## 10. Next step
 
-A separate technical design for the V1 scope: app framework, local-agent transport,
-persistence, the operation data contract with the skills, and UI design. No application
-code is scaffolded before that design is accepted.
+The technical design for the V1 scope is accepted:
+[2026-07-22-script-creator-technical-design.md](2026-07-22-script-creator-technical-design.md).
+Next is the implementation plan (spikes first: agent-transport durability, then editor
+range identity), followed by V1 implementation. No application code is scaffolded before
+the plan is accepted.
