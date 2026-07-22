@@ -3,7 +3,7 @@
 ## Contents
 
 - [Start with the promise and payoff](#start-with-the-promise-and-payoff)
-- [Generate and score three opening candidates](#generate-and-score-three-opening-candidates)
+- [Compare and score three opening candidates](#compare-and-score-three-opening-candidates)
 - [Build scenes without invention](#build-scenes-without-invention)
 - [Choose story only when it serves the promise](#choose-story-only-when-it-serves-the-promise)
 - [Build a narrative spine from changed understanding](#build-a-narrative-spine-from-changed-understanding)
@@ -31,7 +31,11 @@ Require all five to describe the same video. State the useful change in how the
 viewer will see or act. Do not begin with an interesting scene that cannot lead
 directly to that change.
 
-## Generate and score three opening candidates
+## Compare and score three opening candidates
+
+Use this three-candidate comparison only in Phase 2 or when Martin explicitly requests
+opening options or a scored comparison. In Phase 1, generate the single requested opening
+unless Martin asks for alternatives.
 
 Generate exactly three credible candidates before choosing the opening. Use a
 micro-story, direct demonstration, question, explanation, or evidence reveal as the

@@ -344,6 +344,167 @@ class SkillPackageTests(unittest.TestCase):
                     rf"\[[^\]\n]+;[^\]\n]+;[^\]\n]+\]",
                 )
 
+    def test_rapid_mode_is_the_default_and_skips_production_overhead(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        contracts = (
+            "Default to Phase 1 for ideas, openings, hooks, rough drafts, short "
+            "narration, humor or voice passes, and scoped refinement.",
+            "Return the requested artifact directly.",
+            "Do not perform web research, write an assignment contract or evidence "
+            "packet, force three opening candidates, create annotated-script "
+            "scaffolding, plan visuals or rights, run the production rubric, or invoke "
+            "the validator unless Martin explicitly asks for that work.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, skill)
+
+    def test_rapid_mode_defers_verification_without_permitting_fabrication(
+        self,
+    ) -> None:
+        rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
+        self.assertTrue(rapid_path.is_file())
+        rapid = " ".join(rapid_path.read_text(encoding="utf-8").split())
+        self.assertIn("Deferred verification permits speed, never fabrication.", rapid)
+        for factual_atom in (
+            "date",
+            "person",
+            "experiment",
+            "quotation",
+            "chronology",
+            "motive",
+            "mechanism",
+        ):
+            with self.subTest(factual_atom=factual_atom):
+                self.assertIn(factual_atom, rapid)
+        self.assertIn(
+            "Omit unavailable specificity or write around it; do not fill the gap.",
+            rapid,
+        )
+
+    def test_rapid_operations_are_independent_and_selection_scoped(self) -> None:
+        rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
+        self.assertTrue(rapid_path.is_file())
+        rapid = " ".join(
+            rapid_path.read_text(encoding="utf-8").split()
+        )
+        for heading in (
+            "### Generate",
+            "### Review",
+            "### Rewrite selection",
+            "### Generate alternatives",
+            "### Promote",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, rapid)
+        contracts = (
+            "Return findings only; do not rewrite the supplied text.",
+            "Return only the replacement for the supplied selection unless Martin "
+            "requests commentary.",
+            "Keep the source selection unchanged and return clearly separated, "
+            "genuinely distinct choices for the same narrative job.",
+            "Do not depend on hidden conversational state.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
+    def test_selected_topic_brief_is_consumed_without_rerunning_ideation(self) -> None:
+        rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
+        self.assertTrue(rapid_path.is_file())
+        rapid = " ".join(
+            rapid_path.read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "Treat a supplied selected topic brief as the handoff from topic "
+            "selection; do not rerun topic ideation unless Martin explicitly asks.",
+            rapid,
+        )
+        for field in (
+            "topic and angle",
+            "audience",
+            "title and thumbnail promise",
+            "core tension or open question",
+            "by-end viewer promise",
+            "intended payoff",
+            "factual anchors",
+            "important unknowns",
+        ):
+            with self.subTest(field=field):
+                self.assertIn(field, rapid)
+
+    def test_rapid_hook_contract_includes_question_relevance_and_promise(self) -> None:
+        rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
+        self.assertTrue(rapid_path.is_file())
+        rapid = " ".join(
+            rapid_path.read_text(encoding="utf-8").split()
+        )
+        hook = (
+            "event → joke → paradox → meaning → consequential question → viewer "
+            "relevance → by-end promise"
+        )
+        self.assertIn(hook, rapid)
+        for contract in (
+            "Open with a concrete event",
+            "State the big question",
+            "Connect the problem to the viewer",
+            "Promise what the viewer will understand, recognize, identify, or be able "
+            "to do by the end",
+            "Follow every non-obvious abstraction with a concrete example, image, or "
+            "consequence",
+            "Demonstrate the pattern before naming the concept",
+            "Push mechanism-derived humor to the stronger second or third beat",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
+    def test_creative_approval_gate_precedes_production(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        gate = (
+            "Remain in Phase 1 until Martin explicitly approves the premise, voice, "
+            "hook, and story direction or directly requests evidence-backed "
+            "finalization."
+        )
+        preserve = (
+            "Preserve the approved prototype as the voice baseline; research may "
+            "narrow claims but must not silently replace its structure or personality."
+        )
+        self.assertIn(gate, skill)
+        self.assertIn(preserve, skill)
+        self.assertLess(
+            skill.index(gate),
+            skill.index("## Phase 2 — Evidence and production"),
+        )
+
+    def test_phase_two_keeps_existing_production_resources(self) -> None:
+        skill = SKILL_MD.read_text(encoding="utf-8")
+        for resource in (
+            "references/story-and-hook-method.md",
+            "references/research-and-rights.md",
+            "references/annotated-script-format.md",
+            "assets/annotated-script-template.md",
+            "references/quality-rubric.md",
+            "scripts/validate_annotated_script.py",
+        ):
+            with self.subTest(resource=resource):
+                self.assertIn(resource, skill)
+
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        self.assertIn(
+            "Use this three-candidate comparison only in Phase 2 or when Martin "
+            "explicitly requests opening options or a scored comparison.",
+            story,
+        )
+        self.assertIn(
+            "In Phase 1, generate the single requested opening unless Martin asks for "
+            "alternatives.",
+            story,
+        )
+
     def test_required_package_files_exist(self) -> None:
         required = {
             "SKILL.md",
@@ -351,6 +512,7 @@ class SkillPackageTests(unittest.TestCase):
             "assets/annotated-script-template.md",
             "references/annotated-script-format.md",
             "references/quality-rubric.md",
+            "references/rapid-prototyping.md",
             "references/research-and-rights.md",
             "references/story-and-hook-method.md",
             "scripts/validate_annotated_script.py",
@@ -360,9 +522,10 @@ class SkillPackageTests(unittest.TestCase):
         expected_openai = (
             b"interface:\n"
             b'  display_name: "WHP YouTube Script Writer"\n'
-            b'  short_description: "Write rigorous, production-annotated WHP scripts"\n'
-            b'  default_prompt: "Use $writing-whp-youtube-scripts to develop a '
-            b'story-led, source-audited Why Humans Play episode script."\n'
+            b'  short_description: "Prototype and finalize compelling WHP scripts"\n'
+            b'  default_prompt: "Use $writing-whp-youtube-scripts to rapidly '
+            b'prototype, refine, or production-finalize a Why Humans Play episode '
+            b'script."\n'
         )
         self.assertEqual(
             (SKILL_ROOT / "agents" / "openai.yaml").read_bytes(),
@@ -437,6 +600,7 @@ class SkillPackageTests(unittest.TestCase):
             if "://" not in target and not target.startswith("#")
         ]
         expected = [
+            "references/rapid-prototyping.md",
             "references/story-and-hook-method.md",
             "references/research-and-rights.md",
             "references/annotated-script-format.md",
