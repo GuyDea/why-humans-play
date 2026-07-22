@@ -151,3 +151,24 @@ without duplicating the editorial workflow outside the skills.
 ledger. No application files were created. `BRAND.md` and `CLAUDE.md` needed no change
 because this is an internal authoring workflow, not a new portfolio product or a change to
 the repository authority chain.
+
+## 2026-07-22 — Accept Script Creator business requirements
+
+**Decision:** Accept the Script Creator business requirements at
+`docs/superpowers/specs/2026-07-22-script-creator-requirements.md`: V1 is prototyping-first
+with a full topic-selection run UI, complete selection-scoped editing, first-class passage
+variations, and the creative approval gate with promotion; read-aloud support and the
+deeper production-phase UI are deferred, and the app's framework, persistence, agent
+transport, exact data contract, and UI design remain deferred to a separate technical
+design.
+
+**Rationale:** Line-level refinement is the demonstrated bottleneck for the EP1
+replacement narration and topic selection is the immediate next need, so both receive
+first-class V1 support; production-phase depth follows once prototyping proves out, and
+the requirements stay inside the recorded local-workbench boundary so the skills keep
+owning the editorial rules.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-requirements.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change
+because the requirements conform to the recorded workbench boundary and the app remains an
+internal authoring tool, not a portfolio product.
