@@ -1,0 +1,5 @@
+{"type":"thread.started","thread_id":"019f8a93-f1a5-7272-bb27-2c09b892a626"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"Skill descriptions were shortened to fit the 2% skills context budget. Codex can still see every skill, but some descriptions are shorter. Disable unused skills or plugins to leave more room for the rest."}}
+{"type":"item.completed","item":{"id":"item_1","type":"agent_message","text":"OK"}}
+{"type":"turn.completed","usage":{"input_tokens":17766,"cached_input_tokens":6912,"output_tokens":46,"reasoning_output_tokens":39}}
