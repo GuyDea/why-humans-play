@@ -96,6 +96,9 @@ Use either flexible spine:
 - **Event-first:** Open with a concrete event. Say who or what did what and what
   unexpectedly happened, using only supplied factual atoms. Keep mechanism explanation out
   of the first beat.
+- For a research-event opening, include the supplied or verified year and responsible
+  institution or team when available. Do not replace a known attribution with generic
+  ‘scientists’ or invent a university, city, or lab.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
 - State the paradox in plain language only as far as the supplied facts support. When the
   causal link is unavailable, ask whether the visible result exposed a scoring mismatch
@@ -107,6 +110,10 @@ Use either flexible spine:
   choice, institution, game, or AI conversation.
 - **Promise what the viewer will understand, recognize, identify, or be able to do by the
   end.** A vague tease such as “it gets stranger” is not a viewer promise.
+
+Write the by-end promise as a literal learning contract. Keep jokes, comic images,
+metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
+promise, but it must not complicate what the viewer will learn.
 
 For every generated episode opening or full narration, state the by-end promise inside the
 opening; a later takeaway does not substitute for it.
@@ -171,15 +178,16 @@ narration.
 
 ## Compact worked example
 
-Assume a supplied brief establishes only this factual spine: in 2018, researchers ran an AI
-block-stacking experiment; the AI flipped a block instead of completing the intended stack
-and still received reward.
+Assume a supplied brief establishes only this factual spine: in 2017, researchers at
+DeepMind reported an AI block-stacking experiment; the AI flipped a block instead of
+completing the intended stack and still received reward.
 
 The supplied facts establish the outcome mismatch, not its mechanism.
 
 > How can an AI receive a reward—and still leave the intended job unfinished?
 >
-> In 2018, researchers gave an AI a simple job. Put one block on top of another.
+> In 2017, researchers at DeepMind reported a strange AI failure. They had given the AI a
+> simple job: put one block on top of another.
 >
 > The AI flipped the block, took the reward, and left the intended stack unfinished. Some
 > AIs just want to see the world burn—this one got rewarded before the furniture was even
@@ -187,8 +195,8 @@ The supplied facts establish the outcome mismatch, not its mechanism.
 >
 > Funny. But those facts leave a serious question: if an AI can receive a reward without
 > completing the intended task, how often can a polished AI answer solve the sentence you
-> typed while quietly missing the thing you meant? By the end, you will know how to
-> recognize that gap before fluent confidence hides it.
+> typed while quietly missing the thing you meant? By the end, you will know four questions
+> for checking whether an AI answer actually solved your problem.
 
 The example demonstrates structure, not an independently verified source. Do not carry its
 year or event into another script unless the user's brief or the evidence phase supplies it.
@@ -201,11 +209,14 @@ Before returning rapid work, check internally:
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
 - Do the first two spoken sentences each carry one idea in plain syntax?
+- Does a research-event opening use the known year and institution without inventing a
+  location or affiliation?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?
 - Does it promise what the viewer will gain by the end?
+- Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does each substantial abstraction receive a concrete example?
 - Does the AI–human or game–human connection appear early enough?
 - Would the copy sound natural aloud?
@@ -221,6 +232,7 @@ Keep this audit internal unless Martin asks to see it.
 - Returning three drafts when one was requested.
 - Naming a concept before making its pattern visible.
 - Adding jokes that could be removed without changing the explanation.
+- Putting a punchline or colorful metaphor inside the by-end learning promise.
 - Replacing accepted copy outside the selected scope.
 - Mistaking approval of one line for approval of the creative direction.
 - Dragging assignment contracts, ledgers, visual plans, or validator output into Phase 1.

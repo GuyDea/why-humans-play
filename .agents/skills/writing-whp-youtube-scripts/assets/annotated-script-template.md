@@ -58,7 +58,10 @@ bee's motives.
 - **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
 
 ### Claims
-- `F-001` — Ball rolling without a food reward met the study's play criteria (`VERIFIED`).
+- `F-001` — Supports narration: “In a 2022 experiment, bumblebees had an unobstructed
+  path to food. Some detoured into an object area, contacted wooden balls, and rolled them
+  repeatedly without a food reward. The researchers said this met their operational play
+  criteria.” — `VERIFIED`.
 
 ### Visual
 - Use the paper's experimental-layout figure as `A-001`.

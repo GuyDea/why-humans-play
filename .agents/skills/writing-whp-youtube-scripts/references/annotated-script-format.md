@@ -99,7 +99,7 @@ _Time: 00:00–00:18 · Target: ~42 words_
 What changes for the viewer and which promise or question this serves.
 
 ### Claims
-- `F-001` — Short claim label and confidence status.
+- `F-001` — Supports narration: “Exact factual wording from this beat.” — confidence status.
 
 ### Visual
 - Treatment and `A-001` asset reference.
@@ -125,6 +125,14 @@ choice to use no additional element. Under `Motion / edit`, include either a
 non-empty `**Animation purpose:**` field or an explicit `No animation — ...`
 explanation. State what motion clarifies; do not use animation as an unsupported
 decorative instruction.
+
+Map every factual narration sentence or separable factual clause to at least one `F-###` ID
+in the adjacent `### Claims` section. Quote the supported narration wording in each
+beat-level claim entry so the source mapping stays visible in the script but outside the
+spoken narration. One entry may quote multiple nearby statements only when its evidence
+record supports all of them. Do not assign source markers to jokes, opinions, transitions,
+or clearly signaled hypotheticals merely to make the section look complete. This semantic
+coverage remains a human audit; the structural validator does not prove it.
 
 Place each required or optional structured block in the beat where it performs its
 narrative job. Use these exact schemas:

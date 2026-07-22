@@ -40,6 +40,11 @@ rights findings.
 6. Assign one confidence status before drafting narration.
 7. Use only the approved wording or a weaker formulation.
 
+Map every factual narration sentence or separable factual clause to at least one `F-###` ID
+in the adjacent `### Claims` section. A single ID may cover multiple nearby statements only
+when its evidence record supports each one. Jokes, opinions, transitions, and clearly
+signaled hypotheticals do not need invented source markers.
+
 Record the precise page, table, figure, section, paragraph, or timestamp where
 available, and check chronology separately when comparing retellings.
 
@@ -118,6 +123,10 @@ the discrepancy against the origin before drafting.
 
 Before finalizing, reverse-audit every narrated material claim against its evidence
 record.
+
+Before the word-for-word checks, confirm that every factual narration sentence or separable
+factual clause has an adjacent beat-level `F-###` mapping. Treat an unmapped factual
+statement as unresolved even when its source exists elsewhere in the document.
 
 1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and
    `Approved wording`. Retain every limiting scope or modal term; if it does not fit,

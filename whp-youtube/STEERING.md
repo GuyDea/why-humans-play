@@ -137,10 +137,15 @@ These are laws, not suggestions. They apply to every WHP video forever.
   syntax, and replace technical compound phrases with simpler words when meaning survives.
   Do not spend either sentence on a technical setup label. State the human-readable premise
   first; hold experimental qualifiers and mechanism detail until after the hook.
+- **Make research events sound real because they are specific.** When supplied or verified,
+  name the year and responsible institution or team in the opening. Do not flatten a known
+  attribution into generic “scientists,” and never invent a university, city, or lab.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
-  to do by the end. A generic "keep watching" tease is not a viewer promise.
+  to do by the end. A generic "keep watching" tease is not a viewer promise. Write the
+  promise itself as a literal learning contract: keep jokes, comic images, metaphors, and
+  colorful callbacks out of that sentence even when humor surrounds it.
 - **The Vsauce template `[verified]` (steal this exact shape):** question → concrete
   absurdity reframe ("games are weird — why would I invite a goalie to make scoring
   *harder*?") → intellectual anchor (a named idea / researcher). It lands the hook in
@@ -224,6 +229,10 @@ millions on junk science).
 - **Literal and grounded.** Play, intellect, learning, game theory, the human condition.
   **No consciousness / "woo" / spirituality drift. Ever.**
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
+- **Keep facts traceable inside the production script.** In Phase 2, map every factual
+  narration sentence or separable factual clause to an adjacent `F-###` claim entry that
+  quotes the supported wording. Keep those source markers out of spoken narration and out
+  of initial rapid prototypes unless Martin explicitly requests them.
 - **Model the caveat.** When the evidence is soft, say so. The gold-standard move is the
   *equifinality* beat Vsauce used: "juvenile rats deprived of play grew smaller, less
   developed brains — *but* the evidence doesn't prove play is *vital*; exercise or teaching

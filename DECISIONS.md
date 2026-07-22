@@ -171,3 +171,40 @@ remaining supportable by the episode's score-versus-goal argument.
 ledger. `BRAND.md` and `CLAUDE.md` already state the correct doctrine and authority chain.
 The active Episode 1 production scaffold remains unchanged because its narration is
 creatively superseded.
+
+## 2026-07-22 — Keep the viewer promise literal
+
+**Decision:** The by-end learning promise in a WHP opening must state plainly and
+specifically what the viewer will learn; jokes, comic images, metaphors, and colorful
+callbacks stay outside the promise sentence even when humor surrounds it.
+
+**Rationale:** A comic phrase such as “before fluent nonsense walks out wearing a tie”
+made the learning pitch less direct. The pitch must be clear without convolution.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`, and this
+ledger. `BRAND.md`, `CLAUDE.md`, and the superseded Episode 1 production scaffold remain
+unchanged because this decision concerns rapid-script phrasing rather than brand doctrine,
+the authority chain, or the old production narration.
+
+## 2026-07-22 — Make research events specific and final facts traceable
+
+**Decision:** A research-event opening names the supplied or verified year and responsible
+institution or team when available, without inventing a university or location; Phase 2
+maps every factual narration statement to an adjacent, non-spoken `F-###` source entry,
+while initial rapid prototypes remain free of citation markup unless explicitly requested.
+
+**Rationale:** A dated, attributed event sounds like something that actually happened, and
+every factual statement in the final production script should be directly traceable without
+turning the narration into a citation readout.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/research-and-rights.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`, and
+this ledger. `BRAND.md`, `CLAUDE.md`, and the superseded Episode 1 production scaffold remain
+unchanged because the decision refines script attribution and evidence annotation without
+changing brand doctrine, repository authority, or the old production narration.

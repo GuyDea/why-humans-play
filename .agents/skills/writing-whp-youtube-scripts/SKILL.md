@@ -60,6 +60,8 @@ specificity to make a draft sound authoritative. Preserve accepted language and 
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+Do not add these source markers to Phase 1 prototypes unless Martin explicitly asks.
+
 ## Creative approval gate
 
 Remain in Phase 1 until Martin explicitly approves the premise, voice, hook, and story
@@ -77,7 +79,9 @@ For evidence-backed finalization:
    `Deliverable`, `Useful viewer change`, scope, runtime, constraints, and payoff.
 2. Extract the material claims from the approved prototype. Build the evidence packet,
    assign confidence to every material claim, and approve only wording its evidence
-   supports. Narrow or remove unsupported wording while preserving the approved voice.
+   supports. Narrow or remove unsupported wording while preserving the approved voice. Map
+   every factual narration sentence or separable factual clause to at least one `F-###` ID
+   in the adjacent `### Claims` section.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.

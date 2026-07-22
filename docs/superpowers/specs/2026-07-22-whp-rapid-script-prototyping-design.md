@@ -83,6 +83,9 @@ its structure or personality during research.
 Extract the material factual claims from the approved prototype, gather or refresh their
 evidence, and let confidence control the final wording. Remove, narrow, or replace claims
 that cannot be supported while preserving the approved rhythm and point whenever possible.
+Map every factual narration sentence or separable factual clause to an adjacent `F-###`
+claim entry that quotes the supported wording. Keep these source markers outside spoken
+narration and omit them from Phase 1 unless Martin explicitly requests them.
 
 Then expand to the target runtime, add the annotated production structure, resolve personal
 input and viewer application, plan visuals and rights, run the editorial audits, validate
@@ -172,11 +175,16 @@ workbench can capture it without contaminating the script artifact.
    until after the hook. Do not use provocative terms as literal claims of intent unless
    the evidence establishes that state or the narration clearly marks the term as
    shorthand.
+   When a research-event opening has a supplied or verified year and responsible
+   institution or team, name them; do not substitute generic “scientists” or invent a
+   university, city, or lab.
 3. **Build the complete hook.** Move through:
    `event → joke → paradox → meaning → consequential question → viewer relevance → by-end promise`
    or `question → event → joke → paradox → meaning → viewer relevance → by-end promise`.
 4. **Promise an answer.** State what the viewer will understand, recognize, identify, or
-   be able to do by the end. A generic tease is not a promise.
+   be able to do by the end. A generic tease is not a promise. Write the promise itself as
+   a literal learning contract, with no joke, comic image, metaphor, or colorful callback
+   inside that sentence; humor may surround it without complicating the takeaway.
 5. **Make the human connection early.** Do not postpone why the idea matters in ordinary
    behavior or AI use.
 6. **Concretize every non-obvious claim.** Follow an abstraction with an example, image,
@@ -207,6 +215,9 @@ Before returning a prototype or refinement, check only:
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?
 - Does it promise what the viewer will gain by the end?
+- Is the by-end promise literal, specific, and free of jokes or metaphors?
+- Does a research-event opening name the known year and institution without inventing a
+  location or affiliation?
 - Does each substantial abstraction receive a concrete example?
 - Does the AI–human or game–human connection appear early enough?
 - Would the copy sound natural aloud?
@@ -252,6 +263,10 @@ then pass after implementation.
   by-end promise.
 - Question-first openings ask a supportable question, ground it immediately in the event,
   and keep the first two spoken sentences syntactically simple.
+- Research-event openings use the supplied or verified year and responsible institution or
+  team when available without inventing a location or affiliation.
+- Phase 2 maps every factual narration statement to an adjacent, non-spoken `F-###` claim
+  entry while Phase 1 remains free of source markup by default.
 - Requested iteration telemetry reports per-task elapsed time and runtime token usage when
   exposed, otherwise `unavailable`, without entering the narration.
 - Phase 2 still routes every existing evidence, rights, format, rubric, and validation
@@ -296,8 +311,8 @@ voice baseline.
 - The [evaluation record](../evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md)
   preserves three pre-change baselines, the superseded prompt-contaminated campaign, five
   matched control/skill pairs, observed failures, RED–GREEN refinements, and residual risks.
-- Deterministic verification passes 31 skill-package tests and 81 annotated-script validator
-  tests: 112 tests total.
+- Deterministic verification passes 34 skill-package tests and 81 annotated-script validator
+  tests: 115 tests total.
 - The skill-creator validator passes for both the canonical `.agents` package and its
   `.claude` discovery link. The annotated production template also passes structural
   validation.

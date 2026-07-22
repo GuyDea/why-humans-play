@@ -131,6 +131,11 @@ class SkillPackageTests(unittest.TestCase):
             .read_text(encoding="utf-8")
             .split()
         )
+        template = " ".join(
+            (SKILL_ROOT / "assets/annotated-script-template.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
 
         personal_input_default = (
             "Missing supplied personal material, or a short runtime, is not by itself "
@@ -499,6 +504,80 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_rapid_viewer_promise_is_literal_and_joke_free(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        for contract in (
+            "Write the by-end promise as a literal learning contract.",
+            "Keep jokes, comic images, metaphors, and colorful callbacks out of the "
+            "promise sentence.",
+            "Humor may surround the promise, but it must not complicate what the "
+            "viewer will learn.",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
+    def test_rapid_research_event_names_known_date_and_institution(self) -> None:
+        rapid = " ".join(
+            (
+                SKILL_ROOT / "references/rapid-prototyping.md"
+            ).read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "For a research-event opening, include the supplied or verified year and "
+            "responsible institution or team when available.",
+            rapid,
+        )
+        self.assertIn(
+            "Do not replace a known attribution with generic ‘scientists’ or invent "
+            "a university, city, or lab.",
+            rapid,
+        )
+
+    def test_phase_two_maps_each_factual_statement_to_an_adjacent_source(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        research = " ".join(
+            (SKILL_ROOT / "references/research-and-rights.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        format_text = " ".join(
+            (SKILL_ROOT / "references/annotated-script-format.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        template = " ".join(
+            (SKILL_ROOT / "assets/annotated-script-template.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        contract = (
+            "Map every factual narration sentence or separable factual clause to at "
+            "least one `F-###` ID in the adjacent `### Claims` section."
+        )
+        self.assertIn(contract, skill)
+        self.assertIn(contract, research)
+        self.assertIn(contract, format_text)
+        self.assertIn(
+            "Do not add these source markers to Phase 1 prototypes unless Martin "
+            "explicitly asks.",
+            skill,
+        )
+        self.assertIn(
+            "Quote the supported narration wording in each beat-level claim entry so "
+            "the source mapping stays visible in the script but outside the spoken "
+            "narration.",
+            format_text,
+        )
+        self.assertIn(
+            "Supports narration: “In a 2022 experiment, bumblebees had an "
+            "unobstructed path to food.",
+            template,
+        )
+
     def test_rapid_hook_supports_an_honest_question_first_entry(self) -> None:
         rapid = " ".join(
             (
@@ -637,8 +716,8 @@ class SkillPackageTests(unittest.TestCase):
             )
         )
         self.assertIn(
-            "In 2018, researchers gave an AI a simple job. Put one block on top of "
-            "another.",
+            "In 2017, researchers at DeepMind reported a strange AI failure. They had "
+            "given the AI a simple job: put one block on top of another.",
             spoken_example,
         )
         self.assertNotIn("block-stacking experiment", spoken_example)
