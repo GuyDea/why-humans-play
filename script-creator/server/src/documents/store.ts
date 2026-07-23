@@ -64,7 +64,8 @@ interface NextSequenceRow {
 }
 
 const SCHEMA_VERSION = 2;
-const MIGRATION_V2 = `
+const MAX_SUPPORTED_SCHEMA_VERSION = 3;
+export const MIGRATION_V2 = `
 CREATE TABLE IF NOT EXISTS drafts (
   id TEXT PRIMARY KEY,
   episode_slug TEXT NOT NULL,
@@ -226,9 +227,9 @@ export class DocumentStore {
 
   private migrate(): void {
     const version = this.db.pragma('user_version', { simple: true }) as number;
-    if (version > SCHEMA_VERSION) {
+    if (version > MAX_SUPPORTED_SCHEMA_VERSION) {
       throw new Error(
-        `state database schema version ${version} is newer than supported version ${SCHEMA_VERSION}`,
+        `state database schema version ${version} is newer than supported version ${MAX_SUPPORTED_SCHEMA_VERSION}`,
       );
     }
     if (version < SCHEMA_VERSION) {

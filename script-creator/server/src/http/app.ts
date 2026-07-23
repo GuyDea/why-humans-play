@@ -19,6 +19,7 @@ import {
   InvalidValidatorPathError,
   type ValidatorResult,
 } from '../repo/validator.js';
+import type { TopicService } from '../topics/service.js';
 import {
   hasSseQueryNonce,
   parseFromSeq,
@@ -45,11 +46,25 @@ export interface ValidatorHttpService {
   validate(path: string): Promise<ValidatorResult>;
 }
 
+export type TopicHttpService = Pick<
+  TopicService,
+  | 'createIdea'
+  | 'getIdea'
+  | 'listIdeas'
+  | 'updateIdea'
+  | 'deleteIdea'
+  | 'registerRun'
+  | 'listRuns'
+  | 'getRun'
+  | 'pipeline'
+>;
+
 export interface BuildAppOptions {
   nonce: string;
   staticRoot?: string;
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
+  topicService?: TopicHttpService;
   artifactService: unknown;
   validatorService: ValidatorHttpService;
 }
@@ -69,6 +84,30 @@ interface OperationParams {
 
 interface DraftParams {
   id: string;
+}
+
+interface IdeaParams {
+  id: string;
+}
+
+interface TopicRunParams {
+  id: string;
+}
+
+interface CreateIdeaBody {
+  text?: unknown;
+  source?: unknown;
+  status?: unknown;
+}
+
+interface UpdateIdeaBody {
+  text?: unknown;
+  source?: unknown;
+  status?: unknown;
+}
+
+interface RegisterTopicRunBody {
+  opId?: unknown;
 }
 
 interface CreateDraftBody {
@@ -116,6 +155,7 @@ function isAllowedOrigin(origin: string): boolean {
 
 export function buildApp(options: BuildAppOptions): FastifyInstance {
   const app = Fastify();
+  const topicService = options.topicService ?? UNCONFIGURED_TOPIC_SERVICE;
 
   app.addHook('onRequest', async (request, reply) => {
     const origin = request.headers.origin;
@@ -362,6 +402,121 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  app.post<{ Body: CreateIdeaBody }>(
+    '/api/ideas',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(topicService.createIdea({
+          text: requiredString(request.body?.text, 'text'),
+          source: requiredIdeaSource(request.body?.source),
+          status: request.body?.status === undefined
+            ? undefined
+            : requiredIdeaStatus(request.body.status),
+        }));
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/ideas', async (_request, reply) => {
+    try {
+      return topicService.listIdeas();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
+  app.get<{ Params: IdeaParams }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        return topicService.getIdea(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.patch<{ Params: IdeaParams; Body: UpdateIdeaBody }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        const update: {
+          text?: string;
+          source?: 'inbox' | 'ideate';
+          status?: 'open' | 'promoted' | 'discarded';
+        } = {};
+        if (hasOwn(request.body, 'text')) {
+          update.text = requiredString(request.body.text, 'text');
+        }
+        if (hasOwn(request.body, 'source')) {
+          update.source = requiredIdeaSource(request.body.source);
+        }
+        if (hasOwn(request.body, 'status')) {
+          update.status = requiredIdeaStatus(request.body.status);
+        }
+        return topicService.updateIdea(request.params.id, update);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.delete<{ Params: IdeaParams }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        topicService.deleteIdea(request.params.id);
+        return reply.code(204).send();
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: RegisterTopicRunBody }>(
+    '/api/topic-runs',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(
+          topicService.registerRun(
+            requiredString(request.body?.opId, 'opId'),
+          ),
+        );
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/topic-runs', async (_request, reply) => {
+    try {
+      return topicService.listRuns();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
+  app.get<{ Params: TopicRunParams }>(
+    '/api/topic-runs/:id',
+    async (request, reply) => {
+      try {
+        return topicService.getRun(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/pipeline', async (_request, reply) => {
+    try {
+      return await topicService.pipeline();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
   if (options.staticRoot !== undefined) {
     const staticRoot = resolve(options.staticRoot);
     const serveStatic = (
@@ -475,6 +630,22 @@ function requiredDocument(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
+function requiredIdeaSource(value: unknown): 'inbox' | 'ideate' {
+  if (value !== 'inbox' && value !== 'ideate') {
+    throw new Error('source must be inbox or ideate');
+  }
+  return value;
+}
+
+function requiredIdeaStatus(
+  value: unknown,
+): 'open' | 'promoted' | 'discarded' {
+  if (!['open', 'promoted', 'discarded'].includes(String(value))) {
+    throw new Error('status must be open, promoted, or discarded');
+  }
+  return value as 'open' | 'promoted' | 'discarded';
+}
+
 function waitForStreamDrain(stream: PassThrough): Promise<void> {
   return new Promise((resolve) => {
     if (stream.destroyed) {
@@ -573,3 +744,45 @@ function sendValidatorError(
   reply.log.error({ err: error }, 'validator request failed');
   return reply.code(500).send({ error: 'internal server error' });
 }
+
+function sendTopicError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error ? error.message : 'topic request failed';
+  if (/^(?:idea|topic run|operation) not found:/i.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (isTopicClientError(message)) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'topic request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+function isTopicClientError(message: string): boolean {
+  return [
+    /^(?:text|opId) is required$/,
+    /^source must be inbox or ideate$/,
+    /^status must be open, promoted, or discarded$/,
+    /^idea update is required$/,
+    /^operation .+ is not a full-topic-run$/,
+  ].some((pattern) => pattern.test(message));
+}
+
+const topicNotConfigured = (): never => {
+  throw new Error('topic service is not configured');
+};
+
+const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {
+  createIdea: topicNotConfigured,
+  getIdea: topicNotConfigured,
+  listIdeas: topicNotConfigured,
+  updateIdea: topicNotConfigured,
+  deleteIdea: topicNotConfigured,
+  registerRun: topicNotConfigured,
+  listRuns: topicNotConfigured,
+  getRun: topicNotConfigured,
+  pipeline: topicNotConfigured,
+};

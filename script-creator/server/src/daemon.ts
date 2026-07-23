@@ -29,6 +29,8 @@ import {
 } from './repo/artifacts.js';
 import { runValidatorJson } from './repo/validator.js';
 import { JobSupervisor } from './supervisor.js';
+import { TopicService } from './topics/service.js';
+import { TopicStore } from './topics/store.js';
 import {
   type AppDirEnvironment,
   type AppDirs,
@@ -131,11 +133,13 @@ export function createDaemonContext(
   const nonce = generateNonce();
   const jobStore = new JobStore(stateDbFile);
   let documentStore: DocumentStore | undefined;
+  let topicStore: TopicStore | undefined;
   let supervisor: JobSupervisor | undefined;
   let operationService: OperationService | undefined;
 
   try {
     documentStore = new DocumentStore(stateDbFile);
+    topicStore = new TopicStore(stateDbFile);
     supervisor = new JobSupervisor({
       store: jobStore,
       jobsRoot: dirs.jobsRoot,
@@ -150,11 +154,18 @@ export function createDaemonContext(
     supervisor.reattach();
     operationService.reconcileTimedOutAttempts();
     const documentService = new DocumentService({ store: documentStore });
+    const topicService = new TopicService({
+      store: topicStore,
+      operationService,
+      documentService,
+      repoRoot,
+    });
     const app = buildApp({
       nonce,
       staticRoot: findStaticRoot(repoRoot),
       operationService,
       documentService,
+      topicService,
       artifactService: {
         write: (
           relPath: string,
@@ -172,6 +183,7 @@ export function createDaemonContext(
     });
     const activeSupervisor = supervisor;
     const activeDocumentStore = documentStore;
+    const activeTopicStore = topicStore;
     const activeOperationService = operationService;
 
     let closed = false;
@@ -191,7 +203,11 @@ export function createDaemonContext(
           try {
             await app.close();
           } finally {
-            activeDocumentStore.close();
+            try {
+              activeTopicStore.close();
+            } finally {
+              activeDocumentStore.close();
+            }
           }
         }
       },
@@ -200,6 +216,7 @@ export function createDaemonContext(
     operationService?.dispose();
     if (supervisor) supervisor.stop();
     else jobStore.close();
+    topicStore?.close();
     documentStore?.close();
     throw error;
   }
