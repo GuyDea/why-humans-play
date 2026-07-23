@@ -147,6 +147,7 @@ class TopicClientStub {
     operation: OperationName;
     promise: Promise<void>;
   } | null = null;
+  private blockedIdeaUpdate: Promise<void> | null = null;
   readonly submissions: Submission[] = [];
 
   readonly listIdeas = vi.fn(async () => [...this.ideas]);
@@ -168,6 +169,9 @@ class TopicClientStub {
     id: string,
     input: UpdateIdeaInput,
   ): Promise<IdeaRecord> => {
+    const blocked = this.blockedIdeaUpdate;
+    this.blockedIdeaUpdate = null;
+    if (blocked) await blocked;
     const current = this.ideas.find((idea) => idea.id === id);
     if (!current) throw new Error(`idea not found: ${id}`);
     const updated = { ...current, ...input };
@@ -405,6 +409,14 @@ class TopicClientStub {
     return release;
   }
 
+  pauseNextIdeaUpdate(): () => void {
+    let release = () => undefined;
+    this.blockedIdeaUpdate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    return release;
+  }
+
   setGateOutcome(
     state: OperationRecord['state'],
     result: OperationResult,
@@ -593,6 +605,58 @@ describe('routed Topics composition', () => {
         user_constraints: {},
       },
     });
+  });
+
+  it('renders and persists a completed gate-check from its rendered button', async () => {
+    const client = new TopicClientStub();
+    client.seedIdea({
+      id: 'idea-rendered-gate',
+      text: 'Why chosen difficulty changes effort',
+      source: 'inbox',
+      status: 'open',
+      latestCheck: null,
+      createdAt: '2026-07-23T12:00:00.000Z',
+    });
+    const topics = await mountTopics(client);
+    const card = await waitForCard(
+      topics,
+      'Why chosen difficulty changes effort',
+    );
+    client.updateIdea.mockClear();
+    const releasePersistence = client.pauseNextIdeaUpdate();
+
+    findButton(card, 'Gate-check').click();
+
+    try {
+      await vi.waitFor(() => {
+        topics.tick();
+        const result = card.querySelector(
+          '[data-testid="gate-check-result"]',
+        );
+        expect(result).not.toBeNull();
+        expect(result?.querySelectorAll('[data-testid="gate-chip"]'))
+          .toHaveLength(6);
+        expect(
+          result?.querySelector('[data-testid="gate-verdict"]')?.textContent,
+        ).toContain('pass');
+        expect(client.updateIdea).toHaveBeenCalledTimes(1);
+        expect(client.updateIdea).toHaveBeenCalledWith(
+          'idea-rendered-gate',
+          {
+            latestCheck: {
+              verdict: 'pass',
+              gates: GATES.map((gate) => ({
+                gate,
+                verdict: 'pass',
+                reasonMarkdown: `${gate} has a clear path.`,
+              })),
+            },
+          },
+        );
+      });
+    } finally {
+      releasePersistence();
+    }
   });
 
   it('hydrates the latest persisted gate-check when ideas reload', async () => {

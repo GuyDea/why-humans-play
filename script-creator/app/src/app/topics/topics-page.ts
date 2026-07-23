@@ -859,9 +859,7 @@ export class TopicsPage implements OnInit, OnDestroy {
   >(
     this.client,
     mapStudioConsoleEvents,
-    { onChange: () => this.handleGateTrackerChange() },
   );
-  private readonly settledGateOperations = new Set<GateTrackedOperation>();
   private detachGateRuntime: (() => void) | null = null;
   private calloutSequence = 0;
 
@@ -970,7 +968,7 @@ export class TopicsPage implements OnInit, OnDestroy {
       ...operations,
       [ideaId]: tracked,
     }));
-    this.handleGateTrackerChange();
+    void tracked.completion.then(() => this.settleGateCheck(ideaId, tracked));
   }
 
   protected gatePending(ideaId: string): boolean {
@@ -1082,20 +1080,6 @@ export class TopicsPage implements OnInit, OnDestroy {
       this.addThrownFailure('ideate', error);
     } finally {
       this.ideateBusy.set(false);
-    }
-  }
-
-  private handleGateTrackerChange(): void {
-    for (const [ideaId, tracked] of Object.entries(this.gateOperations())) {
-      if (
-        this.settledGateOperations.has(tracked)
-        || tracked.phase() === 'submitting'
-        || tracked.phase() === 'streaming'
-      ) {
-        continue;
-      }
-      this.settledGateOperations.add(tracked);
-      void this.settleGateCheck(ideaId, tracked);
     }
   }
 
