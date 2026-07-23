@@ -130,6 +130,10 @@ REFERENCES_HEADING_RE = re.compile(
     r"^## References and source materials\s*$", re.MULTILINE
 )
 REFERENCE_ID_RE = re.compile(r"`([FA]-\d{3})`")
+INLINE_EVIDENCE_LINK_RE = re.compile(
+    r"[ \t]*\[(?P<record_id>F-\d{3})\]"
+    r"\((?P<url>https?://[^)\s]+)\)"
+)
 RECORD_HEADING_RE = re.compile(r"^#### ([FA]-\d{3})(?:\s|$)", re.MULTILINE)
 LEVEL_THREE_HEADING_RE = re.compile(
     r"^### ([^#\r\n].*?)[ \t]*$", re.MULTILINE
@@ -544,7 +548,8 @@ def _extract_narration_from_masked(masked_text: str) -> str:
                     current = []
                 continue
             quoted = match.group(1)
-            spoken = PERSONAL_MARKER_RE.sub("", quoted).strip()
+            spoken = PERSONAL_MARKER_RE.sub("", quoted)
+            spoken = INLINE_EVIDENCE_LINK_RE.sub("", spoken).strip()
             if spoken:
                 current.append(spoken)
             elif not PERSONAL_MARKER_RE.search(quoted) and current:
@@ -556,7 +561,9 @@ def _extract_narration_from_masked(masked_text: str) -> str:
 
 
 def extract_narration(text: str) -> str:
-    """Return spoken blockquote copy under Narration headings, without input markers."""
+    """Return spoken blockquote copy without review-only personal-input markers
+    or inline evidence indicators.
+    """
 
     masked = _mask_fenced_blocks(text)
     if APPENDIX_HEADING_RE.search(masked):

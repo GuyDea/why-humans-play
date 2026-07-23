@@ -215,7 +215,7 @@ _Time: 00:00–00:30 · Target: ~80 words_
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
 > food reward. The researchers said this met their operational play criteria. That
-> does not tell us what a bee feels—but makes the detour hard to dismiss.
+> does not tell us what a bee feels—but makes the detour hard to dismiss. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
 > <!-- PI-001: Martin input -->
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
@@ -490,14 +490,7 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn(LIMITATION_SENTENCE, result.stdout)
 
     def test_fixture_narration_count_matches_metadata(self) -> None:
-        narration = extract_exact(BEAT_BLOCK, "### Narration\n", "\n### Story function")
-        words = [
-            word
-            for line in narration.splitlines()
-            if line.startswith("> ") and "<!--" not in line
-            for word in line.removeprefix("> ").split()
-        ]
-        self.assertEqual(len(words), 80)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
         self.assertIn("- **Target runtime:** 00:30", HEADER_BLOCK)
         self.assertIn("- **Word count:** 80", HEADER_BLOCK)
         self.assertIn("_Time: 00:00–00:30 · Target: ~80 words_", BEAT_BLOCK)
@@ -916,6 +909,23 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotIn("PI-001", narration)
         self.assertNotIn("<!--", narration)
         self.assertEqual(count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_inline_evidence_indicator_is_excluded_from_narration_and_word_count(
+        self,
+    ) -> None:
+        narration = validator.extract_narration(VALID_DOCUMENT)
+        self.assertNotIn("[F-001]", narration)
+        self.assertNotIn("10.1016/j.anbehav.2022.08.013", narration)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_ordinary_markdown_link_is_not_removed_as_evidence_metadata(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "Those clues can sharpen the question",
+            "See [the ordinary link](https://example.org/guide). Those clues can sharpen the question",
+        )
+        narration = validator.extract_narration(document)
+        self.assertIn("[the ordinary link](https://example.org/guide)", narration)
 
     def test_duplicate_personal_markers_are_rejected(self) -> None:
         marker = "> <!-- PI-001: Martin input -->\n"
