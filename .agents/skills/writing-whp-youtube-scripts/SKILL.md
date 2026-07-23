@@ -73,6 +73,13 @@ ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson. Sc
 on existing narration does not require rebuilding the architecture unless the requested
 change alters the episode's central message.
 
+An architecture cannot be approved unless it contains both a non-obvious understanding
+and a concrete, evidence-bounded viewer response with an observable result. Check the
+complete transformation explicitly: `Before, I thought X. Now, I understand Y. Next time,
+I will do Z. I will know it helped when I observe W.` Preserve that approved
+learning-and-action contract when drafting the opening promise, explanation, viewer
+application, and final lesson.
+
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
 case, label a hypothetical clearly instead of making one sound historical.
@@ -102,6 +109,11 @@ For episode-scale work without an approved architecture, return only the archite
 artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
 Positive feedback on one insight, example, phenomenon, or reframe does not approve the
 complete architecture.
+
+Do not approve a familiar summary with generic advice attached. The non-obvious
+understanding must revise the viewer's prior model, and the response must name a relevant
+situation, a concrete decision rule or sequence, an observable result, a real boundary,
+and at least one transfer case.
 
 Architecture approval authorizes beat ordering and narration prototyping, not evidence
 production. Preserve the approved architecture as the message baseline during prose
@@ -172,6 +184,9 @@ For evidence-backed finalization:
   evidence-bounded insight; low-risk action, observation, or reflection; observable signal;
   real boundary; and larger benefit. The structured block does not substitute for spoken
   copy.
+- Preserve the approved learning-and-action contract from architecture through the
+  opening promise, explanation, viewer application, and final lesson; do not replace it
+  with generic caution or an unrelated checklist.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique
   image.

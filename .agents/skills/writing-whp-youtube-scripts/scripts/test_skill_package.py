@@ -435,6 +435,88 @@ class SkillPackageTests(unittest.TestCase):
             normalized,
         )
 
+    def test_architecture_requires_a_new_learning_and_concrete_action_contract(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "architecture": " ".join(
+                ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+            ),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "rubric": " ".join(
+                (SKILL_ROOT / "references/quality-rubric.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+
+        gate = (
+            "An architecture cannot be approved unless it contains both a non-obvious "
+            "understanding and a concrete, evidence-bounded viewer response with an "
+            "observable result."
+        )
+        for source_name in ("skill", "architecture"):
+            with self.subTest(source=source_name, contract="approval-gate"):
+                self.assertIn(gate, sources[source_name])
+
+        self.assertIn("### Learning and action contract", sources["architecture"])
+        for field in (
+            "**New understanding:**",
+            "**Prior model revised:**",
+            "**Concrete response:**",
+            "**Decision rule or sequence:**",
+            "**Observable result:**",
+            "**Boundary:**",
+            "**Transfer:**",
+        ):
+            with self.subTest(field=field):
+                self.assertIn(field, sources["architecture"])
+
+        transformation = (
+            "Before, I thought X. Now, I understand Y. Next time, I will do Z. I will "
+            "know it helped when I observe W."
+        )
+        for source_name in ("skill", "architecture"):
+            with self.subTest(source=source_name, contract="transformation"):
+                self.assertIn(transformation, sources[source_name])
+
+        vague_payoff = (
+            "`Be careful`, `think critically`, `ask better questions`, and a loose "
+            "checklist without a decision rule, sequence, or observable result do not "
+            "pass."
+        )
+        for source_name in ("architecture", "rapid", "rubric"):
+            with self.subTest(source=source_name, contract="vague-payoff"):
+                self.assertIn(vague_payoff, sources[source_name])
+
+        self.assertIn(
+            "Carry the approved learning-and-action contract into the opening promise, "
+            "explanation, viewer application, and final lesson.",
+            sources["rapid"],
+        )
+        self.assertIn(
+            "The narration must teach the new model before asking the viewer to use "
+            "the response.",
+            sources["rapid"],
+        )
+        self.assertIn(
+            "Full credit requires the finished script to preserve the approved "
+            "situation, decision rule or sequence, observable result, boundary, and "
+            "transfer case.",
+            sources["rubric"],
+        )
+        self.assertIn(
+            "Compare the finished payoff with the approved learning-and-action "
+            "contract: preserve the named situation, decision rule or sequence, "
+            "observable result, boundary, and transfer case.",
+            sources["rubric"],
+        )
+
     def test_architecture_requires_an_earned_deeper_insight(self) -> None:
         architecture = " ".join(
             ARCHITECTURE_MD.read_text(encoding="utf-8").split()

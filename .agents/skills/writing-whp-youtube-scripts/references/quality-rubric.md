@@ -47,11 +47,16 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 ### 1. Title, thumbnail, opening, and payoff alignment
 
 - **0:** The opening pursues a different question, the packaging promise is hidden or
-  misleading, or the payoff does not resolve it.
+  misleading, or the payoff does not resolve it. The work also scores 0 when it supplies
+  either a familiar summary with no new model or an action list that does not follow from
+  the episode's mechanism.
 - **1:** The components address the same topic, but the viewer promise is delayed,
   vague, overbroad, or only partially paid off.
 - **2:** The title, thumbnail promise, opening question, central answer, and final
-  payoff create one clear and explicitly resolved contract.
+  payoff create one clear and explicitly resolved contract. The payoff teaches the
+  approved non-obvious understanding and carries it into a concrete, observable, bounded
+  viewer response. Full credit requires the finished script to preserve the approved
+  situation, decision rule or sequence, observable result, boundary, and transfer case.
 
 ### 2. Factual precision and status-matched wording
 
@@ -152,6 +157,11 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   viewer application is in scope, its voiced application, observable signal, boundary,
   and larger benefit form part of that same payoff.
 
+Across dimensions 1 and 10, `Be careful`, `think critically`, `ask better questions`, and
+a loose checklist without a decision rule, sequence, or observable result do not pass.
+Require both a non-obvious understanding that revises the viewer's prior model and a
+concrete response that follows from the mechanism.
+
 ## Enforce readiness gates
 
 Apply score and gate requirements separately. Use these promotion gates only for a
@@ -223,6 +233,9 @@ chains under the status thresholds, and require stable source-native locators.
 1. **Promise and payoff:** Compare title, thumbnail, first seconds, central question,
    useful viewer change, and final answer word for word. When application is in scope,
    also compare its voiced application, observable signal, boundary, and larger benefit.
+   Compare the finished payoff with the approved learning-and-action contract: preserve
+   the named situation, decision rule or sequence, observable result, boundary, and
+   transfer case.
 2. **Factual wording and confidence:** Compare every narrated material claim word for
    word with its exact claim, approved wording, status, scope, and caveat. Retain every
    limiting scope or modal term, or weaken the narration. When application is in scope,

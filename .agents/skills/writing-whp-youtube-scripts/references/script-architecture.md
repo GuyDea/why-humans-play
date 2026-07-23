@@ -29,7 +29,8 @@ turn. Wait for Martin to refine and explicitly approve the architecture.
 When an approved architecture is visible in the supplied context, use it as the content
 baseline for beat ordering and narration. Preserve its central question, core answer,
 belief shift, insight ladder, earned reframe, boundaries, payoff, and final lesson. Do not
-smuggle in a new thesis because it creates an attractive anecdote or joke.
+smuggle in a new thesis because it creates an attractive anecdote or joke. Preserve its
+learning-and-action contract as part of that baseline.
 
 For a scoped review, rewrite, or alternatives request against existing narration, operate
 on the supplied selection. Rebuild the architecture only when Martin asks or when the
@@ -130,10 +131,37 @@ Prefer examples from different regions when this improves scope and surprise. Do
 research or invent missing specificity during ordinary rapid architecture work; mark what
 the later evidence pass must verify.
 
+### Learning and action contract
+
+An architecture cannot be approved unless it contains both a non-obvious understanding
+and a concrete, evidence-bounded viewer response with an observable result.
+
+- **New understanding:** State the non-obvious model or reframe the viewer will learn.
+- **Prior model revised:** Name the reasonable familiar belief that this understanding
+  corrects, complicates, or replaces.
+- **Concrete response:** Name the action, observation, or reflection the viewer can use
+  in one relevant situation.
+- **Decision rule or sequence:** Give enough order and specificity for the viewer to
+  perform the response rather than merely agree with it.
+- **Observable result:** State what the viewer should notice if the response helps.
+- **Boundary:** State what the response does not prove, prevent, or solve.
+- **Transfer:** Name at least one different situation in which the same model and response
+  remain useful.
+
+Complete this acceptance test in plain language:
+
+`Before, I thought X. Now, I understand Y. Next time, I will do Z. I will know it helped when I observe W.`
+
+The response can be an action, observation, or reflection, but it must follow from the
+mechanism and remain no stronger than the evidence. `Be careful`, `think critically`,
+`ask better questions`, and a loose checklist without a decision rule, sequence, or
+observable result do not pass.
+
 ### Practical payoff
 
-State what the viewer will be able to recognize, question, decide, or do differently.
-Derive it from the mechanism rather than attaching generic advice.
+Compress the learning-and-action contract into one memorable rule, method, or changed
+choice. State what the viewer will be able to recognize, question, decide, or do
+differently. Derive it from the mechanism rather than attaching generic advice.
 
 ### Final lesson
 
@@ -155,7 +183,9 @@ Review the architecture without drafting around its weaknesses:
 - Does each example prove its assigned claim rather than merely decorate it?
 - Does the phenomenon map clarify the argument instead of displaying terminology?
 - Does the reframe change interpretation or prediction beyond the opening case?
-- Does the practical payoff follow from the reframe?
+- Does the learning-and-action contract revise a prior model and produce one concrete,
+  observable, bounded response?
+- Does the practical payoff compress that contract without weakening it?
 - Does the final lesson answer the central question?
 
 When Martin targets one field, revise only that field unless its change creates a visible
@@ -167,6 +197,10 @@ rewriting the rest.
 Treat architecture approval as a separate gate from later creative approval of the complete
 narration. Approval of a topic, title, isolated insight, individual example, or earlier
 script does not approve the architecture.
+
+Reject the architecture when either half of the learning-and-action contract is missing.
+A novel idea with no usable response is incomplete; an actionable checklist with no new
+understanding is generic self-help rather than a WHP payload.
 
 After presenting or revising the complete architecture, stop and wait. Proceed to beat
 ordering, hook writing, and narration only after Martin explicitly approves the architecture
@@ -181,6 +215,8 @@ answer, insight ladder, earned reframe, practical payoff, or final lesson.
 - Drafting a polished opening before the central answer is approved.
 - Treating a beat outline as message architecture.
 - Producing a generic topic summary with no earned reframe.
+- Producing a surprising reframe with no concrete viewer response.
+- Attaching generic advice or a loose checklist that does not follow from the mechanism.
 - Adding controversy that the mechanism cannot support.
 - Listing named biases without showing what each one explains.
 - Using several examples that all prove the same shallow point.

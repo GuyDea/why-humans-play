@@ -88,6 +88,13 @@ and refining only what Martin targets. Keep the prototype easy to discard and fa
 but preserve the approved central question, core answer, insight ladder, earned reframe,
 practical payoff, boundaries, and final lesson.
 
+Carry the approved learning-and-action contract into the opening promise, explanation,
+viewer application, and final lesson. The narration must teach the new model before asking
+the viewer to use the response. Preserve its concrete situation, decision rule or sequence,
+observable result, boundary, and transfer instead of replacing them with advice that merely
+sounds responsible. `Be careful`, `think critically`, `ask better questions`, and a loose
+checklist without a decision rule, sequence, or observable result do not pass.
+
 Aim each paragraph at curiosity, laughter, insight, or more than one. Cut background that
 does not sharpen the next question. Escalate from the concrete incident to ordinary human
 experience and then to the larger system without losing the central mechanism.
@@ -135,6 +142,10 @@ Use either flexible spine:
 Write the by-end promise as a literal learning contract. Keep jokes, comic images,
 metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
 promise, but it must not complicate what the viewer will learn.
+
+For a complete episode, make that promise reflect both halves of the approved contract:
+the new understanding and the concrete response the viewer will be able to use. Keep the
+wording concise; do not recite the full method before the episode has earned it.
 
 When the promise asks an AI to help audit its own answer, describe the questions as a way to
 surface gaps or help check the result, not as proof that the answer is correct. Preserve that
@@ -301,6 +312,10 @@ Before returning rapid work, check internally:
   opening, beat outline, or narration was drafted?
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
   without adding a competing thesis?
+- Does it teach the approved new understanding before asking the viewer to use the
+  concrete response?
+- Do the opening promise, viewer application, and final lesson preserve the approved
+  decision rule or sequence, observable result, and boundary?
 - Does the first sentence feel like a concrete event or irresistible proposition?
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?

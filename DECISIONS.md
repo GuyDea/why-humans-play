@@ -596,7 +596,12 @@ afterward.
 
 **Documents:** `whp-youtube/STEERING.md`,
 `docs/steering/whp-video-topic-skill.md`,
-`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`, and this ledger.
+`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`,
+`docs/superpowers/plans/2026-07-23-whp-painpoint-action-gates.md`,
+`.agents/skills/choosing-whp-video-topic/SKILL.md`,
+`.agents/skills/choosing-whp-video-topic/references/research-method.md`,
+`.agents/skills/choosing-whp-video-topic/references/output-contract.md`,
+`.agents/skills/choosing-whp-video-topic/scripts/test_skill_package.py`, and this ledger.
 `BRAND.md` remains unchanged by this decision because wonder-, history-, and
 explicit-game-led episodes remain part of the brand and may begin from a shared mystery,
 desire, or tension rather than suffering.
@@ -612,6 +617,13 @@ and something actionable, rather than delivering a familiar summary surrounded b
 examples and prose.
 
 **Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
-`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`, and this ledger.
+`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`,
+`docs/superpowers/plans/2026-07-23-whp-painpoint-action-gates.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`, and this
+ledger.
 The current Episode 1 script and launch sequence remain unchanged because this decision
 changes the authoring gate, not an approved episode topic or narration.
