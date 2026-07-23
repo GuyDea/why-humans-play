@@ -4,22 +4,25 @@ import { describe, expect, it } from 'vitest';
 import { routes } from './app.routes';
 
 describe('Studio routes', () => {
-  it('routes the studio, shared-history console, and topic workbench pages', () => {
-    expect(routes.slice(0, 3).map((route) => route.path)).toEqual([
+  it('routes the studio, shared-history console, topic workbench, and pipeline pages', () => {
+    expect(routes.slice(0, 4).map((route) => route.path)).toEqual([
       '',
       'console',
       'topics',
+      'pipeline',
     ]);
     expect(routes[0]?.component?.name).toBe('StudioPage');
     expect(routes[1]?.component?.name).toBe('AgentConsolePage');
     expect(routes[2]?.component?.name).toBe('TopicsPage');
+    expect(routes[3]?.component?.name).toBe('PipelinePage');
   });
 
-  it('renders persistent Studio, Topics, and Console navigation around the router outlet', () => {
+  it('renders persistent Studio, Topics, Pipeline, and Console navigation around the router outlet', () => {
     const template = readFileSync('src/app/app.html', 'utf8');
 
     expect(template).toContain('routerLink="/"');
     expect(template).toContain('routerLink="/topics"');
+    expect(template).toContain('routerLink="/pipeline"');
     expect(template).toContain('routerLink="/console"');
     expect(template).toContain('<router-outlet');
   });

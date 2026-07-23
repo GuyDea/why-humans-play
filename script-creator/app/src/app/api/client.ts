@@ -259,6 +259,16 @@ export interface PipelineRowInput {
   ref: string;
 }
 
+export interface PipelineItem {
+  episodeSlug: string;
+  state: string;
+  milestone: string | null;
+  ref: string | null;
+  draftId: string | null;
+  title: string | null;
+  creativePhase: string | null;
+}
+
 export interface ValidatorDiagnostic {
   message: string;
   line: number | null;
@@ -497,6 +507,10 @@ export class DaemonClient {
       method: 'POST',
       body: JSON.stringify(row),
     });
+  }
+
+  async getPipeline(): Promise<PipelineItem[]> {
+    return this.request('/api/pipeline');
   }
 
   async validate(path: string): Promise<ValidatorResult> {

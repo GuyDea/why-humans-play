@@ -34,6 +34,38 @@ afterEach(() => {
 });
 
 describe('DaemonClient', () => {
+  it('loads the merged pipeline with the nonce', async () => {
+    const response = [{
+      episodeSlug: 'voluntary-obstacles',
+      state: 'architecture',
+      milestone: 'selected',
+      ref: 'whp-youtube/topics/voluntary-obstacles.md',
+      draftId: 'draft-1',
+      title: 'Why We Make Games Harder',
+      creativePhase: 'architecture',
+    }];
+    const fetchMock = vi.fn(async () => jsonResponse(response));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const getPipeline = (
+      client as DaemonClient & {
+        getPipeline?: () => Promise<typeof response>;
+      }
+    ).getPipeline;
+
+    expect(getPipeline).toBeTypeOf('function');
+    if (!getPipeline) return;
+    await expect(getPipeline.call(client)).resolves.toEqual(response);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/api/pipeline`,
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('x-sc-nonce'))
+      .toBe(NONCE);
+  });
+
   it('lists durable operation summaries with the nonce', async () => {
     const response = {
       operations: [
