@@ -6,13 +6,20 @@ import {
   signal,
   type OnDestroy,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import type {
+  ArtifactWriteResult,
+  DraftRecord,
+  IdeaRecord,
   OperationState,
+  PackageDirection,
+  PackageTestRecord,
   TopicGateName,
   TopicRunSnapshot,
   TopicScoreName,
   TopicSummary,
 } from '../api/client';
+import { createBlankNarrationDocument } from '../drafts/draft-manager';
 import { STUDIO_SESSION } from '../studio-session';
 import { buildTopicOperationInputs } from './inputs';
 
@@ -38,6 +45,33 @@ const SCORE_CRITERIA: ReadonlyArray<{
 ];
 
 type SortKey = 'total' | TopicScoreName;
+type ShortlistEntry = TopicSummary['shortlist'][number];
+
+interface HandoffBrief {
+  topic: string;
+  anchors: string[];
+  unknowns: string[];
+}
+
+interface HandoffPreview {
+  markdown: string;
+  brief: HandoffBrief;
+  idea: IdeaRecord;
+  slug: string;
+  title: string;
+}
+
+interface OperationOutcome {
+  operation: {
+    state: OperationState;
+    error: string | null;
+  };
+  result:
+    | { kind: 'schema'; value: unknown; guardrail: string | null }
+    | { kind: 'raw'; markdown: string }
+    | { kind: 'failed'; error: string }
+    | { kind: 'pending' };
+}
 
 @Component({
   selector: 'app-full-run-panel',
@@ -224,7 +258,7 @@ type SortKey = 'total' | TopicScoreName;
                 </thead>
                 <tbody>
                   @for (entry of sortedShortlist(); track entry.subject) {
-                    <tr>
+                    <tr data-testid="shortlist-row">
                       <th scope="row">
                         <span class="rank">#{{ entry.rank }}</span>
                         <strong data-testid="shortlist-subject">
@@ -251,6 +285,18 @@ type SortKey = 'total' | TopicScoreName;
                             }
                           </div>
                         }
+                        <button
+                          class="test-package-action"
+                          type="button"
+                          [disabled]="packageBusy() !== null"
+                          (click)="testPackages(entry)"
+                        >
+                          {{
+                            packageBusy() === entry.subject
+                              ? 'Testing packages…'
+                              : 'Test packages'
+                          }}
+                        </button>
                       </th>
                       <td class="total-score">
                         {{ scoreValue(entry.total) }}
@@ -330,6 +376,95 @@ type SortKey = 'total' | TopicScoreName;
               </div>
             </section>
 
+            @if (packageError()) {
+              <article
+                class="package-test-error"
+                data-testid="package-test-error"
+                role="alert"
+              >
+                <strong>Package test could not be saved.</strong>
+                <p>{{ packageError() }}</p>
+              </article>
+            }
+
+            @if (packageFinalist(); as finalist) {
+              <section
+                class="package-tester"
+                data-testid="package-tester"
+                aria-labelledby="package-tester-heading"
+              >
+                <header class="section-label package-tester-heading">
+                  <div>
+                    <p>Focused promise test</p>
+                    <h3 id="package-tester-heading">{{ finalist.subject }}</h3>
+                  </div>
+                  <span data-testid="package-history">
+                    {{ packageHistory().length }}
+                    {{ packageHistory().length === 1 ? 'saved test' : 'saved tests' }}
+                  </span>
+                </header>
+
+                @if (packageHistory().length > 0) {
+                  <div class="package-table-scroll">
+                    <table
+                      class="package-test-table"
+                      data-testid="package-test-table"
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col">Finalist</th>
+                          <th scope="col">Direction</th>
+                          <th scope="col">Working title</th>
+                          <th scope="col">Intended viewer</th>
+                          <th scope="col">Familiar element</th>
+                          <th scope="col">Surprise / tension</th>
+                          <th scope="col">Visual promise</th>
+                          <th scope="col">Delivered payoff</th>
+                          <th scope="col">Survives honestly?</th>
+                        </tr>
+                      </thead>
+                      @for (test of packageHistory(); track test.id) {
+                        <tbody>
+                          <tr class="history-divider">
+                            <th colspan="9" scope="rowgroup">
+                              {{ packageTestLabel(test, $index) }}
+                            </th>
+                          </tr>
+                          @for (direction of test.directions; track $index) {
+                            <tr
+                              data-testid="package-test-direction"
+                              [attr.data-survives]="direction.survives_honestly"
+                            >
+                              <td>{{ finalist.subject }}</td>
+                              <th scope="row">Direction {{ $index + 1 }}</th>
+                              <td>{{ direction.working_title }}</td>
+                              <td>{{ direction.intended_viewer }}</td>
+                              <td>{{ direction.familiar_markdown }}</td>
+                              <td>{{ direction.surprise_markdown }}</td>
+                              <td>{{ direction.visual_promise_markdown }}</td>
+                              <td>{{ direction.delivered_payoff_markdown }}</td>
+                              <td>
+                                <strong class="survival-badge">
+                                  {{ direction.survives_honestly ? 'Yes' : 'No' }}
+                                </strong>
+                                <p>{{ direction.reason_markdown }}</p>
+                              </td>
+                            </tr>
+                          }
+                        </tbody>
+                      }
+                    </table>
+                  </div>
+                } @else if (packageBusy()) {
+                  <p class="package-empty">Testing three distinct promises…</p>
+                } @else {
+                  <p class="package-empty">
+                    No saved package test exists for this finalist yet.
+                  </p>
+                }
+              </section>
+            }
+
             <article
               class="winner-card"
               data-testid="winner-card"
@@ -359,7 +494,74 @@ type SortKey = 'total' | TopicScoreName;
                   </dd>
                 </div>
               </dl>
+              @if (summary.winner.subject && summary.winner.angle_markdown) {
+                <button
+                  class="handoff-action"
+                  type="button"
+                  [disabled]="handoffBusy()"
+                  (click)="previewHandoff(summary)"
+                >
+                  {{ handoffBusy() ? 'Preparing handoff…' : 'Preview handoff' }}
+                </button>
+              }
             </article>
+
+            @if (handoffError()) {
+              <article
+                class="handoff-error"
+                data-testid="handoff-conflict"
+                role="alert"
+              >
+                <strong>Handoff paused safely.</strong>
+                <p>{{ handoffError() }}</p>
+              </article>
+            }
+
+            @if (handoffPreview(); as preview) {
+              <section
+                class="handoff-preview"
+                data-testid="handoff-preview"
+                aria-labelledby="handoff-preview-heading"
+              >
+                <header class="section-label">
+                  <p>Acceptance gate</p>
+                  <h3 id="handoff-preview-heading">Selected-topic brief</h3>
+                </header>
+                <pre>{{ preview.markdown }}</pre>
+                <dl>
+                  <div>
+                    <dt>Topic metadata</dt>
+                    <dd>{{ preview.brief.topic }}</dd>
+                  </div>
+                  <div>
+                    <dt>Factual anchors</dt>
+                    <dd>{{ preview.brief.anchors.length }}</dd>
+                  </div>
+                  <div>
+                    <dt>Open unknowns</dt>
+                    <dd>{{ preview.brief.unknowns.length }}</dd>
+                  </div>
+                  <div>
+                    <dt>Starting phase</dt>
+                    <dd>architecture</dd>
+                  </div>
+                </dl>
+                <div class="handoff-actions">
+                  <p>
+                    Confirmation creates the draft, writes the brief through CAS,
+                    records the selected pipeline milestone, and promotes the idea.
+                  </p>
+                  <button
+                    class="primary-action"
+                    type="button"
+                    [disabled]="handoffBusy()"
+                    (click)="confirmHandoff(preview)"
+                  >
+                    {{ handoffBusy() ? 'Confirming…' : 'Confirm handoff' }}
+                  </button>
+                </div>
+              </section>
+            }
           </section>
         }
       }
@@ -900,8 +1102,12 @@ type SortKey = 'total' | TopicScoreName;
 })
 export class FullRunPanel implements OnDestroy {
   private readonly client = inject(STUDIO_SESSION).client;
+  private readonly router = inject(Router);
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private pollGeneration = 0;
+  private handoffDraft: DraftRecord | null = null;
+  private handoffArtifactWritten = false;
+  private handoffPipelineWritten = false;
 
   protected readonly ideaText = signal('');
   protected readonly constraints = signal('');
@@ -910,6 +1116,14 @@ export class FullRunPanel implements OnDestroy {
   protected readonly pollRecovering = signal(false);
   protected readonly snapshot = signal<TopicRunSnapshot | null>(null);
   protected readonly sortKey = signal<SortKey>('total');
+  protected readonly packageBusy = signal<string | null>(null);
+  protected readonly packageError = signal<string | null>(null);
+  protected readonly packageFinalist = signal<ShortlistEntry | null>(null);
+  protected readonly packageHistory =
+    signal<readonly PackageTestRecord[]>([]);
+  protected readonly handoffBusy = signal(false);
+  protected readonly handoffError = signal<string | null>(null);
+  protected readonly handoffPreview = signal<HandoffPreview | null>(null);
   protected readonly criteria = SCORE_CRITERIA;
   protected readonly completedCount = computed(
     () => this.snapshot()?.progress.filter((item) => item.status === 'done').length
@@ -989,6 +1203,35 @@ export class FullRunPanel implements OnDestroy {
     return 'Decision incomplete';
   }
 
+  protected testPackages(finalist: ShortlistEntry): void {
+    if (this.packageBusy() !== null) return;
+    void this.runPackageTest(finalist);
+  }
+
+  protected packageTestLabel(
+    test: PackageTestRecord,
+    index: number,
+  ): string {
+    const date = new Date(test.createdAt);
+    const timestamp = Number.isNaN(date.valueOf())
+      ? test.createdAt
+      : new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(date);
+    return `Test ${this.packageHistory().length - index} · ${timestamp}`;
+  }
+
+  protected previewHandoff(summary: TopicSummary): void {
+    if (this.handoffBusy()) return;
+    void this.runHandoffPreview(summary);
+  }
+
+  protected confirmHandoff(preview: HandoffPreview): void {
+    if (this.handoffBusy()) return;
+    void this.acceptHandoff(preview);
+  }
+
   private async startFullRun(): Promise<void> {
     const generation = ++this.pollGeneration;
     this.clearPollTimer();
@@ -997,6 +1240,8 @@ export class FullRunPanel implements OnDestroy {
     this.pollRecovering.set(false);
     this.snapshot.set(null);
     this.sortKey.set('total');
+    this.resetPackageTest();
+    this.resetHandoff();
 
     try {
       const notes = this.constraints().trim();
@@ -1019,6 +1264,205 @@ export class FullRunPanel implements OnDestroy {
       this.pollRecovering.set(false);
       this.runError.set(errorMessage(error));
     }
+  }
+
+  private async runPackageTest(finalist: ShortlistEntry): Promise<void> {
+    this.packageBusy.set(finalist.subject);
+    this.packageError.set(null);
+    this.packageFinalist.set(finalist);
+    this.packageHistory.set([]);
+
+    try {
+      const idea = await this.resolveIdea(
+        finalist.subject,
+        finalist.angle_markdown,
+      );
+      this.packageHistory.set(
+        await this.client.listPackageTests(idea.id),
+      );
+      const runArtifacts = this.currentRunArtifacts();
+      const outcome = await this.executeOperation(
+        'package-test',
+        buildTopicOperationInputs({
+          ideaText: finalistIdeaText(finalist),
+          userConstraints: {},
+          runArtifacts,
+          selectedWinner: null,
+        }, 'package-test'),
+      );
+      const directions = packageDirections(outcome);
+      const saved = await this.client.createPackageTest(idea.id, {
+        opId: operationId(outcome),
+        directions,
+      });
+      this.packageHistory.update((history) => [saved, ...history]);
+    } catch (error) {
+      this.packageError.set(errorMessage(error));
+    } finally {
+      this.packageBusy.set(null);
+    }
+  }
+
+  private async runHandoffPreview(summary: TopicSummary): Promise<void> {
+    const winner = summary.winner;
+    if (!winner.subject || !winner.angle_markdown) return;
+    this.handoffBusy.set(true);
+    this.handoffError.set(null);
+    this.handoffPreview.set(null);
+    this.handoffDraft = null;
+    this.handoffArtifactWritten = false;
+    this.handoffPipelineWritten = false;
+
+    try {
+      const idea = await this.resolveIdea(
+        winner.subject,
+        winner.angle_markdown,
+      );
+      const outcome = await this.executeOperation(
+        'handoff-preview',
+        buildTopicOperationInputs({
+          ideaText: '',
+          userConstraints: null,
+          runArtifacts: this.currentRunArtifacts(),
+          selectedWinner: winner,
+        }, 'handoff-preview'),
+      );
+      if (
+        outcome.operation.state !== 'completed'
+        || outcome.result.kind !== 'raw'
+        || outcome.result.markdown.trim() === ''
+      ) {
+        throw new Error(operationFailure(outcome));
+      }
+      const markdown = outcome.result.markdown;
+      this.handoffPreview.set({
+        markdown,
+        brief: parseHandoffBrief(markdown, winner),
+        idea,
+        slug: slugify(winner.subject),
+        title: winner.subject,
+      });
+    } catch (error) {
+      this.handoffError.set(errorMessage(error));
+    } finally {
+      this.handoffBusy.set(false);
+    }
+  }
+
+  private async acceptHandoff(preview: HandoffPreview): Promise<void> {
+    this.handoffBusy.set(true);
+    this.handoffError.set(null);
+    const artifactPath = `whp-youtube/topics/${preview.slug}.md`;
+
+    try {
+      if (this.handoffDraft === null) {
+        const blank = createBlankNarrationDocument('beat_topic_handoff');
+        this.handoffDraft = await this.client.create({
+          episodeSlug: preview.slug,
+          title: preview.title,
+          format: 'narration',
+          doc: {
+            ...blank,
+            metadata: {
+              topic: preview.brief.topic,
+              anchors: preview.brief.anchors,
+              unknowns: preview.brief.unknowns,
+              approvedLessons: [],
+              creativeStatus: { phase: 'architecture' },
+              directionApproved: false,
+            },
+          },
+        });
+      }
+
+      if (!this.handoffArtifactWritten) {
+        const result = await this.client.writeArtifact(
+          artifactPath,
+          preview.markdown,
+          { expectNew: true },
+        );
+        assertNoArtifactConflict(result, 'topic brief');
+        this.handoffArtifactWritten = true;
+      }
+
+      if (!this.handoffPipelineWritten) {
+        const result = await this.client.upsertPipelineRow({
+          episodeSlug: preview.slug,
+          milestone: 'selected',
+          ref: artifactPath,
+        });
+        assertNoArtifactConflict(result, 'pipeline');
+        this.handoffPipelineWritten = true;
+      }
+
+      await this.client.updateIdea(preview.idea.id, {
+        status: 'promoted',
+      });
+      await this.router.navigate(['/'], {
+        queryParams: { draft: this.handoffDraft.id },
+      });
+    } catch (error) {
+      this.handoffError.set(handoffErrorMessage(error));
+    } finally {
+      this.handoffBusy.set(false);
+    }
+  }
+
+  private async resolveIdea(
+    subject: string,
+    angleMarkdown: string,
+  ): Promise<IdeaRecord> {
+    const text = `${subject}\n\n${angleMarkdown}`;
+    const ideas = await this.client.listIdeas();
+    return ideas.find((idea) => idea.text === text)
+      ?? await this.client.createIdea({ text, source: 'ideate' });
+  }
+
+  private currentRunArtifacts(): {
+    summary: TopicSummary;
+    reportMd: string | undefined;
+  } {
+    const current = this.snapshot();
+    if (!current?.summary) {
+      throw new Error('Complete a topic run before testing its finalists.');
+    }
+    return {
+      summary: current.summary,
+      reportMd: current.reportMd,
+    };
+  }
+
+  private async executeOperation(
+    operation: 'package-test' | 'handoff-preview',
+    inputs: unknown,
+  ): Promise<OperationOutcome & { id: string }> {
+    const { id } = await this.client.submitOp(operation, inputs);
+    await this.client.streamEvents(id, {
+      onEvent: () => undefined,
+      onDone: () => undefined,
+      onError: () => undefined,
+    });
+    const [record, result] = await Promise.all([
+      this.client.getOp(id),
+      this.client.getResult(id),
+    ]);
+    return { id, operation: record, result };
+  }
+
+  private resetPackageTest(): void {
+    this.packageBusy.set(null);
+    this.packageError.set(null);
+    this.packageFinalist.set(null);
+    this.packageHistory.set([]);
+  }
+
+  private resetHandoff(): void {
+    this.handoffBusy.set(false);
+    this.handoffError.set(null);
+    this.handoffPreview.set(null);
+    this.handoffDraft = null;
+    this.handoffArtifactWritten = false;
+    this.handoffPipelineWritten = false;
   }
 
   private async poll(runId: string, generation: number): Promise<void> {
@@ -1073,6 +1517,201 @@ function compareNullableScoreDescending(
   if (left === null) return 1;
   if (right === null) return -1;
   return right - left;
+}
+
+function finalistIdeaText(finalist: ShortlistEntry): string {
+  return `${finalist.subject}\n\n${finalist.angle_markdown}`;
+}
+
+function operationId(outcome: OperationOutcome & { id: string }): string {
+  return outcome.id;
+}
+
+function packageDirections(outcome: OperationOutcome): PackageDirection[] {
+  if (
+    outcome.operation.state !== 'completed'
+    || outcome.result.kind !== 'schema'
+  ) {
+    throw new Error(operationFailure(outcome));
+  }
+  if (outcome.result.guardrail?.trim()) {
+    throw new Error(outcome.result.guardrail);
+  }
+  const payload = record(outcome.result.value);
+  if (
+    payload?.['status'] !== 'complete'
+    || !Array.isArray(payload['directions'])
+  ) {
+    throw new Error(
+      'Package test did not return the required directions table.',
+    );
+  }
+  return payload['directions'].map((candidate, index) => {
+    const direction = record(candidate);
+    if (!direction) {
+      throw new Error(`Package direction ${index + 1} is not an object.`);
+    }
+    return {
+      working_title: requiredResultString(
+        direction,
+        'working_title',
+        index,
+      ),
+      intended_viewer: requiredResultString(
+        direction,
+        'intended_viewer',
+        index,
+      ),
+      familiar_markdown: requiredResultString(
+        direction,
+        'familiar_markdown',
+        index,
+      ),
+      surprise_markdown: requiredResultString(
+        direction,
+        'surprise_markdown',
+        index,
+      ),
+      visual_promise_markdown: requiredResultString(
+        direction,
+        'visual_promise_markdown',
+        index,
+      ),
+      delivered_payoff_markdown: requiredResultString(
+        direction,
+        'delivered_payoff_markdown',
+        index,
+      ),
+      survives_honestly: requiredResultBoolean(direction, index),
+      reason_markdown: requiredResultString(
+        direction,
+        'reason_markdown',
+        index,
+      ),
+    };
+  });
+}
+
+function requiredResultString(
+  direction: Record<string, unknown>,
+  field: keyof Omit<PackageDirection, 'survives_honestly'>,
+  index: number,
+): string {
+  const value = direction[field];
+  if (typeof value !== 'string') {
+    throw new Error(
+      `Package direction ${index + 1} is missing ${field}.`,
+    );
+  }
+  return value;
+}
+
+function requiredResultBoolean(
+  direction: Record<string, unknown>,
+  index: number,
+): boolean {
+  const value = direction['survives_honestly'];
+  if (typeof value !== 'boolean') {
+    throw new Error(
+      `Package direction ${index + 1} is missing survives_honestly.`,
+    );
+  }
+  return value;
+}
+
+function operationFailure(outcome: OperationOutcome): string {
+  if (outcome.result.kind === 'failed') return outcome.result.error;
+  if (outcome.operation.error?.trim()) return outcome.operation.error;
+  if (outcome.result.kind === 'pending') {
+    return 'Operation ended before a result became available.';
+  }
+  return `Operation ended in ${outcome.operation.state}.`;
+}
+
+function parseHandoffBrief(
+  markdown: string,
+  winner: TopicSummary['winner'],
+): HandoffBrief {
+  const fallbackTopic = winner.subject && winner.angle_markdown
+    ? `${winner.subject} — ${winner.angle_markdown}`
+    : winner.subject ?? winner.angle_markdown ?? '';
+  const topicMatch =
+    /^\s*\*\*(?:selected )?topic(?: and angle)?:\*\*\s*(.+?)\s*$/imu
+      .exec(markdown);
+  const anchors: string[] = [];
+  const unknowns: string[] = [];
+  let section: 'anchors' | 'unknowns' | null = null;
+
+  for (const line of markdown.split(/\r?\n/u)) {
+    const heading = /^#{1,6}[ \t]+(.+?)\s*$/u.exec(line)?.[1]
+      ?.toLowerCase();
+    if (heading !== undefined) {
+      section = heading.includes('anchor')
+        ? 'anchors'
+        : heading.includes('unknown')
+          ? 'unknowns'
+          : null;
+      continue;
+    }
+    const item = /^[ \t]*[-*][ \t]+(.+?)\s*$/u.exec(line)?.[1];
+    if (!item || section === null) continue;
+    (section === 'anchors' ? anchors : unknowns).push(item);
+  }
+
+  return {
+    topic: topicMatch?.[1]?.trim() || fallbackTopic,
+    anchors,
+    unknowns,
+  };
+}
+
+function slugify(value: string): string {
+  return value
+    .normalize('NFKD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '')
+    || 'selected-topic';
+}
+
+function assertNoArtifactConflict(
+  result: ArtifactWriteResult,
+  label: string,
+): void {
+  if (!result.conflict) return;
+  const parked = result.parked?.length
+    ? ` Both versions were parked at: ${result.parked.join(', ')}.`
+    : '';
+  throw new Error(
+    `${capitalize(label)} CAS conflict; current repository hash is ${result.currentHash}.${parked}`,
+  );
+}
+
+function handoffErrorMessage(error: unknown): string {
+  if (error && typeof error === 'object') {
+    const body = record((error as Record<string, unknown>)['body']);
+    const currentHash = body?.['currentHash'];
+    if (typeof currentHash === 'string') {
+      const parked = Array.isArray(body?.['parked'])
+        ? body['parked'].filter(
+            (path): path is string => typeof path === 'string',
+          )
+        : [];
+      return `CAS conflict; current repository hash is ${currentHash}.${
+        parked.length > 0
+          ? ` Both versions were preserved at: ${parked.join(', ')}.`
+          : ''
+      }`;
+    }
+  }
+  return errorMessage(error);
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }
 
 function renderTopicMarkdown(report: string): string {

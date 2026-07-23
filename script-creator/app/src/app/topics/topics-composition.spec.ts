@@ -10,12 +10,17 @@ import { createApplication } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
+  ArtifactExpectedState,
+  ArtifactWriteResult,
+  CreateDraftInput,
   DaemonClient,
   CreateIdeaInput,
+  DraftRecord,
   IdeaRecord,
   OperationName,
   OperationRecord,
   OperationResult,
+  PackageDirection,
   StreamEventsOptions,
   TopicRunSnapshot,
   TopicRunSummary,
@@ -59,7 +64,10 @@ const SUMMARY: TopicSummary = {
     candidate('Unscored Candidate'),
   ],
   shortlist: [
-    shortlistEntry('Voluntary Obstacles', 1, 91, 18),
+    {
+      ...shortlistEntry('Voluntary Obstacles', 1, 91, 18),
+      angle_markdown: 'Why chosen constraints can make effort meaningful.',
+    },
     shortlistEntry('The Queue Game', 2, 84, 24),
     shortlistEntry('Unscored Candidate', 3, null, null),
   ],
@@ -108,6 +116,18 @@ interface Submission {
 class TopicClientStub {
   private sequence = 0;
   private ideas: IdeaRecord[] = [];
+  private packageTests: Array<{
+    id: string;
+    ideaId: string;
+    opId: string;
+    directions: PackageDirection[];
+    createdAt: string;
+  }> = [];
+  private drafts: DraftRecord[] = [];
+  private artifactResult: ArtifactWriteResult = {
+    conflict: false,
+    hash: 'topic-brief-hash',
+  };
   private topicRunSnapshots: Array<TopicRunSnapshot | Error> = [];
   private topicRunSnapshotIndex = 0;
   readonly submissions: Submission[] = [];
@@ -138,6 +158,25 @@ class TopicClientStub {
   });
   readonly deleteIdea = vi.fn(async (id: string) => {
     this.ideas = this.ideas.filter((idea) => idea.id !== id);
+  });
+  readonly listPackageTests = vi.fn(async (ideaId: string) =>
+    this.packageTests.filter((test) => test.ideaId === ideaId));
+  readonly createPackageTest = vi.fn(async (
+    ideaId: string,
+    input: {
+      opId: string;
+      directions: PackageDirection[];
+    },
+  ) => {
+    const record = {
+      id: `package-test-${this.packageTests.length + 1}`,
+      ideaId,
+      opId: input.opId,
+      directions: input.directions,
+      createdAt: '2026-07-23T12:10:00.000Z',
+    };
+    this.packageTests.push(record);
+    return record;
   });
   readonly registerTopicRun = vi.fn(async (
     opId: string,
@@ -226,12 +265,100 @@ class TopicClientStub {
         guardrail: null,
       };
     }
+    if (operation === 'package-test') {
+      return {
+        kind: 'schema',
+        value: {
+          status: 'complete',
+          directions: [
+            {
+              working_title: 'Why We Make Games Harder Than They Need to Be',
+              intended_viewer: 'Players who choose self-imposed rules',
+              familiar_markdown: 'A no-hit run.',
+              surprise_markdown: 'Constraint can create meaning.',
+              visual_promise_markdown: 'The same level under two rule sets.',
+              delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+              survives_honestly: true,
+              reason_markdown: 'The episode can demonstrate the promise.',
+            },
+            {
+              working_title: 'The Rules Nobody Forced You to Follow',
+              intended_viewer: 'People curious about difficult hobbies',
+              familiar_markdown: 'A hard-mode menu.',
+              surprise_markdown: 'The harder route changes identity.',
+              visual_promise_markdown: 'Easy and hard paths split on screen.',
+              delivered_payoff_markdown: 'Why effort alone is not the whole story.',
+              survives_honestly: false,
+              reason_markdown: 'The identity claim outruns the current evidence.',
+            },
+          ],
+          guardrail_markdown: null,
+        },
+        guardrail: null,
+      };
+    }
+    if (operation === 'handoff-preview') {
+      return {
+        kind: 'raw',
+        markdown: [
+          '# Selected topic brief',
+          '',
+          '**Topic:** Voluntary Obstacles — Why chosen constraints can make effort meaningful.',
+          '',
+          '## Factual anchors',
+          '',
+          '- Players voluntarily accept harder rules.',
+          '- A no-hit run makes failure legible.',
+          '',
+          '## Important unknowns',
+          '',
+          '- Which opening proof case is strongest?',
+        ].join('\n'),
+      };
+    }
     throw new Error(`unexpected operation: ${operation}`);
   });
+  readonly list = vi.fn(async () => this.drafts.map((draft) => ({
+    id: draft.id,
+    episodeSlug: draft.episodeSlug,
+    title: draft.title,
+    format: draft.format,
+    updatedAt: draft.updatedAt,
+  })));
+  readonly create = vi.fn(async (
+    input: CreateDraftInput,
+  ): Promise<DraftRecord> => {
+    const draft: DraftRecord = {
+      id: 'draft-handoff-1',
+      ...input,
+      updatedAt: '2026-07-23T12:15:00.000Z',
+    };
+    this.drafts = [draft, ...this.drafts];
+    return draft;
+  });
+  readonly get = vi.fn(async (id: string): Promise<DraftRecord> => {
+    const draft = this.drafts.find((candidate) => candidate.id === id);
+    if (!draft) throw new Error(`draft not found: ${id}`);
+    return draft;
+  });
+  readonly listRevisions = vi.fn(async () => []);
+  readonly writeArtifact = vi.fn(async (
+    _path: string,
+    _content: string,
+    _expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult> => this.artifactResult);
+  readonly upsertPipelineRow = vi.fn(async () => ({
+    conflict: false as const,
+    hash: 'pipeline-hash',
+  }));
 
   queueTopicRun(...snapshots: Array<TopicRunSnapshot | Error>): void {
     this.topicRunSnapshots = snapshots;
     this.topicRunSnapshotIndex = 0;
+  }
+
+  setArtifactResult(result: ArtifactWriteResult): void {
+    this.artifactResult = result;
   }
 
   private submission(id: string): Submission {
@@ -490,6 +617,214 @@ describe('routed Topics composition', () => {
     expect(winner?.textContent).toContain(
       'Why We Make Games Harder Than They Need to Be',
     );
+  });
+
+  it('keeps package-test history and confirms a winner handoff into an architecture draft', async () => {
+    const topics = await mountTopics();
+    const reportMd = '# Completed topic run\n\nThe winner is ready for handoff.';
+    topics.client.queueTopicRun({
+      ...snapshot('completed', 'done'),
+      summary: SUMMARY,
+      reportMd,
+    });
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'Why players choose voluntary obstacles',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    const voluntaryRow = Array.from(
+      topics.root.querySelectorAll<HTMLTableRowElement>(
+        '[data-testid="shortlist-row"]',
+      ),
+    ).find((row) => row.textContent?.includes('Voluntary Obstacles'));
+    if (!voluntaryRow) throw new Error('winner shortlist row was not rendered');
+    findButton(voluntaryRow, 'Test packages').click();
+
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelectorAll(
+        '[data-testid="package-test-direction"]',
+      )).toHaveLength(2);
+    });
+    const packageTable = topics.root.querySelector(
+      '[data-testid="package-test-table"]',
+    );
+    expect(Array.from(packageTable?.querySelectorAll('thead th') ?? [])
+      .map((header) => header.textContent?.replace(/\s+/gu, ' ').trim()))
+      .toEqual([
+        'Finalist',
+        'Direction',
+        'Working title',
+        'Intended viewer',
+        'Familiar element',
+        'Surprise / tension',
+        'Visual promise',
+        'Delivered payoff',
+        'Survives honestly?',
+      ]);
+    const testedDirections = packageTable?.querySelectorAll<HTMLElement>(
+      '[data-testid="package-test-direction"]',
+    );
+    expect(testedDirections?.[0]?.dataset['survives']).toBe('true');
+    expect(testedDirections?.[1]?.dataset['survives']).toBe('false');
+    expect(topics.root.querySelector('[data-testid="package-history"]')?.textContent)
+      .toContain('1 saved test');
+
+    expect(topics.client.submissions.at(-1)).toEqual({
+      id: expect.any(String),
+      operation: 'package-test',
+      inputs: {
+        idea_text: [
+          'Voluntary Obstacles',
+          'Why chosen constraints can make effort meaningful.',
+        ].join('\n\n'),
+        user_constraints: {},
+        run_artifacts: {
+          summary: SUMMARY,
+          reportMd,
+        },
+      },
+    });
+    expect(topics.client.createPackageTest).toHaveBeenCalledWith(
+      'idea-2',
+      {
+        opId: topics.client.submissions.at(-1)?.id,
+        directions: expect.arrayContaining([
+          expect.objectContaining({
+            working_title: 'Why We Make Games Harder Than They Need to Be',
+            survives_honestly: true,
+          }),
+        ]),
+      },
+    );
+
+    findButton(
+      topics.root.querySelector('[data-testid="winner-card"]'),
+      'Preview handoff',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelector('[data-testid="handoff-preview"]')?.textContent)
+        .toContain('Which opening proof case is strongest?');
+    });
+    expect(topics.client.submissions.at(-1)).toEqual({
+      id: expect.any(String),
+      operation: 'handoff-preview',
+      inputs: {
+        selected_winner: SUMMARY.winner,
+        run_artifacts: {
+          summary: SUMMARY,
+          reportMd,
+        },
+      },
+    });
+
+    const navigate = vi.spyOn(topics.router, 'navigate')
+      .mockResolvedValue(true);
+    findButton(
+      topics.root.querySelector('[data-testid="handoff-preview"]'),
+      'Confirm handoff',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(navigate).toHaveBeenCalledWith(['/'], {
+        queryParams: { draft: 'draft-handoff-1' },
+      });
+    });
+
+    expect(topics.client.create).toHaveBeenCalledWith({
+      episodeSlug: 'voluntary-obstacles',
+      title: 'Voluntary Obstacles',
+      format: 'narration',
+      doc: expect.objectContaining({
+        metadata: {
+          topic: 'Voluntary Obstacles — Why chosen constraints can make effort meaningful.',
+          anchors: [
+            'Players voluntarily accept harder rules.',
+            'A no-hit run makes failure legible.',
+          ],
+          unknowns: ['Which opening proof case is strongest?'],
+          approvedLessons: [],
+          creativeStatus: { phase: 'architecture' },
+          directionApproved: false,
+        },
+      }),
+    });
+    expect(topics.client.writeArtifact).toHaveBeenCalledWith(
+      'whp-youtube/topics/voluntary-obstacles.md',
+      expect.stringContaining('# Selected topic brief'),
+      { expectNew: true },
+    );
+    expect(topics.client.upsertPipelineRow).toHaveBeenCalledWith({
+      episodeSlug: 'voluntary-obstacles',
+      milestone: 'selected',
+      ref: 'whp-youtube/topics/voluntary-obstacles.md',
+    });
+    expect(topics.client.updateIdea).toHaveBeenCalledWith(
+      'idea-2',
+      { status: 'promoted' },
+    );
+  });
+
+  it('surfaces a handoff CAS conflict and stops before pipeline promotion', async () => {
+    const topics = await mountTopics();
+    topics.client.queueTopicRun({
+      ...snapshot('completed', 'done'),
+      summary: SUMMARY,
+      reportMd: '# Completed topic run',
+    });
+    topics.client.setArtifactResult({
+      conflict: true,
+      currentHash: 'someone-else-hash',
+      parked: ['whp-youtube/topics/topic.md.sc-conflict-1'],
+    });
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'Why players choose voluntary obstacles',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+    findButton(
+      topics.root.querySelector('[data-testid="winner-card"]'),
+      'Preview handoff',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelector('[data-testid="handoff-preview"]'))
+        .not.toBeNull();
+    });
+
+    const navigate = vi.spyOn(topics.router, 'navigate')
+      .mockResolvedValue(true);
+    findButton(
+      topics.root.querySelector('[data-testid="handoff-preview"]'),
+      'Confirm handoff',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      const conflict = topics.root.querySelector(
+        '[data-testid="handoff-conflict"]',
+      );
+      expect(conflict?.getAttribute('role')).toBe('alert');
+      expect(conflict?.textContent).toContain('someone-else-hash');
+      expect(conflict?.textContent).toContain('sc-conflict-1');
+    });
+
+    expect(topics.client.create).toHaveBeenCalledOnce();
+    expect(topics.client.upsertPipelineRow).not.toHaveBeenCalled();
+    expect(topics.client.updateIdea).not.toHaveBeenCalledWith(
+      expect.any(String),
+      { status: 'promoted' },
+    );
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('shows a summary error honestly while preserving the raw report', async () => {

@@ -85,6 +85,30 @@ export interface UpdateIdeaInput {
   status?: IdeaStatus;
 }
 
+export interface PackageDirection {
+  working_title: string;
+  intended_viewer: string;
+  familiar_markdown: string;
+  surprise_markdown: string;
+  visual_promise_markdown: string;
+  delivered_payoff_markdown: string;
+  survives_honestly: boolean;
+  reason_markdown: string;
+}
+
+export interface PackageTestRecord {
+  id: string;
+  ideaId: string;
+  opId: string;
+  directions: PackageDirection[];
+  createdAt: string;
+}
+
+export interface CreatePackageTestInput {
+  opId: string;
+  directions: PackageDirection[];
+}
+
 export type TopicGateName =
   | 'game_play_centrality'
   | 'human_revelation'
@@ -127,17 +151,9 @@ export interface TopicSummary {
     confidence: 'high' | 'medium' | 'low';
     decisive_risk_markdown: string;
   }>;
-  packages: Array<{
+  packages: Array<PackageDirection & {
     finalist: string;
     direction: string;
-    working_title: string;
-    intended_viewer: string;
-    familiar_markdown: string;
-    surprise_markdown: string;
-    visual_promise_markdown: string;
-    delivered_payoff_markdown: string;
-    survives_honestly: boolean;
-    reason_markdown: string;
   }>;
   winner: {
     decision_status:
@@ -236,6 +252,12 @@ export type ArtifactWriteResult =
     currentHash: string | 'absent';
     parked?: string[];
   };
+
+export interface PipelineRowInput {
+  episodeSlug: string;
+  milestone: string;
+  ref: string;
+}
 
 export interface ValidatorDiagnostic {
   message: string;
@@ -347,6 +369,25 @@ export class DaemonClient {
     });
   }
 
+  async listPackageTests(id: string): Promise<PackageTestRecord[]> {
+    return this.request(
+      `/api/ideas/${encodeURIComponent(id)}/package-tests`,
+    );
+  }
+
+  async createPackageTest(
+    id: string,
+    input: CreatePackageTestInput,
+  ): Promise<PackageTestRecord> {
+    return this.request(
+      `/api/ideas/${encodeURIComponent(id)}/package-tests`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
   async registerTopicRun(opId: string): Promise<TopicRunSummary> {
     return this.request('/api/topic-runs', {
       method: 'POST',
@@ -446,6 +487,15 @@ export class DaemonClient {
     return this.request('/api/artifacts', {
       method: 'POST',
       body: JSON.stringify({ path, content, expectedState }),
+    });
+  }
+
+  async upsertPipelineRow(
+    row: PipelineRowInput,
+  ): Promise<ArtifactWriteResult> {
+    return this.request('/api/pipeline', {
+      method: 'POST',
+      body: JSON.stringify(row),
     });
   }
 

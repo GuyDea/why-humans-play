@@ -267,6 +267,66 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('maps package-test history and accepted-handoff CAS calls', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const direction = {
+      working_title: 'Why We Make Games Harder',
+      intended_viewer: 'Players who choose harder rules',
+      familiar_markdown: 'A no-hit run.',
+      surprise_markdown: 'Constraint can create meaning.',
+      visual_promise_markdown: 'One level under two rule sets.',
+      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+      survives_honestly: true,
+      reason_markdown: 'The episode can deliver the promise.',
+    };
+
+    await client.listPackageTests('idea/one');
+    await client.createPackageTest('idea/one', {
+      opId: 'op-package-1',
+      directions: [direction],
+    });
+    await client.upsertPipelineRow({
+      episodeSlug: 'voluntary-obstacles',
+      milestone: 'selected',
+      ref: 'whp-youtube/topics/voluntary-obstacles.md',
+    });
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone/package-tests`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone/package-tests`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          opId: 'op-package-1',
+          directions: [direction],
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/pipeline`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          episodeSlug: 'voluntary-obstacles',
+          milestone: 'selected',
+          ref: 'whp-youtube/topics/voluntary-obstacles.md',
+        }),
+      },
+    ]);
+  });
+
   it('registers and polls topic runs with authenticated requests', async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(jsonResponse({

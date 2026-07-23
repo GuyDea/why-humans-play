@@ -225,6 +225,147 @@ app-full-run-panel .winner-card dd {
   line-height: 1.45;
 }
 
+app-full-run-panel :where(.test-package-action, .handoff-action) {
+  margin-top: 0.7rem;
+  border: 1px solid var(--whp-line-strong);
+  padding: 0.42rem 0.6rem;
+  color: var(--whp-ink);
+  background: var(--whp-surface);
+  cursor: pointer;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+app-full-run-panel :where(.test-package-action, .handoff-action):hover {
+  border-color: var(--whp-accent);
+  color: var(--whp-accent);
+}
+
+app-full-run-panel :where(.package-test-error, .handoff-error) {
+  margin-top: 1rem;
+  border-left: 3px solid var(--whp-accent);
+  padding: 0.8rem 1rem;
+  background: var(--whp-accent-tint);
+}
+
+app-full-run-panel :where(.package-test-error, .handoff-error) p {
+  margin: 0.3rem 0 0;
+  color: var(--whp-muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+app-full-run-panel :where(.package-tester, .handoff-preview) {
+  margin-top: 2rem;
+  border-top: 3px solid var(--whp-ink);
+  padding-top: 1rem;
+}
+
+app-full-run-panel .package-tester-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+app-full-run-panel .package-tester-heading > span {
+  color: var(--whp-muted);
+  font-family: var(--whp-font-mono);
+  font-size: 0.62rem;
+}
+
+app-full-run-panel .package-test-table {
+  min-width: 104rem;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+app-full-run-panel .package-test-table tbody tr[data-survives='true'] {
+  box-shadow: inset 3px 0 var(--whp-success);
+}
+
+app-full-run-panel .package-test-table tbody tr[data-survives='false'] {
+  box-shadow: inset 3px 0 var(--whp-accent);
+  background: var(--whp-accent-tint);
+}
+
+app-full-run-panel .history-divider th {
+  color: var(--whp-muted);
+  background: var(--whp-panel);
+  font-family: var(--whp-font-mono);
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+app-full-run-panel .package-empty {
+  margin: 0;
+  border: 1px dashed var(--whp-line-strong);
+  padding: 1rem;
+  color: var(--whp-muted);
+  font-size: 0.72rem;
+}
+
+app-full-run-panel .handoff-action {
+  grid-column: 2 / -1;
+  justify-self: end;
+  margin-top: 0;
+}
+
+app-full-run-panel .handoff-preview pre {
+  max-height: 24rem;
+  overflow: auto;
+  margin: 0;
+  border: 1px solid var(--whp-line);
+  padding: 1rem;
+  color: var(--whp-ink);
+  background: var(--whp-ground);
+  font-family: var(--whp-font-editor);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+app-full-run-panel .handoff-preview dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 1rem 0 0;
+}
+
+app-full-run-panel .handoff-preview dl > div {
+  border-left: 1px solid var(--whp-line-strong);
+  padding-left: 0.7rem;
+}
+
+app-full-run-panel .handoff-preview dt {
+  color: var(--whp-muted);
+  font-size: 0.56rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+app-full-run-panel .handoff-preview dd {
+  margin: 0.25rem 0 0;
+  font-size: 0.68rem;
+  line-height: 1.45;
+}
+
+app-full-run-panel .handoff-actions {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+app-full-run-panel .handoff-actions p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--whp-muted);
+  font-size: 0.7rem;
+  line-height: 1.5;
+}
+
 /*
  * Topic Studio's full-run panel keeps its responsive rules global so its
  * desktop evidence-table styles remain below Angular's per-component budget.
@@ -304,6 +445,20 @@ app-full-run-panel .winner-card dd {
   app-full-run-panel .winner-card dl > div {
     grid-template-columns: 1fr;
     gap: 0.25rem;
+  }
+
+  app-full-run-panel .handoff-preview dl {
+    grid-template-columns: 1fr;
+  }
+
+  app-full-run-panel .handoff-action {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+  }
+
+  app-full-run-panel .handoff-actions {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
