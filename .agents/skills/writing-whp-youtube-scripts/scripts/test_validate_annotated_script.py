@@ -918,6 +918,112 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotIn("10.1016/j.anbehav.2022.08.013", narration)
         self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
 
+    def test_claim_mapping_requires_inline_evidence_indicator(self) -> None:
+        marker = " [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        document = replace_exact(APPENDIX_DOCUMENT, marker, "")
+        self.assert_error(
+            document,
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator",
+        )
+
+    def test_inline_evidence_indicator_must_be_mapped_in_same_beat(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-002](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-002 is not mapped in Claims",
+        )
+
+    def test_inline_evidence_indicator_requires_one_record(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-777](https://example.org/missing)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-777 has no matching evidence record",
+        )
+
+    def test_inline_evidence_indicator_url_must_match_original_url(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-001](https://example.org/wrong-source)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-001 URL does not match its Original URL",
+        )
+
+    def test_claim_mapping_checks_every_claims_section(self) -> None:
+        second_record = extract_exact(
+            APPENDIX_DOCUMENT,
+            "##### F-001",
+            "\n#### Visual and archival sources",
+        )
+        second_record = replace_exact(
+            second_record,
+            "##### F-001",
+            "##### F-002",
+        )
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "\n#### Visual\n",
+            "\n#### Claims\n"
+            "- `F-002` — A second factual claim (`VERIFIED`).\n\n"
+            "#### Visual\n",
+        )
+        document = replace_exact(
+            document,
+            "\n#### Visual and archival sources",
+            "\n" + second_record + "\n#### Visual and archival sources",
+        )
+        self.assert_error(
+            document,
+            "Beat 01 Claims references F-002 but narration has no inline evidence indicator",
+        )
+
+    def test_inline_indicator_mapping_checks_every_narration_section(self) -> None:
+        second_record = extract_exact(
+            APPENDIX_DOCUMENT,
+            "##### F-001",
+            "\n#### Visual and archival sources",
+        )
+        second_record = replace_exact(
+            second_record,
+            "##### F-001",
+            "##### F-002",
+        )
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "#### Story function\n",
+            "#### Narration\n"
+            "> A second narration section. "
+            "[F-002](https://doi.org/10.1016/j.anbehav.2022.08.013)\n\n"
+            "#### Story function\n",
+        )
+        document = replace_exact(
+            document,
+            "#### Visual\n",
+            "#### Visual\n- Supporting evidence record: `F-002`.\n",
+        )
+        document = replace_exact(
+            document,
+            "\n#### Visual and archival sources",
+            "\n" + second_record + "\n#### Visual and archival sources",
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-002 is not mapped in Claims",
+        )
+
     def test_ordinary_markdown_link_is_not_removed_as_evidence_metadata(self) -> None:
         document = replace_exact(
             COMPLETED_DOCUMENT,

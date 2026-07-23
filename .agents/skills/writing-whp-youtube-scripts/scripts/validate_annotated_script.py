@@ -969,6 +969,60 @@ def _validate_asset_record(
             errors.append(f"Record {record.record_id} has invalid asset Status: {status!r}.")
 
 
+def _validate_inline_evidence_indicators(
+    beats_text: str,
+    records_by_id: dict[str, list[Record]],
+    fields_by_record: dict[int, dict[str, str]],
+    errors: list[str],
+) -> None:
+    for beat_id, beat in _beat_blocks(beats_text):
+        narration = "\n".join(_section_bodies(beat, "Narration"))
+        claims = "\n".join(_section_bodies(beat, "Claims"))
+        claim_ids = {
+            record_id
+            for record_id in REFERENCE_ID_RE.findall(claims)
+            if record_id.startswith("F-")
+        }
+        indicators = list(INLINE_EVIDENCE_LINK_RE.finditer(narration))
+        indicator_ids = {match.group("record_id") for match in indicators}
+
+        for record_id in sorted(claim_ids - indicator_ids):
+            errors.append(
+                f"Beat {beat_id} Claims references {record_id} but narration has no "
+                "inline evidence indicator."
+            )
+
+        for match in indicators:
+            record_id = match.group("record_id")
+            url = match.group("url")
+            if record_id not in claim_ids:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} is not "
+                    "mapped in Claims."
+                )
+
+            records = records_by_id.get(record_id, [])
+            if not records:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} has no "
+                    "matching evidence record."
+                )
+                continue
+            if len(records) != 1:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} requires "
+                    f"exactly one evidence record; found {len(records)}."
+                )
+                continue
+
+            expected_url = fields_by_record[id(records[0])].get("Original URL")
+            if expected_url and url != expected_url:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} URL does "
+                    f"not match its Original URL: {expected_url}."
+                )
+
+
 def _validate_references(
     reference_text: str,
     references_text: str,
@@ -1012,6 +1066,13 @@ def _validate_references(
             _validate_evidence_record(record, fields, errors)
         else:
             _validate_asset_record(record, fields, errors)
+
+    _validate_inline_evidence_indicators(
+        reference_text,
+        records_by_id,
+        fields_by_record,
+        errors,
+    )
 
     for record_id in sorted(referenced_ids):
         count = len(records_by_id.get(record_id, []))
