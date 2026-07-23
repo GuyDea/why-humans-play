@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  rmSync,
   statSync,
   symlinkSync,
   writeFileSync,
@@ -30,10 +31,15 @@ describe('writeArtifact', () => {
     'whp-youtube/drafts/example.md',
     'whp-youtube/topic-runs/example.md',
     'whp-youtube/PIPELINE.md',
-  ])('writes %s and creates its parent directories', (relPath) => {
+  ])('writes %s and creates its parent directories', async (relPath) => {
     const repoRoot = makeRepo();
 
-    const result = writeArtifact(repoRoot, relPath, 'approved content\n');
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'approved content\n',
+      { expectNew: true },
+    );
 
     expect(readFileSync(join(repoRoot, relPath), 'utf8')).toBe('approved content\n');
     expect(result).toEqual({
@@ -50,29 +56,35 @@ describe('writeArtifact', () => {
     'whp-youtube/episodes/example.md',
     'whp-youtube/topics',
     'whp-youtube/PIPELINE.md/child.md',
-  ])('rejects non-whitelisted or unsafe path %s', (relPath) => {
+  ])('rejects non-whitelisted or unsafe path %s', async (relPath) => {
     const repoRoot = makeRepo();
 
-    expect(() => writeArtifact(repoRoot, relPath, 'nope')).toThrow(
+    await expect(writeArtifact(
+      repoRoot,
+      relPath,
+      'nope',
+      { expectNew: true },
+    )).rejects.toThrow(
       /artifact path/i,
     );
   });
 
-  it('rejects a whitelisted path whose parent escapes through a symlink', () => {
+  it('rejects a whitelisted path whose parent escapes through a symlink', async () => {
     const repoRoot = makeRepo();
     const outside = mkdtempSync(join(tmpdir(), 'repo-artifacts-outside-'));
     mkdirSync(join(repoRoot, 'whp-youtube'), { recursive: true });
     symlinkSync(outside, join(repoRoot, 'whp-youtube', 'topics'));
 
-    expect(() => writeArtifact(
+    await expect(writeArtifact(
       repoRoot,
       'whp-youtube/topics/escaped.md',
       'nope',
-    )).toThrow(/artifact path/i);
+      { expectNew: true },
+    )).rejects.toThrow(/artifact path/i);
     expect(readdirSync(outside)).toEqual([]);
   });
 
-  it('replaces an existing artifact through a same-directory rename', () => {
+  it('replaces an existing artifact through a same-directory rename', async () => {
     const repoRoot = makeRepo();
     const relPath = 'whp-youtube/drafts/example.md';
     const target = join(repoRoot, relPath);
@@ -80,21 +92,23 @@ describe('writeArtifact', () => {
     writeFileSync(target, 'old');
     const oldInode = statSync(target).ino;
 
-    writeArtifact(repoRoot, relPath, 'new');
+    await writeArtifact(repoRoot, relPath, 'new', {
+      expectedHash: sha256('old'),
+    });
 
     expect(readFileSync(target, 'utf8')).toBe('new');
     expect(statSync(target).ino).not.toBe(oldInode);
     expect(readdirSync(dirname(target))).toEqual(['example.md']);
   });
 
-  it('refuses a stale expected hash without clobbering the current file', () => {
+  it('refuses a stale expected hash without clobbering the current file', async () => {
     const repoRoot = makeRepo();
     const relPath = 'whp-youtube/topics/example.md';
     const target = join(repoRoot, relPath);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, 'external edit');
 
-    const result = writeArtifact(repoRoot, relPath, 'our edit', {
+    const result = await writeArtifact(repoRoot, relPath, 'our edit', {
       expectedHash: sha256('stale content'),
     });
 
@@ -106,14 +120,14 @@ describe('writeArtifact', () => {
     expect(readdirSync(dirname(target))).toEqual(['example.md']);
   });
 
-  it('writes when the expected hash matches the current file', () => {
+  it('writes when the expected hash matches the current file', async () => {
     const repoRoot = makeRepo();
     const relPath = 'whp-youtube/topics/example.md';
     const target = join(repoRoot, relPath);
     mkdirSync(dirname(target), { recursive: true });
     writeFileSync(target, 'expected content');
 
-    const result = writeArtifact(repoRoot, relPath, 'replacement', {
+    const result = await writeArtifact(repoRoot, relPath, 'replacement', {
       expectedHash: sha256('expected content'),
     });
 
@@ -123,13 +137,118 @@ describe('writeArtifact', () => {
     });
     expect(readFileSync(target, 'utf8')).toBe('replacement');
   });
+
+  it('conflicts when an existing file has no expected state', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'external edit');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our edit',
+      undefined as never,
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external edit'),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('external edit');
+  });
+
+  it('conflicts when a replacement target was unexpectedly deleted', async () => {
+    const repoRoot = makeRepo();
+
+    const result = await writeArtifact(
+      repoRoot,
+      'whp-youtube/topics/missing.md',
+      'replacement',
+      { expectedHash: sha256('expected content') },
+    );
+
+    expect(result).toEqual({ conflict: true, currentHash: 'absent' });
+  });
+
+  it('conflicts when a creation target is unexpectedly present', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'external file');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'new file',
+      { expectNew: true },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external file'),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('external file');
+  });
+
+  it('preserves an external mutation at the final replacement boundary', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        beforeFinalIdentityCheck: () => {
+          writeFileSync(target, 'external mutation');
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external mutation'),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('external mutation');
+    expect(readdirSync(dirname(target))).toEqual(['example.md']);
+  });
+
+  it('preserves an external deletion at the final replacement boundary', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        beforeFinalIdentityCheck: () => {
+          rmSync(target);
+        },
+      },
+    );
+
+    expect(result).toEqual({ conflict: true, currentHash: 'absent' });
+    expect(readdirSync(dirname(target))).toEqual([]);
+  });
 });
 
 describe('upsertPipelineRow', () => {
-  it('creates PIPELINE.md with a Markdown table and the keyed row', () => {
+  it('creates PIPELINE.md with a Markdown table and the keyed row', async () => {
     const repoRoot = makeRepo();
 
-    upsertPipelineRow(repoRoot, {
+    await upsertPipelineRow(repoRoot, {
       episodeSlug: 'why-we-play',
       milestone: 'creative-approved',
       ref: 'whp-youtube/drafts/why-we-play.md',
@@ -144,7 +263,7 @@ describe('upsertPipelineRow', () => {
       ].join('\n'));
   });
 
-  it('updates the row keyed by episode slug while preserving all other content', () => {
+  it('updates the row keyed by episode slug while preserving all other content', async () => {
     const repoRoot = makeRepo();
     const pipelinePath = join(repoRoot, 'whp-youtube', 'PIPELINE.md');
     mkdirSync(dirname(pipelinePath), { recursive: true });
@@ -160,7 +279,7 @@ describe('upsertPipelineRow', () => {
       '',
     ].join('\n'));
 
-    upsertPipelineRow(repoRoot, {
+    await upsertPipelineRow(repoRoot, {
       episodeSlug: 'why-we-play',
       milestone: 'creative-approved',
       ref: 'whp-youtube/drafts/why-we-play.md',
@@ -179,7 +298,7 @@ describe('upsertPipelineRow', () => {
     ].join('\n'));
   });
 
-  it('appends a new keyed row to the existing table without changing other rows', () => {
+  it('appends a new keyed row to the existing table without changing other rows', async () => {
     const repoRoot = makeRepo();
     const pipelinePath = join(repoRoot, 'whp-youtube', 'PIPELINE.md');
     mkdirSync(dirname(pipelinePath), { recursive: true });
@@ -190,7 +309,7 @@ describe('upsertPipelineRow', () => {
       '',
     ].join('\n'));
 
-    upsertPipelineRow(repoRoot, {
+    await upsertPipelineRow(repoRoot, {
       episodeSlug: 'why-we-play',
       milestone: 'topic-approved',
       ref: 'whp-youtube/topics/why-we-play.md',

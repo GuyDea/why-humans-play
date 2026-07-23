@@ -67,14 +67,31 @@ export class JobSupervisor {
 
   enqueue(
     env: Omit<JobEnvelope, 'jobId'> & { jobId?: string },
-    opts: { resumedFrom?: string } = {},
+    opts: {
+      resumedFrom?: string;
+      operation?: {
+        id: string;
+        name: string;
+        deadlineAt: string;
+        createdAt: string;
+      };
+    } = {},
   ): string {
     const jobId = env.jobId ?? randomUUID();
     const jobDir = join(this.jobsRoot, jobId);
     mkdirSync(jobDir, { recursive: true });
     const full: JobEnvelope = { ...env, jobId };
     writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(full));
-    this.store.create(full, jobDir, opts);
+    if (opts.operation) {
+      this.store.createOperationWithJob(
+        opts.operation,
+        full,
+        jobDir,
+        { resumedFrom: opts.resumedFrom },
+      );
+    } else {
+      this.store.create(full, jobDir, { resumedFrom: opts.resumedFrom });
+    }
     this.tick();
     return jobId;
   }
@@ -273,6 +290,9 @@ export class JobSupervisor {
     mkdirSync(jobDir, { recursive: true });
     const fresh: JobEnvelope = { ...env, jobId: retryId, resumeThreadId: undefined };
     writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(fresh));
-    this.store.create(fresh, jobDir, { retryOf: job.id });
+    this.store.create(fresh, jobDir, {
+      retryOf: job.id,
+      operationId: job.operationId ?? undefined,
+    });
   }
 }

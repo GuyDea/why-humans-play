@@ -136,6 +136,15 @@ const opId = submit.json.id as string;
 const firstEvents = await a.sse(`/api/ops/${opId}/events`, { collectMs: 6000 });
 const lastId = firstEvents.filter((e) => e.id).at(-1)?.id;
 check('SSE streamed initial events', firstEvents.length > 0 && !!lastId, `${firstEvents.length} events, lastId ${lastId}`);
+const preKillRecord = await a.get(`/api/ops/${opId}`);
+const preKillIsActive = preKillRecord.json
+  && ['queued', 'running', 'cancelling'].includes(preKillRecord.json.state);
+const preKillDoneCount = firstEvents.filter((e) => e.event === 'done').length;
+check(
+  'operation is active with no done before SIGKILL',
+  preKillIsActive && preKillDoneCount === 0,
+  `state ${preKillRecord.json?.state}, done ${preKillDoneCount}`,
+);
 
 child.kill('SIGKILL');
 await new Promise((r) => setTimeout(r, 500));
@@ -144,8 +153,16 @@ a = api(hs);
 check('daemon restarted with fresh handshake', hs.port > 0 && hs.nonce.length >= 16);
 
 const tail = await a.sse(`/api/ops/${opId}/events`, { lastEventId: lastId, collectMs: 20 * 60_000 });
-const tailIds = tail.filter((e) => e.id).map((e) => Number(e.id));
-check('SSE reconnect resumes after Last-Event-ID', tailIds.length === 0 || tailIds[0]! > Number(lastId), `first tail id ${tailIds[0]}`);
+const resumedCodex = tail.filter(
+  (e) => e.event === 'codex'
+    && e.id !== ''
+    && Number(e.id) > Number(lastId),
+);
+check(
+  'SSE reconnect resumes after Last-Event-ID',
+  resumedCodex.length >= 1,
+  `resumed codex events ${resumedCodex.length}, first id ${resumedCodex[0]?.id}`,
+);
 
 const rec = await waitTerminal(a, opId, 20 * 60_000);
 check('op survived daemon restart to completion', rec.state === 'completed', rec.state);
@@ -172,8 +189,18 @@ await new Promise((r) => setTimeout(r, 5000));
 const cancelRes = await a.post(`/api/ops/${c.json.id}/cancel`, {});
 check('cancel accepted', cancelRes.status === 200, `status ${cancelRes.status}`);
 const cRec = await waitTerminal(a, c.json.id, 120_000);
-const cEvents = await a.get(`/api/ops/${c.json.id}`);
-check('cancelled with events preserved', cRec.state === 'cancelled', cRec.state);
+const cEvents = await a.sse(`/api/ops/${c.json.id}/events`, {
+  collectMs: 120_000,
+});
+const cancelledCodexCount = cEvents.filter((e) => e.event === 'codex').length;
+const cancelledDoneCount = cEvents.filter((e) => e.event === 'done').length;
+check(
+  'cancelled with events preserved and one terminal done',
+  cRec.state === 'cancelled'
+    && cancelledCodexCount >= 1
+    && cancelledDoneCount === 1,
+  `state ${cRec.state}, codex ${cancelledCodexCount}, done ${cancelledDoneCount}`,
+);
 
 child.kill('SIGTERM');
 const failed = results.filter(([, ok]) => !ok);

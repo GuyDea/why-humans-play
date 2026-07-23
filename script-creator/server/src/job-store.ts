@@ -1,8 +1,16 @@
 import Database from 'better-sqlite3';
-import type { JobEnvelope, JobRecord, JobState, RunnerUsage } from './types.js';
+import type {
+  JobEnvelope,
+  JobRecord,
+  JobState,
+  OperationState,
+  RunnerUsage,
+  StoredOperation,
+} from './types.js';
 
 interface JobRow {
   id: string;
+  operation_id: string | null;
   state: JobState;
   envelope_json: string;
   job_dir: string;
@@ -20,6 +28,14 @@ interface JobRow {
   error: string | null;
 }
 
+interface OperationRow {
+  id: string;
+  name: string;
+  deadline_at: string;
+  created_at: string;
+  state: OperationState;
+}
+
 interface CancellationRow {
   cancel_requested_at: string | null;
   cancel_deadline_at: string | null;
@@ -31,8 +47,16 @@ export interface CancellationRequest {
 }
 
 const SCHEMA = `
+CREATE TABLE IF NOT EXISTS operations (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  deadline_at TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  state TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS jobs (
   id TEXT PRIMARY KEY,
+  operation_id TEXT,
   state TEXT NOT NULL,
   envelope_json TEXT NOT NULL,
   job_dir TEXT NOT NULL,
@@ -52,10 +76,13 @@ CREATE TABLE IF NOT EXISTS jobs (
   cancel_deadline_at TEXT
 );`;
 
-function ensureCancellationColumns(db: Database.Database): void {
+function ensureJobColumns(db: Database.Database): void {
   const columns = new Set(
     db.prepare<[], { name: string }>('PRAGMA table_info(jobs)').all().map((column) => column.name),
   );
+  if (!columns.has('operation_id')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN operation_id TEXT');
+  }
   if (!columns.has('cancel_requested_at')) {
     db.exec('ALTER TABLE jobs ADD COLUMN cancel_requested_at TEXT');
   }
@@ -67,6 +94,7 @@ function ensureCancellationColumns(db: Database.Database): void {
 function toRecord(row: JobRow): JobRecord {
   return {
     id: row.id,
+    operationId: row.operation_id,
     state: row.state,
     envelopeJson: row.envelope_json,
     jobDir: row.job_dir,
@@ -85,6 +113,30 @@ function toRecord(row: JobRow): JobRecord {
   };
 }
 
+function toOperation(row: OperationRow): StoredOperation {
+  return {
+    id: row.id,
+    name: row.name,
+    deadlineAt: row.deadline_at,
+    createdAt: row.created_at,
+    state: row.state,
+  };
+}
+
+interface CreateJobOptions {
+  retryOf?: string;
+  resumedFrom?: string;
+  operationId?: string;
+  createdAt?: string;
+}
+
+interface CreateOperationInput {
+  id: string;
+  name: string;
+  deadlineAt: string;
+  createdAt: string;
+}
+
 export class JobStore {
   private readonly db: Database.Database;
 
@@ -93,15 +145,69 @@ export class JobStore {
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('synchronous = FULL');
     this.db.exec(SCHEMA);
-    ensureCancellationColumns(this.db);
+    ensureJobColumns(this.db);
+    this.db.exec(
+      'CREATE INDEX IF NOT EXISTS jobs_operation_id_idx ON jobs(operation_id)',
+    );
   }
 
-  create(env: JobEnvelope, jobDir: string, opts: { retryOf?: string; resumedFrom?: string } = {}): JobRecord {
-    this.db.prepare(
-      `INSERT INTO jobs (id, state, envelope_json, job_dir, retry_of, resumed_from, created_at)
-       VALUES (?, 'queued', ?, ?, ?, ?, ?)`,
-    ).run(env.jobId, JSON.stringify(env), jobDir, opts.retryOf ?? null, opts.resumedFrom ?? null, new Date().toISOString());
+  create(
+    env: JobEnvelope,
+    jobDir: string,
+    opts: CreateJobOptions = {},
+  ): JobRecord {
+    this.insertJob(env, jobDir, opts);
+    if (opts.operationId !== undefined) {
+      this.updateOperationFromActiveAttempt(opts.operationId);
+    }
     return this.get(env.jobId)!;
+  }
+
+  createOperationWithJob(
+    operation: CreateOperationInput,
+    env: JobEnvelope,
+    jobDir: string,
+    opts: Pick<CreateJobOptions, 'resumedFrom'> = {},
+  ): JobRecord {
+    this.db.transaction(() => {
+      this.db.prepare(
+        `INSERT INTO operations (id, name, deadline_at, created_at, state)
+         VALUES (?, ?, ?, ?, 'queued')`,
+      ).run(
+        operation.id,
+        operation.name,
+        operation.deadlineAt,
+        operation.createdAt,
+      );
+      this.insertJob(env, jobDir, {
+        ...opts,
+        operationId: operation.id,
+        createdAt: operation.createdAt,
+      });
+    })();
+    return this.get(env.jobId)!;
+  }
+
+  private insertJob(
+    env: JobEnvelope,
+    jobDir: string,
+    opts: CreateJobOptions,
+  ): void {
+    this.db.prepare(
+      `INSERT INTO jobs (
+         id, operation_id, state, envelope_json, job_dir, retry_of,
+         resumed_from, created_at
+       )
+       VALUES (?, ?, 'queued', ?, ?, ?, ?, ?)`,
+    ).run(
+      env.jobId,
+      opts.operationId ?? null,
+      JSON.stringify(env),
+      jobDir,
+      opts.retryOf ?? null,
+      opts.resumedFrom ?? null,
+      opts.createdAt ?? new Date().toISOString(),
+    );
   }
 
   get(id: string): JobRecord | null {
@@ -109,14 +215,63 @@ export class JobStore {
     return row ? toRecord(row) : null;
   }
 
+  getOperation(id: string): StoredOperation | null {
+    const row = this.db.prepare<[string], OperationRow>(
+      'SELECT * FROM operations WHERE id = ?',
+    ).get(id);
+    return row ? toOperation(row) : null;
+  }
+
+  nonTerminalOperations(): StoredOperation[] {
+    return this.db.prepare<[], OperationRow>(
+      `SELECT * FROM operations
+       WHERE state IN ('queued', 'running', 'cancelling')
+       ORDER BY created_at`,
+    ).all().map(toOperation);
+  }
+
+  operationAttempts(operationId: string): JobRecord[] {
+    return this.db.prepare<[string], JobRow>(
+      'SELECT * FROM jobs WHERE operation_id = ? ORDER BY rowid',
+    ).all(operationId).map(toRecord);
+  }
+
+  activeAttempt(operationId: string): JobRecord | null {
+    const row = this.db.prepare<[string], JobRow>(
+      `SELECT * FROM jobs
+       WHERE operation_id = ?
+       ORDER BY rowid DESC
+       LIMIT 1`,
+    ).get(operationId);
+    return row ? toRecord(row) : null;
+  }
+
   setState(id: string, state: JobState, error?: string): void {
-    const finished = ['completed', 'failed', 'cancelled', 'invalid-output', 'interrupted'].includes(state);
-    const now = new Date().toISOString();
+    this.db.transaction(() => {
+      const finished = [
+        'completed',
+        'failed',
+        'cancelled',
+        'invalid-output',
+        'interrupted',
+      ].includes(state);
+      const now = new Date().toISOString();
+      this.db.prepare(
+        `UPDATE jobs SET state = ?, error = COALESCE(?, error),
+         started_at = CASE WHEN ? = 'running' THEN COALESCE(started_at, ?) ELSE started_at END,
+         finished_at = COALESCE(?, finished_at) WHERE id = ?`,
+      ).run(state, error ?? null, state, now, finished ? now : null, id);
+      const operationId = this.get(id)?.operationId;
+      if (operationId !== null && operationId !== undefined) {
+        this.updateOperationFromActiveAttempt(operationId);
+      }
+    })();
+  }
+
+  markOperationTimedOut(id: string): void {
     this.db.prepare(
-      `UPDATE jobs SET state = ?, error = COALESCE(?, error),
-       started_at = CASE WHEN ? = 'running' THEN COALESCE(started_at, ?) ELSE started_at END,
-       finished_at = COALESCE(?, finished_at) WHERE id = ?`,
-    ).run(state, error ?? null, state, now, finished ? now : null, id);
+      "UPDATE operations SET state = 'timed-out' WHERE id = ?",
+    ).run(id);
   }
 
   setThreadId(id: string, threadId: string): void {
@@ -167,6 +322,16 @@ export class JobStore {
 
   jobsRetriedFrom(id: string): JobRecord[] {
     return this.db.prepare<[string], JobRow>('SELECT * FROM jobs WHERE retry_of = ?').all(id).map(toRecord);
+  }
+
+  private updateOperationFromActiveAttempt(operationId: string): void {
+    const operation = this.getOperation(operationId);
+    if (!operation || operation.state === 'timed-out') return;
+    const active = this.activeAttempt(operationId);
+    if (!active) return;
+    this.db.prepare(
+      'UPDATE operations SET state = ? WHERE id = ?',
+    ).run(active.state, operationId);
   }
 
   close(): void {

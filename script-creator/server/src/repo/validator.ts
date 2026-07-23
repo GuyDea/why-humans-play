@@ -1,5 +1,13 @@
 import { spawn } from 'node:child_process';
-import { isAbsolute, resolve, win32 } from 'node:path';
+import { lstatSync, realpathSync } from 'node:fs';
+import {
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+  sep,
+  win32,
+} from 'node:path';
 
 export interface ValidatorDiagnostic {
   message: string;
@@ -34,6 +42,46 @@ export function assertValidatorScriptPath(scriptRelPath: string): void {
     || !scriptRelPath.startsWith('whp-youtube/')
     || scriptRelPath.length === 'whp-youtube/'.length
   ) {
+    throw new InvalidValidatorPathError(scriptRelPath);
+  }
+}
+
+function resolveValidatorTarget(
+  repoRoot: string,
+  scriptRelPath: string,
+): string {
+  try {
+    const canonicalRepoRoot = realpathSync(repoRoot);
+    const components = scriptRelPath.split('/');
+    let current = canonicalRepoRoot;
+    for (const [index, component] of components.entries()) {
+      current = join(current, component);
+      const stat = lstatSync(current);
+      const isFinal = index === components.length - 1;
+      if (
+        stat.isSymbolicLink()
+        || (isFinal ? !stat.isFile() : !stat.isDirectory())
+      ) {
+        throw new InvalidValidatorPathError(scriptRelPath);
+      }
+    }
+
+    const canonicalWhpRoot = realpathSync(
+      join(canonicalRepoRoot, 'whp-youtube'),
+    );
+    const canonicalTarget = realpathSync(current);
+    const targetWithinWhp = relative(canonicalWhpRoot, canonicalTarget);
+    if (
+      targetWithinWhp === ''
+      || targetWithinWhp === '..'
+      || targetWithinWhp.startsWith(`..${sep}`)
+      || isAbsolute(targetWithinWhp)
+    ) {
+      throw new InvalidValidatorPathError(scriptRelPath);
+    }
+    return canonicalTarget;
+  } catch (error) {
+    if (error instanceof InvalidValidatorPathError) throw error;
     throw new InvalidValidatorPathError(scriptRelPath);
   }
 }
@@ -75,10 +123,8 @@ export async function runValidatorJson(
     repoRoot,
     '.agents/skills/writing-whp-youtube-scripts/scripts',
   );
-  const target = options.absoluteTargetForTests ?? resolve(
-    repoRoot,
-    scriptRelPath,
-  );
+  const target = options.absoluteTargetForTests
+    ?? resolveValidatorTarget(repoRoot, scriptRelPath);
   if (
     options.absoluteTargetForTests !== undefined
     && !isAbsolute(options.absoluteTargetForTests)

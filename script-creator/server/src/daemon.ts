@@ -128,6 +128,7 @@ export function createDaemonContext(
       store: jobStore,
       jobsRoot: dirs.jobsRoot,
     });
+    supervisor.reattach();
     const operationService = new OperationService({
       supervisor,
       store: jobStore,
@@ -141,13 +142,8 @@ export function createDaemonContext(
         write: (
           relPath: string,
           content: string,
-          expectedHash?: string,
-        ) => writeArtifact(
-          repoRoot,
-          relPath,
-          content,
-          expectedHash === undefined ? {} : { expectedHash },
-        ),
+          expectedState: Parameters<typeof writeArtifact>[3],
+        ) => writeArtifact(repoRoot, relPath, content, expectedState),
         upsertPipelineRow: (
           row: Parameters<typeof upsertPipelineRow>[1],
         ) => upsertPipelineRow(repoRoot, row),
@@ -157,7 +153,6 @@ export function createDaemonContext(
           runValidatorJson(repoRoot, scriptRelPath),
       },
     });
-    supervisor.reattach();
     const activeSupervisor = supervisor;
     const activeDocumentStore = documentStore;
 

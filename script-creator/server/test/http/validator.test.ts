@@ -1,11 +1,29 @@
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { buildApp } from '../../src/http/app.js';
-import type { ValidatorResult } from '../../src/repo/validator.js';
+import {
+  runValidatorJson,
+  type ValidatorResult,
+} from '../../src/repo/validator.js';
 import { UNUSED_DOCUMENT_SERVICE } from './stubs.js';
 
 const NONCE = 'task-15-validator-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
 const apps: Array<ReturnType<typeof buildApp>> = [];
+const fixtures: string[] = [];
+const REAL_SCRIPTS_DIR = resolve(
+  import.meta.dirname,
+  '../../../..',
+  '.agents/skills/writing-whp-youtube-scripts/scripts',
+);
 
 function makeApp(validate: (path: string) => Promise<ValidatorResult>) {
   const app = buildApp({
@@ -29,6 +47,9 @@ function makeApp(validate: (path: string) => Promise<ValidatorResult>) {
 
 afterEach(async () => {
   for (const app of apps.splice(0)) await app.close();
+  for (const fixture of fixtures.splice(0)) {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 describe('validator HTTP API', () => {
@@ -71,6 +92,32 @@ describe('validator HTTP API', () => {
       error: 'invalid or non-whitelisted validator path: ../secret.md',
     });
     expect(validate).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when an in-repo path escapes through a symlink', async () => {
+    const fixture = mkdtempSync(join(tmpdir(), 'validator-http-symlink-'));
+    fixtures.push(fixture);
+    const repoRoot = join(fixture, 'repo');
+    const outside = join(fixture, 'outside');
+    mkdirSync(join(repoRoot, 'whp-youtube'), { recursive: true });
+    mkdirSync(outside);
+    writeFileSync(join(outside, 'script.md'), '# Outside\n', 'utf8');
+    symlinkSync(outside, join(repoRoot, 'whp-youtube', 'linked'));
+    const app = makeApp((path) => runValidatorJson(repoRoot, path, {
+      scriptsDir: REAL_SCRIPTS_DIR,
+    }));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/validate',
+      headers: AUTH,
+      payload: { path: 'whp-youtube/linked/script.md' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      error: 'invalid or non-whitelisted validator path: whp-youtube/linked/script.md',
+    });
   });
 
   it('requires a string path', async () => {

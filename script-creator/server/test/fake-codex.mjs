@@ -12,6 +12,23 @@ const resumeIdx = argv.indexOf('resume');
 const resumeId = resumeIdx >= 0 ? argv[resumeIdx + 1] : null;
 const schemaIdx = argv.indexOf('--output-schema');
 const hasSchema = schemaIdx >= 0;
+let attemptMode = mode;
+if (mode === 'slow-operation-schema') attemptMode = 'operation-schema';
+if (
+  mode === 'invalid-schema-once'
+  || mode === 'invalid-schema-then-hang'
+) {
+  const marker = process.env.FAKE_CODEX_ATTEMPT_FILE;
+  if (!marker) throw new Error(`${mode} requires FAKE_CODEX_ATTEMPT_FILE`);
+  if (existsSync(marker)) {
+    attemptMode = mode === 'invalid-schema-once'
+      ? 'operation-schema'
+      : 'hang';
+  } else {
+    writeFileSync(marker, 'first attempt failed schema validation');
+    attemptMode = 'bad-schema-output';
+  }
+}
 
 const fixture = join(import.meta.dirname, 'fixtures',
   mode === 'turn-failed'
@@ -26,16 +43,16 @@ if (mode === 'partial-usage') {
     ? { type: 'turn.completed', usage: { input_tokens: e.usage.input_tokens } }
     : e);
 }
-if (mode === 'bad-schema-output') {
+if (attemptMode === 'bad-schema-output') {
   lines = lines.map((e) =>
     e.type === 'item.completed' && e.item?.type === 'agent_message'
       ? { ...e, item: { ...e.item, text: '{"unexpected":true}' } } : e);
 }
-if (mode === 'operation-schema' || mode === 'operation-guardrail') {
-  const status = mode === 'operation-guardrail'
+if (attemptMode === 'operation-schema' || attemptMode === 'operation-guardrail') {
+  const status = attemptMode === 'operation-guardrail'
     ? process.env.FAKE_OPERATION_STATUS ?? 'declined'
     : 'complete';
-  const guardrail = mode === 'operation-guardrail'
+  const guardrail = attemptMode === 'operation-guardrail'
     ? 'This request crosses the approved scope.'
     : null;
   lines = lines.map((e) =>
@@ -85,13 +102,13 @@ const lateUsage = mode === 'late-usage'
 if (lateUsage) lines = lines.filter((e) => e !== lateUsage);
 
 if (mode === 'ignore-sigint') process.on('SIGINT', () => {});
-const delay = mode === 'slow' ? 400 : 10;
+const delay = mode === 'slow' || mode === 'slow-operation-schema' ? 400 : 10;
 let emitted = 0;
 for (const e of lines) {
   writeSync(process.stdout.fd, JSON.stringify(e) + '\n');
   emitted += 1;
   if (mode === 'malformed-json' && emitted === 2) writeSync(process.stdout.fd, '{broken\n');
-  if (mode === 'hang' && emitted === 2) { setInterval(() => {}, 60_000); await new Promise(() => {}); }
+  if (attemptMode === 'hang' && emitted === 2) { setInterval(() => {}, 60_000); await new Promise(() => {}); }
   await new Promise((r) => setTimeout(r, delay));
   if (mode === 'ignore-sigint' && emitted === 2) {
     await new Promise((r) => setTimeout(r, 60_000)); // survives SIGINT; SIGKILL only

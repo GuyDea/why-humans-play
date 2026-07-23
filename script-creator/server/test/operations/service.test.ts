@@ -57,6 +57,12 @@ class ManualClock implements OperationClock {
       next.callback();
     }
   }
+
+  pendingDelays(): number[] {
+    return this.timers
+      .map((timer) => timer.at - this.time)
+      .sort((a, b) => a - b);
+  }
 }
 
 interface Fixture {
@@ -85,6 +91,7 @@ function makeFixture(
     env: {
       ...extraEnv,
       FAKE_CODEX_MODE: mode,
+      FAKE_CODEX_ATTEMPT_FILE: join(root, 'attempt.marker'),
       PATH: `${binDir}:${process.env.PATH ?? ''}`,
     },
   });
@@ -196,6 +203,80 @@ describe('OperationService', () => {
     fixture.clock.advance(1);
 
     expect((await terminal(fixture, id)).state).toBe('cancelled');
+  });
+
+  it('re-arms the original persisted deadline after recreation and lets the operation complete', async () => {
+    const fixture = makeFixture('slow-operation-schema');
+    const id = submit(fixture, 'rewrite-selection', {
+      selection: 'Finish before the durable deadline.',
+    });
+    await waitFor(() => fixture.store.get(id)?.state === 'running');
+    fixture.clock.advance(1_000);
+
+    const restartedClock = new ManualClock(fixture.clock.now());
+    const restarted = new OperationService({
+      supervisor: fixture.supervisor,
+      store: fixture.store,
+      clock: restartedClock,
+    });
+
+    expect(restartedClock.pendingDelays()).toEqual([
+      SCOPED_TIMEOUT_MS - 1_000,
+    ]);
+    await terminal(fixture, id);
+    expect(restarted.result(id).kind).toBe('schema');
+    restartedClock.advance(SCOPED_TIMEOUT_MS);
+    expect(restarted.get(id).state).toBe('completed');
+  });
+
+  it('fires an overdue persisted deadline immediately after recreation', async () => {
+    const fixture = makeFixture('hang');
+    const id = submit(fixture, 'rewrite-selection', {
+      selection: 'Still running when the daemon restarts.',
+    });
+    await waitFor(() => fixture.service.events(id).length >= 2);
+    await waitFor(() => fixture.store.get(id)?.state === 'running');
+
+    const restartedClock = new ManualClock(
+      fixture.clock.now() + SCOPED_TIMEOUT_MS + 1,
+    );
+    const restarted = new OperationService({
+      supervisor: fixture.supervisor,
+      store: fixture.store,
+      clock: restartedClock,
+    });
+
+    expect((await terminal(fixture, id)).state).toBe('cancelled');
+    expect(restarted.get(id).state).toBe('timed-out');
+    expect(restarted.result(id)).toEqual({
+      kind: 'failed',
+      error: expect.stringMatching(/timed out/i),
+    });
+  });
+
+  it('keeps a schema retry on the original operation deadline', async () => {
+    const fixture = makeFixture('invalid-schema-then-hang');
+    const id = submit(fixture, 'rewrite-selection', {
+      selection: 'The retry must not receive a fresh timeout window.',
+    });
+    const retry = await waitFor(() => {
+      const attempts = fixture.store.operationAttempts(id);
+      const latest = attempts.at(-1);
+      return attempts.length === 2 && latest?.state === 'running'
+        ? latest
+        : undefined;
+    });
+
+    expect(retry.retryOf).toBe(id);
+    expect(retry.operationId).toBe(id);
+    fixture.clock.advance(SCOPED_TIMEOUT_MS);
+    await fixture.supervisor.waitForTerminal(retry.id, 5_000);
+
+    expect(fixture.service.get(id).state).toBe('timed-out');
+    expect(fixture.service.result(id)).toEqual({
+      kind: 'failed',
+      error: expect.stringMatching(/timed out/i),
+    });
   });
 
   it('flags a running operation after 120 seconds without a new event', async () => {

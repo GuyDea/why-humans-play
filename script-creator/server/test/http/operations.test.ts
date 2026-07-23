@@ -40,6 +40,7 @@ function makeFixture(mode: string): Fixture {
     pollMs: 20,
     env: {
       FAKE_CODEX_MODE: mode,
+      FAKE_CODEX_ATTEMPT_FILE: join(root, 'attempt.marker'),
       PATH: `${binDir}:${process.env.PATH ?? ''}`,
     },
   });
@@ -190,6 +191,47 @@ describe('operations HTTP API', () => {
     expect(sseEventSequences(queryReconnect.body)).toEqual(expectedTail);
     expect(headerReconnect.body).toMatch(/event: done/);
     expect(queryReconnect.body).toMatch(/event: done/);
+  });
+
+  it('keeps one public id and one final done across a schema retry', async () => {
+    const fixture = makeFixture('invalid-schema-once');
+    const id = await submit(fixture);
+
+    const stream = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}/events`,
+      headers: AUTH,
+    });
+
+    const attempts = fixture.store.operationAttempts(id);
+    expect(attempts).toHaveLength(2);
+    expect(attempts.map((attempt) => attempt.operationId))
+      .toEqual([id, id]);
+    expect(attempts[1]!.retryOf).toBe(attempts[0]!.id);
+    expect(sseEventSequences(stream.body)).toEqual(
+      fixture.service.events(id).map((event) => event.seq),
+    );
+    expect(sseEventSequences(stream.body)).toEqual(
+      [...sseEventSequences(stream.body)].sort((a, b) => a - b),
+    );
+    expect(stream.body.match(/^event: done$/gm)).toHaveLength(1);
+
+    const record = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}`,
+      headers: AUTH,
+    });
+    expect(record.json()).toMatchObject({ id, state: 'completed' });
+
+    const result = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}/result`,
+      headers: AUTH,
+    });
+    expect(result.json()).toMatchObject({
+      kind: 'schema',
+      value: { replacement_markdown: 'Rewritten passage.' },
+    });
   });
 
   it('resumes an operation with fresh inputs over HTTP', async () => {

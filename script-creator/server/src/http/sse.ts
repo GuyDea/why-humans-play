@@ -6,8 +6,7 @@ import {
   readSync,
 } from 'node:fs';
 import { StringDecoder } from 'node:string_decoder';
-import { jobPaths } from '../runner-status.js';
-import type { CodexEvent, JobState } from '../types.js';
+import type { CodexEvent, OperationState } from '../types.js';
 import type { OperationService } from '../operations/service.js';
 
 const SSE_ROUTE = /^\/api\/ops\/[^/]+\/events$/;
@@ -16,7 +15,9 @@ const HEARTBEAT_MS = 15_000;
 
 type OperationEventSource =
   & Pick<OperationService, 'events' | 'get'>
-  & Partial<Pick<OperationService, 'state'>>;
+  & Partial<
+    Pick<OperationService, 'state' | 'isTerminal' | 'eventFiles'>
+  >;
 
 export interface SseSink {
   write(chunk: string): boolean | void;
@@ -61,22 +62,28 @@ export async function pumpOperationEvents(
 ): Promise<void> {
   let cursor = fromSeq;
   let nextHeartbeatAt = Date.now() + HEARTBEAT_MS;
-  const initialRecord = source.get(operationId);
-  const fileCursor = source.state && initialRecord.jobDir
-    ? new EventFileCursor(jobPaths(initialRecord.jobDir).eventsFile, fromSeq)
+  source.get(operationId);
+  const fileCursor = source.eventFiles
+    ? new OperationEventFileCursor(fromSeq)
     : undefined;
 
   while (!sink.isClosed?.()) {
-    const events = fileCursor?.read() ?? source.events(operationId, cursor);
+    const events = fileCursor && source.eventFiles
+      ? fileCursor.read(source.eventFiles(operationId))
+      : source.events(operationId, cursor);
     for (const event of events) {
       if (!await writeChunk(sink, formatCodexEvent(event))) return;
       cursor = Math.max(cursor, event.seq);
     }
 
-    const state = source.state
-      ? source.state(operationId)
-      : source.get(operationId).state;
-    if (isTerminal(state)) {
+    const terminal = source.isTerminal
+      ? source.isTerminal(operationId)
+      : isTerminal(
+        source.state
+          ? source.state(operationId)
+          : source.get(operationId).state,
+      );
+    if (terminal) {
       await writeChunk(sink, 'event: done\ndata: {}\n\n');
       return;
     }
@@ -93,16 +100,49 @@ export async function pumpOperationEvents(
   }
 }
 
+class OperationEventFileCursor {
+  private readonly attempts: Array<{
+    file: string;
+    publicOffset: number;
+    cursor: EventFileCursor;
+  }> = [];
+
+  constructor(private readonly fromSeq: number) {}
+
+  read(files: string[]): CodexEvent[] {
+    const events: CodexEvent[] = [];
+    for (const file of files) {
+      let attempt = this.attempts.find((candidate) => candidate.file === file);
+      if (!attempt) {
+        const previous = this.attempts.at(-1);
+        attempt = {
+          file,
+          publicOffset: previous
+            ? previous.publicOffset + previous.cursor.sequence
+            : 0,
+          cursor: new EventFileCursor(file),
+        };
+        this.attempts.push(attempt);
+      }
+      for (const event of attempt.cursor.read()) {
+        const publicEvent = {
+          ...event,
+          seq: attempt.publicOffset + event.seq,
+        };
+        if (publicEvent.seq > this.fromSeq) events.push(publicEvent);
+      }
+    }
+    return events;
+  }
+}
+
 class EventFileCursor {
-  private offset = 0;
-  private sequence = 0;
+  offset = 0;
+  sequence = 0;
   private carry = '';
   private readonly decoder = new StringDecoder('utf8');
 
-  constructor(
-    private readonly file: string,
-    private readonly fromSeq: number,
-  ) {}
+  constructor(private readonly file: string) {}
 
   read(): CodexEvent[] {
     const bytes = this.readAppendedBytes();
@@ -114,7 +154,6 @@ class EventFileCursor {
     for (const raw of lines) {
       if (raw.length === 0) continue;
       this.sequence += 1;
-      if (this.sequence <= this.fromSeq) continue;
       events.push(parseEvent(this.sequence, raw));
     }
     return events;
@@ -177,6 +216,6 @@ function formatCodexEvent(event: CodexEvent): string {
   return `id: ${event.seq}\nevent: codex\ndata: ${event.raw}\n\n`;
 }
 
-function isTerminal(state: JobState): boolean {
+function isTerminal(state: OperationState): boolean {
   return !['queued', 'running', 'cancelling'].includes(state);
 }

@@ -48,8 +48,11 @@ export type JobState =
   | 'queued' | 'running' | 'interrupted' | 'cancelling' | 'cancelled'
   | 'completed' | 'failed' | 'invalid-output';
 
+export type OperationState = JobState | 'timed-out';
+
 export interface JobRecord {
   id: string;
+  operationId: string | null;
   state: JobState;
   envelopeJson: string;
   jobDir: string;
@@ -65,4 +68,12 @@ export interface JobRecord {
   reasoningOutputTokens: number | null;
   usageAvailable: 0 | 1;
   error: string | null;
+}
+
+export interface StoredOperation {
+  id: string;
+  name: string;
+  deadlineAt: string;
+  createdAt: string;
+  state: OperationState;
 }

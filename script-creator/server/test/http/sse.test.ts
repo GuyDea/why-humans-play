@@ -1,18 +1,9 @@
-import {
-  appendFileSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   pumpOperationEvents,
   type SseSink,
 } from '../../src/http/sse.js';
 import type { OperationRecord } from '../../src/operations/service.js';
-import { jobPaths } from '../../src/runner-status.js';
 import type { CodexEvent, JobState } from '../../src/types.js';
 
 function record(state: JobState): OperationRecord {
@@ -82,25 +73,23 @@ describe('operation SSE pump', () => {
     expect(readsBeforeNextInterval).toBe(1);
   });
 
-  it('tails the event file without rereading it through the service', async () => {
+  it('polls public events so the service can follow attempt changes', async () => {
     vi.useFakeTimers();
-    const jobDir = mkdtempSync(join(tmpdir(), 'operation-sse-cursor-'));
-    const eventsFile = jobPaths(jobDir).eventsFile;
-    writeFileSync(
-      eventsFile,
-      '{"type":"thread.started"}\n{"type":"turn.started"}\n',
-    );
+    const events: CodexEvent[] = [
+      { seq: 1, raw: '{"type":"thread.started"}' },
+      { seq: 2, raw: '{"type":"turn.started"}' },
+    ];
     let state: JobState = 'running';
     let recordReads = 0;
     let serviceEventReads = 0;
     const source = {
-      events: () => {
+      events: (_id: string, fromSeq = 0) => {
         serviceEventReads += 1;
-        return [];
+        return events.filter((event) => event.seq > fromSeq);
       },
       get: () => {
         recordReads += 1;
-        return { ...record(state), jobDir };
+        return record(state);
       },
       state: () => state,
     };
@@ -113,20 +102,19 @@ describe('operation SSE pump', () => {
       },
     });
     await vi.advanceTimersByTimeAsync(0);
-    appendFileSync(eventsFile, '{"type":"item.completed"}\n');
+    events.push({ seq: 3, raw: '{"type":"item.completed"}' });
     await vi.advanceTimersByTimeAsync(250);
     state = 'completed';
     await vi.advanceTimersByTimeAsync(250);
     await pumping;
 
     expect(recordReads).toBe(1);
-    expect(serviceEventReads).toBe(0);
+    expect(serviceEventReads).toBe(3);
     expect(chunks.filter((chunk) => chunk.includes('event: codex')))
       .toEqual([
         'id: 2\nevent: codex\ndata: {"type":"turn.started"}\n\n',
         'id: 3\nevent: codex\ndata: {"type":"item.completed"}\n\n',
       ]);
     expect(chunks.at(-1)).toBe('event: done\ndata: {}\n\n');
-    rmSync(jobDir, { recursive: true, force: true });
   });
 });

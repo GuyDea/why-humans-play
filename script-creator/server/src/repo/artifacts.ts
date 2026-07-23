@@ -1,6 +1,8 @@
 import { createHash, randomBytes } from 'node:crypto';
 import {
   closeSync,
+  constants,
+  fstatSync,
   fsyncSync,
   lstatSync,
   mkdirSync,
@@ -23,12 +25,24 @@ import {
 } from 'node:path';
 
 export interface WriteArtifactOptions {
-  expectedHash?: string;
+  expectedHash: string;
+}
+
+export interface WriteNewArtifactOptions {
+  expectNew: true;
+}
+
+export type ArtifactExpectedState =
+  | WriteArtifactOptions
+  | WriteNewArtifactOptions;
+
+export interface ArtifactWriteHooks {
+  beforeFinalIdentityCheck?(): void | Promise<void>;
 }
 
 export type ArtifactWriteResult =
   | { conflict: false; hash: string }
-  | { conflict: true; currentHash: string };
+  | { conflict: true; currentHash: string | 'absent' };
 
 export interface PipelineRow {
   episodeSlug: string;
@@ -42,6 +56,41 @@ const ALLOWED_DIRECTORY_PREFIXES = [
   'whp-youtube/topic-runs/',
 ] as const;
 const PIPELINE_PATH = 'whp-youtube/PIPELINE.md';
+
+class AsyncMutex {
+  private tail = Promise.resolve();
+
+  async run<T>(task: () => T | Promise<T>): Promise<T> {
+    const previous = this.tail;
+    let release = () => {};
+    this.tail = new Promise<void>((resolveLock) => {
+      release = resolveLock;
+    });
+    await previous;
+    try {
+      return await task();
+    } finally {
+      release();
+    }
+  }
+}
+
+const WRITE_MUTEX = new AsyncMutex();
+
+interface FileIdentity {
+  bytes: Buffer;
+  hash: string;
+  dev: bigint;
+  ino: bigint;
+  size: bigint;
+  mtimeNs: bigint;
+  ctimeNs: bigint;
+}
+
+interface IdentityRead {
+  identity: FileIdentity | 'absent';
+  stable: boolean;
+}
 
 function invalidArtifactPath(relPath: string): Error {
   return new Error(`invalid or non-whitelisted artifact path: ${relPath}`);
@@ -94,17 +143,80 @@ function ensureSafeParent(repoRoot: string, target: string, relPath: string): vo
   }
 }
 
-function currentFileHash(target: string, relPath: string): string | undefined {
+function readIdentity(target: string, relPath: string): IdentityRead {
+  let descriptor: number | undefined;
   try {
-    const stat = lstatSync(target);
-    if (stat.isSymbolicLink() || !stat.isFile()) {
+    const pathStat = lstatSync(target, { bigint: true });
+    if (pathStat.isSymbolicLink() || !pathStat.isFile()) {
       throw invalidArtifactPath(relPath);
     }
-    return createHash('sha256').update(readFileSync(target)).digest('hex');
+    descriptor = openSync(
+      target,
+      constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+    );
+    const before = fstatSync(descriptor, { bigint: true });
+    if (!before.isFile()) throw invalidArtifactPath(relPath);
+    const bytes = readFileSync(descriptor);
+    const after = fstatSync(descriptor, { bigint: true });
+    closeSync(descriptor);
+    descriptor = undefined;
+    const latestPath = lstatSync(target, { bigint: true });
+    if (latestPath.isSymbolicLink() || !latestPath.isFile()) {
+      throw invalidArtifactPath(relPath);
+    }
+    return {
+      identity: {
+        bytes,
+        hash: createHash('sha256').update(bytes).digest('hex'),
+        dev: after.dev,
+        ino: after.ino,
+        size: after.size,
+        mtimeNs: after.mtimeNs,
+        ctimeNs: after.ctimeNs,
+      },
+      stable: sameStat(pathStat, before)
+        && sameStat(before, after)
+        && sameStat(after, latestPath),
+    };
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;
+    if (descriptor !== undefined) closeSync(descriptor);
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return { identity: 'absent', stable: true };
+    }
     throw error;
   }
+}
+
+function sameStat(
+  left: ReturnType<typeof lstatSync>,
+  right: ReturnType<typeof lstatSync>,
+): boolean {
+  const a = left as unknown as {
+    dev: bigint;
+    ino: bigint;
+    size: bigint;
+    mtimeNs: bigint;
+    ctimeNs: bigint;
+  };
+  const b = right as unknown as typeof a;
+  return a.dev === b.dev
+    && a.ino === b.ino
+    && a.size === b.size
+    && a.mtimeNs === b.mtimeNs
+    && a.ctimeNs === b.ctimeNs;
+}
+
+function sameIdentity(left: FileIdentity, right: FileIdentity): boolean {
+  return left.dev === right.dev
+    && left.ino === right.ino
+    && left.size === right.size
+    && left.mtimeNs === right.mtimeNs
+    && left.ctimeNs === right.ctimeNs
+    && left.hash === right.hash;
+}
+
+function stateHash(read: IdentityRead): string | 'absent' {
+  return read.identity === 'absent' ? 'absent' : read.identity.hash;
 }
 
 function contentHash(content: string): string {
@@ -204,18 +316,47 @@ export function writeArtifact(
   repoRoot: string,
   relPath: string,
   content: string,
-  options: WriteArtifactOptions = {},
-): ArtifactWriteResult {
+  expectedState: ArtifactExpectedState,
+  hooks: ArtifactWriteHooks = {},
+): Promise<ArtifactWriteResult> {
+  return WRITE_MUTEX.run(() => writeArtifactLocked(
+    repoRoot,
+    relPath,
+    content,
+    expectedState,
+    hooks,
+  ));
+}
+
+async function writeArtifactLocked(
+  repoRoot: string,
+  relPath: string,
+  content: string,
+  expectedState: ArtifactExpectedState | undefined,
+  hooks: ArtifactWriteHooks,
+): Promise<ArtifactWriteResult> {
   const resolved = resolveArtifactPath(repoRoot, relPath);
   ensureSafeParent(resolved.repoRoot, resolved.target, relPath);
 
-  const currentHash = currentFileHash(resolved.target, relPath);
-  if (
-    options.expectedHash !== undefined
-    && currentHash !== undefined
-    && currentHash !== options.expectedHash
-  ) {
-    return { conflict: true, currentHash };
+  const initial = readIdentity(resolved.target, relPath);
+  const replacing = expectedState !== undefined
+    && 'expectedHash' in expectedState;
+  const creating = expectedState !== undefined
+    && 'expectNew' in expectedState
+    && expectedState.expectNew === true;
+  if (!replacing && !creating) {
+    return { conflict: true, currentHash: stateHash(initial) };
+  }
+  if (replacing) {
+    if (
+      initial.identity === 'absent'
+      || !initial.stable
+      || initial.identity.hash !== expectedState.expectedHash
+    ) {
+      return { conflict: true, currentHash: stateHash(initial) };
+    }
+  } else if (initial.identity !== 'absent') {
+    return { conflict: true, currentHash: stateHash(initial) };
   }
 
   const tempPath = join(
@@ -230,11 +371,19 @@ export function writeArtifact(
     closeSync(tempFd);
     tempFd = undefined;
 
-    if (options.expectedHash !== undefined) {
-      const latestHash = currentFileHash(resolved.target, relPath);
-      if (latestHash !== undefined && latestHash !== options.expectedHash) {
-        return { conflict: true, currentHash: latestHash };
+    await hooks.beforeFinalIdentityCheck?.();
+    const latest = readIdentity(resolved.target, relPath);
+    if (replacing) {
+      if (
+        initial.identity === 'absent'
+        || latest.identity === 'absent'
+        || !latest.stable
+        || !sameIdentity(initial.identity, latest.identity)
+      ) {
+        return { conflict: true, currentHash: stateHash(latest) };
       }
+    } else if (latest.identity !== 'absent') {
+      return { conflict: true, currentHash: stateHash(latest) };
     }
 
     renameSync(tempPath, resolved.target);
@@ -248,18 +397,31 @@ export function writeArtifact(
 export function upsertPipelineRow(
   repoRoot: string,
   row: PipelineRow,
-): ArtifactWriteResult {
-  const resolved = resolveArtifactPath(repoRoot, PIPELINE_PATH);
-  const existingHash = currentFileHash(resolved.target, PIPELINE_PATH);
-  const existing = existingHash === undefined
-    ? ''
-    : readFileSync(resolved.target, 'utf8');
-  const content = upsertPipelineContent(existing, row);
-
-  return writeArtifact(
-    repoRoot,
-    PIPELINE_PATH,
-    content,
-    existingHash === undefined ? {} : { expectedHash: existingHash },
-  );
+  hooks: ArtifactWriteHooks = {},
+): Promise<ArtifactWriteResult> {
+  return WRITE_MUTEX.run(async () => {
+    const resolved = resolveArtifactPath(repoRoot, PIPELINE_PATH);
+    ensureSafeParent(resolved.repoRoot, resolved.target, PIPELINE_PATH);
+    const existing = readIdentity(resolved.target, PIPELINE_PATH);
+    if (!existing.stable) {
+      return { conflict: true, currentHash: stateHash(existing) };
+    }
+    const content = upsertPipelineContent(
+      existing.identity === 'absent'
+        ? ''
+        : existing.identity.bytes.toString('utf8'),
+      row,
+    );
+    const expectedState: ArtifactExpectedState =
+      existing.identity === 'absent'
+        ? { expectNew: true }
+        : { expectedHash: existing.identity.hash };
+    return writeArtifactLocked(
+      repoRoot,
+      PIPELINE_PATH,
+      content,
+      expectedState,
+      hooks,
+    );
+  });
 }

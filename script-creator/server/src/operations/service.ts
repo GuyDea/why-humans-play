@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { JobStore } from '../job-store.js';
@@ -5,9 +6,9 @@ import { jobPaths } from '../runner-status.js';
 import type { JobSupervisor } from '../supervisor.js';
 import type {
   CodexEvent,
-  JobEnvelope,
   JobRecord,
-  JobState,
+  OperationState,
+  StoredOperation,
 } from '../types.js';
 import { buildEnvelopePrompt } from './envelope.js';
 import {
@@ -44,8 +45,11 @@ export interface OperationClock {
   setTimeout(callback: () => void, delayMs: number): unknown;
 }
 
-export interface OperationRecord extends JobRecord {
+export interface OperationRecord
+  extends Omit<JobRecord, 'id' | 'operationId' | 'state'> {
+  id: string;
   operation: OperationName;
+  state: OperationState;
   stalled: boolean;
 }
 
@@ -69,6 +73,7 @@ export class OperationService {
     this.supervisor = opts.supervisor;
     this.store = opts.store;
     this.clock = opts.clock ?? SYSTEM_CLOCK;
+    this.rearmDeadlines();
   }
 
   submit(
@@ -76,22 +81,21 @@ export class OperationService {
     inputs: unknown,
     opts: { resumeOf?: string } = {},
   ): string {
-    const operation = (OPERATIONS as Record<string, OperationDefinition>)[opName];
-    if (!operation) throw new Error(`unknown operation: ${opName}`);
+    const definition = this.definition(opName);
     if (inputs === undefined) throw new Error('full inputs are required');
 
     let resumedFrom: string | undefined;
     let resumeThreadId: string | undefined;
     if (opts.resumeOf !== undefined) {
-      const parent = this.requireJob(opts.resumeOf);
-      const parentOperation = this.operationFor(parent);
-      if (parentOperation.name !== operation.name) {
+      const parentOperation = this.requireOperation(opts.resumeOf);
+      const parent = this.activeAttempt(parentOperation.id);
+      if (parentOperation.name !== definition.name) {
         throw new Error(
-          `cannot resume ${parentOperation.name} as ${operation.name}`,
+          `cannot resume ${parentOperation.name} as ${definition.name}`,
         );
       }
-      if (!operation.resumable) {
-        throw new Error(`operation ${operation.name} is not resumable`);
+      if (!definition.resumable) {
+        throw new Error(`operation ${definition.name} is not resumable`);
       }
       if (this.resumeDepth(parent) >= 3) {
         throw new Error('maximum resume chain length is 3');
@@ -103,59 +107,113 @@ export class OperationService {
       resumeThreadId = parent.threadId;
     }
 
-    const id = this.supervisor.enqueue({
-      prompt: buildEnvelopePrompt(operation, inputs),
+    const id = randomUUID();
+    const createdAtMs = this.clock.now();
+    const createdAt = new Date(createdAtMs).toISOString();
+    const deadlineAt = new Date(
+      createdAtMs + TIMEOUT_MS[definition.timeoutClass],
+    ).toISOString();
+    this.supervisor.enqueue({
+      jobId: id,
+      prompt: buildEnvelopePrompt(definition, inputs),
       cwd: REPO_ROOT,
-      sandbox: operation.sandbox,
-      outputSchema: operation.result.kind === 'schema'
-        ? operation.result.schema
+      sandbox: definition.sandbox,
+      outputSchema: definition.result.kind === 'schema'
+        ? definition.result.schema
         : undefined,
       resumeThreadId,
-    }, { resumedFrom });
-    this.activity.set(id, { lastSeq: 0, lastEventAt: this.clock.now() });
-    this.clock.setTimeout(() => this.timeout(id), TIMEOUT_MS[operation.timeoutClass]);
+    }, {
+      resumedFrom,
+      operation: {
+        id,
+        name: definition.name,
+        deadlineAt,
+        createdAt,
+      },
+    });
+    this.activity.set(id, { lastSeq: 0, lastEventAt: createdAtMs });
+    this.armDeadline(id, Date.parse(deadlineAt));
     return id;
   }
 
   get(id: string): OperationRecord {
-    const job = this.requireJob(id);
-    const operation = this.operationFor(job);
-    this.observeEvents(job, this.supervisor.events(id));
-    const activity = this.activityFor(job);
+    const operation = this.requireOperation(id);
+    const job = this.activeAttempt(id);
+    const events = this.events(id);
+    this.observeEvents(id, job, events);
+    const activity = this.activityFor(id, job);
     return {
       ...job,
+      id: operation.id,
       operation: operation.name as OperationName,
+      state: operation.state === 'timed-out'
+        ? 'timed-out'
+        : job.state,
       stalled: job.state === 'running'
         && this.clock.now() - activity.lastEventAt >= STALL_MS,
     };
   }
 
+  /**
+   * Public sequence numbers concatenate each attempt's persisted sequence
+   * space. Attempt N starts after the final sequence emitted by attempt N-1.
+   */
   events(id: string, fromSeq = 0): CodexEvent[] {
-    const job = this.requireJob(id);
-    const events = this.supervisor.events(id, fromSeq);
-    this.observeEvents(job, events);
-    return events;
+    this.requireOperation(id);
+    const publicEvents: CodexEvent[] = [];
+    let offset = 0;
+    for (const attempt of this.store.operationAttempts(id)) {
+      const attemptEvents = this.supervisor.events(attempt.id);
+      for (const event of attemptEvents) {
+        const publicEvent = { ...event, seq: offset + event.seq };
+        if (publicEvent.seq > fromSeq) publicEvents.push(publicEvent);
+      }
+      offset += attemptEvents.at(-1)?.seq ?? 0;
+    }
+    const active = this.activeAttempt(id);
+    this.observeEvents(id, active, publicEvents);
+    return publicEvents;
   }
 
-  state(id: string): JobState {
-    return this.requireJob(id).state;
+  eventFiles(id: string): string[] {
+    this.requireOperation(id);
+    return this.store.operationAttempts(id).map(
+      (attempt) => jobPaths(attempt.jobDir).eventsFile,
+    );
+  }
+
+  state(id: string): OperationState {
+    return this.get(id).state;
+  }
+
+  isTerminal(id: string): boolean {
+    const operation = this.requireOperation(id);
+    const active = this.activeAttempt(id);
+    return isTerminalState(operation.state) && isTerminalState(active.state);
   }
 
   cancel(id: string): void {
-    this.requireJob(id);
-    this.supervisor.cancel(id);
+    this.requireOperation(id);
+    this.supervisor.cancel(this.activeAttempt(id).id);
   }
 
   result(id: string): OperationServiceResult {
-    const job = this.requireJob(id);
-    const operation = this.operationFor(job);
+    const operation = this.requireOperation(id);
+    const job = this.activeAttempt(id);
+    const definition = this.definition(operation.name);
+    if (operation.state === 'timed-out') {
+      return {
+        kind: 'failed',
+        error: `operation timed out at its ${operation.deadlineAt} deadline`,
+      };
+    }
     if (['queued', 'running', 'cancelling'].includes(job.state)) {
       return { kind: 'pending' };
     }
     if (job.state !== 'completed') {
       return {
         kind: 'failed',
-        error: job.error ?? this.defaultError(job),
+        error: job.error ?? this.defaultError(job.state),
       };
     }
 
@@ -164,7 +222,7 @@ export class OperationService {
       return { kind: 'failed', error: 'operation produced no final result' };
     }
     const markdown = readFileSync(finalMessageFile, 'utf8');
-    if (operation.result.kind === 'raw') {
+    if (definition.result.kind === 'raw') {
       return { kind: 'raw', markdown };
     }
     try {
@@ -174,31 +232,36 @@ export class OperationService {
     } catch (error) {
       return {
         kind: 'failed',
-        error: error instanceof Error ? error.message : 'invalid structured result',
+        error: error instanceof Error
+          ? error.message
+          : 'invalid structured result',
       };
     }
   }
 
-  private requireJob(id: string): JobRecord {
-    const job = this.store.get(id);
-    if (!job) throw new Error(`operation not found: ${id}`);
+  private requireOperation(id: string): StoredOperation {
+    const operation = this.store.getOperation(id);
+    if (!operation) throw new Error(`operation not found: ${id}`);
+    return operation;
+  }
+
+  private activeAttempt(operationId: string): JobRecord {
+    const job = this.store.activeAttempt(operationId);
+    if (!job) {
+      throw new Error(`operation ${operationId} has no persisted attempt`);
+    }
     return job;
   }
 
-  private operationFor(job: JobRecord): OperationDefinition {
-    let prompt: string;
-    try {
-      prompt = (JSON.parse(job.envelopeJson) as JobEnvelope).prompt;
-    } catch {
-      throw new Error(`operation ${job.id} has an invalid persisted envelope`);
-    }
-    const operation = Object.values(OPERATIONS).find((candidate) =>
-      prompt.startsWith(
-        `$${candidate.skill}\nOperation: ${candidate.operationLabel}\nInputs: `,
-      ));
-    if (!operation) {
-      throw new Error(`operation ${job.id} has an unknown persisted envelope`);
-    }
+  private requireJob(id: string): JobRecord {
+    const job = this.store.get(id);
+    if (!job) throw new Error(`operation attempt not found: ${id}`);
+    return job;
+  }
+
+  private definition(name: string): OperationDefinition {
+    const operation = (OPERATIONS as Record<string, OperationDefinition>)[name];
+    if (!operation) throw new Error(`unknown operation: ${name}`);
     return operation;
   }
 
@@ -215,19 +278,41 @@ export class OperationService {
     return depth;
   }
 
-  private timeout(id: string): void {
-    const job = this.store.get(id);
-    if (job && (job.state === 'queued' || job.state === 'running')) {
-      this.supervisor.cancel(id);
+  private rearmDeadlines(): void {
+    for (const operation of this.store.nonTerminalOperations()) {
+      this.armDeadline(operation.id, Date.parse(operation.deadlineAt));
     }
   }
 
-  private observeEvents(job: JobRecord, events: CodexEvent[]): void {
+  private armDeadline(id: string, deadline: number): void {
+    const delay = deadline - this.clock.now();
+    if (delay <= 0) {
+      this.timeout(id);
+      return;
+    }
+    this.clock.setTimeout(() => this.timeout(id), delay);
+  }
+
+  private timeout(id: string): void {
+    const operation = this.store.getOperation(id);
+    if (!operation || isTerminalState(operation.state)) return;
+    const job = this.store.activeAttempt(id);
+    this.store.markOperationTimedOut(id);
+    if (job && ['queued', 'running'].includes(job.state)) {
+      this.supervisor.cancel(job.id);
+    }
+  }
+
+  private observeEvents(
+    operationId: string,
+    job: JobRecord,
+    events: CodexEvent[],
+  ): void {
     const lastSeq = events.at(-1)?.seq;
     if (lastSeq === undefined) return;
-    const activity = this.activity.get(job.id);
+    const activity = this.activity.get(operationId);
     if (!activity || lastSeq > activity.lastSeq) {
-      this.activity.set(job.id, {
+      this.activity.set(operationId, {
         lastSeq,
         lastEventAt: this.lastEventTime(job),
       });
@@ -243,8 +328,8 @@ export class OperationService {
     }
   }
 
-  private activityFor(job: JobRecord): Activity {
-    const existing = this.activity.get(job.id);
+  private activityFor(operationId: string, job: JobRecord): Activity {
+    const existing = this.activity.get(operationId);
     if (existing) return existing;
     const persistedStart = Date.parse(job.startedAt ?? job.createdAt);
     const activity = {
@@ -253,7 +338,7 @@ export class OperationService {
         ? persistedStart
         : this.clock.now(),
     };
-    this.activity.set(job.id, activity);
+    this.activity.set(operationId, activity);
     return activity;
   }
 
@@ -263,10 +348,16 @@ export class OperationService {
     return typeof guardrail === 'string' ? guardrail : null;
   }
 
-  private defaultError(job: JobRecord): string {
-    if (job.state === 'cancelled') return 'operation cancelled';
-    if (job.state === 'interrupted') return 'operation interrupted';
-    if (job.state === 'invalid-output') return 'operation returned invalid output';
+  private defaultError(state: OperationState): string {
+    if (state === 'cancelled') return 'operation cancelled';
+    if (state === 'interrupted') return 'operation interrupted';
+    if (state === 'invalid-output') {
+      return 'operation returned invalid output';
+    }
     return 'operation failed';
   }
+}
+
+function isTerminalState(state: OperationState): boolean {
+  return !['queued', 'running', 'cancelling'].includes(state);
 }
