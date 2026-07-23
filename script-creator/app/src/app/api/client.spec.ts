@@ -218,6 +218,55 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('maps idea inbox calls and authenticates every request', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await client.listIdeas();
+    await client.createIdea({
+      text: 'Why players choose harsher rules',
+      source: 'inbox',
+    });
+    await client.updateIdea('idea/one', { status: 'discarded' });
+    await client.deleteIdea('idea/one');
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/ideas`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/ideas`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          text: 'Why players choose harsher rules',
+          source: 'inbox',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone`,
+        method: 'PATCH',
+        nonce: NONCE,
+        body: JSON.stringify({ status: 'discarded' }),
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone`,
+        method: 'DELETE',
+        nonce: NONCE,
+        body: undefined,
+      },
+    ]);
+  });
+
   it('parses split SSE frames exactly and reconnects with the latest event id after a drop', async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn()

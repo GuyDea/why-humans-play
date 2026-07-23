@@ -62,6 +62,29 @@ export interface OperationListResponse {
   operations: OperationSummary[];
 }
 
+export type IdeaSource = 'inbox' | 'ideate';
+export type IdeaStatus = 'open' | 'promoted' | 'discarded';
+
+export interface IdeaRecord {
+  id: string;
+  text: string;
+  source: IdeaSource;
+  status: IdeaStatus;
+  createdAt: string;
+}
+
+export interface CreateIdeaInput {
+  text: string;
+  source: IdeaSource;
+  status?: IdeaStatus;
+}
+
+export interface UpdateIdeaInput {
+  text?: string;
+  source?: IdeaSource;
+  status?: IdeaStatus;
+}
+
 export type OperationResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -208,6 +231,33 @@ export class DaemonClient {
     return this.request(`/api/ops/${encodeURIComponent(id)}/resume`, {
       method: 'POST',
       body: JSON.stringify({ inputs }),
+    });
+  }
+
+  async listIdeas(): Promise<IdeaRecord[]> {
+    return this.request('/api/ideas');
+  }
+
+  async createIdea(input: CreateIdeaInput): Promise<IdeaRecord> {
+    return this.request('/api/ideas', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async updateIdea(
+    id: string,
+    input: UpdateIdeaInput,
+  ): Promise<IdeaRecord> {
+    return this.request(`/api/ideas/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async deleteIdea(id: string): Promise<void> {
+    await this.request(`/api/ideas/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
     });
   }
 
