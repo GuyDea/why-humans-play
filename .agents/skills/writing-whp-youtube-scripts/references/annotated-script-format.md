@@ -33,23 +33,31 @@ Use this top-level order:
 3. One `## Appendix` heading containing script metadata, production notes, editorial audit
    results, and references.
 
-Do not put header fields, timestamps, targets, story-function labels, claims, citations,
-visuals, edit instructions, on-screen text, audio notes, accessibility notes, assets,
-personal-input fields, viewer-application fields, or editorial commentary in the numbered
-narration layer.
+Do not put header fields, timestamps, targets, story-function labels, claims, citations
+other than required inline evidence indicators, visuals, edit instructions, on-screen text,
+audio notes, accessibility notes, assets, personal-input fields, viewer-application fields,
+or editorial commentary in the numbered narration layer.
 
 ## Numbered narration-only beats
 
 Use ordinary ascending numbers and a descriptive title. The beat body may contain only
-spoken blockquotes, blank lines, and unresolved personal-input markers inside blockquotes:
+spoken blockquotes, blank lines, unresolved personal-input markers inside blockquotes, and
+inline evidence indicators appended to mapped factual narration inside those blockquotes:
 
 ```markdown
 ## 1. Descriptive name
 
-> Clean spoken copy.
+> In 2016, OpenAI reported the experiment. [F-010](https://example.org/original)
 >
-> A second spoken paragraph.
+> This sentence is interpretation, not a new factual claim.
 ```
+
+Append a visible `[F-###](Original URL)` indicator immediately after every mapped factual
+narration sentence or separable factual clause. Treat inline evidence indicators as review
+annotations, not spoken words; exclude them from narration extraction, word count, table
+reads, and teleprompter output. The visible label must exactly match `F-\d{3}`, the target
+must equal that record's `Original URL`, and the same ID must appear in the matching appendix
+beat's `Claims` section. Multiple indicators may follow one clause.
 
 Each numbered beat must have exactly one matching appendix beat entry. Its number and title
 must match exactly; narration beat `## 1. Descriptive name` maps to appendix beat
@@ -373,8 +381,9 @@ because its structure passes.
 
 Build table-read and teleprompter copy by concatenating only the blockquotes in numbered
 beats before `## Appendix`, in beat order. Preserve the spoken words and paragraph order,
-but remove personal-input marker annotations. Never include appendix material in the
-narration-only copy. Count only the extracted spoken words when updating `Word count`.
+but strip personal-input marker annotations and inline evidence indicators. Never include
+appendix material in the narration-only copy. Count only the extracted spoken words after
+those review annotations are removed when updating `Word count`.
 
 ## Validation
 
@@ -388,14 +397,15 @@ Do not hardcode the skill package path or use a vendor-specific environment vari
 
 Use the validator to check that required metadata fields and end sections exist; narration
 and appendix beat IDs and titles match, are well formed, unique, and ascending; narration
-beats contain only spoken blockquotes; every appendix beat contains all required
-production subsections; deliverable-specific personal-input and viewer-application blocks have
-the required cardinality, fields, decision vocabulary, and marker lifecycle; stated
-word count matches extracted narration; motion notes state an animation purpose or
-explicitly decline animation; referenced fact and asset IDs have exactly one record;
-records contain their required fields; required URLs and status values have valid
-forms; and a `RECORD-READY` document has no structurally blocked referenced
-dependencies.
+beats contain only spoken blockquotes and the allowed review annotations; inline evidence
+indicators are stripped from narration extraction and structurally match the same beat's
+`Claims` IDs and each evidence record's `Original URL`; every appendix beat contains all
+required production subsections; deliverable-specific personal-input and viewer-application
+blocks have the required cardinality, fields, decision vocabulary, and marker lifecycle;
+stated word count matches extracted narration; motion notes state an animation purpose or
+explicitly decline animation; referenced fact and asset IDs have exactly one record; records
+contain their required fields; required URLs and status values have valid forms; and a
+`RECORD-READY` document has no structurally blocked referenced dependencies.
 
 Treat the validator as a structural check only. Preserve its limitation exactly:
 
@@ -414,8 +424,11 @@ storytelling, visuals, or editorial judgment are sound.
 
 Avoid these errors:
 
-- Putting production notes, citations, or directions inside narration blockquotes.
+- Putting production notes, directions, or citations other than required inline evidence
+  indicators inside narration blockquotes.
 - Putting metadata or production headings anywhere in the numbered narration layer.
+- Leaving inline evidence indicators in narration-only output, counting them as speech, or
+  using a label, URL, or beat mapping that does not match its evidence record.
 - Letting a narration beat number or title drift from its appendix entry.
 - Inventing first-person material instead of requesting, integrating, or omitting it.
 - Leaving an input marker unresolved after `RESEARCH-DRAFT`, or counting it as speech.

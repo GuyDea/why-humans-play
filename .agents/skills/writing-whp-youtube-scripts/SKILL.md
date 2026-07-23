@@ -60,6 +60,21 @@ specificity to make a draft sound authoritative. Preserve accepted language and 
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+Prefer a documented real-world case for each substantial point and make its damaged goal
+and human cost explicit. When the available factual boundary does not contain a suitable
+case, label a hypothetical clearly instead of making one sound historical.
+For a worldwide pattern, prefer a strong lesser-known case for the developed story when it
+offers useful surprise, then use a short montage of recognizable cases to demonstrate
+global scope.
+Prepare every unfamiliar proper name before first use, then identify it and explain its
+relevance; never drop a name as if the viewer missed an earlier introduction.
+Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
+outcome`. If that chain is not clear on first hearing, replace the example rather than
+defending it with extra setup.
+For an enduring failure pattern, pair one vivid early warning with one compact current echo
+that demonstrates persistence and present relevance. Carry the opening's concrete vocabulary
+into the application and ending only when it keeps the lesson clearer.
+
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or
 timing audit. Treat timing as a post-draft
@@ -87,7 +102,11 @@ For evidence-backed finalization:
    assign confidence to every material claim, and approve only wording its evidence
    supports. Narrow or remove unsupported wording while preserving the approved voice. Map
    every factual narration sentence or separable factual clause to at least one `F-###` ID
-   in the matching appendix beat's `#### Claims` section.
+   in the matching appendix beat's `#### Claims` section. Append a visible
+   `[F-###](Original URL)` indicator immediately after every mapped factual narration
+   sentence or separable factual clause. Treat inline evidence indicators as review
+   annotations, not spoken words; exclude them from narration extraction, word count, table
+   reads, and teleprompter output. Keep the full evidence record in the appendix.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.
@@ -104,8 +123,10 @@ For evidence-backed finalization:
 7. Complete the narration for spoken delivery and show it to Martin before auditing it.
    Read it aloud and revise for speech without imposing a runtime cut first.
 8. The readable script comes first as numbered beats containing only the beat heading and
-   spoken blockquote narration. Put all metadata and production annotations in a final
-   appendix whose beat entries match the narration beat numbers and titles.
+   spoken blockquote narration. Visible inline evidence indicators may appear within those
+   blockquotes as the sole non-spoken review annotations. Put all other metadata and
+   production annotations in a final appendix whose beat entries match the narration beat
+   numbers and titles.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
    retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
@@ -117,6 +138,9 @@ For evidence-backed finalization:
   chronology, or sensory detail.
 - Let confidence control narration. Omit rejected claims. Use an unverified example only
   when it is attributed, explicitly caveated, and non-load-bearing.
+- For incentive-failure examples, show the intended goal, the measure or target, the changed
+  behavior, the number that improved, and the damaged goal and human cost. Direct humor at
+  the mechanism or institution, then say plainly what got worse and who paid.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
   `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it as
   proof of prevalence, causality, or mechanism.
@@ -131,6 +155,8 @@ For evidence-backed finalization:
   ownable fallback, and never call an asset cleared without a documented basis.
 - State the explanatory purpose of each animation. If motion adds no understanding, choose
   a still or no animation.
+- Keep numbered beats narration-only except for visible inline evidence indicators, which
+  are non-spoken review annotations.
 - Keep production notes in the matching appendix beat so their relationship to narration
   remains explicit without interrupting the readable script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or

@@ -45,6 +45,14 @@ in the matching appendix beat's `#### Claims` section. A single ID may cover mul
 when its evidence record supports each one. Jokes, opinions, transitions, and clearly
 signaled hypotheticals do not need invented source markers.
 
+Append a visible `[F-###](Original URL)` indicator immediately after every mapped factual
+narration sentence or separable factual clause. Treat inline evidence indicators as review
+annotations, not spoken words; exclude them from narration extraction, word count, table
+reads, and teleprompter output. Each indicator must use the mapped record's stable ID and
+exact `Original URL`. Repeat the indicator when the same record supports another materially
+separate factual sentence. Do not create indicators for jokes, opinions, transitions,
+clearly labeled hypotheticals, or guidance that makes no empirical efficacy claim.
+
 Record the precise page, table, figure, section, paragraph, or timestamp where
 available, and check chronology separately when comparing retellings.
 
@@ -127,6 +135,8 @@ record.
 Before the word-for-word checks, confirm that every factual narration sentence or separable
 factual clause has a matching appendix-beat `F-###` mapping. Treat an unmapped factual
 statement as unresolved even when its source exists elsewhere in the document.
+Then confirm that each mapped sentence or clause has a visible inline indicator whose label
+and target match the evidence record's stable ID and exact `Original URL`.
 
 1. Compare the narration word for word with `Exact claim`, `Scope`, `Caveat`, and
    `Approved wording`. Retain every limiting scope or modal term; if it does not fit,
