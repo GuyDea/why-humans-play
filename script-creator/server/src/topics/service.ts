@@ -13,6 +13,7 @@ import {
   relative,
   resolve,
 } from 'node:path';
+import { withCreativePhase } from '../documents/service.js';
 import type {
   DraftDocument,
   DraftFormat,
@@ -761,7 +762,7 @@ export class TopicService {
         episodeSlug: input.episodeSlug,
         title: input.title,
         format: input.draft.format,
-        doc: input.draft.doc,
+        doc: withCreativePhase(input.draft.doc, 'architecture'),
       });
       saga = this.advanceHandoff(saga, { draftCreated: true });
     }
@@ -788,7 +789,7 @@ export class TopicService {
     if (!saga.pipelineUpserted) {
       const result = await this.artifactService.upsertPipelineRow({
         episodeSlug: input.episodeSlug,
-        milestone: 'selected',
+        milestone: 'architecture',
         ref: artifactPath,
       });
       if (result.conflict) {

@@ -43,7 +43,7 @@ const DRAFT_DOC = {
     anchors: ['Players voluntarily accept harder rules.'],
     unknowns: ['Which opening proof case is strongest?'],
     approvedLessons: [],
-    creativeStatus: { phase: 'architecture' },
+    creativeStatus: { phase: 'rapid-prototype' },
     directionApproved: false,
   },
   content: [{
@@ -255,6 +255,15 @@ describe('topic handoff saga HTTP API', () => {
       error: null,
     });
     expect(fixture.documentStore.listDrafts()).toHaveLength(1);
+    expect(fixture.documentStore.getDraft('draft-handoff-1')?.doc)
+      .toMatchObject({
+        metadata: { creativeStatus: { phase: 'architecture' } },
+      });
+    expect(fixture.upsert).toHaveBeenCalledWith({
+      episodeSlug: 'voluntary-obstacles',
+      milestone: 'architecture',
+      ref: 'whp-youtube/topics/voluntary-obstacles.md',
+    });
     expect(fixture.topicStore.getIdea('idea-1')?.status).toBe('promoted');
   });
 

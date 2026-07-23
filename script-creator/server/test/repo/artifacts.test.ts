@@ -50,6 +50,7 @@ describe('writeArtifact', () => {
   it.each([
     'whp-youtube/topics/example.md',
     'whp-youtube/drafts/example.md',
+    'whp-youtube/architectures/example.md',
     'whp-youtube/topic-runs/example.md',
     'whp-youtube/PIPELINE.md',
   ])('writes %s and creates its parent directories', async (relPath) => {
@@ -76,6 +77,7 @@ describe('writeArtifact', () => {
     'whp-youtube/topics/../../outside.md',
     'whp-youtube/episodes/example.md',
     'whp-youtube/topics',
+    'whp-youtube/architectures',
     'whp-youtube/PIPELINE.md/child.md',
   ])('rejects non-whitelisted or unsafe path %s', async (relPath) => {
     const repoRoot = makeRepo();

@@ -60,6 +60,7 @@ export interface PipelineRow {
 const ALLOWED_DIRECTORY_PREFIXES = [
   'whp-youtube/topics/',
   'whp-youtube/drafts/',
+  'whp-youtube/architectures/',
   'whp-youtube/topic-runs/',
 ] as const;
 const PIPELINE_PATH = 'whp-youtube/PIPELINE.md';
