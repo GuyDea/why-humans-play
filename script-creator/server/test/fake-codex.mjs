@@ -12,6 +12,7 @@ const resumeIdx = argv.indexOf('resume');
 const resumeId = resumeIdx >= 0 ? argv[resumeIdx + 1] : null;
 const schemaIdx = argv.indexOf('--output-schema');
 const hasSchema = schemaIdx >= 0;
+const schemaFile = hasSchema ? argv[schemaIdx + 1] : null;
 let attemptMode = mode;
 if (mode === 'slow-operation-schema') attemptMode = 'operation-schema';
 if (
@@ -48,24 +49,22 @@ if (attemptMode === 'bad-schema-output') {
     e.type === 'item.completed' && e.item?.type === 'agent_message'
       ? { ...e, item: { ...e.item, text: '{"unexpected":true}' } } : e);
 }
-if (attemptMode === 'operation-schema' || attemptMode === 'operation-guardrail') {
-  const status = attemptMode === 'operation-guardrail'
-    ? process.env.FAKE_OPERATION_STATUS ?? 'declined'
-    : 'complete';
-  const guardrail = attemptMode === 'operation-guardrail'
-    ? 'This request crosses the approved scope.'
-    : null;
+if (hasSchema && attemptMode !== 'bad-schema-output') {
+  if (!schemaFile) throw new Error('--output-schema requires a schema file');
+  const schema = JSON.parse(readFileSync(schemaFile, 'utf8'));
+  const output = synthesizeSchema(schema);
+  if (attemptMode === 'operation-guardrail') {
+    output.status = process.env.FAKE_OPERATION_STATUS ?? 'declined';
+    output.guardrail_markdown = 'This request crosses the approved scope.';
+    if ('replacement_markdown' in output) output.replacement_markdown = '';
+  }
   lines = lines.map((e) =>
     e.type === 'item.completed' && e.item?.type === 'agent_message'
       ? {
           ...e,
           item: {
             ...e.item,
-            text: JSON.stringify({
-              status,
-              replacement_markdown: status === 'complete' ? 'Rewritten passage.' : '',
-              guardrail_markdown: guardrail,
-            }),
+            text: JSON.stringify(output),
           },
         }
       : e);
@@ -128,3 +127,56 @@ if (lateUsage) {
   writer.unref();
 }
 process.exit(0);
+
+function synthesizeSchema(schema, propertyName = '') {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
+    throw new Error(`cannot synthesize schema property ${propertyName || '<root>'}`);
+  }
+
+  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
+    if (propertyName === 'status' && schema.enum.includes('complete')) {
+      return 'complete';
+    }
+    return schema.enum[0];
+  }
+
+  if (
+    Array.isArray(schema.type)
+    && schema.type.length === 2
+    && schema.type.includes('string')
+    && schema.type.includes('null')
+  ) {
+    return null;
+  }
+
+  switch (schema.type) {
+    case 'object': {
+      const properties = schema.properties;
+      const required = Array.isArray(schema.required) ? schema.required : [];
+      if (!properties || typeof properties !== 'object' || Array.isArray(properties)) {
+        throw new Error(`object schema property ${propertyName || '<root>'} has no properties`);
+      }
+      return Object.fromEntries(required.map((name) => [
+        name,
+        synthesizeSchema(properties[name], name),
+      ]));
+    }
+    case 'array':
+      return [synthesizeSchema(schema.items, propertyName)];
+    case 'string':
+      return propertyName === 'replacement_markdown'
+        ? 'Rewritten passage.'
+        : `Fake ${propertyName}.`;
+    case 'number':
+    case 'integer':
+      return 1;
+    case 'boolean':
+      return false;
+    case 'null':
+      return null;
+    default:
+      throw new Error(
+        `unsupported schema type for property ${propertyName || '<root>'}`,
+      );
+  }
+}

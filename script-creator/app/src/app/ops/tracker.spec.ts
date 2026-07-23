@@ -126,6 +126,8 @@ describe('OpTracker', () => {
       { seq: 2, text: 'item.completed' },
     ]);
     expect(tracked.result()).toEqual(schemaResult());
+    expect(tracked.state()).toBe('completed');
+    expect(tracked.errorMessage()).toBeNull();
     expect(tracked.telemetry()).toEqual({
       tokens: 150,
       elapsed: 2_500,
@@ -260,5 +262,27 @@ describe('OpTracker', () => {
       kind: 'failed',
       error: 'daemon unavailable',
     });
+    expect(tracked.state()).toBe('failed');
+    expect(tracked.errorMessage()).toBe('daemon unavailable');
+  });
+
+  it('preserves the exact daemon terminal state and error message', async () => {
+    const tracker = new OpTracker(mockClient({
+      getOp: vi.fn(async () => operationRecord({
+        state: 'invalid-output',
+        error: 'response failed schema validation',
+      })),
+      getResult: vi.fn(async () => ({
+        kind: 'failed',
+        error: 'invalid operation result',
+      })),
+    }), mapConsoleEvents);
+
+    const tracked = tracker.launch('review', inputs, meta);
+    await vi.waitFor(() => expect(tracked.phase()).toBe('failed'));
+
+    expect(tracked.state()).toBe('invalid-output');
+    expect(tracked.errorMessage())
+      .toBe('response failed schema validation');
   });
 });

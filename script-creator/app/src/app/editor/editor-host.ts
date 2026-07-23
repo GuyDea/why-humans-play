@@ -27,6 +27,9 @@ import {
   computeMetrics,
   type DocumentJson,
 } from '../metrics';
+import type {
+  OperationFailurePresentation,
+} from '../ops/failure-presentation';
 import { FindingsPanel } from '../panels/findings-panel';
 import { preserveDraftDocument } from './draft-document';
 import type {
@@ -144,6 +147,40 @@ interface AutosaveSnapshot {
         </p>
       }
 
+      @if (operationFailures().length > 0) {
+        <aside
+          class="operation-failure-callouts"
+          aria-label="Operation failures"
+          aria-live="polite"
+        >
+          @for (
+            failure of operationFailures();
+            track failure.operation + '-' + failure.state + '-' + $index
+          ) {
+            <article role="alert">
+              <strong>{{ failure.operation }} · {{ failure.state }}</strong>
+              <p>{{ failure.reason }}</p>
+            </article>
+          }
+        </aside>
+
+        <ol
+          class="operation-console"
+          aria-label="Operation console"
+          aria-live="polite"
+        >
+          @for (
+            failure of operationFailures();
+            track failure.operation + '-' + failure.state + '-' + $index
+          ) {
+            <li [attr.data-kind]="failure.consoleEntry.kind">
+              <span>{{ failure.consoleEntry.kind }}</span>
+              <pre>{{ failure.consoleEntry.text }}</pre>
+            </li>
+          }
+        </ol>
+      }
+
       @if (guardrails().length > 0) {
         <aside
           class="guardrail-callouts"
@@ -257,6 +294,8 @@ interface AutosaveSnapshot {
     }
 
     .operation-error,
+    .operation-failure-callouts p,
+    .operation-console pre,
     .guardrail-callouts p {
       margin: 0;
     }
@@ -267,6 +306,62 @@ interface AutosaveSnapshot {
       padding: 0.7rem 0.8rem;
       color: var(--whp-accent);
       font-size: 0.78rem;
+    }
+
+    .operation-failure-callouts {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .operation-failure-callouts article {
+      border-left: 3px solid var(--whp-accent);
+      background: var(--whp-accent-tint);
+      padding: 0.75rem 0.85rem;
+    }
+
+    .operation-failure-callouts strong {
+      color: var(--whp-accent);
+      font-size: 0.72rem;
+    }
+
+    .operation-failure-callouts p {
+      margin-top: 0.35rem;
+      color: var(--whp-ink);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .operation-console {
+      margin: 0;
+      padding: 0;
+      border: 1px solid var(--whp-line);
+      background: var(--whp-ink);
+      list-style: none;
+    }
+
+    .operation-console li {
+      display: grid;
+      grid-template-columns: 4.5rem minmax(0, 1fr);
+      gap: 0.65rem;
+      padding: 0.6rem 0.75rem;
+      border-left: 3px solid var(--whp-accent);
+    }
+
+    .operation-console span {
+      color: color-mix(in srgb, var(--whp-ground) 65%, transparent);
+      font-size: 0.62rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .operation-console pre {
+      overflow-wrap: anywhere;
+      color: var(--whp-ground);
+      font-family: var(--whp-font-mono);
+      font-size: 0.7rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
     }
 
     .guardrail-callouts {
@@ -364,6 +459,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly doc = signal<DocumentJson | null>(null);
   readonly findings = signal<readonly FindingLayer[]>([]);
   readonly guardrails = signal<readonly GuardrailCallout[]>([]);
+  readonly operationFailures =
+    signal<readonly OperationFailurePresentation[]>([]);
   readonly operationError = signal<string | null>(null);
   private readonly currentDirty = signal(false);
   private readonly queuedAutosaves = signal(0);
@@ -465,6 +562,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.doc.set(this.persistedDocument(documentNode.toJSON() as DocumentJson));
     this.findings.set([]);
     this.guardrails.set([]);
+    this.operationFailures.set([]);
     this.operationError.set(null);
     this.currentDirty.set(false);
     if (this.queuedAutosaves() === 0) this.saveError.set(null);
@@ -493,9 +591,10 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       container: mount,
       client: this.client(),
       draftDocument: () => this.selectionContextDocument ?? draft.doc,
-      onOutcomes: ({ findings, guardrails }) => {
+      onOutcomes: ({ findings, guardrails, failures }) => {
         this.findings.set(findings);
         this.guardrails.set(guardrails);
+        this.operationFailures.set(failures);
       },
       onLaunch: () => this.operationError.set(null),
       onError: (error) => {

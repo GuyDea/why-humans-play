@@ -292,4 +292,91 @@ describe('SelectionRuntime', () => {
     view.destroy();
     container.remove();
   });
+
+  it('emits a structured terminal failure with a console entry', async () => {
+    const { state, draftDocument, target } = selectedState();
+    const container = document.createElement('div');
+    const mount = document.createElement('div');
+    container.append(mount);
+    document.body.append(container);
+    let afterDispatch = (): void => undefined;
+    const view = new EditorView(mount, {
+      state,
+      nodeViews: variantNodeViews,
+      dispatchTransaction(transaction) {
+        view.updateState(view.state.apply(transaction));
+        afterDispatch();
+      },
+    });
+    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
+      left: position === target.from ? 100 : 180,
+      right: position === target.from ? 100 : 180,
+      top: 80,
+      bottom: 100,
+    }));
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 20,
+      y: 10,
+      left: 20,
+      right: 420,
+      top: 10,
+      bottom: 310,
+      width: 400,
+      height: 300,
+      toJSON: () => ({}),
+    });
+    const client = {
+      submitOp: vi.fn(async () => ({ id: 'op-failed' })),
+      streamEvents: vi.fn(async (
+        _id: string,
+        options: { onDone(): void },
+      ) => options.onDone()),
+      getOp: vi.fn(async () => ({
+        ...completedOperation('op-failed'),
+        state: 'invalid-output' as const,
+        error: 'response failed schema validation',
+      })),
+      getResult: vi.fn(async () => ({
+        kind: 'failed' as const,
+        error: 'invalid operation result',
+      })),
+    } as unknown as DaemonClient;
+    const onOutcomes = vi.fn();
+    const onError = vi.fn();
+    const runtime = new SelectionRuntime({
+      view,
+      container,
+      client,
+      draftDocument: () => draftDocument,
+      onOutcomes,
+      onError,
+    });
+    afterDispatch = () => runtime.handleEditorDispatch();
+
+    runtime.toolbar.element.querySelector<HTMLButtonElement>(
+      'button[data-action="rewrite"]',
+    )!.click();
+
+    await vi.waitFor(() => {
+      expect(onOutcomes).toHaveBeenLastCalledWith({
+        findings: [],
+        guardrails: [],
+        failures: [{
+          operation: 'rewrite-selection',
+          state: 'invalid-output',
+          reason: 'invalid operation result',
+          consoleEntry: {
+            kind: 'failure',
+            text: 'rewrite-selection [invalid-output] invalid operation result',
+          },
+        }],
+      });
+    });
+    expect(onError).not.toHaveBeenCalled();
+    expect(getProposals(view.state)).toEqual([]);
+
+    runtime.destroy();
+    view.destroy();
+    container.remove();
+  });
 });

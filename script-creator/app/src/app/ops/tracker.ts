@@ -9,6 +9,7 @@ import {
   type OperationName,
   type OperationRecord,
   type OperationResult,
+  type OperationState,
   type SseFrame,
 } from '../api/client';
 
@@ -36,8 +37,11 @@ export interface OpTrackerOptions {
 }
 
 export interface TrackedOperation<Meta = unknown, ConsoleEntry = unknown> {
+  readonly operation: OperationName;
   readonly id: Signal<string | null>;
   readonly phase: Signal<OperationPhase>;
+  readonly state: Signal<OperationState | null>;
+  readonly errorMessage: Signal<string | null>;
   readonly events: Signal<readonly SseFrame[]>;
   readonly consoleEntries: Signal<readonly ConsoleEntry[]>;
   readonly result: Signal<OperationResult | null>;
@@ -52,6 +56,8 @@ interface MutableTrackedOperation<Meta, ConsoleEntry>
   extends TrackedOperation<Meta, ConsoleEntry> {
   readonly id: WritableSignal<string | null>;
   readonly phase: WritableSignal<OperationPhase>;
+  readonly state: WritableSignal<OperationState | null>;
+  readonly errorMessage: WritableSignal<string | null>;
   readonly events: WritableSignal<readonly SseFrame[]>;
   readonly consoleEntries: WritableSignal<readonly ConsoleEntry[]>;
   readonly result: WritableSignal<OperationResult | null>;
@@ -115,6 +121,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
   async cancel(id: string): Promise<void> {
     const tracked = this.requireRecord(id);
     await this.client.cancel(id);
+    tracked.state.set('cancelled');
     tracked.phase.set('cancelled');
   }
 
@@ -131,6 +138,8 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     return {
       id,
       phase,
+      state: signal<OperationState | null>(null),
+      errorMessage: signal<string | null>(null),
       events: signal<readonly SseFrame[]>([]),
       consoleEntries: signal<readonly ConsoleEntry[]>([]),
       result: signal<OperationResult | null>(null),
@@ -198,6 +207,8 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
         this.client.getOp(id),
         this.client.getResult(id),
       ]);
+      tracked.state.set(operation.state);
+      tracked.errorMessage.set(operation.error);
       tracked.result.set(result);
       tracked.stallFlag.set(operation.stalled);
       tracked.telemetry.set(operationTelemetry(operation));
@@ -220,6 +231,8 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
         kind: 'failed',
         error: errorMessage(error),
       });
+      tracked.state.set('failed');
+      tracked.errorMessage.set(errorMessage(error));
       tracked.phase.set('failed');
     } finally {
       if (statusTimer !== undefined) {
@@ -235,6 +248,8 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     try {
       const operation = await this.client.getOp(id);
       if (tracked.phase() !== 'streaming') return;
+      tracked.state.set(operation.state);
+      tracked.errorMessage.set(operation.error);
       tracked.stallFlag.set(operation.stalled);
       tracked.telemetry.set(operationTelemetry(operation));
     } catch {

@@ -7,6 +7,10 @@ import type {
   DraftDocument,
 } from '../api/client';
 import type { OperationContext } from '../ops/context';
+import {
+  operationFailurePresentation,
+  type OperationFailurePresentation,
+} from '../ops/failure-presentation';
 import { OpTracker } from '../ops/tracker';
 import { readDraftMetadata } from '../panels/brief-panel';
 import {
@@ -72,6 +76,7 @@ export function selectionSnapshot(
 export interface SelectionRuntimeOutcomes {
   findings: readonly FindingLayer[];
   guardrails: readonly GuardrailCallout[];
+  failures: readonly OperationFailurePresentation[];
 }
 
 export interface SelectionRuntimeOptions {
@@ -92,6 +97,7 @@ export class SelectionRuntime {
     (outcomes: SelectionRuntimeOutcomes) => void;
   private readonly onLaunch: () => void;
   private readonly onError: (error: unknown) => void;
+  private failures: readonly OperationFailurePresentation[] = [];
   private destroyed = false;
 
   constructor(options: SelectionRuntimeOptions) {
@@ -146,10 +152,22 @@ export class SelectionRuntime {
     void value.settled.then(
       (settlement) => {
         if (this.destroyed) return;
-        this.emitOutcomes();
         if (settlement.status === 'failed') {
-          this.onError(new Error(settlement.error));
+          const result = value.tracked.result();
+          const failure = operationFailurePresentation({
+            operation: value.tracked.operation,
+            phase: value.tracked.phase(),
+            state: value.tracked.state(),
+            reason: result?.kind === 'failed' ? result.error : null,
+            errorMessage: value.tracked.errorMessage(),
+          });
+          if (failure) {
+            this.failures = [...this.failures, failure];
+          } else {
+            this.onError(new Error(settlement.error));
+          }
         }
+        this.emitOutcomes();
       },
       (error: unknown) => {
         if (!this.destroyed) this.onError(error);
@@ -161,6 +179,7 @@ export class SelectionRuntime {
     this.onOutcomes({
       findings: this.bridge.findingLayers(),
       guardrails: this.bridge.guardrails(),
+      failures: this.failures,
     });
   }
 }
