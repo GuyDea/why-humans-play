@@ -532,3 +532,54 @@ ideas without becoming a list of terminology.
 ledger. `BRAND.md`, `CLAUDE.md`, historical research, Episode 1, and app implementation
 remain unchanged because this is an authoring-order decision consistent with existing
 brand doctrine and the local app is being changed separately on another branch.
+
+## 2026-07-23 — Complete the Script Creator draft-list contract
+
+**Decision:** Script Creator exposes a nonce-guarded `GET /api/drafts` endpoint returning
+body-free draft summaries ordered by most recent update so the Studio library can list
+saved drafts without loading each document.
+
+**Rationale:** The Studio already calls the collection endpoint, but the daemon registered
+only draft creation and per-ID reads and writes, leaving the library request to fail with a
+404.
+
+**Documents:** This ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no
+content change because this is an internal workbench transport contract. The active Script
+Creator Plan 4 already requires draft listing, while Plan 3 is preserved as the historical
+implementation plan whose endpoint wording left the collection read ambiguous.
+
+## 2026-07-23 — Make durable operations authoritative in Script Creator Console
+
+**Decision:** Script Creator exposes a nonce-guarded `GET /api/ops` endpoint for the 100
+most recent durable operations, newest first, and the routed Console polls that list every
+five seconds as its source of truth while retaining live Studio runtime events only as
+supplemental in-flight detail.
+
+**Rationale:** Navigating to `/console` unmounts the Studio and its runtime, so in-memory
+tracker history cannot survive the route change even though the daemon already persists
+operations and attempts durably.
+
+**Documents:** `docs/superpowers/plans/2026-07-23-script-creator-plan4-studio.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
+because this is an internal workbench runtime and transport contract. The Fix 5 report is
+preserved as a historical verification record; Fix 6 will record the implementation.
+
+## 2026-07-23 — Close Script Studio provenance and live-runtime gaps before merge
+
+**Decision:** Script Studio operation inputs contain only explicit stored draft state, live
+editor state, structural daemon-defined scope, or user-entered text; every asynchronous
+range operation resolves an editor-core-managed live anchor before applying a result; the
+mounted production surface exposes proposal conflicts verbatim; console re-roll requires a
+live owning runtime; editor-core symbols are consumed through its public package root; and
+autosave retries are bounded, supersedable, and cancelled with their owning draft runtime.
+
+**Rationale:** Final review found app-authored editorial fallbacks in submitted envelopes,
+raw coordinates that could drift onto unrelated text, a composition test that bypassed the
+production components, incomplete conflict presentation, detached re-rolls that could
+produce headless results, a private dependency import, and a retry queue that could block
+newer draft state or survive editor teardown.
+
+**Documents:** `docs/superpowers/plans/2026-07-23-script-creator-plan4-studio.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
+because this decision tightens an internal workbench implementation without changing WHP
+brand or channel doctrine. The final-review report remains the detailed fix-wave record.
