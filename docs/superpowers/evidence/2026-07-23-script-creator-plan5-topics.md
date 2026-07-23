@@ -2,8 +2,9 @@
 
 **Date:** 2026-07-23
 **Plan:** [2026-07-23-script-creator-plan5-topics.md](../plans/2026-07-23-script-creator-plan5-topics.md)
-**Deterministic suites at verdict:** server 34 files / 242 tests; app 24 files — green
-on the host; typecheck and `ng build` clean.
+**Deterministic suites at verdict:** server 37 files / 259 tests; app 24 files /
+153 tests — green on the host; typecheck and `ng build` clean (after fix wave 1,
+below).
 
 ## Browser verification (real Chrome, daemon + fake codex, three phases)
 
@@ -11,10 +12,12 @@ on the host; typecheck and `ng build` clean.
   appended as ideate-sourced ideas; per-idea gate-check rendered the six-gate result
   block with verdict badge and persisted to the idea (`latestCheck`), surviving
   reloads.
-- **Full run:** launch → the twelve-row mandated checklist rendered live with the
-  skill's verbatim texts advancing to done → completion produced the report and a
+- **Full run:** launch → the mandated checklist rendered live with the skill's
+  verbatim texts advancing to done → completion produced the report and a
   **33-row sortable candidate board** (11 sort controls), winner card, package
-  directions with survival highlighting.
+  directions with survival highlighting. *(Originally twelve rows under
+  `WHP_PROGRESS/1`; re-verified at thirteen rows under the skill-owned
+  `WHP_PROGRESS/2` manifest after fix wave 1.)*
 - **Durable runs:** after a daemon restart and reload, the completed run appeared in
   the run history, reopened to the full board from the persisted summary, and package
   testing + handoff operated on the durable data.
@@ -50,6 +53,38 @@ a house-rule fix", …) appended to the inbox.
 - **F4 — durable runs UI:** completed runs vanished from the page on reload despite
   durable server rows (the Plan 4 console class, second instance). The run history now
   reads the durable list and reopens boards from persisted summaries.
+
+## Final review fix wave 1 (browser re-verified)
+
+The whole-branch final review returned seven findings
+(`.superpowers/sdd/p5-final-review-report.md`); all were fixed and the affected
+flows re-verified in real Chrome against the daemon + fake codex:
+
+- **WHP_PROGRESS/2:** the live checklist rendered all **thirteen** manifest rows
+  (including the new `06-proof-cases`) with the skill's verbatim texts, heading
+  derived from the manifest count ("13-step checklist", 13/13 done). A server sync
+  test parses `SKILL.md` plus the transport manifest, so future checklist drift
+  fails the suite. The summary now enforces cross-invariants (seven score/grade
+  pairs per shortlist row, exactly three package directions per top-three
+  finalist, winner drawn from the finalists) — the rendered board showed nine
+  package rows across three finalists.
+- **Idempotent handoff saga:** confirm created the draft in phase `architecture`,
+  wrote the brief, upserted the pipeline row, promoted the idea; a second confirm
+  from the reopened durable run navigated to the **same draft id** — still one
+  draft, one pipeline row.
+- **Gate-check lifecycle:** the launch button stayed disabled ("Checking…")
+  through completion *and persistence*, six distinct gates rendered (enum-cycled
+  PASS/FAIL/UNKNOWN), and the persisted check survived reload.
+- **Pipeline navigation:** a draft-less card deep-linked to
+  `/topics?topic=<slug>&ref=<ref>` and the page rendered the repository brief
+  content on arrival.
+- **Pipeline diagnostics:** a deliberately malformed `PIPELINE.md` produced
+  row-numbered diagnostics on the board ("Row 5: … three-cell …", "Row 6:
+  Duplicate … slug", "Row 7: … empty required cell") while valid rows stayed
+  visible; ENOENT still reads as "no pipeline".
+- **Central migrations:** one shared registry owns the state-database version
+  sequence (documents v1–v2, topics v3, gate-check v4, architecture reserved v5)
+  with upgrade tests from v2/v3/v4 shapes.
 
 ## Verdict
 
