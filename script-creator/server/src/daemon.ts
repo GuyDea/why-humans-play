@@ -16,7 +16,10 @@ import { DocumentService } from './documents/service.js';
 import { DocumentStore } from './documents/store.js';
 import { buildApp } from './http/app.js';
 import { JobStore } from './job-store.js';
-import { OperationService } from './operations/service.js';
+import {
+  OperationService,
+  type OperationClock,
+} from './operations/service.js';
 import {
   upsertPipelineRow,
   writeArtifact,
@@ -48,6 +51,7 @@ export interface DaemonContext {
 export interface CreateDaemonContextOptions {
   repoRoot: string;
   env: AppDirEnvironment;
+  clock?: OperationClock;
 }
 
 type DaemonSignal = 'SIGINT' | 'SIGTERM';
@@ -121,6 +125,7 @@ export function createDaemonContext(
   const jobStore = new JobStore(stateDbFile);
   let documentStore: DocumentStore | undefined;
   let supervisor: JobSupervisor | undefined;
+  let operationService: OperationService | undefined;
 
   try {
     documentStore = new DocumentStore(stateDbFile);
@@ -128,11 +133,14 @@ export function createDaemonContext(
       store: jobStore,
       jobsRoot: dirs.jobsRoot,
     });
-    supervisor.reattach();
-    const operationService = new OperationService({
+    operationService = new OperationService({
       supervisor,
       store: jobStore,
+      clock: options.clock,
     });
+    operationService.enforceDeadlinesAtBoot();
+    supervisor.reattach();
+    operationService.reconcileTimedOutAttempts();
     const documentService = new DocumentService({ store: documentStore });
     const app = buildApp({
       nonce,
@@ -155,6 +163,7 @@ export function createDaemonContext(
     });
     const activeSupervisor = supervisor;
     const activeDocumentStore = documentStore;
+    const activeOperationService = operationService;
 
     let closed = false;
     return {
@@ -167,6 +176,7 @@ export function createDaemonContext(
         if (closed) return;
         closed = true;
         try {
+          activeOperationService.dispose();
           activeSupervisor.stop();
         } finally {
           try {
@@ -178,6 +188,7 @@ export function createDaemonContext(
       },
     };
   } catch (error) {
+    operationService?.dispose();
     if (supervisor) supervisor.stop();
     else jobStore.close();
     documentStore?.close();

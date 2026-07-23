@@ -79,6 +79,25 @@ function sseEventSequences(body: string): number[] {
   return [...body.matchAll(/^id: (\d+)$/gm)].map((match) => Number(match[1]));
 }
 
+function rawSseFrames(body: string): Array<{
+  id?: number;
+  event: string;
+  data: string;
+}> {
+  return body.split('\n\n').flatMap((chunk) => {
+    if (chunk.length === 0 || chunk.startsWith(':')) return [];
+    let id: number | undefined;
+    let event = 'message';
+    const data: string[] = [];
+    for (const line of chunk.split('\n')) {
+      if (line.startsWith('id:')) id = Number(line.slice(3).trim());
+      if (line.startsWith('event:')) event = line.slice(6).trim();
+      if (line.startsWith('data:')) data.push(line.slice(5).trim());
+    }
+    return [{ id, event, data: data.join('\n') }];
+  });
+}
+
 async function waitForTerminal(
   fixture: Fixture,
   id: string,
@@ -102,6 +121,7 @@ afterEach(async () => {
       }
     }
     await fixture.app.close();
+    fixture.service.dispose();
     fixture.supervisor.stop();
     rmSync(fixture.root, { recursive: true, force: true });
   }
@@ -208,13 +228,19 @@ describe('operations HTTP API', () => {
     expect(attempts.map((attempt) => attempt.operationId))
       .toEqual([id, id]);
     expect(attempts[1]!.retryOf).toBe(attempts[0]!.id);
-    expect(sseEventSequences(stream.body)).toEqual(
-      fixture.service.events(id).map((event) => event.seq),
-    );
-    expect(sseEventSequences(stream.body)).toEqual(
-      [...sseEventSequences(stream.body)].sort((a, b) => a - b),
-    );
-    expect(stream.body.match(/^event: done$/gm)).toHaveLength(1);
+    const frames = rawSseFrames(stream.body);
+    const codexFrames = frames.filter((frame) => frame.event === 'codex');
+    const ids = codexFrames.map((frame) => frame.id);
+    expect(ids.every((value): value is number => value !== undefined)).toBe(true);
+    expect(ids.every(
+      (value, index) => index === 0 || value! > ids[index - 1]!,
+    )).toBe(true);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(frames.filter((frame) => frame.event === 'done')).toHaveLength(1);
+    expect(codexFrames.some((frame) => frame.data.includes('unexpected')))
+      .toBe(true);
+    expect(codexFrames.some((frame) => frame.data.includes('Rewritten passage.')))
+      .toBe(true);
 
     const record = await fixture.app.inject({
       method: 'GET',
@@ -232,6 +258,48 @@ describe('operations HTTP API', () => {
       kind: 'schema',
       value: { replacement_markdown: 'Rewritten passage.' },
     });
+  });
+
+  it('cancels the active retry attempt with one public done event', async () => {
+    const fixture = makeFixture('invalid-schema-then-hang');
+    const id = await submit(fixture);
+    const retry = await waitFor(() => {
+      const attempts = fixture.store.operationAttempts(id);
+      const active = attempts.at(-1);
+      return attempts.length === 2 && active?.state === 'running'
+        ? active
+        : undefined;
+    });
+
+    const cancelResponse = await fixture.app.inject({
+      method: 'POST',
+      url: `/api/ops/${id}/cancel`,
+      headers: AUTH,
+    });
+    expect(cancelResponse.statusCode).toBe(200);
+
+    const stream = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}/events`,
+      headers: AUTH,
+    });
+    const attempts = fixture.store.operationAttempts(id);
+    expect(attempts[0]).toMatchObject({ state: 'invalid-output' });
+    expect(attempts[1]).toMatchObject({
+      id: retry.id,
+      state: 'cancelled',
+    });
+    expect(fixture.store.activeAttempt(id)?.id).toBe(retry.id);
+    expect(rawSseFrames(stream.body).filter(
+      (frame) => frame.event === 'done',
+    )).toHaveLength(1);
+
+    const record = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}`,
+      headers: AUTH,
+    });
+    expect(record.json()).toMatchObject({ id, state: 'cancelled' });
   });
 
   it('resumes an operation with fresh inputs over HTTP', async () => {

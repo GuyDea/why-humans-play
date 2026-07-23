@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readFileSync,
   readdirSync,
+  renameSync,
   rmSync,
   statSync,
   symlinkSync,
@@ -206,7 +207,7 @@ describe('writeArtifact', () => {
       'our replacement',
       { expectedHash: sha256('expected content') },
       {
-        beforeFinalIdentityCheck: () => {
+        afterSnapshotCreated: () => {
           writeFileSync(target, 'external mutation');
         },
       },
@@ -233,7 +234,7 @@ describe('writeArtifact', () => {
       'our replacement',
       { expectedHash: sha256('expected content') },
       {
-        beforeFinalIdentityCheck: () => {
+        afterSnapshotCreated: () => {
           rmSync(target);
         },
       },
@@ -241,6 +242,35 @@ describe('writeArtifact', () => {
 
     expect(result).toEqual({ conflict: true, currentHash: 'absent' });
     expect(readdirSync(dirname(target))).toEqual([]);
+  });
+
+  it('restores the snapshot when an external rename displaces our replacement', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    const external = join(dirname(target), 'external.md');
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        afterRename: () => {
+          writeFileSync(external, 'external displacement');
+          renameSync(external, target);
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external displacement'),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('expected content');
+    expect(readdirSync(dirname(target))).toEqual(['example.md']);
   });
 });
 
@@ -322,5 +352,38 @@ describe('upsertPipelineRow', () => {
       '| why-we-play | topic-approved | whp-youtube/topics/why-we-play.md |',
       '',
     ].join('\n'));
+  });
+
+  it('preserves an external PIPELINE mutation after its snapshot is created', async () => {
+    const repoRoot = makeRepo();
+    const pipelinePath = join(repoRoot, 'whp-youtube', 'PIPELINE.md');
+    mkdirSync(dirname(pipelinePath), { recursive: true });
+    writeFileSync(pipelinePath, [
+      '| Episode | Milestone | Ref |',
+      '| --- | --- | --- |',
+      '| existing | draft | whp-youtube/drafts/existing.md |',
+      '',
+    ].join('\n'));
+
+    const result = await upsertPipelineRow(
+      repoRoot,
+      {
+        episodeSlug: 'why-we-play',
+        milestone: 'topic-approved',
+        ref: 'whp-youtube/topics/why-we-play.md',
+      },
+      {
+        afterSnapshotCreated: () => {
+          writeFileSync(pipelinePath, 'external pipeline edit\n');
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external pipeline edit\n'),
+    });
+    expect(readFileSync(pipelinePath, 'utf8')).toBe('external pipeline edit\n');
+    expect(readdirSync(dirname(pipelinePath))).toEqual(['PIPELINE.md']);
   });
 });

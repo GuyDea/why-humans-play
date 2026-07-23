@@ -4,6 +4,7 @@ import {
   constants,
   fstatSync,
   fsyncSync,
+  linkSync,
   lstatSync,
   mkdirSync,
   openSync,
@@ -11,6 +12,7 @@ import {
   realpathSync,
   renameSync,
   rmSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import {
@@ -37,7 +39,8 @@ export type ArtifactExpectedState =
   | WriteNewArtifactOptions;
 
 export interface ArtifactWriteHooks {
-  beforeFinalIdentityCheck?(): void | Promise<void>;
+  afterSnapshotCreated?(): void;
+  afterRename?(): void;
 }
 
 export type ArtifactWriteResult =
@@ -341,6 +344,9 @@ async function writeArtifactLocked(
   const initial = readIdentity(resolved.target, relPath);
   const replacing = expectedState !== undefined
     && 'expectedHash' in expectedState;
+  const expectedHash = replacing
+    ? expectedState.expectedHash
+    : undefined;
   const creating = expectedState !== undefined
     && 'expectNew' in expectedState
     && expectedState.expectNew === true;
@@ -363,34 +369,106 @@ async function writeArtifactLocked(
     dirname(resolved.target),
     `.${basename(resolved.target)}.${process.pid}.${randomBytes(8).toString('hex')}.tmp`,
   );
+  const snapshotPath = join(
+    dirname(resolved.target),
+    `.${basename(resolved.target)}.${process.pid}.${randomBytes(8).toString('hex')}.snapshot`,
+  );
   let tempFd: number | undefined;
+  let snapshotCreated = false;
+  let oursDisplacedTarget = false;
   try {
     tempFd = openSync(tempPath, 'wx', 0o666);
     writeFileSync(tempFd, content, 'utf8');
     fsyncSync(tempFd);
-    closeSync(tempFd);
-    tempFd = undefined;
+    const tempIdentity = fstatSync(tempFd, { bigint: true });
 
-    await hooks.beforeFinalIdentityCheck?.();
-    const latest = readIdentity(resolved.target, relPath);
-    if (replacing) {
-      if (
-        initial.identity === 'absent'
-        || latest.identity === 'absent'
-        || !latest.stable
-        || !sameIdentity(initial.identity, latest.identity)
-      ) {
-        return { conflict: true, currentHash: stateHash(latest) };
+    if (creating) {
+      try {
+        linkSync(tempPath, resolved.target);
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code === 'EEXIST') {
+          return {
+            conflict: true,
+            currentHash: stateHash(readIdentity(resolved.target, relPath)),
+          };
+        }
+        throw error;
       }
-    } else if (latest.identity !== 'absent') {
-      return { conflict: true, currentHash: stateHash(latest) };
+      const targetIdentity = lstatSync(resolved.target, { bigint: true });
+      if (
+        !targetIdentity.isFile()
+        || targetIdentity.dev !== tempIdentity.dev
+        || targetIdentity.ino !== tempIdentity.ino
+      ) {
+        return {
+          conflict: true,
+          currentHash: stateHash(readIdentity(resolved.target, relPath)),
+        };
+      }
+      return { conflict: false, hash: contentHash(content) };
+    }
+
+    try {
+      linkSync(resolved.target, snapshotPath);
+      snapshotCreated = true;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return { conflict: true, currentHash: 'absent' };
+      }
+      throw error;
+    }
+
+    hooks.afterSnapshotCreated?.();
+    const snapshot = readIdentity(snapshotPath, relPath);
+    const current = readIdentity(resolved.target, relPath);
+    if (
+      snapshot.identity === 'absent'
+      || !snapshot.stable
+      || snapshot.identity.hash !== expectedHash
+      || current.identity === 'absent'
+      || !current.stable
+      || !sameIdentity(snapshot.identity, current.identity)
+    ) {
+      const currentHash = stateHash(current);
+      unlinkSync(snapshotPath);
+      snapshotCreated = false;
+      return { conflict: true, currentHash };
     }
 
     renameSync(tempPath, resolved.target);
+    oursDisplacedTarget = true;
+    hooks.afterRename?.();
+    const targetIdentity = lstatSync(resolved.target, { bigint: true });
+    if (
+      !targetIdentity.isFile()
+      || targetIdentity.dev !== tempIdentity.dev
+      || targetIdentity.ino !== tempIdentity.ino
+    ) {
+      const currentHash = stateHash(readIdentity(resolved.target, relPath));
+      renameSync(snapshotPath, resolved.target);
+      snapshotCreated = false;
+      oursDisplacedTarget = false;
+      return { conflict: true, currentHash };
+    }
+
+    unlinkSync(snapshotPath);
+    snapshotCreated = false;
+    oursDisplacedTarget = false;
     return { conflict: false, hash: contentHash(content) };
+  } catch (error) {
+    if (snapshotCreated) {
+      if (oursDisplacedTarget) {
+        renameSync(snapshotPath, resolved.target);
+      } else {
+        unlinkSync(snapshotPath);
+      }
+      snapshotCreated = false;
+    }
+    throw error;
   } finally {
     if (tempFd !== undefined) closeSync(tempFd);
     rmSync(tempPath, { force: true });
+    rmSync(snapshotPath, { force: true });
   }
 }
 

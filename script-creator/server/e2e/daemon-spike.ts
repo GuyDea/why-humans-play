@@ -79,10 +79,12 @@ const api = (hs: Handshake) => ({
     const events: Array<{ id: string; data: string; event: string }> = [];
     let buffer = '';
     const stop = Date.now() + opts.collectMs;
+    let postDoneStop: number | undefined;
     for (;;) {
+      const readStop = Math.min(stop, postDoneStop ?? stop);
       const race = await Promise.race([
         reader.read(),
-        new Promise<'timeout'>((r) => setTimeout(() => r('timeout'), Math.max(0, stop - Date.now()))),
+        new Promise<'timeout'>((r) => setTimeout(() => r('timeout'), Math.max(0, readStop - Date.now()))),
       ]);
       if (race === 'timeout') { await reader.cancel().catch(() => {}); break; }
       const { done, value } = race;
@@ -97,9 +99,18 @@ const api = (hs: Handshake) => ({
           if (line.startsWith('data:')) ev.data += line.slice(5).trim();
         }
         if (ev.id || ev.data || ev.event !== 'message') events.push(ev);
-        if (ev.event === 'done') { await reader.cancel().catch(() => {}); return events; }
+        if (ev.event === 'done' && postDoneStop === undefined) {
+          postDoneStop = Date.now() + 2000;
+        }
       }
-      if (done) break;
+      if (done) {
+        const doneDeadline = postDoneStop;
+        if (doneDeadline !== undefined && Date.now() < doneDeadline) {
+          await new Promise((resolve) => setTimeout(resolve, doneDeadline - Date.now()));
+        }
+        await reader.cancel().catch(() => {});
+        break;
+      }
     }
     return events;
   },
@@ -169,6 +180,13 @@ check('op survived daemon restart to completion', rec.state === 'completed', rec
 const result = await a.get(`/api/ops/${opId}/result`);
 check('schema-valid rewrite result', result.json?.kind === 'schema' && typeof result.json?.value?.replacement_markdown === 'string',
   JSON.stringify(result.json?.value?.status));
+const completionDoneCount = [...firstEvents, ...tail]
+  .filter((e) => e.event === 'done').length;
+check(
+  'completion stream emitted exactly one terminal done',
+  completionDoneCount === 1,
+  `done ${completionDoneCount}`,
+);
 check('tokens on record', rec.usageAvailable === 1 && rec.inputTokens > 0,
   `in=${rec.inputTokens} out=${rec.outputTokens} reasoning=${rec.reasoningOutputTokens}`);
 

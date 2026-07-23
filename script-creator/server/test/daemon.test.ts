@@ -19,6 +19,7 @@ import {
   startDaemonContext,
   writeRuntimeFile,
 } from '../src/daemon.js';
+import { OperationService } from '../src/operations/service.js';
 import { JobSupervisor } from '../src/supervisor.js';
 
 describe('generateNonce', () => {
@@ -71,7 +72,17 @@ describe('createDaemonContext', () => {
     const xdgData = join(root, 'data');
     const xdgState = join(root, 'state');
     mkdirSync(repoRoot);
+    const enforce = vi.spyOn(
+      OperationService.prototype,
+      'enforceDeadlinesAtBoot',
+    );
     const reattach = vi.spyOn(JobSupervisor.prototype, 'reattach');
+    const sweep = vi.spyOn(
+      OperationService.prototype,
+      'reconcileTimedOutAttempts',
+    );
+    const dispose = vi.spyOn(OperationService.prototype, 'dispose');
+    const stop = vi.spyOn(JobSupervisor.prototype, 'stop');
     const context = createDaemonContext({
       repoRoot,
       env: {
@@ -82,6 +93,14 @@ describe('createDaemonContext', () => {
 
     try {
       expect(reattach).toHaveBeenCalledOnce();
+      expect(enforce).toHaveBeenCalledOnce();
+      expect(sweep).toHaveBeenCalledOnce();
+      expect(enforce.mock.invocationCallOrder[0]).toBeLessThan(
+        reattach.mock.invocationCallOrder[0]!,
+      );
+      expect(reattach.mock.invocationCallOrder[0]).toBeLessThan(
+        sweep.mock.invocationCallOrder[0]!,
+      );
       expect(context.stateDbFile).toBe(
         join(context.dirs.stateDir, 'state.sqlite3'),
       );
@@ -94,7 +113,16 @@ describe('createDaemonContext', () => {
       expect(response.statusCode).toBe(200);
     } finally {
       await context.close();
+      expect(dispose).toHaveBeenCalledOnce();
+      expect(stop).toHaveBeenCalledOnce();
+      expect(dispose.mock.invocationCallOrder[0]).toBeLessThan(
+        stop.mock.invocationCallOrder[0]!,
+      );
+      enforce.mockRestore();
       reattach.mockRestore();
+      sweep.mockRestore();
+      dispose.mockRestore();
+      stop.mockRestore();
     }
   });
 });

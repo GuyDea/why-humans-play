@@ -33,6 +33,9 @@ const SYSTEM_CLOCK: OperationClock = {
     timer.unref?.();
     return timer;
   },
+  clearTimeout: (timer) => globalThis.clearTimeout(
+    timer as ReturnType<typeof globalThis.setTimeout>,
+  ),
 };
 
 interface Activity {
@@ -43,6 +46,7 @@ interface Activity {
 export interface OperationClock {
   now(): number;
   setTimeout(callback: () => void, delayMs: number): unknown;
+  clearTimeout(timer: unknown): void;
 }
 
 export interface OperationRecord
@@ -64,6 +68,9 @@ export class OperationService {
   private readonly store: JobStore;
   private readonly clock: OperationClock;
   private readonly activity = new Map<string, Activity>();
+  private readonly deadlineTimers = new Map<string, unknown>();
+  private readonly unsubscribeTerminal: () => void;
+  private disposed = false;
 
   constructor(opts: {
     supervisor: JobSupervisor;
@@ -73,6 +80,9 @@ export class OperationService {
     this.supervisor = opts.supervisor;
     this.store = opts.store;
     this.clock = opts.clock ?? SYSTEM_CLOCK;
+    this.unsubscribeTerminal = this.store.onOperationTerminal(
+      (id) => this.clearDeadline(id),
+    );
     this.rearmDeadlines();
   }
 
@@ -133,6 +143,9 @@ export class OperationService {
     });
     this.activity.set(id, { lastSeq: 0, lastEventAt: createdAtMs });
     this.armDeadline(id, Date.parse(deadlineAt));
+    if (isTerminalState(this.requireOperation(id).state)) {
+      this.clearDeadline(id);
+    }
     return id;
   }
 
@@ -195,6 +208,37 @@ export class OperationService {
   cancel(id: string): void {
     this.requireOperation(id);
     this.supervisor.cancel(this.activeAttempt(id).id);
+  }
+
+  enforceDeadlinesAtBoot(now = this.clock.now()): void {
+    for (const operation of this.store.nonTerminalOperations()) {
+      const deadline = Date.parse(operation.deadlineAt);
+      if (deadline <= now) this.timeout(operation.id, now);
+      else this.armDeadline(operation.id, deadline);
+    }
+  }
+
+  reconcileTimedOutAttempts(): void {
+    for (const operation of this.store.timedOutOperations()) {
+      const attempt = this.store.activeAttempt(operation.id);
+      if (
+        attempt
+        && ['queued', 'running', 'cancelling'].includes(attempt.state)
+      ) {
+        this.timeout(operation.id, this.clock.now());
+      }
+    }
+  }
+
+  dispose(): void {
+    if (this.disposed) return;
+    this.disposed = true;
+    for (const timer of this.deadlineTimers.values()) {
+      this.clock.clearTimeout(timer);
+    }
+    this.deadlineTimers.clear();
+    this.activity.clear();
+    this.unsubscribeTerminal();
   }
 
   result(id: string): OperationServiceResult {
@@ -280,26 +324,55 @@ export class OperationService {
 
   private rearmDeadlines(): void {
     for (const operation of this.store.nonTerminalOperations()) {
-      this.armDeadline(operation.id, Date.parse(operation.deadlineAt));
+      const deadline = Date.parse(operation.deadlineAt);
+      if (deadline > this.clock.now()) {
+        this.armDeadline(operation.id, deadline);
+      }
     }
   }
 
   private armDeadline(id: string, deadline: number): void {
+    if (this.disposed) return;
+    this.clearDeadline(id);
     const delay = deadline - this.clock.now();
-    if (delay <= 0) {
-      this.timeout(id);
-      return;
-    }
-    this.clock.setTimeout(() => this.timeout(id), delay);
+    if (delay <= 0) return;
+    const timer = this.clock.setTimeout(() => {
+      this.deadlineTimers.delete(id);
+      this.timeout(id, this.clock.now());
+    }, delay);
+    this.deadlineTimers.set(id, timer);
   }
 
-  private timeout(id: string): void {
+  private clearDeadline(id: string): void {
+    const timer = this.deadlineTimers.get(id);
+    if (timer === undefined) return;
+    this.clock.clearTimeout(timer);
+    this.deadlineTimers.delete(id);
+  }
+
+  private timeout(id: string, now: number): void {
+    if (this.disposed) return;
     const operation = this.store.getOperation(id);
-    if (!operation || isTerminalState(operation.state)) return;
+    if (
+      !operation
+      || (
+        operation.state !== 'timed-out'
+        && isTerminalState(operation.state)
+      )
+    ) {
+      return;
+    }
     const job = this.store.activeAttempt(id);
-    this.store.markOperationTimedOut(id);
-    if (job && ['queued', 'running'].includes(job.state)) {
-      this.supervisor.cancel(job.id);
+    const graceMs = job
+      ? (JSON.parse(job.envelopeJson) as { graceMs?: number }).graceMs ?? 5_000
+      : 5_000;
+    const attempt = this.store.timeoutOperationAndRequestCancellation(
+      id,
+      new Date(now).toISOString(),
+      new Date(now + graceMs * 2).toISOString(),
+    );
+    if (attempt) {
+      this.supervisor.reconcilePersistedCancellation(attempt.id);
     }
   }
 

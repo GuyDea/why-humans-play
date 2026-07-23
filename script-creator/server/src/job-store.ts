@@ -139,6 +139,7 @@ interface CreateOperationInput {
 
 export class JobStore {
   private readonly db: Database.Database;
+  private readonly operationTerminalListeners = new Set<(id: string) => void>();
 
   constructor(dbFile: string) {
     this.db = new Database(dbFile);
@@ -230,6 +231,14 @@ export class JobStore {
     ).all().map(toOperation);
   }
 
+  timedOutOperations(): StoredOperation[] {
+    return this.db.prepare<[], OperationRow>(
+      `SELECT * FROM operations
+       WHERE state = 'timed-out'
+       ORDER BY created_at`,
+    ).all().map(toOperation);
+  }
+
   operationAttempts(operationId: string): JobRecord[] {
     return this.db.prepare<[string], JobRow>(
       'SELECT * FROM jobs WHERE operation_id = ? ORDER BY rowid',
@@ -247,7 +256,7 @@ export class JobStore {
   }
 
   setState(id: string, state: JobState, error?: string): void {
-    this.db.transaction(() => {
+    const operationId = this.db.transaction(() => {
       const finished = [
         'completed',
         'failed',
@@ -265,13 +274,57 @@ export class JobStore {
       if (operationId !== null && operationId !== undefined) {
         this.updateOperationFromActiveAttempt(operationId);
       }
+      return operationId;
     })();
+    if (operationId !== null && operationId !== undefined) {
+      this.notifyOperationTerminal(operationId);
+    }
   }
 
-  markOperationTimedOut(id: string): void {
-    this.db.prepare(
-      "UPDATE operations SET state = 'timed-out' WHERE id = ?",
-    ).run(id);
+  timeoutOperationAndRequestCancellation(
+    operationId: string,
+    requestedAt: string,
+    deadlineAt: string,
+  ): JobRecord | null {
+    const attemptId = this.db.transaction(() => {
+      const operation = this.getOperation(operationId);
+      if (
+        !operation
+        || ![
+          'queued',
+          'running',
+          'cancelling',
+          'timed-out',
+        ].includes(operation.state)
+      ) {
+        return null;
+      }
+      const attempt = this.activeAttempt(operationId);
+      this.db.prepare(
+        "UPDATE operations SET state = 'timed-out' WHERE id = ?",
+      ).run(operationId);
+      if (
+        attempt
+        && ['queued', 'running', 'cancelling'].includes(attempt.state)
+      ) {
+        this.db.prepare(
+          `UPDATE jobs
+           SET state = 'cancelling',
+             cancel_requested_at = COALESCE(cancel_requested_at, ?),
+             cancel_deadline_at = COALESCE(cancel_deadline_at, ?)
+           WHERE id = ?`,
+        ).run(requestedAt, deadlineAt, attempt.id);
+        return attempt.id;
+      }
+      return null;
+    })();
+    this.notifyOperationTerminal(operationId);
+    return attemptId === null ? null : this.get(attemptId);
+  }
+
+  onOperationTerminal(listener: (id: string) => void): () => void {
+    this.operationTerminalListeners.add(listener);
+    return () => this.operationTerminalListeners.delete(listener);
   }
 
   setThreadId(id: string, threadId: string): void {
@@ -326,6 +379,8 @@ export class JobStore {
 
   private updateOperationFromActiveAttempt(operationId: string): void {
     const operation = this.getOperation(operationId);
+    // A runner completion observed after its deadline may finish the attempt,
+    // but it must never change the public operation back from timed-out.
     if (!operation || operation.state === 'timed-out') return;
     const active = this.activeAttempt(operationId);
     if (!active) return;
@@ -334,7 +389,20 @@ export class JobStore {
     ).run(active.state, operationId);
   }
 
+  private notifyOperationTerminal(operationId: string): void {
+    const operation = this.getOperation(operationId);
+    if (!operation || !isTerminalState(operation.state)) return;
+    for (const listener of this.operationTerminalListeners) {
+      listener(operationId);
+    }
+  }
+
   close(): void {
+    this.operationTerminalListeners.clear();
     this.db.close();
   }
+}
+
+function isTerminalState(state: OperationState): boolean {
+  return !['queued', 'running', 'cancelling'].includes(state);
 }

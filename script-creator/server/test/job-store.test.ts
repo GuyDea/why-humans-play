@@ -69,4 +69,64 @@ describe('JobStore', () => {
     expect(retry.retryOf).toBe('j1');
     expect(resumed.resumedFrom).toBe('j1');
   });
+
+  it('atomically marks an operation timed out and persists active cancellation intent', () => {
+    const s = freshStore();
+    s.createOperationWithJob(
+      {
+        id: 'op-1',
+        name: 'rewrite-selection',
+        createdAt: '2026-07-23T10:00:00.000Z',
+        deadlineAt: '2026-07-23T10:15:00.000Z',
+      },
+      env,
+      '/jobs/j1',
+    );
+    s.setState('j1', 'running');
+
+    const attempt = s.timeoutOperationAndRequestCancellation(
+      'op-1',
+      '2026-07-23T10:15:00.000Z',
+      '2026-07-23T10:15:10.000Z',
+    );
+
+    expect(s.getOperation('op-1')?.state).toBe('timed-out');
+    expect(attempt).toMatchObject({ id: 'j1', state: 'cancelling' });
+    expect(s.getCancellation('j1')).toEqual({
+      requestedAt: '2026-07-23T10:15:00.000Z',
+      deadlineAt: '2026-07-23T10:15:10.000Z',
+    });
+  });
+
+  it('turns a queued retry into persisted cancellation before it can launch', () => {
+    const s = freshStore();
+    s.createOperationWithJob(
+      {
+        id: 'op-1',
+        name: 'rewrite-selection',
+        createdAt: '2026-07-23T10:00:00.000Z',
+        deadlineAt: '2026-07-23T10:15:00.000Z',
+      },
+      env,
+      '/jobs/j1',
+    );
+    s.setState('j1', 'invalid-output');
+    s.create(
+      { ...env, jobId: 'j2' },
+      '/jobs/j2',
+      { operationId: 'op-1', retryOf: 'j1' },
+    );
+
+    s.timeoutOperationAndRequestCancellation(
+      'op-1',
+      '2026-07-23T10:15:00.000Z',
+      '2026-07-23T10:15:10.000Z',
+    );
+
+    expect(s.activeAttempt('op-1')).toMatchObject({
+      id: 'j2',
+      state: 'cancelling',
+    });
+    expect(s.nextQueued()).toBeNull();
+  });
 });
