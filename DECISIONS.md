@@ -583,3 +583,35 @@ newer draft state or survive editor teardown.
 ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
 because this decision tightens an internal workbench implementation without changing WHP
 brand or channel doctrine. The final-review report remains the detailed fix-wave record.
+
+## 2026-07-23 — Start problem-led topic selection from the widest specific pain
+
+**Decision:** For problem-led WHP episodes, generate and compare specific recognizable
+viewer painpoints before choosing the explanatory mechanism, prioritizing the widest
+evidence-supported pain rather than the broadest subject label.
+
+**Rationale:** Topic generation should address the widest painpoint that most people
+recognize and suffer from instead of beginning with a technical topic and adding relevance
+afterward.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/steering/whp-video-topic-skill.md`,
+`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`, and this ledger.
+`BRAND.md` remains unchanged by this decision because wonder-, history-, and
+explicit-game-led episodes remain part of the brand and may begin from a shared mystery,
+desire, or tension rather than suffering.
+
+## 2026-07-23 — Require a new-learning and concrete-action contract
+
+**Decision:** Every WHP episode architecture must state both the non-obvious understanding
+the viewer will gain and the concrete, evidence-bounded action, observation, or reflection
+they can use, including an observable result and a real boundary, before narration begins.
+
+**Rationale:** Every episode should leave people feeling that they learned something new
+and something actionable, rather than delivering a familiar summary surrounded by
+examples and prose.
+
+**Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-23-whp-painpoint-action-gates-design.md`, and this ledger.
+The current Episode 1 script and launch sequence remain unchanged because this decision
+changes the authoring gate, not an approved episode topic or narration.

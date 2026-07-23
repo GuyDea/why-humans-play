@@ -41,17 +41,30 @@ evidence-funnel workflow:
 1. Read current WHP doctrine, episode history, backlog, and production constraints.
 2. Generate a deliberately diverse subject pool from independent internal and external
    signals.
-3. Turn subjects into specific video angles with a human stake and an earned payoff.
-4. Apply WHP, rigor, payoff, duplication, and feasibility gates.
-5. Research surviving candidates through multiple independent signals.
-6. Rank them with a reach-weighted scorecard and explicit evidence confidence.
-7. Stress-test the top three as title/thumbnail promises before resolving winner status.
-8. Return a dated, cited winner decision—or an explicit incomplete result—with risks,
+3. For problem-led candidates, generate and compare specific lived painpoints before
+   choosing the explanatory mechanism; for wonder-, history-, and explicit-game-led
+   candidates, use the analogous shared mystery, desire, or tension.
+4. Turn those audience tensions and subjects into specific video angles with a human
+   stake and an earned payoff.
+5. Apply WHP, rigor, payoff, duplication, and feasibility gates.
+6. Research surviving candidates through multiple independent signals.
+7. Rank them with a reach-weighted scorecard and explicit evidence confidence.
+8. Stress-test the top three as title/thumbnail promises before resolving winner status.
+9. Return a dated, cited winner decision—or an explicit incomplete result—with risks,
    comparison evidence, and follow-ups where supported.
 
 Keep the core procedure in `SKILL.md`. Put the detailed research protocol and output
 contract in directly linked reference files. Read canonical WHP documents at run time
 instead of copying their doctrine into the skill.
+
+For a problem-led angle, “widest” means widest **specific and recognizable** pain, not the
+broadest category label. Record the target viewer, the lived moment, the cost, evidence of
+reach or recurrence, the familiar surface explanation, the hidden game or mechanism, the
+new understanding, and the usable response. Compare reach, recognition, frequency,
+consequence, and unresolvedness as separate evidence-backed dimensions rather than
+pretending they multiply into a precise market-size number. A mechanism such as reward
+hacking can explain a winning angle, but it cannot substitute for the human problem that
+makes a stranger care.
 
 ## Alternatives
 

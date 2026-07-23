@@ -95,6 +95,22 @@ lottery ticket.
 
 These are laws, not suggestions. They apply to every WHP video forever.
 
+### Start problem-led episodes from the viewer's widest specific pain
+
+When an episode competes on a problem the viewer already lives—AI, work, money,
+relationships, attention, or institutions—generate and compare the painpoints before
+choosing the technical mechanism. Seek the widest **specific, recognizable, recurring**
+pain that WHP can honestly explain and help with. Name the person, the moment, and the
+cost in one sentence; “AI is changing everything” and “reward hacking” are subjects, not
+painpoints. Use current evidence to test reach, frequency, consequence, and whether the
+problem remains unresolved. Do not select an interesting mechanism and manufacture human
+relevance afterward.
+
+Wonder-led, history-led, and explicit-game episodes may begin from a widely shared mystery,
+desire, or tension instead of suffering. They still need an immediately recognizable human
+stake and the same useful payoff. This distinction preserves WHP's full field of inquiry
+without weakening the audience-first test for problem-led growth episodes.
+
 ## Law 1 — Packaging is the product
 
 - **The idea sets the ceiling; execution only decides whether you reach it.** `[reported]`
@@ -181,7 +197,7 @@ Use this order for WHP scripts:
    beat outline, joke, transition, or narration. State the central question and core
    answer, the viewer's before-and-after belief, a three-to-five-step insight ladder,
    the relevant phenomenon and paradox map, the earned reframe, real-world proof cases,
-   practical payoff, final lesson, and scope boundary.
+   learning-and-action contract, practical payoff, final lesson, and scope boundary.
 2. Refine that architecture with Martin and obtain explicit approval of the complete
    intellectual payload. Approval of the topic, title, one example, or one clever insight
    does not approve the architecture.
@@ -208,6 +224,14 @@ paradoxes, signaling problems, and other named phenomena during architecture wor
 name them in narration only when they clarify a demonstrated pattern rather than creating
 a glossary recital. A controversial conclusion is useful only when the preceding mechanism
 earns it and a stated boundary keeps it honest.
+
+Every architecture must also pass a double-payoff gate before narration begins. It must
+state the non-obvious understanding the viewer gains and the concrete action, observation,
+or reflection that follows from it. Make the transformation testable:
+`Before, I thought X. Now, I understand Y. Next time, I will do Z. I will know it helped
+when I observe W.` Add the real boundary and at least one transfer case. “Be careful,”
+“think critically,” “ask better questions,” or a loose checklist without a decision rule,
+sequence, or observable result fails the gate.
 
 In the final production document, the readable script comes first as numbered beats that
 contain spoken narration only. Put all timestamps, targets, story functions, claims,
