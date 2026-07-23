@@ -34,6 +34,7 @@ export type MapConsoleEvents<ConsoleEntry> = (
 
 export interface OpTrackerOptions {
   statusPollMs?: number;
+  onChange?: () => void;
 }
 
 export interface TrackedOperation<Meta = unknown, ConsoleEntry = unknown> {
@@ -74,6 +75,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
   private readonly recordsById =
     new Map<string, MutableTrackedOperation<Meta, ConsoleEntry>>();
   private readonly statusPollMs: number;
+  private readonly onChange: () => void;
 
   readonly history = this.historyState.asReadonly();
 
@@ -83,6 +85,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     options: OpTrackerOptions = {},
   ) {
     this.statusPollMs = options.statusPollMs ?? 5_000;
+    this.onChange = options.onChange ?? (() => undefined);
   }
 
   launch(
@@ -123,6 +126,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     await this.client.cancel(id);
     tracked.state.set('cancelled');
     tracked.phase.set('cancelled');
+    this.onChange();
   }
 
   private createTrackedOperation(
@@ -164,6 +168,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     tracked: MutableTrackedOperation<Meta, ConsoleEntry>,
   ): void {
     this.historyState.update((history) => [...history, tracked]);
+    this.onChange();
   }
 
   private run(
@@ -186,6 +191,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       tracked.id.set(id);
       this.recordsById.set(id, tracked);
       tracked.phase.set('streaming');
+      this.onChange();
       statusTimer = globalThis.setInterval(() => {
         void this.refreshStatus(id, tracked);
       }, this.statusPollMs);
@@ -196,6 +202,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
           tracked.consoleEntries.set([
             ...this.mapConsoleEvents(tracked.events()),
           ]);
+          this.onChange();
         },
         onDone: () => undefined,
         onError: () => undefined,
@@ -225,6 +232,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       } else {
         tracked.phase.set('failed');
       }
+      this.onChange();
     } catch (error) {
       if (tracked.phase() === 'cancelled') return;
       tracked.result.set({
@@ -234,6 +242,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       tracked.state.set('failed');
       tracked.errorMessage.set(errorMessage(error));
       tracked.phase.set('failed');
+      this.onChange();
     } finally {
       if (statusTimer !== undefined) {
         globalThis.clearInterval(statusTimer);
@@ -252,6 +261,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       tracked.errorMessage.set(operation.error);
       tracked.stallFlag.set(operation.stalled);
       tracked.telemetry.set(operationTelemetry(operation));
+      this.onChange();
     } catch {
       // SSE reconnects independently; a status refresh can try again next tick.
     }

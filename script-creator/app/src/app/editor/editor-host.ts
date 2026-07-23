@@ -27,18 +27,13 @@ import {
   computeMetrics,
   type DocumentJson,
 } from '../metrics';
-import type {
-  OperationFailurePresentation,
-} from '../ops/failure-presentation';
 import { FindingsPanel } from '../panels/findings-panel';
 import { preserveDraftDocument } from './draft-document';
-import type {
-  FindingLayer,
-  GuardrailCallout,
-} from './proposal-bridge';
+import type { FindingLayer } from './proposal-bridge';
 import {
-  SelectionRuntime,
-} from './selection-runtime';
+  composeStudio,
+  type StudioComposition,
+} from './studio-composition';
 
 export class DebouncedAutosave<T> {
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -147,61 +142,23 @@ interface AutosaveSnapshot {
         </p>
       }
 
-      @if (operationFailures().length > 0) {
-        <aside
-          class="operation-failure-callouts"
-          aria-label="Operation failures"
-          aria-live="polite"
-        >
-          @for (
-            failure of operationFailures();
-            track failure.operation + '-' + failure.state + '-' + $index
-          ) {
-            <article role="alert">
-              <strong>{{ failure.operation }} · {{ failure.state }}</strong>
-              <p>{{ failure.reason }}</p>
-            </article>
-          }
-        </aside>
+      <aside
+        #failureMount
+        class="operation-failure-callouts"
+        aria-label="Operation failures"
+      ></aside>
 
-        <ol
-          class="operation-console"
-          aria-label="Operation console"
-          aria-live="polite"
-        >
-          @for (
-            failure of operationFailures();
-            track failure.operation + '-' + failure.state + '-' + $index
-          ) {
-            <li [attr.data-kind]="failure.consoleEntry.kind">
-              <span>{{ failure.consoleEntry.kind }}</span>
-              <pre>{{ failure.consoleEntry.text }}</pre>
-            </li>
-          }
-        </ol>
-      }
-
-      @if (guardrails().length > 0) {
-        <aside
-          class="guardrail-callouts"
-          aria-label="Guardrail callouts"
-          aria-live="polite"
-        >
-          @for (
-            guardrail of guardrails();
-            track guardrail.operationId ?? $index
-          ) {
-            <article>
-              <strong>{{ guardrail.operation }} guardrail</strong>
-              <p>{{ guardrail.markdown }}</p>
-            </article>
-          }
-        </aside>
-      }
+      <aside
+        #guardrailMount
+        class="guardrail-callouts"
+        aria-label="Guardrail callouts"
+      ></aside>
 
       @if (findings().length > 0) {
         <app-findings-panel [findings]="findings()" />
       }
+
+      <div #consoleMount class="operation-console-host"></div>
 
       <aside class="pacing" aria-label="Pacing by beat">
         @for (beat of metrics().beats; track $index; let index = $index) {
@@ -293,101 +250,13 @@ interface AutosaveSnapshot {
       outline: none;
     }
 
-    .operation-error,
-    .operation-failure-callouts p,
-    .operation-console pre,
-    .guardrail-callouts p {
-      margin: 0;
-    }
-
     .operation-error {
+      margin: 0;
       border-left: 3px solid var(--whp-accent);
       background: var(--whp-accent-tint);
       padding: 0.7rem 0.8rem;
       color: var(--whp-accent);
       font-size: 0.78rem;
-    }
-
-    .operation-failure-callouts {
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .operation-failure-callouts article {
-      border-left: 3px solid var(--whp-accent);
-      background: var(--whp-accent-tint);
-      padding: 0.75rem 0.85rem;
-    }
-
-    .operation-failure-callouts strong {
-      color: var(--whp-accent);
-      font-size: 0.72rem;
-    }
-
-    .operation-failure-callouts p {
-      margin-top: 0.35rem;
-      color: var(--whp-ink);
-      font-size: 0.78rem;
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
-
-    .operation-console {
-      margin: 0;
-      padding: 0;
-      border: 1px solid var(--whp-line);
-      background: var(--whp-ink);
-      list-style: none;
-    }
-
-    .operation-console li {
-      display: grid;
-      grid-template-columns: 4.5rem minmax(0, 1fr);
-      gap: 0.65rem;
-      padding: 0.6rem 0.75rem;
-      border-left: 3px solid var(--whp-accent);
-    }
-
-    .operation-console span {
-      color: color-mix(in srgb, var(--whp-ground) 65%, transparent);
-      font-size: 0.62rem;
-      font-weight: 800;
-      text-transform: uppercase;
-    }
-
-    .operation-console pre {
-      overflow-wrap: anywhere;
-      color: var(--whp-ground);
-      font-family: var(--whp-font-mono);
-      font-size: 0.7rem;
-      line-height: 1.45;
-      white-space: pre-wrap;
-    }
-
-    .guardrail-callouts {
-      display: grid;
-      gap: 0.5rem;
-    }
-
-    .guardrail-callouts article {
-      border: 1px solid var(--whp-line-strong);
-      border-left: 3px solid var(--whp-accent);
-      background: var(--whp-warning-tint);
-      padding: 0.75rem 0.85rem;
-    }
-
-    .guardrail-callouts strong {
-      color: var(--whp-warning);
-      font-size: 0.72rem;
-      text-transform: capitalize;
-    }
-
-    .guardrail-callouts p {
-      margin-top: 0.35rem;
-      color: var(--whp-ink);
-      font-size: 0.78rem;
-      line-height: 1.45;
-      white-space: pre-wrap;
     }
 
     .pacing {
@@ -458,9 +327,6 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
   readonly doc = signal<DocumentJson | null>(null);
   readonly findings = signal<readonly FindingLayer[]>([]);
-  readonly guardrails = signal<readonly GuardrailCallout[]>([]);
-  readonly operationFailures =
-    signal<readonly OperationFailurePresentation[]>([]);
   readonly operationError = signal<string | null>(null);
   private readonly currentDirty = signal(false);
   private readonly queuedAutosaves = signal(0);
@@ -483,9 +349,15 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
   @ViewChild('editorMount', { static: true })
   private editorMount?: ElementRef<HTMLDivElement>;
+  @ViewChild('failureMount', { static: true })
+  private failureMount?: ElementRef<HTMLElement>;
+  @ViewChild('guardrailMount', { static: true })
+  private guardrailMount?: ElementRef<HTMLElement>;
+  @ViewChild('consoleMount', { static: true })
+  private consoleMount?: ElementRef<HTMLElement>;
 
   private editorView: EditorView | null = null;
-  private selectionRuntime: SelectionRuntime | null = null;
+  private studioComposition: StudioComposition | null = null;
   private selectionContextDocument: DraftDocument | null = null;
   private activeDraftId: string | null = null;
   private draftEpoch = 0;
@@ -514,8 +386,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.autosave.flush();
     this.draftEpoch += 1;
-    this.selectionRuntime?.destroy();
-    this.selectionRuntime = null;
+    this.studioComposition?.destroy();
+    this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
   }
@@ -539,11 +411,14 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
   private mountDraft(draft: DraftRecord): void {
     const mount = this.editorMount?.nativeElement;
-    if (!mount) return;
+    const failures = this.failureMount?.nativeElement;
+    const guardrails = this.guardrailMount?.nativeElement;
+    const consolePanel = this.consoleMount?.nativeElement;
+    if (!mount || !failures || !guardrails || !consolePanel) return;
 
     this.autosave.flush();
-    this.selectionRuntime?.destroy();
-    this.selectionRuntime = null;
+    this.studioComposition?.destroy();
+    this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
     mount.replaceChildren();
@@ -561,8 +436,6 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.editVersion = 0;
     this.doc.set(this.persistedDocument(documentNode.toJSON() as DocumentJson));
     this.findings.set([]);
-    this.guardrails.set([]);
-    this.operationFailures.set([]);
     this.operationError.set(null);
     this.currentDirty.set(false);
     if (this.queuedAutosaves() === 0) this.saveError.set(null);
@@ -582,25 +455,26 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         );
         this.doc.set(doc);
         if (transaction.docChanged) this.scheduleAutosave(doc);
-        this.selectionRuntime?.handleEditorDispatch();
+        this.studioComposition?.handleEditorDispatch();
       },
     });
     this.editorView = mountedView;
-    this.selectionRuntime = new SelectionRuntime({
-      view: mountedView,
-      container: mount,
-      client: this.client(),
-      draftDocument: () => this.selectionContextDocument ?? draft.doc,
-      onOutcomes: ({ findings, guardrails, failures }) => {
-        this.findings.set(findings);
-        this.guardrails.set(guardrails);
-        this.operationFailures.set(failures);
+    this.studioComposition = composeStudio(
+      mountedView,
+      this.client(),
+      {
+        editor: mount,
+        failures,
+        guardrails,
+        console: consolePanel,
+        draftDocument: () => this.selectionContextDocument ?? draft.doc,
+        onFindings: (findings) => this.findings.set(findings),
+        onLaunch: () => this.operationError.set(null),
+        onError: (error) => {
+          this.operationError.set(operationErrorMessage(error));
+        },
       },
-      onLaunch: () => this.operationError.set(null),
-      onError: (error) => {
-        this.operationError.set(operationErrorMessage(error));
-      },
-    });
+    );
   }
 
   private scheduleAutosave(doc: DocumentJson): void {

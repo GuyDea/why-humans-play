@@ -330,6 +330,179 @@ textarea {
   font-size: 0.68rem;
 }
 
+.selection-operation-pending {
+  z-index: 19;
+  border: 1px solid color-mix(in srgb, var(--whp-ground) 18%, transparent);
+  border-radius: 0.2rem;
+  color: var(--whp-ground);
+  background: var(--whp-ink);
+  padding: 0.38rem 0.55rem;
+  box-shadow: 0 0.5rem 1.4rem color-mix(in srgb, var(--whp-ink) 22%, transparent);
+  font-family: var(--whp-font-ui);
+  font-size: 0.65rem;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+}
+
+.operation-failure-callouts,
+.guardrail-callouts {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.operation-failure-callout,
+.guardrail-callout {
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid var(--whp-accent);
+}
+
+.operation-failure-callout {
+  background: var(--whp-accent-tint);
+}
+
+.guardrail-callout {
+  border-top: 1px solid var(--whp-line-strong);
+  border-right: 1px solid var(--whp-line-strong);
+  border-bottom: 1px solid var(--whp-line-strong);
+  background: var(--whp-warning-tint);
+}
+
+.operation-failure-callout strong,
+.guardrail-callout strong {
+  color: var(--whp-accent);
+  font-size: 0.72rem;
+  text-transform: capitalize;
+}
+
+.guardrail-callout strong {
+  color: var(--whp-warning);
+}
+
+.operation-failure-callout p,
+.guardrail-callout p {
+  margin: 0.35rem 0 0;
+  color: var(--whp-ink);
+  font-size: 0.78rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.agent-console-panel {
+  border: 1px solid var(--whp-line);
+  background: var(--whp-panel);
+  font-family: var(--whp-font-ui);
+}
+
+.agent-console-panel > header,
+.console-operation-summary,
+.console-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.agent-console-panel > header {
+  justify-content: space-between;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid var(--whp-line);
+}
+
+.agent-console-panel > header span,
+.console-operation-summary span {
+  color: var(--whp-muted);
+  font-size: 0.68rem;
+}
+
+.console-operation-list,
+.console-entry-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.console-operation {
+  border-bottom: 1px solid var(--whp-line);
+  background: var(--whp-surface);
+}
+
+.console-operation:last-child {
+  border-bottom: 0;
+}
+
+.console-operation-summary {
+  flex-wrap: wrap;
+  padding: 0.65rem 0.8rem;
+}
+
+.console-operation-summary > strong {
+  font-size: 0.75rem;
+}
+
+.console-telemetry {
+  margin-inline-start: auto;
+}
+
+.console-entry-list {
+  border-block: 1px solid var(--whp-line-soft);
+  background: var(--whp-ink);
+}
+
+.console-entry-list > li {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.55rem 0.8rem;
+}
+
+.console-entry-list > li[data-kind='failure'],
+.console-entry-list > li[data-kind='warning'] {
+  border-left: 3px solid var(--whp-accent);
+}
+
+.console-entry-list span {
+  color: color-mix(in srgb, var(--whp-ground) 65%, transparent);
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.console-entry-list pre {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--whp-ground);
+  font-family: var(--whp-font-mono);
+  font-size: 0.7rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.console-actions {
+  justify-content: end;
+  padding: 0.55rem 0.8rem;
+}
+
+.console-actions button {
+  border: 1px solid var(--whp-line-strong);
+  background: var(--whp-surface);
+  padding: 0.35rem 0.55rem;
+  color: var(--whp-ink);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.console-actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.agent-console-panel .empty {
+  padding: 0.75rem 0.8rem;
+  color: var(--whp-muted);
+  font-size: 0.72rem;
+}
+
 @keyframes proposal-pulse {
   from {
     background-color: transparent;

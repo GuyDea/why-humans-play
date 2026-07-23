@@ -6,6 +6,7 @@ import {
   signal,
   type Signal,
 } from '@angular/core';
+import type { SseFrame } from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
 
 export type StudioConsoleKind =
@@ -81,6 +82,29 @@ export class AgentConsoleModel<Meta = unknown> {
   }
 }
 
+export function mapStudioConsoleEvents(
+  events: readonly SseFrame[],
+): StudioConsoleEntry[] {
+  return events.map((event, index) => {
+    const payload = eventPayload(event);
+    const type = stringValue(payload?.['type']) || event.event;
+    const item = record(payload?.['item']);
+    const itemType = stringValue(item?.['type']);
+    const message = stringValue(
+      item?.['text']
+      ?? item?.['message']
+      ?? payload?.['message']
+      ?? payload?.['error'],
+    );
+
+    return {
+      seq: sequenceNumber(event.id, index),
+      kind: consoleKind(type, itemType),
+      text: message || consoleFallback(type, itemType, event.data),
+    };
+  });
+}
+
 export function formatTokens(tokens: number | null): string {
   return tokens === null ? 'unavailable' : tokens.toLocaleString('en-US');
 }
@@ -93,6 +117,70 @@ export function formatElapsed(milliseconds: number | null): string {
   return minutes > 0
     ? `${minutes}m ${remainder}s`
     : `${remainder}s`;
+}
+
+function consoleKind(
+  type: string,
+  itemType: string,
+): StudioConsoleKind {
+  if (type === 'thread.started') return 'thread';
+  if (type.startsWith('turn.')) {
+    return type.includes('failed') || type.includes('error')
+      ? 'failure'
+      : 'turn';
+  }
+  if (itemType === 'agent_message') return 'message';
+  if (
+    itemType.includes('tool')
+    || itemType.includes('command')
+    || itemType === 'web_search'
+  ) {
+    return 'tool';
+  }
+  if (
+    type.includes('failed')
+    || type.includes('error')
+    || itemType.includes('error')
+  ) {
+    return 'failure';
+  }
+  if (type.includes('warning')) return 'warning';
+  return 'other';
+}
+
+function consoleFallback(
+  type: string,
+  itemType: string,
+  raw: string,
+): string {
+  if (itemType !== '') return `${type} · ${itemType}`;
+  if (type !== '') return type;
+  return raw;
+}
+
+function eventPayload(
+  event: SseFrame,
+): Record<string, unknown> | null {
+  try {
+    return record(JSON.parse(event.data));
+  } catch {
+    return null;
+  }
+}
+
+function sequenceNumber(value: string, index: number): number {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : index + 1;
+}
+
+function record(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === 'string' ? value : '';
 }
 
 @Component({

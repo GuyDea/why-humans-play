@@ -11,7 +11,14 @@ import {
   operationFailurePresentation,
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
-import { OpTracker } from '../ops/tracker';
+import {
+  OpTracker,
+  type TrackedOperation,
+} from '../ops/tracker';
+import {
+  mapStudioConsoleEvents,
+  type StudioConsoleEntry,
+} from '../panels/agent-console';
 import { readDraftMetadata } from '../panels/brief-panel';
 import {
   ProposalBridge,
@@ -79,36 +86,53 @@ export interface SelectionRuntimeOutcomes {
   failures: readonly OperationFailurePresentation[];
 }
 
+export type SelectionRuntimeRecord = TrackedOperation<
+  ProposalLaunchMeta,
+  StudioConsoleEntry
+>;
+
 export interface SelectionRuntimeOptions {
   view: EditorView;
   container: HTMLElement;
   client: DaemonClient;
   draftDocument(): DraftDocument;
   onOutcomes?: (outcomes: SelectionRuntimeOutcomes) => void;
+  onRecords?: (
+    records: readonly SelectionRuntimeRecord[],
+  ) => void;
   onLaunch?: () => void;
   onError?: (error: unknown) => void;
 }
 
 export class SelectionRuntime {
   readonly toolbar: SelectionToolbar;
+  readonly tracker: OpTracker<ProposalLaunchMeta, StudioConsoleEntry>;
 
   private readonly bridge: ProposalBridge;
   private readonly onOutcomes:
     (outcomes: SelectionRuntimeOutcomes) => void;
+  private readonly onRecords:
+    (records: readonly SelectionRuntimeRecord[]) => void;
   private readonly onLaunch: () => void;
   private readonly onError: (error: unknown) => void;
+  private readonly launches = new Set<BridgeLaunch>();
   private failures: readonly OperationFailurePresentation[] = [];
   private destroyed = false;
 
   constructor(options: SelectionRuntimeOptions) {
     this.onOutcomes = options.onOutcomes ?? (() => undefined);
+    this.onRecords = options.onRecords ?? (() => undefined);
     this.onLaunch = options.onLaunch ?? (() => undefined);
     this.onError = options.onError ?? (() => undefined);
-    const tracker = new OpTracker<ProposalLaunchMeta, unknown>(
+    this.tracker = new OpTracker<
+      ProposalLaunchMeta,
+      StudioConsoleEntry
+    >(
       options.client,
-      () => [],
+      mapStudioConsoleEvents,
+      { onChange: () => this.emitRecords() },
     );
-    this.bridge = new ProposalBridge(options.view, tracker, {
+    this.bridge = new ProposalBridge(options.view, this.tracker, {
       isActive: () => !this.destroyed,
     });
     this.toolbar = new SelectionToolbar({
@@ -134,6 +158,7 @@ export class SelectionRuntime {
       onError: this.onError,
     });
     this.emitOutcomes();
+    this.emitRecords();
   }
 
   handleEditorDispatch(): void {
@@ -146,9 +171,50 @@ export class SelectionRuntime {
     this.toolbar.destroy();
   }
 
-  private monitor(value: unknown): void {
+  acceptProposal(proposalId: string): boolean {
+    return this.bridge.accept(proposalId);
+  }
+
+  rejectProposal(proposalId: string): boolean {
+    return this.bridge.reject(proposalId);
+  }
+
+  canReroll(operationId: string): boolean {
+    const launch = this.launchForOperation(operationId);
+    return launch ? this.canRerollLaunch(launch) : false;
+  }
+
+  reroll(operationId: string): BridgeLaunch {
+    const launch = this.launchForOperation(operationId);
+    if (!launch || !this.canRerollLaunch(launch)) {
+      throw new Error(`operation ${operationId} cannot be re-rolled`);
+    }
+    return this.monitor(this.bridge.reroll(launch));
+  }
+
+  canRerollProposal(proposalId: string): boolean {
+    const launch = this.launchForProposal(proposalId);
+    return launch ? this.canRerollLaunch(launch) : false;
+  }
+
+  rerollProposal(proposalId: string): BridgeLaunch {
+    const launch = this.launchForProposal(proposalId);
+    if (!launch || !this.canRerollLaunch(launch)) {
+      throw new Error(`proposal ${proposalId} cannot be re-rolled`);
+    }
+    return this.monitor(this.bridge.reroll(launch));
+  }
+
+  cancel(operationId: string): Promise<void> {
+    return this.tracker.cancel(operationId);
+  }
+
+  private monitor(value: unknown): BridgeLaunch {
     this.onLaunch();
-    if (!isBridgeLaunch(value)) return;
+    if (!isBridgeLaunch(value)) {
+      throw new Error('selection operation did not return a bridge launch');
+    }
+    this.launches.add(value);
     void value.settled.then(
       (settlement) => {
         if (this.destroyed) return;
@@ -173,14 +239,47 @@ export class SelectionRuntime {
         if (!this.destroyed) this.onError(error);
       },
     );
+    return value;
   }
 
   private emitOutcomes(): void {
+    if (this.destroyed) return;
     this.onOutcomes({
       findings: this.bridge.findingLayers(),
       guardrails: this.bridge.guardrails(),
       failures: this.failures,
     });
+  }
+
+  private emitRecords(): void {
+    if (this.destroyed) return;
+    this.onRecords(this.tracker.history());
+  }
+
+  private launchForOperation(
+    operationId: string,
+  ): BridgeLaunch | undefined {
+    return Array.from(this.launches).find(
+      ({ tracked }) => tracked.id() === operationId,
+    );
+  }
+
+  private launchForProposal(
+    proposalId: string,
+  ): BridgeLaunch | undefined {
+    return Array.from(this.launches).find(
+      (launch) => launch.proposalId === proposalId,
+    );
+  }
+
+  private canRerollLaunch(launch: BridgeLaunch): boolean {
+    return Boolean(
+      launch.proposalId
+      && launch.tracked.canResume()
+      && this.bridge.proposalLayers().some(
+        ({ id }) => id === launch.proposalId,
+      ),
+    );
   }
 }
 
