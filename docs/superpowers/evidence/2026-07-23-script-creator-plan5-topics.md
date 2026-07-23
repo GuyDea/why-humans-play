@@ -66,7 +66,17 @@ extraction now enforces the skill contract's winner-eligibility/angle/total
 rules; the handoff saga exposes durable per-step state with resume-by-key (no
 preview re-derivation) proven against recreated stores on the same database
 file; migrations run once-per-version (handoff table v5, architecture reserved
-v6); and the brief loader accepts contained episode refs:
+v6); and the brief loader accepts contained episode refs.
+
+Fix wave 2 was then proven live in Chrome: a pre-planted conflicting brief made
+the artifact step fail after draft creation ("Handoff paused safely … topic
+brief conflicts with <hash>"); a **real page reload** later, the reopened
+durable run showed the "Handoff in progress" panel (Draft created ✓, three steps
+pending) and **Resume handoff** completed every step from the durable key — one
+draft, brief written, pipeline row upserted. A draft-less **episode-ref** card
+navigated to `/topics?topic=…&ref=whp-youtube/episodes/…` and rendered the
+episode content on arrival. Suites at this point: server 37 files / 270 tests,
+app 24 files / 155 tests, typechecks and `ng build` clean on the host:
 
 - **WHP_PROGRESS/2:** the live checklist rendered all **thirteen** manifest rows
   (including the new `06-proof-cases`) with the skill's verbatim texts, heading
