@@ -8,3 +8,6 @@ export * from './proposals.js';
 export * from './revision.js';
 export * from './schema.js';
 export * from './variants.js';
+
+export { EditorState } from 'prosemirror-state';
+export { EditorView } from 'prosemirror-view';

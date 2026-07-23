@@ -16,8 +16,7 @@ import {
   schema,
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
-import { EditorState } from '@whp/script-creator-editor-core/node_modules/prosemirror-state';
-import { EditorView } from '@whp/script-creator-editor-core/node_modules/prosemirror-view';
+import { EditorState, EditorView } from '@whp/script-creator-editor-core';
 import type {
   DraftRecord,
   RevisionRecord,
