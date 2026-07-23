@@ -71,6 +71,25 @@ the contract requires: the result arrived as a first-class schema payload, not a
   turned out to be the plan's genuinely compact Task 8; the worker implemented the
   full contract. No process change needed beyond the extra review pass it triggered.
 
+## Post-review hardening
+
+The final whole-branch review (fresh reviewer) raised six findings — three High: schema
+retries orphaned the public operation id (SSE could say `done` while the contracted
+retry ran invisibly); hard timeouts were in-memory only (daemon restarts and
+supervisor retries escaped the binding limits); artifact writes were atomic-for-readers
+but not compare-and-swap. One fix wave resolved all of them: durable `operations` rows
+with attempt chains (`jobs.operation_id`, retries inherited, all public reads resolve
+the active attempt, one terminal `done`), persisted deadlines re-armed or fired on
+boot and inherited by retries, CAS artifact writes requiring `{expectedHash}` or
+`{expectNew}` behind a single mutex with boundary mutation/deletion regressions,
+no-follow symlink-rejecting validator path containment, a fail-closed E2E, and the
+progress-ledger corrections. Suite grew to 30 files / 170 tests, green three
+consecutive host runs, typecheck clean. The real E2E was rerun with the strengthened
+assertions and again returned ALL CHECKS VERIFIED — active pre-kill state with zero
+early `done`, five resumed codex events after `Last-Event-ID`, tokens
+in=49424/out=932/reasoning=690, and the cancelled stream showing two codex events plus
+exactly one terminal `done`.
+
 ## Verdict
 
 **The backend is real.** The full path — HTTP request → nonce gate → envelope →
