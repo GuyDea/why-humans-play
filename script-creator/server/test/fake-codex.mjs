@@ -356,7 +356,7 @@ function fullTopicReport() {
   ].join('\n');
 }
 
-function synthesizeSchema(schema, propertyName = '') {
+function synthesizeSchema(schema, propertyName = '', itemIndex = 0) {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
     throw new Error(`cannot synthesize schema property ${propertyName || '<root>'}`);
   }
@@ -365,7 +365,7 @@ function synthesizeSchema(schema, propertyName = '') {
     if (propertyName === 'status' && schema.enum.includes('complete')) {
       return 'complete';
     }
-    return schema.enum[0];
+    return schema.enum[itemIndex % schema.enum.length];
   }
 
   if (
@@ -386,7 +386,7 @@ function synthesizeSchema(schema, propertyName = '') {
       }
       return Object.fromEntries(required.map((name) => [
         name,
-        synthesizeSchema(properties[name], name),
+        synthesizeSchema(properties[name], name, itemIndex),
       ]));
     }
     case 'array': {
@@ -395,7 +395,7 @@ function synthesizeSchema(schema, propertyName = '') {
         : 1;
       return Array.from(
         { length: count },
-        () => synthesizeSchema(schema.items, propertyName),
+        (_, index) => synthesizeSchema(schema.items, propertyName, index),
       );
     }
     case 'string':
