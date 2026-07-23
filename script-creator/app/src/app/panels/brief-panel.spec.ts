@@ -1,4 +1,12 @@
-import { signal } from '@angular/core';
+import '@angular/compiler';
+import {
+  createComponent,
+  provideZonelessChangeDetection,
+  signal,
+  ɵSIGNAL,
+  type ɵInputSignalNode,
+} from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
 import type {
   DraftRecord,
@@ -7,6 +15,7 @@ import type {
 } from '../api/client';
 import {
   ApprovalGate,
+  BriefPanel,
   BriefPanelModel,
   buildDraftEnvelopeInputs,
   readDraftMetadata,
@@ -146,6 +155,39 @@ describe('draft brief metadata', () => {
     });
   });
 
+  it('persists brief edits against the latest editor document', async () => {
+    const save = vi.fn<BriefPanelSaver['save']>(async (_id, input) =>
+      savedDraft(input, 1));
+    const model = new BriefPanelModel({
+      ...draft,
+      doc: { ...draft.doc, metadata },
+    }, { save });
+    const editedDocument = {
+      ...draft.doc,
+      content: [{
+        type: 'beat',
+        content: [{
+          type: 'paragraph',
+          content: [{ type: 'text', text: 'Latest narration.' }],
+        }],
+      }],
+    };
+
+    model.syncDocument(editedDocument);
+    await model.update({ topic: 'Updated topic' });
+
+    expect(save).toHaveBeenCalledWith('draft-1', {
+      doc: {
+        ...editedDocument,
+        metadata: {
+          ...metadata,
+          topic: 'Updated topic',
+        },
+      },
+      disposition: 'brief-metadata',
+    });
+  });
+
   it('injects the persisted brief fields into the exact operation envelope shape', () => {
     const inputs = buildDraftEnvelopeInputs({
       selection: 'selected narration',
@@ -260,4 +302,60 @@ describe('approval gate', () => {
     expect(gate.activeOperation()).toBe(launched);
     expect(onLaunch).toHaveBeenCalledWith(launched);
   });
+
+  it('renders Promote disabled until the approval toggle is on', async () => {
+    const save = vi.fn<BriefPanelSaver['save']>(async (_id, input) =>
+      savedDraft(input, 1));
+    const model = new BriefPanelModel({
+      ...draft,
+      doc: { ...draft.doc, metadata },
+    }, { save });
+    const gate = new ApprovalGate(
+      model,
+      { launch: vi.fn() },
+      () => ({
+        selection: 'full narration',
+        before: '',
+        after: '',
+        beatTitle: draft.title,
+        narrativeJob: '',
+        requestedScope: { kind: 'full-draft' },
+      }),
+    );
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-brief-panel');
+    document.body.append(host);
+    const component = createComponent(BriefPanel, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    setRequiredInput(component.instance.model, model);
+    setRequiredInput(component.instance.gate, gate);
+    application.attachView(component.hostView);
+    component.changeDetectorRef.detectChanges();
+
+    try {
+      const promote = host.querySelector<HTMLButtonElement>('button.promote')!;
+      expect(promote.disabled).toBe(true);
+
+      await model.setDirectionApproved(true);
+      component.changeDetectorRef.detectChanges();
+      expect(promote.disabled).toBe(false);
+    } finally {
+      application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
 });
+
+function setRequiredInput<T>(
+  inputSignal: { [ɵSIGNAL]: unknown },
+  value: T,
+): void {
+  const node = inputSignal[ɵSIGNAL] as ɵInputSignalNode<T, T>;
+  node.applyValueToInputSignal(node, value);
+}

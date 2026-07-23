@@ -187,6 +187,13 @@ export class BriefPanelModel {
     return this.update({ directionApproved: approved });
   }
 
+  syncDocument(document: DraftDocument): void {
+    this.draft.update((draft) => ({
+      ...draft,
+      doc: withDraftMetadata(document, this.metadata()),
+    }));
+  }
+
   save(id: string, input: SaveDraftInput): Promise<SavedDraft> {
     return this.enqueueSave(id, () => input);
   }

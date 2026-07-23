@@ -19,7 +19,7 @@
   content: "";
 }
 
-.masthead > div {
+.masthead > .identity {
   display: flex;
   margin-inline-end: auto;
   align-items: center;
@@ -46,10 +46,25 @@
   letter-spacing: 0.01em;
 }
 
-.masthead p {
-  margin: 0;
+.masthead nav {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.masthead a {
+  border-bottom: 2px solid transparent;
   color: color-mix(in srgb, var(--whp-ground) 72%, transparent);
+  padding: 0.38rem 0.5rem;
   font-size: 0.72rem;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.masthead a:hover,
+.masthead a.active {
+  border-bottom-color: var(--whp-accent);
+  color: var(--whp-ground);
 }
 
 @media (max-width: 38rem) {
@@ -62,5 +77,9 @@
     width: 3rem;
     height: 0.24rem;
     align-self: auto;
+  }
+
+  .masthead nav {
+    align-self: stretch;
   }
 }

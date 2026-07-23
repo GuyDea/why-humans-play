@@ -27,7 +27,17 @@ import {
   computeMetrics,
   type DocumentJson,
 } from '../metrics';
-import { FindingsPanel } from '../panels/findings-panel';
+import {
+  ApprovalGate,
+  BriefPanelModel,
+  type DraftEnvelopeContext,
+  type PromotionLauncher,
+} from '../panels/brief-panel';
+import { ParkingLotModel } from '../panels/parking-lot';
+import {
+  type StudioRuntimeHandle,
+  type StudioSession,
+} from '../studio-session';
 import { preserveDraftDocument } from './draft-document';
 import type { FindingLayer } from './proposal-bridge';
 import {
@@ -104,12 +114,12 @@ interface AutosaveSnapshot {
   doc: DocumentJson;
   version: number;
   epoch: number;
+  brief: BriefPanelModel;
 }
 
 @Component({
   selector: 'app-editor-host',
   standalone: true,
-  imports: [FindingsPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="editor-shell">
@@ -153,10 +163,6 @@ interface AutosaveSnapshot {
         class="guardrail-callouts"
         aria-label="Guardrail callouts"
       ></aside>
-
-      @if (findings().length > 0) {
-        <app-findings-panel [findings]="findings()" />
-      }
 
       <div #consoleMount class="operation-console-host"></div>
 
@@ -323,10 +329,18 @@ interface AutosaveSnapshot {
 export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly draft = input.required<DraftRecord>();
   readonly client = input.required<DaemonClient>();
+  readonly session = input.required<StudioSession>();
   readonly wpm = input(150);
 
   readonly doc = signal<DocumentJson | null>(null);
+  readonly editorState = signal<EditorState | null>(null);
   readonly findings = signal<readonly FindingLayer[]>([]);
+  readonly brief = signal<BriefPanelModel | null>(null);
+  readonly approvalGate = signal<ApprovalGate | null>(null);
+  readonly parkingLot = new ParkingLotModel(
+    this.editorState,
+    (transaction) => this.editorView?.dispatch(transaction),
+  );
   readonly operationError = signal<string | null>(null);
   private readonly currentDirty = signal(false);
   private readonly queuedAutosaves = signal(0);
@@ -358,6 +372,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
   private editorView: EditorView | null = null;
   private studioComposition: StudioComposition | null = null;
+  private detachRuntime: (() => void) | null = null;
   private selectionContextDocument: DraftDocument | null = null;
   private activeDraftId: string | null = null;
   private draftEpoch = 0;
@@ -386,10 +401,13 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.autosave.flush();
     this.draftEpoch += 1;
+    this.detachRuntime?.();
+    this.detachRuntime = null;
     this.studioComposition?.destroy();
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.editorState.set(null);
   }
 
   protected pacingPercent(ratio: number): number {
@@ -417,10 +435,13 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     if (!mount || !failures || !guardrails || !consolePanel) return;
 
     this.autosave.flush();
+    this.detachRuntime?.();
+    this.detachRuntime = null;
     this.studioComposition?.destroy();
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.editorState.set(null);
     mount.replaceChildren();
 
     const documentNode = schema.nodeFromJSON(draft.doc);
@@ -432,6 +453,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
     this.activeDraftId = draft.id;
     this.selectionContextDocument = draft.doc;
+    const brief = new BriefPanelModel(draft, this.client());
+    this.brief.set(brief);
+    this.approvalGate.set(null);
     this.draftEpoch += 1;
     this.editVersion = 0;
     this.doc.set(this.persistedDocument(documentNode.toJSON() as DocumentJson));
@@ -450,6 +474,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         if (this.editorView !== mountedView || mountedView === null) return;
         const nextState = mountedView.state.apply(transaction);
         mountedView.updateState(nextState);
+        this.editorState.set(nextState);
         const doc = this.persistedDocument(
           nextState.doc.toJSON() as DocumentJson,
         );
@@ -459,7 +484,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       },
     });
     this.editorView = mountedView;
-    this.studioComposition = composeStudio(
+    this.editorState.set(mountedView.state);
+    const composition = composeStudio(
       mountedView,
       this.client(),
       {
@@ -467,7 +493,10 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         failures,
         guardrails,
         console: consolePanel,
-        draftDocument: () => this.selectionContextDocument ?? draft.doc,
+        draftDocument: () =>
+          this.brief()?.draft().doc
+          ?? this.selectionContextDocument
+          ?? draft.doc,
         onFindings: (findings) => this.findings.set(findings),
         onLaunch: () => this.operationError.set(null),
         onError: (error) => {
@@ -475,6 +504,15 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         },
       },
     );
+    this.studioComposition = composition;
+    this.detachRuntime = this.session().attachRuntime(
+      composition.runtime as unknown as StudioRuntimeHandle,
+    );
+    this.approvalGate.set(new ApprovalGate(
+      brief,
+      promotionLauncher(composition),
+      () => this.promotionContext(),
+    ));
   }
 
   private scheduleAutosave(doc: DocumentJson): void {
@@ -483,14 +521,22 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
     const version = ++this.editVersion;
     const epoch = this.draftEpoch;
+    const brief = this.brief();
+    if (!brief) return;
     this.currentDirty.set(true);
-    this.autosave.schedule({ draftId, doc, version, epoch });
+    this.autosave.schedule({
+      draftId,
+      doc,
+      version,
+      epoch,
+      brief,
+    });
   }
 
   private async saveSnapshot(snapshot: AutosaveSnapshot): Promise<void> {
-    const { draftId, doc, version, epoch } = snapshot;
+    const { draftId, doc, version, epoch, brief } = snapshot;
     try {
-      const saved = await this.client().save(draftId, {
+      const saved = await brief.save(draftId, {
         doc,
         disposition: 'autosave',
       });
@@ -511,12 +557,46 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private persistedDocument(document: DocumentJson): DocumentJson {
-    const source = this.selectionContextDocument;
+    const source = this.brief()?.draft().doc
+      ?? this.selectionContextDocument;
     if (!source) return document;
     const persisted = preserveDraftDocument(document, source);
     this.selectionContextDocument = persisted;
+    this.brief()?.syncDocument(persisted);
     return persisted;
   }
+
+  private promotionContext(): DraftEnvelopeContext<{ kind: 'full-draft' }> {
+    const view = this.editorView;
+    const draft = this.brief()?.draft() ?? this.draft();
+    return {
+      selection: view
+        ? view.state.doc.textBetween(
+            0,
+            view.state.doc.content.size,
+            '\n\n',
+          )
+        : '',
+      before: '',
+      after: '',
+      beatTitle: draft.title,
+      narrativeJob: '',
+      requestedScope: { kind: 'full-draft' },
+    };
+  }
+}
+
+function promotionLauncher(
+  composition: StudioComposition,
+): PromotionLauncher {
+  return {
+    launch: (operation, inputs, meta) =>
+      composition.runtime.tracker.launch(
+        operation,
+        inputs,
+        meta as never,
+      ) as unknown as ReturnType<PromotionLauncher['launch']>,
+  };
 }
 
 function saveErrorMessage(error: unknown): string {

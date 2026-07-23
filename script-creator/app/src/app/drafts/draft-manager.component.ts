@@ -4,9 +4,14 @@ import {
   type OnInit,
   input,
   signal,
+  viewChild,
 } from '@angular/core';
 import type { DaemonClient } from '../api/client';
 import { EditorHost } from '../editor/editor-host';
+import { BriefPanel } from '../panels/brief-panel';
+import { FindingsPanel } from '../panels/findings-panel';
+import { ParkingLot } from '../panels/parking-lot';
+import type { StudioSession } from '../studio-session';
 import {
   DraftManager,
 } from './draft-manager';
@@ -17,8 +22,11 @@ import { RevisionTimeline } from './revision-timeline';
   selector: 'app-draft-manager',
   standalone: true,
   imports: [
+    BriefPanel,
     DraftTransfer,
     EditorHost,
+    FindingsPanel,
+    ParkingLot,
     RevisionTimeline,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -99,6 +107,7 @@ import { RevisionTimeline } from './revision-timeline';
             <app-editor-host
               [draft]="activeDraft"
               [client]="client()"
+              [session]="session()"
             />
           } @else {
             <section class="welcome">
@@ -112,11 +121,46 @@ import { RevisionTimeline } from './revision-timeline';
           }
         </main>
 
-        <aside class="history-rail">
-          <app-revision-timeline [manager]="studio" />
-          <div class="rail-rule"></div>
-          <app-draft-transfer [manager]="studio" />
-        </aside>
+        @if (studio.activeDraft()) {
+          <aside class="history-rail">
+            @if (editorHost(); as activeEditor) {
+              @if (activeEditor.brief(); as brief) {
+                @if (activeEditor.approvalGate(); as approvalGate) {
+                  <details open>
+                    <summary>Brief &amp; approval</summary>
+                    <app-brief-panel
+                      [model]="brief"
+                      [gate]="approvalGate"
+                    />
+                  </details>
+                }
+              }
+
+              <details open>
+                <summary>Review findings</summary>
+                <app-findings-panel [findings]="activeEditor.findings()" />
+              </details>
+
+              <details open>
+                <summary>Variants &amp; parking</summary>
+                <app-parking-lot [model]="activeEditor.parkingLot" />
+              </details>
+            }
+
+            <details>
+              <summary>Revisions &amp; transfer</summary>
+              <app-revision-timeline [manager]="studio" />
+              <div class="rail-rule"></div>
+              <app-draft-transfer [manager]="studio" />
+            </details>
+          </aside>
+        } @else {
+          <aside class="history-rail">
+            <app-revision-timeline [manager]="studio" />
+            <div class="rail-rule"></div>
+            <app-draft-transfer [manager]="studio" />
+          </aside>
+        }
       </div>
     }
   `,
@@ -312,13 +356,33 @@ import { RevisionTimeline } from './revision-timeline';
     .history-rail {
       display: grid;
       align-content: start;
-      gap: 1.25rem;
+      gap: 0.75rem;
       max-height: calc(100vh - 3.75rem);
       overflow-y: auto;
     }
 
+    details {
+      border-bottom: 1px solid var(--whp-line);
+      padding-bottom: 0.75rem;
+    }
+
+    summary {
+      margin-bottom: 0.6rem;
+      color: var(--whp-muted);
+      cursor: pointer;
+      font-size: 0.66rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    details:not([open]) summary {
+      margin-bottom: 0;
+    }
+
     .rail-rule {
       height: 1px;
+      margin-block: 0.75rem;
       background: var(--whp-line);
     }
 
@@ -369,7 +433,9 @@ import { RevisionTimeline } from './revision-timeline';
 })
 export class DraftManagerComponent implements OnInit {
   readonly client = input.required<DaemonClient>();
+  readonly session = input.required<StudioSession>();
   readonly manager = signal<DraftManager | null>(null);
+  readonly editorHost = viewChild(EditorHost);
 
   ngOnInit(): void {
     const manager = new DraftManager(this.client());

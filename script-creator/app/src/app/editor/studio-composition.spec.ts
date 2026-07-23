@@ -1,3 +1,4 @@
+import '@angular/compiler';
 import {
   EditorState,
   EditorView,
@@ -5,6 +6,13 @@ import {
   schema,
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
+import {
+  createComponent,
+  provideZonelessChangeDetection,
+  ɵSIGNAL,
+  type ɵInputSignalNode,
+} from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
   DaemonClient,
@@ -12,8 +20,19 @@ import type {
   OperationName,
   OperationRecord,
   OperationResult,
+  SavedDraft,
   StreamEventsOptions,
 } from '../api/client';
+import {
+  ApprovalGate,
+  BriefPanelModel,
+  type PromotionLauncher,
+} from '../panels/brief-panel';
+import {
+  FindingsPanel,
+  findingRows,
+} from '../panels/findings-panel';
+import type { FindingLayer } from './proposal-bridge';
 import {
   composeStudio,
   type StudioComposition,
@@ -258,6 +277,247 @@ describe('studio composition', () => {
         '[data-testid="operation-guardrail"]',
       )?.textContent).toContain('crosses the approved scope');
     });
+  });
+
+  it('feeds review results to the findings panel rows', async () => {
+    const { state, draftDocument, target } = selectedState();
+    const root = document.createElement('section');
+    const editor = document.createElement('div');
+    const failures = document.createElement('div');
+    const guardrails = document.createElement('div');
+    const consolePanel = document.createElement('div');
+    root.append(editor, failures, guardrails, consolePanel);
+    document.body.append(root);
+
+    let composition: StudioComposition | null = null;
+    let findings: readonly FindingLayer[] = [];
+    const view = new EditorView(editor, {
+      state,
+      nodeViews: variantNodeViews,
+      dispatchTransaction(transaction) {
+        view.updateState(view.state.apply(transaction));
+        composition?.handleEditorDispatch();
+      },
+    });
+    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
+      left: position === target.from ? 100 : 180,
+      right: position === target.from ? 100 : 180,
+      top: 80,
+      bottom: 100,
+    }));
+    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
+      x: 20,
+      y: 10,
+      left: 20,
+      right: 420,
+      top: 10,
+      bottom: 310,
+      width: 400,
+      height: 300,
+      toJSON: () => ({}),
+    });
+
+    const daemon = new ControllableDaemonClient();
+    view.focus();
+    composition = composeStudio(
+      view,
+      daemon as unknown as DaemonClient,
+      {
+        editor,
+        failures,
+        guardrails,
+        console: consolePanel,
+        draftDocument: () => draftDocument,
+        onFindings: (next) => {
+          findings = next;
+        },
+      },
+    );
+    mounted.push({ composition, view, root });
+
+    composition.runtime.toolbar.element
+      .querySelector<HTMLButtonElement>('button[data-action="review"]')!
+      .click();
+    await vi.waitFor(() => {
+      expect(consolePanel.querySelector(
+        '[data-testid="console-operation"]',
+      )?.textContent).toContain('streaming');
+    });
+    daemon.resolve('op-1', {
+      operation: completedOperation('op-1', { operation: 'review' }),
+      result: {
+        kind: 'schema',
+        value: {
+          status: 'complete',
+          findings: [{
+            anchor: SELECTED_TEXT,
+            severity: 'important',
+            finding_markdown: 'Ground this claim in the supplied anchor.',
+            optional_direction_markdown: 'Name the concrete rule.',
+          }],
+          guardrail_markdown: null,
+        },
+        guardrail: null,
+      },
+    });
+
+    await vi.waitFor(() => expect(findings).toHaveLength(1));
+    expect(findingRows(findings)).toEqual([
+      expect.objectContaining({
+        anchor: SELECTED_TEXT,
+        severity: 'important',
+        findingMarkdown: 'Ground this claim in the supplied anchor.',
+        anchorStatus: 'anchored',
+      }),
+    ]);
+
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const findingsHost = document.createElement('app-findings-panel');
+    document.body.append(findingsHost);
+    const findingsComponent = createComponent(FindingsPanel, {
+      environmentInjector: application.injector,
+      hostElement: findingsHost,
+    });
+    const findingsNode = findingsComponent.instance.findings[ɵSIGNAL] as
+      ɵInputSignalNode<readonly FindingLayer[], readonly FindingLayer[]>;
+    findingsNode.applyValueToInputSignal(findingsNode, findings);
+    application.attachView(findingsComponent.hostView);
+    findingsComponent.changeDetectorRef.detectChanges();
+
+    try {
+      expect(findingsHost.textContent).toContain(
+        'Ground this claim in the supplied anchor.',
+      );
+      expect(findingsHost.textContent).toContain('Anchored');
+    } finally {
+      application.detachView(findingsComponent.hostView);
+      findingsComponent.destroy();
+      application.destroy();
+      findingsHost.remove();
+    }
+  });
+
+  it('launches approved promotion through the runtime tracker and renders its stream', async () => {
+    const { state, draftDocument, target } = selectedState();
+    const root = document.createElement('section');
+    const editor = document.createElement('div');
+    const failures = document.createElement('div');
+    const guardrails = document.createElement('div');
+    const consolePanel = document.createElement('div');
+    root.append(editor, failures, guardrails, consolePanel);
+    document.body.append(root);
+
+    let composition: StudioComposition | null = null;
+    const view = new EditorView(editor, {
+      state,
+      nodeViews: variantNodeViews,
+      dispatchTransaction(transaction) {
+        view.updateState(view.state.apply(transaction));
+        composition?.handleEditorDispatch();
+      },
+    });
+    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
+      left: position === target.from ? 100 : 180,
+      right: position === target.from ? 100 : 180,
+      top: 80,
+      bottom: 100,
+    }));
+    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
+      x: 20,
+      y: 10,
+      left: 20,
+      right: 420,
+      top: 10,
+      bottom: 310,
+      width: 400,
+      height: 300,
+      toJSON: () => ({}),
+    });
+
+    const daemon = new ControllableDaemonClient();
+    view.focus();
+    composition = composeStudio(
+      view,
+      daemon as unknown as DaemonClient,
+      {
+        editor,
+        failures,
+        guardrails,
+        console: consolePanel,
+        draftDocument: () => draftDocument,
+      },
+    );
+    mounted.push({ composition, view, root });
+
+    const draft = {
+      id: 'draft-promote',
+      episodeSlug: 'approved-episode',
+      title: 'Approved episode',
+      format: 'narration' as const,
+      doc: draftDocument,
+      updatedAt: '2026-07-23T12:00:00.000Z',
+    };
+    const save = vi.fn(async (_id: string, input: { doc: DraftDocument }) => ({
+      draft: { ...draft, doc: input.doc },
+      revision: {
+        id: 'revision-promote',
+        draftId: draft.id,
+        seq: 1,
+        opId: null,
+        disposition: 'brief-metadata',
+        doc: input.doc,
+        createdAt: '2026-07-23T12:00:01.000Z',
+      },
+    } satisfies SavedDraft));
+    const brief = new BriefPanelModel(draft, { save });
+    const launcher: PromotionLauncher = {
+      launch: (operation, inputs, meta) =>
+        composition!.runtime.tracker.launch(
+          operation,
+          inputs,
+          meta as never,
+        ) as unknown as ReturnType<PromotionLauncher['launch']>,
+    };
+    const gate = new ApprovalGate(
+      brief,
+      launcher,
+      () => ({
+        selection: view.state.doc.textContent,
+        before: '',
+        after: '',
+        beatTitle: draft.title,
+        narrativeJob: '',
+        requestedScope: { kind: 'full-draft' },
+      }),
+    );
+
+    expect(gate.canPromote()).toBe(false);
+    await brief.setDirectionApproved(true);
+    expect(gate.canPromote()).toBe(true);
+    gate.promote();
+
+    await vi.waitFor(() => {
+      expect(daemon.submitOp).toHaveBeenCalledWith(
+        'promote',
+        expect.objectContaining({
+          selection: view.state.doc.textContent,
+          requested_scope: { kind: 'full-draft' },
+        }),
+      );
+      expect(consolePanel.textContent).toContain('Working on op-1.');
+    });
+    daemon.resolve('op-1', {
+      operation: completedOperation('op-1', { operation: 'promote' }),
+      result: {
+        kind: 'raw',
+        markdown: 'Promotion complete.',
+      },
+    });
+    await vi.waitFor(() => expect(
+      gate.activeOperation()?.phase(),
+    ).toBe('done'));
   });
 });
 

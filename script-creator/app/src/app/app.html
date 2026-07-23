@@ -1,10 +1,19 @@
 <header class="masthead">
-  <div>
+  <div class="identity">
     <span class="brand">Why Humans Play</span>
     <span class="divider" aria-hidden="true"></span>
     <strong>Script Studio</strong>
   </div>
-  <p>Draft, compare, restore, and export narration.</p>
+  <nav aria-label="Script Creator">
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+    >
+      Studio
+    </a>
+    <a routerLink="/console" routerLinkActive="active">Console</a>
+  </nav>
 </header>
 
-<app-draft-manager [client]="client" />
+<router-outlet />

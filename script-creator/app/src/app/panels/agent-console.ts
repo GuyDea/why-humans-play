@@ -266,7 +266,7 @@ function stringValue(value: unknown): string {
                 [disabled]="!operation.canResume()"
                 (click)="model().resumeSelected()"
               >
-                Resume
+                Re-roll
               </button>
             </div>
           </div>

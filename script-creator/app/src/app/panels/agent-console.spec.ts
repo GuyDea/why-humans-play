@@ -1,7 +1,16 @@
-import { signal } from '@angular/core';
+import '@angular/compiler';
+import {
+  createComponent,
+  provideZonelessChangeDetection,
+  signal,
+  ɵSIGNAL,
+  type ɵInputSignalNode,
+} from '@angular/core';
+import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
 import type { TrackedOperation } from '../ops/tracker';
 import {
+  AgentConsole,
   AgentConsoleModel,
   formatElapsed,
   formatTokens,
@@ -93,6 +102,52 @@ describe('AgentConsoleModel', () => {
     expect(model.resumeSelected()).toBe(resumed);
     expect(resume).toHaveBeenCalledWith('op-1');
     expect(model.selected()).toBe(resumed);
+  });
+
+  it('renders tracker records with working Cancel and Re-roll controls', async () => {
+    const operation = tracked('op-1', {
+      phase: 'streaming',
+      entries: [{ seq: 1, kind: 'message', text: 'Checking the hook.' }],
+    });
+    const cancel = vi.fn(async () => undefined);
+    const tracker: AgentConsoleTracker<Meta> = {
+      history: signal([operation]),
+      cancel,
+      resume: vi.fn(),
+    };
+    const model = new AgentConsoleModel(tracker);
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    application.attachView(component.hostView);
+    component.changeDetectorRef.detectChanges();
+
+    try {
+      expect(host.textContent).toContain('Checking the hook.');
+      const controls = Array.from(
+        host.querySelectorAll<HTMLButtonElement>('.actions button'),
+      );
+      expect(controls.map(({ textContent }) => textContent?.trim())).toEqual([
+        'Cancel',
+        'Re-roll',
+      ]);
+      controls[0]!.click();
+      await vi.waitFor(() => expect(cancel).toHaveBeenCalledWith('op-1'));
+    } finally {
+      application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
   });
 });
 
