@@ -173,23 +173,41 @@ These are laws, not suggestions. They apply to every WHP video forever.
   games for a living, and the honest science surprised me." `[reported]` Authority in
   the hook buys retention when you have no subscriber base.
 
-### Develop the voice before the production package
+### Develop the message, then the voice, before the production package
 
 Use this order for WHP scripts:
 
-1. Write one complete narration prototype that tests the hook, humor, human connection,
-   central idea, and ending as one continuous story.
-2. Show Martin the complete narration before running editorial, retention, or timing
+1. Build one script architecture from the selected topic before writing an opening,
+   beat outline, joke, transition, or narration. State the central question and core
+   answer, the viewer's before-and-after belief, a three-to-five-step insight ladder,
+   the relevant phenomenon and paradox map, the earned reframe, real-world proof cases,
+   practical payoff, final lesson, and scope boundary.
+2. Refine that architecture with Martin and obtain explicit approval of the complete
+   intellectual payload. Approval of the topic, title, one example, or one clever insight
+   does not approve the architecture.
+3. Write one complete narration prototype from the approved architecture, testing the
+   hook, humor, human connection, examples, and ending as one continuous story. Do not
+   quietly replace the approved question, core answer, insight ladder, earned reframe,
+   payoff, or final lesson because a different anecdote is easier to write.
+4. Show Martin the complete narration before running editorial, retention, or timing
    audits. Do not pre-cut context from a version he has not seen.
-3. Refine it with Martin at line level, preserving approved language and changing only
+5. Refine it with Martin at line level, preserving approved language and changing only
    the requested scope.
-4. Obtain explicit approval of the complete narration and creative direction.
-5. Only then gather or refresh evidence, add production structure, and run claims, rights,
+6. Obtain explicit approval of the complete narration and creative direction.
+7. Only then gather or refresh evidence, add production structure, and run claims, rights,
    editorial, retention, timing, and format checks.
-6. Present audit concerns separately before making any context-losing rewrite. An audit
+8. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
-7. Close the central lesson with a short declarative button. A final question or forward
+9. Close the central lesson with a short declarative button. A final question or forward
    hook may follow only when it does not leave the episode's main answer unresolved.
+
+The architecture must go beyond a competent summary of familiar material. Its insight
+ladder should converge on one defensible deeper conclusion—an earned reframe that changes
+how the viewer interprets or predicts another situation. Map established laws, biases,
+paradoxes, signaling problems, and other named phenomena during architecture work, but
+name them in narration only when they clarify a demonstrated pattern rather than creating
+a glossary recital. A controversial conclusion is useful only when the preceding mechanism
+earns it and a stated boundary keeps it honest.
 
 In the final production document, the readable script comes first as numbered beats that
 contain spoken narration only. Put all timestamps, targets, story functions, claims,
@@ -212,9 +230,10 @@ replacement of only that selection; generation of alternatives for the same narr
 job; and promotion of an approved prototype into evidence-backed production.
 
 The topic-selection skill owns topic comparison and selection. The script-writing skill
-consumes the selected topic brief and owns narration onward. The future app will own local
-UI state, text selections, and revision history; it must call the skills rather than
-duplicate their editorial rules. Keep approved artifacts portable in repository Markdown.
+consumes the selected topic brief and owns script architecture onward. The future app will
+own local UI state, text selections, and revision history; it must call the skills rather
+than duplicate their editorial rules. Keep approved artifacts portable in repository
+Markdown.
 Choose the app framework, persistence, local-agent transport, and exact data contract only
 when that feature receives its own design; do not scaffold placeholder app code now.
 

@@ -1,4 +1,4 @@
 interface:
   display_name: "WHP YouTube Script Writer"
-  short_description: "Prototype and finalize compelling WHP scripts"
-  default_prompt: "Use $writing-whp-youtube-scripts to rapidly prototype, refine, or production-finalize a Why Humans Play episode script."
+  short_description: "Architect, prototype, and finalize WHP scripts"
+  default_prompt: "Use $writing-whp-youtube-scripts to architect, prototype, refine, or production-finalize a Why Humans Play episode script."

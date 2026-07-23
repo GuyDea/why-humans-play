@@ -7,8 +7,10 @@ ideation unless Martin explicitly asks.
 
 Carry forward any supplied topic and angle, audience, title and thumbnail promise, core
 tension or open question, by-end viewer promise, intended payoff, factual anchors, and
-important unknowns. Missing nonessential fields do not block a useful prototype. Ask only
-when a missing choice would materially change the requested artifact.
+important unknowns. Route a new episode through the
+[script architecture method](script-architecture.md) before narration. Missing nonessential
+fields do not block a useful architecture or prototype. Ask only when a missing choice
+would materially change the requested artifact.
 
 Do not depend on hidden conversational state. Work from the supplied topic brief, artifact
 or selection, surrounding context, requested operation, and creative status. In ordinary
@@ -43,8 +45,10 @@ into another.
 
 ### Generate
 
-Return one useful artifact at the requested scope: structure, opening, passage, narration, or
-other explicitly requested unit. Do not return a menu when Martin asked for one draft.
+Return one useful artifact at the requested scope: architecture, structure, opening,
+passage, narration, or other explicitly requested unit. For a new episode or thesis-level
+rethink without an approved architecture, return only the architecture. Do not return a
+menu when Martin asked for one artifact.
 
 ### Review
 
@@ -71,11 +75,18 @@ direct request for evidence-backed finalization. Freeze the approved prototype a
 baseline, extract its material claims, and enter the production workflow. Research may bound
 the claims; it must not quietly replace the personality that earned approval.
 
-## Draft for discovery
+## Draft from the approved architecture
 
-Create the narration before explaining the process. In rapid mode, discover the best story
-by writing it, hearing it, and refining only what Martin targets. Keep the prototype easy to
-discard and fast to revise.
+Do not write narration as a way to discover what the episode means. Treat examples, stories,
+humor, and hooks as the delivery system for an approved payload, not as substitutes for that
+payload. Do not write hook copy, jokes, transitions, scene direction, or complete narration
+inside the architecture artifact. Refine weak, redundant, obvious, or disconnected ideas at
+architecture level before spending prose on them.
+
+After Martin approves the architecture, discover the best delivery by writing it, hearing it,
+and refining only what Martin targets. Keep the prototype easy to discard and fast to revise,
+but preserve the approved central question, core answer, insight ladder, earned reframe,
+practical payoff, boundaries, and final lesson.
 
 Aim each paragraph at curiosity, laughter, insight, or more than one. Cut background that
 does not sharpen the next question. Escalate from the concrete incident to ordinary human
@@ -286,6 +297,10 @@ supplies them.
 
 Before returning rapid work, check internally:
 
+- For episode-scale work, was the complete architecture explicitly approved before any
+  opening, beat outline, or narration was drafted?
+- Does the prototype deliver the approved core answer, insight ladder, and earned reframe
+  without adding a competing thesis?
 - Does the first sentence feel like a concrete event or irresistible proposition?
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
@@ -318,6 +333,9 @@ Keep this audit internal unless Martin asks to see it.
 
 ## Common mistakes
 
+- Jumping from a selected topic or one promising insight directly into narration.
+- Treating a beat outline, list of facts, or generic topic summary as script architecture.
+- Using hooks, jokes, or examples to hide a weak or unapproved intellectual payload.
 - Starting with process, caveats, or a mechanism lecture instead of the event.
 - Keeping a technically exact example after first-hearing confusion reveals that its causal
   action is too hard to explain.
