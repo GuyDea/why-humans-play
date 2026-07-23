@@ -66,6 +66,34 @@ proposal and accepted into the document.
   durable operations via the new `GET /api/ops` (missing-list-endpoint class, second
   instance), refreshing while mounted.
 
+## Post-review hardening
+
+The final whole-branch review (fresh reviewer) returned FAIL with seven findings and
+correctly caught two controller-verification lapses: the composition net tested
+`composeStudio` directly instead of the production components that must call it, and
+this evidence document had transcribed the implementer's overstated claim about it —
+both now corrected. The fix wave resolved: provenance-pure envelopes (the preset
+sentence and the `rapid-prototype` fallback removed; creative phase is explicit stored
+draft state, edited in the brief panel, with launches refusing and instructing when it
+is missing; an end-to-end provenance spec starts from stored draft + concrete user
+action and proves every submitted key's origin); live editor-core anchors for
+Alternatives and Review with concurrent-edit regressions (no more stale coordinates);
+a real-component composition net mounting the production surface; the labeled
+Base/Current/Proposed conflict widget with Accept disabled; runtime-owned re-roll
+eligibility (no headless resumes from the routed console); editor-core `Decoration`
+re-exports replacing the second deep-import regression; and a bounded, superseding,
+destroy-cancelled autosave retry queue (the head-blocking data-safety issue, fixed
+before merge as ruled). Suites after the wave: app 21 files green three consecutive
+runs, editor-core 11 green, typecheck and `ng build` clean.
+
+The two browser flows the review found unevidenced were then executed and recorded
+live: a Review operation produced an anchored, severity-labeled finding in the findings
+panel; a rewrite over a locked range produced the conflicted proposal rendering
+`Base: "into a performance"` / `Current: "into a performance"` /
+`Proposed: "Rewritten passage."` verbatim with Accept disabled. (The in-editor pin
+decoration for findings is panel-verified; its visual treatment in the editor gutter is
+styling-level and tracked for Plan 5 polish.)
+
 ## Verdict
 
 **The Script Studio is real and usable.** Martin can open a browser page served by the
