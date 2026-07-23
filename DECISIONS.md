@@ -583,3 +583,21 @@ newer draft state or survive editor teardown.
 ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
 because this decision tightens an internal workbench implementation without changing WHP
 brand or channel doctrine. The final-review report remains the detailed fix-wave record.
+## 2026-07-23 — Accept the Script Creator architecture stage contract
+
+**Decision:** Accept the architecture stage design amendment at
+`docs/superpowers/specs/2026-07-23-script-creator-architecture-ui-design.md`: drafts gain
+an architecture phase gating episode-scale narration behind explicit whole-architecture
+approval; the artifact is stored as the skill's nine fixed sections with section-grain
+operations (`generate-architecture`, `review-architecture`,
+`rewrite-architecture-section`) and a canonical milestone written to the new whitelisted
+path `whp-youtube/architectures/<slug>.md`; implementation is Plan 6's first block.
+
+**Rationale:** The 2026-07-23 architecture-first amendment required a focused app design
+before implementation; this contract adds only transport, storage, UI, and the gate while
+the skill keeps every editorial rule.
+
+**Documents:** `docs/superpowers/specs/2026-07-23-script-creator-architecture-ui-design.md`,
+`docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
+the amendment implements the recorded editorial decision inside the workbench boundary.

@@ -98,14 +98,12 @@ content never contaminate exported Markdown; export is blocked until variants ar
 settled and proposals resolved. External file edits are detected by content hash and
 imported as a new revision — never silently overwritten.
 
-> **Architecture-first amendment boundary:** The accepted requirements now require an
-> architecture draft, explicit whole-architecture approval, and an approved portable
-> Markdown milestone before episode-scale narration. This earlier technical design does not
-> yet define the architecture field schema, operation transport, editor model, persistence
-> shape, approval transition, codec, or canonical Markdown location. Specify and test those
-> together in the focused architecture-UI design before implementation. Until then, the
-> `ScriptDocument` shape and normative operation schemas below remain the pre-architecture
-> app contract and are not sufficient to enable episode-scale narration generation.
+> **Architecture stage:** the architecture-first requirement's app contract is specified
+> in the accepted
+> [architecture stage design amendment](2026-07-23-script-creator-architecture-ui-design.md)
+> (section-structured artifact, three registry operations, explicit whole-architecture
+> approval gating episode-scale narration, canonical milestone at
+> `whp-youtube/architectures/<slug>.md`). Implemented as Plan 6's first block.
 
 **Safe agent merge.** Every request freezes `baseRevision`, the selected slice, stable
 endpoint IDs, and a text fingerprint. On result: validate the typed response (never

@@ -1,7 +1,7 @@
 # Script Creator — Architecture Stage Design Amendment
 
 **Date:** 2026-07-23
-**Status:** Draft for Martin's approval
+**Status:** Accepted 2026-07-23
 **Scope:** The focused design amendment required by the technical design's
 "Architecture-first amendment boundary" (2026-07-23): the app contract for the script
 architecture stage — field schema, operations, editor model, persistence, approval
@@ -9,7 +9,7 @@ transition, codec, and canonical Markdown location. Implements the "Approve scri
 architecture before narration" decision inside the workbench. Implementation lands as
 the first block of Plan 6.
 
-## Decision (proposed)
+## Decision
 
 The draft lifecycle gains an **architecture phase** between topic handoff and rapid
 prototyping. The architecture is a section-structured artifact (the skill's nine fixed
