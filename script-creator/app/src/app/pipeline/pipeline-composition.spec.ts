@@ -67,7 +67,9 @@ class PipelineClientStub {
   }));
   readonly getTopicBrief = vi.fn(async (ref: string) => ({
     ref,
-    markdown: '# The Queue Game\n\nRepository topic brief.',
+    markdown: ref.includes('/episodes/')
+      ? '# Why AI Cheats\n\nRepository episode content.'
+      : '# The Queue Game\n\nRepository topic brief.',
   }));
   readonly listIdeas = vi.fn(async () => []);
   readonly listTopicRuns = vi.fn(async () => []);
@@ -156,6 +158,27 @@ describe('routed Pipeline composition', () => {
       expect(pipeline.router.url).toContain('topic=the-queue-game');
       expect(pipeline.router.url).toContain(
         'ref=whp-youtube%2Ftopics%2Fthe-queue-game.md',
+      );
+    });
+  });
+
+  it('opens a draft-less episode ref and renders its repository content', async () => {
+    const pipeline = await mountPipeline();
+    findCard(pipeline.root, 'why-ai-cheats').click();
+
+    await vi.waitFor(() => {
+      pipeline.tick();
+      const brief = pipeline.root.querySelector<HTMLElement>(
+        '[data-testid="selected-topic-brief"]',
+      );
+      expect(brief?.textContent).toContain('Why AI Cheats');
+      expect(brief?.textContent).toContain('Repository episode content.');
+      expect(pipeline.client.getTopicBrief).toHaveBeenCalledWith(
+        'whp-youtube/episodes/01-why-ai-cheats.md',
+      );
+      expect(pipeline.router.url).toContain('topic=why-ai-cheats');
+      expect(pipeline.router.url).toContain(
+        'ref=whp-youtube%2Fepisodes%2F01-why-ai-cheats.md',
       );
     });
   });

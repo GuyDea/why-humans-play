@@ -42,8 +42,9 @@ the gate.
 
 - Stored on the draft: `architecture: { sections: [{ key, title, md }], approvedMd:
   string | null, approvedAt: string | null }` in the existing drafts store (the next
-  global schema version in the centralized migration sequence — v5 as of Plan 5,
-  which took v4 for gate-check persistence); revisions of the architecture append to the existing revision history with a
+  global schema version in the centralized migration sequence — v6 as of Plan 5,
+  which took v4 for gate-check persistence and v5 for the topic-handoff saga);
+  revisions of the architecture append to the existing revision history with a
   `kind: 'architecture'` discriminator.
 - The nine section keys/titles are fixed constants mirroring the skill reference
   (package-and-audience, central-question, core-answer, belief-shift, insight-ladder,

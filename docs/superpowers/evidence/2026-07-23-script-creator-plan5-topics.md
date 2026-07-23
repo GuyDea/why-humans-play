@@ -57,8 +57,16 @@ a house-rule fix", …) appended to the inbox.
 ## Final review fix wave 1 (browser re-verified)
 
 The whole-branch final review returned seven findings
-(`.superpowers/sdd/p5-final-review-report.md`); all were fixed and the affected
-flows re-verified in real Chrome against the daemon + fake codex:
+(`.superpowers/sdd/p5-final-review-report.md`); fix wave 1 addressed them and the
+affected flows were re-verified in real Chrome against the daemon + fake codex.
+A fresh confirmation review then found five residual gaps (incomplete extraction
+invariants, saga not resumable across a real reload, migration replay instead of
+a versioned chain, episode-ref navigation, ledger hygiene), closed by fix wave 2:
+extraction now enforces the skill contract's winner-eligibility/angle/total
+rules; the handoff saga exposes durable per-step state with resume-by-key (no
+preview re-derivation) proven against recreated stores on the same database
+file; migrations run once-per-version (handoff table v5, architecture reserved
+v6); and the brief loader accepts contained episode refs:
 
 - **WHP_PROGRESS/2:** the live checklist rendered all **thirteen** manifest rows
   (including the new `06-proof-cases`) with the skill's verbatim texts, heading

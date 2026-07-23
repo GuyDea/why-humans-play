@@ -15,6 +15,7 @@ import type {
   PackageTestRecord,
   TopicGateName,
   TopicHandoffResult,
+  TopicHandoffState,
   TopicRunSnapshot,
   TopicRunSummary,
   TopicScoreName,
@@ -574,6 +575,63 @@ interface OperationOutcome {
                 <strong>Handoff paused safely.</strong>
                 <p>{{ handoffError() }}</p>
               </article>
+            }
+
+            @if (!handoffPreview()) {
+              @if (visibleHandoff(); as handoff) {
+                <section
+                  class="handoff-preview"
+                  data-testid="handoff-in-progress"
+                  aria-labelledby="handoff-progress-heading"
+                >
+                  <header class="section-label">
+                    <p>Durable handoff</p>
+                    <h3 id="handoff-progress-heading">
+                      {{
+                        handoff.complete
+                          ? 'Handoff complete'
+                          : 'Handoff in progress'
+                      }}
+                    </h3>
+                  </header>
+                  <p>
+                    {{ handoff.title }} · {{ handoff.episodeSlug }}
+                  </p>
+                  <ol class="handoff-steps" data-testid="handoff-steps">
+                    <li>
+                      <span>Draft created</span>
+                      <strong>{{ handoff.steps.draftCreated }}</strong>
+                    </li>
+                    <li>
+                      <span>Artifact written</span>
+                      <strong>{{ handoff.steps.artifactWritten }}</strong>
+                    </li>
+                    <li>
+                      <span>Pipeline upserted</span>
+                      <strong>{{ handoff.steps.pipelineUpserted }}</strong>
+                    </li>
+                    <li>
+                      <span>Idea promoted</span>
+                      <strong>{{ handoff.steps.ideaPromoted }}</strong>
+                    </li>
+                  </ol>
+                  @if (!handoff.complete) {
+                    <div class="handoff-actions">
+                      <p>
+                        Resume uses the durable stored brief and draft payload.
+                      </p>
+                      <button
+                        class="primary-action"
+                        type="button"
+                        [disabled]="handoffBusy()"
+                        (click)="resumeHandoff(handoff)"
+                      >
+                        {{ handoffBusy() ? 'Resuming…' : 'Resume handoff' }}
+                      </button>
+                    </div>
+                  }
+                </section>
+              }
             }
 
             @if (handoffPreview(); as preview) {
@@ -1206,6 +1264,14 @@ export class FullRunPanel implements OnInit, OnDestroy {
   protected readonly handoffError = signal<string | null>(null);
   protected readonly handoffPreview = signal<HandoffPreview | null>(null);
   protected readonly handoffResult = signal<TopicHandoffResult | null>(null);
+  protected readonly visibleHandoff = computed<
+    TopicHandoffState | null
+  >(() => {
+    const durable = this.snapshot()?.handoff;
+    const result = this.handoffResult();
+    if (!durable) return null;
+    return result ? { ...durable, ...result } : durable;
+  });
   protected readonly criteria = SCORE_CRITERIA;
   protected readonly completedCount = computed(
     () => this.snapshot()?.progress.filter((item) => item.status === 'done').length
@@ -1339,6 +1405,11 @@ export class FullRunPanel implements OnInit, OnDestroy {
   protected confirmHandoff(preview: HandoffPreview): void {
     if (this.handoffBusy()) return;
     void this.acceptHandoff(preview);
+  }
+
+  protected resumeHandoff(handoff: TopicHandoffState): void {
+    if (this.handoffBusy()) return;
+    void this.resumeDurableHandoff(handoff);
   }
 
   private async startFullRun(): Promise<void> {
@@ -1493,6 +1564,37 @@ export class FullRunPanel implements OnInit, OnDestroy {
       if (!result.complete) {
         this.handoffError.set(
           result.error ?? 'The handoff is incomplete and can be retried safely.',
+        );
+        return;
+      }
+      await this.router.navigate(['/'], {
+        queryParams: { draft: result.draftId },
+      });
+    } catch (error) {
+      this.handoffError.set(errorMessage(error));
+    } finally {
+      this.handoffBusy.set(false);
+    }
+  }
+
+  private async resumeDurableHandoff(
+    handoff: TopicHandoffState,
+  ): Promise<void> {
+    this.handoffBusy.set(true);
+    this.handoffError.set(null);
+
+    try {
+      const runId = this.selectedRunId();
+      if (runId === null) {
+        throw new Error('Select a durable topic run before resuming handoff.');
+      }
+      const result = await this.client.handoffTopicRun(runId, {
+        resumeKey: handoff.resumeKey,
+      });
+      this.handoffResult.set(result);
+      if (!result.complete) {
+        this.handoffError.set(
+          result.error ?? 'The durable handoff remains incomplete.',
         );
         return;
       }

@@ -66,7 +66,9 @@ CREATE TABLE IF NOT EXISTS package_tests (
 
 CREATE INDEX IF NOT EXISTS package_tests_idea_created
   ON package_tests (idea_id, created_at DESC);
+`;
 
+const TOPIC_HANDOFF_V5 = `
 CREATE TABLE IF NOT EXISTS topic_handoff_sagas (
   run_id TEXT NOT NULL,
   winner_subject TEXT NOT NULL,
@@ -118,6 +120,12 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
   },
   {
     version: 5,
+    owner: 'topics',
+    name: 'topic-handoff-saga',
+    apply: (db) => db.exec(TOPIC_HANDOFF_V5),
+  },
+  {
+    version: 6,
     owner: 'architecture',
     name: 'reserved-placeholder',
     apply: () => {},
@@ -135,12 +143,13 @@ export function migrateStateDatabase(db: Database.Database): void {
     );
   }
 
-  db.transaction(() => {
-    for (const migration of STATE_MIGRATIONS) migration.apply(db);
-    if (version < LATEST_STATE_SCHEMA_VERSION) {
-      db.pragma(`user_version = ${LATEST_STATE_SCHEMA_VERSION}`);
-    }
-  })();
+  for (const migration of STATE_MIGRATIONS) {
+    if (version >= migration.version) continue;
+    db.transaction(() => {
+      migration.apply(db);
+      db.pragma(`user_version = ${migration.version}`);
+    })();
+  }
 }
 
 function ensureColumn(

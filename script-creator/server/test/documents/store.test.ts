@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 describe('DocumentStore', () => {
-  it('migrates a v1 state database through the shared v5 registry', () => {
+  it('migrates a v1 state database through the shared v6 registry', () => {
     const dbFile = databaseFile();
     const before = new Database(dbFile);
     before.exec(`
@@ -72,7 +72,7 @@ describe('DocumentStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(5);
+    expect(version).toBe(6);
     expect(drafts).toEqual([
       'id',
       'episode_slug',

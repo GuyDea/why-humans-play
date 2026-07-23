@@ -136,6 +136,7 @@ interface RegisterTopicRunBody {
 }
 
 interface TopicHandoffBody {
+  resumeKey?: unknown;
   ideaId?: unknown;
   episodeSlug?: unknown;
   title?: unknown;

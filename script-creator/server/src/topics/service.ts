@@ -1,6 +1,18 @@
 import { createHash, randomUUID } from 'node:crypto';
-import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { constants } from 'node:fs';
+import {
+  lstat,
+  open,
+  readFile,
+  realpath,
+} from 'node:fs/promises';
+import {
+  dirname,
+  isAbsolute,
+  join,
+  relative,
+  resolve,
+} from 'node:path';
 import type {
   DraftDocument,
   DraftFormat,
@@ -158,11 +170,35 @@ export function extractTopicSummary(
         'whp-summary block violates schema: each shortlist row must contain all seven score and grade pairs',
     };
   }
+  for (const row of summary.shortlist) {
+    const scores = SCORE_NAMES.map((name) => row.scores[name].score);
+    if (scores.some((score) => score === null)) {
+      if (row.total !== null) {
+        return {
+          summary: null,
+          summaryError:
+            'whp-summary block violates schema: shortlist total must be null when any component score is null',
+        };
+      }
+      continue;
+    }
+    const expectedTotal = scores.reduce<number>(
+      (total, score) => total + (score ?? 0),
+      0,
+    );
+    if (row.total !== expectedTotal) {
+      return {
+        summary: null,
+        summaryError:
+          'whp-summary block violates schema: shortlist total must equal the sum of its seven component scores',
+      };
+    }
+  }
 
-  const finalists = [...summary.shortlist]
+  const finalistRows = [...summary.shortlist]
     .sort((left, right) => left.rank - right.rank)
-    .slice(0, 3)
-    .map((row) => row.subject);
+    .slice(0, 3);
+  const finalists = finalistRows.map((row) => row.subject);
   const packageCounts = new Map<string, number>();
   for (const row of summary.packages) {
     packageCounts.set(row.finalist, (packageCounts.get(row.finalist) ?? 0) + 1);
@@ -181,6 +217,16 @@ export function extractTopicSummary(
 
   const winner = summary.winner;
   if (
+    winner.decision_status !== 'incomplete'
+    && finalistRows.length < 2
+  ) {
+    return {
+      summary: null,
+      summaryError:
+        'whp-summary block violates schema: winner-selected and provisional-winner decisions require at least two winner-eligible finalists',
+    };
+  }
+  if (
     (winner.subject !== null && !finalists.includes(winner.subject))
     || (winner.decision_status !== 'incomplete' && winner.subject === null)
   ) {
@@ -188,6 +234,19 @@ export function extractTopicSummary(
       summary: null,
       summaryError:
         'whp-summary block violates schema: winner must be one of the finalists',
+    };
+  }
+  const winnerRow = finalistRows.find(
+    (row) => row.subject === winner.subject,
+  );
+  if (
+    winnerRow
+    && winner.angle_markdown !== winnerRow.angle_markdown
+  ) {
+    return {
+      summary: null,
+      summaryError:
+        'whp-summary block violates schema: winner angle must match its shortlist row',
     };
   }
   return {
@@ -228,6 +287,7 @@ export interface TopicRunSnapshot {
   summary?: TopicSummary | null;
   summaryError?: string;
   reportMd?: string;
+  handoff?: TopicHandoffState;
 }
 
 export interface PipelineItem {
@@ -312,6 +372,12 @@ export interface TopicHandoffInput {
   };
 }
 
+export interface TopicHandoffResumeInput {
+  resumeKey: string;
+}
+
+type TopicHandoffCommand = TopicHandoffInput | TopicHandoffResumeInput;
+
 export interface TopicHandoffResult {
   draftId: string;
   complete: boolean;
@@ -322,6 +388,13 @@ export interface TopicHandoffResult {
     ideaPromoted: 'pending' | 'completed';
   };
   error: string | null;
+}
+
+export interface TopicHandoffState extends TopicHandoffResult {
+  resumeKey: string;
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
 }
 
 const TERMINAL_STATES = new Set<OperationState>([
@@ -524,6 +597,12 @@ export class TopicService {
       }
       if (record.reportMd !== null) snapshot.reportMd = record.reportMd;
     }
+    const winnerSubject = (record.summary as TopicSummary | null)
+      ?.winner.subject;
+    if (winnerSubject !== null && winnerSubject !== undefined) {
+      const saga = this.store.getHandoffSaga(record.id, winnerSubject);
+      if (saga) snapshot.handoff = durableHandoffState(saga);
+    }
     return snapshot;
   }
 
@@ -578,7 +657,7 @@ export class TopicService {
   async topicBrief(ref: string): Promise<TopicBrief> {
     const normalized = requireNonEmpty(ref, 'ref');
     if (
-      !/^whp-youtube\/topics\/[a-z0-9][a-z0-9._-]*\.md$/u
+      !/^whp-youtube\/(?:topics|episodes)\/[a-z0-9][a-z0-9._-]*\.md$/u
         .test(normalized)
     ) {
       throw new Error(`invalid topic brief ref: ${normalized}`);
@@ -586,7 +665,10 @@ export class TopicService {
     try {
       return {
         ref: normalized,
-        markdown: await readFile(join(this.repoRoot, normalized), 'utf8'),
+        markdown: await readPipelineContractMarkdown(
+          this.repoRoot,
+          normalized,
+        ),
       };
     } catch (error) {
       if (
@@ -596,6 +678,13 @@ export class TopicService {
       ) {
         throw new Error(`topic brief not found: ${normalized}`);
       }
+      if (
+        error instanceof Error
+        && 'code' in error
+        && error.code === 'ELOOP'
+      ) {
+        throw new Error(`invalid topic brief ref: ${normalized}`);
+      }
       throw error;
     }
   }
@@ -604,7 +693,7 @@ export class TopicService {
     runId: string,
     value: unknown,
   ): Promise<TopicHandoffResult> {
-    const input = requireHandoffInput(value);
+    const command = requireHandoffCommand(value);
     this.getRun(runId);
     const run = this.store.getRun(runId);
     if (!run) throw new Error(`topic run not found: ${runId}`);
@@ -615,25 +704,38 @@ export class TopicService {
     }
     const key = `${runId}\u0000${winnerSubject}`;
     return this.withHandoffLock(key, () =>
-      this.resumeHandoff(runId, winnerSubject, input));
+      this.resumeHandoff(runId, winnerSubject, command));
   }
 
   private async resumeHandoff(
     runId: string,
     winnerSubject: string,
-    input: TopicHandoffInput,
+    command: TopicHandoffCommand,
   ): Promise<TopicHandoffResult> {
     if (!this.artifactService) {
       throw new Error('topic handoff artifact service is not configured');
     }
-    this.getIdea(input.ideaId);
-    const inputJson = JSON.stringify(input);
     let saga = this.store.getHandoffSaga(runId, winnerSubject);
-    if (saga && JSON.stringify(saga.input) !== inputJson) {
-      throw new Error(
-        'topic handoff payload does not match the durable run and winner saga',
-      );
+    let input: TopicHandoffInput;
+    if (isHandoffResumeInput(command)) {
+      if (
+        !saga
+        || command.resumeKey !== handoffResumeKey(runId, winnerSubject)
+      ) {
+        throw new Error(
+          'topic handoff resume key does not match a durable saga',
+        );
+      }
+      input = requireHandoffInput(saga.input);
+    } else {
+      input = command;
+      if (saga && JSON.stringify(saga.input) !== JSON.stringify(input)) {
+        throw new Error(
+          'topic handoff payload does not match the durable run and winner saga',
+        );
+      }
     }
+    this.getIdea(input.ideaId);
     if (!saga) {
       const timestamp = this.now();
       saga = this.store.createHandoffSaga({
@@ -802,6 +904,25 @@ function requireHandoffInput(value: unknown): TopicHandoffInput {
   };
 }
 
+function requireHandoffCommand(value: unknown): TopicHandoffCommand {
+  const input = asRecord(value);
+  if (input && 'resumeKey' in input) {
+    return {
+      resumeKey: requireNonEmpty(
+        input['resumeKey'] as string,
+        'resumeKey',
+      ),
+    };
+  }
+  return requireHandoffInput(value);
+}
+
+function isHandoffResumeInput(
+  command: TopicHandoffCommand,
+): command is TopicHandoffResumeInput {
+  return 'resumeKey' in command;
+}
+
 function handoffResult(
   saga: TopicHandoffSagaRecord,
   error: string | null,
@@ -818,6 +939,76 @@ function handoffResult(
     steps,
     error,
   };
+}
+
+function durableHandoffState(
+  saga: TopicHandoffSagaRecord,
+): TopicHandoffState {
+  const input = requireHandoffInput(saga.input);
+  return {
+    ...handoffResult(saga, null),
+    resumeKey: handoffResumeKey(saga.runId, saga.winnerSubject),
+    ideaId: input.ideaId,
+    episodeSlug: input.episodeSlug,
+    title: input.title,
+  };
+}
+
+function handoffResumeKey(
+  runId: string,
+  winnerSubject: string,
+): string {
+  return createHash('sha256')
+    .update(`topic-handoff\u0000${runId}\u0000${winnerSubject}`)
+    .digest('hex');
+}
+
+async function readPipelineContractMarkdown(
+  repoRoot: string,
+  ref: string,
+): Promise<string> {
+  const canonicalRoot = await realpath(repoRoot);
+  const target = resolve(canonicalRoot, ref);
+  const relativeTarget = relative(canonicalRoot, target);
+  if (
+    relativeTarget === ''
+    || relativeTarget.startsWith('..')
+    || isAbsolute(relativeTarget)
+  ) {
+    throw new Error(`invalid topic brief ref: ${ref}`);
+  }
+
+  let current = canonicalRoot;
+  for (const segment of ref.split('/').slice(0, -1)) {
+    current = join(current, segment);
+    const stat = await lstat(current);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) {
+      throw new Error(`invalid topic brief ref: ${ref}`);
+    }
+  }
+  const canonicalParent = await realpath(dirname(target));
+  const relativeParent = relative(canonicalRoot, canonicalParent);
+  if (relativeParent.startsWith('..') || isAbsolute(relativeParent)) {
+    throw new Error(`invalid topic brief ref: ${ref}`);
+  }
+
+  const targetStat = await lstat(target);
+  if (targetStat.isSymbolicLink() || !targetStat.isFile()) {
+    throw new Error(`invalid topic brief ref: ${ref}`);
+  }
+  const handle = await open(
+    target,
+    constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0),
+  );
+  try {
+    const openedStat = await handle.stat();
+    if (!openedStat.isFile()) {
+      throw new Error(`invalid topic brief ref: ${ref}`);
+    }
+    return await handle.readFile('utf8');
+  } finally {
+    await handle.close();
+  }
 }
 
 function stepStatus(done: boolean): 'pending' | 'completed' {

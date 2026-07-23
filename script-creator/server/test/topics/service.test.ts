@@ -1,4 +1,10 @@
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -21,9 +27,11 @@ const roots: string[] = [];
 const stores: TopicStore[] = [];
 
 const VALID_SUMMARY: TopicSummary = {
-  candidates: [{
-    subject: 'Sudoku',
-    angle_markdown: 'What its rules reveal about puzzle hunger.',
+  candidates: ['Sudoku', 'Chess'].map((subject) => ({
+    subject,
+    angle_markdown: subject === 'Sudoku'
+      ? 'What its rules reveal about puzzle hunger.'
+      : 'What deep expertise does and does not transfer.',
     gates: [
       {
         gate: 'game_play_centrality',
@@ -57,26 +65,46 @@ const VALID_SUMMARY: TopicSummary = {
       },
     ],
     disposition: 'deep-research finalist',
-  }],
-  shortlist: [{
-    rank: 1,
-    subject: 'Sudoku',
-    angle_markdown: 'What its rules reveal about puzzle hunger.',
-    scores: {
-      demand: { score: 19, grade: 'B' },
-      opening: { score: 11, grade: 'B' },
-      package: { score: 15, grade: 'B' },
-      satisfaction: { score: 11, grade: 'A' },
-      whp: { score: 10, grade: 'A' },
-      evidence: { score: 8, grade: 'B' },
-      feasibility: { score: 5, grade: 'A' },
+  })),
+  shortlist: [
+    {
+      rank: 1,
+      subject: 'Sudoku',
+      angle_markdown: 'What its rules reveal about puzzle hunger.',
+      scores: {
+        demand: { score: 19, grade: 'B' },
+        opening: { score: 11, grade: 'B' },
+        package: { score: 15, grade: 'B' },
+        satisfaction: { score: 11, grade: 'A' },
+        whp: { score: 10, grade: 'A' },
+        evidence: { score: 8, grade: 'B' },
+        feasibility: { score: 5, grade: 'A' },
+      },
+      total: 79,
+      confidence: 'medium',
+      decisive_risk_markdown: 'Audience transfer remains indirect.',
     },
-    total: 79,
-    confidence: 'medium',
-    decisive_risk_markdown: 'Audience transfer remains indirect.',
-  }],
-  packages: Array.from({ length: 3 }, (_, index) => ({
-    finalist: 'Sudoku',
+    {
+      rank: 2,
+      subject: 'Chess',
+      angle_markdown: 'What deep expertise does and does not transfer.',
+      scores: {
+        demand: { score: 18, grade: 'B' },
+        opening: { score: 12, grade: 'B' },
+        package: { score: 16, grade: 'B' },
+        satisfaction: { score: 12, grade: 'A' },
+        whp: { score: 9, grade: 'A' },
+        evidence: { score: 8, grade: 'B' },
+        feasibility: { score: 4, grade: 'A' },
+      },
+      total: 79,
+      confidence: 'medium',
+      decisive_risk_markdown: 'The transfer literature needs careful framing.',
+    },
+  ],
+  packages: ['Sudoku', 'Chess'].flatMap((finalist) =>
+    Array.from({ length: 3 }, (_, index) => ({
+    finalist,
     direction: `The perfect puzzle ${index + 1}`,
     working_title: `The Puzzle That Conquered the World ${index + 1}`,
     intended_viewer: 'People who enjoy everyday puzzles',
@@ -86,7 +114,7 @@ const VALID_SUMMARY: TopicSummary = {
     delivered_payoff_markdown: 'Why simple constraints travel.',
     survives_honestly: true,
     reason_markdown: 'The episode can deliver the promise.',
-  })),
+  }))),
   winner: {
     decision_status: 'winner-selected',
     subject: 'Sudoku',
@@ -296,7 +324,7 @@ describe('extractTopicSummary', () => {
       ...VALID_SUMMARY,
       winner: {
         ...VALID_SUMMARY.winner,
-        subject: 'Chess',
+        subject: 'Go',
       },
     }))).toEqual({
       summary: null,
@@ -321,6 +349,115 @@ describe('extractTopicSummary', () => {
         /^whp-summary block violates schema:/,
       ),
     });
+  });
+
+  it.each(['winner-selected', 'provisional-winner'] as const)(
+    'rejects a %s decision with fewer than two finalists',
+    (decisionStatus) => {
+      expect(extractTopicSummary(report({
+        ...VALID_SUMMARY,
+        shortlist: VALID_SUMMARY.shortlist.slice(0, 1),
+        packages: VALID_SUMMARY.packages.slice(0, 3),
+        winner: {
+          ...VALID_SUMMARY.winner,
+          decision_status: decisionStatus,
+        },
+      }))).toEqual({
+        summary: null,
+        summaryError: expect.stringMatching(
+          /^whp-summary block violates schema:.*at least two.*finalists/i,
+        ),
+      });
+    },
+  );
+
+  it('rejects a winner angle that differs from its shortlist row', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      winner: {
+        ...VALID_SUMMARY.winner,
+        angle_markdown: 'A different angle that was never shortlisted.',
+      },
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*winner angle.*shortlist/i,
+      ),
+    });
+  });
+
+  it('rejects a shortlist total that does not sum its seven scores', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      shortlist: [{
+        ...VALID_SUMMARY.shortlist[0]!,
+        total: 80,
+      }, VALID_SUMMARY.shortlist[1]!],
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*total.*sum/i,
+      ),
+    });
+  });
+
+  it('rejects a null shortlist total when all seven scores are present', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      shortlist: [{
+        ...VALID_SUMMARY.shortlist[0]!,
+        total: null,
+      }, VALID_SUMMARY.shortlist[1]!],
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*total.*sum/i,
+      ),
+    });
+  });
+
+  it('rejects a numeric shortlist total when any component is null', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      shortlist: [{
+        ...VALID_SUMMARY.shortlist[0]!,
+        scores: {
+          ...VALID_SUMMARY.shortlist[0]!.scores,
+          demand: { score: null, grade: 'unknown' },
+        },
+        total: 60,
+      }, VALID_SUMMARY.shortlist[1]!],
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*total must be null/i,
+      ),
+    });
+  });
+
+  it('rejects the confirmation-review probe through summaryError', () => {
+    const nullScores = Object.fromEntries(
+      Object.keys(VALID_SUMMARY.shortlist[0]!.scores)
+        .map((name) => [name, { score: null, grade: 'unknown' }]),
+    ) as TopicSummary['shortlist'][number]['scores'];
+    const extracted = extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      shortlist: [{
+        ...VALID_SUMMARY.shortlist[0]!,
+        scores: nullScores,
+        total: 100,
+      }],
+      packages: VALID_SUMMARY.packages.slice(0, 3),
+      winner: {
+        ...VALID_SUMMARY.winner,
+        angle_markdown: 'A mismatched winner angle.',
+      },
+    }));
+
+    expect(extracted.summary).toBeNull();
+    expect(extracted.summaryError).toMatch(
+      /^whp-summary block violates schema:/,
+    );
   });
 });
 
@@ -677,10 +814,16 @@ describe('TopicService', () => {
   it('loads a selected repository topic brief by its pipeline ref', async () => {
     const fixture = makeService();
     const topicDirectory = join(fixture.root, 'whp-youtube', 'topics');
+    const episodeDirectory = join(fixture.root, 'whp-youtube', 'episodes');
     mkdirSync(topicDirectory, { recursive: true });
+    mkdirSync(episodeDirectory, { recursive: true });
     writeFileSync(
       join(topicDirectory, 'the-queue-game.md'),
       '# The Queue Game\n\nRepository topic brief.',
+    );
+    writeFileSync(
+      join(episodeDirectory, '01-why-ai-cheats.md'),
+      '# Why AI Cheats\n\nRepository episode.',
     );
 
     await expect(
@@ -691,8 +834,33 @@ describe('TopicService', () => {
       ref: 'whp-youtube/topics/the-queue-game.md',
       markdown: '# The Queue Game\n\nRepository topic brief.',
     });
+    await expect(
+      fixture.service.topicBrief(
+        'whp-youtube/episodes/01-why-ai-cheats.md',
+      ),
+    ).resolves.toEqual({
+      ref: 'whp-youtube/episodes/01-why-ai-cheats.md',
+      markdown: '# Why AI Cheats\n\nRepository episode.',
+    });
     await expect(fixture.service.topicBrief('../DECISIONS.md'))
       .rejects.toThrow(/invalid topic brief ref/i);
+    await expect(
+      fixture.service.topicBrief(
+        'whp-youtube/episodes/01-why-ai-cheats.txt',
+      ),
+    ).rejects.toThrow(/invalid topic brief ref/i);
+
+    writeFileSync(
+      join(fixture.root, 'outside.md'),
+      '# Outside the pipeline contract.',
+    );
+    symlinkSync(
+      '../../outside.md',
+      join(episodeDirectory, 'linked.md'),
+    );
+    await expect(
+      fixture.service.topicBrief('whp-youtube/episodes/linked.md'),
+    ).rejects.toThrow(/invalid topic brief ref/i);
   });
 });
 

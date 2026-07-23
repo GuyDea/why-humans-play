@@ -197,6 +197,7 @@ export interface TopicRunSnapshot {
   summary?: TopicSummary | null;
   summaryError?: string;
   reportMd?: string;
+  handoff?: TopicHandoffState;
 }
 
 export interface TopicHandoffInput {
@@ -210,6 +211,14 @@ export interface TopicHandoffInput {
   };
 }
 
+export interface TopicHandoffResumeInput {
+  resumeKey: string;
+}
+
+export type TopicHandoffCommand =
+  | TopicHandoffInput
+  | TopicHandoffResumeInput;
+
 export interface TopicHandoffResult {
   draftId: string;
   complete: boolean;
@@ -220,6 +229,13 @@ export interface TopicHandoffResult {
     ideaPromoted: 'pending' | 'completed';
   };
   error: string | null;
+}
+
+export interface TopicHandoffState extends TopicHandoffResult {
+  resumeKey: string;
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
 }
 
 export type OperationResult =
@@ -470,7 +486,7 @@ export class DaemonClient {
 
   async handoffTopicRun(
     id: string,
-    input: TopicHandoffInput,
+    input: TopicHandoffCommand,
   ): Promise<TopicHandoffResult> {
     return this.request(
       `/api/topic-runs/${encodeURIComponent(id)}/handoff`,

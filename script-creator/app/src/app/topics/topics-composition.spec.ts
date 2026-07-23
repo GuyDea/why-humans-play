@@ -575,6 +575,94 @@ describe('routed Topics composition', () => {
     });
   });
 
+  it('resumes a durable incomplete handoff after reload without a preview', async () => {
+    const client = new TopicClientStub();
+    client.seedTopicRun(
+      {
+        id: 'run-durable-1',
+        opId: 'op-durable-1',
+        state: 'completed',
+        createdAt: '2026-07-23T10:30:00.000Z',
+      },
+      {
+        ...snapshot('completed', 'done'),
+        summary: SUMMARY,
+        reportMd: '# Durable topic report',
+        handoff: {
+          resumeKey: 'resume-durable-1',
+          ideaId: 'idea-1',
+          episodeSlug: 'voluntary-obstacles',
+          title: 'Voluntary Obstacles',
+          draftId: 'draft-handoff-1',
+          complete: false,
+          steps: {
+            draftCreated: 'completed',
+            artifactWritten: 'completed',
+            pipelineUpserted: 'pending',
+            ideaPromoted: 'pending',
+          },
+        },
+      },
+    );
+    client.queueHandoffResults({
+      draftId: 'draft-handoff-1',
+      complete: true,
+      steps: {
+        draftCreated: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'completed',
+        ideaPromoted: 'completed',
+      },
+      error: null,
+    });
+    const topics = await mountTopics(client);
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelectorAll(
+        '[data-testid="topic-run-row"]',
+      )).toHaveLength(1);
+    });
+
+    findButton(
+      topics.root.querySelector('[data-testid="topic-run-row"]'),
+      'Select run',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelector(
+        '[data-testid="handoff-in-progress"]',
+      )?.textContent).toContain('Handoff in progress');
+      expect(topics.root.querySelector(
+        '[data-testid="handoff-steps"]',
+      )?.textContent?.replace(/\s+/gu, ' '))
+        .toContain('Pipeline upsertedpending');
+    });
+
+    const navigate = vi.spyOn(topics.router, 'navigate')
+      .mockResolvedValue(true);
+    findButton(
+      topics.root.querySelector('[data-testid="handoff-in-progress"]'),
+      'Resume',
+    ).click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(client.handoffTopicRun).toHaveBeenCalledWith(
+        'run-durable-1',
+        { resumeKey: 'resume-durable-1' },
+      );
+      expect(topics.root.querySelector(
+        '[data-testid="handoff-steps"]',
+      )?.textContent?.replace(/\s+/gu, ' '))
+        .toContain('Idea promotedcompleted');
+    });
+    expect(client.submissions).not.toContainEqual(
+      expect.objectContaining({ operation: 'handoff-preview' }),
+    );
+    expect(navigate).toHaveBeenCalledWith(['/'], {
+      queryParams: { draft: 'draft-handoff-1' },
+    });
+  });
+
   it('lists durable topic runs newest first', async () => {
     const client = new TopicClientStub();
     client.seedTopicRuns(
