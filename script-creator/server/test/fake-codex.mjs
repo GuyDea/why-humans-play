@@ -31,6 +31,28 @@ if (mode === 'bad-schema-output') {
     e.type === 'item.completed' && e.item?.type === 'agent_message'
       ? { ...e, item: { ...e.item, text: '{"unexpected":true}' } } : e);
 }
+if (mode === 'operation-schema' || mode === 'operation-guardrail') {
+  const status = mode === 'operation-guardrail'
+    ? process.env.FAKE_OPERATION_STATUS ?? 'declined'
+    : 'complete';
+  const guardrail = mode === 'operation-guardrail'
+    ? 'This request crosses the approved scope.'
+    : null;
+  lines = lines.map((e) =>
+    e.type === 'item.completed' && e.item?.type === 'agent_message'
+      ? {
+          ...e,
+          item: {
+            ...e.item,
+            text: JSON.stringify({
+              status,
+              replacement_markdown: status === 'complete' ? 'Rewritten passage.' : '',
+              guardrail_markdown: guardrail,
+            }),
+          },
+        }
+      : e);
+}
 
 process.stdin.on('data', () => {});
 process.stdin.resume();

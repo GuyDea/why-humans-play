@@ -65,13 +65,16 @@ export class JobSupervisor {
     this.timer.unref?.();
   }
 
-  enqueue(env: Omit<JobEnvelope, 'jobId'> & { jobId?: string }): string {
+  enqueue(
+    env: Omit<JobEnvelope, 'jobId'> & { jobId?: string },
+    opts: { resumedFrom?: string } = {},
+  ): string {
     const jobId = env.jobId ?? randomUUID();
     const jobDir = join(this.jobsRoot, jobId);
     mkdirSync(jobDir, { recursive: true });
     const full: JobEnvelope = { ...env, jobId };
     writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(full));
-    this.store.create(full, jobDir);
+    this.store.create(full, jobDir, opts);
     this.tick();
     return jobId;
   }
