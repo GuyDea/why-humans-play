@@ -113,9 +113,20 @@ interface Submission {
   inputs: unknown;
 }
 
+interface PersistedGateCheck {
+  verdict: 'pass' | 'fail' | 'unknown';
+  gates: Array<{
+    gate: typeof GATES[number];
+    verdict: 'pass' | 'fail' | 'unknown';
+    reasonMarkdown: string;
+  }>;
+}
+
 class TopicClientStub {
   private sequence = 0;
-  private ideas: IdeaRecord[] = [];
+  private ideas: Array<
+    IdeaRecord & { latestCheck?: PersistedGateCheck | null }
+  > = [];
   private packageTests: Array<{
     id: string;
     ideaId: string;
@@ -130,6 +141,12 @@ class TopicClientStub {
   };
   private topicRunSnapshots: Array<TopicRunSnapshot | Error> = [];
   private topicRunSnapshotIndex = 0;
+  private gateState: OperationRecord['state'] = 'completed';
+  private gateOutcome: OperationResult | null = null;
+  private blockedStream: {
+    operation: OperationName;
+    promise: Promise<void>;
+  } | null = null;
   readonly submissions: Submission[] = [];
 
   readonly listIdeas = vi.fn(async () => [...this.ideas]);
@@ -141,6 +158,7 @@ class TopicClientStub {
       text: input.text,
       source: input.source,
       status: input.status ?? 'open',
+      latestCheck: null,
       createdAt: `2026-07-23T12:00:${String(this.sequence).padStart(2, '0')}.000Z`,
     };
     this.ideas = [idea, ...this.ideas];
@@ -207,31 +225,41 @@ class TopicClientStub {
     return { id };
   });
   readonly streamEvents = vi.fn(async (
-    _id: string,
+    id: string,
     options: StreamEventsOptions,
   ) => {
+    const blocked = this.blockedStream;
+    if (blocked?.operation === this.submission(id).operation) {
+      this.blockedStream = null;
+      await blocked.promise;
+    }
     await options.onDone();
   });
-  readonly getOp = vi.fn(async (id: string): Promise<OperationRecord> => ({
-    id,
-    operation: this.submission(id).operation,
-    state: 'completed',
-    stalled: false,
-    envelopeJson: '{}',
-    jobDir: `/tmp/${id}`,
-    threadId: `thread-${id}`,
-    retryOf: null,
-    resumedFrom: null,
-    createdAt: '2026-07-23T12:00:00.000Z',
-    startedAt: '2026-07-23T12:00:00.000Z',
-    finishedAt: '2026-07-23T12:00:01.000Z',
-    inputTokens: 10,
-    cachedInputTokens: 0,
-    outputTokens: 5,
-    reasoningOutputTokens: 0,
-    usageAvailable: 1,
-    error: null,
-  }));
+  readonly getOp = vi.fn(async (id: string): Promise<OperationRecord> => {
+    const operation = this.submission(id).operation;
+    return {
+      id,
+      operation,
+      state: operation === 'quick-gate-check'
+        ? this.gateState
+        : 'completed',
+      stalled: false,
+      envelopeJson: '{}',
+      jobDir: `/tmp/${id}`,
+      threadId: `thread-${id}`,
+      retryOf: null,
+      resumedFrom: null,
+      createdAt: '2026-07-23T12:00:00.000Z',
+      startedAt: '2026-07-23T12:00:00.000Z',
+      finishedAt: '2026-07-23T12:00:01.000Z',
+      inputTokens: 10,
+      cachedInputTokens: 0,
+      outputTokens: 5,
+      reasoningOutputTokens: 0,
+      usageAvailable: 1,
+      error: null,
+    };
+  });
   readonly getResult = vi.fn(async (id: string): Promise<OperationResult> => {
     const { operation } = this.submission(id);
     if (operation === 'ideate') {
@@ -250,6 +278,7 @@ class TopicClientStub {
       };
     }
     if (operation === 'quick-gate-check') {
+      if (this.gateOutcome !== null) return this.gateOutcome;
       return {
         kind: 'schema',
         value: {
@@ -361,6 +390,29 @@ class TopicClientStub {
     this.artifactResult = result;
   }
 
+  seedIdea(idea: IdeaRecord & {
+    latestCheck?: PersistedGateCheck | null;
+  }): void {
+    this.ideas = [idea, ...this.ideas];
+  }
+
+  pauseNextStream(operation: OperationName): () => void {
+    let release = () => undefined;
+    const promise = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.blockedStream = { operation, promise };
+    return release;
+  }
+
+  setGateOutcome(
+    state: OperationRecord['state'],
+    result: OperationResult,
+  ): void {
+    this.gateState = state;
+    this.gateOutcome = result;
+  }
+
   private submission(id: string): Submission {
     const submission = this.submissions.find((item) => item.id === id);
     if (!submission) throw new Error(`submission not found: ${id}`);
@@ -374,6 +426,7 @@ interface MountedTopics {
   root: HTMLElement;
   router: Router;
   client: TopicClientStub;
+  session: StudioSession;
   tick(): void;
   destroy(): void;
 }
@@ -463,7 +516,19 @@ describe('routed Topics composition', () => {
       source: 'ideate',
     });
 
+    const releaseInboxGate = topics.client.pauseNextStream('quick-gate-check');
     findButton(capturedCard, 'Gate-check').click();
+    topics.tick();
+    expect(capturedCard.querySelector(
+      '[data-testid="gate-check-pending"]',
+    )).not.toBeNull();
+    expect(topics.session.history()).toHaveLength(1);
+    expect(topics.session.history()[0]?.operation).toBe('quick-gate-check');
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.session.history()[0]?.phase()).toBe('streaming');
+    });
+    releaseInboxGate();
     await vi.waitFor(() => {
       topics.tick();
       const result = capturedCard.querySelector(
@@ -485,6 +550,141 @@ describe('routed Topics composition', () => {
         idea_text: 'Why players choose harsher rules',
         user_constraints: {},
       },
+    });
+    expect(topics.client.updateIdea).toHaveBeenCalledWith(
+      'idea-1',
+      {
+        latestCheck: {
+          verdict: 'pass',
+          gates: GATES.map((gate) => ({
+            gate,
+            verdict: 'pass',
+            reasonMarkdown: `${gate} has a clear path.`,
+          })),
+        },
+      },
+    );
+
+    const angleCard = Array.from(
+      topics.root.querySelectorAll<HTMLElement>('[data-testid="angle-card"]'),
+    ).find((card) => card.textContent?.includes('Voluntary obstacles'));
+    if (!angleCard) throw new Error('production ideate angle card was not rendered');
+    const releaseAngleGate = topics.client.pauseNextStream('quick-gate-check');
+    findButton(angleCard, 'Gate-check').click();
+    topics.tick();
+    expect(angleCard.querySelector(
+      '[data-testid="gate-check-pending"]',
+    )).not.toBeNull();
+    expect(topics.session.history()).toHaveLength(2);
+    releaseAngleGate();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(angleCard.querySelector(
+        '[data-testid="gate-check-result"] [data-testid="gate-verdict"]',
+      )?.textContent).toContain('pass');
+    });
+    expect(topics.client.submissions[2]).toMatchObject({
+      operation: 'quick-gate-check',
+      inputs: {
+        idea_text: [
+          'Voluntary obstacles',
+          'Why harder rules can make effort feel meaningful.',
+        ].join('\n\n'),
+        user_constraints: {},
+      },
+    });
+  });
+
+  it('hydrates the latest persisted gate-check when ideas reload', async () => {
+    const client = new TopicClientStub();
+    client.seedIdea({
+      id: 'idea-persisted',
+      text: 'Why voluntary obstacles change effort',
+      source: 'inbox',
+      status: 'open',
+      createdAt: '2026-07-23T12:00:00.000Z',
+      latestCheck: {
+        verdict: 'fail',
+        gates: GATES.map((gate) => ({
+          gate,
+          verdict: 'fail',
+          reasonMarkdown: `${gate} needs more evidence.`,
+        })),
+      },
+    });
+
+    const topics = await mountTopics(client);
+    let card: HTMLElement | null = null;
+    await vi.waitFor(() => {
+      topics.tick();
+      card = Array.from(
+        topics.root.querySelectorAll<HTMLElement>(
+          '[data-testid="idea-card"]',
+        ),
+      ).find((candidate) =>
+        candidate.textContent?.includes(
+          'Why voluntary obstacles change effort',
+        )) ?? null;
+      expect(card).not.toBeNull();
+    });
+    if (!card) throw new Error('persisted idea card was not rendered');
+    expect(card.querySelector(
+      '[data-testid="gate-check-result"] [data-testid="gate-verdict"]',
+    )?.textContent).toContain('fail');
+    expect(card.querySelectorAll('[data-testid="gate-chip"]')).toHaveLength(6);
+  });
+
+  it('renders tracked gate-check guardrail and failure callouts', async () => {
+    const guardrailClient = new TopicClientStub();
+    guardrailClient.seedIdea({
+      id: 'idea-guardrail',
+      text: 'A guarded topic',
+      source: 'inbox',
+      status: 'open',
+      latestCheck: null,
+      createdAt: '2026-07-23T12:00:00.000Z',
+    });
+    guardrailClient.setGateOutcome('completed', {
+      kind: 'schema',
+      value: {
+        status: 'declined',
+        verdict: 'unknown',
+        gates: [],
+        guardrail_markdown: 'Narrow the topic before checking it.',
+      },
+      guardrail: null,
+    });
+    const guarded = await mountTopics(guardrailClient);
+    const guardedCard = await waitForCard(guarded, 'A guarded topic');
+    findButton(guardedCard, 'Gate-check').click();
+    await vi.waitFor(() => {
+      guarded.tick();
+      expect(guarded.root.querySelector(
+        '[data-testid="operation-guardrail"]',
+      )?.textContent).toContain('Narrow the topic before checking it.');
+    });
+
+    const failureClient = new TopicClientStub();
+    failureClient.seedIdea({
+      id: 'idea-failure',
+      text: 'A failing topic',
+      source: 'inbox',
+      status: 'open',
+      latestCheck: null,
+      createdAt: '2026-07-23T12:00:00.000Z',
+    });
+    failureClient.setGateOutcome('invalid-output', {
+      kind: 'failed',
+      error: 'invalid operation result',
+    });
+    const failed = await mountTopics(failureClient);
+    const failedCard = await waitForCard(failed, 'A failing topic');
+    findButton(failedCard, 'Gate-check').click();
+    await vi.waitFor(() => {
+      failed.tick();
+      expect(failed.root.querySelector(
+        '[data-testid="operation-failure"]',
+      )?.textContent).toContain('invalid operation result');
     });
   });
 
@@ -917,11 +1117,12 @@ describe('routed Topics composition', () => {
   });
 });
 
-async function mountTopics(): Promise<MountedTopics> {
+async function mountTopics(
+  client = new TopicClientStub(),
+): Promise<MountedTopics> {
   await ɵresolveComponentResources(async (url) =>
     url.endsWith('app.html') ? appTemplate : appStyles);
   globalThis.history.replaceState(null, '', '/topics');
-  const client = new TopicClientStub();
   const session = new StudioSession(client as unknown as DaemonClient);
   const application = await createApplication({
     providers: [
@@ -944,6 +1145,7 @@ async function mountTopics(): Promise<MountedTopics> {
     root,
     router,
     client,
+    session,
     tick: () => {
       application.tick();
       component.changeDetectorRef.detectChanges();
@@ -977,6 +1179,22 @@ function findCard(root: Element, text: string): HTMLElement {
   const card = Array.from(
     root.querySelectorAll<HTMLElement>('[data-testid="idea-card"]'),
   ).find((candidate) => candidate.textContent?.includes(text));
+  if (!card) throw new Error(`idea card "${text}" was not rendered`);
+  return card;
+}
+
+async function waitForCard(
+  topics: MountedTopics,
+  text: string,
+): Promise<HTMLElement> {
+  let card: HTMLElement | null = null;
+  await vi.waitFor(() => {
+    topics.tick();
+    card = Array.from(
+      topics.root.querySelectorAll<HTMLElement>('[data-testid="idea-card"]'),
+    ).find((candidate) => candidate.textContent?.includes(text)) ?? null;
+    expect(card).not.toBeNull();
+  });
   if (!card) throw new Error(`idea card "${text}" was not rendered`);
   return card;
 }

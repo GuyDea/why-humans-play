@@ -65,11 +65,21 @@ export interface OperationListResponse {
 export type IdeaSource = 'inbox' | 'ideate';
 export type IdeaStatus = 'open' | 'promoted' | 'discarded';
 
+export interface GateCheckResult {
+  verdict: 'pass' | 'fail' | 'unknown';
+  gates: Array<{
+    gate: TopicGateName;
+    verdict: 'pass' | 'fail' | 'unknown';
+    reasonMarkdown: string;
+  }>;
+}
+
 export interface IdeaRecord {
   id: string;
   text: string;
   source: IdeaSource;
   status: IdeaStatus;
+  latestCheck: GateCheckResult | null;
   createdAt: string;
 }
 
@@ -83,6 +93,7 @@ export interface UpdateIdeaInput {
   text?: string;
   source?: IdeaSource;
   status?: IdeaStatus;
+  latestCheck?: GateCheckResult | null;
 }
 
 export interface PackageDirection {

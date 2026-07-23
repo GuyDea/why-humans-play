@@ -20,6 +20,12 @@ import {
   type ValidatorResult,
 } from '../repo/validator.js';
 import type { TopicService } from '../topics/service.js';
+import type {
+  ArtifactExpectedState,
+  ArtifactWriteResult,
+  PipelineRow,
+} from '../repo/artifacts.js';
+import type { PackageDirection } from '../topics/store.js';
 import {
   hasSseQueryNonce,
   parseFromSeq,
@@ -53,11 +59,22 @@ export type TopicHttpService = Pick<
   | 'listIdeas'
   | 'updateIdea'
   | 'deleteIdea'
+  | 'createPackageTest'
+  | 'listPackageTests'
   | 'registerRun'
   | 'listRuns'
   | 'getRun'
   | 'pipeline'
 >;
+
+export interface ArtifactHttpService {
+  write?(
+    path: string,
+    content: string,
+    expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult>;
+  upsertPipelineRow?(row: PipelineRow): Promise<ArtifactWriteResult>;
+}
 
 export interface BuildAppOptions {
   nonce: string;
@@ -65,7 +82,7 @@ export interface BuildAppOptions {
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
   topicService?: TopicHttpService;
-  artifactService: unknown;
+  artifactService: ArtifactHttpService;
   validatorService: ValidatorHttpService;
 }
 
@@ -104,10 +121,28 @@ interface UpdateIdeaBody {
   text?: unknown;
   source?: unknown;
   status?: unknown;
+  latestCheck?: unknown;
 }
 
 interface RegisterTopicRunBody {
   opId?: unknown;
+}
+
+interface CreatePackageTestBody {
+  opId?: unknown;
+  directions?: unknown;
+}
+
+interface WriteArtifactBody {
+  path?: unknown;
+  content?: unknown;
+  expectedState?: unknown;
+}
+
+interface UpsertPipelineBody {
+  episodeSlug?: unknown;
+  milestone?: unknown;
+  ref?: unknown;
 }
 
 interface CreateDraftBody {
@@ -446,6 +481,7 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           text?: string;
           source?: 'inbox' | 'ideate';
           status?: 'open' | 'promoted' | 'discarded';
+          latestCheck?: unknown;
         } = {};
         if (hasOwn(request.body, 'text')) {
           update.text = requiredString(request.body.text, 'text');
@@ -455,6 +491,9 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         }
         if (hasOwn(request.body, 'status')) {
           update.status = requiredIdeaStatus(request.body.status);
+        }
+        if (hasOwn(request.body, 'latestCheck')) {
+          update.latestCheck = request.body.latestCheck;
         }
         return topicService.updateIdea(request.params.id, update);
       } catch (error) {
@@ -469,6 +508,37 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       try {
         topicService.deleteIdea(request.params.id);
         return reply.code(204).send();
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: IdeaParams; Body: CreatePackageTestBody }>(
+    '/api/ideas/:id/package-tests',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(topicService.createPackageTest(
+          request.params.id,
+          {
+            opId: requiredString(request.body?.opId, 'opId'),
+            directions: requiredArray(
+              request.body?.directions,
+              'directions',
+            ) as PackageDirection[],
+          },
+        ));
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: IdeaParams }>(
+    '/api/ideas/:id/package-tests',
+    async (request, reply) => {
+      try {
+        return topicService.listPackageTests(request.params.id);
       } catch (error) {
         return sendTopicError(reply, error);
       }
@@ -516,6 +586,49 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       return sendTopicError(reply, error);
     }
   });
+
+  app.post<{ Body: WriteArtifactBody }>(
+    '/api/artifacts',
+    async (request, reply) => {
+      try {
+        const write = options.artifactService.write;
+        if (!write) throw new Error('artifact service is not configured');
+        const result = await write(
+          requiredString(request.body?.path, 'path'),
+          requiredStringValue(request.body?.content, 'content'),
+          requiredArtifactExpectedState(request.body?.expectedState),
+        );
+        return result.conflict
+          ? reply.code(409).send(result)
+          : reply.send(result);
+      } catch (error) {
+        return sendArtifactError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: UpsertPipelineBody }>(
+    '/api/pipeline',
+    async (request, reply) => {
+      try {
+        const upsert = options.artifactService.upsertPipelineRow;
+        if (!upsert) throw new Error('artifact service is not configured');
+        const result = await upsert({
+          episodeSlug: requiredString(
+            request.body?.episodeSlug,
+            'episodeSlug',
+          ),
+          milestone: requiredString(request.body?.milestone, 'milestone'),
+          ref: requiredString(request.body?.ref, 'ref'),
+        });
+        return result.conflict
+          ? reply.code(409).send(result)
+          : reply.send(result);
+      } catch (error) {
+        return sendArtifactError(reply, error);
+      }
+    },
+  );
 
   if (options.staticRoot !== undefined) {
     const staticRoot = resolve(options.staticRoot);
@@ -606,6 +719,55 @@ function requiredString(value: unknown, field: string): string {
     throw new Error(`${field} is required`);
   }
   return value;
+}
+
+function requiredStringValue(value: unknown, field: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`${field} must be a string`);
+  }
+  return value;
+}
+
+function requiredArray(value: unknown, field: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`${field} must be an array`);
+  }
+  return value;
+}
+
+function requiredArtifactExpectedState(
+  value: unknown,
+): ArtifactExpectedState {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('expectedState is required');
+  }
+  const state = value as Record<string, unknown>;
+  const hasExpectNew = Object.prototype.hasOwnProperty.call(
+    state,
+    'expectNew',
+  );
+  const hasExpectedHash = Object.prototype.hasOwnProperty.call(
+    state,
+    'expectedHash',
+  );
+  if (
+    hasExpectNew
+    && state['expectNew'] === true
+    && !hasExpectedHash
+  ) {
+    return { expectNew: true };
+  }
+  if (
+    hasExpectedHash
+    && typeof state['expectedHash'] === 'string'
+    && state['expectedHash'].trim() !== ''
+    && !hasExpectNew
+  ) {
+    return { expectedHash: state['expectedHash'] };
+  }
+  throw new Error(
+    'expectedState must contain exactly expectNew or expectedHash',
+  );
 }
 
 function optionalString(value: unknown, field: string): string | null {
@@ -764,11 +926,32 @@ function sendTopicError(
 function isTopicClientError(message: string): boolean {
   return [
     /^(?:text|opId) is required$/,
+    /^directions must be an array$/,
+    /^directions\[\d+\]/,
     /^source must be inbox or ideate$/,
     /^status must be open, promoted, or discarded$/,
+    /^latestCheck\./,
     /^idea update is required$/,
     /^operation .+ is not a full-topic-run$/,
   ].some((pattern) => pattern.test(message));
+}
+
+function sendArtifactError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error ? error.message : 'artifact failed';
+  if ([
+    /^(?:path|episodeSlug|milestone|ref) is required$/,
+    /^content must be a string$/,
+    /^expectedState /,
+    /^invalid or non-whitelisted artifact path:/,
+  ].some((pattern) => pattern.test(message))) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'artifact request failed');
+  return reply.code(500).send({ error: 'internal server error' });
 }
 
 const topicNotConfigured = (): never => {
@@ -781,6 +964,8 @@ const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {
   listIdeas: topicNotConfigured,
   updateIdea: topicNotConfigured,
   deleteIdea: topicNotConfigured,
+  createPackageTest: topicNotConfigured,
+  listPackageTests: topicNotConfigured,
   registerRun: topicNotConfigured,
   listRuns: topicNotConfigured,
   getRun: topicNotConfigured,

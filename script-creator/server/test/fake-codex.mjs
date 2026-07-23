@@ -389,8 +389,15 @@ function synthesizeSchema(schema, propertyName = '') {
         synthesizeSchema(properties[name], name),
       ]));
     }
-    case 'array':
-      return [synthesizeSchema(schema.items, propertyName)];
+    case 'array': {
+      const count = Number.isInteger(schema.minItems) && schema.minItems >= 0
+        ? schema.minItems
+        : 1;
+      return Array.from(
+        { length: count },
+        () => synthesizeSchema(schema.items, propertyName),
+      );
+    }
     case 'string':
       return propertyName === 'replacement_markdown'
         ? 'Rewritten passage.'

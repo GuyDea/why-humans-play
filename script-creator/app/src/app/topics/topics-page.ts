@@ -4,20 +4,34 @@ import {
   computed,
   inject,
   signal,
+  type OnDestroy,
   type OnInit,
 } from '@angular/core';
 import type {
+  GateCheckResult,
   IdeaRecord,
   IdeaStatus,
   OperationName,
   OperationRecord,
   OperationResult,
+  TopicGateName,
 } from '../api/client';
 import {
   operationFailurePresentation,
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
-import { STUDIO_SESSION } from '../studio-session';
+import {
+  OpTracker,
+  type TrackedOperation,
+} from '../ops/tracker';
+import {
+  mapStudioConsoleEvents,
+  type StudioConsoleEntry,
+} from '../panels/agent-console';
+import {
+  STUDIO_SESSION,
+  type StudioRuntimeHandle,
+} from '../studio-session';
 import { FullRunPanel } from './full-run-panel';
 import { buildTopicOperationInputs } from './inputs';
 
@@ -30,23 +44,26 @@ const TOPIC_GATE_NAMES = [
   'portfolio_fit',
 ] as const;
 
-type TopicGateName = typeof TOPIC_GATE_NAMES[number];
 type TopicVerdict = 'pass' | 'fail' | 'unknown';
 
 interface IdeateCard {
+  ideaId: string;
   subject: string;
   angleMarkdown: string;
   seed: string;
 }
 
-interface GateResult {
-  verdict: TopicVerdict;
-  gates: Array<{
-    gate: TopicGateName;
-    verdict: TopicVerdict;
-    reasonMarkdown: string;
-  }>;
+type ParsedIdeateCard = Omit<IdeateCard, 'ideaId'>;
+
+interface GateCheckMeta {
+  ideaId: string;
+  remainingHops: 0;
 }
+
+type GateTrackedOperation = TrackedOperation<
+  GateCheckMeta,
+  StudioConsoleEntry
+>;
 
 interface OperationOutcome {
   operation: OperationRecord;
@@ -178,13 +195,25 @@ interface GuardrailPresentation {
                   </label>
                   <button
                     class="secondary-action"
+                    data-testid="gate-check-button"
                     type="button"
-                    [disabled]="gateBusy()[idea.id]"
-                    (click)="gateCheck(idea)"
+                    [disabled]="gatePending(idea.id)"
+                    (click)="gateCheck(idea.id)"
                   >
-                    {{ gateBusy()[idea.id] ? 'Checking…' : 'Gate-check' }}
+                    {{ gatePending(idea.id) ? 'Checking…' : 'Gate-check' }}
                   </button>
                 </div>
+
+                @if (gatePending(idea.id)) {
+                  <div
+                    class="gate-pending"
+                    data-testid="gate-check-pending"
+                    [attr.data-phase]="gatePhase(idea.id)"
+                    role="status"
+                  >
+                    Gate-check · {{ gatePhase(idea.id) }}…
+                  </div>
+                }
 
                 @if (gateChecks()[idea.id]; as check) {
                   <section
@@ -268,7 +297,7 @@ interface GuardrailPresentation {
 
           <div class="ideate-results" data-testid="ideate-results">
             @for (card of ideateCards(); track $index) {
-              <article class="angle-card">
+              <article class="angle-card" data-testid="angle-card">
                 <span class="angle-index">
                   {{ String($index + 1).padStart(2, '0') }}
                 </span>
@@ -276,6 +305,62 @@ interface GuardrailPresentation {
                   <h3>{{ card.subject }}</h3>
                   <p>{{ card.angleMarkdown }}</p>
                   <small>Seed: {{ card.seed }}</small>
+                  <div class="angle-actions">
+                    <button
+                      class="secondary-action"
+                      data-testid="gate-check-button"
+                      type="button"
+                      [disabled]="gatePending(card.ideaId)"
+                      (click)="gateCheck(card.ideaId)"
+                    >
+                      {{ gatePending(card.ideaId) ? 'Checking…' : 'Gate-check' }}
+                    </button>
+                  </div>
+
+                  @if (gatePending(card.ideaId)) {
+                    <div
+                      class="gate-pending"
+                      data-testid="gate-check-pending"
+                      [attr.data-phase]="gatePhase(card.ideaId)"
+                      role="status"
+                    >
+                      Gate-check · {{ gatePhase(card.ideaId) }}…
+                    </div>
+                  }
+
+                  @if (gateChecks()[card.ideaId]; as check) {
+                    <section
+                      class="gate-result"
+                      data-testid="gate-check-result"
+                      [attr.aria-label]="'Gate-check for ' + card.subject"
+                    >
+                      <header>
+                        <span>Six-gate read</span>
+                        <strong
+                          class="verdict-badge"
+                          data-testid="gate-verdict"
+                          [attr.data-verdict]="check.verdict"
+                        >
+                          {{ check.verdict }}
+                        </strong>
+                      </header>
+                      <div class="gate-grid">
+                        @for (gate of check.gates; track gate.gate) {
+                          <details
+                            class="gate-chip"
+                            data-testid="gate-chip"
+                            [attr.data-verdict]="gate.verdict"
+                          >
+                            <summary>
+                              <span>{{ gateLabel(gate.gate) }}</span>
+                              <strong>{{ gate.verdict }}</strong>
+                            </summary>
+                            <p>{{ gate.reasonMarkdown }}</p>
+                          </details>
+                        }
+                      </div>
+                    </section>
+                  }
                 </div>
               </article>
             } @empty {
@@ -555,6 +640,15 @@ interface GuardrailPresentation {
       font-size: 0.7rem;
     }
 
+    .gate-pending {
+      border-top: 1px solid var(--whp-line-soft);
+      padding-top: 0.75rem;
+      color: var(--whp-muted);
+      font-family: var(--whp-font-mono);
+      font-size: 0.64rem;
+      text-transform: capitalize;
+    }
+
     .gate-result {
       display: grid;
       gap: 0.65rem;
@@ -694,6 +788,12 @@ interface GuardrailPresentation {
       line-height: 1.4;
     }
 
+    .angle-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.8rem;
+    }
+
     .empty-state {
       padding: 1.5rem 1rem;
       color: var(--whp-muted);
@@ -750,8 +850,19 @@ interface GuardrailPresentation {
     }
   `,
 })
-export class TopicsPage implements OnInit {
-  private readonly client = inject(STUDIO_SESSION).client;
+export class TopicsPage implements OnInit, OnDestroy {
+  private readonly session = inject(STUDIO_SESSION);
+  private readonly client = this.session.client;
+  private readonly gateTracker = new OpTracker<
+    GateCheckMeta,
+    StudioConsoleEntry
+  >(
+    this.client,
+    mapStudioConsoleEvents,
+    { onChange: () => this.handleGateTrackerChange() },
+  );
+  private readonly settledGateOperations = new Set<GateTrackedOperation>();
+  private detachGateRuntime: (() => void) | null = null;
   private calloutSequence = 0;
 
   protected readonly ideas = signal<readonly IdeaRecord[]>([]);
@@ -762,10 +873,10 @@ export class TopicsPage implements OnInit {
   protected readonly ideateFreeText = signal('');
   protected readonly ideateBusy = signal(false);
   protected readonly ideateCards = signal<readonly IdeateCard[]>([]);
-  protected readonly gateBusy =
-    signal<Readonly<Record<string, boolean>>>({});
+  protected readonly gateOperations =
+    signal<Readonly<Record<string, GateTrackedOperation>>>({});
   protected readonly gateChecks =
-    signal<Readonly<Record<string, GateResult>>>({});
+    signal<Readonly<Record<string, GateCheckResult>>>({});
   protected readonly failures =
     signal<readonly OperationFailurePresentation[]>([]);
   protected readonly guardrails =
@@ -777,7 +888,21 @@ export class TopicsPage implements OnInit {
   protected readonly String = String;
 
   ngOnInit(): void {
+    const runtime: StudioRuntimeHandle = {
+      tracker: this.gateTracker,
+      cancel: (id) => this.gateTracker.cancel(id),
+      canReroll: () => false,
+      reroll: () => {
+        throw new Error('topic gate-check operations cannot be re-rolled');
+      },
+    };
+    this.detachGateRuntime = this.session.attachRuntime(runtime);
     void this.loadIdeas();
+  }
+
+  ngOnDestroy(): void {
+    this.detachGateRuntime?.();
+    this.detachGateRuntime = null;
   }
 
   protected setCaptureText(event: Event): void {
@@ -821,9 +946,40 @@ export class TopicsPage implements OnInit {
     void this.runIdeate();
   }
 
-  protected gateCheck(idea: IdeaRecord): void {
-    if (this.gateBusy()[idea.id]) return;
-    void this.runGateCheck(idea);
+  protected gateCheck(ideaId: string): void {
+    if (this.gatePending(ideaId)) return;
+    const idea = this.ideas().find((candidate) => candidate.id === ideaId);
+    if (!idea) {
+      this.addThrownFailure(
+        'quick-gate-check',
+        new Error(`idea not found: ${ideaId}`),
+      );
+      return;
+    }
+    const tracked = this.gateTracker.launch(
+      'quick-gate-check',
+      buildTopicOperationInputs({
+        ideaText: idea.text,
+        userConstraints: {},
+        runArtifacts: null,
+        selectedWinner: null,
+      }, 'quick-gate-check'),
+      { ideaId, remainingHops: 0 },
+    );
+    this.gateOperations.update((operations) => ({
+      ...operations,
+      [ideaId]: tracked,
+    }));
+    this.handleGateTrackerChange();
+  }
+
+  protected gatePending(ideaId: string): boolean {
+    const phase = this.gateOperations()[ideaId]?.phase();
+    return phase === 'submitting' || phase === 'streaming';
+  }
+
+  protected gatePhase(ideaId: string): string {
+    return this.gateOperations()[ideaId]?.phase() ?? 'submitting';
   }
 
   protected gateLabel(gate: TopicGateName): string {
@@ -832,7 +988,14 @@ export class TopicsPage implements OnInit {
 
   private async loadIdeas(): Promise<void> {
     try {
-      this.ideas.set(await this.client.listIdeas());
+      const ideas = await this.client.listIdeas();
+      this.ideas.set(ideas);
+      this.gateChecks.set(Object.fromEntries(
+        ideas.flatMap((idea) =>
+          idea.latestCheck === null
+            ? []
+            : [[idea.id, idea.latestCheck] as const]),
+      ));
       this.loadError.set(null);
     } catch (error) {
       this.loadError.set(errorMessage(error));
@@ -901,13 +1064,18 @@ export class TopicsPage implements OnInit {
       }
 
       const created: IdeaRecord[] = [];
+      const persistedCards: IdeateCard[] = [];
       for (const card of cards) {
-        created.push(await this.client.createIdea({
+        const idea = await this.client.createIdea({
           text: `${card.subject}\n\n${card.angleMarkdown}`,
           source: 'ideate',
-        }));
+        });
+        created.push(idea);
+        persistedCards.push({ ...card, ideaId: idea.id });
       }
-      this.ideateCards.update((current) => [...current, ...cards]);
+      this.ideateCards.update(
+        (current) => [...current, ...persistedCards],
+      );
       this.ideas.update((ideas) => [...created].reverse().concat(ideas));
       this.ideateFreeText.set('');
     } catch (error) {
@@ -917,43 +1085,84 @@ export class TopicsPage implements OnInit {
     }
   }
 
-  private async runGateCheck(idea: IdeaRecord): Promise<void> {
-    this.gateBusy.update((busy) => ({ ...busy, [idea.id]: true }));
-    try {
-      const outcome = await this.executeOperation(
-        'quick-gate-check',
-        buildTopicOperationInputs({
-          ideaText: idea.text,
-          userConstraints: {},
-          runArtifacts: null,
-          selectedWinner: null,
-        }, 'quick-gate-check'),
+  private handleGateTrackerChange(): void {
+    for (const [ideaId, tracked] of Object.entries(this.gateOperations())) {
+      if (
+        this.settledGateOperations.has(tracked)
+        || tracked.phase() === 'submitting'
+        || tracked.phase() === 'streaming'
+      ) {
+        continue;
+      }
+      this.settledGateOperations.add(tracked);
+      void this.settleGateCheck(ideaId, tracked);
+    }
+  }
+
+  private async settleGateCheck(
+    ideaId: string,
+    tracked: GateTrackedOperation,
+  ): Promise<void> {
+    const result = tracked.result();
+    if (tracked.phase() === 'guardrail' && result !== null) {
+      this.addGuardrail(
+        tracked.operation,
+        resultGuardrail(result)
+          ?? 'The topic skill narrowed or declined this request without guidance.',
       );
-      const guardrail = resultGuardrail(outcome.result);
-      if (guardrail !== null) {
-        this.addGuardrail('quick-gate-check', guardrail);
-        return;
-      }
-      if (!isSuccessfulSchemaOutcome(outcome)) {
-        this.addFailure(outcome, resultFailure(outcome.result));
-        return;
-      }
-      const check = parseGateResult(outcome.result.value);
-      if (check === null) {
-        this.addFailure(
-          outcome,
-          'Gate-check result did not contain each of the six required gates.',
-        );
-        return;
-      }
-      this.gateChecks.update((checks) => ({
-        ...checks,
-        [idea.id]: check,
-      }));
+      return;
+    }
+    if (tracked.phase() !== 'done' || result?.kind !== 'schema') {
+      this.addTrackedFailure(tracked);
+      return;
+    }
+
+    const check = parseGateResult(result.value);
+    if (check === null) {
+      this.addTrackedFailure(
+        tracked,
+        'Gate-check result did not contain each of the six required gates.',
+      );
+      return;
+    }
+    this.gateChecks.update((checks) => ({
+      ...checks,
+      [ideaId]: check,
+    }));
+
+    try {
+      const updated = await this.client.updateIdea(ideaId, {
+        latestCheck: check,
+      });
+      this.ideas.update((ideas) => ideas.map((idea) =>
+        idea.id === ideaId ? updated : idea));
     } catch (error) {
-      this.addThrownFailure('quick-gate-check', error);
-    } finally {
-      this.gateBusy.update((busy) => ({ ...busy, [idea.id]: false }));
+      this.addThrownFailure(
+        'quick-gate-check',
+        new Error(
+          `Gate-check completed but its latest result could not be saved: ${
+            errorMessage(error)
+          }`,
+        ),
+      );
+    }
+  }
+
+  private addTrackedFailure(
+    tracked: GateTrackedOperation,
+    reason: string | null = null,
+  ): void {
+    const result = tracked.result();
+    const presentation = operationFailurePresentation({
+      operation: tracked.operation,
+      phase: tracked.phase() === 'done' ? 'failed' : tracked.phase(),
+      state: tracked.state(),
+      reason: reason
+        ?? (result?.kind === 'failed' ? result.error : null),
+      errorMessage: tracked.errorMessage(),
+    });
+    if (presentation) {
+      this.failures.update((failures) => [...failures, presentation]);
     }
   }
 
@@ -1028,7 +1237,7 @@ export class TopicsPage implements OnInit {
   }
 }
 
-function parseIdeateCards(value: unknown): IdeateCard[] | null {
+function parseIdeateCards(value: unknown): ParsedIdeateCard[] | null {
   const result = record(value);
   if (
     result?.['status'] !== 'complete'
@@ -1037,7 +1246,7 @@ function parseIdeateCards(value: unknown): IdeateCard[] | null {
     return null;
   }
 
-  const cards: IdeateCard[] = [];
+  const cards: ParsedIdeateCard[] = [];
   for (const candidate of result['cards']) {
     const card = record(candidate);
     const subject = nonEmptyString(card?.['subject']);
@@ -1049,7 +1258,7 @@ function parseIdeateCards(value: unknown): IdeateCard[] | null {
   return cards;
 }
 
-function parseGateResult(value: unknown): GateResult | null {
+function parseGateResult(value: unknown): GateCheckResult | null {
   const result = record(value);
   const verdict = topicVerdict(result?.['verdict']);
   if (
@@ -1061,7 +1270,7 @@ function parseGateResult(value: unknown): GateResult | null {
     return null;
   }
 
-  const gates: GateResult['gates'] = [];
+  const gates: GateCheckResult['gates'] = [];
   const found = new Set<TopicGateName>();
   for (const candidate of result['gates']) {
     const gate = record(candidate);

@@ -19,9 +19,13 @@ import {
 import { validateAgainstSchema } from '../schema-validate.js';
 import type { CodexEvent, OperationState } from '../types.js';
 import {
+  type GateCheckResult,
   type IdeaRecord,
   type IdeaSource,
   type IdeaStatus,
+  type PackageDirection,
+  type PackageTestRecord,
+  type TopicGateName,
   type TopicRunRecord,
   type TopicStore,
 } from './store.js';
@@ -151,6 +155,12 @@ export interface UpdateIdeaInput {
   text?: string;
   source?: IdeaSource;
   status?: IdeaStatus;
+  latestCheck?: unknown;
+}
+
+export interface CreatePackageTestInput {
+  opId: string;
+  directions: PackageDirection[];
 }
 
 export interface TopicRunSummary {
@@ -227,6 +237,7 @@ export class TopicService {
       text: requireText(input.text),
       source: requireIdeaSource(input.source),
       status: requireIdeaStatus(input.status ?? 'open'),
+      latestCheck: null,
       createdAt: this.now(),
     });
   }
@@ -246,6 +257,7 @@ export class TopicService {
       input.text === undefined
       && input.source === undefined
       && input.status === undefined
+      && input.latestCheck === undefined
     ) {
       throw new Error('idea update is required');
     }
@@ -259,6 +271,9 @@ export class TopicService {
       status: input.status === undefined
         ? current.status
         : requireIdeaStatus(input.status),
+      latestCheck: input.latestCheck === undefined
+        ? current.latestCheck
+        : requireGateCheck(input.latestCheck),
     });
   }
 
@@ -266,6 +281,25 @@ export class TopicService {
     if (!this.store.deleteIdea(id)) {
       throw new Error(`idea not found: ${id}`);
     }
+  }
+
+  createPackageTest(
+    ideaId: string,
+    input: CreatePackageTestInput,
+  ): PackageTestRecord {
+    this.getIdea(ideaId);
+    return this.store.createPackageTest({
+      id: this.idFactory(),
+      ideaId,
+      opId: requireNonEmpty(input.opId, 'opId'),
+      directions: requirePackageDirections(input.directions),
+      createdAt: this.now(),
+    });
+  }
+
+  listPackageTests(ideaId: string): PackageTestRecord[] {
+    this.getIdea(ideaId);
+    return this.store.listPackageTests(ideaId);
   }
 
   registerRun(opId: string): TopicRunSummary {
@@ -432,6 +466,144 @@ function requireIdeaSource(value: IdeaSource): IdeaSource {
 function requireIdeaStatus(value: IdeaStatus): IdeaStatus {
   if (!['open', 'promoted', 'discarded'].includes(value)) {
     throw new Error('status must be open, promoted, or discarded');
+  }
+  return value;
+}
+
+function requireGateCheck(value: unknown): GateCheckResult | null {
+  if (value === null) return null;
+  const check = asRecord(value);
+  const verdict = requireGateVerdict(check?.['verdict'], 'latestCheck.verdict');
+  const candidates = check?.['gates'];
+  if (!Array.isArray(candidates) || candidates.length !== GATE_NAMES.length) {
+    throw new Error('latestCheck.gates must contain exactly six gates');
+  }
+
+  const found = new Set<TopicGateName>();
+  const gates: GateCheckResult['gates'] = candidates.map((candidate, index) => {
+    const gate = asRecord(candidate);
+    const name = requireGateName(
+      gate?.['gate'],
+      `latestCheck.gates[${index}].gate`,
+    );
+    if (found.has(name)) {
+      throw new Error(`latestCheck.gates[${index}].gate must be unique`);
+    }
+    found.add(name);
+    return {
+      gate: name,
+      verdict: requireGateVerdict(
+        gate?.['verdict'],
+        `latestCheck.gates[${index}].verdict`,
+      ),
+      reasonMarkdown: requireGateReason(
+        gate?.['reasonMarkdown'],
+        index,
+      ),
+    };
+  });
+  if (GATE_NAMES.some((name) => !found.has(name))) {
+    throw new Error('latestCheck.gates must contain each fixed gate');
+  }
+  return { verdict, gates };
+}
+
+function requireGateName(value: unknown, field: string): TopicGateName {
+  if (
+    typeof value !== 'string'
+    || !GATE_NAMES.includes(value as TopicGateName)
+  ) {
+    throw new Error(`${field} is invalid`);
+  }
+  return value as TopicGateName;
+}
+
+function requireGateVerdict(
+  value: unknown,
+  field: string,
+): GateCheckResult['verdict'] {
+  if (value !== 'pass' && value !== 'fail' && value !== 'unknown') {
+    throw new Error(`${field} must be pass, fail, or unknown`);
+  }
+  return value;
+}
+
+function requireGateReason(value: unknown, index: number): string {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(
+      `latestCheck.gates[${index}].reasonMarkdown is required`,
+    );
+  }
+  return value;
+}
+
+function requirePackageDirections(value: unknown): PackageDirection[] {
+  if (!Array.isArray(value)) throw new Error('directions must be an array');
+  return value.map((candidate, index) => {
+    const direction = asRecord(candidate);
+    if (!direction) {
+      throw new Error(`directions[${index}] must be an object`);
+    }
+    return {
+      working_title: requiredPackageString(
+        direction['working_title'],
+        index,
+        'working_title',
+      ),
+      intended_viewer: requiredPackageString(
+        direction['intended_viewer'],
+        index,
+        'intended_viewer',
+      ),
+      familiar_markdown: requiredPackageString(
+        direction['familiar_markdown'],
+        index,
+        'familiar_markdown',
+      ),
+      surprise_markdown: requiredPackageString(
+        direction['surprise_markdown'],
+        index,
+        'surprise_markdown',
+      ),
+      visual_promise_markdown: requiredPackageString(
+        direction['visual_promise_markdown'],
+        index,
+        'visual_promise_markdown',
+      ),
+      delivered_payoff_markdown: requiredPackageString(
+        direction['delivered_payoff_markdown'],
+        index,
+        'delivered_payoff_markdown',
+      ),
+      survives_honestly: requiredPackageBoolean(
+        direction['survives_honestly'],
+        index,
+      ),
+      reason_markdown: requiredPackageString(
+        direction['reason_markdown'],
+        index,
+        'reason_markdown',
+      ),
+    };
+  });
+}
+
+function requiredPackageString(
+  value: unknown,
+  index: number,
+  field: string,
+): string {
+  if (typeof value !== 'string') {
+    throw new Error(`directions[${index}].${field} must be a string`);
+  }
+  return value;
+}
+
+function requiredPackageBoolean(value: unknown, index: number): boolean {
+  if (typeof value !== 'boolean') {
+    throw new Error(
+      `directions[${index}].survives_honestly must be a boolean`,
+    );
   }
   return value;
 }

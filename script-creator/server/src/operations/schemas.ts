@@ -83,6 +83,8 @@ export const GATE_CHECK_SCHEMA = strictObject({
   },
   gates: {
     type: 'array',
+    minItems: 6,
+    maxItems: 6,
     items: strictObject({
       gate: {
         enum: [

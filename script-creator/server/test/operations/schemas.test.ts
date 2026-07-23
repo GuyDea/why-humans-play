@@ -37,6 +37,21 @@ describe('operation schemas', () => {
       expect(Object.keys(props), op.name).toEqual(expect.arrayContaining(['status', 'guardrail_markdown']));
     }
   });
+
+  it('requires exactly the six fixed quick-gate-check gates', () => {
+    const operation = OPERATIONS['quick-gate-check'];
+    expect(operation.result.kind).toBe('schema');
+    if (operation.result.kind !== 'schema') return;
+
+    const gates = (operation.result.schema as {
+      properties: Record<string, Record<string, unknown>>;
+    }).properties['gates'];
+    expect(gates).toMatchObject({
+      type: 'array',
+      minItems: 6,
+      maxItems: 6,
+    });
+  });
 });
 
 describe('operation schema payloads', () => {

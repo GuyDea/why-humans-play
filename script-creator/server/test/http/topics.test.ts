@@ -19,6 +19,21 @@ import {
 
 const NONCE = 'task-1-topics-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
+const GATE_CHECK = {
+  verdict: 'pass',
+  gates: [
+    'game_play_centrality',
+    'human_revelation',
+    'recognized_payoff',
+    'evidence_path',
+    'production_reality',
+    'portfolio_fit',
+  ].map((gate) => ({
+    gate,
+    verdict: 'pass',
+    reasonMarkdown: `${gate} has a clear path.`,
+  })),
+};
 
 const SUMMARY: TopicSummary = {
   candidates: [],
@@ -141,6 +156,7 @@ describe('topics HTTP API', () => {
       text: 'Why games make effort feel voluntary',
       source: 'inbox',
       status: 'open',
+      latestCheck: null,
     });
 
     const listed = await fixture.app.inject({
@@ -162,10 +178,26 @@ describe('topics HTTP API', () => {
       method: 'PATCH',
       url: '/api/ideas/idea-1',
       headers: AUTH,
-      payload: { status: 'discarded' },
+      payload: {
+        status: 'discarded',
+        latestCheck: GATE_CHECK,
+      },
     });
     expect(updated.statusCode).toBe(200);
-    expect(updated.json()).toMatchObject({ status: 'discarded' });
+    expect(updated.json()).toMatchObject({
+      status: 'discarded',
+      latestCheck: GATE_CHECK,
+    });
+
+    const reloaded = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ideas',
+      headers: AUTH,
+    });
+    expect(reloaded.json()[0]).toMatchObject({
+      id: 'idea-1',
+      latestCheck: GATE_CHECK,
+    });
 
     const deleted = await fixture.app.inject({
       method: 'DELETE',
@@ -235,6 +267,51 @@ describe('topics HTTP API', () => {
     });
   });
 
+  it('creates and lists package-test history for an idea', async () => {
+    const fixture = makeFixture(['idea-1', 'package-test-1']);
+    await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ideas',
+      headers: AUTH,
+      payload: {
+        text: 'Why games make effort feel voluntary',
+        source: 'inbox',
+      },
+    });
+    const directions = [{
+      working_title: 'Why We Make Games Harder',
+      intended_viewer: 'Players who choose harder rules',
+      familiar_markdown: 'A no-hit run.',
+      surprise_markdown: 'Constraint can create meaning.',
+      visual_promise_markdown: 'One level under two rule sets.',
+      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+      survives_honestly: true,
+      reason_markdown: 'The episode can deliver the promise.',
+    }];
+
+    const created = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ideas/idea-1/package-tests',
+      headers: AUTH,
+      payload: { opId: 'op-package-1', directions },
+    });
+    expect(created.statusCode).toBe(201);
+    expect(created.json()).toMatchObject({
+      id: 'package-test-1',
+      ideaId: 'idea-1',
+      opId: 'op-package-1',
+      directions,
+    });
+
+    const listed = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ideas/idea-1/package-tests',
+      headers: AUTH,
+    });
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json()).toEqual([created.json()]);
+  });
+
   it('returns pipeline rows merged with local draft creative state', async () => {
     const fixture = makeFixture();
     fixture.documentStore.createDraft({
@@ -297,6 +374,8 @@ describe('topics HTTP API', () => {
         listIdeas: fail,
         updateIdea: fail,
         deleteIdea: fail,
+        createPackageTest: fail,
+        listPackageTests: fail,
         registerRun: fail,
         listRuns: fail,
         getRun: fail,
@@ -330,6 +409,8 @@ describe('topics HTTP API', () => {
     ['GET', '/api/ideas/idea-1'],
     ['PATCH', '/api/ideas/idea-1'],
     ['DELETE', '/api/ideas/idea-1'],
+    ['GET', '/api/ideas/idea-1/package-tests'],
+    ['POST', '/api/ideas/idea-1/package-tests'],
     ['GET', '/api/topic-runs'],
     ['POST', '/api/topic-runs'],
     ['GET', '/api/topic-runs/run-1'],

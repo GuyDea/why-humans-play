@@ -4,12 +4,49 @@ import type { OperationState } from '../types.js';
 
 export type IdeaSource = 'inbox' | 'ideate';
 export type IdeaStatus = 'open' | 'promoted' | 'discarded';
+export type TopicGateName =
+  | 'game_play_centrality'
+  | 'human_revelation'
+  | 'recognized_payoff'
+  | 'evidence_path'
+  | 'production_reality'
+  | 'portfolio_fit';
+export type GateVerdict = 'pass' | 'fail' | 'unknown';
+
+export interface GateCheckResult {
+  verdict: GateVerdict;
+  gates: Array<{
+    gate: TopicGateName;
+    verdict: GateVerdict;
+    reasonMarkdown: string;
+  }>;
+}
 
 export interface IdeaRecord {
   id: string;
   text: string;
   source: IdeaSource;
   status: IdeaStatus;
+  latestCheck: GateCheckResult | null;
+  createdAt: string;
+}
+
+export interface PackageDirection {
+  working_title: string;
+  intended_viewer: string;
+  familiar_markdown: string;
+  surprise_markdown: string;
+  visual_promise_markdown: string;
+  delivered_payoff_markdown: string;
+  survives_honestly: boolean;
+  reason_markdown: string;
+}
+
+export interface PackageTestRecord {
+  id: string;
+  ideaId: string;
+  opId: string;
+  directions: PackageDirection[];
   createdAt: string;
 }
 
@@ -30,6 +67,7 @@ interface IdeaRow {
   source: IdeaSource;
   status: IdeaStatus;
   created_at: string;
+  latest_check_json: string | null;
 }
 
 interface TopicRunRow {
@@ -43,7 +81,15 @@ interface TopicRunRow {
   created_at: string;
 }
 
-const SCHEMA_VERSION = 3;
+interface PackageTestRow {
+  id: string;
+  idea_id: string;
+  op_id: string;
+  directions_json: string;
+  created_at: string;
+}
+
+const SCHEMA_VERSION = 4;
 const MIGRATION_V3 = `
 CREATE TABLE IF NOT EXISTS ideas (
   id TEXT PRIMARY KEY,
@@ -67,6 +113,20 @@ CREATE TABLE IF NOT EXISTS topic_runs (
 
 CREATE INDEX IF NOT EXISTS topic_runs_created_at
   ON topic_runs (created_at);
+
+CREATE TABLE IF NOT EXISTS package_tests (
+  id TEXT PRIMARY KEY,
+  idea_id TEXT NOT NULL REFERENCES ideas(id) ON DELETE CASCADE,
+  op_id TEXT NOT NULL,
+  directions_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS package_tests_idea_created
+  ON package_tests (idea_id, created_at DESC);
+`;
+const MIGRATION_V4 = `
+ALTER TABLE ideas ADD COLUMN latest_check_json TEXT;
 `;
 
 function ideaFrom(row: IdeaRow): IdeaRecord {
@@ -75,6 +135,9 @@ function ideaFrom(row: IdeaRow): IdeaRecord {
     text: row.text,
     source: row.source,
     status: row.status,
+    latestCheck: row.latest_check_json === null
+      ? null
+      : JSON.parse(row.latest_check_json) as GateCheckResult,
     createdAt: row.created_at,
   };
 }
@@ -94,6 +157,16 @@ function runFrom(row: TopicRunRow): TopicRunRecord {
   };
 }
 
+function packageTestFrom(row: PackageTestRow): PackageTestRecord {
+  return {
+    id: row.id,
+    ideaId: row.idea_id,
+    opId: row.op_id,
+    directions: JSON.parse(row.directions_json) as PackageDirection[],
+    createdAt: row.created_at,
+  };
+}
+
 export class TopicStore {
   private readonly db: Database.Database;
 
@@ -101,18 +174,23 @@ export class TopicStore {
     this.db = new Database(dbFile);
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('synchronous = FULL');
+    this.db.pragma('foreign_keys = ON');
     this.migrate();
   }
 
   createIdea(record: IdeaRecord): IdeaRecord {
     this.db.prepare(
-      `INSERT INTO ideas (id, text, source, status, created_at)
-       VALUES (?, ?, ?, ?, ?)`,
+      `INSERT INTO ideas (
+        id, text, source, status, latest_check_json, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
     ).run(
       record.id,
       record.text,
       record.source,
       record.status,
+      record.latestCheck === null
+        ? null
+        : JSON.stringify(record.latestCheck),
       record.createdAt,
     );
     return this.getIdea(record.id)!;
@@ -135,9 +213,17 @@ export class TopicStore {
   updateIdea(record: IdeaRecord): IdeaRecord {
     const result = this.db.prepare(
       `UPDATE ideas
-       SET text = ?, source = ?, status = ?
+       SET text = ?, source = ?, status = ?, latest_check_json = ?
        WHERE id = ?`,
-    ).run(record.text, record.source, record.status, record.id);
+    ).run(
+      record.text,
+      record.source,
+      record.status,
+      record.latestCheck === null
+        ? null
+        : JSON.stringify(record.latestCheck),
+      record.id,
+    );
     if (result.changes === 0) {
       throw new Error(`idea not found: ${record.id}`);
     }
@@ -147,6 +233,32 @@ export class TopicStore {
   deleteIdea(id: string): boolean {
     return this.db.prepare('DELETE FROM ideas WHERE id = ?').run(id)
       .changes > 0;
+  }
+
+  createPackageTest(record: PackageTestRecord): PackageTestRecord {
+    this.db.prepare(
+      `INSERT INTO package_tests (
+        id, idea_id, op_id, directions_json, created_at
+      ) VALUES (?, ?, ?, ?, ?)`,
+    ).run(
+      record.id,
+      record.ideaId,
+      record.opId,
+      JSON.stringify(record.directions),
+      record.createdAt,
+    );
+    const saved = this.db.prepare<[string], PackageTestRow>(
+      'SELECT * FROM package_tests WHERE id = ?',
+    ).get(record.id)!;
+    return packageTestFrom(saved);
+  }
+
+  listPackageTests(ideaId: string): PackageTestRecord[] {
+    return this.db.prepare<[string], PackageTestRow>(
+      `SELECT * FROM package_tests
+       WHERE idea_id = ?
+       ORDER BY created_at DESC, rowid DESC`,
+    ).all(ideaId).map(packageTestFrom);
   }
 
   createRun(record: TopicRunRecord): TopicRunRecord {
@@ -220,12 +332,13 @@ export class TopicStore {
         `state database schema version ${version} is newer than supported version ${SCHEMA_VERSION}`,
       );
     }
-    if (version < SCHEMA_VERSION) {
-      this.db.transaction(() => {
-        if (version < 2) this.db.exec(MIGRATION_V2);
-        this.db.exec(MIGRATION_V3);
+    this.db.transaction(() => {
+      if (version < 2) this.db.exec(MIGRATION_V2);
+      this.db.exec(MIGRATION_V3);
+      if (version < 4) this.db.exec(MIGRATION_V4);
+      if (version < SCHEMA_VERSION) {
         this.db.pragma(`user_version = ${SCHEMA_VERSION}`);
-      })();
-    }
+      }
+    })();
   }
 }

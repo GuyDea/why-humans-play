@@ -289,6 +289,7 @@ describe('TopicService', () => {
       text: 'Why voluntary difficulty feels good',
       source: 'inbox',
       status: 'open',
+      latestCheck: null,
       createdAt: '2026-07-23T10:00:00.000Z',
     });
 
@@ -296,14 +297,67 @@ describe('TopicService', () => {
     expect(service.updateIdea(created.id, {
       source: 'ideate',
       status: 'promoted',
+      latestCheck: {
+        verdict: 'pass',
+        gates: [
+          'game_play_centrality',
+          'human_revelation',
+          'recognized_payoff',
+          'evidence_path',
+          'production_reality',
+          'portfolio_fit',
+        ].map((gate) => ({
+          gate,
+          verdict: 'pass',
+          reasonMarkdown: `${gate} has a clear path.`,
+        })),
+      },
     })).toMatchObject({
       source: 'ideate',
       status: 'promoted',
+      latestCheck: {
+        verdict: 'pass',
+        gates: expect.any(Array),
+      },
     });
     expect(service.listIdeas()).toHaveLength(1);
     service.deleteIdea(created.id);
     expect(service.listIdeas()).toEqual([]);
     expect(() => service.getIdea(created.id)).toThrow(/idea not found/i);
+  });
+
+  it('persists validated package-test history against an existing idea', () => {
+    const { service } = makeService();
+    const idea = service.createIdea({
+      text: 'Why voluntary difficulty feels good',
+      source: 'inbox',
+    });
+    const directions = [{
+      working_title: 'Why We Make Games Harder',
+      intended_viewer: 'Players who choose harder rules',
+      familiar_markdown: 'A no-hit run.',
+      surprise_markdown: 'Constraint can create meaning.',
+      visual_promise_markdown: 'One level under two rule sets.',
+      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+      survives_honestly: true,
+      reason_markdown: 'The episode can deliver the promise.',
+    }];
+
+    const saved = service.createPackageTest(idea.id, {
+      opId: 'op-package-1',
+      directions,
+    });
+
+    expect(saved).toEqual({
+      id: 'run-1',
+      ideaId: idea.id,
+      opId: 'op-package-1',
+      directions,
+      createdAt: '2026-07-23T10:00:00.000Z',
+    });
+    expect(service.listPackageTests(idea.id)).toEqual([saved]);
+    expect(() => service.listPackageTests('missing'))
+      .toThrow(/idea not found/i);
   });
 
   it('registers a run idempotently by op id and extracts its terminal result once', () => {
