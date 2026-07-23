@@ -8,7 +8,10 @@ import { OperationService } from '../../src/operations/service.js';
 import { JobSupervisor } from '../../src/supervisor.js';
 import type { JobRecord, JobState } from '../../src/types.js';
 import { waitFor } from '../helpers.js';
-import { UNUSED_DOCUMENT_SERVICE } from './stubs.js';
+import {
+  UNUSED_DOCUMENT_SERVICE,
+  UNUSED_VALIDATOR_SERVICE,
+} from './stubs.js';
 
 const NONCE = 'task-11-test-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
@@ -46,7 +49,7 @@ function makeFixture(mode: string): Fixture {
     operationService: service,
     documentService: UNUSED_DOCUMENT_SERVICE,
     artifactService: {},
-    validatorService: {},
+    validatorService: UNUSED_VALIDATOR_SERVICE,
   });
   const fixture = { root, app, service, supervisor, store, ids: [] };
   fixtures.push(fixture);
@@ -254,7 +257,7 @@ describe('operations HTTP API', () => {
       },
       documentService: UNUSED_DOCUMENT_SERVICE,
       artifactService: {},
-      validatorService: {},
+      validatorService: UNUSED_VALIDATOR_SERVICE,
     });
 
     const responsePromise = app.inject({
@@ -290,7 +293,7 @@ describe('operations HTTP API', () => {
       },
       documentService: UNUSED_DOCUMENT_SERVICE,
       artifactService: {},
-      validatorService: {},
+      validatorService: UNUSED_VALIDATOR_SERVICE,
     });
 
     const response = await app.inject({

@@ -9,6 +9,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { DocumentService } from '../../src/documents/service.js';
 import { DocumentStore } from '../../src/documents/store.js';
 import { buildApp } from '../../src/http/app.js';
+import { UNUSED_VALIDATOR_SERVICE } from './stubs.js';
 
 const NONCE = 'task-12-document-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
@@ -47,7 +48,7 @@ function makeFixture(ids: string[]): Fixture {
     },
     documentService,
     artifactService: {},
-    validatorService: {},
+    validatorService: UNUSED_VALIDATOR_SERVICE,
   });
   const fixture = { root, store, app };
   fixtures.push(fixture);

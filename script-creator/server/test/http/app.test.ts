@@ -1,6 +1,9 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../../src/http/app.js';
-import { UNUSED_DOCUMENT_SERVICE } from './stubs.js';
+import {
+  UNUSED_DOCUMENT_SERVICE,
+  UNUSED_VALIDATOR_SERVICE,
+} from './stubs.js';
 
 const NONCE = 'test-launch-nonce';
 const app = buildApp({
@@ -16,7 +19,7 @@ const app = buildApp({
   },
   documentService: UNUSED_DOCUMENT_SERVICE,
   artifactService: {},
-  validatorService: {},
+  validatorService: UNUSED_VALIDATOR_SERVICE,
 });
 
 afterAll(async () => {

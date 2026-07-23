@@ -12,6 +12,11 @@ import {
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
 import {
+  assertValidatorScriptPath,
+  InvalidValidatorPathError,
+  type ValidatorResult,
+} from '../repo/validator.js';
+import {
   hasSseQueryNonce,
   parseFromSeq,
   pumpOperationEvents,
@@ -32,12 +37,16 @@ export type DocumentHttpService = Pick<
   | 'exportMarkdown'
 >;
 
+export interface ValidatorHttpService {
+  validate(path: string): Promise<ValidatorResult>;
+}
+
 export interface BuildAppOptions {
   nonce: string;
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
   artifactService: unknown;
-  validatorService: unknown;
+  validatorService: ValidatorHttpService;
 }
 
 interface SubmitBody {
@@ -74,6 +83,10 @@ interface SaveDraftBody {
 
 interface ImportDraftBody {
   markdown?: unknown;
+}
+
+interface ValidateBody {
+  path?: unknown;
 }
 
 interface EventsQuery {
@@ -113,6 +126,19 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
   });
 
   app.get('/api/health', async () => ({ ok: true }));
+
+  app.post<{ Body: ValidateBody }>(
+    '/api/validate',
+    async (request, reply) => {
+      try {
+        const path = requiredString(request.body?.path, 'path');
+        assertValidatorScriptPath(path);
+        return await options.validatorService.validate(path);
+      } catch (error) {
+        return sendValidatorError(reply, error);
+      }
+    },
+  );
 
   app.post<{ Body: CreateDraftBody }>(
     '/api/drafts',
@@ -438,4 +464,20 @@ function isOperationClientError(message: string): boolean {
     /^operation cannot be resumed without a thread id$/,
     /^fromSeq and Last-Event-ID must be /,
   ].some((pattern) => pattern.test(message));
+}
+
+function sendValidatorError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error ? error.message : 'validation failed';
+  if (
+    error instanceof InvalidValidatorPathError
+    || message === 'path is required'
+  ) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'validator request failed');
+  return reply.code(500).send({ error: 'internal server error' });
 }
