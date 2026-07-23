@@ -102,7 +102,11 @@ For evidence-backed finalization:
    assign confidence to every material claim, and approve only wording its evidence
    supports. Narrow or remove unsupported wording while preserving the approved voice. Map
    every factual narration sentence or separable factual clause to at least one `F-###` ID
-   in the matching appendix beat's `#### Claims` section.
+   in the matching appendix beat's `#### Claims` section. Append a visible
+   `[F-###](Original URL)` indicator immediately after every mapped factual narration
+   sentence or separable factual clause. Treat inline evidence indicators as review
+   annotations, not spoken words; exclude them from narration extraction, word count, table
+   reads, and teleprompter output. Keep the full evidence record in the appendix.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.
@@ -119,8 +123,10 @@ For evidence-backed finalization:
 7. Complete the narration for spoken delivery and show it to Martin before auditing it.
    Read it aloud and revise for speech without imposing a runtime cut first.
 8. The readable script comes first as numbered beats containing only the beat heading and
-   spoken blockquote narration. Put all metadata and production annotations in a final
-   appendix whose beat entries match the narration beat numbers and titles.
+   spoken blockquote narration. Visible inline evidence indicators may appear within those
+   blockquotes as the sole non-spoken review annotations. Put all other metadata and
+   production annotations in a final appendix whose beat entries match the narration beat
+   numbers and titles.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
    retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
@@ -149,6 +155,8 @@ For evidence-backed finalization:
   ownable fallback, and never call an asset cleared without a documented basis.
 - State the explanatory purpose of each animation. If motion adds no understanding, choose
   a still or no animation.
+- Keep numbered beats narration-only except for visible inline evidence indicators, which
+  are non-spoken review annotations.
 - Keep production notes in the matching appendix beat so their relationship to narration
   remains explicit without interrupting the readable script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or

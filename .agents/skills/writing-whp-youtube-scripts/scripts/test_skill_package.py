@@ -817,6 +817,64 @@ class SkillPackageTests(unittest.TestCase):
             template,
         )
 
+    def test_phase_two_factual_claims_have_clickable_inline_source_indicators(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "research": " ".join(
+                (SKILL_ROOT / "references/research-and-rights.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "format": " ".join(
+                (SKILL_ROOT / "references/annotated-script-format.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "template": (
+                SKILL_ROOT / "assets/annotated-script-template.md"
+            ).read_text(encoding="utf-8"),
+        }
+        core_contract = (
+            "Append a visible `[F-###](Original URL)` indicator immediately after every "
+            "mapped factual narration sentence or separable factual clause."
+        )
+        non_spoken_contract = (
+            "Treat inline evidence indicators as review annotations, not spoken words; "
+            "exclude them from narration extraction, word count, table reads, and "
+            "teleprompter output."
+        )
+        for source_name in ("skill", "research", "format"):
+            with self.subTest(source=source_name, contract="core"):
+                self.assertIn(core_contract, sources[source_name])
+            with self.subTest(source=source_name, contract="non-spoken"):
+                self.assertIn(non_spoken_contract, sources[source_name])
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        template_narration = sources["template"].split(
+            "## 1. The detour\n", 1
+        )[1].split("\n## Appendix", 1)[0]
+        worked_narration = " ".join(
+            line.removeprefix("> ").strip()
+            for line in template_narration.splitlines()
+            if line.startswith("> ")
+        )
+        required_placements = (
+            "In a 2022 experiment, bumblebees had an unobstructed path to "
+            f"food. {marker}",
+            "Some detoured into an object area, contacted wooden balls, and rolled "
+            f"them repeatedly without a food reward. {marker}",
+            "The researchers said this met their operational play criteria. "
+            f"{marker}",
+            f"That does not tell us what a bee feels {marker}—but",
+            "Those clues can sharpen the question; they cannot reveal the animal's "
+            f"inner experience. {marker}",
+        )
+        for placement in required_placements:
+            with self.subTest(template_placement=placement):
+                self.assertIn(placement, worked_narration)
+        self.assertEqual(worked_narration.count(marker), 5)
+
     def test_rapid_hook_supports_an_honest_question_first_entry(self) -> None:
         rapid = " ".join(
             (
@@ -1047,7 +1105,7 @@ class SkillPackageTests(unittest.TestCase):
             skill,
         )
         self.assertIn(
-            "Put all metadata and production annotations in a final appendix whose "
+            "Put all other metadata and production annotations in a final appendix whose "
             "beat entries match the narration beat numbers and titles.",
             skill,
         )
@@ -1189,7 +1247,9 @@ class SkillPackageTests(unittest.TestCase):
         local = [
             target
             for target in targets
-            if "://" not in target and not target.startswith("#")
+            if "://" not in target
+            and not target.startswith("#")
+            and target != "Original URL"
         ]
         expected = [
             "references/rapid-prototyping.md",
