@@ -67,6 +67,7 @@ export class OperationService {
   private readonly supervisor: JobSupervisor;
   private readonly store: JobStore;
   private readonly clock: OperationClock;
+  private readonly codexBin: string | undefined;
   private readonly activity = new Map<string, Activity>();
   private readonly deadlineTimers = new Map<string, unknown>();
   private readonly unsubscribeTerminal: () => void;
@@ -76,10 +77,12 @@ export class OperationService {
     supervisor: JobSupervisor;
     store: JobStore;
     clock?: OperationClock;
+    codexBin?: string;
   }) {
     this.supervisor = opts.supervisor;
     this.store = opts.store;
     this.clock = opts.clock ?? SYSTEM_CLOCK;
+    this.codexBin = opts.codexBin;
     this.unsubscribeTerminal = this.store.onOperationTerminal(
       (id) => this.clearDeadline(id),
     );
@@ -132,6 +135,7 @@ export class OperationService {
         ? definition.result.schema
         : undefined,
       resumeThreadId,
+      codexBin: this.codexBin,
     }, {
       resumedFrom,
       operation: {

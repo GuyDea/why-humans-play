@@ -1,6 +1,9 @@
+import { readFile } from 'node:fs/promises';
+import { extname, resolve, sep } from 'node:path';
 import { PassThrough } from 'node:stream';
 import Fastify, {
   type FastifyInstance,
+  type FastifyRequest,
   type FastifyReply,
 } from 'fastify';
 import {
@@ -43,6 +46,7 @@ export interface ValidatorHttpService {
 
 export interface BuildAppOptions {
   nonce: string;
+  staticRoot?: string;
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
   artifactService: unknown;
@@ -94,6 +98,10 @@ interface EventsQuery {
   nonce?: string;
 }
 
+interface StaticParams {
+  '*': string;
+}
+
 const LOOPBACK_ORIGIN =
   /^http:\/\/(?:127\.0\.0\.1|localhost):(?:0|[1-9]\d{0,4})$/;
 
@@ -113,6 +121,8 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     if (origin !== undefined && !isAllowedOrigin(origin)) {
       return reply.code(403).send({ error: 'forbidden origin' });
     }
+
+    if (!isApiPath(request.raw.url ?? '')) return;
 
     const hasHeaderNonce = request.headers['x-sc-nonce'] === options.nonce;
     const hasQueryNonce = hasSseQueryNonce(
@@ -345,7 +355,82 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  if (options.staticRoot !== undefined) {
+    const staticRoot = resolve(options.staticRoot);
+    const serveStatic = (
+      request: FastifyRequest,
+      reply: FastifyReply,
+    ) => serveStaticFile(staticRoot, request, reply);
+    app.get('/', serveStatic);
+    app.get<{ Params: StaticParams }>('/*', serveStatic);
+  }
+
   return app;
+}
+
+function isApiPath(rawUrl: string): boolean {
+  const path = rawUrl.split('?', 1)[0] ?? '';
+  return path === '/api' || path.startsWith('/api/');
+}
+
+async function serveStaticFile(
+  staticRoot: string,
+  request: FastifyRequest,
+  reply: FastifyReply,
+) {
+  const rawPath = (request.raw.url ?? '/').split('?', 1)[0] ?? '/';
+  if (isApiPath(rawPath)) {
+    return reply.code(404).send({ error: 'not found' });
+  }
+
+  let pathname: string;
+  try {
+    pathname = decodeURIComponent(rawPath);
+  } catch {
+    return reply.code(400).send({ error: 'invalid path' });
+  }
+  const relativePath = pathname.replace(/^\/+/, '');
+  const file = extname(pathname) === ''
+    ? resolve(staticRoot, 'index.html')
+    : resolve(staticRoot, relativePath);
+  if (file !== staticRoot && !file.startsWith(`${staticRoot}${sep}`)) {
+    return reply.code(404).send({ error: 'not found' });
+  }
+
+  try {
+    const contents = await readFile(file);
+    return reply.type(contentType(file)).send(contents);
+  } catch (error) {
+    if (
+      error instanceof Error
+      && 'code' in error
+      && ['ENOENT', 'EISDIR', 'ENOTDIR'].includes(String(error.code))
+    ) {
+      return reply.code(404).send({ error: 'not found' });
+    }
+    throw error;
+  }
+}
+
+function contentType(file: string): string {
+  switch (extname(file).toLowerCase()) {
+    case '.html': return 'text/html; charset=utf-8';
+    case '.css': return 'text/css; charset=utf-8';
+    case '.js':
+    case '.mjs': return 'application/javascript; charset=utf-8';
+    case '.json':
+    case '.map': return 'application/json; charset=utf-8';
+    case '.svg': return 'image/svg+xml';
+    case '.png': return 'image/png';
+    case '.jpg':
+    case '.jpeg': return 'image/jpeg';
+    case '.gif': return 'image/gif';
+    case '.ico': return 'image/x-icon';
+    case '.woff': return 'font/woff';
+    case '.woff2': return 'font/woff2';
+    case '.txt': return 'text/plain; charset=utf-8';
+    default: return 'application/octet-stream';
+  }
 }
 
 function hasOwn(value: unknown, key: string): value is Record<string, unknown> {

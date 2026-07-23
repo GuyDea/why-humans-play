@@ -1,3 +1,11 @@
+import {
+  mkdtempSync,
+  mkdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../../src/http/app.js';
 import {
@@ -24,6 +32,82 @@ const app = buildApp({
 
 afterAll(async () => {
   await app.close();
+});
+
+describe('buildApp static serving', () => {
+  const staticRoot = mkdtempSync(join(tmpdir(), 'script-creator-static-'));
+  const assetsRoot = join(staticRoot, 'assets');
+  mkdirSync(assetsRoot);
+  writeFileSync(
+    join(staticRoot, 'index.html'),
+    '<!doctype html><title>Script Creator</title>',
+  );
+  writeFileSync(
+    join(assetsRoot, 'studio.js'),
+    'globalThis.scriptCreator = true;',
+  );
+  const staticApp = buildApp({
+    nonce: NONCE,
+    staticRoot,
+    operationService: {
+      submit: () => 'job-1',
+      get: () => {
+        throw new Error('operation not found: job-1');
+      },
+      events: () => [],
+      cancel: () => {},
+      result: () => ({ kind: 'pending' }),
+    },
+    documentService: UNUSED_DOCUMENT_SERVICE,
+    artifactService: {},
+    validatorService: UNUSED_VALIDATOR_SERVICE,
+  });
+
+  afterAll(async () => {
+    await staticApp.close();
+    rmSync(staticRoot, { recursive: true, force: true });
+  });
+
+  it('serves index.html without a nonce', async () => {
+    const response = await staticApp.inject({
+      method: 'GET',
+      url: '/',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('text/html');
+    expect(response.body).toContain('<title>Script Creator</title>');
+  });
+
+  it('serves an asset without a nonce', async () => {
+    const response = await staticApp.inject({
+      method: 'GET',
+      url: '/assets/studio.js',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['content-type']).toContain('javascript');
+    expect(response.body).toBe('globalThis.scriptCreator = true;');
+  });
+
+  it('falls back to index.html for an extensionless app route', async () => {
+    const response = await staticApp.inject({
+      method: 'GET',
+      url: '/drafts/example',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toContain('<title>Script Creator</title>');
+  });
+
+  it('keeps API routes behind the nonce guard', async () => {
+    const response = await staticApp.inject({
+      method: 'GET',
+      url: '/api/health',
+    });
+
+    expect(response.statusCode).toBe(401);
+  });
 });
 
 describe('buildApp security', () => {

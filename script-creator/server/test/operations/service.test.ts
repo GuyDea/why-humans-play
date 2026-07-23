@@ -87,6 +87,7 @@ const fixtures: Fixture[] = [];
 function makeFixture(
   mode: string,
   extraEnv: Record<string, string> = {},
+  codexBin?: string,
 ): Fixture {
   const root = mkdtempSync(join(tmpdir(), 'operation-service-'));
   const binDir = join(root, 'bin');
@@ -105,7 +106,12 @@ function makeFixture(
     },
   });
   const clock = new ManualClock();
-  const service = new OperationService({ supervisor, store, clock });
+  const service = new OperationService({
+    supervisor,
+    store,
+    clock,
+    codexBin,
+  });
   const fixture = { root, service, supervisor, store, clock, ids: [] };
   fixtures.push(fixture);
   return fixture;
@@ -180,9 +186,25 @@ describe('OperationService', () => {
     expect(envelope.cwd).toBe(REPO_ROOT);
     expect(envelope.sandbox).toBe('read-only');
     expect(envelope.outputSchema).toEqual(REWRITE_SCHEMA);
+    expect(envelope).not.toHaveProperty('codexBin');
     expect(JSON.parse(readFileSync(jobPaths(job.jobDir).schemaFile, 'utf8')))
       .toEqual(REWRITE_SCHEMA);
     expect(fixture.service.events(id, 1).every((event) => event.seq > 1)).toBe(true);
+  });
+
+  it('puts the configured codex binary override in submitted envelopes', async () => {
+    const codexBin = `${process.execPath} ${FAKE_CODEX}`;
+    const fixture = makeFixture('operation-schema', {}, codexBin);
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original passage.' },
+    );
+
+    await terminal(fixture, id);
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.codexBin).toBe(codexBin);
   });
 
   it('returns the final Markdown for a raw operation', async () => {

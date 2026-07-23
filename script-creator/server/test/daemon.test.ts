@@ -19,8 +19,11 @@ import {
   startDaemonContext,
   writeRuntimeFile,
 } from '../src/daemon.js';
+import { JobStore } from '../src/job-store.js';
 import { OperationService } from '../src/operations/service.js';
 import { JobSupervisor } from '../src/supervisor.js';
+
+const FAKE_CODEX = join(import.meta.dirname, 'fake-codex.mjs');
 
 describe('generateNonce', () => {
   it('returns a 32-character hexadecimal launch nonce', () => {
@@ -66,6 +69,79 @@ describe('writeRuntimeFile', () => {
 });
 
 describe('createDaemonContext', () => {
+  it('serves the built Angular browser output when it exists', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-static-root-'));
+    const repoRoot = join(root, 'repo');
+    const browserRoot = join(
+      repoRoot,
+      'script-creator',
+      'app',
+      'dist',
+      'app',
+      'browser',
+    );
+    mkdirSync(browserRoot, { recursive: true });
+    writeFileSync(
+      join(browserRoot, 'index.html'),
+      '<!doctype html><title>Angular Script Studio</title>',
+    );
+    const context = createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+      },
+    });
+
+    try {
+      const response = await context.app.inject({
+        method: 'GET',
+        url: '/',
+      });
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toContain('<title>Angular Script Studio</title>');
+    } finally {
+      await context.close();
+    }
+  });
+
+  it('threads SC_CODEX_BIN into submitted job envelopes', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-codex-bin-'));
+    const repoRoot = join(root, 'repo');
+    const codexBin = `${process.execPath} ${FAKE_CODEX}`;
+    mkdirSync(repoRoot);
+    const context = createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+        SC_CODEX_BIN: codexBin,
+      },
+    });
+    let reader: JobStore | undefined;
+
+    try {
+      const response = await context.app.inject({
+        method: 'POST',
+        url: '/api/ops',
+        headers: { 'x-sc-nonce': context.nonce },
+        payload: {
+          operation: 'rewrite-selection',
+          inputs: { selection: 'Use the deterministic test binary.' },
+        },
+      });
+      expect(response.statusCode).toBe(200);
+
+      const { id } = response.json<{ id: string }>();
+      reader = new JobStore(context.stateDbFile);
+      const envelope = JSON.parse(reader.get(id)!.envelopeJson);
+      expect(envelope.codexBin).toBe(codexBin);
+    } finally {
+      reader?.close();
+      await context.close();
+    }
+  });
+
   it('wires XDG state into the services and reattaches without listening', async () => {
     const root = mkdtempSync(join(tmpdir(), 'daemon-context-'));
     const repoRoot = join(root, 'repo');
@@ -182,8 +258,9 @@ describe('startDaemonContext', () => {
         });
       expect(log).toHaveBeenCalledOnce();
       expect(log).toHaveBeenCalledWith(
-        'Script Creator daemon listening at http://127.0.0.1:80',
+        `Script Creator daemon listening at http://127.0.0.1:80/#nonce=${context.nonce}`,
       );
+      expect(running.url).toBe('http://127.0.0.1:80');
       expect([...listeners.keys()].sort()).toEqual(['SIGINT', 'SIGTERM']);
 
       listeners.get('SIGTERM')!();
@@ -200,8 +277,9 @@ describe('startDaemonContext', () => {
       );
       expect(listeners.size).toBe(0);
     } finally {
-      if (running) await running.shutdown();
-      else await context.close();
+      const closing = running ? running.shutdown() : context.close();
+      releaseClose();
+      await closing;
     }
   });
 });

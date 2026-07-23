@@ -1,12 +1,15 @@
 import { randomBytes } from 'node:crypto';
 import {
   closeSync,
+  existsSync,
   fchmodSync,
   fsyncSync,
   mkdirSync,
   openSync,
+  readdirSync,
   renameSync,
   rmSync,
+  statSync,
   writeFileSync,
 } from 'node:fs';
 import { basename, dirname, join, resolve } from 'node:path';
@@ -48,9 +51,13 @@ export interface DaemonContext {
   close(): Promise<void>;
 }
 
+export interface DaemonEnvironment extends AppDirEnvironment {
+  SC_CODEX_BIN?: string;
+}
+
 export interface CreateDaemonContextOptions {
   repoRoot: string;
-  env: AppDirEnvironment;
+  env: DaemonEnvironment;
   clock?: OperationClock;
 }
 
@@ -81,7 +88,7 @@ export interface RunningDaemon {
 export interface StartDaemonOptions {
   port?: number;
   repoRoot?: string;
-  env?: AppDirEnvironment;
+  env?: DaemonEnvironment;
 }
 
 const PROCESS_SIGNALS: DaemonSignalTarget = {
@@ -137,6 +144,7 @@ export function createDaemonContext(
       supervisor,
       store: jobStore,
       clock: options.clock,
+      codexBin: options.env.SC_CODEX_BIN,
     });
     operationService.enforceDeadlinesAtBoot();
     supervisor.reattach();
@@ -144,6 +152,7 @@ export function createDaemonContext(
     const documentService = new DocumentService({ store: documentStore });
     const app = buildApp({
       nonce,
+      staticRoot: findStaticRoot(repoRoot),
       operationService,
       documentService,
       artifactService: {
@@ -260,7 +269,10 @@ export async function startDaemonContext(
     });
     runtimePublished = true;
 
-    (options.log ?? console.log)(`Script Creator daemon listening at ${url}`);
+    const launchUrl = `${url}/#nonce=${context.nonce}`;
+    (options.log ?? console.log)(
+      `Script Creator daemon listening at ${launchUrl}`,
+    );
     return {
       port,
       nonce: context.nonce,
@@ -285,6 +297,7 @@ export async function startDaemon(
     HOME: process.env.HOME,
     XDG_DATA_HOME: process.env.XDG_DATA_HOME,
     XDG_STATE_HOME: process.env.XDG_STATE_HOME,
+    SC_CODEX_BIN: process.env.SC_CODEX_BIN,
   };
   const context = createDaemonContext({ repoRoot, env });
   return startDaemonContext(context, { port: options.port ?? 0 });
@@ -316,6 +329,21 @@ export function writeRuntimeFile(
 
 export function removeRuntimeFile(runtimeFile: string): void {
   rmSync(runtimeFile, { force: true });
+}
+
+function findStaticRoot(repoRoot: string): string | undefined {
+  const distRoot = join(repoRoot, 'script-creator', 'app', 'dist');
+  if (!existsSync(distRoot)) return undefined;
+
+  for (const entry of readdirSync(distRoot, { withFileTypes: true })
+    .filter((candidate) => candidate.isDirectory())
+    .sort((left, right) => left.name.localeCompare(right.name))) {
+    const browserRoot = join(distRoot, entry.name, 'browser');
+    if (existsSync(browserRoot) && statSync(browserRoot).isDirectory()) {
+      return browserRoot;
+    }
+  }
+  return undefined;
 }
 
 async function main(): Promise<void> {
