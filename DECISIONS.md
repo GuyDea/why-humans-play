@@ -319,6 +319,21 @@ format compatibility.
 live episode needed no content change because they already state the correct brand,
 authority, narration-first, and opaque-appendix direction.
 
+## 2026-07-23 — Embed the editor core directly without TipTap
+
+**Decision:** The Script Creator Studio embeds the Spike 2 editor core's ProseMirror
+schema, plugins, and plain-DOM node views directly inside the Angular app, dropping the
+technical design's TipTap 3 wrapper.
+
+**Rationale:** Spike 2 produced a complete framework-agnostic editor core — including the
+selection toolbar and node views TipTap would have supplied — so the wrapper would add a
+conversion layer and integration risk without providing any needed feature.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/plans/2026-07-23-script-creator-plan4-studio.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
+the choice is internal to the workbench implementation.
+
 ## 2026-07-22 — Ground substantial points in real-world consequences
 
 **Decision:** For each non-obvious WHP point, prefer a compact documented real-world case

@@ -45,12 +45,16 @@ Browser UI (Angular)  ⇄  HTTP + SSE  ⇄  local Node daemon  ⇄  durable job 
 
 ## Editing surface and document model
 
-**Editor: TipTap 3 on ProseMirror.** ProseMirror's transaction and step-mapping model is
-the decisive fit: ranges survive concurrent edits, which is the central problem of
-asynchronous agent results landing in a document Martin kept editing. CodeMirror 6 was
-rejected for the main surface (structured inline variants fight a text-document model;
-possibly useful later for a raw-Markdown view), Lexical as second choice (more bespoke
-machinery for range rebasing), `contentEditable` outright.
+**Editor: ProseMirror directly (editor-core).** ProseMirror's transaction and
+step-mapping model is the decisive fit: ranges survive concurrent edits, which is the
+central problem of asynchronous agent results landing in a document Martin kept editing.
+CodeMirror 6 was rejected for the main surface (structured inline variants fight a
+text-document model; possibly useful later for a raw-Markdown view), Lexical as second
+choice (more bespoke machinery for range rebasing), `contentEditable` outright.
+*(Amended 2026-07-23: the original design named TipTap 3 as a convenience wrapper.
+Spike 2 delivered a complete framework-agnostic ProseMirror core — plugins, NodeViews,
+selection toolbar — leaving TipTap nothing to provide, so the Studio embeds editor-core
+directly.)*
 
 Four custom extensions:
 
