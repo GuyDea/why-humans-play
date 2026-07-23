@@ -163,6 +163,28 @@ describe('SelectionToolbar', () => {
     container.remove();
   });
 
+  it('restores a non-empty selection toolbar when the editor regains focus', async () => {
+    const { view, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+    });
+
+    view.dom.blur();
+    expect(toolbar.element.hidden).toBe(true);
+
+    view.dom.focus();
+    await Promise.resolve();
+    expect(toolbar.element.hidden).toBe(false);
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('launches review, rewrite, custom rewrite, and counted alternatives', () => {
     const { view, target, container } = selectedEditor();
     const fixture = bridgeFixture();

@@ -409,4 +409,48 @@ describe('ProposalBridge', () => {
     }]);
     view.destroy();
   });
+
+  it('does not apply a late result after the bridge becomes inactive', async () => {
+    const { view, target } = editorWithText();
+    const phase = signal<OperationPhase>('streaming');
+    const tracked = {
+      ...trackedOperation(
+        'op-1',
+        rewriteResult,
+        {
+          operation: 'rewrite' as const,
+          target,
+          proposalId: 'proposal-1',
+        },
+      ),
+      phase,
+    };
+    const launcher: OperationLauncher = {
+      launch: () => tracked,
+      resume: () => tracked,
+    };
+    let active = true;
+    const bridge = new ProposalBridge(view, launcher, {
+      nextId: idFactory(['proposal-1']),
+      isActive: () => active,
+      pollMs: 1,
+    });
+    const launch = bridge.launchRewrite({}, target);
+
+    active = false;
+
+    await expect(launch.settled).resolves.toEqual({
+      status: 'failed',
+      error: 'proposal bridge is no longer active',
+    });
+    expect(getProposals(view.state)).toEqual([
+      expect.objectContaining({
+        id: 'proposal-1',
+        status: 'pending',
+      }),
+    ]);
+    expect(view.state.doc.textContent).toContain('selected words');
+    expect(view.state.doc.textContent).not.toContain('A tighter passage.');
+    view.destroy();
+  });
 });

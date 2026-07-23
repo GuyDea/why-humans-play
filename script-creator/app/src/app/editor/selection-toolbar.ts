@@ -159,10 +159,8 @@ export class SelectionToolbar {
   }
 
   destroy(): void {
-    this.view.dom.removeEventListener('keyup', this.queueUpdate);
-    this.view.dom.removeEventListener('mouseup', this.queueUpdate);
+    this.view.dom.removeEventListener('focus', this.queueUpdate);
     this.view.dom.removeEventListener('blur', this.handleBlur);
-    document.removeEventListener('selectionchange', this.queueUpdate);
     globalThis.window.removeEventListener('resize', this.queueUpdate);
     globalThis.window.removeEventListener('scroll', this.queueUpdate, true);
     this.element.removeEventListener('mousedown', this.handleMouseDown);
@@ -193,10 +191,8 @@ export class SelectionToolbar {
   }
 
   private addListeners(): void {
-    this.view.dom.addEventListener('keyup', this.queueUpdate);
-    this.view.dom.addEventListener('mouseup', this.queueUpdate);
+    this.view.dom.addEventListener('focus', this.queueUpdate);
     this.view.dom.addEventListener('blur', this.handleBlur);
-    document.addEventListener('selectionchange', this.queueUpdate);
     globalThis.window.addEventListener('resize', this.queueUpdate);
     globalThis.window.addEventListener('scroll', this.queueUpdate, true);
     this.element.addEventListener('mousedown', this.handleMouseDown);

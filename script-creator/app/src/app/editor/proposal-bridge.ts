@@ -155,6 +155,7 @@ export interface BridgeLaunch extends PendingBridgeLaunch {
 export interface ProposalBridgeOptions {
   nextId?: () => string;
   pollMs?: number;
+  isActive?: () => boolean;
 }
 
 interface AlternativeOption {
@@ -180,6 +181,7 @@ export class ProposalBridge {
   private idSequence = 0;
   private readonly nextId: () => string;
   private readonly pollMs: number;
+  private readonly isActive: () => boolean;
   private readonly findingsState: WritableSignal<readonly ReviewFinding[]> =
     signal([]);
   private readonly guardrailsState:
@@ -197,6 +199,7 @@ export class ProposalBridge {
   ) {
     this.nextId = options.nextId ?? (() => `bridge-${++this.idSequence}`);
     this.pollMs = options.pollMs ?? 10;
+    this.isActive = options.isActive ?? (() => true);
   }
 
   launchRewrite(
@@ -390,6 +393,13 @@ export class ProposalBridge {
   ): Promise<BridgeSettlement> {
     await this.waitForTerminalPhase(launch.tracked);
 
+    if (!this.isActive()) {
+      return {
+        status: 'failed',
+        error: 'proposal bridge is no longer active',
+      };
+    }
+
     if (launch.tracked.phase() === 'guardrail') {
       return this.applyGuardrail(launch);
     }
@@ -424,7 +434,10 @@ export class ProposalBridge {
   private async waitForTerminalPhase(
     tracked: TrackedOperation<ProposalLaunchMeta>,
   ): Promise<void> {
-    while (!TERMINAL_PHASES.has(tracked.phase())) {
+    while (
+      this.isActive()
+      && !TERMINAL_PHASES.has(tracked.phase())
+    ) {
       await delay(this.pollMs);
     }
   }

@@ -17,20 +17,25 @@ import {
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
 import { EditorState, EditorView } from '@whp/script-creator-editor-core';
-import type {
-  DraftRecord,
-  RevisionRecord,
-  SaveDraftInput,
-  SavedDraft,
+import {
+  type DaemonClient,
+  type DraftDocument,
+  type DraftRecord,
+  type RevisionRecord,
 } from '../api/client';
 import {
   computeMetrics,
   type DocumentJson,
 } from '../metrics';
-
-export interface DraftSaver {
-  save(id: string, input: SaveDraftInput): Promise<SavedDraft>;
-}
+import { FindingsPanel } from '../panels/findings-panel';
+import { preserveDraftDocument } from './draft-document';
+import type {
+  FindingLayer,
+  GuardrailCallout,
+} from './proposal-bridge';
+import {
+  SelectionRuntime,
+} from './selection-runtime';
 
 export class DebouncedAutosave<T> {
   private timer: ReturnType<typeof setTimeout> | null = null;
@@ -106,6 +111,7 @@ interface AutosaveSnapshot {
 @Component({
   selector: 'app-editor-host',
   standalone: true,
+  imports: [FindingsPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="editor-shell">
@@ -131,6 +137,34 @@ interface AutosaveSnapshot {
       </header>
 
       <div #editorMount class="editor" data-testid="editor"></div>
+
+      @if (operationError()) {
+        <p class="operation-error" role="alert">
+          Selection action failed — {{ operationError() }}
+        </p>
+      }
+
+      @if (guardrails().length > 0) {
+        <aside
+          class="guardrail-callouts"
+          aria-label="Guardrail callouts"
+          aria-live="polite"
+        >
+          @for (
+            guardrail of guardrails();
+            track guardrail.operationId ?? $index
+          ) {
+            <article>
+              <strong>{{ guardrail.operation }} guardrail</strong>
+              <p>{{ guardrail.markdown }}</p>
+            </article>
+          }
+        </aside>
+      }
+
+      @if (findings().length > 0) {
+        <app-findings-panel [findings]="findings()" />
+      }
 
       <aside class="pacing" aria-label="Pacing by beat">
         @for (beat of metrics().beats; track $index; let index = $index) {
@@ -222,6 +256,45 @@ interface AutosaveSnapshot {
       outline: none;
     }
 
+    .operation-error,
+    .guardrail-callouts p {
+      margin: 0;
+    }
+
+    .operation-error {
+      border-left: 3px solid var(--whp-accent);
+      background: var(--whp-accent-tint);
+      padding: 0.7rem 0.8rem;
+      color: var(--whp-accent);
+      font-size: 0.78rem;
+    }
+
+    .guardrail-callouts {
+      display: grid;
+      gap: 0.5rem;
+    }
+
+    .guardrail-callouts article {
+      border: 1px solid var(--whp-line-strong);
+      border-left: 3px solid var(--whp-accent);
+      background: var(--whp-warning-tint);
+      padding: 0.75rem 0.85rem;
+    }
+
+    .guardrail-callouts strong {
+      color: var(--whp-warning);
+      font-size: 0.72rem;
+      text-transform: capitalize;
+    }
+
+    .guardrail-callouts p {
+      margin-top: 0.35rem;
+      color: var(--whp-ink);
+      font-size: 0.78rem;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
     .pacing {
       display: grid;
       gap: 0.5rem;
@@ -285,10 +358,13 @@ interface AutosaveSnapshot {
 })
 export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly draft = input.required<DraftRecord>();
-  readonly client = input.required<DraftSaver>();
+  readonly client = input.required<DaemonClient>();
   readonly wpm = input(150);
 
   readonly doc = signal<DocumentJson | null>(null);
+  readonly findings = signal<readonly FindingLayer[]>([]);
+  readonly guardrails = signal<readonly GuardrailCallout[]>([]);
+  readonly operationError = signal<string | null>(null);
   private readonly currentDirty = signal(false);
   private readonly queuedAutosaves = signal(0);
   readonly unsaved = computed(
@@ -312,6 +388,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private editorMount?: ElementRef<HTMLDivElement>;
 
   private editorView: EditorView | null = null;
+  private selectionRuntime: SelectionRuntime | null = null;
+  private selectionContextDocument: DraftDocument | null = null;
   private activeDraftId: string | null = null;
   private draftEpoch = 0;
   private editVersion = 0;
@@ -339,6 +417,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   ngOnDestroy(): void {
     this.autosave.flush();
     this.draftEpoch += 1;
+    this.selectionRuntime?.destroy();
+    this.selectionRuntime = null;
     this.editorView?.destroy();
     this.editorView = null;
   }
@@ -365,6 +445,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     if (!mount) return;
 
     this.autosave.flush();
+    this.selectionRuntime?.destroy();
+    this.selectionRuntime = null;
     this.editorView?.destroy();
     this.editorView = null;
     mount.replaceChildren();
@@ -377,25 +459,47 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     });
 
     this.activeDraftId = draft.id;
+    this.selectionContextDocument = draft.doc;
     this.draftEpoch += 1;
     this.editVersion = 0;
-    this.doc.set(documentNode.toJSON() as DocumentJson);
+    this.doc.set(this.persistedDocument(documentNode.toJSON() as DocumentJson));
+    this.findings.set([]);
+    this.guardrails.set([]);
+    this.operationError.set(null);
     this.currentDirty.set(false);
     if (this.queuedAutosaves() === 0) this.saveError.set(null);
     this.revisions.set([]);
     this.latestRevision.set(null);
 
-    this.editorView = new EditorView(mount, {
+    let mountedView: EditorView | null = null;
+    mountedView = new EditorView(mount, {
       state,
       nodeViews: variantNodeViews,
       dispatchTransaction: (transaction) => {
-        const view = this.editorView;
-        if (!view) return;
-        const nextState = view.state.apply(transaction);
-        view.updateState(nextState);
-        const doc = nextState.doc.toJSON() as DocumentJson;
+        if (this.editorView !== mountedView || mountedView === null) return;
+        const nextState = mountedView.state.apply(transaction);
+        mountedView.updateState(nextState);
+        const doc = this.persistedDocument(
+          nextState.doc.toJSON() as DocumentJson,
+        );
         this.doc.set(doc);
         if (transaction.docChanged) this.scheduleAutosave(doc);
+        this.selectionRuntime?.handleEditorDispatch();
+      },
+    });
+    this.editorView = mountedView;
+    this.selectionRuntime = new SelectionRuntime({
+      view: mountedView,
+      container: mount,
+      client: this.client(),
+      draftDocument: () => this.selectionContextDocument ?? draft.doc,
+      onOutcomes: ({ findings, guardrails }) => {
+        this.findings.set(findings);
+        this.guardrails.set(guardrails);
+      },
+      onLaunch: () => this.operationError.set(null),
+      onError: (error) => {
+        this.operationError.set(operationErrorMessage(error));
       },
     });
   }
@@ -432,12 +536,26 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private isCurrentDraft(draftId: string, epoch: number): boolean {
     return this.activeDraftId === draftId && this.draftEpoch === epoch;
   }
+
+  private persistedDocument(document: DocumentJson): DocumentJson {
+    const source = this.selectionContextDocument;
+    if (!source) return document;
+    const persisted = preserveDraftDocument(document, source);
+    this.selectionContextDocument = persisted;
+    return persisted;
+  }
 }
 
 function saveErrorMessage(error: unknown): string {
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'save failed';
+}
+
+function operationErrorMessage(error: unknown): string {
+  return error instanceof Error && error.message.trim() !== ''
+    ? error.message
+    : 'operation failed';
 }
 
 function delay(milliseconds: number): Promise<void> {

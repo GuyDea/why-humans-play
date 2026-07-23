@@ -5,10 +5,10 @@ import {
   input,
   signal,
 } from '@angular/core';
+import type { DaemonClient } from '../api/client';
 import { EditorHost } from '../editor/editor-host';
 import {
   DraftManager,
-  type DraftManagerClient,
 } from './draft-manager';
 import { DraftTransfer } from './draft-transfer';
 import { RevisionTimeline } from './revision-timeline';
@@ -368,7 +368,7 @@ import { RevisionTimeline } from './revision-timeline';
   `,
 })
 export class DraftManagerComponent implements OnInit {
-  readonly client = input.required<DraftManagerClient>();
+  readonly client = input.required<DaemonClient>();
   readonly manager = signal<DraftManager | null>(null);
 
   ngOnInit(): void {

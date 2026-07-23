@@ -14,7 +14,7 @@ export function extractNonce(location: NonceLocation): string | null {
     : location.hash;
   const fragmentNonce = new URLSearchParams(fragment).get('nonce');
 
-  if (fragmentNonce) {
+  if (fragmentNonce !== null) {
     memoryNonce = fragmentNonce;
     storeNonce(fragmentNonce);
     history.replaceState(
