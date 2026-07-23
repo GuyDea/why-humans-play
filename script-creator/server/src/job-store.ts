@@ -20,6 +20,16 @@ interface JobRow {
   error: string | null;
 }
 
+interface CancellationRow {
+  cancel_requested_at: string | null;
+  cancel_deadline_at: string | null;
+}
+
+export interface CancellationRequest {
+  requestedAt: string | null;
+  deadlineAt: string | null;
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS jobs (
   id TEXT PRIMARY KEY,
@@ -37,8 +47,22 @@ CREATE TABLE IF NOT EXISTS jobs (
   output_tokens INTEGER,
   reasoning_output_tokens INTEGER,
   usage_available INTEGER NOT NULL DEFAULT 0,
-  error TEXT
+  error TEXT,
+  cancel_requested_at TEXT,
+  cancel_deadline_at TEXT
 );`;
+
+function ensureCancellationColumns(db: Database.Database): void {
+  const columns = new Set(
+    db.prepare<[], { name: string }>('PRAGMA table_info(jobs)').all().map((column) => column.name),
+  );
+  if (!columns.has('cancel_requested_at')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN cancel_requested_at TEXT');
+  }
+  if (!columns.has('cancel_deadline_at')) {
+    db.exec('ALTER TABLE jobs ADD COLUMN cancel_deadline_at TEXT');
+  }
+}
 
 function toRecord(row: JobRow): JobRecord {
   return {
@@ -69,6 +93,7 @@ export class JobStore {
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('synchronous = FULL');
     this.db.exec(SCHEMA);
+    ensureCancellationColumns(this.db);
   }
 
   create(env: JobEnvelope, jobDir: string, opts: { retryOf?: string; resumedFrom?: string } = {}): JobRecord {
@@ -96,6 +121,23 @@ export class JobStore {
 
   setThreadId(id: string, threadId: string): void {
     this.db.prepare('UPDATE jobs SET thread_id = ? WHERE id = ?').run(threadId, id);
+  }
+
+  requestCancellation(id: string, requestedAt: string, deadlineAt: string): void {
+    this.db.prepare(
+      `UPDATE jobs
+       SET state = 'cancelling', cancel_requested_at = ?, cancel_deadline_at = ?
+       WHERE id = ?`,
+    ).run(requestedAt, deadlineAt, id);
+  }
+
+  getCancellation(id: string): CancellationRequest | null {
+    const row = this.db.prepare<[string], CancellationRow>(
+      'SELECT cancel_requested_at, cancel_deadline_at FROM jobs WHERE id = ?',
+    ).get(id);
+    return row
+      ? { requestedAt: row.cancel_requested_at, deadlineAt: row.cancel_deadline_at }
+      : null;
   }
 
   recordUsage(id: string, usage: RunnerUsage | undefined): void {

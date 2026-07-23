@@ -36,6 +36,48 @@ describe('reattach', () => {
     expect(s2.events(id).at(-1)!.parsed!.type).toBe('turn.completed');
   });
 
+  it('re-arms cancellation escalation from the persisted deadline', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'reat-cancel-'));
+    const db = join(root, 'state.sqlite3');
+    const s1 = supervisorAt(root, db, 'ignore-sigint');
+    const id = s1.enqueue({
+      prompt: 'p',
+      cwd: tmpdir(),
+      sandbox: 'read-only',
+      codexBin: FAKE,
+      graceMs: 400,
+    });
+    await waitFor(() => s1.events(id).length >= 2);
+    const status = await waitFor(() => readStatus(jobPaths(s1.store.get(id)!.jobDir).statusFile));
+
+    try {
+      process.kill(-status.pgid, 'SIGSTOP');
+      s1.cancel(id);
+      expect(s1.store.get(id)!.state).toBe('cancelling');
+      const cancellation = s1.store.getCancellation(id)!;
+      expect(cancellation.requestedAt).not.toBeNull();
+      expect(cancellation.deadlineAt).not.toBeNull();
+      expect(Date.parse(cancellation.deadlineAt!) - Date.parse(cancellation.requestedAt!)).toBe(800);
+      s1.stop();
+
+      await new Promise((resolve) => setTimeout(resolve, 900));
+      const s2 = supervisorAt(root, db, 'ignore-sigint');
+      s2.reattach();
+
+      await waitFor(() => {
+        try {
+          process.kill(-status.pgid, 0);
+          return false;
+        } catch {
+          return true;
+        }
+      }, 300);
+      expect((await s2.waitForTerminal(id, 5000)).state).toBe('cancelled');
+    } finally {
+      try { process.kill(-status.pgid, 'SIGKILL'); } catch { /* already dead */ }
+    }
+  });
+
   it('marks a dead-runner job interrupted', async () => {
     const root = mkdtempSync(join(tmpdir(), 'reat-'));
     const db = join(root, 'state.sqlite3');

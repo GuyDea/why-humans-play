@@ -101,7 +101,14 @@ export class JobSupervisor {
     if (!job || !['running', 'queued'].includes(job.state)) return;
     if (job.state === 'queued') { this.store.setState(jobId, 'cancelled', 'cancelled before start'); return; }
     const status = readStatus(jobPaths(job.jobDir).statusFile);
-    this.store.setState(jobId, 'cancelling');
+    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
+    const requestedAt = Date.now();
+    const deadlineAt = requestedAt + (env.graceMs ?? 5000) * 2;
+    this.store.requestCancellation(
+      jobId,
+      new Date(requestedAt).toISOString(),
+      new Date(deadlineAt).toISOString(),
+    );
     const pgid = status?.pgid ?? this.preStatusPid(job);
     this.ensureCancellation(job, pgid);
   }
@@ -228,8 +235,11 @@ export class JobSupervisor {
     this.signalCancellation(job.id, pgid);
     if (this.cancellationEscalations.has(job.id)) return;
     this.cancellationEscalations.add(job.id);
-    const env = JSON.parse(job.envelopeJson) as JobEnvelope;
-    const grace = (env.graceMs ?? 5000) * 2;
+    const persistedDeadline = this.store.getCancellation(job.id)?.deadlineAt;
+    const deadline = persistedDeadline === null || persistedDeadline === undefined
+      ? Date.now()
+      : Date.parse(persistedDeadline);
+    const delay = Math.max(0, deadline - Date.now());
     setTimeout(() => {
       if (this.stopped) return;
       const current = this.store.get(job.id);
@@ -237,7 +247,7 @@ export class JobSupervisor {
       const status = readStatus(jobPaths(current.jobDir).statusFile);
       const currentPgid = status?.pgid ?? this.preStatusPid(current);
       if (currentPgid !== undefined) signalProcessGroup(currentPgid, 'SIGKILL');
-    }, grace).unref?.();
+    }, delay).unref?.();
   }
 
   private signalCancellation(jobId: string, pgid: number | undefined): void {
