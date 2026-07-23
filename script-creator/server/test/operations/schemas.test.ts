@@ -19,6 +19,17 @@ describe('operation schemas', () => {
     }
   });
 
+  it('registers a strict summary sidecar schema for the raw full topic run', () => {
+    const result = OPERATIONS['full-topic-run'].result as {
+      kind: 'raw';
+      summarySchema?: Record<string, unknown>;
+    };
+
+    expect(result.kind).toBe('raw');
+    expect(result.summarySchema).toBeDefined();
+    assertStrict(result.summarySchema!, 'full-topic-run.summary');
+  });
+
   it('every schema shares the status/guardrail frame', () => {
     for (const op of Object.values(OPERATIONS)) {
       if (op.result.kind !== 'schema') continue;

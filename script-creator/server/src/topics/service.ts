@@ -11,6 +11,11 @@ import type {
   OperationService,
   OperationServiceResult,
 } from '../operations/service.js';
+import {
+  TOPIC_GATE_NAMES,
+  TOPIC_SCORE_NAMES,
+  TOPIC_SUMMARY_SCHEMA,
+} from '../operations/schemas.js';
 import { validateAgainstSchema } from '../schema-validate.js';
 import type { CodexEvent, OperationState } from '../types.js';
 import {
@@ -21,24 +26,10 @@ import {
   type TopicStore,
 } from './store.js';
 
-const GATE_NAMES = [
-  'game_play_centrality',
-  'human_revelation',
-  'recognized_payoff',
-  'evidence_path',
-  'production_reality',
-  'portfolio_fit',
-] as const;
+export { TOPIC_SUMMARY_SCHEMA } from '../operations/schemas.js';
 
-const SCORE_NAMES = [
-  'demand',
-  'opening',
-  'package',
-  'satisfaction',
-  'whp',
-  'evidence',
-  'feasibility',
-] as const;
+const GATE_NAMES = TOPIC_GATE_NAMES;
+const SCORE_NAMES = TOPIC_SCORE_NAMES;
 
 export type GateName = typeof GATE_NAMES[number];
 export type ScoreName = typeof SCORE_NAMES[number];
@@ -91,92 +82,6 @@ export interface TopicSummary {
     strongest_package_markdown: string | null;
   };
 }
-
-type JsonSchema = Record<string, unknown>;
-
-function strictObject(
-  properties: Record<string, JsonSchema>,
-): JsonSchema {
-  return {
-    type: 'object',
-    required: Object.keys(properties),
-    additionalProperties: false,
-    properties,
-  };
-}
-
-function scoreSchema(maximum: number): JsonSchema {
-  return strictObject({
-    score: { type: ['integer', 'null'], minimum: 0, maximum },
-    grade: { enum: ['A', 'B', 'C', 'unknown'] },
-  });
-}
-
-export const TOPIC_SUMMARY_SCHEMA = strictObject({
-  candidates: {
-    type: 'array',
-    items: strictObject({
-      subject: { type: 'string' },
-      angle_markdown: { type: 'string' },
-      gates: {
-        type: 'array',
-        minItems: 6,
-        maxItems: 6,
-        items: strictObject({
-          gate: { enum: GATE_NAMES },
-          verdict: { enum: ['pass', 'fail', 'unknown'] },
-          reason_markdown: { type: 'string' },
-        }),
-      },
-      disposition: { type: 'string' },
-    }),
-  },
-  shortlist: {
-    type: 'array',
-    items: strictObject({
-      rank: { type: 'integer', minimum: 1 },
-      subject: { type: 'string' },
-      angle_markdown: { type: 'string' },
-      scores: strictObject({
-        demand: scoreSchema(25),
-        opening: scoreSchema(15),
-        package: scoreSchema(20),
-        satisfaction: scoreSchema(15),
-        whp: scoreSchema(10),
-        evidence: scoreSchema(10),
-        feasibility: scoreSchema(5),
-      }),
-      total: { type: ['integer', 'null'], minimum: 0, maximum: 100 },
-      confidence: { enum: ['high', 'medium', 'low'] },
-      decisive_risk_markdown: { type: 'string' },
-    }),
-  },
-  packages: {
-    type: 'array',
-    items: strictObject({
-      finalist: { type: 'string' },
-      direction: { type: 'string' },
-      working_title: { type: 'string' },
-      intended_viewer: { type: 'string' },
-      familiar_markdown: { type: 'string' },
-      surprise_markdown: { type: 'string' },
-      visual_promise_markdown: { type: 'string' },
-      delivered_payoff_markdown: { type: 'string' },
-      survives_honestly: { type: 'boolean' },
-      reason_markdown: { type: 'string' },
-    }),
-  },
-  winner: strictObject({
-    decision_status: {
-      enum: ['winner-selected', 'provisional-winner', 'incomplete'],
-    },
-    subject: { type: ['string', 'null'] },
-    angle_markdown: { type: ['string', 'null'] },
-    confidence: { enum: ['high', 'medium', 'low'] },
-    why_now_markdown: { type: 'string' },
-    strongest_package_markdown: { type: ['string', 'null'] },
-  }),
-});
 
 export interface TopicSummaryExtraction {
   summary: TopicSummary | null;

@@ -24,6 +24,32 @@ const GUARDRAIL_MARKDOWN = {
   type: ['string', 'null'],
 };
 
+export const TOPIC_GATE_NAMES = [
+  'game_play_centrality',
+  'human_revelation',
+  'recognized_payoff',
+  'evidence_path',
+  'production_reality',
+  'portfolio_fit',
+] as const;
+
+export const TOPIC_SCORE_NAMES = [
+  'demand',
+  'opening',
+  'package',
+  'satisfaction',
+  'whp',
+  'evidence',
+  'feasibility',
+] as const;
+
+function scoreSchema(maximum: number): JsonSchema {
+  return strictObject({
+    score: { type: ['integer', 'null'], minimum: 0, maximum },
+    grade: { enum: ['A', 'B', 'C', 'unknown'] },
+  });
+}
+
 export const REVIEW_SCHEMA = strictObject({
   status: STATUS,
   findings: {
@@ -131,4 +157,70 @@ export const DISTILL_SCHEMA = strictObject({
     }),
   },
   guardrail_markdown: GUARDRAIL_MARKDOWN,
+});
+
+export const TOPIC_SUMMARY_SCHEMA = strictObject({
+  candidates: {
+    type: 'array',
+    items: strictObject({
+      subject: { type: 'string' },
+      angle_markdown: { type: 'string' },
+      gates: {
+        type: 'array',
+        minItems: 6,
+        maxItems: 6,
+        items: strictObject({
+          gate: { enum: TOPIC_GATE_NAMES },
+          verdict: { enum: ['pass', 'fail', 'unknown'] },
+          reason_markdown: { type: 'string' },
+        }),
+      },
+      disposition: { type: 'string' },
+    }),
+  },
+  shortlist: {
+    type: 'array',
+    items: strictObject({
+      rank: { type: 'integer', minimum: 1 },
+      subject: { type: 'string' },
+      angle_markdown: { type: 'string' },
+      scores: strictObject({
+        demand: scoreSchema(25),
+        opening: scoreSchema(15),
+        package: scoreSchema(20),
+        satisfaction: scoreSchema(15),
+        whp: scoreSchema(10),
+        evidence: scoreSchema(10),
+        feasibility: scoreSchema(5),
+      }),
+      total: { type: ['integer', 'null'], minimum: 0, maximum: 100 },
+      confidence: { enum: ['high', 'medium', 'low'] },
+      decisive_risk_markdown: { type: 'string' },
+    }),
+  },
+  packages: {
+    type: 'array',
+    items: strictObject({
+      finalist: { type: 'string' },
+      direction: { type: 'string' },
+      working_title: { type: 'string' },
+      intended_viewer: { type: 'string' },
+      familiar_markdown: { type: 'string' },
+      surprise_markdown: { type: 'string' },
+      visual_promise_markdown: { type: 'string' },
+      delivered_payoff_markdown: { type: 'string' },
+      survives_honestly: { type: 'boolean' },
+      reason_markdown: { type: 'string' },
+    }),
+  },
+  winner: strictObject({
+    decision_status: {
+      enum: ['winner-selected', 'provisional-winner', 'incomplete'],
+    },
+    subject: { type: ['string', 'null'] },
+    angle_markdown: { type: ['string', 'null'] },
+    confidence: { enum: ['high', 'medium', 'low'] },
+    why_now_markdown: { type: 'string' },
+    strongest_package_markdown: { type: ['string', 'null'] },
+  }),
 });

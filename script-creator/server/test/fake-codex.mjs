@@ -37,6 +37,7 @@ const fixture = join(import.meta.dirname, 'fixtures',
     : hasSchema ? 'events-schema.jsonl' : 'events-plain.jsonl');
 let lines = readFileSync(fixture, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
 
+if (mode === 'full-topic-run') lines = fullTopicRunEvents();
 if (resumeId) lines = lines.map((e) => e.type === 'thread.started' ? { ...e, thread_id: resumeId } : e);
 if (mode === 'no-usage') lines = lines.map((e) => e.type === 'turn.completed' ? { type: 'turn.completed' } : e);
 if (mode === 'partial-usage') {
@@ -101,7 +102,9 @@ const lateUsage = mode === 'late-usage'
 if (lateUsage) lines = lines.filter((e) => e !== lateUsage);
 
 if (mode === 'ignore-sigint') process.on('SIGINT', () => {});
-const delay = mode === 'slow' || mode === 'slow-operation-schema' ? 400 : 10;
+const delay = mode === 'slow' || mode === 'slow-operation-schema'
+  ? 400
+  : mode === 'full-topic-run' ? 100 : 10;
 let emitted = 0;
 for (const e of lines) {
   writeSync(process.stdout.fd, JSON.stringify(e) + '\n');
@@ -127,6 +130,231 @@ if (lateUsage) {
   writer.unref();
 }
 process.exit(0);
+
+function fullTopicRunEvents() {
+  const steps = [
+    ['01-frame', 'Record the decision frame and current WHP context.'],
+    ['02-mode', 'Select and state the evidence mode.'],
+    ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
+    ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
+    ['05-angles', 'Develop materially different angles for promising subjects.'],
+    ['06-gates', 'Identify opening proof cases and audit every advancing angle against all six hard gates.'],
+    ['07-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+    ['08-deep', 'Deeply research the finalists with multiple signals.'],
+    ['09-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+    ['10-packages', 'Test three package promises for each top-three finalist.'],
+    ['11-winner', 'Resolve winner status using responsibly supported, winner-eligible finalists.'],
+    ['12-audit', 'Complete the output and evidence audit.'],
+  ];
+  const event = (text) => ({
+    type: 'item.completed',
+    item: { type: 'agent_message', text },
+  });
+  const events = [
+    { type: 'thread.started', thread_id: 'fake-full-topic-thread' },
+    { type: 'turn.started' },
+    event(steps.map(([id, text]) =>
+      `WHP_PROGRESS/1 ${id} pending :: ${text}`).join('\n')),
+  ];
+
+  for (const [id, text] of steps) {
+    events.push(
+      event(`WHP_PROGRESS/1 ${id} active :: ${text}`),
+      {
+        type: 'item.completed',
+        item: {
+          type: 'command_execution',
+          command: `fake-topic-step ${id}`,
+          exit_code: 0,
+        },
+      },
+      event(`WHP_PROGRESS/1 ${id} done :: ${text}`),
+    );
+  }
+
+  events.push(
+    event(fullTopicReport()),
+    {
+      type: 'turn.completed',
+      usage: {
+        input_tokens: 24000,
+        cached_input_tokens: 12000,
+        output_tokens: 3600,
+        reasoning_output_tokens: 1800,
+      },
+    },
+  );
+  return events;
+}
+
+function fullTopicReport() {
+  const gates = (subject) => [
+    {
+      gate: 'game_play_centrality',
+      verdict: 'pass',
+      reason_markdown: `${subject} uses a game mechanic as the explanatory core.`,
+    },
+    {
+      gate: 'human_revelation',
+      verdict: 'pass',
+      reason_markdown: `${subject} reveals a recognizable human choice.`,
+    },
+    {
+      gate: 'recognized_payoff',
+      verdict: 'pass',
+      reason_markdown: 'The intended viewer can state the earned takeaway.',
+    },
+    {
+      gate: 'evidence_path',
+      verdict: 'pass',
+      reason_markdown: 'The fake fixture records multiple independent signals.',
+    },
+    {
+      gate: 'production_reality',
+      verdict: 'pass',
+      reason_markdown: 'The central mechanism has a filmable visual form.',
+    },
+    {
+      gate: 'portfolio_fit',
+      verdict: 'pass',
+      reason_markdown: 'The fake fixture does not overlap a committed episode.',
+    },
+  ];
+  const candidates = [
+    {
+      subject: 'The Queue Game',
+      angle_markdown: 'How waiting lines turn patience into a strategic choice.',
+      gates: gates('The Queue Game'),
+      disposition: 'deep-research finalist',
+    },
+    {
+      subject: 'Rules That Travel',
+      angle_markdown: 'Why a few portable constraints can make a puzzle spread.',
+      gates: gates('Rules That Travel'),
+      disposition: 'deep-research finalist',
+    },
+    {
+      subject: 'The Workplace Scoreboard',
+      angle_markdown: 'What visible targets change about cooperation at work.',
+      gates: gates('The Workplace Scoreboard'),
+      disposition: 'deep-research finalist',
+    },
+  ];
+  const shortlist = [
+    {
+      rank: 1,
+      subject: candidates[0].subject,
+      angle_markdown: candidates[0].angle_markdown,
+      scores: {
+        demand: { score: 21, grade: 'A' },
+        opening: { score: 13, grade: 'A' },
+        package: { score: 17, grade: 'B' },
+        satisfaction: { score: 13, grade: 'A' },
+        whp: { score: 9, grade: 'A' },
+        evidence: { score: 9, grade: 'A' },
+        feasibility: { score: 5, grade: 'A' },
+      },
+      total: 87,
+      confidence: 'high',
+      decisive_risk_markdown: 'The opening must make the strategic choice visible immediately.',
+    },
+    {
+      rank: 2,
+      subject: candidates[1].subject,
+      angle_markdown: candidates[1].angle_markdown,
+      scores: {
+        demand: { score: 18, grade: 'B' },
+        opening: { score: 12, grade: 'B' },
+        package: { score: 16, grade: 'B' },
+        satisfaction: { score: 12, grade: 'B' },
+        whp: { score: 9, grade: 'A' },
+        evidence: { score: 8, grade: 'B' },
+        feasibility: { score: 5, grade: 'A' },
+      },
+      total: 80,
+      confidence: 'medium',
+      decisive_risk_markdown: 'The familiar puzzle may overpower the human revelation.',
+    },
+    {
+      rank: 3,
+      subject: candidates[2].subject,
+      angle_markdown: candidates[2].angle_markdown,
+      scores: {
+        demand: { score: 16, grade: 'B' },
+        opening: { score: 10, grade: 'B' },
+        package: { score: 14, grade: 'B' },
+        satisfaction: { score: 12, grade: 'B' },
+        whp: { score: 8, grade: 'B' },
+        evidence: { score: 8, grade: 'B' },
+        feasibility: { score: 5, grade: 'A' },
+      },
+      total: 73,
+      confidence: 'medium',
+      decisive_risk_markdown: 'The framing could become an abstract management lecture.',
+    },
+  ];
+  const packages = [
+    {
+      finalist: 'The Queue Game',
+      direction: 'Every line is a game',
+      working_title: 'The Secret Game You Play in Every Queue',
+      intended_viewer: 'Anyone who has chosen the apparently faster line',
+      familiar_markdown: 'The everyday choice between two queues.',
+      surprise_markdown: 'Everyone choosing strategically can make the system worse.',
+      visual_promise_markdown: 'Two animated lines repeatedly overtaking each other.',
+      delivered_payoff_markdown: 'A practical way to see the incentives hidden in waiting.',
+      survives_honestly: true,
+      reason_markdown: 'The episode directly demonstrates the promised strategic trap.',
+    },
+    {
+      finalist: 'The Queue Game',
+      direction: 'Why the other line wins',
+      working_title: 'Why the Other Line Always Moves Faster',
+      intended_viewer: 'People drawn to counterintuitive everyday explanations',
+      familiar_markdown: 'The frustration of watching another line move.',
+      surprise_markdown: 'Attention and switching distort the remembered result.',
+      visual_promise_markdown: 'One person switching between diverging queue paths.',
+      delivered_payoff_markdown: 'Why the losing-line feeling is powerful but misleading.',
+      survives_honestly: true,
+      reason_markdown: 'The evidence can support the perception claim without overpromising.',
+    },
+    {
+      finalist: 'The Queue Game',
+      direction: 'Designing fair waits',
+      working_title: 'Can You Design a Fair Queue?',
+      intended_viewer: 'Viewers interested in systems and fairness',
+      familiar_markdown: 'The single line and the many-line checkout.',
+      surprise_markdown: 'Faster and fairer are different design goals.',
+      visual_promise_markdown: 'Competing queue layouts filling and draining.',
+      delivered_payoff_markdown: 'How queue rules trade speed, choice, and perceived fairness.',
+      survives_honestly: false,
+      reason_markdown: 'The design survey is broader than the strongest episode angle.',
+    },
+  ];
+  const summary = {
+    candidates,
+    shortlist,
+    packages,
+    winner: {
+      decision_status: 'winner-selected',
+      subject: 'The Queue Game',
+      angle_markdown: 'How waiting lines turn patience into a strategic choice.',
+      confidence: 'high',
+      why_now_markdown: 'It is an evergreen, instantly recognizable entry point.',
+      strongest_package_markdown: 'The Secret Game You Play in Every Queue.',
+    },
+  };
+
+  return [
+    '# Fake WHP next-video recommendation',
+    '',
+    'This deterministic report exercises Topic Studio without making a real editorial decision.',
+    '',
+    '```whp-summary',
+    JSON.stringify(summary, null, 2),
+    '```',
+  ].join('\n');
+}
 
 function synthesizeSchema(schema, propertyName = '') {
   if (!schema || typeof schema !== 'object' || Array.isArray(schema)) {
