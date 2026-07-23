@@ -179,6 +179,76 @@ export class DocumentService {
   }
 }
 
+export function readCreativeStatus(
+  doc: DraftDocument,
+): Record<string, unknown> | null {
+  const metadata = recordValue(doc['metadata']);
+  const creativeStatus = recordValue(metadata?.['creativeStatus']);
+  return creativeStatus ? { ...creativeStatus } : null;
+}
+
+export function readCreativePhase(doc: DraftDocument): string | null {
+  const phase = readCreativeStatus(doc)?.['phase'];
+  return typeof phase === 'string' && phase.trim() !== ''
+    ? phase
+    : null;
+}
+
+export function hasNarration(doc: DraftDocument): boolean {
+  return containsNarrationText(doc['content']);
+}
+
+export function hasCompleteNarrationApproval(
+  doc: DraftDocument,
+): boolean {
+  const metadata = recordValue(doc['metadata']);
+  return metadata?.['directionApproved'] === true;
+}
+
+export function withCreativePhase(
+  doc: DraftDocument,
+  phase: string,
+): DraftDocument {
+  const metadata = recordValue(doc['metadata']) ?? {};
+  const creativeStatus = recordValue(metadata['creativeStatus']) ?? {};
+  return {
+    ...doc,
+    metadata: {
+      ...metadata,
+      creativeStatus: {
+        ...creativeStatus,
+        phase,
+      },
+    },
+  };
+}
+
+function containsNarrationText(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.some((node) => {
+    const record = recordValue(node);
+    if (!record) return false;
+    if (
+      record['type'] === 'text'
+      && typeof record['text'] === 'string'
+      && record['text'].trim() !== ''
+    ) {
+      return true;
+    }
+    return containsNarrationText(record['content']);
+  });
+}
+
+function recordValue(
+  value: unknown,
+): Record<string, unknown> | undefined {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : undefined;
+}
+
 function documentFormat(doc: DraftDocument): DraftFormat {
   let node;
   try {

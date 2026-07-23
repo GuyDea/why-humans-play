@@ -6,6 +6,7 @@ import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { ArchitectureService } from '../../src/architecture/service.js';
 import { DocumentService } from '../../src/documents/service.js';
 import { DocumentStore } from '../../src/documents/store.js';
 import { buildApp } from '../../src/http/app.js';
@@ -35,6 +36,19 @@ function makeFixture(ids: string[]): Fixture {
     },
     now: () => '2026-07-23T10:00:00.000Z',
   });
+  const architectureService = new ArchitectureService({
+    store,
+    operationService: {
+      submit: () => 'operation-1',
+      get: () => ({ operation: 'rewrite-selection' }),
+    },
+    idFactory: () => {
+      const id = remainingIds.shift();
+      if (!id) throw new Error('test id factory exhausted');
+      return id;
+    },
+    now: () => '2026-07-23T10:00:00.000Z',
+  });
   const app = buildApp({
     nonce: NONCE,
     operationService: {
@@ -48,6 +62,7 @@ function makeFixture(ids: string[]): Fixture {
       result: () => ({ kind: 'pending' }),
     },
     documentService,
+    architectureService,
     artifactService: {},
     validatorService: UNUSED_VALIDATOR_SERVICE,
   });
@@ -347,5 +362,77 @@ describe('drafts HTTP API', () => {
     expect(missing.json()).toEqual({ error: 'draft not found: missing' });
     expect(invalid.statusCode).toBe(400);
     expect(invalid.json()).toEqual({ error: 'markdown is required' });
+  });
+
+  it('reads and revision-checks architecture saves with a 409 current state', async () => {
+    const fixture = makeFixture([
+      'draft-architecture',
+      'architecture-revision-1',
+    ]);
+    const doc = parseMarkdown('## 1. Opening\n\n> A first line.').toJSON();
+    await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts',
+      headers: AUTH,
+      payload: {
+        episodeSlug: 'architecture',
+        title: 'Architecture',
+        format: 'narration',
+        doc,
+      },
+    });
+    const sections = [{
+      key: 'core-answer',
+      title: 'Core answer',
+      md: '### Core answer\n\nA mechanism.\n',
+    }];
+
+    const saved = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-architecture/architecture',
+      headers: AUTH,
+      payload: {
+        expectedRevisionSeq: 0,
+        sections,
+        opId: 'operation-rewrite',
+        disposition: 'accepted',
+      },
+    });
+    const stale = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-architecture/architecture',
+      headers: AUTH,
+      payload: {
+        expectedRevisionSeq: 0,
+        sections: [],
+        opId: null,
+        disposition: 'manual-save',
+      },
+    });
+    const fetched = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts/draft-architecture/architecture',
+      headers: AUTH,
+    });
+
+    expect(saved.statusCode).toBe(200);
+    expect(saved.json()).toMatchObject({
+      state: { revisionSeq: 1, sections },
+      revision: {
+        seq: 1,
+        kind: 'architecture',
+        opId: 'operation-rewrite',
+      },
+    });
+    expect(stale.statusCode).toBe(409);
+    expect(stale.json()).toMatchObject({
+      error: 'architecture revision conflict',
+      current: { revisionSeq: 1, sections },
+    });
+    expect(fetched.statusCode).toBe(200);
+    expect(fetched.json()).toMatchObject({
+      revisionSeq: 1,
+      sections,
+    });
   });
 });

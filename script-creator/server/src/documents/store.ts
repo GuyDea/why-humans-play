@@ -59,6 +59,41 @@ export interface SaveDraftRecord {
   };
 }
 
+export interface SaveArchitectureRecord {
+  expectedRevisionSeq: number;
+  architecture: DraftArchitecture;
+  updatedAt: string;
+  revision: {
+    idFactory: () => string;
+    opId: string | null;
+    disposition: string;
+    createdAt: string;
+  };
+}
+
+export type ArchitectureSagaAction = 'approve' | 'reopen';
+
+export interface ArchitectureSagaRecord {
+  draftId: string;
+  action: ArchitectureSagaAction;
+  expectedRevisionSeq: number;
+  input: unknown;
+  revisionAppended: boolean;
+  artifactWritten: boolean;
+  pipelineUpserted: boolean;
+  draftUpdated: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReplaceDraftWorkflowState {
+  doc: DraftDocument;
+  architecture: DraftArchitecture;
+  architectureArtifactHash: string | null;
+  narrationReconciliationRequired: boolean;
+  updatedAt: string;
+}
+
 interface DraftRow {
   id: string;
   episode_slug: string;
@@ -86,6 +121,19 @@ interface RevisionRow {
 
 interface NextSequenceRow {
   seq: number;
+}
+
+interface ArchitectureSagaRow {
+  draft_id: string;
+  action: ArchitectureSagaAction;
+  expected_revision_seq: number;
+  input_json: string;
+  revision_appended: 0 | 1;
+  artifact_written: 0 | 1;
+  pipeline_upserted: 0 | 1;
+  draft_updated: 0 | 1;
+  created_at: string;
+  updated_at: string;
 }
 
 function draftFrom(row: DraftRow): DraftRecord {
@@ -123,6 +171,23 @@ function revisionFrom(row: RevisionRow): RevisionRecord {
     kind: row.kind,
     doc: JSON.parse(row.doc_json) as DraftDocument,
     createdAt: row.created_at,
+  };
+}
+
+function architectureSagaFrom(
+  row: ArchitectureSagaRow,
+): ArchitectureSagaRecord {
+  return {
+    draftId: row.draft_id,
+    action: row.action,
+    expectedRevisionSeq: row.expected_revision_seq,
+    input: JSON.parse(row.input_json) as unknown,
+    revisionAppended: row.revision_appended === 1,
+    artifactWritten: row.artifact_written === 1,
+    pipelineUpserted: row.pipeline_upserted === 1,
+    draftUpdated: row.draft_updated === 1,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -221,6 +286,180 @@ export class DocumentStore {
         ),
       };
     })();
+  }
+
+  currentRevisionSeq(draftId: string): number {
+    return this.db.prepare<[string], NextSequenceRow>(
+      `SELECT COALESCE(MAX(seq), 0) AS seq
+       FROM revisions
+       WHERE draft_id = ?`,
+    ).get(draftId)!.seq;
+  }
+
+  saveArchitecture(
+    id: string,
+    update: SaveArchitectureRecord,
+  ): { draft: DraftRecord; revision: RevisionRecord } | null {
+    return this.db.transaction(() => {
+      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      const currentSeq = this.currentRevisionSeq(id);
+      if (currentSeq !== update.expectedRevisionSeq) return null;
+
+      this.db.prepare(
+        `UPDATE drafts
+         SET architecture_json = ?, updated_at = ?
+         WHERE id = ?`,
+      ).run(
+        JSON.stringify(update.architecture),
+        update.updatedAt,
+        id,
+      );
+      const nextSeq = currentSeq + 1;
+      const revisionId = update.revision.idFactory();
+      this.db.prepare(
+        `INSERT INTO revisions (
+          id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, 'architecture')`,
+      ).run(
+        revisionId,
+        id,
+        nextSeq,
+        update.revision.opId,
+        update.revision.disposition,
+        JSON.stringify(update.architecture),
+        update.revision.createdAt,
+      );
+
+      return {
+        draft: this.getDraft(id)!,
+        revision: revisionFrom(
+          this.db.prepare<[string], RevisionRow>(
+            'SELECT * FROM revisions WHERE id = ?',
+          ).get(revisionId)!,
+        ),
+      };
+    })();
+  }
+
+  replaceArchitectureState(
+    id: string,
+    architecture: DraftArchitecture,
+    architectureArtifactHash: string | null,
+  ): DraftRecord {
+    const result = this.db.prepare(
+      `UPDATE drafts
+       SET architecture_json = ?, architecture_artifact_hash = ?
+       WHERE id = ?`,
+    ).run(
+      JSON.stringify(architecture),
+      architectureArtifactHash,
+      id,
+    );
+    if (result.changes === 0) throw new Error(`draft not found: ${id}`);
+    return this.getDraft(id)!;
+  }
+
+  replaceDraftWorkflowState(
+    id: string,
+    state: ReplaceDraftWorkflowState,
+  ): DraftRecord {
+    const result = this.db.prepare(
+      `UPDATE drafts
+       SET doc_json = ?, architecture_json = ?,
+           architecture_artifact_hash = ?,
+           narration_reconciliation_required = ?, updated_at = ?
+       WHERE id = ?`,
+    ).run(
+      JSON.stringify(state.doc),
+      JSON.stringify(state.architecture),
+      state.architectureArtifactHash,
+      state.narrationReconciliationRequired ? 1 : 0,
+      state.updatedAt,
+      id,
+    );
+    if (result.changes === 0) throw new Error(`draft not found: ${id}`);
+    return this.getDraft(id)!;
+  }
+
+  getRevision(id: string): RevisionRecord | null {
+    const row = this.db.prepare<[string], RevisionRow>(
+      'SELECT * FROM revisions WHERE id = ?',
+    ).get(id);
+    return row ? revisionFrom(row) : null;
+  }
+
+  getArchitectureSaga(
+    draftId: string,
+    action: ArchitectureSagaAction,
+    expectedRevisionSeq: number,
+  ): ArchitectureSagaRecord | null {
+    const row = this.db.prepare<
+      [string, ArchitectureSagaAction, number],
+      ArchitectureSagaRow
+    >(
+      `SELECT * FROM architecture_sagas
+       WHERE draft_id = ? AND action = ? AND expected_revision_seq = ?`,
+    ).get(draftId, action, expectedRevisionSeq);
+    return row ? architectureSagaFrom(row) : null;
+  }
+
+  createArchitectureSaga(
+    saga: ArchitectureSagaRecord,
+  ): ArchitectureSagaRecord {
+    this.db.prepare(
+      `INSERT OR IGNORE INTO architecture_sagas (
+        draft_id, action, expected_revision_seq, input_json,
+        revision_appended, artifact_written, pipeline_upserted,
+        draft_updated, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      saga.draftId,
+      saga.action,
+      saga.expectedRevisionSeq,
+      JSON.stringify(saga.input),
+      saga.revisionAppended ? 1 : 0,
+      saga.artifactWritten ? 1 : 0,
+      saga.pipelineUpserted ? 1 : 0,
+      saga.draftUpdated ? 1 : 0,
+      saga.createdAt,
+      saga.updatedAt,
+    );
+    return this.getArchitectureSaga(
+      saga.draftId,
+      saga.action,
+      saga.expectedRevisionSeq,
+    )!;
+  }
+
+  updateArchitectureSaga(
+    saga: ArchitectureSagaRecord,
+  ): ArchitectureSagaRecord {
+    const result = this.db.prepare(
+      `UPDATE architecture_sagas
+       SET input_json = ?, revision_appended = ?, artifact_written = ?,
+           pipeline_upserted = ?, draft_updated = ?, updated_at = ?
+       WHERE draft_id = ? AND action = ? AND expected_revision_seq = ?`,
+    ).run(
+      JSON.stringify(saga.input),
+      saga.revisionAppended ? 1 : 0,
+      saga.artifactWritten ? 1 : 0,
+      saga.pipelineUpserted ? 1 : 0,
+      saga.draftUpdated ? 1 : 0,
+      saga.updatedAt,
+      saga.draftId,
+      saga.action,
+      saga.expectedRevisionSeq,
+    );
+    if (result.changes === 0) {
+      throw new Error(
+        `architecture saga not found: ${saga.draftId}/${saga.action}/${saga.expectedRevisionSeq}`,
+      );
+    }
+    return this.getArchitectureSaga(
+      saga.draftId,
+      saga.action,
+      saga.expectedRevisionSeq,
+    )!;
   }
 
   listRevisions(draftId: string): RevisionRecord[] {

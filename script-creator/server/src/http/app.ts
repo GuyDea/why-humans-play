@@ -7,6 +7,13 @@ import Fastify, {
   type FastifyReply,
 } from 'fastify';
 import {
+  ArchitectureArtifactConflictError,
+  ArchitectureGateError,
+  ArchitectureRevisionConflictError,
+  type ArchitectureService,
+  type SaveArchitectureInput,
+} from '../architecture/service.js';
+import {
   ExportBlockedError,
   type CreateDraftInput,
   type DocumentService,
@@ -36,6 +43,14 @@ type OperationHttpService = Pick<
   OperationService,
   'submit' | 'list' | 'get' | 'events' | 'cancel' | 'result'
 >;
+
+export interface ArchitectureHttpService extends Pick<
+  ArchitectureService,
+  'get' | 'save' | 'submitOperation' | 'resumeOperation'
+> {
+  approve?: ArchitectureService['approve'];
+  reopen?: ArchitectureService['reopen'];
+}
 
 export type DocumentHttpService = Pick<
   DocumentService,
@@ -83,6 +98,7 @@ export interface BuildAppOptions {
   staticRoot?: string;
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
+  architectureService?: ArchitectureHttpService;
   topicService?: TopicHttpService;
   artifactService: ArtifactHttpService;
   validatorService: ValidatorHttpService;
@@ -176,6 +192,22 @@ interface SaveDraftBody {
   disposition?: unknown;
 }
 
+interface SaveArchitectureBody {
+  expectedRevisionSeq?: unknown;
+  sections?: unknown;
+  opId?: unknown;
+  disposition?: unknown;
+}
+
+interface ApproveArchitectureBody {
+  expectedRevisionSeq?: unknown;
+}
+
+interface ReopenArchitectureBody {
+  expectedRevisionSeq?: unknown;
+  confirmed?: unknown;
+}
+
 interface ImportDraftBody {
   markdown?: unknown;
 }
@@ -207,6 +239,8 @@ function isAllowedOrigin(origin: string): boolean {
 export function buildApp(options: BuildAppOptions): FastifyInstance {
   const app = Fastify();
   const topicService = options.topicService ?? UNCONFIGURED_TOPIC_SERVICE;
+  const architectureService = options.architectureService
+    ?? UNCONFIGURED_ARCHITECTURE_SERVICE;
 
   app.addHook('onRequest', async (request, reply) => {
     const origin = request.headers.origin;
@@ -288,6 +322,75 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/architecture',
+    async (request, reply) => {
+      try {
+        return architectureService.get(request.params.id);
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.put<{ Params: DraftParams; Body: SaveArchitectureBody }>(
+    '/api/drafts/:id/architecture',
+    async (request, reply) => {
+      try {
+        const input: SaveArchitectureInput = {
+          expectedRevisionSeq: requiredRevisionSeq(
+            request.body?.expectedRevisionSeq,
+          ),
+          sections: requiredArchitectureSections(request.body?.sections),
+          opId: optionalString(request.body?.opId, 'opId'),
+          disposition: requiredString(
+            request.body?.disposition,
+            'disposition',
+          ),
+        };
+        return architectureService.save(request.params.id, input);
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams; Body: ApproveArchitectureBody }>(
+    '/api/drafts/:id/architecture/approve',
+    async (request, reply) => {
+      try {
+        if (!architectureService.approve) {
+          throw new Error('architecture approval is not configured');
+        }
+        return await architectureService.approve(
+          request.params.id,
+          requiredRevisionSeq(request.body?.expectedRevisionSeq),
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams; Body: ReopenArchitectureBody }>(
+    '/api/drafts/:id/architecture/reopen',
+    async (request, reply) => {
+      try {
+        if (!architectureService.reopen) {
+          throw new Error('architecture reopen is not configured');
+        }
+        return await architectureService.reopen(request.params.id, {
+          confirmed: requiredTrue(request.body?.confirmed, 'confirmed'),
+          expectedRevisionSeq: requiredRevisionSeq(
+            request.body?.expectedRevisionSeq,
+          ),
+        });
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
   app.put<{ Params: DraftParams; Body: SaveDraftBody }>(
     '/api/drafts/:id',
     async (request, reply) => {
@@ -349,6 +452,14 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       if (!hasOwn(request.body, 'inputs')) {
         throw new Error('inputs are required');
       }
+      if (
+        request.body.operation === 'generate-episode'
+        || request.body.operation === 'promote'
+      ) {
+        throw new Error(
+          `operation ${request.body.operation} requires a draft-scoped submission`,
+        );
+      }
       const id = options.operationService.submit(
         request.body.operation as OperationName,
         request.body.inputs,
@@ -358,6 +469,52 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       return sendOperationError(reply, error);
     }
   });
+
+  app.post<{ Params: DraftParams; Body: SubmitBody }>(
+    '/api/drafts/:id/ops',
+    async (request, reply) => {
+      try {
+        if (typeof request.body?.operation !== 'string') {
+          throw new Error('operation is required');
+        }
+        if (!hasOwn(request.body, 'inputs')) {
+          throw new Error('inputs are required');
+        }
+        return {
+          id: architectureService.submitOperation(
+            request.params.id,
+            request.body.operation as OperationName,
+            request.body.inputs,
+          ),
+        };
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: { id: string; operationId: string };
+    Body: ResumeBody;
+  }>(
+    '/api/drafts/:id/ops/:operationId/resume',
+    async (request, reply) => {
+      try {
+        if (!hasOwn(request.body, 'inputs')) {
+          throw new Error('inputs are required');
+        }
+        return {
+          id: architectureService.resumeOperation(
+            request.params.id,
+            request.params.operationId,
+            request.body.inputs,
+          ),
+        };
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
 
   app.get('/api/ops', () => ({
     operations: options.operationService.list(),
@@ -782,6 +939,25 @@ function requiredArray(value: unknown, field: string): unknown[] {
   return value;
 }
 
+function requiredArchitectureSections(
+  value: unknown,
+): SaveArchitectureInput['sections'] {
+  if (!Array.isArray(value)) throw new Error('sections must be an array');
+  return value as SaveArchitectureInput['sections'];
+}
+
+function requiredRevisionSeq(value: unknown): number {
+  if (!Number.isInteger(value) || Number(value) < 0) {
+    throw new Error('expectedRevisionSeq must be a non-negative integer');
+  }
+  return value as number;
+}
+
+function requiredTrue(value: unknown, field: string): true {
+  if (value !== true) throw new Error(`${field} must be true`);
+  return true;
+}
+
 function requiredArtifactExpectedState(
   value: unknown,
 ): ArtifactExpectedState {
@@ -924,6 +1100,54 @@ function sendOperationError(
   return reply.code(500).send({ error: 'internal server error' });
 }
 
+function sendArchitectureError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  if (error instanceof ArchitectureRevisionConflictError) {
+    return reply.code(409).send({
+      error: error.message,
+      current: error.current,
+    });
+  }
+  if (error instanceof ArchitectureArtifactConflictError) {
+    return reply.code(409).send({
+      error: error.message,
+      currentHash: error.currentHash,
+      ...(error.parked ? { parked: error.parked } : {}),
+      steps: error.steps,
+      state: error.state,
+    });
+  }
+  if (error instanceof ArchitectureGateError) {
+    return reply.code(409).send({ error: error.message });
+  }
+  const message = error instanceof Error
+    ? error.message
+    : 'architecture request failed';
+  if (/^draft not found:/i.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if ([
+    /^operation is required$/,
+    /^inputs (?:are required|must be an object)$/,
+    /^sections(?:\[| must be an array)/,
+    /^expectedRevisionSeq must be a non-negative integer$/,
+    /^opId must be a string or null$/,
+    /^disposition is required$/,
+    /^confirmed must be true$/,
+    /^unknown operation:/,
+    /^cannot resume .+ as .+$/,
+    /^operation .+ is not resumable$/,
+    /^maximum resume chain length is 3$/,
+    /^operation cannot be resumed without a thread id$/,
+  ].some((pattern) => pattern.test(message))) {
+    return reply.code(400).send({ error: message });
+  }
+  reply.log.error({ err: error }, 'architecture request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
 function isOperationClientError(message: string): boolean {
   return [
     /^operation is required$/,
@@ -934,6 +1158,7 @@ function isOperationClientError(message: string): boolean {
     /^operation .+ is not resumable$/,
     /^maximum resume chain length is 3$/,
     /^operation cannot be resumed without a thread id$/,
+    /^operation (?:generate-episode|promote) requires a draft-scoped submission$/,
     /^fromSeq and Last-Event-ID must be /,
   ].some((pattern) => pattern.test(message));
 }
@@ -1010,6 +1235,19 @@ function sendArtifactError(
 
 const topicNotConfigured = (): never => {
   throw new Error('topic service is not configured');
+};
+
+const architectureNotConfigured = (): never => {
+  throw new Error('architecture service is not configured');
+};
+
+const UNCONFIGURED_ARCHITECTURE_SERVICE: ArchitectureHttpService = {
+  get: architectureNotConfigured,
+  save: architectureNotConfigured,
+  submitOperation: architectureNotConfigured,
+  resumeOperation: architectureNotConfigured,
+  approve: architectureNotConfigured,
+  reopen: architectureNotConfigured,
 };
 
 const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {

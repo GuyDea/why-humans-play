@@ -15,6 +15,7 @@ import {
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FastifyInstance } from 'fastify';
+import { ArchitectureService } from './architecture/service.js';
 import { DocumentService } from './documents/service.js';
 import { DocumentStore } from './documents/store.js';
 import { buildApp } from './http/app.js';
@@ -154,6 +155,20 @@ export function createDaemonContext(
     supervisor.reattach();
     operationService.reconcileTimedOutAttempts();
     const documentService = new DocumentService({ store: documentStore });
+    const architectureService = new ArchitectureService({
+      store: documentStore,
+      operationService,
+      artifactService: {
+        write: (
+          relPath: string,
+          content: string,
+          expectedState: Parameters<typeof writeArtifact>[3],
+        ) => writeArtifact(repoRoot, relPath, content, expectedState),
+        upsertPipelineRow: (
+          row: Parameters<typeof upsertPipelineRow>[1],
+        ) => upsertPipelineRow(repoRoot, row),
+      },
+    });
     const topicService = new TopicService({
       store: topicStore,
       operationService,
@@ -175,6 +190,7 @@ export function createDaemonContext(
       staticRoot: findStaticRoot(repoRoot),
       operationService,
       documentService,
+      architectureService,
       topicService,
       artifactService: {
         write: (
