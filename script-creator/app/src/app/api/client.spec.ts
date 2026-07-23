@@ -267,6 +267,57 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('registers and polls topic runs with authenticated requests', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse({
+        id: 'run-1',
+        opId: 'op-1',
+        state: 'running',
+        createdAt: '2026-07-23T12:00:00.000Z',
+      }))
+      .mockResolvedValueOnce(jsonResponse({
+        state: 'running',
+        progress: [{
+          id: '01-frame',
+          status: 'active',
+          text: 'Record the decision frame and current WHP context.',
+        }],
+      }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const topicClient = client as DaemonClient & {
+      registerTopicRun?: (opId: string) => Promise<unknown>;
+      getTopicRun?: (id: string) => Promise<unknown>;
+    };
+
+    expect(topicClient.registerTopicRun).toBeTypeOf('function');
+    expect(topicClient.getTopicRun).toBeTypeOf('function');
+    if (!topicClient.registerTopicRun || !topicClient.getTopicRun) return;
+
+    await topicClient.registerTopicRun('op/one');
+    await topicClient.getTopicRun('run/one');
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/topic-runs`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ opId: 'op/one' }),
+      },
+      {
+        url: `${BASE_URL}/api/topic-runs/run%2Fone`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+    ]);
+  });
+
   it('parses split SSE frames exactly and reconnects with the latest event id after a drop', async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn()

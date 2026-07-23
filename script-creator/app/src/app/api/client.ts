@@ -85,6 +85,92 @@ export interface UpdateIdeaInput {
   status?: IdeaStatus;
 }
 
+export type TopicGateName =
+  | 'game_play_centrality'
+  | 'human_revelation'
+  | 'recognized_payoff'
+  | 'evidence_path'
+  | 'production_reality'
+  | 'portfolio_fit';
+
+export type TopicScoreName =
+  | 'demand'
+  | 'opening'
+  | 'package'
+  | 'satisfaction'
+  | 'whp'
+  | 'evidence'
+  | 'feasibility';
+
+export type TopicEvidenceGrade = 'A' | 'B' | 'C' | 'unknown';
+
+export interface TopicSummary {
+  candidates: Array<{
+    subject: string;
+    angle_markdown: string;
+    gates: Array<{
+      gate: TopicGateName;
+      verdict: 'pass' | 'fail' | 'unknown';
+      reason_markdown: string;
+    }>;
+    disposition: string;
+  }>;
+  shortlist: Array<{
+    rank: number;
+    subject: string;
+    angle_markdown: string;
+    scores: Record<TopicScoreName, {
+      score: number | null;
+      grade: TopicEvidenceGrade;
+    }>;
+    total: number | null;
+    confidence: 'high' | 'medium' | 'low';
+    decisive_risk_markdown: string;
+  }>;
+  packages: Array<{
+    finalist: string;
+    direction: string;
+    working_title: string;
+    intended_viewer: string;
+    familiar_markdown: string;
+    surprise_markdown: string;
+    visual_promise_markdown: string;
+    delivered_payoff_markdown: string;
+    survives_honestly: boolean;
+    reason_markdown: string;
+  }>;
+  winner: {
+    decision_status:
+      | 'winner-selected'
+      | 'provisional-winner'
+      | 'incomplete';
+    subject: string | null;
+    angle_markdown: string | null;
+    confidence: 'high' | 'medium' | 'low';
+    why_now_markdown: string;
+    strongest_package_markdown: string | null;
+  };
+}
+
+export interface TopicRunSummary {
+  id: string;
+  opId: string;
+  state: OperationState;
+  createdAt: string;
+}
+
+export interface TopicRunSnapshot {
+  state: OperationState;
+  progress: Array<{
+    id: string;
+    status: 'pending' | 'active' | 'done' | 'unknown';
+    text: string;
+  }>;
+  summary?: TopicSummary | null;
+  summaryError?: string;
+  reportMd?: string;
+}
+
 export type OperationResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -259,6 +345,17 @@ export class DaemonClient {
     await this.request(`/api/ideas/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
+  }
+
+  async registerTopicRun(opId: string): Promise<TopicRunSummary> {
+    return this.request('/api/topic-runs', {
+      method: 'POST',
+      body: JSON.stringify({ opId }),
+    });
+  }
+
+  async getTopicRun(id: string): Promise<TopicRunSnapshot> {
+    return this.request(`/api/topic-runs/${encodeURIComponent(id)}`);
   }
 
   async streamEvents(

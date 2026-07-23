@@ -17,6 +17,9 @@ import type {
   OperationRecord,
   OperationResult,
   StreamEventsOptions,
+  TopicRunSnapshot,
+  TopicRunSummary,
+  TopicSummary,
   UpdateIdeaInput,
 } from '../api/client';
 import { App } from '../app';
@@ -34,6 +37,68 @@ const GATES = [
   'portfolio_fit',
 ] as const;
 
+const PROGRESS = [
+  ['01-frame', 'Record the decision frame and current WHP context.'],
+  ['02-mode', 'Select and state the evidence mode.'],
+  ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
+  ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
+  ['05-angles', 'Develop materially different angles for promising subjects.'],
+  ['06-gates', 'Identify opening proof cases and audit every advancing angle against all six hard gates.'],
+  ['07-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+  ['08-deep', 'Deeply research the finalists with multiple signals.'],
+  ['09-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+  ['10-packages', 'Test three package promises for each top-three finalist.'],
+  ['11-winner', 'Resolve winner status using responsibly supported, winner-eligible finalists.'],
+  ['12-audit', 'Complete the output and evidence audit.'],
+] as const;
+
+const SUMMARY: TopicSummary = {
+  candidates: [
+    candidate('Voluntary Obstacles'),
+    candidate('The Queue Game'),
+    candidate('Unscored Candidate'),
+  ],
+  shortlist: [
+    shortlistEntry('Voluntary Obstacles', 1, 91, 18),
+    shortlistEntry('The Queue Game', 2, 84, 24),
+    shortlistEntry('Unscored Candidate', 3, null, null),
+  ],
+  packages: [
+    {
+      finalist: 'Voluntary Obstacles',
+      direction: 'Harder on purpose',
+      working_title: 'Why We Make Games Harder Than They Need to Be',
+      intended_viewer: 'Players who choose self-imposed rules',
+      familiar_markdown: 'A no-hit run.',
+      surprise_markdown: 'Constraint can create meaning.',
+      visual_promise_markdown: 'The same level under two rule sets.',
+      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+      survives_honestly: true,
+      reason_markdown: 'The episode can demonstrate the promise.',
+    },
+    {
+      finalist: 'The Queue Game',
+      direction: 'Fair waits',
+      working_title: 'Can You Design a Fair Queue?',
+      intended_viewer: 'People who hate choosing the wrong line',
+      familiar_markdown: 'Two checkout lines.',
+      surprise_markdown: 'Speed and fairness split.',
+      visual_promise_markdown: 'Queues filling and draining.',
+      delivered_payoff_markdown: 'How queue rules shape choice.',
+      survives_honestly: false,
+      reason_markdown: 'The promise is broader than the evidence.',
+    },
+  ],
+  winner: {
+    decision_status: 'winner-selected',
+    subject: 'Voluntary Obstacles',
+    angle_markdown: 'Why chosen constraints can make effort meaningful.',
+    confidence: 'high',
+    why_now_markdown: 'It opens a recognizable door into the channel thesis.',
+    strongest_package_markdown: 'Why We Make Games Harder Than They Need to Be',
+  },
+};
+
 interface Submission {
   id: string;
   operation: OperationName;
@@ -43,6 +108,8 @@ interface Submission {
 class TopicClientStub {
   private sequence = 0;
   private ideas: IdeaRecord[] = [];
+  private topicRunSnapshots: Array<TopicRunSnapshot | Error> = [];
+  private topicRunSnapshotIndex = 0;
   readonly submissions: Submission[] = [];
 
   readonly listIdeas = vi.fn(async () => [...this.ideas]);
@@ -71,6 +138,26 @@ class TopicClientStub {
   });
   readonly deleteIdea = vi.fn(async (id: string) => {
     this.ideas = this.ideas.filter((idea) => idea.id !== id);
+  });
+  readonly registerTopicRun = vi.fn(async (
+    opId: string,
+  ): Promise<TopicRunSummary> => ({
+    id: 'run-1',
+    opId,
+    state: 'running',
+    createdAt: '2026-07-23T12:00:00.000Z',
+  }));
+  readonly getTopicRun = vi.fn(async (): Promise<TopicRunSnapshot> => {
+    const snapshot = this.topicRunSnapshots[
+      Math.min(
+        this.topicRunSnapshotIndex,
+        this.topicRunSnapshots.length - 1,
+      )
+    ];
+    if (!snapshot) throw new Error('topic run snapshots were not configured');
+    this.topicRunSnapshotIndex += 1;
+    if (snapshot instanceof Error) throw snapshot;
+    return snapshot;
   });
   readonly submitOp = vi.fn(async (
     operation: OperationName,
@@ -142,6 +229,11 @@ class TopicClientStub {
     throw new Error(`unexpected operation: ${operation}`);
   });
 
+  queueTopicRun(...snapshots: Array<TopicRunSnapshot | Error>): void {
+    this.topicRunSnapshots = snapshots;
+    this.topicRunSnapshotIndex = 0;
+  }
+
   private submission(id: string): Submission {
     const submission = this.submissions.find((item) => item.id === id);
     if (!submission) throw new Error(`submission not found: ${id}`);
@@ -162,6 +254,7 @@ interface MountedTopics {
 const mounted: MountedTopics[] = [];
 
 afterEach(() => {
+  vi.useRealTimers();
   while (mounted.length > 0) mounted.pop()?.destroy();
   document.body.replaceChildren();
   globalThis.history.replaceState(null, '', '/');
@@ -267,6 +360,226 @@ describe('routed Topics composition', () => {
       },
     });
   });
+
+  it('advances a full-run checklist and sorts the completed candidate board', async () => {
+    const topics = await mountTopics();
+    topics.client.queueTopicRun(
+      snapshot('running', 'pending'),
+      {
+        ...snapshot('running', 'pending'),
+        progress: PROGRESS.map(([id, text], index) => ({
+          id,
+          text,
+          status: index === 0 ? 'done' : index === 1 ? 'active' : 'pending',
+        })),
+      },
+      {
+        ...snapshot('completed', 'done'),
+        summary: SUMMARY,
+        reportMd: [
+          '# Topic report',
+          '',
+          'A complete evidence-backed recommendation.',
+          '',
+          '| Signal | Finding |',
+          '| --- | --- |',
+          '| Search | [Primary source](https://example.com/source) |',
+        ].join('\n'),
+      },
+    );
+    vi.useFakeTimers();
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'Why players choose voluntary obstacles',
+    );
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-constraints"]'),
+      'Prefer a visually provable opening.',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    expect(topics.client.submissions.at(-1)).toEqual({
+      id: expect.any(String),
+      operation: 'full-topic-run',
+      inputs: {
+        idea_text: 'Why players choose voluntary obstacles',
+        user_constraints: {
+          notes: 'Prefer a visually provable opening.',
+        },
+        progress_transport: 'WHP_PROGRESS/1',
+        summary_transport: 'fenced-whp-summary',
+      },
+    });
+    expect(topics.client.registerTopicRun).toHaveBeenCalledWith(
+      topics.client.submissions.at(-1)?.id,
+    );
+    const checklist = topics.root.querySelector('[data-testid="run-checklist"]');
+    expect(checklist?.querySelectorAll('[data-testid="checklist-row"]'))
+      .toHaveLength(12);
+    expect(checklist?.textContent).toContain(PROGRESS[5][1]);
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(1_999);
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    topics.tick();
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(2);
+    expect(
+      checklist?.querySelector('[data-progress-id="01-frame"]')
+        ?.getAttribute('data-status'),
+    ).toBe('done');
+    expect(
+      checklist?.querySelector('[data-progress-id="02-mode"]')
+        ?.getAttribute('data-status'),
+    ).toBe('active');
+
+    await vi.advanceTimersByTimeAsync(2_000);
+    topics.tick();
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(3);
+    await vi.advanceTimersByTimeAsync(4_000);
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(3);
+
+    const report = topics.root.querySelector('[data-testid="topic-report"]');
+    expect(report?.querySelector('h1')?.textContent).toContain('Topic report');
+    expect(report?.textContent).toContain(
+      'A complete evidence-backed recommendation.',
+    );
+    expect(report?.querySelectorAll('table tbody tr')).toHaveLength(1);
+    expect(report?.querySelector<HTMLAnchorElement>('a')?.href)
+      .toBe('https://example.com/source');
+    expect(topics.root.querySelector('[data-testid="raw-topic-report"]')?.textContent)
+      .toContain('# Topic report');
+
+    const board = topics.root.querySelector('[data-testid="candidate-board"]');
+    expect(board).not.toBeNull();
+    expect(subjectOrder(board)).toEqual([
+      'Voluntary Obstacles',
+      'The Queue Game',
+      'Unscored Candidate',
+    ]);
+    findButton(board, 'Demand').click();
+    topics.tick();
+    expect(subjectOrder(board)).toEqual([
+      'The Queue Game',
+      'Voluntary Obstacles',
+      'Unscored Candidate',
+    ]);
+    expect(board?.querySelectorAll('[data-testid="candidate-gate-chip"]'))
+      .toHaveLength(18);
+    const firstCandidateGate = board?.querySelector<HTMLDetailsElement>(
+      '[data-testid="candidate-gate-chip"]',
+    );
+    expect(firstCandidateGate).toBeInstanceOf(HTMLDetailsElement);
+    if (firstCandidateGate) {
+      firstCandidateGate.open = true;
+      expect(firstCandidateGate.textContent).toContain('is supported');
+    }
+
+    const packages = topics.root.querySelectorAll<HTMLElement>(
+      '[data-testid="package-direction"]',
+    );
+    expect(packages).toHaveLength(2);
+    expect(packages[0]?.dataset['survives']).toBe('true');
+    expect(packages[1]?.dataset['survives']).toBe('false');
+    const winner = topics.root.querySelector('[data-testid="winner-card"]');
+    expect(winner?.textContent).toContain('Voluntary Obstacles');
+    expect(winner?.textContent).toContain(
+      'Why We Make Games Harder Than They Need to Be',
+    );
+  });
+
+  it('shows a summary error honestly while preserving the raw report', async () => {
+    const topics = await mountTopics();
+    topics.client.queueTopicRun({
+      ...snapshot('completed', 'done'),
+      summary: null,
+      summaryError: 'whp-summary block contains malformed JSON',
+      reportMd: '# Recoverable report\n\nThe narrative is still available.',
+    });
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'A recoverable run',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    const error = topics.root.querySelector('[data-testid="summary-error"]');
+    expect(error?.getAttribute('role')).toBe('alert');
+    expect(error?.textContent).toContain(
+      'whp-summary block contains malformed JSON',
+    );
+    expect(topics.root.querySelector('[data-testid="topic-report"]')?.textContent)
+      .toContain('The narrative is still available.');
+    expect(topics.root.querySelector('[data-testid="raw-topic-report"]')?.textContent)
+      .toContain('# Recoverable report');
+    expect(topics.root.querySelector('[data-testid="candidate-board"]')).toBeNull();
+  });
+
+  it('recovers polling after a transient snapshot failure without unlocking launch', async () => {
+    const topics = await mountTopics();
+    topics.client.queueTopicRun(
+      snapshot('running', 'pending'),
+      new Error('temporary connection drop'),
+      {
+        ...snapshot('completed', 'done'),
+        summary: SUMMARY,
+        reportMd: '# Recovered report',
+      },
+    );
+    vi.useFakeTimers();
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'A run that outlives a connection drop',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    await vi.advanceTimersByTimeAsync(2_000);
+    topics.tick();
+    expect(topics.root.querySelector('[data-testid="run-error"]')?.textContent)
+      .toContain('Retrying');
+    expect(findButton(topics.root, 'Run in progress').disabled).toBe(true);
+    expect(topics.client.submitOp).toHaveBeenCalledTimes(1);
+
+    await vi.advanceTimersByTimeAsync(2_000);
+    topics.tick();
+    expect(topics.client.getTopicRun).toHaveBeenCalledTimes(3);
+    expect(topics.root.querySelector('[data-testid="topic-report"]')?.textContent)
+      .toContain('Recovered report');
+    expect(topics.root.querySelector('[data-testid="run-error"]')).toBeNull();
+  });
+
+  it('states honestly when a summary error has no raw report', async () => {
+    const topics = await mountTopics();
+    topics.client.queueTopicRun({
+      ...snapshot('completed', 'done'),
+      summary: null,
+      summaryError: 'whp-summary block is missing',
+    });
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'A run without a report',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    expect(topics.root.querySelector('[data-testid="summary-error"]')?.textContent)
+      .toContain('No raw report was returned');
+    expect(topics.root.querySelector('[data-testid="raw-topic-report"]')).toBeNull();
+  });
 });
 
 async function mountTopics(): Promise<MountedTopics> {
@@ -343,4 +656,65 @@ function findButton(
     candidate.textContent?.replace(/\s+/gu, ' ').trim().startsWith(label));
   if (!button) throw new Error(`button ${label} was not rendered`);
   return button;
+}
+
+function snapshot(
+  state: TopicRunSnapshot['state'],
+  status: TopicRunSnapshot['progress'][number]['status'],
+): TopicRunSnapshot {
+  return {
+    state,
+    progress: PROGRESS.map(([id, text]) => ({ id, text, status })),
+  };
+}
+
+function candidate(subject: string): TopicSummary['candidates'][number] {
+  return {
+    subject,
+    angle_markdown: `${subject} reveals a human choice through play.`,
+    gates: GATES.map((gate) => ({
+      gate,
+      verdict: 'pass',
+      reason_markdown: `${gate} is supported.`,
+    })),
+    disposition: 'deep-research finalist',
+  };
+}
+
+function shortlistEntry(
+  subject: string,
+  rank: number,
+  total: number | null,
+  demand: number | null,
+): TopicSummary['shortlist'][number] {
+  return {
+    rank,
+    subject,
+    angle_markdown: `${subject} reveals a human choice through play.`,
+    scores: {
+      demand: { score: demand, grade: 'A' },
+      opening: { score: 13, grade: 'A' },
+      package: { score: 17, grade: 'B' },
+      satisfaction: { score: 13, grade: 'A' },
+      whp: { score: 9, grade: 'A' },
+      evidence: { score: 8, grade: 'B' },
+      feasibility: { score: 5, grade: 'A' },
+    },
+    total,
+    confidence: 'high',
+    decisive_risk_markdown: `${subject} still needs an opening proof case.`,
+  };
+}
+
+function subjectOrder(board: Element | null): string[] {
+  return Array.from(
+    board?.querySelectorAll<HTMLElement>('[data-testid="shortlist-subject"]')
+      ?? [],
+  ).map((subject) => subject.textContent?.trim() ?? '');
+}
+
+async function flushAsync(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }

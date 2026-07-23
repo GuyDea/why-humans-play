@@ -1,0 +1,1198 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  type OnDestroy,
+} from '@angular/core';
+import type {
+  OperationState,
+  TopicGateName,
+  TopicRunSnapshot,
+  TopicScoreName,
+  TopicSummary,
+} from '../api/client';
+import { STUDIO_SESSION } from '../studio-session';
+import { buildTopicOperationInputs } from './inputs';
+
+const POLL_INTERVAL_MS = 2_000;
+const POLLING_STATES = new Set<OperationState>([
+  'queued',
+  'running',
+  'cancelling',
+]);
+
+const SCORE_CRITERIA: ReadonlyArray<{
+  key: TopicScoreName;
+  label: string;
+  maximum: number;
+}> = [
+  { key: 'demand', label: 'Demand', maximum: 25 },
+  { key: 'opening', label: 'Opening', maximum: 15 },
+  { key: 'package', label: 'Package', maximum: 20 },
+  { key: 'satisfaction', label: 'Satisfaction', maximum: 15 },
+  { key: 'whp', label: 'WHP', maximum: 10 },
+  { key: 'evidence', label: 'Evidence', maximum: 10 },
+  { key: 'feasibility', label: 'Feasibility', maximum: 5 },
+];
+
+type SortKey = 'total' | TopicScoreName;
+
+@Component({
+  selector: 'app-full-run-panel',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <section class="full-run-stage" aria-labelledby="full-run-heading">
+      <header class="run-heading">
+        <div class="run-title">
+          <span class="stage-marker" aria-hidden="true">03</span>
+          <div>
+            <p class="stage-kicker">Decide</p>
+            <h2 id="full-run-heading">Full topic run</h2>
+          </div>
+        </div>
+        @if (snapshot(); as current) {
+          <span class="run-state" [attr.data-state]="current.state">
+            {{ stateLabel(current.state) }}
+          </span>
+        } @else {
+          <span class="run-state" data-state="ready">Ready</span>
+        }
+      </header>
+
+      <form class="run-launcher" (submit)="launch($event)">
+        <div class="run-field">
+          <label for="full-run-idea">Starting territory</label>
+          <textarea
+            id="full-run-idea"
+            data-testid="full-run-idea"
+            rows="3"
+            placeholder="The question, behavior, or subject this run should investigate…"
+            [value]="ideaText()"
+            (input)="setIdeaText($event)"
+          ></textarea>
+        </div>
+        <div class="run-field">
+          <label for="full-run-constraints">
+            Constraints
+            <span>optional</span>
+          </label>
+          <textarea
+            id="full-run-constraints"
+            data-testid="full-run-constraints"
+            rows="3"
+            placeholder="Audience, production, timing, or portfolio constraints…"
+            [value]="constraints()"
+            (input)="setConstraints($event)"
+          ></textarea>
+        </div>
+        <div class="run-launch-actions">
+          <p>
+            The topic-selection skill owns the research, gates, scoring, and
+            recommendation. This surface only transports inputs and renders its work.
+          </p>
+          <button
+            class="primary-action"
+            type="submit"
+            [disabled]="runBusy() || ideaText().trim() === ''"
+          >
+            {{ runBusy() ? 'Run in progress…' : 'Launch full run' }}
+          </button>
+        </div>
+      </form>
+
+      @if (runError()) {
+        <article class="run-error" data-testid="run-error" role="alert">
+          <strong>
+            {{ pollRecovering() ? 'Live progress interrupted' : 'Full run could not continue' }}
+          </strong>
+          <p>{{ runError() }}</p>
+        </article>
+      }
+
+      @if (snapshot(); as current) {
+        <section class="run-console" aria-labelledby="checklist-heading">
+          <header>
+            <div>
+              <p class="console-kicker">Live protocol</p>
+              <h3 id="checklist-heading">Twelve-step checklist</h3>
+            </div>
+            <span class="progress-count">
+              {{ completedCount() }} / {{ current.progress.length }}
+            </span>
+          </header>
+          <ol class="checklist" data-testid="run-checklist" aria-live="polite">
+            @for (item of current.progress; track item.id) {
+              <li
+                data-testid="checklist-row"
+                [attr.data-progress-id]="item.id"
+                [attr.data-status]="item.status"
+              >
+                <span class="progress-mark" aria-hidden="true">
+                  @switch (item.status) {
+                    @case ('done') { ✓ }
+                    @case ('active') { • }
+                    @case ('unknown') { ? }
+                    @default { }
+                  }
+                </span>
+                <span class="progress-copy">
+                  <strong>{{ item.id }}</strong>
+                  <span>{{ item.text }}</span>
+                </span>
+                <span class="progress-status">{{ item.status }}</span>
+              </li>
+            }
+          </ol>
+        </section>
+
+        @if (current.reportMd; as report) {
+          <section class="report-shell" aria-labelledby="report-heading">
+            <header class="section-label">
+              <p>Skill output</p>
+              <h3 id="report-heading">Research report</h3>
+            </header>
+            <article
+              class="markdown-report"
+              data-testid="topic-report"
+              [innerHTML]="reportHtml()"
+            ></article>
+            <details class="raw-report" data-testid="raw-topic-report">
+              <summary>Raw Markdown</summary>
+              <pre>{{ report }}</pre>
+            </details>
+          </section>
+        }
+
+        @if (current.summaryError; as summaryError) {
+          <article class="summary-error" data-testid="summary-error" role="alert">
+            <strong>The structured candidate board is unavailable.</strong>
+            <p>{{ summaryError }}</p>
+            @if (current.reportMd) {
+              <p>The raw report remains available above exactly as returned.</p>
+            } @else {
+              <p>No raw report was returned with this terminal response.</p>
+            }
+          </article>
+        }
+
+        @if (current.summary; as summary) {
+          <section
+            class="candidate-board"
+            data-testid="candidate-board"
+            aria-labelledby="candidate-board-heading"
+          >
+            <header class="board-heading">
+              <div>
+                <p class="console-kicker">Evidence board</p>
+                <h3 id="candidate-board-heading">Shortlist</h3>
+              </div>
+              <p>Sort by the skill’s total or any scored criterion.</p>
+            </header>
+
+            <div class="score-table-scroll">
+              <table class="score-table">
+                <thead>
+                  <tr>
+                    <th scope="col">Candidate</th>
+                    <th scope="col">
+                      <button
+                        type="button"
+                        [attr.aria-pressed]="sortKey() === 'total'"
+                        (click)="setSort('total')"
+                      >
+                        Total {{ sortIndicator('total') }}
+                      </button>
+                    </th>
+                    @for (criterion of criteria; track criterion.key) {
+                      <th scope="col">
+                        <button
+                          type="button"
+                          [attr.aria-pressed]="sortKey() === criterion.key"
+                          (click)="setSort(criterion.key)"
+                        >
+                          {{ criterion.label }}
+                          {{ sortIndicator(criterion.key) }}
+                        </button>
+                        <small>/{{ criterion.maximum }}</small>
+                      </th>
+                    }
+                    <th scope="col">Confidence & risk</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of sortedShortlist(); track entry.subject) {
+                    <tr>
+                      <th scope="row">
+                        <span class="rank">#{{ entry.rank }}</span>
+                        <strong data-testid="shortlist-subject">
+                          {{ entry.subject }}
+                        </strong>
+                        <p>{{ entry.angle_markdown }}</p>
+                        @if (candidateFor(summary, entry.subject); as candidate) {
+                          <div
+                            class="candidate-gates"
+                            [attr.aria-label]="'Gate results for ' + entry.subject"
+                          >
+                            @for (gate of candidate.gates; track gate.gate) {
+                              <details
+                                class="candidate-gate"
+                                data-testid="candidate-gate-chip"
+                                [attr.data-verdict]="gate.verdict"
+                              >
+                                <summary>
+                                  <span>{{ gateLabel(gate.gate) }}</span>
+                                  <strong>{{ gate.verdict }}</strong>
+                                </summary>
+                                <p>{{ gate.reason_markdown }}</p>
+                              </details>
+                            }
+                          </div>
+                        }
+                      </th>
+                      <td class="total-score">
+                        {{ scoreValue(entry.total) }}
+                      </td>
+                      @for (criterion of criteria; track criterion.key) {
+                        <td>
+                          <span class="score-value">
+                            {{ scoreValue(entry.scores[criterion.key].score) }}
+                          </span>
+                          <span
+                            class="evidence-grade"
+                            [attr.data-grade]="entry.scores[criterion.key].grade"
+                          >
+                            {{ entry.scores[criterion.key].grade }}
+                          </span>
+                        </td>
+                      }
+                      <td class="risk-cell">
+                        <strong>{{ entry.confidence }}</strong>
+                        <p>{{ entry.decisive_risk_markdown }}</p>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <section class="packages" aria-labelledby="packages-heading">
+              <header class="section-label">
+                <p>Promise test</p>
+                <h3 id="packages-heading">Packaging directions</h3>
+              </header>
+              <div class="package-table-scroll">
+                <table class="package-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Direction</th>
+                      <th scope="col">Working title</th>
+                      <th scope="col">Intended viewer</th>
+                      <th scope="col">Familiar → surprise</th>
+                      <th scope="col">Visual promise → payoff</th>
+                      <th scope="col">Survives honestly</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (packaging of summary.packages; track $index) {
+                      <tr
+                        data-testid="package-direction"
+                        [attr.data-survives]="packaging.survives_honestly"
+                      >
+                        <th scope="row">
+                          <small>{{ packaging.finalist }}</small>
+                          <strong>{{ packaging.direction }}</strong>
+                        </th>
+                        <td>{{ packaging.working_title }}</td>
+                        <td>{{ packaging.intended_viewer }}</td>
+                        <td>
+                          <span>{{ packaging.familiar_markdown }}</span>
+                          <span class="table-arrow" aria-hidden="true">→</span>
+                          <span>{{ packaging.surprise_markdown }}</span>
+                        </td>
+                        <td>
+                          <span>{{ packaging.visual_promise_markdown }}</span>
+                          <span class="table-arrow" aria-hidden="true">→</span>
+                          <span>{{ packaging.delivered_payoff_markdown }}</span>
+                        </td>
+                        <td>
+                          <strong class="survival-badge">
+                            {{ packaging.survives_honestly ? 'Yes' : 'No' }}
+                          </strong>
+                          <p>{{ packaging.reason_markdown }}</p>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <article
+              class="winner-card"
+              data-testid="winner-card"
+              [attr.data-status]="summary.winner.decision_status"
+            >
+              <div class="winner-seal" aria-hidden="true">W</div>
+              <div class="winner-copy">
+                <p>{{ decisionLabel(summary.winner.decision_status) }}</p>
+                <h3>{{ summary.winner.subject ?? 'No responsible winner yet' }}</h3>
+                @if (summary.winner.angle_markdown) {
+                  <p class="winner-angle">{{ summary.winner.angle_markdown }}</p>
+                }
+              </div>
+              <dl>
+                <div>
+                  <dt>Confidence</dt>
+                  <dd>{{ summary.winner.confidence }}</dd>
+                </div>
+                <div>
+                  <dt>Why now</dt>
+                  <dd>{{ summary.winner.why_now_markdown }}</dd>
+                </div>
+                <div>
+                  <dt>Strongest package</dt>
+                  <dd>
+                    {{ summary.winner.strongest_package_markdown ?? 'Not established' }}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          </section>
+        }
+      }
+    </section>
+  `,
+  styles: `
+    :host {
+      display: block;
+    }
+
+    .full-run-stage {
+      border: 1px solid var(--whp-line);
+      background: var(--whp-surface);
+    }
+
+    .run-heading,
+    .run-title,
+    .run-launch-actions,
+    .run-console > header,
+    .board-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .run-heading {
+      border-bottom: 1px solid var(--whp-line);
+      background: var(--whp-panel);
+      padding: 0.85rem 1rem;
+    }
+
+    .run-title {
+      justify-content: flex-start;
+      gap: 0.8rem;
+    }
+
+    .stage-marker,
+    .progress-count,
+    .rank,
+    .score-value,
+    .evidence-grade,
+    .run-state,
+    .progress-copy strong,
+    .progress-status {
+      font-family: var(--whp-font-mono);
+    }
+
+    .stage-marker,
+    .stage-kicker,
+    .console-kicker,
+    .section-label > p {
+      color: var(--whp-accent);
+      font-size: 0.65rem;
+      font-weight: 850;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    .stage-kicker,
+    .console-kicker,
+    .section-label > p {
+      margin: 0;
+    }
+
+    .run-heading h2,
+    .run-console h3,
+    .board-heading h3,
+    .section-label h3 {
+      margin: 0.12rem 0 0;
+      font-family: var(--whp-font-editor);
+      font-weight: 550;
+    }
+
+    .run-heading h2 {
+      font-size: 1.35rem;
+    }
+
+    .run-state {
+      border: 1px solid var(--whp-line-strong);
+      border-radius: 999px;
+      padding: 0.3rem 0.6rem;
+      color: var(--whp-muted);
+      background: var(--whp-surface);
+      font-size: 0.62rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .run-state[data-state='running'],
+    .run-state[data-state='queued'],
+    .run-state[data-state='cancelling'] {
+      border-color: var(--whp-warning);
+      color: var(--whp-warning);
+    }
+
+    .run-state[data-state='completed'] {
+      border-color: var(--whp-success);
+      color: var(--whp-success);
+    }
+
+    .run-state[data-state='failed'],
+    .run-state[data-state='invalid-output'],
+    .run-state[data-state='timed-out'] {
+      border-color: var(--whp-accent);
+      color: var(--whp-accent);
+    }
+
+    .run-launcher {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      border-bottom: 1px solid var(--whp-line);
+      padding: 1rem;
+    }
+
+    .run-field {
+      display: grid;
+      gap: 0.45rem;
+    }
+
+    .run-field label {
+      display: flex;
+      justify-content: space-between;
+      color: var(--whp-ink);
+      font-size: 0.72rem;
+      font-weight: 780;
+    }
+
+    .run-field label span {
+      color: var(--whp-muted);
+      font-weight: 500;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      border: 1px solid var(--whp-line-strong);
+      border-radius: 0.12rem;
+      padding: 0.75rem;
+      color: var(--whp-ink);
+      background: var(--whp-ground);
+      font-family: var(--whp-font-editor);
+      font-size: 1rem;
+      line-height: 1.5;
+    }
+
+    textarea::placeholder {
+      color: var(--whp-muted);
+    }
+
+    .run-launch-actions {
+      grid-column: 1 / -1;
+      align-items: end;
+    }
+
+    .run-launch-actions p,
+    .board-heading > p {
+      max-width: 68ch;
+      margin: 0;
+      color: var(--whp-muted);
+      font-size: 0.72rem;
+      line-height: 1.5;
+    }
+
+    button {
+      border-radius: 0.12rem;
+      cursor: pointer;
+      font-size: 0.7rem;
+      font-weight: 800;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+    }
+
+    .primary-action {
+      flex: none;
+      border: 1px solid var(--whp-accent);
+      padding: 0.65rem 0.85rem;
+      color: var(--whp-ground);
+      background: var(--whp-accent);
+    }
+
+    .run-error,
+    .summary-error {
+      border-left: 3px solid var(--whp-accent);
+      padding: 0.9rem 1rem;
+      color: var(--whp-ink);
+      background: var(--whp-accent-tint);
+    }
+
+    .run-error p,
+    .summary-error p {
+      margin: 0.3rem 0 0;
+      color: var(--whp-muted);
+      font-size: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .run-console {
+      display: grid;
+      grid-template-columns: minmax(15rem, 0.28fr) minmax(0, 0.72fr);
+      border-bottom: 1px solid var(--whp-line);
+    }
+
+    .run-console > header {
+      align-items: flex-start;
+      border-right: 1px solid var(--whp-line);
+      padding: 1rem;
+    }
+
+    .progress-count {
+      color: var(--whp-accent);
+      font-size: 0.72rem;
+      font-weight: 850;
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .checklist li {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 0.6rem;
+      border-right: 1px solid var(--whp-line-soft);
+      border-bottom: 1px solid var(--whp-line-soft);
+      padding: 0.75rem;
+      color: var(--whp-muted);
+      background: var(--whp-ground);
+    }
+
+    .checklist li:nth-child(3n) {
+      border-right: 0;
+    }
+
+    .checklist li:nth-last-child(-n + 3) {
+      border-bottom: 0;
+    }
+
+    .checklist li[data-status='active'] {
+      box-shadow: inset 3px 0 var(--whp-warning);
+      color: var(--whp-ink);
+      background: var(--whp-panel);
+    }
+
+    .checklist li[data-status='done'] {
+      color: var(--whp-ink);
+    }
+
+    .progress-mark {
+      display: grid;
+      width: 1.25rem;
+      height: 1.25rem;
+      border: 1px solid var(--whp-line-strong);
+      border-radius: 50%;
+      color: var(--whp-muted);
+      font-size: 0.7rem;
+      font-weight: 900;
+      place-items: center;
+    }
+
+    [data-status='done'] .progress-mark {
+      border-color: var(--whp-success);
+      color: var(--whp-success);
+    }
+
+    [data-status='active'] .progress-mark {
+      border-color: var(--whp-warning);
+      color: var(--whp-warning);
+    }
+
+    .progress-copy {
+      display: grid;
+      gap: 0.22rem;
+    }
+
+    .progress-copy strong {
+      color: inherit;
+      font-size: 0.58rem;
+    }
+
+    .progress-copy > span {
+      font-size: 0.68rem;
+      line-height: 1.4;
+    }
+
+    .progress-status {
+      font-size: 0.52rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .report-shell,
+    .candidate-board {
+      border-bottom: 1px solid var(--whp-line);
+      padding: clamp(1rem, 2.5vw, 2rem);
+    }
+
+    .section-label {
+      margin-bottom: 1rem;
+    }
+
+    .board-heading {
+      align-items: end;
+      margin-bottom: 1rem;
+    }
+
+    .score-table-scroll,
+    .package-table-scroll {
+      overflow-x: auto;
+      border: 1px solid var(--whp-line);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      color: var(--whp-ink);
+    }
+
+    th,
+    td {
+      border-right: 1px solid var(--whp-line-soft);
+      border-bottom: 1px solid var(--whp-line-soft);
+      padding: 0.7rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th:last-child,
+    td:last-child {
+      border-right: 0;
+    }
+
+    tbody tr:last-child > * {
+      border-bottom: 0;
+    }
+
+    thead th {
+      color: var(--whp-muted);
+      background: var(--whp-panel);
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    thead button {
+      border: 0;
+      padding: 0;
+      color: inherit;
+      background: transparent;
+      text-transform: uppercase;
+    }
+
+    thead button[aria-pressed='true'] {
+      color: var(--whp-accent);
+    }
+
+    thead small {
+      display: block;
+      margin-top: 0.15rem;
+      font-size: 0.52rem;
+    }
+
+    .score-table {
+      min-width: 78rem;
+    }
+
+    .score-table tbody th {
+      width: 22rem;
+      background: var(--whp-surface);
+    }
+
+    .score-table tbody th > strong {
+      display: block;
+      margin-top: 0.2rem;
+      font-family: var(--whp-font-editor);
+      font-size: 1rem;
+      font-weight: 560;
+    }
+
+    .score-table tbody th > p,
+    .risk-cell p,
+    .package-table p {
+      margin: 0.35rem 0 0;
+      color: var(--whp-muted);
+      font-size: 0.66rem;
+      line-height: 1.45;
+    }
+
+    .rank {
+      color: var(--whp-accent);
+      font-size: 0.6rem;
+    }
+
+    .total-score,
+    .score-value {
+      font-size: 0.82rem;
+      font-weight: 850;
+    }
+
+    .total-score {
+      color: var(--whp-accent);
+    }
+
+    .evidence-grade {
+      display: inline-grid;
+      width: 1.2rem;
+      height: 1.2rem;
+      margin-left: 0.25rem;
+      border: 1px solid var(--whp-line-strong);
+      border-radius: 50%;
+      color: var(--whp-muted);
+      font-size: 0.55rem;
+      place-items: center;
+    }
+
+    .candidate-gates {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-top: 0.65rem;
+    }
+
+    .candidate-gate {
+      border: 1px solid currentcolor;
+      border-radius: 999px;
+      font-size: 0.52rem;
+      font-weight: 750;
+    }
+
+    .candidate-gate summary {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      padding: 0.2rem 0.38rem;
+      cursor: pointer;
+      list-style: none;
+    }
+
+    .candidate-gate summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .candidate-gate strong {
+      text-transform: uppercase;
+    }
+
+    .candidate-gate p {
+      max-width: 17rem;
+      margin: 0;
+      border-top: 1px solid currentcolor;
+      padding: 0.4rem;
+      color: var(--whp-ink);
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    [data-verdict='pass'] {
+      color: var(--whp-success);
+    }
+
+    [data-verdict='fail'] {
+      color: var(--whp-accent);
+    }
+
+    [data-verdict='unknown'] {
+      color: var(--whp-warning);
+    }
+
+    .risk-cell {
+      width: 15rem;
+    }
+
+    .risk-cell > strong {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+    }
+
+    .packages {
+      margin-top: 2rem;
+    }
+
+    .package-table {
+      min-width: 76rem;
+      font-size: 0.7rem;
+      line-height: 1.45;
+    }
+
+    .package-table tbody tr[data-survives='true'] {
+      box-shadow: inset 3px 0 var(--whp-success);
+    }
+
+    .package-table tbody tr[data-survives='false'] {
+      box-shadow: inset 3px 0 var(--whp-accent);
+      background: var(--whp-accent-tint);
+    }
+
+    .package-table tbody th {
+      width: 11rem;
+    }
+
+    .package-table tbody th small,
+    .package-table tbody th strong,
+    .package-table td > span {
+      display: block;
+    }
+
+    .package-table tbody th small {
+      margin-bottom: 0.25rem;
+      color: var(--whp-muted);
+    }
+
+    .table-arrow {
+      margin-block: 0.22rem;
+      color: var(--whp-accent);
+    }
+
+    .survival-badge {
+      color: var(--whp-success);
+      font-size: 0.64rem;
+      text-transform: uppercase;
+    }
+
+    [data-survives='false'] .survival-badge {
+      color: var(--whp-accent);
+    }
+
+  `,
+})
+export class FullRunPanel implements OnDestroy {
+  private readonly client = inject(STUDIO_SESSION).client;
+  private pollTimer: ReturnType<typeof setTimeout> | null = null;
+  private pollGeneration = 0;
+
+  protected readonly ideaText = signal('');
+  protected readonly constraints = signal('');
+  protected readonly runBusy = signal(false);
+  protected readonly runError = signal<string | null>(null);
+  protected readonly pollRecovering = signal(false);
+  protected readonly snapshot = signal<TopicRunSnapshot | null>(null);
+  protected readonly sortKey = signal<SortKey>('total');
+  protected readonly criteria = SCORE_CRITERIA;
+  protected readonly completedCount = computed(
+    () => this.snapshot()?.progress.filter((item) => item.status === 'done').length
+      ?? 0,
+  );
+  protected readonly reportHtml = computed(() => {
+    const report = this.snapshot()?.reportMd;
+    return report ? renderTopicMarkdown(report) : '';
+  });
+  protected readonly sortedShortlist = computed(() => {
+    const shortlist = this.snapshot()?.summary?.shortlist ?? [];
+    const key = this.sortKey();
+    return [...shortlist].sort((left, right) => {
+      const leftValue = key === 'total'
+        ? left.total
+        : left.scores[key].score;
+      const rightValue = key === 'total'
+        ? right.total
+        : right.scores[key].score;
+      return compareNullableScoreDescending(leftValue, rightValue)
+        || left.rank - right.rank;
+    });
+  });
+
+  ngOnDestroy(): void {
+    this.pollGeneration += 1;
+    this.clearPollTimer();
+  }
+
+  protected setIdeaText(event: Event): void {
+    this.ideaText.set(textareaValue(event));
+  }
+
+  protected setConstraints(event: Event): void {
+    this.constraints.set(textareaValue(event));
+  }
+
+  protected launch(event: Event): void {
+    event.preventDefault();
+    if (this.runBusy() || this.ideaText().trim() === '') return;
+    void this.startFullRun();
+  }
+
+  protected setSort(key: SortKey): void {
+    this.sortKey.set(key);
+  }
+
+  protected sortIndicator(key: SortKey): string {
+    return this.sortKey() === key ? '↓' : '';
+  }
+
+  protected stateLabel(state: OperationState): string {
+    return state.replace('-', ' ');
+  }
+
+  protected scoreValue(value: number | null): string {
+    return value === null ? '—' : String(value);
+  }
+
+  protected gateLabel(gate: TopicGateName): string {
+    return gate.split('_').map(capitalize).join(' ');
+  }
+
+  protected candidateFor(
+    summary: TopicSummary,
+    subject: string,
+  ): TopicSummary['candidates'][number] | null {
+    return summary.candidates.find((candidate) => candidate.subject === subject)
+      ?? null;
+  }
+
+  protected decisionLabel(
+    status: TopicSummary['winner']['decision_status'],
+  ): string {
+    if (status === 'winner-selected') return 'Winner selected';
+    if (status === 'provisional-winner') return 'Provisional winner';
+    return 'Decision incomplete';
+  }
+
+  private async startFullRun(): Promise<void> {
+    const generation = ++this.pollGeneration;
+    this.clearPollTimer();
+    this.runBusy.set(true);
+    this.runError.set(null);
+    this.pollRecovering.set(false);
+    this.snapshot.set(null);
+    this.sortKey.set('total');
+
+    try {
+      const notes = this.constraints().trim();
+      const { id: opId } = await this.client.submitOp(
+        'full-topic-run',
+        buildTopicOperationInputs({
+          ideaText: this.ideaText().trim(),
+          userConstraints: notes === '' ? {} : { notes },
+          runArtifacts: null,
+          selectedWinner: null,
+        }, 'full-topic-run'),
+      );
+      if (generation !== this.pollGeneration) return;
+      const run = await this.client.registerTopicRun(opId);
+      if (generation !== this.pollGeneration) return;
+      await this.poll(run.id, generation);
+    } catch (error) {
+      if (generation !== this.pollGeneration) return;
+      this.runBusy.set(false);
+      this.pollRecovering.set(false);
+      this.runError.set(errorMessage(error));
+    }
+  }
+
+  private async poll(runId: string, generation: number): Promise<void> {
+    try {
+      const next = await this.client.getTopicRun(runId);
+      if (generation !== this.pollGeneration) return;
+      this.snapshot.set(next);
+      this.runError.set(null);
+      this.pollRecovering.set(false);
+
+      if (POLLING_STATES.has(next.state)) {
+        this.schedulePoll(runId, generation);
+        return;
+      }
+
+      this.runBusy.set(false);
+      if (next.state !== 'completed' && !next.summaryError) {
+        this.runError.set(
+          `Run ended in ${this.stateLabel(next.state)} before a summary became available.`,
+        );
+      }
+    } catch (error) {
+      if (generation !== this.pollGeneration) return;
+      this.pollRecovering.set(true);
+      this.runError.set(
+        `Live progress is temporarily unavailable. Retrying in 2 seconds. ${errorMessage(error)}`,
+      );
+      this.schedulePoll(runId, generation);
+    }
+  }
+
+  private schedulePoll(runId: string, generation: number): void {
+    this.clearPollTimer();
+    this.pollTimer = setTimeout(() => {
+      this.pollTimer = null;
+      void this.poll(runId, generation);
+    }, POLL_INTERVAL_MS);
+  }
+
+  private clearPollTimer(): void {
+    if (this.pollTimer === null) return;
+    clearTimeout(this.pollTimer);
+    this.pollTimer = null;
+  }
+}
+
+function compareNullableScoreDescending(
+  left: number | null,
+  right: number | null,
+): number {
+  if (left === right) return 0;
+  if (left === null) return 1;
+  if (right === null) return -1;
+  return right - left;
+}
+
+function renderTopicMarkdown(report: string): string {
+  const markdown = report.replace(
+    /\n?```whp-summary[^\S\r\n]*\r?\n[\s\S]*?\r?\n```[^\S\r\n]*(?:\r?\n[^\S\r\n]*)*$/u,
+    '',
+  );
+  const blocks = markdown.trim().split(/\r?\n\r?\n+/u);
+  return blocks.map((block) => renderMarkdownBlock(block)).join('');
+}
+
+function renderMarkdownBlock(block: string): string {
+  const heading = /^(#{1,3})[ \t]+(.+)$/u.exec(block);
+  if (heading) {
+    const level = heading[1]!.length;
+    return `<h${level}>${renderInlineMarkdown(heading[2]!)}</h${level}>`;
+  }
+
+  const lines = block.split(/\r?\n/u);
+  const table = renderMarkdownTable(lines);
+  if (table !== null) return table;
+  if (lines.every((line) => /^[-*][ \t]+/u.test(line))) {
+    const items = lines.map((line) =>
+      `<li>${renderInlineMarkdown(line.replace(/^[-*][ \t]+/u, ''))}</li>`);
+    return `<ul>${items.join('')}</ul>`;
+  }
+  if (lines.every((line) => /^\d+\.[ \t]+/u.test(line))) {
+    const items = lines.map((line) =>
+      `<li>${renderInlineMarkdown(line.replace(/^\d+\.[ \t]+/u, ''))}</li>`);
+    return `<ol>${items.join('')}</ol>`;
+  }
+  if (lines.every((line) => /^>[ \t]?/u.test(line))) {
+    return `<blockquote>${renderInlineMarkdown(
+      lines.map((line) => line.replace(/^>[ \t]?/u, '')).join(' '),
+    )}</blockquote>`;
+  }
+  if (lines.length === 1 && /^-{3,}$/u.test(lines[0]!.trim())) {
+    return '<hr>';
+  }
+  return `<p>${lines.map(renderInlineMarkdown).join('<br>')}</p>`;
+}
+
+function renderInlineMarkdown(value: string): string {
+  const links: string[] = [];
+  const withLinkPlaceholders = value.replace(
+    /\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/gu,
+    (_match, label: string, href: string) => {
+      const index = links.length;
+      links.push(
+        `<a href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)}</a>`,
+      );
+      return `\u0000LINK${index}\u0000`;
+    },
+  );
+  return escapeHtml(withLinkPlaceholders)
+    .replace(/`([^`]+)`/gu, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/gu, '<strong>$1</strong>')
+    .replace(/\*([^*]+)\*/gu, '<em>$1</em>')
+    .replace(/\u0000LINK(\d+)\u0000/gu, (_match, index: string) =>
+      links[Number(index)] ?? '');
+}
+
+function renderMarkdownTable(lines: string[]): string | null {
+  if (lines.length < 2) return null;
+  const headers = tableCells(lines[0]!);
+  const divider = tableCells(lines[1]!);
+  if (
+    headers === null
+    || divider === null
+    || headers.length !== divider.length
+    || !divider.every((cell) => /^:?-{3,}:?$/u.test(cell))
+  ) {
+    return null;
+  }
+
+  const rows: string[][] = [];
+  for (const line of lines.slice(2)) {
+    const cells = tableCells(line);
+    if (cells === null || cells.length !== headers.length) return null;
+    rows.push(cells);
+  }
+  return [
+    '<table><thead><tr>',
+    ...headers.map((cell) => `<th scope="col">${renderInlineMarkdown(cell)}</th>`),
+    '</tr></thead><tbody>',
+    ...rows.map((row) =>
+      `<tr>${row.map((cell) => `<td>${renderInlineMarkdown(cell)}</td>`).join('')}</tr>`),
+    '</tbody></table>',
+  ].join('');
+}
+
+function tableCells(line: string): string[] | null {
+  const trimmed = line.trim();
+  if (!trimmed.includes('|')) return null;
+  const withoutEdges = trimmed
+    .replace(/^\|/u, '')
+    .replace(/\|$/u, '');
+  return withoutEdges.split('|').map((cell) => cell.trim());
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
+function textareaValue(event: Event): string {
+  return event.target instanceof HTMLTextAreaElement
+    ? event.target.value
+    : '';
+}
+
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
+}
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return typeof error === 'string' ? error : 'Operation failed.';
+}

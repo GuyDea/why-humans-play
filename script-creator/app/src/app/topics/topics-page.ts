@@ -18,6 +18,7 @@ import {
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
 import { STUDIO_SESSION } from '../studio-session';
+import { FullRunPanel } from './full-run-panel';
 import { buildTopicOperationInputs } from './inputs';
 
 const TOPIC_GATE_NAMES = [
@@ -61,6 +62,7 @@ interface GuardrailPresentation {
 @Component({
   selector: 'app-topics-page',
   standalone: true,
+  imports: [FullRunPanel],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="topics-page" data-testid="topics-page">
@@ -285,6 +287,8 @@ interface GuardrailPresentation {
           </div>
         </section>
       </div>
+
+      <app-full-run-panel />
     </main>
   `,
   styles: `
