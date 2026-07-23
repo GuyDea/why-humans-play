@@ -4,7 +4,15 @@ import { buildApp } from '../../src/http/app.js';
 const NONCE = 'test-launch-nonce';
 const app = buildApp({
   nonce: NONCE,
-  operationService: {},
+  operationService: {
+    submit: () => 'job-1',
+    get: () => {
+      throw new Error('operation not found: job-1');
+    },
+    events: () => [],
+    cancel: () => {},
+    result: () => ({ kind: 'pending' }),
+  },
   documentService: {},
   artifactService: {},
   validatorService: {},

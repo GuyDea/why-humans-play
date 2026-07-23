@@ -3,7 +3,12 @@ import { resolve } from 'node:path';
 import type { JobStore } from '../job-store.js';
 import { jobPaths } from '../runner-status.js';
 import type { JobSupervisor } from '../supervisor.js';
-import type { CodexEvent, JobEnvelope, JobRecord } from '../types.js';
+import type {
+  CodexEvent,
+  JobEnvelope,
+  JobRecord,
+  JobState,
+} from '../types.js';
 import { buildEnvelopePrompt } from './envelope.js';
 import {
   OPERATIONS,
@@ -130,6 +135,10 @@ export class OperationService {
     const events = this.supervisor.events(id, fromSeq);
     this.observeEvents(job, events);
     return events;
+  }
+
+  state(id: string): JobState {
+    return this.requireJob(id).state;
   }
 
   cancel(id: string): void {
