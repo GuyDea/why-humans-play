@@ -92,6 +92,17 @@ early `done`, five resumed codex events after `Last-Event-ID`, tokens
 in=49424/out=932/reasoning=690, and the cancelled stream showing two codex events plus
 exactly one terminal `done`.
 
+Two further confirmation rounds hardened the wave: atomic timeout transitions with
+boot-order deadline enforcement before reattach reconciliation (a late runner completion
+can never flip a timed-out operation back), strict raw-frame SSE regressions including
+cancel-during-retry, resume ancestry preserved across schema retries, deadline timer
+disposal, duplicate-`done` detection in the E2E, and the non-clobbering conflict
+protocol (concurrent winner always left installed; losing versions parked as
+`.sc-conflict-*`/`.sc-displaced-*`). Final state: 30 files / 182 tests green three
+consecutive host runs, typecheck clean, E2E reverified (single terminal `done` on both
+completion and cancellation streams), and the third confirmation review returned
+PASS / APPROVED with no new findings.
+
 ## Verdict
 
 **The backend is real.** The full path — HTTP request → nonce gate → envelope →
