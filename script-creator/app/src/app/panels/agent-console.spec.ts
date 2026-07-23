@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
+import type { OperationListResponse } from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
 import {
   AgentConsole,
@@ -20,6 +21,17 @@ import {
 
 interface Meta {
   operation: string;
+}
+
+function deferred<T>(): {
+  promise: Promise<T>;
+  resolve(value: T): void;
+} {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((complete) => {
+    resolve = complete;
+  });
+  return { promise, resolve };
 }
 
 function tracked(
@@ -104,18 +116,50 @@ describe('AgentConsoleModel', () => {
     expect(model.selected()).toBe(resumed);
   });
 
-  it('renders tracker records with working Cancel and Re-roll controls', async () => {
-    const operation = tracked('op-1', {
+  it('renders durable records with live detail and daemon-backed Cancel', async () => {
+    const operation = tracked('op-running', {
       phase: 'streaming',
       entries: [{ seq: 1, kind: 'message', text: 'Checking the hook.' }],
     });
-    const cancel = vi.fn(async () => undefined);
+    const trackerCancel = vi.fn(async () => undefined);
     const tracker: AgentConsoleTracker<Meta> = {
       history: signal([operation]),
-      cancel,
+      cancel: trackerCancel,
       resume: vi.fn(),
     };
     const model = new AgentConsoleModel(tracker);
+    const listOps = vi.fn(async () => ({
+      operations: [
+        {
+          id: 'op-running',
+          operation: 'review',
+          state: 'running',
+          createdAt: '2026-07-23T11:00:00.000Z',
+          finishedAt: null,
+          stalled: false,
+          usageAvailable: 1 as const,
+          inputTokens: 120,
+          cachedInputTokens: 40,
+          outputTokens: 30,
+          reasoningOutputTokens: 12,
+        },
+        {
+          id: 'op-completed',
+          operation: 'rewrite-selection',
+          state: 'completed',
+          createdAt: '2026-07-23T10:00:00.000Z',
+          finishedAt: '2026-07-23T10:00:05.000Z',
+          stalled: false,
+          usageAvailable: 0 as const,
+          inputTokens: null,
+          cachedInputTokens: null,
+          outputTokens: null,
+          reasoningOutputTokens: null,
+        },
+      ],
+    }));
+    const cancel = vi.fn(async () => ({ id: 'op-running' }));
+    const client = { listOps, cancel };
     const application = await createApplication({
       providers: [provideZonelessChangeDetection()],
     });
@@ -128,11 +172,34 @@ describe('AgentConsoleModel', () => {
     const modelNode = component.instance.model[ɵSIGNAL] as
       ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
     modelNode.applyValueToInputSignal(modelNode, model);
-    application.attachView(component.hostView);
-    component.changeDetectorRef.detectChanges();
 
     try {
+      const clientInput = (
+        component.instance as AgentConsole & {
+          client?: {
+            [ɵSIGNAL]: ɵInputSignalNode<typeof client, typeof client>;
+          };
+        }
+      ).client;
+      expect(clientInput).toBeDefined();
+      if (!clientInput) return;
+      const clientNode = clientInput[ɵSIGNAL];
+      clientNode.applyValueToInputSignal(clientNode, client);
+      application.attachView(component.hostView);
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(listOps).toHaveBeenCalledOnce());
+      component.changeDetectorRef.detectChanges();
+
       expect(host.textContent).toContain('Checking the hook.');
+      expect(host.textContent).toContain('op-running');
+      expect(host.textContent).toContain('op-completed');
+      expect(host.textContent).toContain('running');
+      expect(host.textContent).toContain('completed');
+      const operationButtons = Array.from(
+        host.querySelectorAll<HTMLButtonElement>('nav button'),
+      );
+      operationButtons[1]!.click();
+      component.changeDetectorRef.detectChanges();
       const controls = Array.from(
         host.querySelectorAll<HTMLButtonElement>('.actions button'),
       );
@@ -140,10 +207,171 @@ describe('AgentConsoleModel', () => {
         'Cancel',
         'Re-roll',
       ]);
+      expect(controls[0]?.disabled).toBe(true);
+      operationButtons[0]!.click();
+      component.changeDetectorRef.detectChanges();
+      expect(controls[0]?.disabled).toBe(false);
       controls[0]!.click();
-      await vi.waitFor(() => expect(cancel).toHaveBeenCalledWith('op-1'));
+      await vi.waitFor(() => expect(cancel).toHaveBeenCalledWith('op-running'));
+      expect(trackerCancel).not.toHaveBeenCalled();
     } finally {
       application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
+
+  it('refreshes durable operations every five seconds only while mounted', async () => {
+    const tracker: AgentConsoleTracker<Meta> = {
+      history: signal([]),
+      cancel: vi.fn(),
+      resume: vi.fn(),
+    };
+    const model = new AgentConsoleModel(tracker);
+    const listOps = vi.fn(async () => ({ operations: [] }));
+    const client = {
+      listOps,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    let attached = false;
+
+    try {
+      const clientInput = (
+        component.instance as AgentConsole & {
+          client?: {
+            [ɵSIGNAL]: ɵInputSignalNode<typeof client, typeof client>;
+          };
+        }
+      ).client;
+      expect(clientInput).toBeDefined();
+      if (!clientInput) return;
+      const clientNode = clientInput[ɵSIGNAL];
+      clientNode.applyValueToInputSignal(clientNode, client);
+      vi.useFakeTimers();
+      application.attachView(component.hostView);
+      attached = true;
+      component.changeDetectorRef.detectChanges();
+      await vi.advanceTimersByTimeAsync(0);
+
+      expect(listOps).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(listOps).toHaveBeenCalledTimes(2);
+
+      application.detachView(component.hostView);
+      attached = false;
+      component.destroy();
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(listOps).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+      if (attached) application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
+
+  it('ignores an older operation snapshot that resolves after a newer poll', async () => {
+    const tracker: AgentConsoleTracker<Meta> = {
+      history: signal([]),
+      cancel: vi.fn(),
+      resume: vi.fn(),
+    };
+    const model = new AgentConsoleModel(tracker);
+    const older = deferred<OperationListResponse>();
+    const newer = deferred<OperationListResponse>();
+    const listOps = vi.fn()
+      .mockReturnValueOnce(older.promise)
+      .mockReturnValueOnce(newer.promise);
+    const client = {
+      listOps,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    const clientNode = component.instance.client[ɵSIGNAL] as
+      ɵInputSignalNode<typeof client, typeof client>;
+    clientNode.applyValueToInputSignal(clientNode, client);
+    let attached = false;
+
+    try {
+      vi.useFakeTimers();
+      application.attachView(component.hostView);
+      attached = true;
+      component.changeDetectorRef.detectChanges();
+      expect(listOps).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(5_000);
+      expect(listOps).toHaveBeenCalledTimes(2);
+      newer.resolve({
+        operations: [{
+          id: 'op-race',
+          operation: 'review',
+          state: 'completed',
+          createdAt: '2026-07-23T11:00:00.000Z',
+          finishedAt: '2026-07-23T11:00:05.000Z',
+          stalled: false,
+          usageAvailable: 1,
+          inputTokens: 120,
+          cachedInputTokens: 40,
+          outputTokens: 30,
+          reasoningOutputTokens: 12,
+        }],
+      });
+      await vi.advanceTimersByTimeAsync(0);
+      component.changeDetectorRef.detectChanges();
+      expect(host.querySelector('nav small')?.textContent?.trim())
+        .toBe('completed');
+
+      older.resolve({
+        operations: [{
+          id: 'op-race',
+          operation: 'review',
+          state: 'running',
+          createdAt: '2026-07-23T11:00:00.000Z',
+          finishedAt: null,
+          stalled: false,
+          usageAvailable: 0,
+          inputTokens: null,
+          cachedInputTokens: null,
+          outputTokens: null,
+          reasoningOutputTokens: null,
+        }],
+      });
+      await vi.advanceTimersByTimeAsync(0);
+      component.changeDetectorRef.detectChanges();
+
+      expect(host.querySelector('nav small')?.textContent?.trim())
+        .toBe('completed');
+      expect(
+        host.querySelector<HTMLButtonElement>('.actions button')?.disabled,
+      ).toBe(true);
+    } finally {
+      vi.useRealTimers();
+      if (attached) application.detachView(component.hostView);
       component.destroy();
       application.destroy();
       host.remove();

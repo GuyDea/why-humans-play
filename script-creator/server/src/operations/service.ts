@@ -57,6 +57,20 @@ export interface OperationRecord
   stalled: boolean;
 }
 
+export interface OperationListRecord {
+  id: string;
+  operation: OperationName;
+  state: OperationState;
+  createdAt: string;
+  finishedAt: string | null;
+  stalled: boolean;
+  usageAvailable: 0 | 1;
+  inputTokens: number | null;
+  cachedInputTokens: number | null;
+  outputTokens: number | null;
+  reasoningOutputTokens: number | null;
+}
+
 export type OperationServiceResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -169,6 +183,25 @@ export class OperationService {
       stalled: job.state === 'running'
         && this.clock.now() - activity.lastEventAt >= STALL_MS,
     };
+  }
+
+  list(): OperationListRecord[] {
+    return this.store.recentOperations().map((operation) => {
+      const record = this.get(operation.id);
+      return {
+        id: record.id,
+        operation: record.operation,
+        state: record.state,
+        createdAt: operation.createdAt,
+        finishedAt: record.finishedAt,
+        stalled: record.stalled,
+        usageAvailable: record.usageAvailable,
+        inputTokens: record.inputTokens,
+        cachedInputTokens: record.cachedInputTokens,
+        outputTokens: record.outputTokens,
+        reasoningOutputTokens: record.reasoningOutputTokens,
+      };
+    });
   }
 
   /**

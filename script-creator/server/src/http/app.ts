@@ -27,7 +27,7 @@ import {
 
 type OperationHttpService = Pick<
   OperationService,
-  'submit' | 'get' | 'events' | 'cancel' | 'result'
+  'submit' | 'list' | 'get' | 'events' | 'cancel' | 'result'
 >;
 
 export type DocumentHttpService = Pick<
@@ -267,6 +267,10 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       return sendOperationError(reply, error);
     }
   });
+
+  app.get('/api/ops', () => ({
+    operations: options.operationService.list(),
+  }));
 
   app.get<{ Params: OperationParams }>('/api/ops/:id', async (request, reply) => {
     try {

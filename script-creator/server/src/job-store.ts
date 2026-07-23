@@ -223,6 +223,14 @@ export class JobStore {
     return row ? toOperation(row) : null;
   }
 
+  recentOperations(): StoredOperation[] {
+    return this.db.prepare<[], OperationRow>(
+      `SELECT * FROM operations
+       ORDER BY created_at DESC, rowid DESC
+       LIMIT 100`,
+    ).all().map(toOperation);
+  }
+
   nonTerminalOperations(): StoredOperation[] {
     return this.db.prepare<[], OperationRow>(
       `SELECT * FROM operations

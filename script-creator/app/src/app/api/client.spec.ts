@@ -34,6 +34,46 @@ afterEach(() => {
 });
 
 describe('DaemonClient', () => {
+  it('lists durable operation summaries with the nonce', async () => {
+    const response = {
+      operations: [
+        {
+          id: 'op-2',
+          operation: 'review',
+          state: 'completed',
+          createdAt: '2026-07-23T11:00:00.000Z',
+          finishedAt: '2026-07-23T11:00:05.000Z',
+          stalled: false,
+          usageAvailable: 1,
+          inputTokens: 120,
+          cachedInputTokens: 40,
+          outputTokens: 30,
+          reasoningOutputTokens: 12,
+        },
+      ],
+    };
+    const fetchMock = vi.fn(async () => jsonResponse(response));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    const listOps = (
+      client as DaemonClient & {
+        listOps?: () => Promise<typeof response>;
+      }
+    ).listOps;
+    expect(listOps).toBeTypeOf('function');
+    if (!listOps) return;
+    await expect(listOps.call(client)).resolves.toEqual(response);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/api/ops`,
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('x-sc-nonce'))
+      .toBe(NONCE);
+  });
+
   it('maps operation, draft, and validator calls and authenticates every request', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({}));
     vi.stubGlobal('fetch', fetchMock);

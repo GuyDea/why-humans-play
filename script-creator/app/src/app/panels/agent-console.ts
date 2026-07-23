@@ -3,10 +3,16 @@ import {
   Component,
   computed,
   input,
+  type OnDestroy,
+  type OnInit,
   signal,
   type Signal,
 } from '@angular/core';
-import type { SseFrame } from '../api/client';
+import type {
+  OperationListResponse,
+  OperationSummary,
+  SseFrame,
+} from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
 
 export type StudioConsoleKind =
@@ -30,6 +36,11 @@ export interface AgentConsoleTracker<Meta = unknown> {
   >;
   cancel(id: string): Promise<void>;
   resume(id: string): TrackedOperation<Meta, StudioConsoleEntry>;
+}
+
+export interface AgentConsoleClient {
+  listOps(): Promise<OperationListResponse>;
+  cancel(id: string): Promise<unknown>;
 }
 
 export class AgentConsoleModel<Meta = unknown> {
@@ -194,77 +205,100 @@ function stringValue(value: unknown): string {
           <p class="eyebrow">Operations</p>
           <h2 id="agent-console-heading">Agent console</h2>
         </div>
-        <span class="count">{{ model().operations().length }}</span>
+        <span class="count">{{ operations().length }}</span>
       </header>
+
+      @if (loadError()) {
+        <p class="load-error" role="alert">{{ loadError() }}</p>
+      }
 
       <div class="console-layout">
         <nav aria-label="Operation history">
           @for (
-            operation of model().operations();
-            track operation.id() ?? $index
+            operation of operations();
+            track operation.id
           ) {
             <button
               type="button"
-              [class.active]="model().selected() === operation"
-              (click)="model().selectOperation(operation)"
+              [class.active]="isSelected(operation)"
+              (click)="selectOperation(operation)"
             >
-              <strong>{{ operationLabel(operation.meta) }}</strong>
-              <span>{{ operation.id() ?? 'Submitting…' }}</span>
-              <small [attr.data-phase]="operation.phase()">
-                {{ operation.phase() }}
+              <strong>{{ operation.operation }}</strong>
+              <span>{{ operation.id }}</span>
+              <small [attr.data-state]="operation.state">
+                {{ operation.state }}
               </small>
             </button>
           } @empty {
-            <p class="empty">Operations will appear here when an agent starts.</p>
+            <p class="empty">No durable operations recorded yet.</p>
           }
         </nav>
 
-        @if (model().selected(); as operation) {
+        @if (selected(); as operation) {
           <div class="stream">
             <div class="telemetry" aria-label="Operation telemetry">
               <span>
-                Tokens
-                <strong>{{ tokenLabel(operation.telemetry().tokens) }}</strong>
+                Input
+                <strong>{{ tokenLabel(operation.inputTokens) }}</strong>
               </span>
               <span>
-                Elapsed
-                <strong>{{ elapsedLabel(operation.telemetry().elapsed) }}</strong>
+                Cached input
+                <strong>{{ tokenLabel(operation.cachedInputTokens) }}</strong>
               </span>
               <span>
-                Resume hops
-                <strong>{{ operation.remainingHops() }}</strong>
+                Output
+                <strong>{{ tokenLabel(operation.outputTokens) }}</strong>
               </span>
-              @if (operation.stallFlag()) {
+              <span>
+                Reasoning
+                <strong>{{ tokenLabel(operation.reasoningOutputTokens) }}</strong>
+              </span>
+              <span>
+                Usage
+                <strong>
+                  {{ operation.usageAvailable ? 'reported' : 'unavailable' }}
+                </strong>
+              </span>
+              @if (operation.stalled) {
                 <span class="stalled" role="status">Stalled</span>
               }
             </div>
 
-            <ol aria-label="Console entries" aria-live="polite">
-              @for (
-                entry of operation.consoleEntries();
-                track entry.seq + '-' + $index
-              ) {
-                <li [attr.data-kind]="entry.kind">
-                  <span>{{ entry.kind }}</span>
-                  <pre>{{ entry.text }}</pre>
+            @if (liveOperation(operation); as live) {
+              <ol aria-label="Console entries" aria-live="polite">
+                @for (
+                  entry of live.consoleEntries();
+                  track entry.seq + '-' + $index
+                ) {
+                  <li [attr.data-kind]="entry.kind">
+                    <span>{{ entry.kind }}</span>
+                    <pre>{{ entry.text }}</pre>
+                  </li>
+                } @empty {
+                  <li class="empty">Waiting for the first console event…</li>
+                }
+              </ol>
+            } @else {
+              <ol aria-label="Console entries">
+                <li class="empty">
+                  Live stream detail is unavailable; this durable summary remains
+                  available.
                 </li>
-              } @empty {
-                <li class="empty">Waiting for the first console event…</li>
-              }
-            </ol>
+              </ol>
+            }
 
             <div class="actions">
               <button
                 type="button"
-                [disabled]="!model().canCancel(operation)"
-                (click)="cancel()"
+                [disabled]="!canCancel(operation)"
+                (click)="cancel(operation)"
               >
                 Cancel
               </button>
               <button
                 type="button"
-                [disabled]="!operation.canResume()"
-                (click)="model().resumeSelected()"
+                [disabled]="!canReroll(operation)"
+                (click)="reroll(operation)"
               >
                 Re-roll
               </button>
@@ -326,6 +360,13 @@ function stringValue(value: unknown): string {
       font-size: 0.7rem;
     }
 
+    .load-error {
+      border-bottom: 1px solid var(--whp-line);
+      padding: 0.75rem 1rem;
+      color: var(--whp-accent);
+      font-size: 0.75rem;
+    }
+
     .console-layout {
       display: grid;
       grid-template-columns: minmax(11rem, 15rem) minmax(0, 1fr);
@@ -377,6 +418,7 @@ function stringValue(value: unknown): string {
     }
 
     .telemetry {
+      flex-wrap: wrap;
       border-bottom: 1px solid var(--whp-line);
     }
 
@@ -478,24 +520,109 @@ function stringValue(value: unknown): string {
     }
   `,
 })
-export class AgentConsole {
+export class AgentConsole implements OnInit, OnDestroy {
   readonly model = input.required<AgentConsoleModel<unknown>>();
+  readonly client = input.required<AgentConsoleClient>();
+  protected readonly operations =
+    signal<readonly OperationSummary[]>([]);
+  protected readonly loadError = signal<string | null>(null);
+  private readonly selectedId = signal<string | null>(null);
+  protected readonly selected = computed(() => {
+    const operations = this.operations();
+    const id = this.selectedId();
+    return operations.find((operation) => operation.id === id)
+      ?? operations[0]
+      ?? null;
+  });
+  private refreshTimer: ReturnType<typeof globalThis.setInterval> | null =
+    null;
+  private refreshGeneration = 0;
+  private destroyed = false;
 
-  protected operationLabel(meta: unknown): string {
-    if (!meta || typeof meta !== 'object') return 'Operation';
-    const operation = (meta as Record<string, unknown>)['operation'];
-    return typeof operation === 'string' ? operation : 'Operation';
+  ngOnInit(): void {
+    void this.refresh();
+    this.refreshTimer = globalThis.setInterval(
+      () => void this.refresh(),
+      5_000,
+    );
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    if (this.refreshTimer !== null) {
+      globalThis.clearInterval(this.refreshTimer);
+      this.refreshTimer = null;
+    }
+  }
+
+  protected selectOperation(operation: OperationSummary): void {
+    this.selectedId.set(operation.id);
+    const live = this.liveOperation(operation);
+    if (live) this.model().selectOperation(live);
+  }
+
+  protected isSelected(operation: OperationSummary): boolean {
+    return this.selected()?.id === operation.id;
+  }
+
+  protected liveOperation(
+    operation: OperationSummary,
+  ): TrackedOperation<unknown, StudioConsoleEntry> | null {
+    return this.model().operations().find(
+      (candidate) => candidate.id() === operation.id,
+    ) ?? null;
+  }
+
+  protected canCancel(operation: OperationSummary): boolean {
+    return ['queued', 'running', 'cancelling'].includes(operation.state);
+  }
+
+  protected canReroll(operation: OperationSummary): boolean {
+    return this.liveOperation(operation)?.canResume() ?? false;
   }
 
   protected tokenLabel(tokens: number | null): string {
     return formatTokens(tokens);
   }
 
-  protected elapsedLabel(milliseconds: number | null): string {
-    return formatElapsed(milliseconds);
+  protected cancel(operation: OperationSummary): void {
+    if (!this.canCancel(operation)) return;
+    void this.cancelAndRefresh(operation.id);
   }
 
-  protected cancel(): void {
-    void this.model().cancelSelected();
+  protected reroll(operation: OperationSummary): void {
+    const live = this.liveOperation(operation);
+    if (!live?.canResume()) return;
+    this.model().selectOperation(live);
+    this.model().resumeSelected();
   }
+
+  private async cancelAndRefresh(id: string): Promise<void> {
+    try {
+      await this.client().cancel(id);
+      await this.refresh();
+    } catch (error) {
+      this.loadError.set(errorMessage(error));
+    }
+  }
+
+  private async refresh(): Promise<void> {
+    const generation = ++this.refreshGeneration;
+    try {
+      const { operations } = await this.client().listOps();
+      if (this.destroyed || generation !== this.refreshGeneration) return;
+      this.operations.set(operations);
+      this.loadError.set(null);
+    } catch (error) {
+      if (!this.destroyed && generation === this.refreshGeneration) {
+        this.loadError.set(errorMessage(error));
+      }
+    }
+  }
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error
+    ? error.message
+    : 'Unable to load durable operations.';
 }

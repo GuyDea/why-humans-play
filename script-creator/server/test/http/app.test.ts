@@ -18,6 +18,7 @@ const app = buildApp({
   nonce: NONCE,
   operationService: {
     submit: () => 'job-1',
+    list: () => [],
     get: () => {
       throw new Error('operation not found: job-1');
     },
@@ -51,6 +52,7 @@ describe('buildApp static serving', () => {
     staticRoot,
     operationService: {
       submit: () => 'job-1',
+      list: () => [],
       get: () => {
         throw new Error('operation not found: job-1');
       },

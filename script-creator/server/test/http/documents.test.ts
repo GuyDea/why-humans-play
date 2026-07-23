@@ -39,6 +39,7 @@ function makeFixture(ids: string[]): Fixture {
     nonce: NONCE,
     operationService: {
       submit: () => 'operation-1',
+      list: () => [],
       get: () => {
         throw new Error('operation not found: operation-1');
       },

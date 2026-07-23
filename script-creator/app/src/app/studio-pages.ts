@@ -36,10 +36,13 @@ export class StudioPage {
   template: `
     <main class="console-page">
       <header>
-        <p>Shared runtime history</p>
+        <p>Durable operation history</p>
         <h1>Agent console</h1>
       </header>
-      <app-agent-console [model]="model" />
+      <app-agent-console
+        [client]="session.client"
+        [model]="model"
+      />
     </main>
   `,
   styles: `
@@ -81,6 +84,6 @@ export class StudioPage {
   `,
 })
 export class AgentConsolePage {
-  private readonly session = inject(STUDIO_SESSION);
+  protected readonly session = inject(STUDIO_SESSION);
   protected readonly model = new AgentConsoleModel(this.session);
 }

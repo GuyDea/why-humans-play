@@ -44,6 +44,24 @@ export interface OperationRecord {
   error: string | null;
 }
 
+export interface OperationSummary {
+  id: string;
+  operation: OperationName;
+  state: OperationState;
+  createdAt: string;
+  finishedAt: string | null;
+  stalled: boolean;
+  usageAvailable: 0 | 1;
+  inputTokens: number | null;
+  cachedInputTokens: number | null;
+  outputTokens: number | null;
+  reasoningOutputTokens: number | null;
+}
+
+export interface OperationListResponse {
+  operations: OperationSummary[];
+}
+
 export type OperationResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -166,6 +184,10 @@ export class DaemonClient {
       method: 'POST',
       body: JSON.stringify({ operation, inputs }),
     });
+  }
+
+  async listOps(): Promise<OperationListResponse> {
+    return this.request('/api/ops');
   }
 
   async getOp(id: string): Promise<OperationRecord> {

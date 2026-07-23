@@ -75,6 +75,41 @@ async function submit(
   return body.id;
 }
 
+function persistOperation(
+  fixture: Fixture,
+  input: {
+    id: string;
+    operation: 'review' | 'rewrite-selection' | 'generate-alternatives';
+    state: 'completed' | 'failed' | 'cancelled';
+    createdAt: string;
+    usage?: {
+      input_tokens: number;
+      cached_input_tokens: number;
+      output_tokens: number;
+      reasoning_output_tokens: number;
+    };
+  },
+): void {
+  fixture.store.createOperationWithJob(
+    {
+      id: input.id,
+      name: input.operation,
+      createdAt: input.createdAt,
+      deadlineAt: '2026-07-23T12:00:00.000Z',
+    },
+    {
+      jobId: input.id,
+      prompt: 'persisted operation fixture',
+      cwd: fixture.root,
+      sandbox: 'read-only',
+    },
+    join(fixture.root, 'jobs', input.id),
+  );
+  fixture.store.recordUsage(input.id, input.usage);
+  fixture.store.setState(input.id, input.state);
+  fixture.ids.push(input.id);
+}
+
 function sseEventSequences(body: string): number[] {
   return [...body.matchAll(/^id: (\d+)$/gm)].map((match) => Number(match[1]));
 }
@@ -128,6 +163,142 @@ afterEach(async () => {
 });
 
 describe('operations HTTP API', () => {
+  it('lists no operations when durable history is empty', async () => {
+    const fixture = makeFixture('operation-schema');
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ operations: [] });
+  });
+
+  it('lists durable operations newest-first with mixed states and telemetry', async () => {
+    const fixture = makeFixture('operation-schema');
+    persistOperation(fixture, {
+      id: 'op-completed',
+      operation: 'review',
+      state: 'completed',
+      createdAt: '2026-07-23T09:00:00.000Z',
+      usage: {
+        input_tokens: 120,
+        cached_input_tokens: 40,
+        output_tokens: 30,
+        reasoning_output_tokens: 12,
+      },
+    });
+    persistOperation(fixture, {
+      id: 'op-failed',
+      operation: 'rewrite-selection',
+      state: 'failed',
+      createdAt: '2026-07-23T10:00:00.000Z',
+    });
+    persistOperation(fixture, {
+      id: 'op-cancelled',
+      operation: 'generate-alternatives',
+      state: 'cancelled',
+      createdAt: '2026-07-23T11:00:00.000Z',
+      usage: {
+        input_tokens: 90,
+        cached_input_tokens: 20,
+        output_tokens: 10,
+        reasoning_output_tokens: 4,
+      },
+    });
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      operations: [
+        {
+          id: 'op-cancelled',
+          operation: 'generate-alternatives',
+          state: 'cancelled',
+          createdAt: '2026-07-23T11:00:00.000Z',
+          finishedAt: expect.any(String),
+          stalled: false,
+          usageAvailable: 1,
+          inputTokens: 90,
+          cachedInputTokens: 20,
+          outputTokens: 10,
+          reasoningOutputTokens: 4,
+        },
+        {
+          id: 'op-failed',
+          operation: 'rewrite-selection',
+          state: 'failed',
+          createdAt: '2026-07-23T10:00:00.000Z',
+          finishedAt: expect.any(String),
+          stalled: false,
+          usageAvailable: 0,
+          inputTokens: null,
+          cachedInputTokens: null,
+          outputTokens: null,
+          reasoningOutputTokens: null,
+        },
+        {
+          id: 'op-completed',
+          operation: 'review',
+          state: 'completed',
+          createdAt: '2026-07-23T09:00:00.000Z',
+          finishedAt: expect.any(String),
+          stalled: false,
+          usageAvailable: 1,
+          inputTokens: 120,
+          cachedInputTokens: 40,
+          outputTokens: 30,
+          reasoningOutputTokens: 12,
+        },
+      ],
+    });
+  });
+
+  it('caps durable operation history at the newest 100 rows', async () => {
+    const fixture = makeFixture('operation-schema');
+    for (let index = 0; index < 101; index += 1) {
+      persistOperation(fixture, {
+        id: `op-${String(index).padStart(3, '0')}`,
+        operation: 'review',
+        state: 'completed',
+        createdAt: new Date(
+          Date.parse('2026-07-23T00:00:00.000Z') + index * 1_000,
+        ).toISOString(),
+      });
+    }
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops',
+      headers: AUTH,
+    });
+    const body = response.json<{ operations: Array<{ id: string }> }>();
+
+    expect(response.statusCode).toBe(200);
+    expect(body.operations).toHaveLength(100);
+    expect(body.operations[0]?.id).toBe('op-100');
+    expect(body.operations.at(-1)?.id).toBe('op-001');
+  });
+
+  it('rejects operation-list reads without the nonce', async () => {
+    const fixture = makeFixture('operation-schema');
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'invalid nonce' });
+  });
+
   it('submits, streams, and exposes a terminal operation with telemetry and result', async () => {
     const fixture = makeFixture('operation-schema');
     const id = await submit(fixture);
@@ -357,6 +528,7 @@ describe('operations HTTP API', () => {
       nonce: NONCE,
       operationService: {
         submit: () => 'job-heartbeat',
+        list: () => [],
         events: () => [],
         get: () => ({ state }) as JobRecord & {
           operation: 'rewrite-selection';
@@ -394,6 +566,7 @@ describe('operations HTTP API', () => {
         submit: () => {
           throw new Error('database disk image is malformed');
         },
+        list: () => [],
         events: () => [],
         get: () => {
           throw new Error('database disk image is malformed');
