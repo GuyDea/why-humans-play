@@ -1,8 +1,11 @@
 export type OperationName =
   | 'generate-scoped'
   | 'generate-episode'
+  | 'generate-architecture'
   | 'review'
+  | 'review-architecture'
   | 'rewrite-selection'
+  | 'rewrite-architecture-section'
   | 'generate-alternatives'
   | 'promote'
   | 'ideate'
@@ -249,6 +252,50 @@ export interface DraftDocument {
 }
 
 export type DraftFormat = 'annotated' | 'narration';
+
+export type ArchitectureOperationName =
+  | 'generate-architecture'
+  | 'review-architecture'
+  | 'rewrite-architecture-section';
+
+export interface ArchitectureSection {
+  key: string;
+  title: string;
+  md: string;
+}
+
+export interface ArchitectureState {
+  sections: ArchitectureSection[];
+  approvedMd: string | null;
+  approvedAt: string | null;
+  revisionSeq: number;
+  narrationReconciliationRequired: boolean;
+}
+
+export interface SaveArchitectureInput {
+  expectedRevisionSeq: number;
+  sections: ArchitectureSection[];
+  opId: string | null;
+  disposition: string;
+}
+
+export interface SavedArchitecture {
+  state: ArchitectureState;
+  revision: RevisionRecord;
+}
+
+export interface ArchitectureActionSteps {
+  revisionAppended: 'pending' | 'completed';
+  artifactWritten: 'pending' | 'completed';
+  pipelineUpserted: 'pending' | 'completed';
+  draftUpdated: 'pending' | 'completed';
+}
+
+export interface ArchitectureActionResult {
+  complete: boolean;
+  steps: ArchitectureActionSteps;
+  state: ArchitectureState;
+}
 
 export interface DraftSummary {
   id: string;
@@ -558,6 +605,81 @@ export class DaemonClient {
       method: 'PUT',
       body: JSON.stringify(input),
     });
+  }
+
+  async getArchitecture(id: string): Promise<ArchitectureState> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture`,
+    );
+  }
+
+  async saveArchitecture(
+    id: string,
+    input: SaveArchitectureInput,
+  ): Promise<SavedArchitecture> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async approveArchitecture(
+    id: string,
+    input: { expectedRevisionSeq: number },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/approve`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async reopenArchitecture(
+    id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/reopen`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async submitDraftOp(
+    draftId: string,
+    operation: OperationName,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/ops`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ operation, inputs }),
+      },
+    );
+  }
+
+  async resumeDraftOp(
+    draftId: string,
+    operationId: string,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/ops/${
+        encodeURIComponent(operationId)
+      }/resume`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ inputs }),
+      },
+    );
   }
 
   async listRevisions(id: string): Promise<RevisionRecord[]> {

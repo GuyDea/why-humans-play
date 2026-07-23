@@ -462,6 +462,145 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('maps architecture and draft-scoped operation routes with exact bodies', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const sections = [{
+      key: 'core-answer',
+      title: 'Core answer',
+      md: '### Core answer\n\nThe answer.\n',
+    }];
+
+    await client.getArchitecture('draft/one');
+    await client.saveArchitecture('draft/one', {
+      expectedRevisionSeq: 4,
+      sections,
+      opId: 'op/save',
+      disposition: 'architecture-proposals-accepted',
+    });
+    await client.approveArchitecture('draft/one', {
+      expectedRevisionSeq: 5,
+    });
+    await client.reopenArchitecture('draft/one', {
+      expectedRevisionSeq: 6,
+      confirmed: true,
+    });
+    await client.submitDraftOp(
+      'draft/one',
+      'generate-architecture',
+      { topic_brief: { topic: 'Supplied topic' } },
+    );
+    await client.resumeDraftOp(
+      'draft/one',
+      'op/one',
+      { architecture_md: 'Supplied architecture.' },
+    );
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture`,
+        method: 'PUT',
+        nonce: NONCE,
+        body: JSON.stringify({
+          expectedRevisionSeq: 4,
+          sections,
+          opId: 'op/save',
+          disposition: 'architecture-proposals-accepted',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/approve`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ expectedRevisionSeq: 5 }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/reopen`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          expectedRevisionSeq: 6,
+          confirmed: true,
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/ops`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          operation: 'generate-architecture',
+          inputs: { topic_brief: { topic: 'Supplied topic' } },
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/ops/op%2Fone/resume`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          inputs: { architecture_md: 'Supplied architecture.' },
+        }),
+      },
+    ]);
+  });
+
+  it('preserves architecture revision and repository CAS conflict bodies', async () => {
+    const revisionBody = {
+      error: 'architecture revision conflict',
+      current: {
+        sections: [],
+        approvedMd: null,
+        approvedAt: null,
+        revisionSeq: 8,
+        narrationReconciliationRequired: false,
+      },
+    };
+    const artifactBody = {
+      error: 'architecture artifact conflict',
+      currentHash: 'external-hash',
+      parked: ['mine.md', 'theirs.md'],
+      steps: {
+        revisionAppended: 'completed',
+        artifactWritten: 'pending',
+        pipelineUpserted: 'pending',
+        draftUpdated: 'pending',
+      },
+      state: revisionBody.current,
+    };
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(revisionBody, 409))
+      .mockResolvedValueOnce(jsonResponse(artifactBody, 409));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await expect(client.saveArchitecture('draft-1', {
+      expectedRevisionSeq: 7,
+      sections: [],
+      opId: null,
+      disposition: 'architecture-proposals-accepted',
+    })).rejects.toMatchObject({
+      status: 409,
+      body: revisionBody,
+    });
+    await expect(client.approveArchitecture('draft-1', {
+      expectedRevisionSeq: 8,
+    })).rejects.toMatchObject({
+      status: 409,
+      body: artifactBody,
+    });
+  });
+
   it('parses split SSE frames exactly and reconnects with the latest event id after a drop', async () => {
     vi.useFakeTimers();
     const fetchMock = vi.fn()
