@@ -377,35 +377,37 @@ export class ApprovalGate {
         </p>
       }
 
-      <button
-        type="button"
-        class="promote"
-        [disabled]="!gate().canPromote()"
-        (click)="gate().promote()"
-      >
-        Promote
-      </button>
+      @if (showPromote()) {
+        <button
+          type="button"
+          class="promote"
+          [disabled]="!gate().canPromote()"
+          (click)="gate().promote()"
+        >
+          Promote
+        </button>
 
-      @if (gate().activeOperation(); as operation) {
-        <section class="promote-stream" aria-labelledby="promote-stream-heading">
-          <div class="stream-heading">
-            <strong id="promote-stream-heading">Promotion console</strong>
-            <span>{{ operation.phase() }}</span>
-          </div>
-          <ol aria-live="polite">
-            @for (
-              entry of operation.consoleEntries();
-              track entry.seq + '-' + $index
-            ) {
-              <li>
-                <span>{{ entry.kind }}</span>
-                <pre>{{ entry.text }}</pre>
-              </li>
-            } @empty {
-              <li class="empty">Waiting for the first console event…</li>
-            }
-          </ol>
-        </section>
+        @if (gate().activeOperation(); as operation) {
+          <section class="promote-stream" aria-labelledby="promote-stream-heading">
+            <div class="stream-heading">
+              <strong id="promote-stream-heading">Promotion console</strong>
+              <span>{{ operation.phase() }}</span>
+            </div>
+            <ol aria-live="polite">
+              @for (
+                entry of operation.consoleEntries();
+                track entry.seq + '-' + $index
+              ) {
+                <li>
+                  <span>{{ entry.kind }}</span>
+                  <pre>{{ entry.text }}</pre>
+                </li>
+              } @empty {
+                <li class="empty">Waiting for the first console event…</li>
+              }
+            </ol>
+          </section>
+        }
       }
     </section>
   `,
@@ -581,6 +583,7 @@ export class ApprovalGate {
 export class BriefPanel {
   readonly model = input.required<BriefPanelModel>();
   readonly gate = input.required<ApprovalGate>();
+  readonly showPromote = input(true);
   protected readonly missingCreativePhaseMessage =
     MISSING_CREATIVE_PHASE_MESSAGE;
 

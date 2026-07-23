@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import {
   corePlugins,
+  parseMarkdown,
   schema,
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
@@ -530,6 +531,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private consoleMount?: ElementRef<HTMLElement>;
 
   private editorView: EditorView | null = null;
+  private applyingAcceptedNarration = false;
   private studioComposition: StudioComposition | null = null;
   private detachRuntime: (() => void) | null = null;
   private selectionContextDocument: DraftDocument | null = null;
@@ -586,6 +588,55 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       : `${remainder}s`;
   }
 
+  async replaceNarrationFromMarkdown(
+    markdown: string,
+    opId: string,
+  ): Promise<void> {
+    const view = this.editorView;
+    const draftId = this.activeDraftId;
+    const brief = this.brief();
+    if (!view || !draftId || !brief) {
+      throw new Error('The narration editor is not ready.');
+    }
+    const parsed = parseMarkdown(markdown);
+    const source = brief.draft().doc;
+    const preserved = preserveDraftDocument(
+      parsed.toJSON() as DocumentJson,
+      source,
+    );
+    const documentNode = schema.nodeFromJSON(preserved);
+    documentNode.check();
+    let transaction = view.state.tr.replaceWith(
+      0,
+      view.state.doc.content.size,
+      documentNode.content,
+    );
+    for (const [key, value] of Object.entries(documentNode.attrs)) {
+      transaction = transaction.setDocAttribute(key, value);
+    }
+
+    this.autosave.cancel();
+    this.applyingAcceptedNarration = true;
+    try {
+      view.dispatch(transaction);
+    } finally {
+      this.applyingAcceptedNarration = false;
+    }
+    const document = this.doc();
+    if (!document) throw new Error('Generated narration could not be parsed.');
+    const saved = await brief.save(draftId, {
+      doc: document,
+      opId,
+      disposition: 'episode-generation-accepted',
+    });
+    this.selectionContextDocument = saved.draft.doc;
+    this.doc.set(saved.draft.doc as DocumentJson);
+    this.currentDirty.set(false);
+    this.saveError.set(null);
+    this.revisions.update((revisions) => [...revisions, saved.revision]);
+    this.latestRevision.set(saved.revision);
+  }
+
   private mountDraft(draft: DraftRecord): void {
     const mount = this.editorMount?.nativeElement;
     const failures = this.failureMount?.nativeElement;
@@ -638,7 +689,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
           nextState.doc.toJSON() as DocumentJson,
         );
         this.doc.set(doc);
-        if (transaction.docChanged) this.scheduleAutosave(doc);
+        if (transaction.docChanged && !this.applyingAcceptedNarration) {
+          this.scheduleAutosave(doc);
+        }
         this.studioComposition?.handleEditorDispatch();
       },
     });

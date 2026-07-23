@@ -9,7 +9,10 @@ import {
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import type { DaemonClient } from '../api/client';
+import { ArchitecturePanel } from '../architecture/architecture-panel';
+import { ArchitectureModel } from '../architecture/model';
 import { EditorHost } from '../editor/editor-host';
+import { NarrationActions } from '../narration/narration-actions';
 import { BriefPanel } from '../panels/brief-panel';
 import { FindingsPanel } from '../panels/findings-panel';
 import { ParkingLot } from '../panels/parking-lot';
@@ -25,10 +28,12 @@ import { RevisionTimeline } from './revision-timeline';
   standalone: true,
   imports: [
     BriefPanel,
+    ArchitecturePanel,
     DraftTransfer,
     EditorHost,
     FindingsPanel,
     ParkingLot,
+    NarrationActions,
     RevisionTimeline,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -106,6 +111,21 @@ import { RevisionTimeline } from './revision-timeline';
               </div>
               <span>{{ activeDraft.episodeSlug }}</span>
             </header>
+            @if (architectureModel(); as architecture) {
+              <app-architecture-panel
+                [model]="architecture"
+                [draft]="activeDraft"
+                (changed)="architectureChanged()"
+              />
+              <app-narration-actions
+                [model]="architecture"
+                [draft]="activeDraft"
+                [client]="client()"
+                [editor]="editorHost() ?? null"
+                [version]="architectureVersion()"
+                (changed)="architectureChanged()"
+              />
+            }
             <app-editor-host
               [draft]="activeDraft"
               [client]="client()"
@@ -332,6 +352,13 @@ import { RevisionTimeline } from './revision-timeline';
       margin: 0 auto;
     }
 
+    app-architecture-panel,
+    app-narration-actions {
+      display: block;
+      max-width: 86rem;
+      margin-inline: auto;
+    }
+
     .welcome {
       display: grid;
       align-content: center;
@@ -439,6 +466,8 @@ export class DraftManagerComponent implements OnInit {
   readonly session = input.required<StudioSession>();
   readonly manager = signal<DraftManager | null>(null);
   readonly editorHost = viewChild(EditorHost);
+  readonly architectureModel = signal<ArchitectureModel | null>(null);
+  readonly architectureVersion = signal(0);
 
   ngOnInit(): void {
     const manager = new DraftManager(this.client());
@@ -449,7 +478,8 @@ export class DraftManagerComponent implements OnInit {
         requestedDraft
         && manager.drafts().some((draft) => draft.id === requestedDraft)
       ) {
-        return manager.openDraft(requestedDraft);
+        return manager.openDraft(requestedDraft).then(() =>
+          this.loadActiveArchitecture());
       }
       return undefined;
     });
@@ -463,17 +493,24 @@ export class DraftManagerComponent implements OnInit {
     event.preventDefault();
     const manager = this.manager();
     if (!manager) return;
-    void manager.createDraft(title.value, slug.value).then(() => {
+    void manager.createDraft(title.value, slug.value).then(async () => {
       if (!manager.actionError()) {
         title.value = '';
         slug.value = '';
+        await this.loadActiveArchitecture();
       }
     });
   }
 
   protected open(id: string): void {
     const manager = this.manager();
-    if (manager?.activeDraft()?.id !== id) void manager?.openDraft(id);
+    if (manager?.activeDraft()?.id !== id) {
+      void manager?.openDraft(id).then(() => this.loadActiveArchitecture());
+    }
+  }
+
+  protected architectureChanged(): void {
+    this.architectureVersion.update((version) => version + 1);
   }
 
   protected updatedDate(value: string): string {
@@ -481,5 +518,19 @@ export class DraftManagerComponent implements OnInit {
     return Number.isNaN(date.valueOf())
       ? value
       : new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' }).format(date);
+  }
+
+  private async loadActiveArchitecture(): Promise<void> {
+    const draft = this.manager()?.activeDraft();
+    if (!draft) {
+      this.architectureModel.set(null);
+      return;
+    }
+    const model = new ArchitectureModel(draft.id, this.client());
+    await model.load();
+    if (this.manager()?.activeDraft()?.id === draft.id) {
+      this.architectureModel.set(model);
+      this.architectureVersion.update((version) => version + 1);
+    }
   }
 }

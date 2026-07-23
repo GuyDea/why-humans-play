@@ -17,6 +17,9 @@ import {
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DaemonClientError } from '../api/client';
 import type {
+  ArchitectureActionResult,
+  ArchitectureSection,
+  ArchitectureState,
   DaemonClient,
   DraftDocument,
   DraftRecord,
@@ -27,6 +30,12 @@ import type {
   SavedDraft,
   StreamEventsOptions,
 } from '../api/client';
+import {
+  ARCHITECTURE_SECTIONS,
+  joinArchitecture,
+} from '../architecture/model';
+import { ArchitecturePanel } from '../architecture/architecture-panel';
+import { NarrationActions } from '../narration/narration-actions';
 import { App } from '../app';
 import { routes } from '../app.routes';
 import appTemplate from '../app.html?raw';
@@ -62,6 +71,22 @@ class ControllableDaemonClient {
     operation: OperationName;
     inputs: unknown;
   }> = [];
+  readonly draftSubmissions: Array<{
+    draftId: string;
+    id: string;
+    operation: OperationName;
+    inputs: unknown;
+    approvedArchitectureMd: string | null;
+  }> = [];
+  readonly canonicalArchitectureWrites: string[] = [];
+  readonly pipelineMilestones: string[] = [];
+  architectureState: ArchitectureState = {
+    sections: [],
+    approvedMd: null,
+    approvedAt: null,
+    revisionSeq: 0,
+    narrationReconciliationRequired: false,
+  };
 
   constructor(readonly storedDraft: DraftRecord) {}
 
@@ -82,6 +107,12 @@ class ControllableDaemonClient {
     input: { doc: DraftDocument; disposition?: string },
   ): Promise<SavedDraft> => {
     this.storedDraft.doc = input.doc;
+    if (input.disposition === 'episode-generation-accepted') {
+      this.architectureState = {
+        ...this.architectureState,
+        narrationReconciliationRequired: false,
+      };
+    }
     const seq = ++this.revisionSequence;
     return {
       draft: this.storedDraft,
@@ -97,6 +128,89 @@ class ControllableDaemonClient {
     };
   });
 
+  readonly getArchitecture = vi.fn(async () =>
+    cloneArchitectureState(this.architectureState));
+  readonly saveArchitecture = vi.fn(async (
+    _id: string,
+    input: {
+      expectedRevisionSeq: number;
+      sections: ArchitectureSection[];
+      opId: string | null;
+      disposition: string;
+    },
+  ) => {
+    if (input.expectedRevisionSeq !== this.architectureState.revisionSeq) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      sections: input.sections.map((section) => ({ ...section })),
+      revisionSeq: this.architectureState.revisionSeq + 1,
+    };
+    return {
+      state: cloneArchitectureState(this.architectureState),
+      revision: {
+        id: `architecture-revision-${this.architectureState.revisionSeq}`,
+        draftId: this.storedDraft.id,
+        seq: this.architectureState.revisionSeq,
+        opId: input.opId,
+        disposition: input.disposition,
+        doc: {},
+        createdAt: '2026-07-24T12:00:00.000Z',
+      },
+    };
+  });
+  readonly approveArchitecture = vi.fn(async (
+    _id: string,
+    input: { expectedRevisionSeq: number },
+  ): Promise<ArchitectureActionResult> => {
+    if (input.expectedRevisionSeq !== this.architectureState.revisionSeq) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      approvedMd: joinArchitecture(this.architectureState.sections),
+      approvedAt: '2026-07-24T12:00:00.000Z',
+      revisionSeq: this.architectureState.revisionSeq + 1,
+    };
+    setDraftPhase(this.storedDraft, 'rapid-prototype');
+    this.canonicalArchitectureWrites.push(
+      `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+    );
+    this.pipelineMilestones.push('prototyping');
+    return completedArchitectureAction(this.architectureState);
+  });
+  readonly reopenArchitecture = vi.fn(async (
+    _id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureActionResult> => {
+    if (
+      input.confirmed !== true
+      || input.expectedRevisionSeq !== this.architectureState.revisionSeq
+    ) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      approvedMd: null,
+      approvedAt: null,
+      revisionSeq: this.architectureState.revisionSeq + 1,
+      narrationReconciliationRequired: true,
+    };
+    setDraftPhase(this.storedDraft, 'architecture');
+    this.pipelineMilestones.push('architecture');
+    return completedArchitectureAction(this.architectureState);
+  });
+
   readonly submitOp = vi.fn(async (
     operation: OperationName,
     inputs: unknown,
@@ -105,6 +219,31 @@ class ControllableDaemonClient {
     this.submissions.push({ id, operation, inputs });
     return { id };
   });
+  readonly submitDraftOp = vi.fn(async (
+    draftId: string,
+    operation: OperationName,
+    inputs: unknown,
+  ) => {
+    const result = await this.submitOp(operation, inputs);
+    this.draftSubmissions.push({
+      draftId,
+      id: result.id,
+      operation,
+      inputs,
+      approvedArchitectureMd: this.architectureState.approvedMd,
+    });
+    return result;
+  });
+  readonly resumeDraftOp = vi.fn(async (
+    draftId: string,
+    operationId: string,
+    inputs: unknown,
+  ) => this.submitDraftOp(
+    draftId,
+    this.submissions.find(({ id }) => id === operationId)?.operation
+      ?? 'review-architecture',
+    inputs,
+  ));
 
   readonly streamEvents = vi.fn(async (
     id: string,
@@ -208,6 +347,218 @@ afterEach(() => {
 });
 
 describe('mounted Script Studio composition', () => {
+  it('drives architecture approval, reopen, and episode reconciliation through production controls', async () => {
+    const confirm = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirm);
+    const studio = await mountStudio(architectureDraft());
+
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const editorHost = studio.root.querySelector('app-editor-host');
+    expect(architecturePanel).not.toBeNull();
+    expect(narrationActions).not.toBeNull();
+    expect(editorHost).not.toBeNull();
+    expect(
+      architecturePanel!.compareDocumentPosition(editorHost!)
+        & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(studio.root.querySelector('app-brief-panel')).not.toBeNull();
+
+    findButton(architecturePanel, 'Generate architecture').click();
+    await expectDraftSubmission(studio, 'generate-architecture', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: generatedArchitectureMarkdown(),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelectorAll(
+        '[data-testid="architecture-proposal"]',
+      )).toHaveLength(12);
+    });
+    const unsafeProposal = Array.from(studio.root.querySelectorAll(
+      '[data-testid="architecture-proposal"]',
+    )).find((element) => element.textContent?.includes('Optional comparison'));
+    expect(unsafeProposal).not.toBeNull();
+    expect(unsafeProposal?.querySelector('img')).toBeNull();
+    expect(unsafeProposal?.innerHTML).not.toContain('onerror=');
+    findButton(unsafeProposal ?? null, 'Reject proposal').click();
+    studio.tick();
+    findButton(architecturePanel, 'Accept all proposals').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.saveArchitecture).toHaveBeenCalledOnce();
+      expect(studio.root.querySelectorAll(
+        '[data-testid="architecture-proposal"]',
+      )).toHaveLength(0);
+      expect(studio.client.architectureState.sections).toHaveLength(11);
+    });
+
+    const coreAnswer = studio.root.querySelector<HTMLElement>(
+      '[data-section-key="core-answer"]',
+    )!;
+    setInputValue(
+      coreAnswer.querySelector('input[aria-label="Refine Core answer"]'),
+      'Make the causal step explicit.',
+    );
+    studio.tick();
+    findButton(coreAnswer, 'Refine section').click();
+    await expectDraftSubmission(
+      studio,
+      'rewrite-architecture-section',
+      1,
+    );
+    studio.client.resolve('op-2', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        replacement_markdown:
+          '### Core answer\n\nThe refined causal answer.\n',
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(coreAnswer.textContent).toContain('The refined causal answer.');
+    });
+    findButton(coreAnswer, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureState.sections.find(
+        ({ key }) => key === 'core-answer',
+      )?.md).toContain('The refined causal answer.');
+      expect(findButton(architecturePanel, 'Review architecture').disabled)
+        .toBe(false);
+    });
+
+    findButton(architecturePanel, 'Review architecture').click();
+    await expectDraftSubmission(studio, 'review-architecture', 1);
+    studio.client.resolve('op-3', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        findings: [{
+          section_key: 'core-answer',
+          severity: 'important',
+          finding_markdown: 'Pin this finding to the core answer.',
+        }],
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(coreAnswer.textContent).toContain(
+        'Pin this finding to the core answer.',
+      );
+    });
+
+    findButton(architecturePanel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(architecturePanel.textContent).toContain('Approved Jul 24, 2026');
+      expect(studio.client.canonicalArchitectureWrites).toEqual([
+        'whp-youtube/architectures/composition-net.md',
+      ]);
+      expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
+    });
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+    const generateEpisode = findButton(narrationActions, 'Generate episode');
+    expect(
+      generateEpisode.disabled,
+      `narration actions: ${narrationActions?.textContent}; state: ${
+        JSON.stringify(narrationComponent?.model().state)
+      }`,
+    ).toBe(false);
+
+    const narrationBeforeReopen = editorText(studio);
+    findButton(architecturePanel, 'Reopen architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(confirm).toHaveBeenCalledWith(
+        'Reopen architecture? Existing narration is preserved but must be reconciled.',
+      );
+      expect(architecturePanel.textContent).toContain(
+        'Reopened — narration reconciliation required',
+      );
+      expect(editorText(studio)).toBe(narrationBeforeReopen);
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(true);
+      expect(findButton(narrationActions, 'Promote').disabled).toBe(true);
+    });
+
+    findButton(architecturePanel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(false);
+      expect(narrationActions.textContent).toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 1);
+    const approvedAtGeneration =
+      studio.client.draftSubmissions.at(-1)?.approvedArchitectureMd;
+    expect(approvedAtGeneration).toBe(
+      studio.client.architectureState.approvedMd,
+    );
+    expect(studio.client.draftSubmissions.at(-1)?.inputs).not.toHaveProperty(
+      'approved_architecture_md',
+    );
+    studio.client.resolve('op-4', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Rejected fresh narration.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions.textContent).toContain(
+        'Rejected fresh narration.',
+      );
+    });
+    findButton(narrationActions, 'Reject episode proposal').click();
+    studio.tick();
+    expect(editorText(studio)).toBe(narrationBeforeReopen);
+
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 2);
+    studio.client.resolve('op-5', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Accepted fresh narration.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions.textContent).toContain(
+        'Accepted fresh narration.',
+      );
+    });
+    findButton(narrationActions, 'Accept episode proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorText(studio)).toContain('Accepted fresh narration.');
+      expect(editorText(studio)).not.toContain('rewrite target');
+      expect(studio.client.save).toHaveBeenCalledWith(
+        'draft-1',
+        expect.objectContaining({
+          opId: 'op-5',
+          disposition: 'episode-generation-accepted',
+        }),
+      );
+      expect(studio.client.architectureState
+        .narrationReconciliationRequired).toBe(false);
+      expect(narrationActions.textContent).not.toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+  });
+
   it('drives the full production Studio and routed Console surface', async () => {
     const cancelAutosave = vi.spyOn(
       DebouncedAutosave.prototype,
@@ -562,13 +913,23 @@ async function mountStudio(
     // Vitest transpiles TypeScript without Angular's AOT input transform. Hydrate
     // only the signal-input metadata so the real production component tree can
     // bind and run under JIT in jsdom.
-    hydrateSignalInputs(BriefPanel, ['model', 'gate']);
+    hydrateSignalInputs(BriefPanel, ['model', 'gate', 'showPromote']);
     hydrateSignalInputs(FindingsPanel, ['findings']);
     hydrateSignalInputs(ParkingLot, ['model']);
     hydrateSignalInputs(RevisionTimeline, ['manager']);
     hydrateSignalInputs(DraftTransfer, ['manager']);
     hydrateSignalInputs(EditorHost, ['draft', 'client', 'session', 'wpm']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(ArchitecturePanel, ['model', 'draft']);
+    hydrateSignalInputs(NarrationActions, [
+      'model',
+      'draft',
+      'client',
+      'editor',
+      'version',
+    ]);
+    hydrateSignalOutputs(ArchitecturePanel, ['changed']);
+    hydrateSignalOutputs(NarrationActions, ['changed']);
     hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
     const draftManagerDefinition = ɵgetComponentDef(DraftManagerComponent);
     if (!draftManagerDefinition) {
@@ -633,6 +994,8 @@ async function mountStudio(
     studio.tick();
     expect(client.get).toHaveBeenCalledWith(draft.id);
     expect(root.querySelector('app-editor-host .ProseMirror')).not.toBeNull();
+    expect(root.querySelector('app-architecture-panel')).not.toBeNull();
+    expect(root.querySelector('app-narration-actions')).not.toBeNull();
     expect(root.querySelector('app-brief-panel')).not.toBeNull();
     expect(root.querySelector('app-findings-panel')).not.toBeNull();
     expect(root.querySelector('app-parking-lot')).not.toBeNull();
@@ -654,6 +1017,17 @@ function hydrateSignalInputs(
   }
   definition.inputs = inputs;
   definition.declaredInputs = declaredInputs;
+}
+
+function hydrateSignalOutputs(
+  component: object,
+  names: string[],
+): void {
+  const definition = ɵgetComponentDef(component as never);
+  if (!definition) throw new Error('Angular component definition is unavailable');
+  const outputs = { ...definition.outputs };
+  for (const name of names) outputs[name] = name;
+  definition.outputs = outputs;
 }
 
 async function selectText(
@@ -911,6 +1285,97 @@ function operationSummary(operation: OperationRecord): OperationSummary {
     outputTokens: operation.outputTokens,
     reasoningOutputTokens: operation.reasoningOutputTokens,
   };
+}
+
+function generatedArchitectureMarkdown(): string {
+  return [
+    ...ARCHITECTURE_SECTIONS.map(({ key, title }) =>
+      `### ${title}\n\nGenerated ${key}.\n`),
+    [
+      '### Optional comparison',
+      '',
+      '<img src=x onerror="globalThis.__unsafe = true">',
+      '',
+    ].join('\n'),
+  ].join('');
+}
+
+function generatedNarrationMarkdown(narration: string): string {
+  return [
+    '# Generated episode',
+    '',
+    '## 1. Opening',
+    '',
+    `> ${narration}`,
+    '',
+  ].join('\n');
+}
+
+function architectureDraft(): DraftRecord {
+  const draft = studioDraft();
+  setDraftPhase(draft, 'architecture');
+  return draft;
+}
+
+function setDraftPhase(draft: DraftRecord, phase: string): void {
+  const metadata = draft.doc['metadata'] as Record<string, unknown>;
+  metadata['creativeStatus'] = {
+    ...metadata['creativeStatus'] as Record<string, unknown>,
+    phase,
+  };
+}
+
+function cloneArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  return {
+    ...state,
+    sections: state.sections.map((section) => ({ ...section })),
+  };
+}
+
+function completedArchitectureAction(
+  state: ArchitectureState,
+): ArchitectureActionResult {
+  return {
+    complete: true,
+    steps: {
+      revisionAppended: 'completed',
+      artifactWritten: 'completed',
+      pipelineUpserted: 'completed',
+      draftUpdated: 'completed',
+    },
+    state: cloneArchitectureState(state),
+  };
+}
+
+async function expectDraftSubmission(
+  studio: MountedStudio,
+  operation: OperationName,
+  count: number,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(
+      studio.client.draftSubmissions.filter(
+        (submission) => submission.operation === operation,
+      ),
+      `${operation} draft submissions; panel text: ${
+        studio.root.querySelector('app-architecture-panel')?.textContent
+      }`,
+    ).toHaveLength(count);
+  });
+}
+
+function setInputValue(
+  element: Element | null,
+  value: string,
+): void {
+  if (!(element instanceof HTMLInputElement)) {
+    throw new Error('input was not rendered');
+  }
+  element.value = value;
+  element.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function domRect(): DOMRect {
