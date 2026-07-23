@@ -147,9 +147,15 @@ describe('bridgeDecision', () => {
       'resumeOperation',
     ]],
     ['reroll', 'result', 'schema', ['receiveProposal']],
-    ['alternatives', 'submit', undefined, ['launchOperation']],
+    ['alternatives', 'submit', undefined, [
+      'requestProposal',
+      'launchOperation',
+    ]],
     ['alternatives', 'result', 'schema', ['insertVariantSet']],
-    ['review', 'submit', undefined, ['launchOperation']],
+    ['review', 'submit', undefined, [
+      'requestProposal',
+      'launchOperation',
+    ]],
     ['review', 'result', 'schema', ['addAnnotations']],
     ['rewrite', 'result', 'guardrail', ['showGuardrail']],
     ['reroll', 'result', 'guardrail', ['showGuardrail']],
@@ -263,7 +269,7 @@ describe('ProposalBridge', () => {
       guardrail: null,
     }]);
     const bridge = new ProposalBridge(view, fixture.launcher, {
-      nextId: idFactory(['variant-1']),
+      nextId: idFactory(['alternatives-anchor', 'variant-1']),
     });
 
     const launch = bridge.launchAlternatives({}, target, 2);
@@ -287,8 +293,58 @@ describe('ProposalBridge', () => {
     expect(fixture.launch).toHaveBeenCalledWith(
       'generate-alternatives',
       {},
-      expect.objectContaining({ count: 2, target }),
+      {
+        operation: 'alternatives',
+        anchorId: 'alternatives-anchor',
+        count: 2,
+      },
     );
+    view.destroy();
+  });
+
+  it('maps an alternatives anchor across an edit before the in-flight range', async () => {
+    const { view, target } = editorWithText();
+    const fixture = launcherFixture([{
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        options: [
+          { label: 'Direct', markdown: 'Say it plainly.' },
+          { label: 'Playful', markdown: 'Make the rule feel like a toy.' },
+        ],
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    }]);
+    const bridge = new ProposalBridge(view, fixture.launcher, {
+      nextId: idFactory(['alternatives-anchor', 'variant-1']),
+    });
+
+    const launch = bridge.launchAlternatives({}, target, 2);
+    const prefix = 'Earlier: ';
+    view.dispatch(view.state.tr.insertText(
+      prefix,
+      target.from - 'Before '.length,
+    ));
+    await launch.settled;
+
+    let variantPosition = -1;
+    view.state.doc.descendants((node, position) => {
+      if (node.type.name === 'inlineVariantSet') {
+        variantPosition = position;
+      }
+    });
+    expect(variantPosition).toBe(target.from + prefix.length);
+    expect(fixture.launch).toHaveBeenCalledWith(
+      'generate-alternatives',
+      {},
+      {
+        operation: 'alternatives',
+        anchorId: 'alternatives-anchor',
+        count: 2,
+      },
+    );
+    expect(getProposals(view.state)).toEqual([]);
     view.destroy();
   });
 
@@ -317,7 +373,7 @@ describe('ProposalBridge', () => {
       guardrail: null,
     }]);
     const bridge = new ProposalBridge(view, fixture.launcher, {
-      nextId: idFactory(['finding-1', 'finding-2']),
+      nextId: idFactory(['review-anchor', 'finding-1', 'finding-2']),
     });
 
     const launch = bridge.launchReview({}, target);
@@ -354,6 +410,54 @@ describe('ProposalBridge', () => {
         ...target,
       }),
     ]);
+    view.destroy();
+  });
+
+  it('maps a review anchor across an edit before the in-flight range', async () => {
+    const { view, target } = editorWithText();
+    const fixture = launcherFixture([{
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        findings: [{
+          anchor: 'words',
+          severity: 'important',
+          finding_markdown: 'This phrase is vague.',
+          optional_direction_markdown: null,
+        }],
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    }]);
+    const bridge = new ProposalBridge(view, fixture.launcher, {
+      nextId: idFactory(['review-anchor', 'finding-1']),
+    });
+
+    const launch = bridge.launchReview({}, target);
+    const prefix = 'Earlier: ';
+    view.dispatch(view.state.tr.insertText(
+      prefix,
+      target.from - 'Before '.length,
+    ));
+    await launch.settled;
+
+    expect(getAnnotations(view.state)).toEqual([
+      expect.objectContaining({
+        id: 'finding-1',
+        from: target.from + prefix.length + 'selected '.length,
+        to: target.to + prefix.length,
+        orphaned: false,
+      }),
+    ]);
+    expect(fixture.launch).toHaveBeenCalledWith(
+      'review',
+      {},
+      {
+        operation: 'review',
+        anchorId: 'review-anchor',
+      },
+    );
+    expect(getProposals(view.state)).toEqual([]);
     view.destroy();
   });
 

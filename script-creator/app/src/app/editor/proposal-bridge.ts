@@ -14,6 +14,7 @@ import {
   rejectProposal,
   requestProposal,
   type EditorView,
+  type Proposal,
   type ProposalStatus,
 } from '@whp/script-creator-editor-core';
 import type {
@@ -67,7 +68,7 @@ export function bridgeDecision(
         ];
       case 'alternatives':
       case 'review':
-        return ['launchOperation'];
+        return ['requestProposal', 'launchOperation'];
     }
   }
 
@@ -90,8 +91,9 @@ export interface SelectionTarget {
 
 export interface ProposalLaunchMeta {
   operation: BridgeOperation;
-  target: SelectionTarget;
+  target?: SelectionTarget;
   proposalId?: string;
+  anchorId?: string;
   count?: 2 | 3;
 }
 
@@ -143,8 +145,9 @@ export type BridgeSettlement =
 
 interface PendingBridgeLaunch {
   operation: BridgeOperation;
-  target: SelectionTarget;
+  target?: SelectionTarget;
   proposalId?: string;
+  anchorId?: string;
   tracked: TrackedOperation<ProposalLaunchMeta>;
 }
 
@@ -186,6 +189,7 @@ export class ProposalBridge {
     signal([]);
   private readonly guardrailsState:
     WritableSignal<readonly GuardrailCallout[]> = signal([]);
+  private readonly structuralAnchorIds = new Set<string>();
 
   readonly findings: Signal<readonly ReviewFinding[]> =
     this.findingsState.asReadonly();
@@ -305,14 +309,21 @@ export class ProposalBridge {
     if (count !== 2 && count !== 3) {
       throw new RangeError('alternative count must be 2 or 3');
     }
-    const tracked = this.launcher.launch(
-      'generate-alternatives',
-      inputs,
-      { operation: 'alternatives', target, count },
-    );
+    const anchorId = this.requestStructuralAnchor(target);
+    let tracked: TrackedOperation<ProposalLaunchMeta>;
+    try {
+      tracked = this.launcher.launch(
+        'generate-alternatives',
+        inputs,
+        { operation: 'alternatives', anchorId, count },
+      );
+    } catch (error) {
+      this.releaseStructuralAnchor(anchorId);
+      throw error;
+    }
     return this.bridgeLaunch({
       operation: 'alternatives',
-      target,
+      anchorId,
       tracked,
     });
   }
@@ -321,14 +332,21 @@ export class ProposalBridge {
     inputs: unknown,
     target: SelectionTarget,
   ): BridgeLaunch {
-    const tracked = this.launcher.launch(
-      'review',
-      inputs,
-      { operation: 'review', target },
-    );
+    const anchorId = this.requestStructuralAnchor(target);
+    let tracked: TrackedOperation<ProposalLaunchMeta>;
+    try {
+      tracked = this.launcher.launch(
+        'review',
+        inputs,
+        { operation: 'review', anchorId },
+      );
+    } catch (error) {
+      this.releaseStructuralAnchor(anchorId);
+      throw error;
+    }
     return this.bridgeLaunch({
       operation: 'review',
-      target,
+      anchorId,
       tracked,
     });
   }
@@ -350,15 +368,21 @@ export class ProposalBridge {
   }
 
   proposalLayers(): ProposalLayer[] {
-    return getProposals(this.view.state).map((proposal) => ({
-      id: proposal.id,
-      from: proposal.from,
-      to: proposal.to,
-      status: proposal.status,
-      base: proposal.fingerprint,
-      current: proposal.current,
-      proposed: proposal.replacement,
-    }));
+    return this.proposals()
+      .map((proposal) => ({
+        id: proposal.id,
+        from: proposal.from,
+        to: proposal.to,
+        status: proposal.status,
+        base: proposal.fingerprint,
+        current: proposal.current,
+        proposed: proposal.replacement,
+      }));
+  }
+
+  proposals(): Proposal[] {
+    return getProposals(this.view.state)
+      .filter(({ id }) => !this.structuralAnchorIds.has(id));
   }
 
   findingLayers(): FindingLayer[] {
@@ -405,6 +429,7 @@ export class ProposalBridge {
     }
     if (launch.tracked.phase() !== 'done') {
       this.rejectPendingProposal(launch.proposalId);
+      this.releaseStructuralAnchor(launch.anchorId);
       return {
         status: 'failed',
         error: operationError(launch.tracked.result()),
@@ -414,6 +439,7 @@ export class ProposalBridge {
     const result = launch.tracked.result();
     if (result?.kind !== 'schema' || !isRecord(result.value)) {
       this.rejectPendingProposal(launch.proposalId);
+      this.releaseStructuralAnchor(launch.anchorId);
       return {
         status: 'failed',
         error: 'operation did not return a schema result',
@@ -446,6 +472,7 @@ export class ProposalBridge {
     launch: PendingBridgeLaunch,
   ): BridgeSettlement {
     this.rejectPendingProposal(launch.proposalId);
+    this.releaseStructuralAnchor(launch.anchorId);
     const result = launch.tracked.result();
     const markdown = result?.kind === 'schema'
       ? result.guardrail ?? schemaGuardrail(result.value)
@@ -500,17 +527,27 @@ export class ProposalBridge {
   ): BridgeSettlement {
     const options = alternativeOptions(value['options']);
     if (!options || options.length === 0) {
+      this.releaseStructuralAnchor(launch.anchorId);
       return {
         status: 'failed',
         error: 'alternatives result did not contain labeled options',
       };
     }
 
+    const target = this.resolveStructuralAnchor(launch.anchorId);
+    if (!target) {
+      this.releaseStructuralAnchor(launch.anchorId);
+      return {
+        status: 'failed',
+        error: 'alternatives target conflicted with an intervening edit',
+      };
+    }
     const inserted = this.insertVariantSet(
-      launch.target,
+      target,
       this.nextId(),
       options,
     );
+    this.releaseStructuralAnchor(launch.anchorId);
     return inserted
       ? { status: 'applied' }
       : {
@@ -575,20 +612,29 @@ export class ProposalBridge {
   ): BridgeSettlement {
     const findings = reviewFindings(value['findings']);
     if (!findings) {
+      this.releaseStructuralAnchor(launch.anchorId);
       return {
         status: 'failed',
         error: 'review result did not contain findings',
       };
     }
 
+    const target = this.resolveStructuralAnchor(launch.anchorId);
+    if (!target) {
+      this.releaseStructuralAnchor(launch.anchorId);
+      return {
+        status: 'failed',
+        error: 'review target conflicted with an intervening edit',
+      };
+    }
     const added: ReviewFinding[] = [];
     for (const finding of findings) {
       const annotationId = this.nextId();
       const range = locateAnchor(
         this.view,
-        launch.target,
+        target,
         finding.anchor,
-      ) ?? launch.target;
+      ) ?? target;
       if (addAnnotation(
         this.view.state,
         (transaction) => this.view.dispatch(transaction),
@@ -611,7 +657,43 @@ export class ProposalBridge {
       }
     }
     this.findingsState.update((current) => [...current, ...added]);
+    this.releaseStructuralAnchor(launch.anchorId);
     return { status: 'applied' };
+  }
+
+  private requestStructuralAnchor(target: SelectionTarget): string {
+    const anchorId = this.nextId();
+    this.structuralAnchorIds.add(anchorId);
+    if (!requestProposal(
+      this.view.state,
+      (transaction) => this.view.dispatch(transaction),
+      { id: anchorId, ...target },
+    )) {
+      this.structuralAnchorIds.delete(anchorId);
+      throw new Error('could not anchor the selection');
+    }
+    return anchorId;
+  }
+
+  private resolveStructuralAnchor(
+    anchorId: string | undefined,
+  ): SelectionTarget | null {
+    if (!anchorId) return null;
+    const anchor = getProposals(this.view.state)
+      .find(({ id }) => id === anchorId);
+    return anchor && anchor.status !== 'conflicted'
+      ? { from: anchor.from, to: anchor.to }
+      : null;
+  }
+
+  private releaseStructuralAnchor(anchorId: string | undefined): void {
+    if (!anchorId) return;
+    rejectProposal(
+      this.view.state,
+      (transaction) => this.view.dispatch(transaction),
+      anchorId,
+    );
+    this.structuralAnchorIds.delete(anchorId);
   }
 
   private rejectPendingProposal(proposalId: string | undefined): void {

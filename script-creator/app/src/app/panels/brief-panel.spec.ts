@@ -76,7 +76,7 @@ describe('draft brief metadata', () => {
     })).toEqual(metadata);
   });
 
-  it('falls back field-by-field when persisted metadata is malformed', () => {
+  it('keeps a missing creative phase empty instead of authoring one', () => {
     expect(readDraftMetadata({
       ...draft.doc,
       metadata: {
@@ -92,7 +92,7 @@ describe('draft brief metadata', () => {
       anchors: ['usable anchor'],
       unknowns: [],
       approvedLessons: ['approved'],
-      creativeStatus: { phase: 'rapid-prototype' },
+      creativeStatus: { phase: '' },
       directionApproved: false,
     });
   });
@@ -226,9 +226,54 @@ describe('draft brief metadata', () => {
       requested_scope: 'Promote this approved baseline.',
     });
   });
+
+  it('refuses to build an envelope without an explicit stored phase', () => {
+    expect(() => buildDraftEnvelopeInputs({
+      selection: 'selected narration',
+      before: '',
+      after: '',
+      beatTitle: 'Opening',
+      narrativeJob: '',
+      requestedScope: { kind: 'full-draft' },
+    }, {
+      ...metadata,
+      creativeStatus: { phase: '' },
+    })).toThrow(
+      'Set the creative phase in Episode brief before launching an operation.',
+    );
+  });
 });
 
 describe('approval gate', () => {
+  it('keeps Promote disabled when direction is approved but phase is missing', () => {
+    const model = new BriefPanelModel({
+      ...draft,
+      doc: {
+        ...draft.doc,
+        metadata: {
+          ...metadata,
+          creativeStatus: { phase: '' },
+          directionApproved: true,
+        },
+      },
+    }, { save: vi.fn() });
+    const gate = new ApprovalGate(
+      model,
+      { launch: vi.fn() },
+      () => ({
+        selection: 'full narration',
+        before: '',
+        after: '',
+        beatTitle: draft.title,
+        narrativeJob: '',
+        requestedScope: { kind: 'full-draft' },
+      }),
+    );
+
+    expect(model.canPromote()).toBe(false);
+    expect(gate.promote()).toBeNull();
+  });
+
   it('stores explicit direction approval before enabling Promote', async () => {
     let seq = 0;
     const save = vi.fn<BriefPanelSaver['save']>(async (_id, input) =>

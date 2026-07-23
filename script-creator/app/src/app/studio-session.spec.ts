@@ -93,4 +93,31 @@ describe('StudioSession', () => {
     expect(reroll).toHaveBeenCalledWith('op-shared');
     expect(tracker.resume).not.toHaveBeenCalled();
   });
+
+  it('disables console Re-roll as soon as the owning runtime detaches', () => {
+    const operation = trackedOperation('op-detached', {
+      phase: 'done',
+      canResume: true,
+    });
+    const tracker = {
+      history: signal([operation] as readonly typeof operation[]),
+      cancel: vi.fn(async () => undefined),
+      resume: vi.fn(),
+    };
+    const runtime: StudioRuntimeHandle = {
+      tracker,
+      cancel: tracker.cancel,
+      canReroll: vi.fn(() => true),
+      reroll: vi.fn(),
+    };
+    const session = new StudioSession({} as DaemonClient);
+    const detach = session.attachRuntime(runtime);
+    const consoleModel = new AgentConsoleModel(session);
+
+    expect(consoleModel.canResume(operation)).toBe(true);
+    detach();
+    expect(consoleModel.canResume(operation)).toBe(false);
+    expect(consoleModel.resumeSelected()).toBeNull();
+    expect(tracker.resume).not.toHaveBeenCalled();
+  });
 });

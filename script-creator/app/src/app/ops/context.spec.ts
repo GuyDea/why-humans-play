@@ -22,7 +22,7 @@ const context: OperationContext = {
     locked_surrounding_text: true,
   },
   approvedLessons: ['Keep the question concrete.'],
-  requestedScope: 'Change only the selected passage.',
+  requestedScope: 'Keep my question, but make its setup shorter.',
 };
 
 const INPUT_KEYS = [
@@ -33,13 +33,11 @@ const INPUT_KEYS = [
   'beat_title',
   'narrative_job',
   'creative_status',
-  'requested_scope',
 ];
 
 function expectVerbatimContext(
   inputs: OperationInputs,
 ): void {
-  expect(Object.keys(inputs)).toEqual(INPUT_KEYS);
   expect(inputs.topic_brief).toBe(context.brief);
   expect(Object.keys(inputs.topic_brief)).toEqual([
     'topic',
@@ -60,36 +58,50 @@ function expectVerbatimContext(
 }
 
 describe('buildOperationInputs', () => {
-  it('accepts the exported operation request union', () => {
+  it('omits requested scope when a preset contributes no user-authored scope', () => {
     const buildFromRequest = (operation: OperationInputRequest) =>
-      buildOperationInputs(context, operation);
+      buildOperationInputs({
+        ...context,
+        requestedScope: undefined,
+      }, operation);
 
-    expect(buildFromRequest('review').requested_scope)
-      .toBe(context.requestedScope);
+    expect(Object.keys(buildFromRequest('review'))).toEqual(INPUT_KEYS);
   });
 
   it.each(['rewrite-selection', 'review'] as const)(
-    'maps %s inputs from explicit context with no extra keys',
+    'maps %s user-entered scope from explicit context with no extra keys',
     (operation) => {
       const inputs = buildOperationInputs(context, operation);
 
       expectVerbatimContext(inputs);
+      expect(Object.keys(inputs)).toEqual([...INPUT_KEYS, 'requested_scope']);
       expect(inputs.requested_scope).toBe(context.requestedScope);
     },
   );
 
-  it('maps alternative count and instruction into the requested scope', () => {
-    const inputs = buildOperationInputs(context, {
+  it('maps only the user-selected alternative count for the preset', () => {
+    const inputs = buildOperationInputs({
+      ...context,
+      requestedScope: undefined,
+    }, {
       kind: 'generate-alternatives',
       count: 3,
     });
 
     expectVerbatimContext(inputs);
-    expect(Object.keys(inputs.requested_scope)).toEqual([
-      'count',
-      'instruction',
-    ]);
-    expect(inputs.requested_scope.count).toBe(3);
-    expect(inputs.requested_scope.instruction).toBe(context.requestedScope);
+    expect(Object.keys(inputs)).toEqual([...INPUT_KEYS, 'requested_scope']);
+    expect(inputs.requested_scope).toEqual({ count: 3 });
+  });
+
+  it('keeps user-entered alternative scope verbatim when supplied', () => {
+    const inputs = buildOperationInputs(context, {
+      kind: 'generate-alternatives',
+      count: 2,
+    });
+
+    expect(inputs.requested_scope).toEqual({
+      count: 2,
+      instruction: context.requestedScope,
+    });
   });
 });

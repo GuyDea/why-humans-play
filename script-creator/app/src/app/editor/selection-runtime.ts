@@ -1,6 +1,7 @@
 import type {
   EditorState,
   EditorView,
+  Proposal,
 } from '@whp/script-creator-editor-core';
 import type {
   DaemonClient,
@@ -19,7 +20,10 @@ import {
   mapStudioConsoleEvents,
   type StudioConsoleEntry,
 } from '../panels/agent-console';
-import { readDraftMetadata } from '../panels/brief-panel';
+import {
+  MISSING_CREATIVE_PHASE_MESSAGE,
+  readDraftMetadata,
+} from '../panels/brief-panel';
 import {
   ProposalBridge,
   type BridgeLaunch,
@@ -30,8 +34,6 @@ import {
 } from './proposal-bridge';
 import { SelectionToolbar } from './selection-toolbar';
 
-const DEFAULT_REQUESTED_SCOPE = 'Change only the selected passage.';
-
 export interface SelectionSnapshot {
   visible: boolean;
   target: SelectionTarget | null;
@@ -41,7 +43,6 @@ export interface SelectionSnapshot {
 export function selectionSnapshot(
   state: EditorState,
   draftDocument: DraftDocument,
-  requestedScope = DEFAULT_REQUESTED_SCOPE,
 ): SelectionSnapshot {
   const { empty, from, to } = state.selection;
   if (empty || from >= to) {
@@ -55,6 +56,9 @@ export function selectionSnapshot(
   const target = { from, to };
   const beat = selectedBeat(state, target);
   const metadata = readDraftMetadata(draftDocument);
+  if (metadata.creativeStatus.phase.trim() === '') {
+    throw new Error(MISSING_CREATIVE_PHASE_MESSAGE);
+  }
   return {
     visible: true,
     target,
@@ -75,7 +79,6 @@ export function selectionSnapshot(
       },
       creativeStatus: metadata.creativeStatus,
       approvedLessons: metadata.approvedLessons,
-      requestedScope,
     },
   };
 }
@@ -177,6 +180,10 @@ export class SelectionRuntime {
 
   rejectProposal(proposalId: string): boolean {
     return this.bridge.reject(proposalId);
+  }
+
+  proposals(): Proposal[] {
+    return this.bridge.proposals();
   }
 
   canReroll(operationId: string): boolean {

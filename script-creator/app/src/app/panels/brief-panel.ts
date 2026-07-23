@@ -81,7 +81,8 @@ export interface ApprovalGateOptions {
   ) => void;
 }
 
-const DEFAULT_CREATIVE_PHASE = 'rapid-prototype';
+export const MISSING_CREATIVE_PHASE_MESSAGE =
+  'Set the creative phase in Episode brief before launching an operation.';
 
 export function readDraftMetadata(
   document: DraftDocument,
@@ -89,7 +90,7 @@ export function readDraftMetadata(
   const raw = asRecord(document['metadata']);
   const creativeStatus = asRecord(raw?.['creativeStatus']);
   const phase = nonEmptyString(creativeStatus?.['phase'])
-    ?? DEFAULT_CREATIVE_PHASE;
+    ?? '';
 
   return {
     topic: typeof raw?.['topic'] === 'string' ? raw['topic'] : '',
@@ -118,6 +119,9 @@ export function buildDraftEnvelopeInputs<RequestedScope>(
   context: DraftEnvelopeContext<RequestedScope>,
   metadata: ScriptDraftMetadata,
 ): DraftEnvelopeInputs<RequestedScope> {
+  if (metadata.creativeStatus.phase.trim() === '') {
+    throw new Error(MISSING_CREATIVE_PHASE_MESSAGE);
+  }
   return {
     topic_brief: {
       topic: metadata.topic,
@@ -144,6 +148,7 @@ export class BriefPanelModel {
   readonly saveError = signal<string | null>(null);
   readonly canPromote = computed(
     () => this.metadata().directionApproved
+      && this.metadata().creativeStatus.phase.trim() !== ''
       && !this.saving()
       && this.saveError() === null,
   );
@@ -344,6 +349,11 @@ export class ApprovalGate {
           (change)="setPhase($event)"
         />
       </label>
+      @if (model().metadata().creativeStatus.phase.trim() === '') {
+        <p class="save-error" role="alert">
+          {{ missingCreativePhaseMessage }}
+        </p>
+      }
 
       <div class="approval">
         <label class="approval-toggle">
@@ -571,6 +581,8 @@ export class ApprovalGate {
 export class BriefPanel {
   readonly model = input.required<BriefPanelModel>();
   readonly gate = input.required<ApprovalGate>();
+  protected readonly missingCreativePhaseMessage =
+    MISSING_CREATIVE_PHASE_MESSAGE;
 
   protected lines(values: readonly string[]): string {
     return values.join('\n');

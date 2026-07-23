@@ -306,6 +306,9 @@ export function createBlankNarrationDocument(beatId: string): DraftDocument {
   return {
     type: 'doc',
     attrs: { format: 'narration', preamble: '' },
+    metadata: {
+      creativeStatus: { phase: 'rapid-prototype' },
+    },
     content: [
       {
         type: 'beat',

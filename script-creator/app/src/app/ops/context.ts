@@ -13,7 +13,7 @@ export interface OperationContext {
   brief: TopicBrief;
   creativeStatus: unknown;
   approvedLessons: string[];
-  requestedScope: string;
+  requestedScope?: unknown;
 }
 
 export interface AlternativesOperation {
@@ -28,11 +28,11 @@ export type OperationInputRequest =
 
 export interface AlternativesScope {
   count: number;
-  instruction: string;
+  instruction?: unknown;
 }
 
 export interface OperationInputs<
-  RequestedScope = string | AlternativesScope,
+  RequestedScope = unknown,
 > {
   topic_brief: TopicBrief;
   approved_lessons: string[];
@@ -44,13 +44,13 @@ export interface OperationInputs<
   beat_title: string;
   narrative_job: string;
   creative_status: unknown;
-  requested_scope: RequestedScope;
+  requested_scope?: RequestedScope;
 }
 
 export function buildOperationInputs(
   context: OperationContext,
   operation: 'rewrite-selection' | 'review',
-): OperationInputs<string>;
+): OperationInputs<unknown>;
 export function buildOperationInputs(
   context: OperationContext,
   operation: AlternativesOperation,
@@ -63,14 +63,7 @@ export function buildOperationInputs(
   context: OperationContext,
   operation: OperationInputRequest,
 ): OperationInputs {
-  const requestedScope = typeof operation === 'string'
-    ? context.requestedScope
-    : {
-        count: operation.count,
-        instruction: context.requestedScope,
-      };
-
-  return {
+  const inputs: OperationInputs = {
     topic_brief: context.brief,
     approved_lessons: context.approvedLessons,
     selection: context.selection,
@@ -81,6 +74,19 @@ export function buildOperationInputs(
     beat_title: context.beatTitle,
     narrative_job: context.narrativeJob,
     creative_status: context.creativeStatus,
-    requested_scope: requestedScope,
+  };
+  if (typeof operation === 'string') {
+    return context.requestedScope === undefined
+      ? inputs
+      : { ...inputs, requested_scope: context.requestedScope };
+  }
+  return {
+    ...inputs,
+    requested_scope: context.requestedScope === undefined
+      ? { count: operation.count }
+      : {
+          count: operation.count,
+          instruction: context.requestedScope,
+        },
   };
 }

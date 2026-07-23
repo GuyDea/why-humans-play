@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DaemonClientError } from '../api/client';
 import { DebouncedAutosave } from './editor-host';
 
 afterEach(() => {
@@ -64,5 +65,88 @@ describe('DebouncedAutosave', () => {
     await vi.advanceTimersByTimeAsync(1_000);
     await autosave.whenIdle();
     expect(saves).toEqual(['recoverable', 'recoverable']);
+  });
+
+  it('lets the newest snapshot supersede queued work after a permanent failure', async () => {
+    vi.useFakeTimers();
+    let rejectFirst!: (error: unknown) => void;
+    const firstAttempt = new Promise<void>((_resolve, reject) => {
+      rejectFirst = reject;
+    });
+    const saves: string[] = [];
+    const autosave = new DebouncedAutosave<string>(async (snapshot) => {
+      saves.push(snapshot);
+      if (snapshot === 'first') await firstAttempt;
+    });
+
+    autosave.schedule('first');
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(saves).toEqual(['first']);
+
+    autosave.schedule('second');
+    autosave.schedule('newest');
+    await vi.advanceTimersByTimeAsync(1_000);
+    rejectFirst(new DaemonClientError(422, {
+      error: 'draft failed validation',
+    }));
+    await autosave.whenIdle();
+
+    expect(saves).toEqual(['first', 'newest']);
+  });
+
+  it('uses capped exponential backoff for retryable failures', async () => {
+    vi.useFakeTimers();
+    const attempts: number[] = [];
+    const autosave = new DebouncedAutosave<string>(
+      async () => {
+        attempts.push(Date.now());
+        if (attempts.length < 4) {
+          throw new DaemonClientError(503, { error: 'daemon unavailable' });
+        }
+      },
+      1_000,
+      100,
+      () => undefined,
+      250,
+    );
+
+    autosave.schedule('retryable');
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(attempts).toHaveLength(1);
+    await vi.advanceTimersByTimeAsync(100);
+    expect(attempts).toHaveLength(2);
+    await vi.advanceTimersByTimeAsync(200);
+    expect(attempts).toHaveLength(3);
+    await vi.advanceTimersByTimeAsync(250);
+    await autosave.whenIdle();
+
+    expect(attempts).toHaveLength(4);
+    expect(attempts.slice(1).map((time, index) =>
+      time - attempts[index]!)).toEqual([100, 200, 250]);
+  });
+
+  it('cancels retry activity without reporting the dirty snapshot as saved', async () => {
+    vi.useFakeTimers();
+    const save = vi.fn(async () => {
+      throw new DaemonClientError(503, { error: 'daemon unavailable' });
+    });
+    const queueSizes: number[] = [];
+    const autosave = new DebouncedAutosave<string>(
+      save,
+      1_000,
+      100,
+      (size) => queueSizes.push(size),
+    );
+
+    autosave.schedule('unsaved');
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(save).toHaveBeenCalledOnce();
+
+    autosave.cancel();
+    await vi.advanceTimersByTimeAsync(10_000);
+    await autosave.whenIdle();
+
+    expect(save).toHaveBeenCalledOnce();
+    expect(queueSizes.at(-1)).toBe(0);
   });
 });

@@ -51,18 +51,31 @@ export class StudioSession implements AgentConsoleTracker<unknown> {
     return this.ownerOf(id).cancel(id);
   }
 
+  canResume(id: string): boolean {
+    const tracker = this.findOwner(id);
+    if (!tracker) return false;
+    const runtime = this.runtimeByTracker.get(tracker);
+    return runtime?.canReroll(id) ?? false;
+  }
+
   resume(id: string): StudioTrackedOperation {
     const tracker = this.ownerOf(id);
     const runtime = this.runtimeByTracker.get(tracker);
     if (runtime?.canReroll(id)) return runtime.reroll(id).tracked;
-    return tracker.resume(id);
+    throw new Error(`operation ${id} has no live owning editor runtime`);
   }
 
   private ownerOf(id: string): AgentConsoleTracker<unknown> {
-    const tracker = this.trackersState().find((candidate) =>
-      candidate.history().some((operation) => operation.id() === id));
+    const tracker = this.findOwner(id);
     if (!tracker) throw new Error(`unknown tracked operation: ${id}`);
     return tracker;
+  }
+
+  private findOwner(
+    id: string,
+  ): AgentConsoleTracker<unknown> | undefined {
+    return this.trackersState().find((candidate) =>
+      candidate.history().some((operation) => operation.id() === id));
   }
 }
 

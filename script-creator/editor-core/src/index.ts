@@ -10,4 +10,8 @@ export * from './schema.js';
 export * from './variants.js';
 
 export { EditorState } from 'prosemirror-state';
-export { EditorView } from 'prosemirror-view';
+export {
+  Decoration,
+  DecorationSet,
+  EditorView,
+} from 'prosemirror-view';

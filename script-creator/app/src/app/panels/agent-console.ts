@@ -36,6 +36,7 @@ export interface AgentConsoleTracker<Meta = unknown> {
   >;
   cancel(id: string): Promise<void>;
   resume(id: string): TrackedOperation<Meta, StudioConsoleEntry>;
+  canResume?(id: string): boolean;
 }
 
 export interface AgentConsoleClient {
@@ -83,10 +84,19 @@ export class AgentConsoleModel<Meta = unknown> {
     return true;
   }
 
+  canResume(
+    operation: TrackedOperation<Meta, StudioConsoleEntry> | null =
+      this.selected(),
+  ): boolean {
+    const id = operation?.id();
+    if (!operation || !id || !operation.canResume()) return false;
+    return this.tracker.canResume?.(id) ?? true;
+  }
+
   resumeSelected(): TrackedOperation<Meta, StudioConsoleEntry> | null {
     const operation = this.selected();
     const id = operation?.id();
-    if (!operation || !id || !operation.canResume()) return null;
+    if (!operation || !id || !this.canResume(operation)) return null;
     const resumed = this.tracker.resume(id);
     this.selectOperation(resumed);
     return resumed;
@@ -578,7 +588,7 @@ export class AgentConsole implements OnInit, OnDestroy {
   }
 
   protected canReroll(operation: OperationSummary): boolean {
-    return this.liveOperation(operation)?.canResume() ?? false;
+    return this.model().canResume(this.liveOperation(operation));
   }
 
   protected tokenLabel(tokens: number | null): string {
@@ -592,7 +602,7 @@ export class AgentConsole implements OnInit, OnDestroy {
 
   protected reroll(operation: OperationSummary): void {
     const live = this.liveOperation(operation);
-    if (!live?.canResume()) return;
+    if (!live || !this.model().canResume(live)) return;
     this.model().selectOperation(live);
     this.model().resumeSelected();
   }

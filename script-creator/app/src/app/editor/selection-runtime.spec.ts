@@ -97,11 +97,7 @@ describe('selectionSnapshot', () => {
   it('maps a non-empty editor selection and draft metadata to live operation context', () => {
     const { state, draftDocument, target } = selectedState();
 
-    expect(selectionSnapshot(
-      state,
-      draftDocument,
-      'Change only the selected passage.',
-    )).toEqual({
+    expect(selectionSnapshot(state, draftDocument)).toEqual({
       visible: true,
       target,
       context: {
@@ -117,7 +113,6 @@ describe('selectionSnapshot', () => {
         },
         creativeStatus: { phase: 'rapid-prototype' },
         approvedLessons: ['Keep the language concrete.'],
-        requestedScope: 'Change only the selected passage.',
       },
     });
   });
@@ -136,11 +131,7 @@ describe('selectionSnapshot', () => {
       },
     );
 
-    expect(selectionSnapshot(
-      collapsed,
-      draftDocument,
-      'Change only the selected passage.',
-    )).toEqual({
+    expect(selectionSnapshot(collapsed, draftDocument)).toEqual({
       visible: false,
       target: null,
       context: null,
@@ -181,6 +172,9 @@ describe('selectionSnapshot', () => {
     );
     const draftDocument = doc.toJSON() as DraftDocument;
     const beats = draftDocument['content'] as Array<Record<string, unknown>>;
+    draftDocument['metadata'] = {
+      creativeStatus: { phase: 'rapid-prototype' },
+    };
     (beats[0]?.['attrs'] as Record<string, unknown>)['narrativeJob'] =
       'Job A';
     (beats[1]?.['attrs'] as Record<string, unknown>)['narrativeJob'] =
@@ -193,6 +187,176 @@ describe('selectionSnapshot', () => {
 });
 
 describe('SelectionRuntime', () => {
+  it('submits only stored draft state, live editor state, and verbatim user text', async () => {
+    const { state, draftDocument, target } = selectedState();
+    const container = document.createElement('div');
+    const mount = document.createElement('div');
+    container.append(mount);
+    document.body.append(container);
+    let afterDispatch = (): void => undefined;
+    const view = new EditorView(mount, {
+      state,
+      nodeViews: variantNodeViews,
+      dispatchTransaction(transaction) {
+        view.updateState(view.state.apply(transaction));
+        afterDispatch();
+      },
+    });
+    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
+      left: position === target.from ? 100 : 180,
+      right: position === target.from ? 100 : 180,
+      top: 80,
+      bottom: 100,
+    }));
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 20,
+      y: 10,
+      left: 20,
+      right: 420,
+      top: 10,
+      bottom: 310,
+      width: 400,
+      height: 300,
+      toJSON: () => ({}),
+    });
+    const submitOp = vi.fn(async () => ({ id: 'op-provenance' }));
+    const client = {
+      submitOp,
+      streamEvents: vi.fn(async (
+        _id: string,
+        options: { onDone(): void },
+      ) => options.onDone()),
+      getOp: vi.fn(async () => completedOperation('op-provenance')),
+      getResult: vi.fn(async () => ({
+        kind: 'schema' as const,
+        value: {
+          status: 'complete',
+          replacement_markdown: 'Sharper words',
+          guardrail_markdown: null,
+        },
+        guardrail: null,
+      })),
+    } as unknown as DaemonClient;
+    const userInstruction =
+      'Keep the factual claim; make the selected sentence more playful.';
+    vi.spyOn(globalThis.window, 'prompt').mockReturnValue(userInstruction);
+    view.focus();
+    const runtime = new SelectionRuntime({
+      view,
+      container,
+      client,
+      draftDocument: () => draftDocument,
+    });
+    afterDispatch = () => runtime.handleEditorDispatch();
+
+    runtime.toolbar.element.querySelector<HTMLButtonElement>(
+      'button[data-action="custom"]',
+    )!.click();
+
+    await vi.waitFor(() => expect(submitOp).toHaveBeenCalledOnce());
+    const expectedInputs = {
+      topic_brief: {
+        topic: 'Why constraints create play',
+        factual_anchors: ['Players accept the rule.'],
+        unknowns: ['Which example is strongest?'],
+      },
+      approved_lessons: ['Keep the language concrete.'],
+      selection: SELECTED_TEXT,
+      surrounding_context: {
+        before: 'Lead paragraph.\n\nBefore ',
+        after: ' after.\n\nFollowing paragraph.',
+      },
+      beat_title: 'The test beat',
+      narrative_job: 'Turn the example into the larger question.',
+      creative_status: { phase: 'rapid-prototype' },
+      requested_scope: userInstruction,
+    };
+    expect(submitOp).toHaveBeenCalledWith(
+      'rewrite-selection',
+      expectedInputs,
+    );
+    expect(Object.keys(expectedInputs)).toEqual([
+      'topic_brief',
+      'approved_lessons',
+      'selection',
+      'surrounding_context',
+      'beat_title',
+      'narrative_job',
+      'creative_status',
+      'requested_scope',
+    ]);
+    expect(Object.keys(expectedInputs.topic_brief)).toEqual([
+      'topic',
+      'factual_anchors',
+      'unknowns',
+    ]);
+    expect(Object.keys(expectedInputs.surrounding_context)).toEqual([
+      'before',
+      'after',
+    ]);
+    expect(Object.keys(expectedInputs.creative_status)).toEqual(['phase']);
+
+    runtime.destroy();
+    view.destroy();
+    container.remove();
+  });
+
+  it('rejects launch when the stored draft has no creative phase', () => {
+    const { state, draftDocument, target } = selectedState();
+    (draftDocument['metadata'] as Record<string, unknown>)['creativeStatus'] = {};
+    const container = document.createElement('div');
+    const mount = document.createElement('div');
+    container.append(mount);
+    document.body.append(container);
+    const view = new EditorView(mount, {
+      state,
+      nodeViews: variantNodeViews,
+      dispatchTransaction(transaction) {
+        view.updateState(view.state.apply(transaction));
+      },
+    });
+    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
+      left: position === target.from ? 100 : 180,
+      right: position === target.from ? 100 : 180,
+      top: 80,
+      bottom: 100,
+    }));
+    vi.spyOn(container, 'getBoundingClientRect').mockReturnValue({
+      x: 20,
+      y: 10,
+      left: 20,
+      right: 420,
+      top: 10,
+      bottom: 310,
+      width: 400,
+      height: 300,
+      toJSON: () => ({}),
+    });
+    const submitOp = vi.fn();
+    const onError = vi.fn();
+    view.focus();
+    const runtime = new SelectionRuntime({
+      view,
+      container,
+      client: { submitOp } as unknown as DaemonClient,
+      draftDocument: () => draftDocument,
+      onError,
+    });
+
+    runtime.toolbar.element.querySelector<HTMLButtonElement>(
+      'button[data-action="rewrite"]',
+    )!.click();
+
+    expect(submitOp).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith(new Error(
+      'Set the creative phase in Episode brief before launching an operation.',
+    ));
+
+    runtime.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('mounts the toolbar and launches a rewrite through context, tracker, and bridge', async () => {
     const { state, draftDocument, target } = selectedState();
     const container = document.createElement('div');

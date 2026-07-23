@@ -1,44 +1,49 @@
 import '@angular/compiler';
 import {
-  EditorState,
-  EditorView,
-  corePlugins,
-  schema,
-  variantNodeViews,
-} from '@whp/script-creator-editor-core';
-import {
   createComponent,
   provideZonelessChangeDetection,
-  ɵSIGNAL,
-  type ɵInputSignalNode,
+  ɵgetComponentDef,
+  ɵresolveComponentResources,
+  ɵɵviewQuerySignal,
+  type ApplicationRef,
+  type ComponentRef,
 } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
+import {
+  provideRouter,
+  Router,
+} from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type {
   DaemonClient,
   DraftDocument,
+  DraftRecord,
   OperationName,
   OperationRecord,
   OperationResult,
+  OperationSummary,
   SavedDraft,
   StreamEventsOptions,
 } from '../api/client';
+import { App } from '../app';
+import { routes } from '../app.routes';
+import appTemplate from '../app.html?raw';
+import appStyles from '../app.scss?raw';
 import {
-  ApprovalGate,
-  BriefPanelModel,
-  type PromotionLauncher,
-} from '../panels/brief-panel';
+  DebouncedAutosave,
+  EditorHost,
+} from './editor-host';
+import { DraftManagerComponent } from '../drafts/draft-manager.component';
+import { BriefPanel } from '../panels/brief-panel';
+import { FindingsPanel } from '../panels/findings-panel';
+import { ParkingLot } from '../panels/parking-lot';
+import { RevisionTimeline } from '../drafts/revision-timeline';
+import { DraftTransfer } from '../drafts/draft-transfer';
+import { AgentConsole } from '../panels/agent-console';
 import {
-  FindingsPanel,
-  findingRows,
-} from '../panels/findings-panel';
-import type { FindingLayer } from './proposal-bridge';
-import {
-  composeStudio,
-  type StudioComposition,
-} from './studio-composition';
-
-const SELECTED_TEXT = 'selected words';
+  STUDIO_SESSION,
+  StudioSession,
+} from '../studio-session';
 
 interface ControlledOutcome {
   operation: OperationRecord;
@@ -47,12 +52,57 @@ interface ControlledOutcome {
 
 class ControllableDaemonClient {
   private sequence = 0;
+  private revisionSequence = 0;
   private readonly finishes = new Map<string, () => void>();
   private readonly outcomes = new Map<string, ControlledOutcome>();
+  readonly submissions: Array<{
+    id: string;
+    operation: OperationName;
+    inputs: unknown;
+  }> = [];
 
-  readonly submitOp = vi.fn(async (_operation: OperationName, _inputs: unknown) => ({
-    id: `op-${++this.sequence}`,
+  constructor(readonly storedDraft: DraftRecord) {}
+
+  readonly list = vi.fn(async () => [draftSummary(this.storedDraft)]);
+  readonly get = vi.fn(async (_id: string) => this.storedDraft);
+  readonly listRevisions = vi.fn(async () => []);
+  readonly create = vi.fn(async () => this.storedDraft);
+  readonly import = vi.fn(async () => this.storedDraft);
+  readonly export = vi.fn(async () => ({ markdown: '# Exported' }));
+  readonly writeArtifact = vi.fn(async () => ({
+    conflict: false as const,
+    hash: 'artifact-hash',
   }));
+  readonly validate = vi.fn(async () => ({ ok: true, errors: [] }));
+
+  readonly save = vi.fn(async (
+    _id: string,
+    input: { doc: DraftDocument; disposition?: string },
+  ): Promise<SavedDraft> => {
+    this.storedDraft.doc = input.doc;
+    const seq = ++this.revisionSequence;
+    return {
+      draft: this.storedDraft,
+      revision: {
+        id: `revision-${seq}`,
+        draftId: this.storedDraft.id,
+        seq,
+        opId: null,
+        disposition: input.disposition ?? 'edit',
+        doc: input.doc,
+        createdAt: `2026-07-23T12:00:${String(seq).padStart(2, '0')}.000Z`,
+      },
+    };
+  });
+
+  readonly submitOp = vi.fn(async (
+    operation: OperationName,
+    inputs: unknown,
+  ) => {
+    const id = `op-${++this.sequence}`;
+    this.submissions.push({ id, operation, inputs });
+    return { id };
+  });
 
   readonly streamEvents = vi.fn(async (
     id: string,
@@ -89,482 +139,661 @@ class ControllableDaemonClient {
 
   readonly cancel = vi.fn(async (id: string) => ({ id }));
   readonly resume = vi.fn(async () => ({ id: `op-${++this.sequence}` }));
+  readonly listOps = vi.fn(async () => ({
+    operations: this.submissions
+      .map(({ id, operation }) =>
+        operationSummary(
+          this.outcomes.get(id)?.operation
+          ?? completedOperation(id, {
+            operation,
+            state: 'running',
+            finishedAt: null,
+          }),
+        ))
+      .reverse(),
+  }));
 
-  resolve(id: string, outcome: ControlledOutcome): void {
+  resolve(
+    id: string,
+    result: OperationResult,
+    overrides: Partial<OperationRecord> = {},
+  ): void {
+    const submission = this.submissions.find((item) => item.id === id);
     const finish = this.finishes.get(id);
-    if (!finish) throw new Error(`operation ${id} is not streaming`);
-    this.outcomes.set(id, outcome);
+    if (!submission || !finish) {
+      throw new Error(`operation ${id} is not streaming`);
+    }
+    this.outcomes.set(id, {
+      operation: completedOperation(id, {
+        operation: submission.operation,
+        ...overrides,
+      }),
+      result,
+    });
     finish();
   }
 }
 
-const mounted: Array<{
-  composition: StudioComposition;
-  view: EditorView;
+interface MountedStudio {
+  application: ApplicationRef;
+  component: ComponentRef<App>;
   root: HTMLElement;
-}> = [];
+  router: Router;
+  client: ControllableDaemonClient;
+  session: StudioSession;
+  tick(): void;
+  destroy(): void;
+}
+
+const mounted: MountedStudio[] = [];
+let appResourcesResolved = false;
+let signalInputsHydrated = false;
+
+if (!Range.prototype.getClientRects) {
+  Range.prototype.getClientRects = () => domRectList();
+}
+if (!Range.prototype.getBoundingClientRect) {
+  Range.prototype.getBoundingClientRect = () => domRect();
+}
+globalThis.scrollBy = () => undefined;
 
 afterEach(() => {
-  for (const entry of mounted.splice(0)) {
-    entry.composition.destroy();
-    entry.view.destroy();
-    entry.root.remove();
-  }
+  while (mounted.length > 0) mounted.pop()?.destroy();
+  document.body.replaceChildren();
+  globalThis.history.replaceState(null, '', '/');
+  vi.restoreAllMocks();
 });
 
-describe('studio composition', () => {
-  it('renders pending, proposal, failure, and console state from toolbar operations', async () => {
-    const { state, draftDocument, target } = selectedState();
-    const root = document.createElement('section');
-    const editor = document.createElement('div');
-    const failures = document.createElement('div');
-    const guardrails = document.createElement('div');
-    const consolePanel = document.createElement('div');
-    root.append(editor, failures, guardrails, consolePanel);
-    document.body.append(root);
-
-    let composition: StudioComposition | null = null;
-    const view = new EditorView(editor, {
-      state,
-      nodeViews: variantNodeViews,
-      dispatchTransaction(transaction) {
-        view.updateState(view.state.apply(transaction));
-        composition?.handleEditorDispatch();
-      },
-    });
-    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
-      left: position === target.from ? 100 : 180,
-      right: position === target.from ? 100 : 180,
-      top: 80,
-      bottom: 100,
-    }));
-    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
-      x: 20,
-      y: 10,
-      left: 20,
-      right: 420,
-      top: 10,
-      bottom: 310,
-      width: 400,
-      height: 300,
-      toJSON: () => ({}),
-    });
-
-    const daemon = new ControllableDaemonClient();
-    view.focus();
-    composition = composeStudio(
-      view,
-      daemon as unknown as DaemonClient,
-      {
-        editor,
-        failures,
-        guardrails,
-        console: consolePanel,
-        draftDocument: () => draftDocument,
-      },
+describe('mounted Script Studio composition', () => {
+  it('drives the full production Studio and routed Console surface', async () => {
+    const cancelAutosave = vi.spyOn(
+      DebouncedAutosave.prototype,
+      'cancel',
     );
-    mounted.push({ composition, view, root });
+    const studio = await mountStudio();
 
-    clickRewrite(composition);
+    expect(studio.root.querySelector('app-studio-page')).not.toBeNull();
+    expect(studio.root.querySelector('app-draft-manager')).not.toBeNull();
+    expect(studio.root.querySelector('app-editor-host')).not.toBeNull();
+    expect(studio.root.querySelector('app-brief-panel')).not.toBeNull();
+    expect(studio.root.querySelector('app-findings-panel')).not.toBeNull();
+    expect(studio.root.querySelector('app-parking-lot')).not.toBeNull();
 
-    await vi.waitFor(() => {
-      expect(editor.querySelector(
-        '[data-testid="selection-operation-pending"]',
-      )).not.toBeNull();
-    });
-    await vi.waitFor(() => {
-      expect(consolePanel.querySelector(
-        '[data-testid="console-operation"]',
-      )?.textContent).toContain('streaming');
-    });
+    const editorHost = studio.root.querySelector('app-editor-host');
+    expect(
+      editorHost?.querySelector('.selection-toolbar'),
+      'EditorHost must invoke composeStudio and mount its runtime toolbar',
+    ).not.toBeNull();
+    expect(
+      editorHost?.querySelector('.agent-console-panel'),
+      'EditorHost must retain the runtime-created console host',
+    ).not.toBeNull();
 
-    daemon.resolve('op-1', {
-      operation: completedOperation('op-1'),
-      result: {
-        kind: 'schema',
-        value: {
-          status: 'complete',
-          replacement_markdown: 'Sharper words',
-          guardrail_markdown: null,
-        },
-        guardrail: null,
-      },
-    });
+    await selectText(studio, 'rewrite target');
+    expect(toolbar(studio).hidden).toBe(false);
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
 
+    studio.client.resolve('op-1', rewriteResult('rewritten target'));
+    let readyProposal: Element | null = null;
     await vi.waitFor(() => {
-      const proposal = view.dom.querySelector('.proposal-diff');
-      expect(proposal?.textContent).toContain('Sharper words');
-      expect(buttonLabels(proposal)).toEqual(
-        expect.arrayContaining(['Accept', 'Reject']),
-      );
+      studio.tick();
+      readyProposal = studio.root.querySelector('.proposal-diff');
+      expect(readyProposal?.textContent).toContain('rewritten target');
     });
-    expect(editor.querySelector(
-      '[data-testid="selection-operation-pending"]',
-    )).toBeNull();
-    const reroll = vi.spyOn(composition.runtime, 'reroll')
-      .mockReturnValue(null as never);
-    findButton(
-      consolePanel.querySelector('[data-testid="console-operation"]'),
-      'Re-roll',
-    ).click();
-    expect(reroll).toHaveBeenCalledWith('op-1');
-    reroll.mockRestore();
-
-    clickRewrite(composition);
+    findButton(readyProposal, 'Accept').click();
+    studio.tick();
     await vi.waitFor(() => {
-      expect(editor.querySelector(
-        '[data-testid="selection-operation-pending"]',
-      )).not.toBeNull();
-    });
-    await vi.waitFor(() => {
-      expect(Array.from(consolePanel.querySelectorAll(
-        '[data-testid="console-operation"]',
-      )).at(-1)?.textContent).toContain('streaming');
-    });
-    const cancel = vi.spyOn(composition.runtime, 'cancel')
-      .mockResolvedValueOnce();
-    findButton(
-      Array.from(consolePanel.querySelectorAll(
-        '[data-testid="console-operation"]',
-      )).at(-1) ?? null,
-      'Cancel',
-    ).click();
-    expect(cancel).toHaveBeenCalledWith('op-2');
-    cancel.mockRestore();
-    daemon.resolve('op-2', {
-      operation: completedOperation('op-2', {
-        state: 'invalid-output',
-        error: 'response failed schema validation',
-      }),
-      result: {
-        kind: 'failed',
-        error: 'invalid operation result',
-      },
+      expect(editorText(studio)).toContain('rewritten target');
+      expect(editorText(studio)).not.toContain('rewrite target');
     });
 
+    await selectText(studio, 'failure target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    studio.client.resolve('op-2', {
+      kind: 'failed',
+      error: 'invalid operation result',
+    }, {
+      state: 'invalid-output',
+      error: 'response failed schema validation',
+    });
     await vi.waitFor(() => {
-      expect(failures.querySelector(
+      studio.tick();
+      expect(studio.root.querySelector(
         '[data-testid="operation-failure"]',
       )?.textContent).toContain('invalid operation result');
     });
-    expect(consolePanel.querySelectorAll(
-      '[data-testid="console-operation"]',
-    )).toHaveLength(2);
-    expect(consolePanel.querySelector(
-      '[data-testid="console-entry"]',
-    )?.textContent).toContain('Working on op-1.');
 
-    clickRewrite(composition);
-    await vi.waitFor(() => {
-      expect(Array.from(consolePanel.querySelectorAll(
-        '[data-testid="console-operation"]',
-      )).at(-1)?.textContent).toContain('streaming');
-    });
-    daemon.resolve('op-3', {
-      operation: completedOperation('op-3'),
-      result: {
-        kind: 'schema',
-        value: {
-          status: 'declined',
-          replacement_markdown: '',
-          guardrail_markdown: 'The request crosses the approved scope.',
-        },
-        guardrail: 'The request crosses the approved scope.',
+    await selectText(studio, 'guardrail target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    studio.client.resolve('op-3', {
+      kind: 'schema',
+      value: {
+        status: 'declined',
+        replacement_markdown: '',
+        guardrail_markdown: 'The request crosses the approved scope.',
       },
+      guardrail: 'The request crosses the approved scope.',
     });
     await vi.waitFor(() => {
-      expect(guardrails.querySelector(
+      studio.tick();
+      expect(studio.root.querySelector(
         '[data-testid="operation-guardrail"]',
       )?.textContent).toContain('crosses the approved scope');
     });
-  });
 
-  it('feeds review results to the findings panel rows', async () => {
-    const { state, draftDocument, target } = selectedState();
-    const root = document.createElement('section');
-    const editor = document.createElement('div');
-    const failures = document.createElement('div');
-    const guardrails = document.createElement('div');
-    const consolePanel = document.createElement('div');
-    root.append(editor, failures, guardrails, consolePanel);
-    document.body.append(root);
-
-    let composition: StudioComposition | null = null;
-    let findings: readonly FindingLayer[] = [];
-    const view = new EditorView(editor, {
-      state,
-      nodeViews: variantNodeViews,
-      dispatchTransaction(transaction) {
-        view.updateState(view.state.apply(transaction));
-        composition?.handleEditorDispatch();
+    await selectText(studio, 'alternatives target');
+    clickToolbar(studio, 'alternatives');
+    await expectPending(studio, true);
+    expect(studio.root.querySelector('.proposal-diff')).toBeNull();
+    studio.client.resolve('op-4', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        options: [
+          { label: 'Direct', markdown: 'State the rule plainly.' },
+          { label: 'Playful', markdown: 'Turn the rule into a toy.' },
+        ],
+        guardrail_markdown: null,
       },
+      guardrail: null,
     });
-    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
-      left: position === target.from ? 100 : 180,
-      right: position === target.from ? 100 : 180,
-      top: 80,
-      bottom: 100,
-    }));
-    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
-      x: 20,
-      y: 10,
-      left: 20,
-      right: 420,
-      top: 10,
-      bottom: 310,
-      width: 400,
-      height: 300,
-      toJSON: () => ({}),
-    });
-
-    const daemon = new ControllableDaemonClient();
-    view.focus();
-    composition = composeStudio(
-      view,
-      daemon as unknown as DaemonClient,
-      {
-        editor,
-        failures,
-        guardrails,
-        console: consolePanel,
-        draftDocument: () => draftDocument,
-        onFindings: (next) => {
-          findings = next;
-        },
-      },
+    const unsettled = await waitForElement(
+      studio,
+      '[data-testid="unsettled-variant"]',
     );
-    mounted.push({ composition, view, root });
-
-    composition.runtime.toolbar.element
-      .querySelector<HTMLButtonElement>('button[data-action="review"]')!
-      .click();
+    expect(unsettled.textContent).toContain('Direct');
+    expect(unsettled.textContent).toContain('Playful');
+    findButton(unsettled, 'Playful').click();
+    studio.tick();
+    findButton(
+      studio.root.querySelector('[data-testid="unsettled-variant"]'),
+      'Pick active',
+    ).click();
+    studio.tick();
     await vi.waitFor(() => {
-      expect(consolePanel.querySelector(
-        '[data-testid="console-operation"]',
-      )?.textContent).toContain('streaming');
+      studio.tick();
+      expect(studio.root.querySelector(
+        '[data-testid="unsettled-variant"]',
+      )).toBeNull();
+      expect(studio.root.querySelector(
+        'ol[aria-label="Parked variants"]',
+      )?.textContent).toContain('State the rule plainly.');
     });
-    daemon.resolve('op-1', {
-      operation: completedOperation('op-1', { operation: 'review' }),
-      result: {
-        kind: 'schema',
-        value: {
-          status: 'complete',
-          findings: [{
-            anchor: SELECTED_TEXT,
-            severity: 'important',
-            finding_markdown: 'Ground this claim in the supplied anchor.',
-            optional_direction_markdown: 'Name the concrete rule.',
-          }],
-          guardrail_markdown: null,
-        },
-        guardrail: null,
+
+    await selectText(studio, 'review target');
+    clickToolbar(studio, 'review');
+    await expectPending(studio, true);
+    studio.client.resolve('op-5', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        findings: [{
+          anchor: 'review target',
+          severity: 'important',
+          finding_markdown: 'Ground this claim in the supplied anchor.',
+          optional_direction_markdown: 'Name the concrete rule.',
+        }],
+        guardrail_markdown: null,
       },
+      guardrail: null,
     });
-
-    await vi.waitFor(() => expect(findings).toHaveLength(1));
-    expect(findingRows(findings)).toEqual([
-      expect.objectContaining({
-        anchor: SELECTED_TEXT,
-        severity: 'important',
-        findingMarkdown: 'Ground this claim in the supplied anchor.',
-        anchorStatus: 'anchored',
-      }),
-    ]);
-
-    const application = await createApplication({
-      providers: [provideZonelessChangeDetection()],
-    });
-    const findingsHost = document.createElement('app-findings-panel');
-    document.body.append(findingsHost);
-    const findingsComponent = createComponent(FindingsPanel, {
-      environmentInjector: application.injector,
-      hostElement: findingsHost,
-    });
-    const findingsNode = findingsComponent.instance.findings[ɵSIGNAL] as
-      ɵInputSignalNode<readonly FindingLayer[], readonly FindingLayer[]>;
-    findingsNode.applyValueToInputSignal(findingsNode, findings);
-    application.attachView(findingsComponent.hostView);
-    findingsComponent.changeDetectorRef.detectChanges();
-
-    try {
-      expect(findingsHost.textContent).toContain(
+    await vi.waitFor(() => {
+      studio.tick();
+      const findings = studio.root.querySelector('app-findings-panel');
+      expect(findings?.textContent).toContain(
         'Ground this claim in the supplied anchor.',
       );
-      expect(findingsHost.textContent).toContain('Anchored');
-    } finally {
-      application.detachView(findingsComponent.hostView);
-      findingsComponent.destroy();
-      application.destroy();
-      findingsHost.remove();
-    }
+      expect(findings?.textContent).toContain('Anchored');
+    });
+
+    const promote = findButton(
+      studio.root.querySelector('app-brief-panel'),
+      'Promote',
+    );
+    expect(promote.disabled).toBe(true);
+    const approval = studio.root.querySelector<HTMLInputElement>(
+      'app-brief-panel input[type="checkbox"]',
+    )!;
+    approval.checked = true;
+    approval.dispatchEvent(new Event('change', { bubbles: true }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(promote.disabled).toBe(false);
+    });
+
+    await selectText(studio, 'reroll target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    studio.client.resolve('op-6', rewriteResult('rerolled target'));
+    await waitForElement(studio, '.proposal-diff');
+    await vi.waitFor(() => {
+      studio.tick();
+      const studioReroll = findButton(
+        Array.from(studio.root.querySelectorAll(
+          '[data-testid="console-operation"]',
+        )).at(-1) ?? null,
+        'Re-roll',
+      );
+      expect(studioReroll.disabled).toBe(false);
+    });
+
+    const cancelsBeforeDetach = cancelAutosave.mock.calls.length;
+    await studio.router.navigateByUrl('/console');
+    studio.tick();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector('app-agent-console-page')).not.toBeNull();
+      expect(studio.root.textContent).toContain('op-6');
+      expect(studio.root.textContent).toContain('Working on op-6.');
+    });
+    const routedReroll = findButton(
+      studio.root.querySelector('app-agent-console .actions'),
+      'Re-roll',
+    );
+    expect(routedReroll.disabled).toBe(true);
+    expect(cancelAutosave.mock.calls.length)
+      .toBeGreaterThan(cancelsBeforeDetach);
+    expect(studio.client.resume).not.toHaveBeenCalled();
+    expect(studio.root.querySelectorAll(
+      'app-agent-console nav button',
+    ).length).toBeGreaterThanOrEqual(6);
   });
 
-  it('launches approved promotion through the runtime tracker and renders its stream', async () => {
-    const { state, draftDocument, target } = selectedState();
-    const root = document.createElement('section');
-    const editor = document.createElement('div');
-    const failures = document.createElement('div');
-    const guardrails = document.createElement('div');
-    const consolePanel = document.createElement('div');
-    root.append(editor, failures, guardrails, consolePanel);
-    document.body.append(root);
+  it('renders verbatim Base, Current, and Proposed for an intervening-edit conflict', async () => {
+    const studio = await mountStudio();
+    await selectText(studio, 'conflict target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
 
-    let composition: StudioComposition | null = null;
-    const view = new EditorView(editor, {
-      state,
-      nodeViews: variantNodeViews,
-      dispatchTransaction(transaction) {
-        view.updateState(view.state.apply(transaction));
-        composition?.handleEditorDispatch();
-      },
-    });
-    vi.spyOn(view, 'coordsAtPos').mockImplementation((position) => ({
-      left: position === target.from ? 100 : 180,
-      right: position === target.from ? 100 : 180,
-      top: 80,
-      bottom: 100,
-    }));
-    vi.spyOn(editor, 'getBoundingClientRect').mockReturnValue({
-      x: 20,
-      y: 10,
-      left: 20,
-      right: 420,
-      top: 10,
-      bottom: 310,
-      width: 400,
-      height: 300,
-      toJSON: () => ({}),
-    });
-
-    const daemon = new ControllableDaemonClient();
-    view.focus();
-    composition = composeStudio(
-      view,
-      daemon as unknown as DaemonClient,
-      {
-        editor,
-        failures,
-        guardrails,
-        console: consolePanel,
-        draftDocument: () => draftDocument,
-      },
+    await replaceRenderedText(
+      studio,
+      'conflict target',
+      'current edited target',
     );
-    mounted.push({ composition, view, root });
+    studio.client.resolve('op-1', rewriteResult('proposed target'));
 
-    const draft = {
-      id: 'draft-promote',
-      episodeSlug: 'approved-episode',
-      title: 'Approved episode',
-      format: 'narration' as const,
-      doc: draftDocument,
-      updatedAt: '2026-07-23T12:00:00.000Z',
-    };
-    const save = vi.fn(async (_id: string, input: { doc: DraftDocument }) => ({
-      draft: { ...draft, doc: input.doc },
-      revision: {
-        id: 'revision-promote',
-        draftId: draft.id,
-        seq: 1,
-        opId: null,
-        disposition: 'brief-metadata',
-        doc: input.doc,
-        createdAt: '2026-07-23T12:00:01.000Z',
-      },
-    } satisfies SavedDraft));
-    const brief = new BriefPanelModel(draft, { save });
-    const launcher: PromotionLauncher = {
-      launch: (operation, inputs, meta) =>
-        composition!.runtime.tracker.launch(
-          operation,
-          inputs,
-          meta as never,
-        ) as unknown as ReturnType<PromotionLauncher['launch']>,
-    };
-    const gate = new ApprovalGate(
-      brief,
-      launcher,
-      () => ({
-        selection: view.state.doc.textContent,
-        before: '',
-        after: '',
-        beatTitle: draft.title,
-        narrativeJob: '',
-        requestedScope: { kind: 'full-draft' },
-      }),
+    let conflict: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      conflict = studio.root.querySelector('.proposal-diff.is-conflicted');
+      expect(labeledConflictValues(conflict!)).toEqual({
+        Base: 'conflict target',
+        Current: 'current edited target',
+        Proposed: 'proposed target',
+      });
+    });
+    expect(labeledConflictValues(conflict)).toEqual({
+      Base: 'conflict target',
+      Current: 'current edited target',
+      Proposed: 'proposed target',
+    });
+    expect(findButton(conflict, 'Accept').disabled).toBe(true);
+  });
+
+  it('renders the same three-way conflict when a lock overlaps the proposal', async () => {
+    const studio = await mountStudio();
+    await selectText(studio, 'lock target');
+    clickToolbar(studio, 'lock');
+    await selectText(studio, 'lock target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    studio.client.resolve('op-1', rewriteResult('locked proposal'));
+
+    const conflict = await waitForElement(
+      studio,
+      '.proposal-diff.is-conflicted',
     );
+    expect(labeledConflictValues(conflict)).toEqual({
+      Base: 'lock target',
+      Current: 'lock target',
+      Proposed: 'locked proposal',
+    });
+    expect(findButton(conflict, 'Accept').disabled).toBe(true);
+  });
 
-    expect(gate.canPromote()).toBe(false);
-    await brief.setDirectionApproved(true);
-    expect(gate.canPromote()).toBe(true);
-    gate.promote();
+  it('shows a launch callout when an opened draft has no stored phase', async () => {
+    const draft = studioDraft();
+    draft.doc['metadata'] = {
+      ...(draft.doc['metadata'] as Record<string, unknown>),
+      creativeStatus: {},
+    };
+    const studio = await mountStudio(draft);
+    await selectText(studio, 'rewrite target');
+    clickToolbar(studio, 'rewrite');
 
     await vi.waitFor(() => {
-      expect(daemon.submitOp).toHaveBeenCalledWith(
-        'promote',
-        expect.objectContaining({
-          selection: view.state.doc.textContent,
-          requested_scope: { kind: 'full-draft' },
-        }),
-      );
-      expect(consolePanel.textContent).toContain('Working on op-1.');
+      studio.tick();
+      expect(studio.root.querySelector('[role="alert"]')?.textContent)
+        .toContain(
+          'Set the creative phase in Episode brief before launching an operation.',
+        );
     });
-    daemon.resolve('op-1', {
-      operation: completedOperation('op-1', { operation: 'promote' }),
-      result: {
-        kind: 'raw',
-        markdown: 'Promotion complete.',
-      },
-    });
-    await vi.waitFor(() => expect(
-      gate.activeOperation()?.phase(),
-    ).toBe('done'));
+    expect(studio.client.submitOp).not.toHaveBeenCalled();
   });
 });
 
-function selectedState(): {
-  state: EditorState;
-  draftDocument: DraftDocument;
-  target: { from: number; to: number };
-} {
-  const doc = schema.node('doc', { format: 'narration', preamble: '' }, [
-    schema.node('beat', {
-      beatId: 'beat-1',
-      title: 'The test beat',
-      timeTargetMs: 30_000,
-    }, [
-      schema.node('paragraph', null, schema.text(
-        `Before ${SELECTED_TEXT} after.`,
-      )),
-    ]),
-  ]);
-  let from = -1;
-  doc.descendants((node, pos) => {
-    if (!node.isText || !node.text) return;
-    const offset = node.text.indexOf(SELECTED_TEXT);
-    if (offset >= 0) from = pos + offset;
+async function mountStudio(
+  draft = studioDraft(),
+): Promise<MountedStudio> {
+  if (!appResourcesResolved) {
+    await ɵresolveComponentResources(async (url) =>
+      url.endsWith('app.html') ? appTemplate : appStyles);
+    appResourcesResolved = true;
+  }
+  if (!signalInputsHydrated) {
+    // Vitest transpiles TypeScript without Angular's AOT input transform. Hydrate
+    // only the signal-input metadata so the real production component tree can
+    // bind and run under JIT in jsdom.
+    hydrateSignalInputs(BriefPanel, ['model', 'gate']);
+    hydrateSignalInputs(FindingsPanel, ['findings']);
+    hydrateSignalInputs(ParkingLot, ['model']);
+    hydrateSignalInputs(RevisionTimeline, ['manager']);
+    hydrateSignalInputs(DraftTransfer, ['manager']);
+    hydrateSignalInputs(EditorHost, ['draft', 'client', 'session', 'wpm']);
+    hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
+    const draftManagerDefinition = ɵgetComponentDef(DraftManagerComponent);
+    if (!draftManagerDefinition) {
+      throw new Error('DraftManager component definition is unavailable');
+    }
+    draftManagerDefinition.viewQuery = (
+      renderFlags: number,
+      instance: DraftManagerComponent,
+    ) => {
+      if (renderFlags & 1) {
+        ɵɵviewQuerySignal(instance.editorHost, EditorHost, 5);
+      }
+    };
+    signalInputsHydrated = true;
+  }
+  globalThis.history.replaceState(null, '', '/');
+  const client = new ControllableDaemonClient(draft);
+  const session = new StudioSession(client as unknown as DaemonClient);
+  const application = await createApplication({
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter(routes),
+      { provide: STUDIO_SESSION, useValue: session },
+    ],
   });
-  const target = { from, to: from + SELECTED_TEXT.length };
-  const state = EditorState.fromJSON(
-    { schema, plugins: corePlugins() },
-    {
-      doc: doc.toJSON(),
-      selection: {
-        type: 'text',
-        anchor: target.from,
-        head: target.to,
-      },
+  const root = document.createElement('app-root');
+  document.body.append(root);
+  const component = createComponent(App, {
+    environmentInjector: application.injector,
+    hostElement: root,
+  });
+  application.attachView(component.hostView);
+  const router = application.injector.get(Router);
+  const studio: MountedStudio = {
+    application,
+    component,
+    root,
+    router,
+    client,
+    session,
+    tick: () => {
+      application.tick();
+      component.changeDetectorRef.detectChanges();
     },
-  );
-  const draftDocument = doc.toJSON() as DraftDocument;
-  draftDocument['metadata'] = {
-    topic: 'Why constraints create play',
-    anchors: ['Players accept the rule.'],
-    unknowns: [],
-    approvedLessons: [],
-    creativeStatus: { phase: 'rapid-prototype' },
-    directionApproved: false,
+    destroy: () => {
+      application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      root.remove();
+    },
   };
-  return { state, draftDocument, target };
+  mounted.push(studio);
+  await router.navigateByUrl('/');
+  studio.tick();
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(client.list).toHaveBeenCalled();
+    expect(root.querySelector('.draft-card')).not.toBeNull();
+  });
+  root.querySelector<HTMLButtonElement>('.draft-card')!.click();
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(client.get).toHaveBeenCalledWith(draft.id);
+    expect(root.querySelector('app-editor-host .ProseMirror')).not.toBeNull();
+    expect(root.querySelector('app-brief-panel')).not.toBeNull();
+    expect(root.querySelector('app-findings-panel')).not.toBeNull();
+    expect(root.querySelector('app-parking-lot')).not.toBeNull();
+  });
+  return studio;
+}
+
+function hydrateSignalInputs(
+  component: object,
+  names: string[],
+): void {
+  const definition = ɵgetComponentDef(component as never);
+  if (!definition) throw new Error('Angular component definition is unavailable');
+  const inputs = { ...definition.inputs };
+  const declaredInputs = { ...definition.declaredInputs };
+  for (const name of names) {
+    inputs[name] = [name, 1, null];
+    declaredInputs[name] = name;
+  }
+  definition.inputs = inputs;
+  definition.declaredInputs = declaredInputs;
+}
+
+async function selectText(
+  studio: MountedStudio,
+  text: string,
+): Promise<void> {
+  const editor = studio.root.querySelector<HTMLElement>('.ProseMirror');
+  if (!editor) throw new Error('the production ProseMirror surface was not mounted');
+  const match = findTextNode(editor, text);
+  if (!match) throw new Error(`text "${text}" was not found in the editor`);
+  const range = document.createRange();
+  range.setStart(match.node, match.offset);
+  range.setEnd(match.node, match.offset + text.length);
+  editor.focus();
+  const selection = globalThis.getSelection();
+  selection?.removeAllRanges();
+  selection?.addRange(range);
+  document.dispatchEvent(new Event('selectionchange'));
+  editor.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(toolbar(studio).hidden).toBe(false);
+  });
+}
+
+async function replaceRenderedText(
+  studio: MountedStudio,
+  current: string,
+  replacement: string,
+): Promise<void> {
+  const editor = studio.root.querySelector<HTMLElement>('.ProseMirror')!;
+  const match = findTextNode(editor, current);
+  if (!match) throw new Error(`text "${current}" was not found in the editor`);
+  match.node.data = [
+    match.node.data.slice(0, match.offset),
+    replacement,
+    match.node.data.slice(match.offset + current.length),
+  ].join('');
+  editor.dispatchEvent(new InputEvent('input', {
+    bubbles: true,
+    inputType: 'insertText',
+    data: replacement,
+  }));
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(editorText(studio)).toContain(replacement);
+    expect(editorText(studio)).not.toContain(current);
+  });
+}
+
+function toolbar(studio: MountedStudio): HTMLDivElement {
+  const element = studio.root.querySelector<HTMLDivElement>(
+    'app-editor-host .selection-toolbar',
+  );
+  if (!element) throw new Error('composeStudio did not mount the selection toolbar');
+  return element;
+}
+
+function clickToolbar(
+  studio: MountedStudio,
+  action: string,
+): void {
+  const button = toolbar(studio).querySelector<HTMLButtonElement>(
+    `button[data-action="${action}"]`,
+  );
+  if (!button) throw new Error(`toolbar action ${action} was not rendered`);
+  button.click();
+  studio.tick();
+}
+
+async function expectPending(
+  studio: MountedStudio,
+  expected: boolean,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(Boolean(studio.root.querySelector(
+      '[data-testid="selection-operation-pending"]',
+    ))).toBe(expected);
+  });
+}
+
+async function expectEmbeddedConsole(
+  studio: MountedStudio,
+  text: string,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(studio.root.querySelector(
+      '[data-testid="console-operation"]',
+    )?.textContent).toContain(text);
+  });
+}
+
+async function waitForElement(
+  studio: MountedStudio,
+  selector: string,
+): Promise<Element> {
+  let element: Element | null = null;
+  await vi.waitFor(() => {
+    studio.tick();
+    element = studio.root.querySelector(selector);
+    expect(element).not.toBeNull();
+  });
+  return element!;
+}
+
+function findTextNode(
+  root: Node,
+  text: string,
+): { node: Text; offset: number } | null {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  for (
+    let node = walker.nextNode();
+    node !== null;
+    node = walker.nextNode()
+  ) {
+    const offset = node.textContent?.indexOf(text) ?? -1;
+    if (node instanceof Text && offset >= 0) return { node, offset };
+  }
+  return null;
+}
+
+function findButton(
+  element: Element | null,
+  label: string,
+): HTMLButtonElement {
+  const button = Array.from(
+    element?.querySelectorAll<HTMLButtonElement>('button') ?? [],
+  ).find((candidate) =>
+    candidate.textContent?.replace(/\s+/gu, ' ').trim().startsWith(label));
+  if (!button) throw new Error(`button ${label} was not rendered`);
+  return button;
+}
+
+function labeledConflictValues(
+  conflict: Element,
+): Record<string, string> {
+  return Object.fromEntries(
+    Array.from(conflict.querySelectorAll<HTMLElement>('[data-conflict-value]'))
+      .map((element) => [
+        element.dataset['conflictValue'] ?? '',
+        element.textContent ?? '',
+      ]),
+  );
+}
+
+function editorText(studio: MountedStudio): string {
+  return studio.root.querySelector('.ProseMirror')?.textContent ?? '';
+}
+
+function rewriteResult(replacement: string): OperationResult {
+  return {
+    kind: 'schema',
+    value: {
+      status: 'complete',
+      replacement_markdown: replacement,
+      guardrail_markdown: null,
+    },
+    guardrail: null,
+  };
+}
+
+function studioDraft(): DraftRecord {
+  return {
+    id: 'draft-1',
+    episodeSlug: 'composition-net',
+    title: 'Composition net',
+    format: 'narration',
+    updatedAt: '2026-07-23T12:00:00.000Z',
+    doc: {
+      type: 'doc',
+      attrs: { format: 'narration', preamble: '' },
+      metadata: {
+        topic: 'Why constraints create play',
+        anchors: ['Players accept the rule.'],
+        unknowns: ['Which example survives review?'],
+        approvedLessons: ['Keep the language concrete.'],
+        creativeStatus: { phase: 'rapid-prototype' },
+        directionApproved: false,
+      },
+      content: [{
+        type: 'beat',
+        attrs: {
+          beatId: 'beat-1',
+          title: 'The test beat',
+          timeTargetMs: 30_000,
+          narrativeJob: 'Turn the example into the larger question.',
+        },
+        content: [{
+          type: 'paragraph',
+          content: [{
+            type: 'text',
+            text: [
+              'rewrite target',
+              'failure target',
+              'guardrail target',
+              'alternatives target',
+              'review target',
+              'reroll target',
+              'conflict target',
+              'lock target',
+            ].join('. ') + '.',
+          }],
+        }],
+      }],
+    },
+  };
+}
+
+function draftSummary(draft: DraftRecord): Omit<DraftRecord, 'doc'> {
+  const { doc: _doc, ...summary } = draft;
+  return summary;
 }
 
 function completedOperation(
@@ -594,26 +823,44 @@ function completedOperation(
   };
 }
 
-function clickRewrite(composition: StudioComposition): void {
-  composition.runtime.toolbar.element
-    .querySelector<HTMLButtonElement>('button[data-action="rewrite"]')!
-    .click();
+function operationSummary(operation: OperationRecord): OperationSummary {
+  return {
+    id: operation.id,
+    operation: operation.operation,
+    state: operation.state,
+    createdAt: operation.createdAt,
+    finishedAt: operation.finishedAt,
+    stalled: operation.stalled,
+    usageAvailable: operation.usageAvailable,
+    inputTokens: operation.inputTokens,
+    cachedInputTokens: operation.cachedInputTokens,
+    outputTokens: operation.outputTokens,
+    reasoningOutputTokens: operation.reasoningOutputTokens,
+  };
 }
 
-function buttonLabels(element: Element | null): string[] {
-  return Array.from(
-    element?.querySelectorAll('button') ?? [],
-    (button) => button.textContent ?? '',
-  );
+function domRect(): DOMRect {
+  return {
+    x: 0,
+    y: 0,
+    width: 1,
+    height: 1,
+    top: 0,
+    right: 1,
+    bottom: 1,
+    left: 0,
+    toJSON: () => ({}),
+  };
 }
 
-function findButton(
-  element: Element | null,
-  label: string,
-): HTMLButtonElement {
-  const button = Array.from(
-    element?.querySelectorAll<HTMLButtonElement>('button') ?? [],
-  ).find((candidate) => candidate.textContent === label);
-  if (!button) throw new Error(`button ${label} was not rendered`);
-  return button;
+function domRectList(): DOMRectList {
+  const rect = domRect();
+  return {
+    0: rect,
+    length: 1,
+    item: (index: number) => index === 0 ? rect : null,
+    [Symbol.iterator]: function* () {
+      yield rect;
+    },
+  };
 }

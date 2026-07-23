@@ -1,13 +1,10 @@
 import {
-  getProposals,
+  Decoration,
+  DecorationSet,
   type EditorState,
   type EditorView,
   type Proposal,
 } from '@whp/script-creator-editor-core';
-import {
-  Decoration,
-  DecorationSet,
-} from '../../../../editor-core/node_modules/prosemirror-view';
 import type {
   DaemonClient,
   DraftDocument,
@@ -314,7 +311,7 @@ function proposalDecorations(
   onError: (error: unknown) => void,
 ): DecorationSet {
   const decorations: Decoration[] = [];
-  for (const proposal of getProposals(state)) {
+  for (const proposal of runtime.proposals()) {
     if (proposal.from < proposal.to) {
       const className = proposal.status === 'pending'
         ? 'proposal-pending'
@@ -360,11 +357,19 @@ function proposalWidget(
     : 'proposal-diff';
   diff.contentEditable = 'false';
 
-  const result = document.createElement('ins');
-  result.textContent = proposal.status === 'pending'
-    ? 'Agent drafting…'
-    : proposal.replacement ?? 'No replacement returned';
-  diff.append(result);
+  if (proposal.status === 'conflicted') {
+    diff.append(
+      conflictValue(document, 'Base', proposal.fingerprint),
+      conflictValue(document, 'Current', proposal.current ?? ''),
+      conflictValue(document, 'Proposed', proposal.replacement ?? ''),
+    );
+  } else {
+    const result = document.createElement('ins');
+    result.textContent = proposal.status === 'pending'
+      ? 'Agent drafting…'
+      : proposal.replacement ?? 'No replacement returned';
+    diff.append(result);
+  }
 
   if (proposal.status !== 'pending') {
     diff.append(
@@ -394,6 +399,22 @@ function proposalWidget(
     );
   }
   return diff;
+}
+
+function conflictValue(
+  document: Document,
+  label: 'Base' | 'Current' | 'Proposed',
+  value: string,
+): HTMLElement {
+  const row = document.createElement('span');
+  row.className = 'proposal-conflict-value';
+  const heading = document.createElement('strong');
+  heading.textContent = label;
+  const text = document.createElement('span');
+  text.dataset['conflictValue'] = label;
+  text.textContent = value;
+  row.append(heading, text);
+  return row;
 }
 
 function actionButton(

@@ -18,6 +18,7 @@ import {
 } from '@whp/script-creator-editor-core';
 import { EditorState, EditorView } from '@whp/script-creator-editor-core';
 import {
+  DaemonClientError,
   type DaemonClient,
   type DraftDocument,
   type DraftRecord,
@@ -49,20 +50,31 @@ export class DebouncedAutosave<T> {
   private timer: ReturnType<typeof setTimeout> | null = null;
   private pending: T | undefined;
   private hasPending = false;
-  private queue: Promise<void> = Promise.resolve();
-  private queuedSnapshots = 0;
+  private generation = 0;
+  private activeGeneration: number | null = null;
+  private activePromise: Promise<void> | null = null;
+  private retryWait: {
+    generation: number;
+    timer: ReturnType<typeof setTimeout>;
+    resolve: (elapsed: boolean) => void;
+  } | null = null;
+  private readonly idleResolvers = new Set<() => void>();
 
   constructor(
     private readonly save: (snapshot: T) => Promise<void>,
     private readonly delayMs = 1_000,
-    private readonly retryDelayMs = 1_000,
+    private readonly initialRetryDelayMs = 1_000,
     private readonly onQueueSizeChange: (size: number) => void = () => undefined,
+    private readonly maxRetryDelayMs = 8_000,
+    private readonly shouldRetry: (error: unknown) => boolean =
+      isRetryableAutosaveError,
   ) {}
 
   schedule(snapshot: T): void {
     this.pending = snapshot;
     this.hasPending = true;
     this.clearTimer();
+    this.wakeRetry(false);
     this.timer = setTimeout(() => {
       this.timer = null;
       this.flush();
@@ -71,35 +83,110 @@ export class DebouncedAutosave<T> {
 
   flush(): Promise<void> | null {
     this.clearTimer();
-    if (!this.hasPending) return null;
-
-    const snapshot = this.pending as T;
-    this.pending = undefined;
-    this.hasPending = false;
-    this.queuedSnapshots += 1;
-    this.onQueueSizeChange(this.queuedSnapshots);
-    this.queue = this.queue
-      .then(() => this.saveUntilSuccessful(snapshot))
-      .finally(() => {
-        this.queuedSnapshots -= 1;
-        this.onQueueSizeChange(this.queuedSnapshots);
-      });
-    return this.queue;
+    this.wakeRetry(false);
+    if (!this.hasPending) return this.activePromise;
+    return this.ensureDrain();
   }
 
   async whenIdle(): Promise<void> {
-    await this.queue;
+    if (this.isIdle()) return;
+    await new Promise<void>((resolve) => {
+      this.idleResolvers.add(resolve);
+    });
   }
 
-  private async saveUntilSuccessful(snapshot: T): Promise<void> {
-    for (;;) {
+  cancel(): void {
+    this.generation += 1;
+    this.clearTimer();
+    this.pending = undefined;
+    this.hasPending = false;
+    this.wakeRetry(false);
+    this.activeGeneration = null;
+    this.activePromise = null;
+    this.onQueueSizeChange(0);
+    this.resolveIdle();
+  }
+
+  private ensureDrain(): Promise<void> | null {
+    const generation = this.generation;
+    if (this.activeGeneration === generation) return this.activePromise;
+    if (!this.hasPending) return null;
+
+    this.activeGeneration = generation;
+    this.onQueueSizeChange(1);
+    const active = this.drain(generation).finally(() => {
+      if (this.activeGeneration !== generation) return;
+      this.activeGeneration = null;
+      this.activePromise = null;
+      if (this.hasPending) {
+        this.ensureDrain();
+        return;
+      }
+      this.onQueueSizeChange(0);
+      this.resolveIdle();
+    });
+    this.activePromise = active;
+    return active;
+  }
+
+  private async drain(generation: number): Promise<void> {
+    while (generation === this.generation && this.hasPending) {
+      const snapshot = this.pending as T;
+      this.pending = undefined;
+      this.hasPending = false;
+      await this.saveWithRetries(snapshot, generation);
+    }
+  }
+
+  private async saveWithRetries(
+    snapshot: T,
+    generation: number,
+  ): Promise<void> {
+    let retryDelayMs = this.initialRetryDelayMs;
+    while (generation === this.generation) {
       try {
         await this.save(snapshot);
         return;
-      } catch {
-        await delay(this.retryDelayMs);
+      } catch (error) {
+        if (
+          generation !== this.generation
+          || !this.shouldRetry(error)
+          || this.hasPending
+        ) {
+          return;
+        }
+        const elapsed = await this.waitForRetry(
+          retryDelayMs,
+          generation,
+        );
+        if (!elapsed) return;
+        retryDelayMs = Math.min(
+          retryDelayMs * 2,
+          this.maxRetryDelayMs,
+        );
       }
     }
+  }
+
+  private waitForRetry(
+    milliseconds: number,
+    generation: number,
+  ): Promise<boolean> {
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        if (this.retryWait?.timer === timer) this.retryWait = null;
+        resolve(true);
+      }, milliseconds);
+      this.retryWait = { generation, timer, resolve };
+    });
+  }
+
+  private wakeRetry(elapsed: boolean): void {
+    const wait = this.retryWait;
+    if (!wait) return;
+    clearTimeout(wait.timer);
+    this.retryWait = null;
+    wait.resolve(elapsed);
   }
 
   private clearTimer(): void {
@@ -107,6 +194,34 @@ export class DebouncedAutosave<T> {
     clearTimeout(this.timer);
     this.timer = null;
   }
+
+  private isIdle(): boolean {
+    return this.timer === null
+      && !this.hasPending
+      && this.activeGeneration === null
+      && this.retryWait === null;
+  }
+
+  private resolveIdle(): void {
+    if (!this.isIdle()) return;
+    for (const resolve of this.idleResolvers) resolve();
+    this.idleResolvers.clear();
+  }
+}
+
+export function isRetryableAutosaveError(error: unknown): boolean {
+  const status = error instanceof DaemonClientError
+    ? error.status
+    : error !== null
+        && typeof error === 'object'
+        && typeof (error as Record<string, unknown>)['status'] === 'number'
+      ? (error as Record<string, number>)['status']!
+      : null;
+  if (status === null) return true;
+  return status === 408
+    || status === 425
+    || status === 429
+    || status >= 500;
 }
 
 interface AutosaveSnapshot {
@@ -399,7 +514,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.autosave.flush();
+    this.autosave.cancel();
     this.draftEpoch += 1;
     this.detachRuntime?.();
     this.detachRuntime = null;
@@ -434,7 +549,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     const consolePanel = this.consoleMount?.nativeElement;
     if (!mount || !failures || !guardrails || !consolePanel) return;
 
-    this.autosave.flush();
+    this.autosave.cancel();
     this.detachRuntime?.();
     this.detachRuntime = null;
     this.studioComposition?.destroy();
@@ -540,14 +655,16 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         doc,
         disposition: 'autosave',
       });
-      this.saveError.set(null);
       if (this.isCurrentDraft(draftId, epoch)) {
+        this.saveError.set(null);
         this.revisions.update((revisions) => [...revisions, saved.revision]);
         this.latestRevision.set(saved.revision);
         if (version === this.editVersion) this.currentDirty.set(false);
       }
     } catch (error) {
-      this.saveError.set(saveErrorMessage(error));
+      if (this.isCurrentDraft(draftId, epoch)) {
+        this.saveError.set(saveErrorMessage(error));
+      }
       throw error;
     }
   }
@@ -609,8 +726,4 @@ function operationErrorMessage(error: unknown): string {
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'operation failed';
-}
-
-function delay(milliseconds: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }

@@ -137,6 +137,9 @@ describe('DraftManager', () => {
       format: 'narration',
       doc: createBlankNarrationDocument('beat_abcdefghij'),
     });
+    expect(createBlankNarrationDocument('beat_abcdefghij')['metadata']).toEqual({
+      creativeStatus: { phase: 'rapid-prototype' },
+    });
     expect(manager.activeDraft()?.id).toBe('created');
     expect(manager.drafts().map(({ id }) => id)).toEqual(['created']);
     expect(fixture.listRevisions).toHaveBeenCalledWith('created');
