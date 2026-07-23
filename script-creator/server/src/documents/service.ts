@@ -9,6 +9,7 @@ import type {
   DraftDocument,
   DraftFormat,
   DraftRecord,
+  DraftSummary,
   RevisionRecord,
 } from './store.js';
 
@@ -81,6 +82,10 @@ export class DocumentService {
     const draft = this.store.getDraft(id);
     if (!draft) throw new Error(`draft not found: ${id}`);
     return draft;
+  }
+
+  listDrafts(): DraftSummary[] {
+    return this.store.listDrafts();
   }
 
   saveDraft(id: string, input: SaveDraftInput): SavedDraft {

@@ -56,13 +56,16 @@ export interface DraftDocument {
 
 export type DraftFormat = 'annotated' | 'narration';
 
-export interface DraftRecord {
+export interface DraftSummary {
   id: string;
   episodeSlug: string;
   title: string;
   format: DraftFormat;
-  doc: DraftDocument;
   updatedAt: string;
+}
+
+export interface DraftRecord extends DraftSummary {
+  doc: DraftDocument;
 }
 
 export interface RevisionRecord {
@@ -227,7 +230,7 @@ export class DaemonClient {
     }
   }
 
-  async list(): Promise<DraftRecord[]> {
+  async list(): Promise<DraftSummary[]> {
     return this.request('/api/drafts');
   }
 

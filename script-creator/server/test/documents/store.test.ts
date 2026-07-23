@@ -101,6 +101,46 @@ describe('DocumentStore', () => {
     expect(store.getDraft('missing')).toBeNull();
   });
 
+  it('returns an empty draft summary list', () => {
+    const store = openStore();
+
+    expect(store.listDrafts()).toEqual([]);
+  });
+
+  it('lists body-free draft summaries newest-updated first', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      id: 'draft-older',
+      episodeSlug: 'older',
+      title: 'Older draft',
+      updatedAt: '2026-07-23T08:00:00.000Z',
+    }));
+    store.createDraft(draft({
+      id: 'draft-newer',
+      episodeSlug: 'newer',
+      title: 'Newer draft',
+      format: 'annotated',
+      updatedAt: '2026-07-23T09:00:00.000Z',
+    }));
+
+    expect(store.listDrafts()).toEqual([
+      {
+        id: 'draft-newer',
+        episodeSlug: 'newer',
+        title: 'Newer draft',
+        format: 'annotated',
+        updatedAt: '2026-07-23T09:00:00.000Z',
+      },
+      {
+        id: 'draft-older',
+        episodeSlug: 'older',
+        title: 'Older draft',
+        format: 'narration',
+        updatedAt: '2026-07-23T08:00:00.000Z',
+      },
+    ]);
+  });
+
   it('updates the draft and appends immutable revisions with monotonic sequence numbers', () => {
     const store = openStore();
     store.createDraft(draft());

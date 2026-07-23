@@ -3,13 +3,16 @@ import Database from 'better-sqlite3';
 export type DraftFormat = 'annotated' | 'narration';
 export type DraftDocument = Record<string, unknown>;
 
-export interface DraftRecord {
+export interface DraftSummary {
   id: string;
   episodeSlug: string;
   title: string;
   format: DraftFormat;
-  doc: DraftDocument;
   updatedAt: string;
+}
+
+export interface DraftRecord extends DraftSummary {
+  doc: DraftDocument;
 }
 
 export interface RevisionRecord {
@@ -43,6 +46,8 @@ interface DraftRow {
   doc_json: string;
   updated_at: string;
 }
+
+type DraftSummaryRow = Omit<DraftRow, 'doc_json'>;
 
 interface RevisionRow {
   id: string;
@@ -95,6 +100,16 @@ function draftFrom(row: DraftRow): DraftRecord {
   };
 }
 
+function draftSummaryFrom(row: DraftSummaryRow): DraftSummary {
+  return {
+    id: row.id,
+    episodeSlug: row.episode_slug,
+    title: row.title,
+    format: row.format,
+    updatedAt: row.updated_at,
+  };
+}
+
 function revisionFrom(row: RevisionRow): RevisionRecord {
   return {
     id: row.id,
@@ -139,6 +154,14 @@ export class DocumentStore {
       'SELECT * FROM drafts WHERE id = ?',
     ).get(id);
     return row ? draftFrom(row) : null;
+  }
+
+  listDrafts(): DraftSummary[] {
+    return this.db.prepare<[], DraftSummaryRow>(
+      `SELECT id, episode_slug, title, format, updated_at
+       FROM drafts
+       ORDER BY updated_at DESC`,
+    ).all().map(draftSummaryFrom);
   }
 
   saveDraft(

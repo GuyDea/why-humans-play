@@ -64,6 +64,79 @@ afterEach(async () => {
 });
 
 describe('drafts HTTP API', () => {
+  it('lists no drafts from an empty store', async () => {
+    const fixture = makeFixture([]);
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([]);
+  });
+
+  it('lists body-free draft summaries newest-updated first', async () => {
+    const fixture = makeFixture([]);
+    const doc = parseMarkdown('## 1. Opening\n\n> A first line.').toJSON();
+    fixture.store.createDraft({
+      id: 'draft-older',
+      episodeSlug: 'older',
+      title: 'Older draft',
+      format: 'narration',
+      doc,
+      updatedAt: '2026-07-23T08:00:00.000Z',
+    });
+    fixture.store.createDraft({
+      id: 'draft-newer',
+      episodeSlug: 'newer',
+      title: 'Newer draft',
+      format: 'annotated',
+      doc: {
+        ...doc,
+        attrs: { ...doc.attrs, format: 'annotated' },
+      },
+      updatedAt: '2026-07-23T09:00:00.000Z',
+    });
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual([
+      {
+        id: 'draft-newer',
+        episodeSlug: 'newer',
+        title: 'Newer draft',
+        format: 'annotated',
+        updatedAt: '2026-07-23T09:00:00.000Z',
+      },
+      {
+        id: 'draft-older',
+        episodeSlug: 'older',
+        title: 'Older draft',
+        format: 'narration',
+        updatedAt: '2026-07-23T08:00:00.000Z',
+      },
+    ]);
+  });
+
+  it('requires the nonce to list drafts', async () => {
+    const fixture = makeFixture([]);
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.json()).toEqual({ error: 'invalid nonce' });
+  });
+
   it('creates and gets a draft', async () => {
     const fixture = makeFixture(['draft-1']);
     const doc = parseMarkdown('## 1. Opening\n\n> A first line.').toJSON();

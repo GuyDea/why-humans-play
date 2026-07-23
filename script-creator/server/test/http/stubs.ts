@@ -10,6 +10,7 @@ function notConfigured(): never {
 export const UNUSED_DOCUMENT_SERVICE: DocumentHttpService = {
   createDraft: notConfigured,
   getDraft: notConfigured,
+  listDrafts: notConfigured,
   saveDraft: notConfigured,
   listRevisions: notConfigured,
   importMarkdown: notConfigured,

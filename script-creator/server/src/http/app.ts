@@ -34,6 +34,7 @@ export type DocumentHttpService = Pick<
   DocumentService,
   | 'createDraft'
   | 'getDraft'
+  | 'listDrafts'
   | 'saveDraft'
   | 'listRevisions'
   | 'importMarkdown'
@@ -168,6 +169,8 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       }
     },
   );
+
+  app.get('/api/drafts', () => options.documentService.listDrafts());
 
   app.post<{ Body: ImportDraftBody }>(
     '/api/drafts/import',

@@ -5,6 +5,7 @@ import type {
   CreateDraftInput,
   DraftDocument,
   DraftRecord,
+  DraftSummary,
   RevisionRecord,
   SaveDraftInput,
   SavedDraft,
@@ -15,7 +16,7 @@ import {
 } from './revision-diff';
 
 export interface DraftManagerClient {
-  list(): Promise<DraftRecord[]>;
+  list(): Promise<DraftSummary[]>;
   create(input: CreateDraftInput): Promise<DraftRecord>;
   get(id: string): Promise<DraftRecord>;
   save(id: string, input: SaveDraftInput): Promise<SavedDraft>;
@@ -39,7 +40,7 @@ export interface DraftManagerOptions {
 }
 
 export class DraftManager {
-  readonly drafts = signal<DraftRecord[]>([]);
+  readonly drafts = signal<DraftSummary[]>([]);
   readonly activeDraft = signal<DraftRecord | null>(null);
   readonly revisions = signal<RevisionRecord[]>([]);
   readonly selectedRevisionIds = signal<string[]>([]);
@@ -264,7 +265,7 @@ export class DraftManager {
     await this.refreshRevisions();
   }
 
-  private upsertDraft(draft: DraftRecord, moveFirst = false): void {
+  private upsertDraft(draft: DraftSummary, moveFirst = false): void {
     this.drafts.update((drafts) => {
       const without = drafts.filter(({ id }) => id !== draft.id);
       return moveFirst
@@ -361,7 +362,7 @@ function slugify(value: string): string {
     || 'untitled-draft';
 }
 
-function sortDrafts(drafts: DraftRecord[]): DraftRecord[] {
+function sortDrafts(drafts: DraftSummary[]): DraftSummary[] {
   return [...drafts].sort((left, right) =>
     right.updatedAt.localeCompare(left.updatedAt));
 }
