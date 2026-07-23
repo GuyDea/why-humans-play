@@ -24,7 +24,7 @@ export function findingRows(
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-labelledby="findings-heading">
+    <section class="panel studio-panel" aria-labelledby="findings-heading">
       <header>
         <div>
           <p>Review</p>
@@ -68,8 +68,8 @@ export function findingRows(
     }
 
     .panel {
-      border: 1px solid #d8d2cc;
-      background: #f8f8f8;
+      border: var(--whp-panel-border);
+      background: var(--whp-panel-background);
     }
 
     header,
@@ -82,7 +82,7 @@ export function findingRows(
 
     header {
       padding: 0.85rem;
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
     }
 
     h2,
@@ -92,13 +92,13 @@ export function findingRows(
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.92rem;
     }
 
     header p,
     header span {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.64rem;
     }
 
@@ -120,12 +120,12 @@ export function findingRows(
       display: grid;
       gap: 0.55rem;
       padding: 0.8rem 0.85rem;
-      border-left: 3px solid #9a938d;
-      border-bottom: 1px solid #ece8e4;
+      border-left: 3px solid var(--whp-line-strong);
+      border-bottom: 1px solid var(--whp-line-soft);
     }
 
     li[data-severity='blocking'] {
-      border-left-color: #aa0a0a;
+      border-left-color: var(--whp-accent);
     }
 
     .severity,
@@ -139,35 +139,35 @@ export function findingRows(
 
     .severity,
     .anchored {
-      color: #706963;
+      color: var(--whp-muted);
     }
 
     .orphan {
-      color: #aa0a0a;
+      color: var(--whp-accent);
     }
 
     blockquote {
-      border-left: 2px solid #d8d2cc;
+      border-left: 2px solid var(--whp-line);
       padding-left: 0.6rem;
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.7rem;
       font-style: italic;
     }
 
     li > p {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.76rem;
       line-height: 1.45;
     }
 
     li > p.direction {
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.7rem;
     }
 
     li.empty {
       border-left-color: transparent;
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.72rem;
     }
   `,

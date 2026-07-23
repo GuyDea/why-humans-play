@@ -100,7 +100,7 @@ export function formatElapsed(milliseconds: number | null): string {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-labelledby="agent-console-heading">
+    <section class="panel studio-panel" aria-labelledby="agent-console-heading">
       <header>
         <div>
           <p class="eyebrow">Operations</p>
@@ -194,8 +194,8 @@ export function formatElapsed(milliseconds: number | null): string {
     }
 
     .panel {
-      border: 1px solid #d8d2cc;
-      background: #f8f8f8;
+      border: var(--whp-panel-border);
+      background: var(--whp-panel-background);
     }
 
     header,
@@ -209,7 +209,7 @@ export function formatElapsed(milliseconds: number | null): string {
     header {
       justify-content: space-between;
       padding: 1rem;
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
     }
 
     h2,
@@ -219,12 +219,12 @@ export function formatElapsed(milliseconds: number | null): string {
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 1rem;
     }
 
     .eyebrow {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.65rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -234,7 +234,7 @@ export function formatElapsed(milliseconds: number | null): string {
     .count,
     .telemetry span,
     nav small {
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.7rem;
     }
 
@@ -247,8 +247,8 @@ export function formatElapsed(milliseconds: number | null): string {
     nav {
       display: grid;
       align-content: start;
-      border-right: 1px solid #d8d2cc;
-      background: #f1efec;
+      border-right: 1px solid var(--whp-line);
+      background: var(--whp-panel);
     }
 
     nav button {
@@ -258,21 +258,21 @@ export function formatElapsed(milliseconds: number | null): string {
       border-left: 3px solid transparent;
       background: transparent;
       padding: 0.7rem;
-      color: #323232;
+      color: var(--whp-ink);
       cursor: pointer;
       font: inherit;
       text-align: left;
     }
 
     nav button.active {
-      border-left-color: #aa0a0a;
-      background: #fff;
+      border-left-color: var(--whp-accent);
+      background: var(--whp-surface);
     }
 
     nav span {
       overflow: hidden;
-      color: #706963;
-      font-family: ui-monospace, monospace;
+      color: var(--whp-muted);
+      font-family: var(--whp-font-mono);
       font-size: 0.65rem;
       text-overflow: ellipsis;
     }
@@ -289,7 +289,7 @@ export function formatElapsed(milliseconds: number | null): string {
     }
 
     .telemetry {
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
     }
 
     .telemetry span {
@@ -298,12 +298,12 @@ export function formatElapsed(milliseconds: number | null): string {
     }
 
     .telemetry strong {
-      color: #323232;
+      color: var(--whp-ink);
     }
 
     .telemetry .stalled {
       margin-inline-start: auto;
-      color: #aa0a0a;
+      color: var(--whp-accent);
       font-weight: 800;
     }
 
@@ -323,11 +323,11 @@ export function formatElapsed(milliseconds: number | null): string {
       grid-template-columns: 4.5rem minmax(0, 1fr);
       gap: 0.65rem;
       padding: 0.6rem 1rem;
-      border-bottom: 1px solid #ece8e4;
+      border-bottom: 1px solid var(--whp-line-soft);
     }
 
     li > span {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.62rem;
       font-weight: 800;
       text-transform: uppercase;
@@ -335,27 +335,27 @@ export function formatElapsed(milliseconds: number | null): string {
 
     li[data-kind='failure'],
     li[data-kind='warning'] {
-      border-left: 3px solid #aa0a0a;
+      border-left: 3px solid var(--whp-accent);
     }
 
     pre {
       overflow-wrap: anywhere;
-      color: #323232;
-      font-family: ui-monospace, monospace;
+      color: var(--whp-ink);
+      font-family: var(--whp-font-mono);
       font-size: 0.72rem;
       line-height: 1.45;
       white-space: pre-wrap;
     }
 
     .actions {
-      border-top: 1px solid #d8d2cc;
+      border-top: 1px solid var(--whp-line);
     }
 
     .actions button {
-      border: 1px solid #8e8781;
-      background: #fff;
+      border: 1px solid var(--whp-line-strong);
+      background: var(--whp-surface);
       padding: 0.42rem 0.65rem;
-      color: #323232;
+      color: var(--whp-ink);
       cursor: pointer;
       font: inherit;
       font-size: 0.72rem;
@@ -369,7 +369,7 @@ export function formatElapsed(milliseconds: number | null): string {
 
     .empty {
       padding: 1rem;
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.75rem;
     }
 
@@ -385,7 +385,7 @@ export function formatElapsed(milliseconds: number | null): string {
 
       nav {
         border-right: 0;
-        border-bottom: 1px solid #d8d2cc;
+        border-bottom: 1px solid var(--whp-line);
       }
     }
   `,

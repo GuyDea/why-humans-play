@@ -21,7 +21,7 @@ export function parkingLotEntries(
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-labelledby="parking-lot-heading">
+    <section class="panel studio-panel" aria-labelledby="parking-lot-heading">
       <header>
         <div>
           <p>Variants</p>
@@ -56,8 +56,8 @@ export function parkingLotEntries(
     }
 
     .panel {
-      border: 1px solid #d8d2cc;
-      background: #f8f8f8;
+      border: var(--whp-panel-border);
+      background: var(--whp-panel-background);
     }
 
     header,
@@ -70,7 +70,7 @@ export function parkingLotEntries(
 
     header {
       padding: 0.85rem;
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
     }
 
     h2,
@@ -79,14 +79,14 @@ export function parkingLotEntries(
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.92rem;
     }
 
     header p,
     header span,
     li span {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.64rem;
     }
 
@@ -108,22 +108,22 @@ export function parkingLotEntries(
       display: grid;
       gap: 0.45rem;
       padding: 0.75rem 0.85rem;
-      border-bottom: 1px solid #ece8e4;
+      border-bottom: 1px solid var(--whp-line-soft);
     }
 
     li strong {
-      color: #aa0a0a;
+      color: var(--whp-accent);
       font-size: 0.74rem;
     }
 
     li p {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.76rem;
       line-height: 1.45;
     }
 
     li.empty {
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.72rem;
     }
   `,

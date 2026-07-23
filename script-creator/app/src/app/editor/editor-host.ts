@@ -182,35 +182,39 @@ interface AutosaveSnapshot {
     }
 
     .format-badge {
-      background: #e7e4df;
-      color: #323232;
+      background: var(--whp-line-soft);
+      color: var(--whp-ink);
       text-transform: uppercase;
     }
 
     .word-count,
     .beat-timing,
     .ratio-label {
-      color: #66615d;
+      color: var(--whp-muted);
       font-size: 0.8rem;
     }
 
     .unsaved-badge {
       margin-inline-start: auto;
-      background: #fff0c9;
-      color: #6b4a00;
+      background: var(--whp-warning-tint);
+      color: var(--whp-warning);
     }
 
     .unsaved-badge.save-failed {
-      background: #f6dada;
-      color: #7c0c0c;
+      background: var(--whp-accent-tint);
+      color: var(--whp-accent);
     }
 
     .editor {
+      position: relative;
       min-height: 24rem;
-      border: 1px solid #d7d2cc;
-      border-radius: 0.4rem;
-      background: #fff;
-      padding: 1.5rem;
+      border: 1px solid var(--whp-line);
+      border-radius: 0.18rem;
+      background: var(--whp-surface);
+      padding: clamp(1.15rem, 3vw, 2rem);
+      box-shadow:
+        inset 0 1px 0 var(--whp-ground),
+        0 0.3rem 1.1rem color-mix(in srgb, var(--whp-ink) 5%, transparent);
     }
 
     .editor :where(.ProseMirror) {
@@ -231,7 +235,7 @@ interface AutosaveSnapshot {
     }
 
     .beat-label {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.8rem;
       font-weight: 700;
     }
@@ -241,18 +245,41 @@ interface AutosaveSnapshot {
       height: 0.45rem;
       overflow: hidden;
       border-radius: 999px;
-      background: #e7e4df;
+      background: var(--whp-line-soft);
     }
 
     .pacing-fill {
       display: block;
       height: 100%;
       border-radius: inherit;
-      background: #4b7562;
+      background: var(--whp-ink);
     }
 
     .over-target .pacing-fill {
-      background: #aa0a0a;
+      background: var(--whp-accent);
+    }
+
+    @media (max-width: 40rem) {
+      .pacing-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 0.35rem 0.65rem;
+      }
+
+      .pacing-track {
+        grid-column: 1 / -1;
+        grid-row: 2;
+      }
+
+      .beat-timing {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .ratio-label {
+        grid-column: 2;
+        grid-row: 1;
+      }
     }
   `,
 })

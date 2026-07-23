@@ -148,13 +148,13 @@ import type { DraftManager } from './draft-manager';
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 1rem;
     }
 
     .eyebrow {
       margin-bottom: 0.2rem;
-      color: #8c8580;
+      color: var(--whp-muted-soft);
       font-size: 0.68rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -162,12 +162,12 @@ import type { DraftManager } from './draft-manager';
     }
 
     details {
-      border-top: 1px solid #e3dfda;
+      border-top: 1px solid var(--whp-line-soft);
       padding-top: 0.7rem;
     }
 
     summary {
-      color: #4f4945;
+      color: var(--whp-muted);
       cursor: pointer;
       font-size: 0.8rem;
       font-weight: 750;
@@ -180,7 +180,7 @@ import type { DraftManager } from './draft-manager';
     label,
     .hint,
     small {
-      color: #716a64;
+      color: var(--whp-muted);
       font-size: 0.72rem;
     }
 
@@ -188,11 +188,11 @@ import type { DraftManager } from './draft-manager';
     input[type="text"] {
       box-sizing: border-box;
       width: 100%;
-      border: 1px solid #cfc8c1;
+      border: 1px solid var(--whp-line-strong);
       border-radius: 0.25rem;
-      background: #fff;
+      background: var(--whp-surface);
       padding: 0.55rem 0.6rem;
-      color: #323232;
+      color: var(--whp-ink);
       font: inherit;
       font-size: 0.78rem;
     }
@@ -209,7 +209,7 @@ import type { DraftManager } from './draft-manager';
 
     .file-action {
       border-bottom: 1px solid currentColor;
-      color: #5f5752;
+      color: var(--whp-muted);
       cursor: pointer;
       font-weight: 700;
     }
@@ -235,15 +235,15 @@ import type { DraftManager } from './draft-manager';
     }
 
     .primary {
-      border: 1px solid #aa0a0a;
-      background: #aa0a0a;
-      color: #fff;
+      border: 1px solid var(--whp-accent);
+      background: var(--whp-accent);
+      color: var(--whp-ground);
     }
 
     .secondary {
-      border: 1px solid #afa69e;
-      background: #fff;
-      color: #403a36;
+      border: 1px solid var(--whp-line-strong);
+      background: var(--whp-surface);
+      color: var(--whp-ink);
     }
 
     button:disabled {
@@ -262,9 +262,9 @@ import type { DraftManager } from './draft-manager';
 
     .blocked,
     .conflict {
-      border-left: 3px solid #aa0a0a;
-      background: #f7e4e1;
-      color: #681515;
+      border-left: 3px solid var(--whp-accent);
+      background: var(--whp-accent-tint);
+      color: var(--whp-accent);
     }
 
     .blocked ul {
@@ -273,28 +273,28 @@ import type { DraftManager } from './draft-manager';
     }
 
     .error {
-      background: #f7e4e1;
-      color: #681515;
+      background: var(--whp-accent-tint);
+      color: var(--whp-accent);
     }
 
     .success {
-      border-left: 3px solid #47745d;
-      background: #e2eee6;
-      color: #28533d;
+      border-left: 3px solid var(--whp-success);
+      background: var(--whp-success-tint);
+      color: var(--whp-success);
       overflow-wrap: anywhere;
     }
 
     code,
     pre {
-      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      font-family: var(--whp-font-mono);
     }
 
     .preview pre {
       max-height: 12rem;
       overflow: auto;
       margin-top: 0.65rem;
-      border: 1px solid #ddd7d1;
-      background: #fff;
+      border: 1px solid var(--whp-line-soft);
+      background: var(--whp-surface);
       padding: 0.65rem;
       font-size: 0.68rem;
       line-height: 1.45;
@@ -306,7 +306,7 @@ import type { DraftManager } from './draft-manager';
     summary:focus-visible,
     button:focus-visible,
     .file-action:focus-within {
-      outline: 2px solid #aa0a0a;
+      outline: 2px solid var(--whp-accent);
       outline-offset: 2px;
     }
   `,

@@ -279,7 +279,7 @@ export class ApprovalGate {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <section class="panel" aria-labelledby="brief-heading">
+    <section class="panel studio-panel" aria-labelledby="brief-heading">
       <header>
         <div>
           <p class="eyebrow">Factual boundary</p>
@@ -400,8 +400,8 @@ export class ApprovalGate {
     .panel {
       display: grid;
       gap: 1rem;
-      border: 1px solid #d8d2cc;
-      background: #f8f8f8;
+      border: var(--whp-panel-border);
+      background: var(--whp-panel-background);
       padding: 1rem;
     }
 
@@ -420,12 +420,12 @@ export class ApprovalGate {
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 1rem;
     }
 
     .eyebrow {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.65rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -434,14 +434,14 @@ export class ApprovalGate {
 
     header > span,
     .stream-heading > span {
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.68rem;
     }
 
     label {
       display: grid;
       gap: 0.32rem;
-      color: #4e4945;
+      color: var(--whp-muted);
       font-size: 0.74rem;
       font-weight: 750;
     }
@@ -450,10 +450,10 @@ export class ApprovalGate {
     input[type='text'] {
       box-sizing: border-box;
       width: 100%;
-      border: 1px solid #c9c2bb;
-      background: #fff;
+      border: 1px solid var(--whp-line-strong);
+      background: var(--whp-surface);
       padding: 0.55rem;
-      color: #323232;
+      color: var(--whp-ink);
       font: inherit;
       font-size: 0.76rem;
       font-weight: 400;
@@ -468,7 +468,7 @@ export class ApprovalGate {
     .approval p,
     .save-status,
     .save-error {
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.68rem;
       font-weight: 400;
     }
@@ -477,8 +477,8 @@ export class ApprovalGate {
       display: grid;
       gap: 0.4rem;
       padding: 0.8rem;
-      border-left: 3px solid #aa0a0a;
-      background: #fff;
+      border-left: 3px solid var(--whp-accent);
+      background: var(--whp-surface);
     }
 
     .approval-toggle {
@@ -491,16 +491,16 @@ export class ApprovalGate {
     }
 
     .save-error {
-      color: #8a1010;
+      color: var(--whp-accent);
       font-weight: 700;
     }
 
     .promote {
       justify-self: start;
-      border: 1px solid #aa0a0a;
-      background: #aa0a0a;
+      border: 1px solid var(--whp-accent);
+      background: var(--whp-accent);
       padding: 0.5rem 0.8rem;
-      color: #fff;
+      color: var(--whp-ground);
       cursor: pointer;
       font: inherit;
       font-size: 0.75rem;
@@ -513,13 +513,13 @@ export class ApprovalGate {
     }
 
     .promote-stream {
-      border: 1px solid #d8d2cc;
-      background: #fff;
+      border: 1px solid var(--whp-line);
+      background: var(--whp-surface);
     }
 
     .stream-heading {
       padding: 0.65rem;
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
       font-size: 0.72rem;
     }
 
@@ -536,11 +536,11 @@ export class ApprovalGate {
       grid-template-columns: 4rem minmax(0, 1fr);
       gap: 0.5rem;
       padding: 0.5rem 0.65rem;
-      border-bottom: 1px solid #ece8e4;
+      border-bottom: 1px solid var(--whp-line-soft);
     }
 
     li > span {
-      color: #817a74;
+      color: var(--whp-muted-soft);
       font-size: 0.6rem;
       font-weight: 800;
       text-transform: uppercase;
@@ -548,15 +548,15 @@ export class ApprovalGate {
 
     pre {
       overflow-wrap: anywhere;
-      color: #323232;
-      font-family: ui-monospace, monospace;
+      color: var(--whp-ink);
+      font-family: var(--whp-font-mono);
       font-size: 0.68rem;
       white-space: pre-wrap;
     }
 
     li.empty {
       display: block;
-      color: #706963;
+      color: var(--whp-muted);
       font-size: 0.7rem;
     }
   `,

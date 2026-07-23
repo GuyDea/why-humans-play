@@ -128,22 +128,22 @@ import { RevisionTimeline } from './revision-timeline';
     .studio {
       display: grid;
       grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr) minmax(16rem, 20rem);
-      min-height: calc(100vh - 5.5rem);
-      border-top: 1px solid #d8d2cc;
+      min-height: calc(100vh - 3.75rem);
+      border-top: 1px solid var(--whp-line);
     }
 
     .draft-rail,
     .history-rail {
-      background: #f3f1ee;
+      background: var(--whp-panel);
       padding: 1.25rem;
     }
 
     .draft-rail {
-      border-right: 1px solid #d8d2cc;
+      border-right: 1px solid var(--whp-line);
     }
 
     .history-rail {
-      border-left: 1px solid #d8d2cc;
+      border-left: 1px solid var(--whp-line);
     }
 
     .rail-heading,
@@ -156,10 +156,10 @@ import { RevisionTimeline } from './revision-timeline';
 
     .rail-heading > span,
     .draft-heading > span {
-      border: 1px solid #c9c2bb;
+      border: 1px solid var(--whp-line-strong);
       border-radius: 999px;
       padding: 0.22rem 0.5rem;
-      color: #6e6761;
+      color: var(--whp-muted);
       font-size: 0.68rem;
     }
 
@@ -170,19 +170,19 @@ import { RevisionTimeline } from './revision-timeline';
     }
 
     h1 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: clamp(1.35rem, 2vw, 2rem);
       letter-spacing: -0.025em;
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 1rem;
     }
 
     .eyebrow {
       margin-bottom: 0.22rem;
-      color: #8c8580;
+      color: var(--whp-muted-soft);
       font-size: 0.68rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -194,11 +194,11 @@ import { RevisionTimeline } from './revision-timeline';
       gap: 0.5rem;
       margin: 1.1rem 0;
       padding-bottom: 1rem;
-      border-bottom: 1px solid #d8d2cc;
+      border-bottom: 1px solid var(--whp-line);
     }
 
     .create-form label {
-      color: #5b544f;
+      color: var(--whp-muted);
       font-size: 0.72rem;
       font-weight: 750;
     }
@@ -206,22 +206,22 @@ import { RevisionTimeline } from './revision-timeline';
     .create-form input {
       box-sizing: border-box;
       width: 100%;
-      border: 1px solid #cbc4bd;
+      border: 1px solid var(--whp-line-strong);
       border-radius: 0.25rem;
-      background: #fff;
+      background: var(--whp-surface);
       padding: 0.5rem 0.55rem;
-      color: #323232;
+      color: var(--whp-ink);
       font: inherit;
       font-size: 0.76rem;
     }
 
     .create-form button {
       justify-self: start;
-      border: 1px solid #aa0a0a;
+      border: 1px solid var(--whp-accent);
       border-radius: 0.25rem;
-      background: #aa0a0a;
+      background: var(--whp-accent);
       padding: 0.48rem 0.7rem;
-      color: #fff;
+      color: var(--whp-ground);
       cursor: pointer;
       font: inherit;
       font-size: 0.73rem;
@@ -241,19 +241,19 @@ import { RevisionTimeline } from './revision-timeline';
       border-left: 3px solid transparent;
       background: transparent;
       padding: 0.7rem 0.65rem;
-      color: #323232;
+      color: var(--whp-ink);
       cursor: pointer;
       font: inherit;
       text-align: left;
     }
 
     .draft-card:hover {
-      background: #ebe7e2;
+      background: color-mix(in srgb, var(--whp-ink) 7%, var(--whp-ground));
     }
 
     .draft-card.active {
-      border-left-color: #aa0a0a;
-      background: #fff;
+      border-left-color: var(--whp-accent);
+      background: var(--whp-surface);
     }
 
     .draft-card strong {
@@ -263,7 +263,7 @@ import { RevisionTimeline } from './revision-timeline';
     .draft-card span,
     .draft-card small {
       overflow: hidden;
-      color: #7a726c;
+      color: var(--whp-muted-soft);
       font-size: 0.68rem;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -271,7 +271,7 @@ import { RevisionTimeline } from './revision-timeline';
 
     .writing-surface {
       min-width: 0;
-      background: #f8f8f8;
+      background: var(--whp-ground);
       padding: clamp(1.25rem, 3vw, 2.75rem);
     }
 
@@ -296,14 +296,16 @@ import { RevisionTimeline } from './revision-timeline';
 
     .welcome h1 {
       max-width: 18ch;
+      font-family: var(--whp-font-editor);
       font-size: clamp(2rem, 4vw, 4.5rem);
+      font-weight: 500;
       line-height: 0.98;
     }
 
     .welcome > p:last-child {
       max-width: 48ch;
       margin-top: 1.25rem;
-      color: #6f6761;
+      color: var(--whp-muted);
       line-height: 1.55;
     }
 
@@ -311,31 +313,31 @@ import { RevisionTimeline } from './revision-timeline';
       display: grid;
       align-content: start;
       gap: 1.25rem;
-      max-height: calc(100vh - 5.5rem);
+      max-height: calc(100vh - 3.75rem);
       overflow-y: auto;
     }
 
     .rail-rule {
       height: 1px;
-      background: #d8d2cc;
+      background: var(--whp-line);
     }
 
     .empty,
     .error {
-      color: #776f69;
+      color: var(--whp-muted);
       font-size: 0.75rem;
       line-height: 1.45;
     }
 
     .error {
-      background: #f7e4e1;
+      background: var(--whp-accent-tint);
       padding: 0.6rem;
-      color: #681515;
+      color: var(--whp-accent);
     }
 
     input:focus-visible,
     button:focus-visible {
-      outline: 2px solid #aa0a0a;
+      outline: 2px solid var(--whp-accent);
       outline-offset: 2px;
     }
 
@@ -347,7 +349,7 @@ import { RevisionTimeline } from './revision-timeline';
       .history-rail {
         grid-column: 1 / -1;
         max-height: none;
-        border-top: 1px solid #d8d2cc;
+        border-top: 1px solid var(--whp-line);
         border-left: 0;
       }
     }
@@ -360,7 +362,7 @@ import { RevisionTimeline } from './revision-timeline';
       .draft-rail,
       .history-rail {
         border: 0;
-        border-bottom: 1px solid #d8d2cc;
+        border-bottom: 1px solid var(--whp-line);
       }
     }
   `,

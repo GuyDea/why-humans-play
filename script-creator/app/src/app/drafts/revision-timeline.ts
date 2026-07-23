@@ -112,13 +112,13 @@ import type { DraftManager } from './draft-manager';
     }
 
     h2 {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 1rem;
     }
 
     .eyebrow {
       margin-bottom: 0.2rem;
-      color: #8c8580;
+      color: var(--whp-muted-soft);
       font-size: 0.68rem;
       font-weight: 800;
       letter-spacing: 0.12em;
@@ -129,7 +129,7 @@ import type { DraftManager } from './draft-manager';
     .restore {
       border: 0;
       background: transparent;
-      color: #6b625d;
+      color: var(--whp-muted);
       cursor: pointer;
       font: inherit;
       font-size: 0.75rem;
@@ -143,7 +143,7 @@ import type { DraftManager } from './draft-manager';
     }
 
     .empty {
-      color: #77706a;
+      color: var(--whp-muted);
       font-size: 0.82rem;
       line-height: 1.45;
     }
@@ -158,7 +158,7 @@ import type { DraftManager } from './draft-manager';
 
     .revision-list li {
       padding: 0.55rem 0;
-      border-top: 1px solid #e3dfda;
+      border-top: 1px solid var(--whp-line-soft);
     }
 
     .revision-list label {
@@ -174,13 +174,13 @@ import type { DraftManager } from './draft-manager';
     }
 
     .revision-list strong {
-      color: #323232;
+      color: var(--whp-ink);
       font-size: 0.78rem;
     }
 
     .revision-list small {
       overflow: hidden;
-      color: #827a74;
+      color: var(--whp-muted-soft);
       font-size: 0.68rem;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -188,7 +188,7 @@ import type { DraftManager } from './draft-manager';
 
     .diff-heading {
       gap: 0.45rem;
-      color: #6b625d;
+      color: var(--whp-muted);
       font-size: 0.7rem;
       font-weight: 700;
     }
@@ -196,31 +196,31 @@ import type { DraftManager } from './draft-manager';
     .diff {
       max-height: 16rem;
       overflow: auto;
-      border: 1px solid #d8d2cc;
-      border-left: 3px solid #323232;
-      background: #fff;
+      border: 1px solid var(--whp-line);
+      border-left: 3px solid var(--whp-ink);
+      background: var(--whp-surface);
       padding: 0.85rem;
-      color: #323232;
-      font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+      color: var(--whp-ink);
+      font-family: var(--whp-font-mono);
       font-size: 0.75rem;
       line-height: 1.55;
       white-space: pre-wrap;
     }
 
     .deleted {
-      background: #f2d8d5;
-      color: #7f1717;
+      background: var(--whp-accent-tint);
+      color: var(--whp-accent);
       text-decoration: line-through;
     }
 
     .inserted {
-      background: #dceade;
-      color: #24563c;
+      background: var(--whp-success-tint);
+      color: var(--whp-success);
     }
 
     input:focus-visible,
     button:focus-visible {
-      outline: 2px solid #aa0a0a;
+      outline: 2px solid var(--whp-accent);
       outline-offset: 2px;
     }
   `,

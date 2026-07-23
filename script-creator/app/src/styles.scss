@@ -1,24 +1,363 @@
 :root {
-  color: #323232;
-  background: #f8f8f8;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --whp-ink: #323232;
+  --whp-ground: #f8f8f8;
+  --whp-surface: #ffffff;
+  --whp-accent: #aa0a0a;
+  --whp-panel: color-mix(in srgb, var(--whp-ink) 3%, var(--whp-ground));
+  --whp-line: color-mix(in srgb, var(--whp-ink) 16%, var(--whp-ground));
+  --whp-muted: color-mix(in srgb, var(--whp-ink) 68%, var(--whp-ground));
+  --whp-muted-soft: color-mix(in srgb, var(--whp-ink) 68%, var(--whp-ground));
+  --whp-line-strong: color-mix(in srgb, var(--whp-ink) 25%, var(--whp-ground));
+  --whp-line-soft: color-mix(in srgb, var(--whp-line) 62%, var(--whp-ground));
+  --whp-accent-tint: color-mix(in srgb, var(--whp-accent) 10%, var(--whp-ground));
+  --whp-accent-tint-strong: color-mix(in srgb, var(--whp-accent) 17%, var(--whp-ground));
+  --whp-success: #326147;
+  --whp-success-tint: #e2eee6;
+  --whp-warning: #6b4a00;
+  --whp-warning-tint: #fff0c9;
+  --whp-font-ui:
+    Inter, "Avenir Next", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --whp-font-editor:
+    Charter, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --whp-font-mono:
+    "SFMono-Regular", Consolas, "Liberation Mono", ui-monospace, monospace;
+  --whp-panel-border: 1px solid var(--whp-line);
+  --whp-panel-background: var(--whp-panel);
+  color: var(--whp-ink);
+  background: var(--whp-ground);
+  font-family: var(--whp-font-ui);
   font-synthesis: none;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html {
   min-width: 20rem;
-  background: #f8f8f8;
+  background: var(--whp-ground);
 }
 
 body {
   min-width: 20rem;
   min-height: 100vh;
   margin: 0;
-  background: #f8f8f8;
+  color: var(--whp-ink);
+  background: var(--whp-ground);
 }
 
 button,
 input,
+select,
 textarea {
   font: inherit;
+}
+
+::selection {
+  color: var(--whp-ink);
+  background: var(--whp-accent-tint-strong);
+}
+
+:where(button, input, select, summary, textarea, [contenteditable="true"]):focus-visible {
+  outline: 2px solid var(--whp-accent);
+  outline-offset: 2px;
+}
+
+.studio-panel {
+  border: var(--whp-panel-border);
+  background: var(--whp-panel-background);
+}
+
+/*
+ * ProseMirror owns the nodes below, so these rules must remain global rather
+ * than in an Angular component's emulated style scope.
+ */
+.ProseMirror {
+  max-width: 68ch;
+  min-height: 21rem;
+  margin-inline: auto;
+  color: var(--whp-ink);
+  font-family: var(--whp-font-editor);
+  font-size: clamp(1rem, 0.96rem + 0.18vw, 1.1rem);
+  line-height: 1.72;
+  caret-color: var(--whp-accent);
+  text-wrap: pretty;
+}
+
+.ProseMirror p {
+  margin: 0 0 1.05em;
+}
+
+.ProseMirror section + section {
+  margin-top: 2.2rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--whp-line-soft);
+}
+
+.ProseMirror .locked {
+  border-bottom: 2px solid var(--whp-accent);
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      var(--whp-accent-tint),
+      var(--whp-accent-tint) 4px,
+      color-mix(in srgb, var(--whp-accent) 4%, var(--whp-ground)) 4px,
+      color-mix(in srgb, var(--whp-accent) 4%, var(--whp-ground)) 8px
+    );
+  padding: 0.08em 0.18em;
+}
+
+.ProseMirror .annotation-range {
+  background:
+    linear-gradient(
+      transparent 67%,
+      color-mix(in srgb, var(--whp-ink) 15%, transparent) 67%
+    );
+}
+
+.ProseMirror .annotation-pin {
+  display: inline-grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-inline: 0.2rem;
+  border: 2px solid var(--whp-surface);
+  border-radius: 50% 50% 50% 0.2rem;
+  color: var(--whp-ground);
+  background: var(--whp-ink);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--whp-ink) 24%, transparent);
+  font-family: var(--whp-font-ui);
+  font-size: 0.64rem;
+  font-weight: 850;
+  line-height: 1;
+  place-items: center;
+  transform: translateY(-0.4rem) rotate(-7deg);
+}
+
+.ProseMirror .variant-set {
+  margin: 1.6rem -0.85rem;
+  border: 1px solid var(--whp-line);
+  border-left: 3px solid var(--whp-accent);
+  background: var(--whp-panel);
+  padding: 1rem;
+}
+
+.ProseMirror .variant-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.8rem;
+}
+
+.ProseMirror :where(.variant-tab, .variant-cycle, .variant-pick) {
+  border: 1px solid var(--whp-line-strong);
+  border-radius: 0.16rem;
+  color: var(--whp-ink);
+  background: var(--whp-surface);
+  padding: 0.38rem 0.58rem;
+  cursor: pointer;
+  font-family: var(--whp-font-ui);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.ProseMirror :where(.variant-tab.active, .variant-cycle:hover, .variant-pick:hover) {
+  border-color: var(--whp-accent);
+  color: var(--whp-ground);
+  background: var(--whp-accent);
+}
+
+.ProseMirror .variant-active-option p:last-child {
+  margin-bottom: 0;
+}
+
+.ProseMirror .variant-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.75rem;
+}
+
+.ProseMirror .inline-variant-set {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem;
+  border-bottom: 2px solid var(--whp-accent);
+  background: var(--whp-panel);
+  padding: 0.08rem 0.3rem;
+}
+
+.ProseMirror .inline-variant-set :where(.variant-cycle, .variant-pick) {
+  padding: 0.2rem 0.38rem;
+  font-size: 0.58rem;
+}
+
+.ProseMirror .proposal-pending {
+  background:
+    linear-gradient(
+      transparent 57%,
+      color-mix(in srgb, var(--whp-ink) 11%, transparent) 57%
+    );
+  animation: proposal-pulse 1s ease-in-out infinite alternate;
+}
+
+.ProseMirror .proposal-original {
+  color: var(--whp-accent);
+  background: var(--whp-accent-tint);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.ProseMirror .proposal-conflicted {
+  background: var(--whp-accent-tint);
+  text-decoration: underline wavy var(--whp-accent);
+}
+
+.ProseMirror .proposal-diff {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  margin-inline: 0.25rem;
+  border: 1px solid color-mix(in srgb, var(--whp-success) 45%, var(--whp-ground));
+  border-radius: 0.16rem;
+  color: var(--whp-ink);
+  background: var(--whp-success-tint);
+  padding: 0.3rem 0.42rem;
+  box-shadow: 0 0.3rem 1rem color-mix(in srgb, var(--whp-ink) 10%, transparent);
+  font-family: var(--whp-font-ui);
+  font-size: 0.72rem;
+  line-height: 1.3;
+  vertical-align: 0.1em;
+}
+
+.ProseMirror .proposal-diff.is-conflicted {
+  border-color: color-mix(in srgb, var(--whp-accent) 40%, var(--whp-ground));
+  background: var(--whp-accent-tint);
+}
+
+.ProseMirror .proposal-diff ins {
+  color: var(--whp-success);
+  font-family: var(--whp-font-editor);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.ProseMirror .proposal-diff button {
+  border: 1px solid currentcolor;
+  border-radius: 0.14rem;
+  color: var(--whp-ink);
+  background: var(--whp-surface);
+  padding: 0.25rem 0.42rem;
+  cursor: pointer;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ProseMirror .proposal-diff button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.selection-toolbar {
+  z-index: 20;
+  display: flex;
+  max-width: calc(100vw - 2rem);
+  align-items: center;
+  gap: 0.2rem;
+  overflow-x: auto;
+  border: 1px solid color-mix(in srgb, var(--whp-ground) 18%, transparent);
+  border-radius: 0.2rem;
+  color: var(--whp-ground);
+  background: var(--whp-ink);
+  padding: 0.28rem;
+  box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--whp-ink) 28%, transparent);
+  font-family: var(--whp-font-ui);
+}
+
+.selection-toolbar[hidden] {
+  display: none;
+}
+
+.selection-toolbar button {
+  flex: none;
+  border: 0;
+  border-radius: 0.12rem;
+  color: inherit;
+  background: transparent;
+  padding: 0.42rem 0.52rem;
+  cursor: pointer;
+  font-size: 0.65rem;
+  font-weight: 780;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+.selection-toolbar button:hover {
+  background: color-mix(in srgb, var(--whp-ground) 13%, transparent);
+}
+
+.selection-toolbar button[data-action='rewrite'] {
+  color: var(--whp-ground);
+  background: var(--whp-accent);
+}
+
+.selection-toolbar .alternative-count {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.25rem;
+  border-inline: 1px solid color-mix(in srgb, var(--whp-ground) 18%, transparent);
+  padding-inline: 0.4rem;
+  color: color-mix(in srgb, var(--whp-ground) 72%, transparent);
+  font-size: 0.58rem;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.selection-toolbar select {
+  border: 1px solid color-mix(in srgb, var(--whp-ground) 28%, transparent);
+  border-radius: 0.12rem;
+  color: var(--whp-ground);
+  background: var(--whp-ink);
+  padding: 0.16rem;
+  font-size: 0.68rem;
+}
+
+@keyframes proposal-pulse {
+  from {
+    background-color: transparent;
+  }
+
+  to {
+    background-color: color-mix(in srgb, var(--whp-accent) 7%, transparent);
+  }
+}
+
+@media (max-width: 40rem) {
+  .ProseMirror {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .ProseMirror .variant-set {
+    margin-inline: -0.4rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
