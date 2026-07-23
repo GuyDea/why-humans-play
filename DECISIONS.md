@@ -401,3 +401,24 @@ still matters in current AI systems. The punchline works only after the causal l
 ledger. Historical evaluation examples remain preserved as records of the behavior that was
 tested; `CLAUDE.md` and parked episode drafts are unchanged because the decision affects
 current editorial doctrine and Episode 1 rather than repository authority or historical work.
+
+## 2026-07-23 — Put clickable evidence indicators beside production claims
+
+**Decision:** Every factual sentence or separable factual clause in an evidence-backed WHP
+production script carries a visible `[F-###](Original URL)` indicator beside the claim;
+the indicator is review metadata and is excluded from spoken narration and word count.
+
+**Rationale:** Martin could not readily locate the source for Episode 1's opening OpenAI
+claim because the URL was buried in the appendix evidence ledger. The source relationship
+must be visible where the claim is read.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/research-and-rights.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`,
+`.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/validate_annotated_script.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` remains unchanged
+because this refines evidence-review presentation rather than brand scope or identity.

@@ -262,8 +262,12 @@ millions on junk science).
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
 - **Keep facts traceable inside the production script.** In Phase 2, map every factual
   narration sentence or separable factual clause to an `F-###` claim entry in the matching
-  appendix beat that quotes the supported wording. Keep those source markers out of spoken
-  narration and out of initial rapid prototypes unless Martin explicitly requests them.
+  appendix beat that quotes the supported wording. In the evidence-backed production
+  version, append a clickable `[F-###](Original URL)` review indicator immediately after
+  each mapped factual sentence or separable clause. These markers are visible for review
+  but excluded from spoken narration and word count. Keep those source markers out of
+  spoken narration and out of initial rapid prototypes unless Martin explicitly requests
+  them.
 - **Model the caveat.** When the evidence is soft, say so. The gold-standard move is the
   *equifinality* beat Vsauce used: "juvenile rats deprived of play grew smaller, less
   developed brains — *but* the evidence doesn't prove play is *vital*; exercise or teaching
