@@ -22,6 +22,8 @@ import type {
   OperationResult,
   PackageDirection,
   StreamEventsOptions,
+  TopicHandoffInput,
+  TopicHandoffResult,
   TopicRunSnapshot,
   TopicRunSummary,
   TopicSummary,
@@ -48,13 +50,14 @@ const PROGRESS = [
   ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
   ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
   ['05-angles', 'Develop materially different angles for promising subjects.'],
-  ['06-gates', 'Identify opening proof cases and audit every advancing angle against all six hard gates.'],
-  ['07-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
-  ['08-deep', 'Deeply research the finalists with multiple signals.'],
-  ['09-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
-  ['10-packages', 'Test three package promises for each top-three finalist.'],
-  ['11-winner', 'Resolve winner status using responsibly supported, winner-eligible finalists.'],
-  ['12-audit', 'Complete the output and evidence audit.'],
+  ['06-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
+  ['07-gates', 'Audit every advancing angle against all six hard gates.'],
+  ['08-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+  ['09-deep', 'Deeply research the finalists with multiple signals.'],
+  ['10-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+  ['11-packages', 'Test three package promises for each top-three finalist.'],
+  ['12-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
+  ['13-audit', 'Complete the output and evidence audit.'],
 ] as const;
 
 const SUMMARY: TopicSummary = {
@@ -72,30 +75,18 @@ const SUMMARY: TopicSummary = {
     shortlistEntry('Unscored Candidate', 3, null, null),
   ],
   packages: [
-    {
-      finalist: 'Voluntary Obstacles',
-      direction: 'Harder on purpose',
-      working_title: 'Why We Make Games Harder Than They Need to Be',
-      intended_viewer: 'Players who choose self-imposed rules',
-      familiar_markdown: 'A no-hit run.',
-      surprise_markdown: 'Constraint can create meaning.',
-      visual_promise_markdown: 'The same level under two rule sets.',
-      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
-      survives_honestly: true,
-      reason_markdown: 'The episode can demonstrate the promise.',
-    },
-    {
-      finalist: 'The Queue Game',
-      direction: 'Fair waits',
-      working_title: 'Can You Design a Fair Queue?',
-      intended_viewer: 'People who hate choosing the wrong line',
-      familiar_markdown: 'Two checkout lines.',
-      surprise_markdown: 'Speed and fairness split.',
-      visual_promise_markdown: 'Queues filling and draining.',
-      delivered_payoff_markdown: 'How queue rules shape choice.',
-      survives_honestly: false,
-      reason_markdown: 'The promise is broader than the evidence.',
-    },
+    ...summaryPackageDirections(
+      'Voluntary Obstacles',
+      'Why We Make Games Harder Than They Need to Be',
+    ),
+    ...summaryPackageDirections(
+      'The Queue Game',
+      'Can You Design a Fair Queue?',
+    ),
+    ...summaryPackageDirections(
+      'Unscored Candidate',
+      'The Candidate We Cannot Score Yet',
+    ),
   ],
   winner: {
     decision_status: 'winner-selected',
@@ -135,10 +126,17 @@ class TopicClientStub {
     createdAt: string;
   }> = [];
   private drafts: DraftRecord[] = [];
-  private artifactResult: ArtifactWriteResult = {
-    conflict: false,
-    hash: 'topic-brief-hash',
-  };
+  private handoffResults: TopicHandoffResult[] = [{
+    draftId: 'draft-handoff-1',
+    complete: true,
+    steps: {
+      draftCreated: 'completed',
+      artifactWritten: 'completed',
+      pipelineUpserted: 'completed',
+      ideaPromoted: 'completed',
+    },
+    error: null,
+  }];
   private topicRuns: TopicRunSummary[] = [];
   private topicRunSnapshots: Array<TopicRunSnapshot | Error> = [];
   private topicRunSnapshotIndex = 0;
@@ -390,11 +388,29 @@ class TopicClientStub {
     _path: string,
     _content: string,
     _expectedState: ArtifactExpectedState,
-  ): Promise<ArtifactWriteResult> => this.artifactResult);
+  ): Promise<ArtifactWriteResult> => ({
+    conflict: false,
+    hash: 'topic-brief-hash',
+  }));
   readonly upsertPipelineRow = vi.fn(async () => ({
     conflict: false as const,
     hash: 'pipeline-hash',
   }));
+  readonly handoffTopicRun = vi.fn(async (
+    _runId: string,
+    _input: TopicHandoffInput,
+  ): Promise<TopicHandoffResult> =>
+    this.handoffResults.shift() ?? {
+      draftId: 'draft-handoff-1',
+      complete: true,
+      steps: {
+        draftCreated: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'completed',
+        ideaPromoted: 'completed',
+      },
+      error: null,
+    });
 
   queueTopicRun(...snapshots: Array<TopicRunSnapshot | Error>): void {
     this.topicRunSnapshots = snapshots;
@@ -413,8 +429,8 @@ class TopicClientStub {
     this.topicRuns = runs;
   }
 
-  setArtifactResult(result: ArtifactWriteResult): void {
-    this.artifactResult = result;
+  queueHandoffResults(...results: TopicHandoffResult[]): void {
+    this.handoffResults = results;
   }
 
   seedIdea(idea: IdeaRecord & {
@@ -706,6 +722,7 @@ describe('routed Topics composition', () => {
     expect(topics.client.updateIdea).toHaveBeenCalledWith(
       'idea-1',
       {
+        latestCheckOpId: 'op-4',
         latestCheck: {
           verdict: 'pass',
           gates: GATES.map((gate) => ({
@@ -783,6 +800,7 @@ describe('routed Topics composition', () => {
         expect(client.updateIdea).toHaveBeenCalledWith(
           'idea-rendered-gate',
           {
+            latestCheckOpId: 'op-1',
             latestCheck: {
               verdict: 'pass',
               gates: GATES.map((gate) => ({
@@ -793,10 +811,20 @@ describe('routed Topics composition', () => {
             },
           },
         );
+        const relaunch = findButton(card, 'Checking');
+        expect(relaunch.disabled).toBe(true);
+        relaunch.click();
+        expect(client.submissions.filter(
+          ({ operation }) => operation === 'quick-gate-check',
+        )).toHaveLength(1);
       });
     } finally {
       releasePersistence();
     }
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(findButton(card, 'Gate-check').disabled).toBe(false);
+    });
   });
 
   it('hydrates the latest persisted gate-check when ideas reload', async () => {
@@ -941,7 +969,7 @@ describe('routed Topics composition', () => {
         user_constraints: {
           notes: 'Prefer a visually provable opening.',
         },
-        progress_transport: 'WHP_PROGRESS/1',
+        progress_transport: 'WHP_PROGRESS/2',
         summary_transport: 'fenced-whp-summary',
       },
     });
@@ -950,7 +978,9 @@ describe('routed Topics composition', () => {
     );
     const checklist = topics.root.querySelector('[data-testid="run-checklist"]');
     expect(checklist?.querySelectorAll('[data-testid="checklist-row"]'))
-      .toHaveLength(12);
+      .toHaveLength(13);
+    expect(checklist?.closest('section')?.textContent)
+      .toContain('13-step checklist');
     expect(checklist?.textContent).toContain(PROGRESS[5][1]);
     expect(topics.client.getTopicRun).toHaveBeenCalledTimes(1);
 
@@ -1013,7 +1043,7 @@ describe('routed Topics composition', () => {
     const packages = topics.root.querySelectorAll<HTMLElement>(
       '[data-testid="package-direction"]',
     );
-    expect(packages).toHaveLength(2);
+    expect(packages).toHaveLength(9);
     expect(packages[0]?.dataset['survives']).toBe('true');
     expect(packages[1]?.dataset['survives']).toBe('false');
     const winner = topics.root.querySelector('[data-testid="winner-card"]');
@@ -1147,38 +1177,34 @@ describe('routed Topics composition', () => {
       });
     });
 
-    expect(topics.client.create).toHaveBeenCalledWith({
+    expect(topics.client.handoffTopicRun).toHaveBeenCalledWith('run-1', {
+      ideaId: 'idea-2',
       episodeSlug: 'voluntary-obstacles',
       title: 'Voluntary Obstacles',
-      format: 'narration',
-      doc: expect.objectContaining({
-        metadata: {
-          topic: 'Voluntary Obstacles — Why chosen constraints can make effort meaningful.',
-          anchors: [
-            'Players voluntarily accept harder rules.',
-            'A no-hit run makes failure legible.',
-          ],
-          unknowns: ['Which opening proof case is strongest?'],
-          approvedLessons: [],
-          creativeStatus: { phase: 'architecture' },
-          directionApproved: false,
-        },
-      }),
+      briefMarkdown: expect.stringContaining('# Selected topic brief'),
+      draft: {
+        format: 'narration',
+        doc: expect.objectContaining({
+          metadata: {
+            topic: 'Voluntary Obstacles — Why chosen constraints can make effort meaningful.',
+            anchors: [
+              'Players voluntarily accept harder rules.',
+              'A no-hit run makes failure legible.',
+            ],
+            unknowns: ['Which opening proof case is strongest?'],
+            approvedLessons: [],
+            creativeStatus: { phase: 'architecture' },
+            directionApproved: false,
+          },
+        }),
+      },
     });
-    expect(topics.client.writeArtifact).toHaveBeenCalledWith(
-      'whp-youtube/topics/voluntary-obstacles.md',
-      expect.stringContaining('# Selected topic brief'),
-      { expectNew: true },
-    );
-    expect(topics.client.upsertPipelineRow).toHaveBeenCalledWith({
-      episodeSlug: 'voluntary-obstacles',
-      milestone: 'selected',
-      ref: 'whp-youtube/topics/voluntary-obstacles.md',
-    });
-    expect(topics.client.updateIdea).toHaveBeenCalledWith(
-      'idea-2',
-      { status: 'promoted' },
-    );
+    expect(topics.client.create).not.toHaveBeenCalled();
+    expect(topics.client.writeArtifact).not.toHaveBeenCalled();
+    expect(topics.client.upsertPipelineRow).not.toHaveBeenCalled();
+    expect(topics.root.querySelector('[data-testid="handoff-steps"]')?.textContent
+      ?.replace(/\s+/gu, ' '))
+      .toContain('Idea promotedcompleted');
   });
 
   it('surfaces a handoff CAS conflict and stops before pipeline promotion', async () => {
@@ -1188,10 +1214,16 @@ describe('routed Topics composition', () => {
       summary: SUMMARY,
       reportMd: '# Completed topic run',
     });
-    topics.client.setArtifactResult({
-      conflict: true,
-      currentHash: 'someone-else-hash',
-      parked: ['whp-youtube/topics/topic.md.sc-conflict-1'],
+    topics.client.queueHandoffResults({
+      draftId: 'draft-handoff-1',
+      complete: false,
+      steps: {
+        draftCreated: 'completed',
+        artifactWritten: 'pending',
+        pipelineUpserted: 'pending',
+        ideaPromoted: 'pending',
+      },
+      error: 'topic brief conflicts with someone-else-hash. Parked: whp-youtube/topics/topic.md.sc-conflict-1.',
     });
 
     enterText(
@@ -1228,12 +1260,16 @@ describe('routed Topics composition', () => {
       expect(conflict?.textContent).toContain('sc-conflict-1');
     });
 
-    expect(topics.client.create).toHaveBeenCalledOnce();
+    expect(topics.client.handoffTopicRun).toHaveBeenCalledOnce();
+    expect(topics.client.create).not.toHaveBeenCalled();
+    expect(topics.client.writeArtifact).not.toHaveBeenCalled();
     expect(topics.client.upsertPipelineRow).not.toHaveBeenCalled();
-    expect(topics.client.updateIdea).not.toHaveBeenCalledWith(
-      expect.any(String),
-      { status: 'promoted' },
-    );
+    expect(topics.root.querySelector('[data-testid="handoff-steps"]')?.textContent
+      ?.replace(/\s+/gu, ' '))
+      .toContain('Draft createdcompleted');
+    expect(topics.root.querySelector('[data-testid="handoff-steps"]')?.textContent
+      ?.replace(/\s+/gu, ' '))
+      .toContain('Artifact writtenpending');
     expect(navigate).not.toHaveBeenCalled();
   });
 
@@ -1429,6 +1465,26 @@ function snapshot(
     state,
     progress: PROGRESS.map(([id, text]) => ({ id, text, status })),
   };
+}
+
+function summaryPackageDirections(
+  finalist: string,
+  title: string,
+): TopicSummary['packages'] {
+  return Array.from({ length: 3 }, (_, index) => ({
+    finalist,
+    direction: `Direction ${index + 1}`,
+    working_title: index === 0 ? title : `${title} · ${index + 1}`,
+    intended_viewer: 'Curious players',
+    familiar_markdown: 'A recognizable play situation.',
+    surprise_markdown: 'The rules reveal a less obvious human tradeoff.',
+    visual_promise_markdown: 'A concrete before-and-after comparison.',
+    delivered_payoff_markdown: 'Why the chosen rule changes behavior.',
+    survives_honestly: index !== 1,
+    reason_markdown: index === 1
+      ? 'The promise is broader than the evidence.'
+      : 'The episode can demonstrate the promise.',
+  }));
 }
 
 function candidate(subject: string): TopicSummary['candidates'][number] {

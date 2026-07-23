@@ -618,3 +618,21 @@ the skill keeps every editorial rule.
 `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`, and this ledger.
 `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
 the amendment implements the recorded editorial decision inside the workbench boundary.
+
+## 2026-07-23 — Close Plan 5 persistence and transport gaps before merge
+
+**Decision:** Script Creator Plan 5 adopts the skill-owned `WHP_PROGRESS/2` thirteen-row
+transport; validates complete topic summaries across finalists, packages, winner, and all
+seven score/grade pairs; performs topic handoff as one durable idempotent server saga;
+uses one centralized state-database migration sequence; persists gate checks within their
+per-idea operation generation; deep-links repository-only pipeline cards to their topic
+briefs; and surfaces malformed pipeline diagnostics instead of treating them as no data.
+
+**Rationale:** The Plan 5 final review found protocol drift, retry-unsafe partial writes, a
+shared migration-version collision, stale-result races, incomplete navigation, and hidden
+repository parse failures.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/plans/2026-07-23-script-creator-plan5-topics.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain unchanged because these
+decisions tighten the internal workbench contract without changing WHP doctrine.

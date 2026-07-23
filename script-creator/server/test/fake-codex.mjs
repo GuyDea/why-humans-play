@@ -138,13 +138,14 @@ function fullTopicRunEvents() {
     ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
     ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
     ['05-angles', 'Develop materially different angles for promising subjects.'],
-    ['06-gates', 'Identify opening proof cases and audit every advancing angle against all six hard gates.'],
-    ['07-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
-    ['08-deep', 'Deeply research the finalists with multiple signals.'],
-    ['09-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
-    ['10-packages', 'Test three package promises for each top-three finalist.'],
-    ['11-winner', 'Resolve winner status using responsibly supported, winner-eligible finalists.'],
-    ['12-audit', 'Complete the output and evidence audit.'],
+    ['06-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
+    ['07-gates', 'Audit every advancing angle against all six hard gates.'],
+    ['08-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+    ['09-deep', 'Deeply research the finalists with multiple signals.'],
+    ['10-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+    ['11-packages', 'Test three package promises for each top-three finalist.'],
+    ['12-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
+    ['13-audit', 'Complete the output and evidence audit.'],
   ];
   const event = (text) => ({
     type: 'item.completed',
@@ -154,12 +155,12 @@ function fullTopicRunEvents() {
     { type: 'thread.started', thread_id: 'fake-full-topic-thread' },
     { type: 'turn.started' },
     event(steps.map(([id, text]) =>
-      `WHP_PROGRESS/1 ${id} pending :: ${text}`).join('\n')),
+      `WHP_PROGRESS/2 ${id} pending :: ${text}`).join('\n')),
   ];
 
   for (const [id, text] of steps) {
     events.push(
-      event(`WHP_PROGRESS/1 ${id} active :: ${text}`),
+      event(`WHP_PROGRESS/2 ${id} active :: ${text}`),
       {
         type: 'item.completed',
         item: {
@@ -168,7 +169,7 @@ function fullTopicRunEvents() {
           exit_code: 0,
         },
       },
-      event(`WHP_PROGRESS/1 ${id} done :: ${text}`),
+      event(`WHP_PROGRESS/2 ${id} done :: ${text}`),
     );
   }
 
@@ -330,6 +331,21 @@ function fullTopicReport() {
       survives_honestly: false,
       reason_markdown: 'The design survey is broader than the strongest episode angle.',
     },
+    ...shortlist.slice(1).flatMap((finalist) =>
+      Array.from({ length: 3 }, (_, index) => ({
+        finalist: finalist.subject,
+        direction: `${['Origins', 'Human stakes', 'Design test'][index]} direction`,
+        working_title: `${finalist.subject}: ${['Where It Came From', 'The Human Game', 'Can the Rules Change?'][index]}`,
+        intended_viewer: 'Curious viewers who recognize the underlying situation',
+        familiar_markdown: `A familiar entry point for ${finalist.subject}.`,
+        surprise_markdown: `Direction ${index + 1} exposes a distinct tension.`,
+        visual_promise_markdown: `A filmable comparison for direction ${index + 1}.`,
+        delivered_payoff_markdown: `A bounded payoff for ${finalist.subject}.`,
+        survives_honestly: index !== 2,
+        reason_markdown: index === 2
+          ? 'The broadest direction outruns the strongest available evidence.'
+          : 'The available evidence can deliver this direction honestly.',
+      }))),
   ];
   const summary = {
     candidates,

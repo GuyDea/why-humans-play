@@ -30,7 +30,7 @@ export interface PackageTestInputs<
 
 export interface FullTopicRunInputs<UserConstraints = unknown>
   extends IdeaOperationInputs<UserConstraints> {
-  progress_transport: 'WHP_PROGRESS/1';
+  progress_transport: 'WHP_PROGRESS/2';
   summary_transport: 'fenced-whp-summary';
 }
 
@@ -133,7 +133,7 @@ export function buildTopicOperationInputs(
       return {
         idea_text: context.ideaText,
         user_constraints: context.userConstraints,
-        progress_transport: 'WHP_PROGRESS/1',
+      progress_transport: 'WHP_PROGRESS/2',
         summary_transport: 'fenced-whp-summary',
       };
     case 'handoff-preview':

@@ -4,9 +4,9 @@
 
 **Goal:** FR-1 complete in the running app: capture ideas, brainstorm angles, gate-check cheaply, run the full topic-selection protocol with its mandated checklist live on screen, browse candidates on a sortable board, test packages, and hand a selected topic off as a studio draft plus a repo brief — with the pipeline board showing where every episode stands.
 
-**Architecture:** extends the three existing packages. Server: ideas/candidates/lessons-free topic store tables, a progress endpoint over the existing `WHP_PROGRESS/1` parser, structured-summary extraction, and a pipeline read API. App: two new routes (`/topics`, `/pipeline`) composed from day one with a real-component composition spec (the Plan 4 F3 rule is now law). Fake codex gains a full-run mode emitting progress markers and a fenced summary so the whole surface is deterministic in the browser.
+**Architecture:** extends the three existing packages. Server: ideas/candidates/lessons-free topic store tables, a progress endpoint over the skill-owned `WHP_PROGRESS/2` manifest, structured-summary extraction, and a pipeline read API. App: two new routes (`/topics`, `/pipeline`) composed from day one with a real-component composition spec (the Plan 4 F3 rule is now law). Fake codex gains a full-run mode emitting progress markers and a fenced summary so the whole surface is deterministic in the browser.
 
-**Contract decision (recorded here, consistent with the design's intent):** the design's "structured summary sidecar" for the full run is transported as a fenced ```whp-summary JSON block at the end of the run's final report message — a serialization of the tables the topic skill's output contract already mandates (same legitimacy argument as `WHP_PROGRESS/1`). The server extracts it on completion into the store; the canonical Markdown report still lands in `whp-youtube/topic-runs/` in real runs. No filesystem coupling for the board.
+**Contract decision (recorded here, consistent with the design's intent):** the design's "structured summary sidecar" for the full run is transported as a fenced ```whp-summary JSON block at the end of the run's final report message — a serialization of the tables the topic skill's output contract already mandates (same legitimacy argument as `WHP_PROGRESS/2`). The server extracts it on completion into the store; the canonical Markdown report still lands in `whp-youtube/topic-runs/` in real runs. No filesystem coupling for the board.
 
 **Sequence note:** the merged architecture-first amendment (approve script architecture before episode-scale narration) does not gate this plan — topic selection precedes architecture. The focused architecture-UI design is now a prerequisite inserted before Plan 6's Promote depth.
 
@@ -32,7 +32,7 @@ server: src/topics/store.ts        — ideas(id, text, source, createdAt, status
         routes: /api/ideas CRUD, /api/topic-runs (list/register/get incl. progress+summary),
                 /api/pipeline (parse PIPELINE.md + draft states)
         test/fake-codex.mjs        — mode full-topic-run: N progress marker messages
-                                     (pending→active→done across the twelve ids), report final
+                                     (pending→active→done across the thirteen manifest ids), report final
                                      message ending with a fenced whp-summary block
 app:    src/app/topics/…           — TopicsPage (idea inbox, ideate cards, gate-check chips,
                                      package table, run console with live checklist, candidate
@@ -52,7 +52,7 @@ Commit `feat(script-creator): topic store, run progress, and pipeline endpoints`
 
 ### Task 2: fake full-run mode + summary schema (server)
 
-`full-topic-run` fake mode: emits the twelve checklist ids transitioning to done as agent messages interleaved with generic events, then a final report markdown ending with a valid fenced `whp-summary` block (candidates with six gates, shortlist rows with seven `score/grade` pairs, three package directions, winner block). The strict summary schema joins the registry (meta-test covers it). Unit test: runner + fake → journaled markers parse to a complete checklist; extraction yields the summary.
+`full-topic-run` fake mode: emits the thirteen checklist ids transitioning to done as agent messages interleaved with generic events, then a final report markdown ending with a valid fenced `whp-summary` block (candidates with six gates, shortlist rows with all seven `score/grade` pairs, exactly three package directions for each top-three finalist, winner drawn from those finalists). The strict summary schema joins the registry (meta-test covers it). A sync test parses the skill checklist plus transport manifest and fails on any count, order, ID, or wording drift. Unit test: runner + fake → journaled markers parse to a complete checklist; extraction yields the summary.
 Commit `feat(script-creator): deterministic full-run fixtures with fenced summary`.
 
 ### Task 3: topic input builders (app)
@@ -67,7 +67,7 @@ Commit `feat(script-creator): topics page with inbox, ideate, and gate checks`.
 
 ### Task 5: full-run console and candidate board (app)
 
-Launch full run (constraints form → inputs builder); live checklist renders the twelve rows from `/api/topic-runs/:id` polling (2 s while running) with the skill's verbatim texts; on completion: report rendered (markdown), candidate board from the summary — sortable by total and per-criterion, gate chips, packaging directions table with survival highlighting, winner card. `summaryError` renders honestly with the raw report still available. Composition spec: run lifecycle against stub client with progress snapshots → rows advance; summary → board sorts.
+Launch full run (constraints form → inputs builder); live checklist renders the manifest-derived row count from `/api/topic-runs/:id` polling (2 s while running) with the skill's verbatim texts; on completion: report rendered (markdown), candidate board from the summary — sortable by total and per-criterion, gate chips, packaging directions table with survival highlighting, winner card. `summaryError` renders honestly with the raw report still available. Composition spec: run lifecycle against stub client with progress snapshots → rows advance; summary → board sorts.
 Commit `feat(script-creator): live full-run checklist and candidate board`.
 
 ### Task 6: package tester and handoff (app)

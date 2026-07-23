@@ -180,6 +180,7 @@ describe('topics HTTP API', () => {
       headers: AUTH,
       payload: {
         status: 'discarded',
+        latestCheckOpId: 'op-gate-1',
         latestCheck: GATE_CHECK,
       },
     });
@@ -218,7 +219,7 @@ describe('topics HTTP API', () => {
       type: 'item.completed',
       item: {
         type: 'agent_message',
-        text: 'WHP_PROGRESS/1 01-frame done :: Decision frame recorded.',
+        text: 'WHP_PROGRESS/2 01-frame done :: Decision frame recorded.',
       },
     };
     fixture.operation.events = [{
@@ -342,15 +343,74 @@ describe('topics HTTP API', () => {
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.json()).toEqual([{
-      episodeSlug: 'sudoku',
-      state: 'prototyping',
-      milestone: 'selected',
-      ref: 'whp-youtube/topics/sudoku.md',
-      draftId: 'draft-1',
-      title: 'Sudoku',
-      creativePhase: 'rapid-prototype',
-    }]);
+    expect(response.json()).toEqual({
+      diagnostics: [],
+      rows: [{
+        episodeSlug: 'sudoku',
+        state: 'prototyping',
+        milestone: 'selected',
+        ref: 'whp-youtube/topics/sudoku.md',
+        draftId: 'draft-1',
+        title: 'Sudoku',
+        creativePhase: 'rapid-prototype',
+      }],
+    });
+  });
+
+  it('returns pipeline parse diagnostics with row numbers', async () => {
+    const fixture = makeFixture();
+    mkdirSync(join(fixture.root, 'whp-youtube'), { recursive: true });
+    writeFileSync(join(fixture.root, 'whp-youtube', 'PIPELINE.md'), [
+      '| Episode | Milestone | Ref |',
+      '| --- | --- | --- |',
+      '| sudoku | | whp-youtube/topics/sudoku.md |',
+      '',
+    ].join('\n'));
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/pipeline',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      rows: [],
+      diagnostics: [{
+        code: 'empty-required-cell',
+        line: 3,
+        message: 'Pipeline row has an empty required cell.',
+      }],
+    });
+  });
+
+  it('returns a repository topic brief selected by pipeline ref', async () => {
+    const fixture = makeFixture();
+    mkdirSync(
+      join(fixture.root, 'whp-youtube', 'topics'),
+      { recursive: true },
+    );
+    writeFileSync(
+      join(
+        fixture.root,
+        'whp-youtube',
+        'topics',
+        'the-queue-game.md',
+      ),
+      '# The Queue Game\n\nRepository topic brief.',
+    );
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/topic-brief?ref=whp-youtube%2Ftopics%2Fthe-queue-game.md',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({
+      ref: 'whp-youtube/topics/the-queue-game.md',
+      markdown: '# The Queue Game\n\nRepository topic brief.',
+    });
   });
 
   it('hides internal failures from idea and topic-run list responses', async () => {
@@ -379,7 +439,9 @@ describe('topics HTTP API', () => {
         registerRun: fail,
         listRuns: fail,
         getRun: fail,
+        handoff: fail,
         pipeline: fail,
+        topicBrief: fail,
       },
       artifactService: {},
       validatorService: UNUSED_VALIDATOR_SERVICE,
@@ -415,6 +477,7 @@ describe('topics HTTP API', () => {
     ['POST', '/api/topic-runs'],
     ['GET', '/api/topic-runs/run-1'],
     ['GET', '/api/pipeline'],
+    ['GET', '/api/topic-brief?ref=whp-youtube%2Ftopics%2Ftopic.md'],
   ] as const)('rejects %s %s without the nonce', async (method, url) => {
     const fixture = makeFixture();
 

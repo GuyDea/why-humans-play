@@ -1,7 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type {
+  DraftDocument,
+  DraftFormat,
   DraftRecord,
   DraftSummary,
 } from '../documents/store.js';
@@ -18,6 +20,11 @@ import {
 } from '../operations/schemas.js';
 import { validateAgainstSchema } from '../schema-validate.js';
 import type { CodexEvent, OperationState } from '../types.js';
+import type {
+  ArtifactExpectedState,
+  ArtifactWriteResult,
+  PipelineRow,
+} from '../repo/artifacts.js';
 import {
   type GateCheckResult,
   type IdeaRecord,
@@ -26,6 +33,7 @@ import {
   type PackageDirection,
   type PackageTestRecord,
   type TopicGateName,
+  type TopicHandoffSagaRecord,
   type TopicRunRecord,
   type TopicStore,
 } from './store.js';
@@ -139,6 +147,49 @@ export function extractTopicSummary(
         'whp-summary block violates schema: each candidate must contain each of the six gates exactly once',
     };
   }
+  if (summary.shortlist.some((row) => {
+    const scoreNames = Object.keys(row.scores);
+    return scoreNames.length !== SCORE_NAMES.length
+      || SCORE_NAMES.some((name) => !scoreNames.includes(name));
+  })) {
+    return {
+      summary: null,
+      summaryError:
+        'whp-summary block violates schema: each shortlist row must contain all seven score and grade pairs',
+    };
+  }
+
+  const finalists = [...summary.shortlist]
+    .sort((left, right) => left.rank - right.rank)
+    .slice(0, 3)
+    .map((row) => row.subject);
+  const packageCounts = new Map<string, number>();
+  for (const row of summary.packages) {
+    packageCounts.set(row.finalist, (packageCounts.get(row.finalist) ?? 0) + 1);
+  }
+  if (
+    summary.packages.length !== finalists.length * 3
+    || finalists.some((finalist) => packageCounts.get(finalist) !== 3)
+    || [...packageCounts.keys()].some((finalist) => !finalists.includes(finalist))
+  ) {
+    return {
+      summary: null,
+      summaryError:
+        'whp-summary block violates schema: exactly three package directions are required per top-three finalist',
+    };
+  }
+
+  const winner = summary.winner;
+  if (
+    (winner.subject !== null && !finalists.includes(winner.subject))
+    || (winner.decision_status !== 'incomplete' && winner.subject === null)
+  ) {
+    return {
+      summary: null,
+      summaryError:
+        'whp-summary block violates schema: winner must be one of the finalists',
+    };
+  }
   return {
     summary,
     summaryError: null,
@@ -156,6 +207,7 @@ export interface UpdateIdeaInput {
   source?: IdeaSource;
   status?: IdeaStatus;
   latestCheck?: unknown;
+  latestCheckOpId?: string;
 }
 
 export interface CreatePackageTestInput {
@@ -188,6 +240,39 @@ export interface PipelineItem {
   creativePhase: string | null;
 }
 
+export type PipelineDiagnosticCode =
+  | 'bad-header'
+  | 'bad-row'
+  | 'empty-required-cell'
+  | 'duplicate-slug';
+
+export interface PipelineDiagnostic {
+  code: PipelineDiagnosticCode;
+  line: number | null;
+  message: string;
+}
+
+interface ParsedPipelineRow {
+  episodeSlug: string;
+  milestone: string;
+  ref: string;
+}
+
+export interface PipelineParseResult {
+  rows: ParsedPipelineRow[];
+  diagnostics: PipelineDiagnostic[];
+}
+
+export interface PipelineSnapshot {
+  rows: PipelineItem[];
+  diagnostics: PipelineDiagnostic[];
+}
+
+export interface TopicBrief {
+  ref: string;
+  markdown: string;
+}
+
 type TopicOperationService = Pick<
   OperationService,
   'get' | 'events' | 'result'
@@ -196,6 +281,47 @@ type TopicOperationService = Pick<
 interface TopicDocumentService {
   listDrafts(): DraftSummary[];
   getDraft(id: string): DraftRecord;
+  createDraftWithId?(
+    id: string,
+    input: {
+      episodeSlug: string;
+      title: string;
+      format: DraftFormat;
+      doc: DraftDocument;
+    },
+  ): DraftRecord;
+}
+
+interface TopicArtifactService {
+  write(
+    path: string,
+    content: string,
+    expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult>;
+  upsertPipelineRow(row: PipelineRow): Promise<ArtifactWriteResult>;
+}
+
+export interface TopicHandoffInput {
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
+  briefMarkdown: string;
+  draft: {
+    format: DraftFormat;
+    doc: DraftDocument;
+  };
+}
+
+export interface TopicHandoffResult {
+  draftId: string;
+  complete: boolean;
+  steps: {
+    draftCreated: 'pending' | 'completed';
+    artifactWritten: 'pending' | 'completed';
+    pipelineUpserted: 'pending' | 'completed';
+    ideaPromoted: 'pending' | 'completed';
+  };
+  error: string | null;
 }
 
 const TERMINAL_STATES = new Set<OperationState>([
@@ -211,14 +337,17 @@ export class TopicService {
   private readonly store: TopicStore;
   private readonly operationService: TopicOperationService;
   private readonly documentService: TopicDocumentService;
+  private readonly artifactService: TopicArtifactService | null;
   private readonly repoRoot: string;
   private readonly idFactory: () => string;
   private readonly now: () => string;
+  private readonly handoffLocks = new Map<string, Promise<void>>();
 
   constructor(options: {
     store: TopicStore;
     operationService: TopicOperationService;
     documentService: TopicDocumentService;
+    artifactService?: TopicArtifactService;
     repoRoot: string;
     idFactory?: () => string;
     now?: () => string;
@@ -226,6 +355,7 @@ export class TopicService {
     this.store = options.store;
     this.operationService = options.operationService;
     this.documentService = options.documentService;
+    this.artifactService = options.artifactService ?? null;
     this.repoRoot = options.repoRoot;
     this.idFactory = options.idFactory ?? randomUUID;
     this.now = options.now ?? (() => new Date().toISOString());
@@ -258,10 +388,45 @@ export class TopicService {
       && input.source === undefined
       && input.status === undefined
       && input.latestCheck === undefined
+      && input.latestCheckOpId === undefined
     ) {
       throw new Error('idea update is required');
     }
     const current = this.getIdea(id);
+    if (input.latestCheck === undefined && input.latestCheckOpId !== undefined) {
+      throw new Error('latestCheck is required with latestCheckOpId');
+    }
+    const nextCheck = input.latestCheck === undefined
+      ? current.latestCheck
+      : requireGateCheck(input.latestCheck);
+    if (input.latestCheck !== undefined) {
+      const incomingOpId = requireNonEmpty(
+        input.latestCheckOpId as string,
+        'latestCheckOpId',
+      );
+      const currentOpId = this.store.getIdeaLatestCheckOpId(id);
+      if (
+        currentOpId !== null
+        && currentOpId !== incomingOpId
+        && !isNewerOperation(
+          this.operationService.get(incomingOpId),
+          this.operationService.get(currentOpId),
+        )
+      ) {
+        return current;
+      }
+      return this.store.updateIdea({
+        ...current,
+        text: input.text === undefined ? current.text : requireText(input.text),
+        source: input.source === undefined
+          ? current.source
+          : requireIdeaSource(input.source),
+        status: input.status === undefined
+          ? current.status
+          : requireIdeaStatus(input.status),
+        latestCheck: nextCheck,
+      }, { latestCheckOpId: incomingOpId });
+    }
     return this.store.updateIdea({
       ...current,
       text: input.text === undefined ? current.text : requireText(input.text),
@@ -271,10 +436,8 @@ export class TopicService {
       status: input.status === undefined
         ? current.status
         : requireIdeaStatus(input.status),
-      latestCheck: input.latestCheck === undefined
-        ? current.latestCheck
-        : requireGateCheck(input.latestCheck),
-    });
+      latestCheck: nextCheck,
+    }, { preserveLatestCheck: true });
   }
 
   deleteIdea(id: string): void {
@@ -364,12 +527,12 @@ export class TopicService {
     return snapshot;
   }
 
-  async pipeline(): Promise<PipelineItem[]> {
-    const rows = await readPipelineRows(
+  async pipeline(): Promise<PipelineSnapshot> {
+    const parsed = await readPipelineRows(
       join(this.repoRoot, 'whp-youtube', 'PIPELINE.md'),
     );
     const records = new Map<string, PipelineItem>();
-    for (const row of rows) {
+    for (const row of parsed.rows) {
       records.set(row.episodeSlug, {
         episodeSlug: row.episodeSlug,
         state: normalizePipelineState(row.milestone),
@@ -404,9 +567,174 @@ export class TopicService {
       });
     }
 
-    return [...records.values()].sort(
-      (left, right) => left.episodeSlug.localeCompare(right.episodeSlug),
-    );
+    return {
+      rows: [...records.values()].sort(
+        (left, right) => left.episodeSlug.localeCompare(right.episodeSlug),
+      ),
+      diagnostics: parsed.diagnostics,
+    };
+  }
+
+  async topicBrief(ref: string): Promise<TopicBrief> {
+    const normalized = requireNonEmpty(ref, 'ref');
+    if (
+      !/^whp-youtube\/topics\/[a-z0-9][a-z0-9._-]*\.md$/u
+        .test(normalized)
+    ) {
+      throw new Error(`invalid topic brief ref: ${normalized}`);
+    }
+    try {
+      return {
+        ref: normalized,
+        markdown: await readFile(join(this.repoRoot, normalized), 'utf8'),
+      };
+    } catch (error) {
+      if (
+        error instanceof Error
+        && 'code' in error
+        && error.code === 'ENOENT'
+      ) {
+        throw new Error(`topic brief not found: ${normalized}`);
+      }
+      throw error;
+    }
+  }
+
+  async handoff(
+    runId: string,
+    value: unknown,
+  ): Promise<TopicHandoffResult> {
+    const input = requireHandoffInput(value);
+    this.getRun(runId);
+    const run = this.store.getRun(runId);
+    if (!run) throw new Error(`topic run not found: ${runId}`);
+    const summary = run.summary as TopicSummary | null;
+    const winnerSubject = summary?.winner.subject;
+    if (!summary || winnerSubject == null) {
+      throw new Error('topic run has no selected winner to hand off');
+    }
+    const key = `${runId}\u0000${winnerSubject}`;
+    return this.withHandoffLock(key, () =>
+      this.resumeHandoff(runId, winnerSubject, input));
+  }
+
+  private async resumeHandoff(
+    runId: string,
+    winnerSubject: string,
+    input: TopicHandoffInput,
+  ): Promise<TopicHandoffResult> {
+    if (!this.artifactService) {
+      throw new Error('topic handoff artifact service is not configured');
+    }
+    this.getIdea(input.ideaId);
+    const inputJson = JSON.stringify(input);
+    let saga = this.store.getHandoffSaga(runId, winnerSubject);
+    if (saga && JSON.stringify(saga.input) !== inputJson) {
+      throw new Error(
+        'topic handoff payload does not match the durable run and winner saga',
+      );
+    }
+    if (!saga) {
+      const timestamp = this.now();
+      saga = this.store.createHandoffSaga({
+        runId,
+        winnerSubject,
+        input,
+        draftId: this.idFactory(),
+        draftCreated: false,
+        artifactWritten: false,
+        pipelineUpserted: false,
+        ideaPromoted: false,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
+
+    if (!saga.draftCreated) {
+      const createDraftWithId = this.documentService.createDraftWithId;
+      if (!createDraftWithId) {
+        throw new Error('topic handoff document service is not configured');
+      }
+      createDraftWithId.call(this.documentService, saga.draftId, {
+        episodeSlug: input.episodeSlug,
+        title: input.title,
+        format: input.draft.format,
+        doc: input.draft.doc,
+      });
+      saga = this.advanceHandoff(saga, { draftCreated: true });
+    }
+
+    const artifactPath = `whp-youtube/topics/${input.episodeSlug}.md`;
+    if (!saga.artifactWritten) {
+      const result = await this.artifactService.write(
+        artifactPath,
+        input.briefMarkdown,
+        { expectNew: true },
+      );
+      const intendedHash = createHash('sha256')
+        .update(input.briefMarkdown)
+        .digest('hex');
+      if (result.conflict && result.currentHash !== intendedHash) {
+        return handoffResult(
+          saga,
+          artifactConflictMessage('topic brief', result),
+        );
+      }
+      saga = this.advanceHandoff(saga, { artifactWritten: true });
+    }
+
+    if (!saga.pipelineUpserted) {
+      const result = await this.artifactService.upsertPipelineRow({
+        episodeSlug: input.episodeSlug,
+        milestone: 'selected',
+        ref: artifactPath,
+      });
+      if (result.conflict) {
+        return handoffResult(
+          saga,
+          artifactConflictMessage('pipeline', result),
+        );
+      }
+      saga = this.advanceHandoff(saga, { pipelineUpserted: true });
+    }
+
+    if (!saga.ideaPromoted) {
+      this.updateIdea(input.ideaId, { status: 'promoted' });
+      saga = this.advanceHandoff(saga, { ideaPromoted: true });
+    }
+    return handoffResult(saga, null);
+  }
+
+  private advanceHandoff(
+    saga: TopicHandoffSagaRecord,
+    update: Partial<TopicHandoffSagaRecord>,
+  ): TopicHandoffSagaRecord {
+    return this.store.updateHandoffSaga({
+      ...saga,
+      ...update,
+      updatedAt: this.now(),
+    });
+  }
+
+  private async withHandoffLock<T>(
+    key: string,
+    action: () => Promise<T>,
+  ): Promise<T> {
+    const previous = this.handoffLocks.get(key) ?? Promise.resolve();
+    let release = () => {};
+    const current = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    this.handoffLocks.set(key, current);
+    await previous;
+    try {
+      return await action();
+    } finally {
+      release();
+      if (this.handoffLocks.get(key) === current) {
+        this.handoffLocks.delete(key);
+      }
+    }
   }
 
   private finalizeRun(
@@ -434,6 +762,76 @@ export class TopicService {
       resultExtracted: true,
     });
   }
+}
+
+function isNewerOperation(
+  incoming: OperationRecord,
+  current: OperationRecord,
+): boolean {
+  return incoming.createdAt > current.createdAt;
+}
+
+function requireHandoffInput(value: unknown): TopicHandoffInput {
+  const input = asRecord(value);
+  const draft = asRecord(input?.['draft']);
+  const doc = asRecord(draft?.['doc']);
+  const format = draft?.['format'];
+  if (!input) throw new Error('topic handoff body is required');
+  if (!doc) throw new Error('draft.doc is required');
+  if (format !== 'narration') {
+    throw new Error('draft.format must be narration');
+  }
+  return {
+    ideaId: requireNonEmpty(
+      input['ideaId'] as string,
+      'ideaId',
+    ),
+    episodeSlug: requireNonEmpty(
+      input['episodeSlug'] as string,
+      'episodeSlug',
+    ),
+    title: requireNonEmpty(input['title'] as string, 'title'),
+    briefMarkdown: requireNonEmpty(
+      input['briefMarkdown'] as string,
+      'briefMarkdown',
+    ),
+    draft: {
+      format,
+      doc,
+    },
+  };
+}
+
+function handoffResult(
+  saga: TopicHandoffSagaRecord,
+  error: string | null,
+): TopicHandoffResult {
+  const steps = {
+    draftCreated: stepStatus(saga.draftCreated),
+    artifactWritten: stepStatus(saga.artifactWritten),
+    pipelineUpserted: stepStatus(saga.pipelineUpserted),
+    ideaPromoted: stepStatus(saga.ideaPromoted),
+  };
+  return {
+    draftId: saga.draftId,
+    complete: Object.values(steps).every((step) => step === 'completed'),
+    steps,
+    error,
+  };
+}
+
+function stepStatus(done: boolean): 'pending' | 'completed' {
+  return done ? 'completed' : 'pending';
+}
+
+function artifactConflictMessage(
+  label: string,
+  result: Extract<ArtifactWriteResult, { conflict: true }>,
+): string {
+  const parked = result.parked?.length
+    ? ` Parked: ${result.parked.join(', ')}.`
+    : '';
+  return `${label} conflicts with ${result.currentHash}.${parked}`;
 }
 
 function runSummary(record: TopicRunRecord): TopicRunSummary {
@@ -618,13 +1016,7 @@ function resultError(
   return `operation ended in ${state} without a topic summary`;
 }
 
-interface PipelineRow {
-  episodeSlug: string;
-  milestone: string;
-  ref: string;
-}
-
-async function readPipelineRows(path: string): Promise<PipelineRow[]> {
+async function readPipelineRows(path: string): Promise<PipelineParseResult> {
   let markdown: string;
   try {
     markdown = await readFile(path, 'utf8');
@@ -634,33 +1026,85 @@ async function readPipelineRows(path: string): Promise<PipelineRow[]> {
       && 'code' in error
       && error.code === 'ENOENT'
     ) {
-      return [];
+      return { rows: [], diagnostics: [] };
     }
     throw error;
   }
+  return parsePipelineMarkdown(markdown);
+}
 
+export function parsePipelineMarkdown(
+  markdown: string,
+): PipelineParseResult {
+  if (markdown.trim() === '') return { rows: [], diagnostics: [] };
   const lines = markdown.split(/\r?\n/);
-  const header = lines.findIndex((line, index) => {
-    const cells = parseTableRow(line)?.map((cell) => cell.toLowerCase());
-    return cells?.[0] === 'episode'
-      && cells[1] === 'milestone'
-      && cells[2] === 'ref'
-      && isTableSeparator(lines[index + 1] ?? '');
-  });
-  if (header === -1) return [];
+  const header = lines.findIndex((line) => parseTableRow(line) !== undefined);
+  const diagnosticLine = header === -1
+    ? lines.findIndex((line) => line.trim() !== '')
+    : header;
+  const headerCells = header === -1
+    ? undefined
+    : parseTableRow(lines[header]!)
+      ?.map((cell) => cell.toLowerCase());
+  if (
+    header === -1
+    || headerCells?.length !== 3
+    || headerCells[0] !== 'episode'
+    || headerCells[1] !== 'milestone'
+    || headerCells[2] !== 'ref'
+    || !isTableSeparator(lines[header + 1] ?? '')
+  ) {
+    return {
+      rows: [],
+      diagnostics: [{
+        code: 'bad-header',
+        line: diagnosticLine === -1 ? null : diagnosticLine + 1,
+        message:
+          'Expected pipeline header "| Episode | Milestone | Ref |".',
+      }],
+    };
+  }
 
-  const rows: PipelineRow[] = [];
-  for (const line of lines.slice(header + 2)) {
+  const rows: ParsedPipelineRow[] = [];
+  const diagnostics: PipelineDiagnostic[] = [];
+  const seenSlugs = new Set<string>();
+  for (let index = header + 2; index < lines.length; index += 1) {
+    const line = lines[index]!;
+    if (line.trim() === '') break;
     const cells = parseTableRow(line);
-    if (!cells || cells.length < 3) break;
-    if (cells[0] === '') continue;
+    if (!cells || cells.length !== 3) {
+      diagnostics.push({
+        code: 'bad-row',
+        line: index + 1,
+        message: 'Pipeline row must be a three-cell Markdown table row.',
+      });
+      continue;
+    }
+    if (cells.some((cell) => cell === '')) {
+      diagnostics.push({
+        code: 'empty-required-cell',
+        line: index + 1,
+        message: 'Pipeline row has an empty required cell.',
+      });
+      continue;
+    }
+    const episodeSlug = cells[0]!;
+    if (seenSlugs.has(episodeSlug)) {
+      diagnostics.push({
+        code: 'duplicate-slug',
+        line: index + 1,
+        message: `Duplicate pipeline episode slug "${episodeSlug}".`,
+      });
+      continue;
+    }
+    seenSlugs.add(episodeSlug);
     rows.push({
-      episodeSlug: cells[0]!,
+      episodeSlug,
       milestone: cells[1]!,
       ref: cells[2]!,
     });
   }
-  return rows;
+  return { rows, diagnostics };
 }
 
 function parseTableRow(line: string): string[] | undefined {
@@ -687,7 +1131,7 @@ function parseTableRow(line: string): string[] | undefined {
 function isTableSeparator(line: string): boolean {
   const cells = parseTableRow(line);
   return cells !== undefined
-    && cells.length >= 3
+    && cells.length === 3
     && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
 }
 

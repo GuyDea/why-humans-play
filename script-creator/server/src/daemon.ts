@@ -159,6 +159,16 @@ export function createDaemonContext(
       operationService,
       documentService,
       repoRoot,
+      artifactService: {
+        write: (
+          relPath: string,
+          content: string,
+          expectedState: Parameters<typeof writeArtifact>[3],
+        ) => writeArtifact(repoRoot, relPath, content, expectedState),
+        upsertPipelineRow: (
+          row: Parameters<typeof upsertPipelineRow>[1],
+        ) => upsertPipelineRow(repoRoot, row),
+      },
     });
     const app = buildApp({
       nonce,

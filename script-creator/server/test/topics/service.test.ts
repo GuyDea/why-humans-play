@@ -7,10 +7,14 @@ import type { OperationRecord } from '../../src/operations/service.js';
 import type { OperationName } from '../../src/operations/registry.js';
 import {
   extractTopicSummary,
+  parsePipelineMarkdown,
   TopicService,
   type TopicSummary,
 } from '../../src/topics/service.js';
-import { TopicStore } from '../../src/topics/store.js';
+import {
+  type GateCheckResult,
+  TopicStore,
+} from '../../src/topics/store.js';
 import type { CodexEvent, OperationState } from '../../src/types.js';
 
 const roots: string[] = [];
@@ -71,10 +75,10 @@ const VALID_SUMMARY: TopicSummary = {
     confidence: 'medium',
     decisive_risk_markdown: 'Audience transfer remains indirect.',
   }],
-  packages: [{
+  packages: Array.from({ length: 3 }, (_, index) => ({
     finalist: 'Sudoku',
-    direction: 'The perfect puzzle',
-    working_title: 'The Puzzle That Conquered the World',
+    direction: `The perfect puzzle ${index + 1}`,
+    working_title: `The Puzzle That Conquered the World ${index + 1}`,
     intended_viewer: 'People who enjoy everyday puzzles',
     familiar_markdown: 'The familiar grid.',
     surprise_markdown: 'Its rules are unusually portable.',
@@ -82,7 +86,7 @@ const VALID_SUMMARY: TopicSummary = {
     delivered_payoff_markdown: 'Why simple constraints travel.',
     survives_honestly: true,
     reason_markdown: 'The episode can deliver the promise.',
-  }],
+  })),
   winner: {
     decision_status: 'winner-selected',
     subject: 'Sudoku',
@@ -110,7 +114,7 @@ function progressEvent(): CodexEvent {
     type: 'item.completed',
     item: {
       type: 'agent_message',
-      text: 'WHP_PROGRESS/1 02-mode active :: Comparing evidence modes.',
+      text: 'WHP_PROGRESS/2 02-mode active :: Comparing evidence modes.',
     },
   };
   return { seq: 1, raw: JSON.stringify(parsed), parsed };
@@ -274,6 +278,50 @@ describe('extractTopicSummary', () => {
       ),
     });
   });
+
+  it('rejects anything other than three package directions per top finalist', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      packages: VALID_SUMMARY.packages.slice(0, 2),
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*exactly three package directions/i,
+      ),
+    });
+  });
+
+  it('rejects a winner that is not one of the top finalists', () => {
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      winner: {
+        ...VALID_SUMMARY.winner,
+        subject: 'Chess',
+      },
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:.*winner must be one of the finalists/i,
+      ),
+    });
+  });
+
+  it('rejects shortlist rows missing any score and grade pair', () => {
+    const scores = { ...VALID_SUMMARY.shortlist[0]!.scores };
+    delete (scores as Partial<typeof scores>).evidence;
+    expect(extractTopicSummary(report({
+      ...VALID_SUMMARY,
+      shortlist: [{
+        ...VALID_SUMMARY.shortlist[0]!,
+        scores,
+      }],
+    }))).toEqual({
+      summary: null,
+      summaryError: expect.stringMatching(
+        /^whp-summary block violates schema:/,
+      ),
+    });
+  });
 });
 
 describe('TopicService', () => {
@@ -297,6 +345,7 @@ describe('TopicService', () => {
     expect(service.updateIdea(created.id, {
       source: 'ideate',
       status: 'promoted',
+      latestCheckOpId: 'op-1',
       latestCheck: {
         verdict: 'pass',
         gates: [
@@ -358,6 +407,41 @@ describe('TopicService', () => {
     expect(service.listPackageTests(idea.id)).toEqual([saved]);
     expect(() => service.listPackageTests('missing'))
       .toThrow(/idea not found/i);
+  });
+
+  it('does not let an older gate operation overwrite a newer persisted check', () => {
+    const operationService = operationStub();
+    const originalGet = operationService.get.bind(operationService);
+    operationService.get = (id) => {
+      if (id === 'gate-old' || id === 'gate-new') {
+        return {
+          id,
+          operation: 'quick-gate-check',
+          state: 'completed',
+          createdAt: id === 'gate-old'
+            ? '2026-07-23T09:00:00.000Z'
+            : '2026-07-23T10:00:00.000Z',
+        } as OperationRecord;
+      }
+      return originalGet(id);
+    };
+    const { service } = makeService(operationService);
+    const idea = service.createIdea({
+      text: 'Why voluntary difficulty feels good',
+      source: 'inbox',
+    });
+    const newer = gateCheck('pass');
+    const older = gateCheck('fail');
+
+    expect(service.updateIdea(idea.id, {
+      latestCheck: newer,
+      latestCheckOpId: 'gate-new',
+    }).latestCheck).toEqual(newer);
+    expect(service.updateIdea(idea.id, {
+      latestCheck: older,
+      latestCheckOpId: 'gate-old',
+    }).latestCheck).toEqual(newer);
+    expect(service.getIdea(idea.id).latestCheck).toEqual(newer);
   });
 
   it('registers a run idempotently by op id and extracts its terminal result once', () => {
@@ -452,8 +536,9 @@ describe('TopicService', () => {
       '',
     ].join('\n'));
 
-    expect(await fixture.service.pipeline()).toEqual([
-      {
+    expect(await fixture.service.pipeline()).toEqual({
+      diagnostics: [],
+      rows: [{
         episodeSlug: 'published-episode',
         state: 'published',
         milestone: 'published',
@@ -479,8 +564,8 @@ describe('TopicService', () => {
         draftId: 'draft-1',
         title: 'Why Sudoku Spread',
         creativePhase: 'creative-approved',
-      },
-    ]);
+      }],
+    });
   });
 
   it('uses the newest draft consistently when an episode slug is duplicated', async () => {
@@ -522,14 +607,111 @@ describe('TopicService', () => {
     };
     const fixture = makeService(operationStub(), documentService);
 
-    expect(await fixture.service.pipeline()).toEqual([{
+    expect(await fixture.service.pipeline()).toEqual({
+      diagnostics: [],
+      rows: [{
+        episodeSlug: 'duplicate',
+        state: 'creative-approved',
+        milestone: null,
+        ref: null,
+        draftId: 'draft-newest',
+        title: 'Newest title',
+        creativePhase: 'creative-approved',
+      }],
+    });
+  });
+
+  it('distinguishes no pipeline from malformed pipeline rows', () => {
+    expect(parsePipelineMarkdown('')).toEqual({
+      rows: [],
+      diagnostics: [],
+    });
+    expect(parsePipelineMarkdown([
+      '# Pipeline',
+      '',
+      '| Episode | Stage | Ref |',
+      '| --- | --- | --- |',
+    ].join('\n'))).toEqual({
+      rows: [],
+      diagnostics: [{
+        code: 'bad-header',
+        line: 3,
+        message:
+          'Expected pipeline header "| Episode | Milestone | Ref |".',
+      }],
+    });
+
+    const parsed = parsePipelineMarkdown([
+      '| Episode | Milestone | Ref |',
+      '| --- | --- | --- |',
+      'not a table row',
+      '| missing-milestone | | whp-youtube/topics/missing.md |',
+      '| duplicate | candidate | whp-youtube/topics/one.md |',
+      '| duplicate | selected | whp-youtube/topics/two.md |',
+    ].join('\n'));
+
+    expect(parsed.rows).toEqual([{
       episodeSlug: 'duplicate',
-      state: 'creative-approved',
-      milestone: null,
-      ref: null,
-      draftId: 'draft-newest',
-      title: 'Newest title',
-      creativePhase: 'creative-approved',
+      milestone: 'candidate',
+      ref: 'whp-youtube/topics/one.md',
     }]);
+    expect(parsed.diagnostics).toEqual([
+      {
+        code: 'bad-row',
+        line: 3,
+        message: 'Pipeline row must be a three-cell Markdown table row.',
+      },
+      {
+        code: 'empty-required-cell',
+        line: 4,
+        message: 'Pipeline row has an empty required cell.',
+      },
+      {
+        code: 'duplicate-slug',
+        line: 6,
+        message: 'Duplicate pipeline episode slug "duplicate".',
+      },
+    ]);
+  });
+
+  it('loads a selected repository topic brief by its pipeline ref', async () => {
+    const fixture = makeService();
+    const topicDirectory = join(fixture.root, 'whp-youtube', 'topics');
+    mkdirSync(topicDirectory, { recursive: true });
+    writeFileSync(
+      join(topicDirectory, 'the-queue-game.md'),
+      '# The Queue Game\n\nRepository topic brief.',
+    );
+
+    await expect(
+      fixture.service.topicBrief(
+        'whp-youtube/topics/the-queue-game.md',
+      ),
+    ).resolves.toEqual({
+      ref: 'whp-youtube/topics/the-queue-game.md',
+      markdown: '# The Queue Game\n\nRepository topic brief.',
+    });
+    await expect(fixture.service.topicBrief('../DECISIONS.md'))
+      .rejects.toThrow(/invalid topic brief ref/i);
   });
 });
+
+function gateCheck(
+  verdict: 'pass' | 'fail',
+): GateCheckResult {
+  return {
+    verdict,
+    gates: ([
+      'game_play_centrality',
+      'human_revelation',
+      'recognized_payoff',
+      'evidence_path',
+      'production_reality',
+      'portfolio_fit',
+    ] as const).map((gate) => ({
+      gate,
+      verdict,
+      reasonMarkdown: `${gate} is ${verdict}.`,
+    })),
+  };
+}

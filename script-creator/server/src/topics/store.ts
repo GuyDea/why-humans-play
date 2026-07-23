@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { MIGRATION_V2 } from '../documents/store.js';
+import { migrateStateDatabase } from '../state-migrations.js';
 import type { OperationState } from '../types.js';
 
 export type IdeaSource = 'inbox' | 'ideate';
@@ -61,6 +61,19 @@ export interface TopicRunRecord {
   createdAt: string;
 }
 
+export interface TopicHandoffSagaRecord {
+  runId: string;
+  winnerSubject: string;
+  input: unknown;
+  draftId: string;
+  draftCreated: boolean;
+  artifactWritten: boolean;
+  pipelineUpserted: boolean;
+  ideaPromoted: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface IdeaRow {
   id: string;
   text: string;
@@ -68,6 +81,11 @@ interface IdeaRow {
   status: IdeaStatus;
   created_at: string;
   latest_check_json: string | null;
+}
+
+interface StoredGateCheck {
+  opId: string;
+  result: GateCheckResult | null;
 }
 
 interface TopicRunRow {
@@ -89,45 +107,18 @@ interface PackageTestRow {
   created_at: string;
 }
 
-const SCHEMA_VERSION = 4;
-const MIGRATION_V3 = `
-CREATE TABLE IF NOT EXISTS ideas (
-  id TEXT PRIMARY KEY,
-  text TEXT NOT NULL,
-  source TEXT NOT NULL CHECK (source IN ('inbox', 'ideate')),
-  status TEXT NOT NULL CHECK (status IN ('open', 'promoted', 'discarded')),
-  created_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS topic_runs (
-  id TEXT PRIMARY KEY,
-  op_id TEXT NOT NULL UNIQUE,
-  state TEXT NOT NULL,
-  report_md TEXT,
-  summary_json TEXT,
-  summary_error TEXT,
-  result_extracted INTEGER NOT NULL DEFAULT 0
-    CHECK (result_extracted IN (0, 1)),
-  created_at TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS topic_runs_created_at
-  ON topic_runs (created_at);
-
-CREATE TABLE IF NOT EXISTS package_tests (
-  id TEXT PRIMARY KEY,
-  idea_id TEXT NOT NULL REFERENCES ideas(id) ON DELETE CASCADE,
-  op_id TEXT NOT NULL,
-  directions_json TEXT NOT NULL,
-  created_at TEXT NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS package_tests_idea_created
-  ON package_tests (idea_id, created_at DESC);
-`;
-const MIGRATION_V4 = `
-ALTER TABLE ideas ADD COLUMN latest_check_json TEXT;
-`;
+interface TopicHandoffSagaRow {
+  run_id: string;
+  winner_subject: string;
+  input_json: string;
+  draft_id: string;
+  draft_created: 0 | 1;
+  artifact_written: 0 | 1;
+  pipeline_upserted: 0 | 1;
+  idea_promoted: 0 | 1;
+  created_at: string;
+  updated_at: string;
+}
 
 function ideaFrom(row: IdeaRow): IdeaRecord {
   return {
@@ -135,11 +126,24 @@ function ideaFrom(row: IdeaRow): IdeaRecord {
     text: row.text,
     source: row.source,
     status: row.status,
-    latestCheck: row.latest_check_json === null
-      ? null
-      : JSON.parse(row.latest_check_json) as GateCheckResult,
+    latestCheck: gateCheckFromJson(row.latest_check_json),
     createdAt: row.created_at,
   };
+}
+
+function gateCheckFromJson(value: string | null): GateCheckResult | null {
+  if (value === null) return null;
+  const parsed = JSON.parse(value) as GateCheckResult | StoredGateCheck;
+  return isStoredGateCheck(parsed) ? parsed.result : parsed;
+}
+
+function isStoredGateCheck(
+  value: GateCheckResult | StoredGateCheck,
+): value is StoredGateCheck {
+  return typeof value === 'object'
+    && value !== null
+    && 'opId' in value
+    && 'result' in value;
 }
 
 function runFrom(row: TopicRunRow): TopicRunRecord {
@@ -164,6 +168,23 @@ function packageTestFrom(row: PackageTestRow): PackageTestRecord {
     opId: row.op_id,
     directions: JSON.parse(row.directions_json) as PackageDirection[],
     createdAt: row.created_at,
+  };
+}
+
+function handoffSagaFrom(
+  row: TopicHandoffSagaRow,
+): TopicHandoffSagaRecord {
+  return {
+    runId: row.run_id,
+    winnerSubject: row.winner_subject,
+    input: JSON.parse(row.input_json) as unknown,
+    draftId: row.draft_id,
+    draftCreated: row.draft_created === 1,
+    artifactWritten: row.artifact_written === 1,
+    pipelineUpserted: row.pipeline_upserted === 1,
+    ideaPromoted: row.idea_promoted === 1,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -210,7 +231,25 @@ export class TopicStore {
     ).all().map(ideaFrom);
   }
 
-  updateIdea(record: IdeaRecord): IdeaRecord {
+  updateIdea(
+    record: IdeaRecord,
+    options: {
+      preserveLatestCheck?: boolean;
+      latestCheckOpId?: string;
+    } = {},
+  ): IdeaRecord {
+    const latestCheckJson = options.preserveLatestCheck
+      ? this.db.prepare<[string], { latest_check_json: string | null }>(
+        'SELECT latest_check_json FROM ideas WHERE id = ?',
+      ).get(record.id)?.latest_check_json ?? null
+      : options.latestCheckOpId === undefined
+        ? record.latestCheck === null
+          ? null
+          : JSON.stringify(record.latestCheck)
+        : JSON.stringify({
+          opId: options.latestCheckOpId,
+          result: record.latestCheck,
+        } satisfies StoredGateCheck);
     const result = this.db.prepare(
       `UPDATE ideas
        SET text = ?, source = ?, status = ?, latest_check_json = ?
@@ -219,15 +258,24 @@ export class TopicStore {
       record.text,
       record.source,
       record.status,
-      record.latestCheck === null
-        ? null
-        : JSON.stringify(record.latestCheck),
+      latestCheckJson,
       record.id,
     );
     if (result.changes === 0) {
       throw new Error(`idea not found: ${record.id}`);
     }
     return this.getIdea(record.id)!;
+  }
+
+  getIdeaLatestCheckOpId(id: string): string | null {
+    const row = this.db.prepare<[string], { latest_check_json: string | null }>(
+      'SELECT latest_check_json FROM ideas WHERE id = ?',
+    ).get(id);
+    if (!row?.latest_check_json) return null;
+    const parsed = JSON.parse(row.latest_check_json) as
+      | GateCheckResult
+      | StoredGateCheck;
+    return isStoredGateCheck(parsed) ? parsed.opId : null;
   }
 
   deleteIdea(id: string): boolean {
@@ -321,24 +369,77 @@ export class TopicStore {
     return this.getRun(record.id)!;
   }
 
+  createHandoffSaga(
+    record: TopicHandoffSagaRecord,
+  ): TopicHandoffSagaRecord {
+    this.db.prepare(
+      `INSERT INTO topic_handoff_sagas (
+        run_id, winner_subject, input_json, draft_id, draft_created,
+        artifact_written, pipeline_upserted, idea_promoted, created_at,
+        updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      record.runId,
+      record.winnerSubject,
+      JSON.stringify(record.input),
+      record.draftId,
+      record.draftCreated ? 1 : 0,
+      record.artifactWritten ? 1 : 0,
+      record.pipelineUpserted ? 1 : 0,
+      record.ideaPromoted ? 1 : 0,
+      record.createdAt,
+      record.updatedAt,
+    );
+    return this.getHandoffSaga(record.runId, record.winnerSubject)!;
+  }
+
+  getHandoffSaga(
+    runId: string,
+    winnerSubject: string,
+  ): TopicHandoffSagaRecord | null {
+    const row = this.db.prepare<
+      [string, string],
+      TopicHandoffSagaRow
+    >(
+      `SELECT * FROM topic_handoff_sagas
+       WHERE run_id = ? AND winner_subject = ?`,
+    ).get(runId, winnerSubject);
+    return row ? handoffSagaFrom(row) : null;
+  }
+
+  updateHandoffSaga(
+    record: TopicHandoffSagaRecord,
+  ): TopicHandoffSagaRecord {
+    const result = this.db.prepare(
+      `UPDATE topic_handoff_sagas
+       SET input_json = ?, draft_id = ?, draft_created = ?,
+         artifact_written = ?, pipeline_upserted = ?, idea_promoted = ?,
+         updated_at = ?
+       WHERE run_id = ? AND winner_subject = ?`,
+    ).run(
+      JSON.stringify(record.input),
+      record.draftId,
+      record.draftCreated ? 1 : 0,
+      record.artifactWritten ? 1 : 0,
+      record.pipelineUpserted ? 1 : 0,
+      record.ideaPromoted ? 1 : 0,
+      record.updatedAt,
+      record.runId,
+      record.winnerSubject,
+    );
+    if (result.changes === 0) {
+      throw new Error(
+        `topic handoff saga not found: ${record.runId}/${record.winnerSubject}`,
+      );
+    }
+    return this.getHandoffSaga(record.runId, record.winnerSubject)!;
+  }
+
   close(): void {
     this.db.close();
   }
 
   private migrate(): void {
-    const version = this.db.pragma('user_version', { simple: true }) as number;
-    if (version > SCHEMA_VERSION) {
-      throw new Error(
-        `state database schema version ${version} is newer than supported version ${SCHEMA_VERSION}`,
-      );
-    }
-    this.db.transaction(() => {
-      if (version < 2) this.db.exec(MIGRATION_V2);
-      this.db.exec(MIGRATION_V3);
-      if (version < 4) this.db.exec(MIGRATION_V4);
-      if (version < SCHEMA_VERSION) {
-        this.db.pragma(`user_version = ${SCHEMA_VERSION}`);
-      }
-    })();
+    migrateStateDatabase(this.db);
   }
 }

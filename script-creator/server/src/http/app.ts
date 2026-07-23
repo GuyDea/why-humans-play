@@ -64,7 +64,9 @@ export type TopicHttpService = Pick<
   | 'registerRun'
   | 'listRuns'
   | 'getRun'
+  | 'handoff'
   | 'pipeline'
+  | 'topicBrief'
 >;
 
 export interface ArtifactHttpService {
@@ -111,6 +113,10 @@ interface TopicRunParams {
   id: string;
 }
 
+interface TopicBriefQuery {
+  ref?: string;
+}
+
 interface CreateIdeaBody {
   text?: unknown;
   source?: unknown;
@@ -122,10 +128,19 @@ interface UpdateIdeaBody {
   source?: unknown;
   status?: unknown;
   latestCheck?: unknown;
+  latestCheckOpId?: unknown;
 }
 
 interface RegisterTopicRunBody {
   opId?: unknown;
+}
+
+interface TopicHandoffBody {
+  ideaId?: unknown;
+  episodeSlug?: unknown;
+  title?: unknown;
+  briefMarkdown?: unknown;
+  draft?: unknown;
 }
 
 interface CreatePackageTestBody {
@@ -482,6 +497,7 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           source?: 'inbox' | 'ideate';
           status?: 'open' | 'promoted' | 'discarded';
           latestCheck?: unknown;
+          latestCheckOpId?: string;
         } = {};
         if (hasOwn(request.body, 'text')) {
           update.text = requiredString(request.body.text, 'text');
@@ -494,6 +510,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         }
         if (hasOwn(request.body, 'latestCheck')) {
           update.latestCheck = request.body.latestCheck;
+        }
+        if (hasOwn(request.body, 'latestCheckOpId')) {
+          update.latestCheckOpId = requiredString(
+            request.body.latestCheckOpId,
+            'latestCheckOpId',
+          );
         }
         return topicService.updateIdea(request.params.id, update);
       } catch (error) {
@@ -579,6 +601,17 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  app.post<{ Params: TopicRunParams; Body: TopicHandoffBody }>(
+    '/api/topic-runs/:id/handoff',
+    async (request, reply) => {
+      try {
+        return await topicService.handoff(request.params.id, request.body);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
   app.get('/api/pipeline', async (_request, reply) => {
     try {
       return await topicService.pipeline();
@@ -586,6 +619,19 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       return sendTopicError(reply, error);
     }
   });
+
+  app.get<{ Querystring: TopicBriefQuery }>(
+    '/api/topic-brief',
+    async (request, reply) => {
+      try {
+        return await topicService.topicBrief(
+          requiredString(request.query.ref, 'ref'),
+        );
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
 
   app.post<{ Body: WriteArtifactBody }>(
     '/api/artifacts',
@@ -912,7 +958,7 @@ function sendTopicError(
   error: unknown,
 ) {
   const message = error instanceof Error ? error.message : 'topic request failed';
-  if (/^(?:idea|topic run|operation) not found:/i.test(message)) {
+  if (/^(?:idea|topic run|topic brief|operation) not found:/i.test(message)) {
     return reply.code(404).send({ error: message });
   }
   if (isTopicClientError(message)) {
@@ -925,14 +971,21 @@ function sendTopicError(
 
 function isTopicClientError(message: string): boolean {
   return [
-    /^(?:text|opId) is required$/,
+    /^(?:text|opId|latestCheckOpId) is required$/,
     /^directions must be an array$/,
     /^directions\[\d+\]/,
     /^source must be inbox or ideate$/,
     /^status must be open, promoted, or discarded$/,
     /^latestCheck\./,
+    /^latestCheck is required with latestCheckOpId$/,
     /^idea update is required$/,
     /^operation .+ is not a full-topic-run$/,
+    /^topic run has no selected winner to hand off$/,
+    /^topic handoff /,
+    /^(?:ideaId|episodeSlug|title|briefMarkdown) is required$/,
+    /^draft\.(?:doc is required|format must be narration)$/,
+    /^ref is required$/,
+    /^invalid topic brief ref:/,
   ].some((pattern) => pattern.test(message));
 }
 
@@ -969,5 +1022,7 @@ const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {
   registerRun: topicNotConfigured,
   listRuns: topicNotConfigured,
   getRun: topicNotConfigured,
+  handoff: topicNotConfigured,
   pipeline: topicNotConfigured,
+  topicBrief: topicNotConfigured,
 };

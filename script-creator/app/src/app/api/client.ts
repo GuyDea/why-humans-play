@@ -94,6 +94,7 @@ export interface UpdateIdeaInput {
   source?: IdeaSource;
   status?: IdeaStatus;
   latestCheck?: GateCheckResult | null;
+  latestCheckOpId?: string;
 }
 
 export interface PackageDirection {
@@ -198,6 +199,29 @@ export interface TopicRunSnapshot {
   reportMd?: string;
 }
 
+export interface TopicHandoffInput {
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
+  briefMarkdown: string;
+  draft: {
+    format: DraftFormat;
+    doc: DraftDocument;
+  };
+}
+
+export interface TopicHandoffResult {
+  draftId: string;
+  complete: boolean;
+  steps: {
+    draftCreated: 'pending' | 'completed';
+    artifactWritten: 'pending' | 'completed';
+    pipelineUpserted: 'pending' | 'completed';
+    ideaPromoted: 'pending' | 'completed';
+  };
+  error: string | null;
+}
+
 export type OperationResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -278,6 +302,26 @@ export interface PipelineItem {
   draftId: string | null;
   title: string | null;
   creativePhase: string | null;
+}
+
+export interface PipelineDiagnostic {
+  code:
+    | 'bad-header'
+    | 'bad-row'
+    | 'empty-required-cell'
+    | 'duplicate-slug';
+  line: number | null;
+  message: string;
+}
+
+export interface PipelineResponse {
+  rows: PipelineItem[];
+  diagnostics: PipelineDiagnostic[];
+}
+
+export interface TopicBrief {
+  ref: string;
+  markdown: string;
 }
 
 export interface ValidatorDiagnostic {
@@ -424,6 +468,19 @@ export class DaemonClient {
     return this.request(`/api/topic-runs/${encodeURIComponent(id)}`);
   }
 
+  async handoffTopicRun(
+    id: string,
+    input: TopicHandoffInput,
+  ): Promise<TopicHandoffResult> {
+    return this.request(
+      `/api/topic-runs/${encodeURIComponent(id)}/handoff`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
   async streamEvents(
     id: string,
     options: StreamEventsOptions,
@@ -524,8 +581,14 @@ export class DaemonClient {
     });
   }
 
-  async getPipeline(): Promise<PipelineItem[]> {
+  async getPipeline(): Promise<PipelineResponse> {
     return this.request('/api/pipeline');
+  }
+
+  async getTopicBrief(ref: string): Promise<TopicBrief> {
+    return this.request(
+      `/api/topic-brief?ref=${encodeURIComponent(ref)}`,
+    );
   }
 
   async validate(path: string): Promise<ValidatorResult> {

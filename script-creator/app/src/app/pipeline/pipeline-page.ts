@@ -7,7 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import type { PipelineItem } from '../api/client';
+import type { PipelineDiagnostic, PipelineItem } from '../api/client';
 import { STUDIO_SESSION } from '../studio-session';
 
 const PIPELINE_COLUMNS = [
@@ -61,6 +61,24 @@ const KNOWN_STATES = new Set<string>(
           {{ unmappedCount() === 1 ? 'episode has' : 'episodes have' }}
           an unrecognized pipeline state and cannot be placed.
         </p>
+      }
+
+      @if (diagnostics().length > 0) {
+        <section class="pipeline-alert diagnostic-alert" role="alert">
+          <div>
+            <strong>Pipeline file needs attention</strong>
+            <ul>
+              @for (diagnostic of diagnostics(); track diagnostic) {
+                <li data-testid="pipeline-diagnostic">
+                  @if (diagnostic.line !== null) {
+                    <b>Row {{ diagnostic.line }}:</b>
+                  }
+                  {{ diagnostic.message }}
+                </li>
+              }
+            </ul>
+          </div>
+        </section>
       }
 
       <section
@@ -164,6 +182,14 @@ const KNOWN_STATES = new Set<string>(
       font-size: .75rem;
     }
     .pipeline-alert div { display: grid; gap: .18rem; }
+    .diagnostic-alert { align-items: start; }
+    .diagnostic-alert ul {
+      display: grid;
+      gap: .3rem;
+      margin: .25rem 0 0;
+      padding-left: 1.15rem;
+    }
+    .diagnostic-alert b { font-weight: 850; }
     .pipeline-alert button {
       border: 1px solid var(--whp-line-strong);
       padding: .4rem .65rem;
@@ -288,6 +314,7 @@ export class PipelinePage implements OnInit {
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly items = signal<PipelineItem[]>([]);
+  protected readonly diagnostics = signal<PipelineDiagnostic[]>([]);
   protected readonly unmappedCount = computed(() =>
     this.items().filter((item) => !KNOWN_STATES.has(item.state)).length);
   private readonly session = inject(STUDIO_SESSION);
@@ -300,8 +327,11 @@ export class PipelinePage implements OnInit {
   protected async load(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
+    this.diagnostics.set([]);
     try {
-      this.items.set(await this.session.client.getPipeline());
+      const response = await this.session.client.getPipeline();
+      this.items.set(response.rows);
+      this.diagnostics.set(response.diagnostics);
     } catch (error) {
       this.error.set(error instanceof Error ? error.message : String(error));
     } finally {
@@ -320,7 +350,12 @@ export class PipelinePage implements OnInit {
       });
       return;
     }
-    void this.router.navigate(['/topics']);
+    void this.router.navigate(['/topics'], {
+      queryParams: {
+        topic: item.episodeSlug,
+        ref: item.ref,
+      },
+    });
   }
 
   protected displayTitle(item: PipelineItem): string {

@@ -172,7 +172,7 @@ Operations and their results:
 The full run's envelope also requests a **structured summary sidecar** (JSON next to the
 report): a serialization of the tables its output contract already mandates — candidate
 pool with gate outcomes, ranked shortlist with criterion scores and grades, packaging
-directions, winner block. Like `WHP_PROGRESS/1`, this transports what the skill already
+directions, winner block. Like `WHP_PROGRESS/2`, this transports what the skill already
 must produce and adds no editorial method; the candidate board (FR-1.5) and package
 tester history (FR-1.6) read it, while the Markdown report stays canonical for reading.
 
@@ -196,16 +196,19 @@ movement, operation change, or creative-status change, and always for gate-check
 runs, handoff, and Promote.
 
 **Live progress.** The full topic run's envelope requests
-`progress_transport: "WHP_PROGRESS/1"` — a serialization of the checklist the topic skill
-already mandates, adding no editorial method:
+`progress_transport: "WHP_PROGRESS/2"` — the versioned serialization owned by the topic
+skill at
+`.agents/skills/choosing-whp-video-topic/references/run-progress-transport.md`, adding no
+editorial method:
 
 ```text
-WHP_PROGRESS/1 <id> <pending|active|done|unknown> :: <skill-authored text>
-ids: 01-frame 02-mode 03-signals 04-pool 05-angles 06-gates
-     07-shallow 08-deep 09-shortlist 10-packages 11-winner 12-audit
+WHP_PROGRESS/2 <id> <pending|active|done|unknown> :: <skill-authored text>
 ```
 
-The app keys rows by ID and renders the skill's text verbatim. For every operation the
+The server suite parses both the skill checklist and its transport manifest and fails if
+the thirteen transport constants drift in count, order, ID, or wording. The app keys rows
+by ID, derives the checklist count from that contract, and renders the skill's text
+verbatim. For every operation the
 generic agent console renders `thread.started`, `turn.started`, agent messages,
 tool/command summaries, errors, and `turn.completed`, preserving unknown event types in
 the log and never exposing hidden reasoning.

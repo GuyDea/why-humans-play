@@ -7,6 +7,7 @@ import {
   type OnDestroy,
   type OnInit,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import type {
   GateCheckResult,
   IdeaRecord,
@@ -15,6 +16,7 @@ import type {
   OperationRecord,
   OperationResult,
   TopicGateName,
+  TopicBrief,
 } from '../api/client';
 import {
   operationFailurePresentation,
@@ -93,6 +95,31 @@ interface GuardrailPresentation {
           idea belongs on Why Humans Play.
         </p>
       </header>
+
+      @if (selectedTopicSlug()) {
+        <section
+          class="selected-topic-brief"
+          data-testid="selected-topic-brief"
+          aria-labelledby="selected-topic-heading"
+        >
+          <header>
+            <div>
+              <p class="stage-kicker">Repository selection</p>
+              <h2 id="selected-topic-heading">{{ selectedTopicSlug() }}</h2>
+            </div>
+            @if (selectedTopicRef()) {
+              <code>{{ selectedTopicRef() }}</code>
+            }
+          </header>
+          @if (selectedTopicLoading()) {
+            <p role="status">Loading repository topic brief…</p>
+          } @else if (selectedTopicError()) {
+            <p role="alert">{{ selectedTopicError() }}</p>
+          } @else if (selectedTopicBrief(); as brief) {
+            <pre>{{ brief.markdown }}</pre>
+          }
+        </section>
+      }
 
       @if (loadError()) {
         <article
@@ -578,6 +605,43 @@ interface GuardrailPresentation {
       display: grid;
     }
 
+    .selected-topic-brief {
+      display: grid;
+      gap: .8rem;
+      border: 1px solid var(--whp-line-strong);
+      border-left: 3px solid var(--whp-accent);
+      padding: 1rem;
+      background: var(--whp-surface);
+    }
+
+    .selected-topic-brief > header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .selected-topic-brief h2,
+    .selected-topic-brief p {
+      margin: 0;
+    }
+
+    .selected-topic-brief code {
+      color: var(--whp-muted);
+      font-size: .62rem;
+    }
+
+    .selected-topic-brief pre {
+      overflow-x: auto;
+      margin: 0;
+      border-top: 1px solid var(--whp-line);
+      padding-top: .8rem;
+      font-family: var(--whp-font-editor);
+      font-size: .92rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+    }
+
     .idea-card {
       display: grid;
       gap: 0.85rem;
@@ -853,6 +917,7 @@ interface GuardrailPresentation {
 export class TopicsPage implements OnInit, OnDestroy {
   private readonly session = inject(STUDIO_SESSION);
   private readonly client = this.session.client;
+  private readonly route = inject(ActivatedRoute);
   private readonly gateTracker = new OpTracker<
     GateCheckMeta,
     StudioConsoleEntry
@@ -862,11 +927,19 @@ export class TopicsPage implements OnInit, OnDestroy {
   );
   private detachGateRuntime: (() => void) | null = null;
   private calloutSequence = 0;
+  private readonly activeGateLifecycles = signal<ReadonlySet<string>>(
+    new Set(),
+  );
 
   protected readonly ideas = signal<readonly IdeaRecord[]>([]);
   protected readonly captureText = signal('');
   protected readonly captureBusy = signal(false);
   protected readonly loadError = signal<string | null>(null);
+  protected readonly selectedTopicSlug = signal<string | null>(null);
+  protected readonly selectedTopicRef = signal<string | null>(null);
+  protected readonly selectedTopicBrief = signal<TopicBrief | null>(null);
+  protected readonly selectedTopicLoading = signal(false);
+  protected readonly selectedTopicError = signal<string | null>(null);
   protected readonly selectedIdeaIds = signal<readonly string[]>([]);
   protected readonly ideateFreeText = signal('');
   protected readonly ideateBusy = signal(false);
@@ -895,6 +968,13 @@ export class TopicsPage implements OnInit, OnDestroy {
       },
     };
     this.detachGateRuntime = this.session.attachRuntime(runtime);
+    const selectedTopic = this.route.snapshot.queryParamMap.get('topic');
+    const selectedRef = this.route.snapshot.queryParamMap.get('ref');
+    this.selectedTopicSlug.set(selectedTopic?.trim() || null);
+    this.selectedTopicRef.set(selectedRef?.trim() || null);
+    if (selectedRef?.trim()) {
+      void this.loadSelectedTopicBrief(selectedRef.trim());
+    }
     void this.loadIdeas();
   }
 
@@ -905,6 +985,19 @@ export class TopicsPage implements OnInit, OnDestroy {
 
   protected setCaptureText(event: Event): void {
     this.captureText.set(textareaValue(event));
+  }
+
+  private async loadSelectedTopicBrief(ref: string): Promise<void> {
+    this.selectedTopicLoading.set(true);
+    this.selectedTopicError.set(null);
+    try {
+      this.selectedTopicBrief.set(await this.client.getTopicBrief(ref));
+    } catch (error) {
+      this.selectedTopicBrief.set(null);
+      this.selectedTopicError.set(errorMessage(error));
+    } finally {
+      this.selectedTopicLoading.set(false);
+    }
   }
 
   protected setIdeateFreeText(event: Event): void {
@@ -968,16 +1061,30 @@ export class TopicsPage implements OnInit, OnDestroy {
       ...operations,
       [ideaId]: tracked,
     }));
-    void tracked.completion.then(() => this.settleGateCheck(ideaId, tracked));
+    this.activeGateLifecycles.update((active) =>
+      new Set([...active, ideaId]));
+    void tracked.completion
+      .then(() => this.settleGateCheck(ideaId, tracked))
+      .finally(() => {
+        this.activeGateLifecycles.update((active) => {
+          const next = new Set(active);
+          next.delete(ideaId);
+          return next;
+        });
+      });
   }
 
   protected gatePending(ideaId: string): boolean {
-    const phase = this.gateOperations()[ideaId]?.phase();
-    return phase === 'submitting' || phase === 'streaming';
+    return this.activeGateLifecycles().has(ideaId);
   }
 
   protected gatePhase(ideaId: string): string {
-    return this.gateOperations()[ideaId]?.phase() ?? 'submitting';
+    const phase = this.gateOperations()[ideaId]?.phase() ?? 'submitting';
+    return this.activeGateLifecycles().has(ideaId)
+        && phase !== 'submitting'
+        && phase !== 'streaming'
+      ? 'saving'
+      : phase;
   }
 
   protected gateLabel(gate: TopicGateName): string {
@@ -1115,8 +1222,13 @@ export class TopicsPage implements OnInit, OnDestroy {
     }));
 
     try {
+      const opId = tracked.id();
+      if (opId === null) {
+        throw new Error('Gate-check completed without an operation id.');
+      }
       const updated = await this.client.updateIdea(ideaId, {
         latestCheck: check,
+        latestCheckOpId: opId,
       });
       this.ideas.update((ideas) => ideas.map((idea) =>
         idea.id === ideaId ? updated : idea));

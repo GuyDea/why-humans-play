@@ -54,7 +54,7 @@ describe('runner', () => {
         continue;
       }
       for (const line of message.text.split(/\r?\n/)) {
-        const match = /^WHP_PROGRESS\/1 (\S+) (\S+) :: /.exec(line);
+        const match = /^WHP_PROGRESS\/2 (\S+) (\S+) :: /.exec(line);
         if (!match) continue;
         const [, id, status] = match;
         histories.set(id!, [...(histories.get(id!) ?? []), status!]);
@@ -70,7 +70,11 @@ describe('runner', () => {
     expect(extracted.summary).not.toBeNull();
     expect(extracted.summary!.candidates[0]!.gates).toHaveLength(6);
     expect(Object.keys(extracted.summary!.shortlist[0]!.scores)).toHaveLength(7);
-    expect(extracted.summary!.packages).toHaveLength(3);
+    expect(extracted.summary!.packages).toHaveLength(9);
+    expect(new Set(extracted.summary!.packages.map((row) => row.finalist)))
+      .toEqual(new Set(
+        extracted.summary!.shortlist.slice(0, 3).map((row) => row.subject),
+      ));
     expect(extracted.summary!.winner).toMatchObject({
       decision_status: 'winner-selected',
       subject: expect.any(String),

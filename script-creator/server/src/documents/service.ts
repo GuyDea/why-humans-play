@@ -59,6 +59,11 @@ export class DocumentService {
   }
 
   createDraft(input: CreateDraftInput): DraftRecord {
+    return this.createDraftWithId(this.idFactory(), input);
+  }
+
+  createDraftWithId(id: string, input: CreateDraftInput): DraftRecord {
+    requireNonEmpty(id, 'draftId');
     requireNonEmpty(input.episodeSlug, 'episodeSlug');
     requireNonEmpty(input.title, 'title');
     const format = documentFormat(input.doc);
@@ -68,8 +73,21 @@ export class DocumentService {
       );
     }
 
+    const existing = this.store.getDraft(id);
+    if (existing) {
+      if (
+        existing.episodeSlug === input.episodeSlug
+        && existing.title === input.title
+        && existing.format === format
+        && JSON.stringify(existing.doc) === JSON.stringify(input.doc)
+      ) {
+        return existing;
+      }
+      throw new Error(`draft idempotency conflict: ${id}`);
+    }
+
     return this.store.createDraft({
-      id: this.idFactory(),
+      id,
       episodeSlug: input.episodeSlug,
       title: input.title,
       format,

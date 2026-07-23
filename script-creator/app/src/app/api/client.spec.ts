@@ -35,15 +35,18 @@ afterEach(() => {
 
 describe('DaemonClient', () => {
   it('loads the merged pipeline with the nonce', async () => {
-    const response = [{
-      episodeSlug: 'voluntary-obstacles',
-      state: 'architecture',
-      milestone: 'selected',
-      ref: 'whp-youtube/topics/voluntary-obstacles.md',
-      draftId: 'draft-1',
-      title: 'Why We Make Games Harder',
-      creativePhase: 'architecture',
-    }];
+    const response = {
+      diagnostics: [],
+      rows: [{
+        episodeSlug: 'voluntary-obstacles',
+        state: 'architecture',
+        milestone: 'selected',
+        ref: 'whp-youtube/topics/voluntary-obstacles.md',
+        draftId: 'draft-1',
+        title: 'Why We Make Games Harder',
+        creativePhase: 'architecture',
+      }],
+    };
     const fetchMock = vi.fn(async () => jsonResponse(response));
     vi.stubGlobal('fetch', fetchMock);
     const client = new DaemonClient(BASE_URL, () => NONCE);
@@ -64,6 +67,26 @@ describe('DaemonClient', () => {
     );
     expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('x-sc-nonce'))
       .toBe(NONCE);
+  });
+
+  it('loads a repository topic brief by its encoded ref', async () => {
+    const response = {
+      ref: 'whp-youtube/topics/the-queue-game.md',
+      markdown: '# The Queue Game\n\nRepository topic brief.',
+    };
+    const fetchMock = vi.fn(async () => jsonResponse(response));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await expect(client.getTopicBrief(response.ref)).resolves.toEqual(response);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/api/topic-brief?ref=${
+        encodeURIComponent(response.ref)
+      }`,
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
   });
 
   it('lists durable operation summaries with the nonce', async () => {
@@ -299,7 +322,7 @@ describe('DaemonClient', () => {
     ]);
   });
 
-  it('maps package-test history and accepted-handoff CAS calls', async () => {
+  it('maps package-test history and the single topic-handoff command', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({}));
     vi.stubGlobal('fetch', fetchMock);
     const client = new DaemonClient(BASE_URL, () => NONCE);
@@ -319,10 +342,15 @@ describe('DaemonClient', () => {
       opId: 'op-package-1',
       directions: [direction],
     });
-    await client.upsertPipelineRow({
+    await client.handoffTopicRun('run/one', {
+      ideaId: 'idea/one',
       episodeSlug: 'voluntary-obstacles',
-      milestone: 'selected',
-      ref: 'whp-youtube/topics/voluntary-obstacles.md',
+      title: 'Voluntary Obstacles',
+      briefMarkdown: '# Selected topic brief',
+      draft: {
+        format: 'narration',
+        doc: { type: 'doc' },
+      },
     });
 
     expect(fetchMock.mock.calls.map(([input, init]) => ({
@@ -347,13 +375,18 @@ describe('DaemonClient', () => {
         }),
       },
       {
-        url: `${BASE_URL}/api/pipeline`,
+        url: `${BASE_URL}/api/topic-runs/run%2Fone/handoff`,
         method: 'POST',
         nonce: NONCE,
         body: JSON.stringify({
+          ideaId: 'idea/one',
           episodeSlug: 'voluntary-obstacles',
-          milestone: 'selected',
-          ref: 'whp-youtube/topics/voluntary-obstacles.md',
+          title: 'Voluntary Obstacles',
+          briefMarkdown: '# Selected topic brief',
+          draft: {
+            format: 'narration',
+            doc: { type: 'doc' },
+          },
         }),
       },
     ]);

@@ -9,13 +9,12 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import type {
-  ArtifactWriteResult,
-  DraftRecord,
   IdeaRecord,
   OperationState,
   PackageDirection,
   PackageTestRecord,
   TopicGateName,
+  TopicHandoffResult,
   TopicRunSnapshot,
   TopicRunSummary,
   TopicScoreName,
@@ -209,7 +208,9 @@ interface OperationOutcome {
           <header>
             <div>
               <p class="console-kicker">Live protocol</p>
-              <h3 id="checklist-heading">Twelve-step checklist</h3>
+              <h3 id="checklist-heading">
+                {{ current.progress.length }}-step checklist
+              </h3>
             </div>
             <span class="progress-count">
               {{ completedCount() }} / {{ current.progress.length }}
@@ -618,6 +619,26 @@ interface OperationOutcome {
                     {{ handoffBusy() ? 'Confirming…' : 'Confirm handoff' }}
                   </button>
                 </div>
+                @if (handoffResult(); as result) {
+                  <ol class="handoff-steps" data-testid="handoff-steps">
+                    <li>
+                      <span>Draft created</span>
+                      <strong>{{ result.steps.draftCreated }}</strong>
+                    </li>
+                    <li>
+                      <span>Artifact written</span>
+                      <strong>{{ result.steps.artifactWritten }}</strong>
+                    </li>
+                    <li>
+                      <span>Pipeline upserted</span>
+                      <strong>{{ result.steps.pipelineUpserted }}</strong>
+                    </li>
+                    <li>
+                      <span>Idea promoted</span>
+                      <strong>{{ result.steps.ideaPromoted }}</strong>
+                    </li>
+                  </ol>
+                }
               </section>
             }
           </section>
@@ -1163,9 +1184,6 @@ export class FullRunPanel implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private pollGeneration = 0;
-  private handoffDraft: DraftRecord | null = null;
-  private handoffArtifactWritten = false;
-  private handoffPipelineWritten = false;
 
   protected readonly ideaText = signal('');
   protected readonly constraints = signal('');
@@ -1187,6 +1205,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
   protected readonly handoffBusy = signal(false);
   protected readonly handoffError = signal<string | null>(null);
   protected readonly handoffPreview = signal<HandoffPreview | null>(null);
+  protected readonly handoffResult = signal<TopicHandoffResult | null>(null);
   protected readonly criteria = SCORE_CRITERIA;
   protected readonly completedCount = computed(
     () => this.snapshot()?.progress.filter((item) => item.status === 'done').length
@@ -1402,9 +1421,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
     this.handoffBusy.set(true);
     this.handoffError.set(null);
     this.handoffPreview.set(null);
-    this.handoffDraft = null;
-    this.handoffArtifactWritten = false;
-    this.handoffPipelineWritten = false;
+    this.handoffResult.set(null);
 
     try {
       const idea = await this.resolveIdea(
@@ -1445,14 +1462,19 @@ export class FullRunPanel implements OnInit, OnDestroy {
   private async acceptHandoff(preview: HandoffPreview): Promise<void> {
     this.handoffBusy.set(true);
     this.handoffError.set(null);
-    const artifactPath = `whp-youtube/topics/${preview.slug}.md`;
 
     try {
-      if (this.handoffDraft === null) {
-        const blank = createBlankNarrationDocument('beat_topic_handoff');
-        this.handoffDraft = await this.client.create({
-          episodeSlug: preview.slug,
-          title: preview.title,
+      const runId = this.selectedRunId();
+      if (runId === null) {
+        throw new Error('Select a durable topic run before confirming handoff.');
+      }
+      const blank = createBlankNarrationDocument('beat_topic_handoff');
+      const result = await this.client.handoffTopicRun(runId, {
+        ideaId: preview.idea.id,
+        episodeSlug: preview.slug,
+        title: preview.title,
+        briefMarkdown: preview.markdown,
+        draft: {
           format: 'narration',
           doc: {
             ...blank,
@@ -1465,37 +1487,20 @@ export class FullRunPanel implements OnInit, OnDestroy {
               directionApproved: false,
             },
           },
-        });
-      }
-
-      if (!this.handoffArtifactWritten) {
-        const result = await this.client.writeArtifact(
-          artifactPath,
-          preview.markdown,
-          { expectNew: true },
-        );
-        assertNoArtifactConflict(result, 'topic brief');
-        this.handoffArtifactWritten = true;
-      }
-
-      if (!this.handoffPipelineWritten) {
-        const result = await this.client.upsertPipelineRow({
-          episodeSlug: preview.slug,
-          milestone: 'selected',
-          ref: artifactPath,
-        });
-        assertNoArtifactConflict(result, 'pipeline');
-        this.handoffPipelineWritten = true;
-      }
-
-      await this.client.updateIdea(preview.idea.id, {
-        status: 'promoted',
+        },
       });
+      this.handoffResult.set(result);
+      if (!result.complete) {
+        this.handoffError.set(
+          result.error ?? 'The handoff is incomplete and can be retried safely.',
+        );
+        return;
+      }
       await this.router.navigate(['/'], {
-        queryParams: { draft: this.handoffDraft.id },
+        queryParams: { draft: result.draftId },
       });
     } catch (error) {
-      this.handoffError.set(handoffErrorMessage(error));
+      this.handoffError.set(errorMessage(error));
     } finally {
       this.handoffBusy.set(false);
     }
@@ -1553,9 +1558,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
     this.handoffBusy.set(false);
     this.handoffError.set(null);
     this.handoffPreview.set(null);
-    this.handoffDraft = null;
-    this.handoffArtifactWritten = false;
-    this.handoffPipelineWritten = false;
+    this.handoffResult.set(null);
   }
 
   private async loadRun(run: TopicRunSummary): Promise<void> {
@@ -1810,39 +1813,6 @@ function slugify(value: string): string {
     .replace(/[^a-z0-9]+/gu, '-')
     .replace(/^-+|-+$/gu, '')
     || 'selected-topic';
-}
-
-function assertNoArtifactConflict(
-  result: ArtifactWriteResult,
-  label: string,
-): void {
-  if (!result.conflict) return;
-  const parked = result.parked?.length
-    ? ` Both versions were parked at: ${result.parked.join(', ')}.`
-    : '';
-  throw new Error(
-    `${capitalize(label)} CAS conflict; current repository hash is ${result.currentHash}.${parked}`,
-  );
-}
-
-function handoffErrorMessage(error: unknown): string {
-  if (error && typeof error === 'object') {
-    const body = record((error as Record<string, unknown>)['body']);
-    const currentHash = body?.['currentHash'];
-    if (typeof currentHash === 'string') {
-      const parked = Array.isArray(body?.['parked'])
-        ? body['parked'].filter(
-            (path): path is string => typeof path === 'string',
-          )
-        : [];
-      return `CAS conflict; current repository hash is ${currentHash}.${
-        parked.length > 0
-          ? ` Both versions were preserved at: ${parked.join(', ')}.`
-          : ''
-      }`;
-    }
-  }
-  return errorMessage(error);
 }
 
 function record(value: unknown): Record<string, unknown> | null {

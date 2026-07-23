@@ -61,7 +61,22 @@ const PIPELINE = [
 ];
 
 class PipelineClientStub {
-  readonly getPipeline = vi.fn(async () => PIPELINE);
+  readonly getPipeline = vi.fn(async () => ({
+    rows: PIPELINE,
+    diagnostics: this.diagnostics,
+  }));
+  readonly getTopicBrief = vi.fn(async (ref: string) => ({
+    ref,
+    markdown: '# The Queue Game\n\nRepository topic brief.',
+  }));
+  readonly listIdeas = vi.fn(async () => []);
+  readonly listTopicRuns = vi.fn(async () => []);
+
+  constructor(readonly diagnostics: Array<{
+    code: 'bad-header' | 'bad-row' | 'empty-required-cell' | 'duplicate-slug';
+    line: number | null;
+    message: string;
+  }> = []) {}
 }
 
 interface MountedPipeline {
@@ -109,7 +124,7 @@ describe('routed Pipeline composition', () => {
     ).toHaveLength(3);
   });
 
-  it('opens draft-backed cards in Studio and repo-only cards in Topics', async () => {
+  it('opens draft-backed cards in Studio', async () => {
     const pipeline = await mountPipeline();
     const navigate = vi.spyOn(pipeline.router, 'navigate')
       .mockResolvedValue(true);
@@ -121,21 +136,54 @@ describe('routed Pipeline composition', () => {
         queryParams: { draft: 'draft-architecture-1' },
       });
     });
+  });
 
-    navigate.mockClear();
+  it('opens repo-only cards at the selected Topics brief', async () => {
+    const pipeline = await mountPipeline();
     findCard(pipeline.root, 'the-queue-game').click();
+
     await vi.waitFor(() => {
       pipeline.tick();
-      expect(navigate).toHaveBeenCalledWith(['/topics']);
+      expect(pipeline.root.querySelector('app-topics-page')).not.toBeNull();
+      const brief = pipeline.root.querySelector<HTMLElement>(
+        '[data-testid="selected-topic-brief"]',
+      );
+      expect(brief?.textContent).toContain('The Queue Game');
+      expect(brief?.textContent).toContain('Repository topic brief.');
+      expect(pipeline.client.getTopicBrief).toHaveBeenCalledWith(
+        'whp-youtube/topics/the-queue-game.md',
+      );
+      expect(pipeline.router.url).toContain('topic=the-queue-game');
+      expect(pipeline.router.url).toContain(
+        'ref=whp-youtube%2Ftopics%2Fthe-queue-game.md',
+      );
     });
+  });
+
+  it('renders malformed pipeline diagnostics with their row numbers', async () => {
+    const pipeline = await mountPipeline([{
+      code: 'duplicate-slug',
+      line: 8,
+      message: 'Duplicate pipeline episode slug "the-queue-game".',
+    }]);
+
+    const diagnostic = pipeline.root.querySelector<HTMLElement>(
+      '[data-testid="pipeline-diagnostic"]',
+    );
+    expect(diagnostic?.textContent).toContain('Row 8');
+    expect(diagnostic?.textContent).toContain(
+      'Duplicate pipeline episode slug "the-queue-game".',
+    );
   });
 });
 
-async function mountPipeline(): Promise<MountedPipeline> {
+async function mountPipeline(
+  diagnostics: ConstructorParameters<typeof PipelineClientStub>[0] = [],
+): Promise<MountedPipeline> {
   await ɵresolveComponentResources(async (url) =>
     url.endsWith('app.html') ? appTemplate : appStyles);
   globalThis.history.replaceState(null, '', '/pipeline');
-  const client = new PipelineClientStub();
+  const client = new PipelineClientStub(diagnostics);
   const session = new StudioSession(client as unknown as DaemonClient);
   const application = await createApplication({
     providers: [
