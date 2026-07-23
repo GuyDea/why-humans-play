@@ -101,8 +101,9 @@ app 24 files / 155 tests, typechecks and `ng build` clean on the host:
   Duplicate … slug", "Row 7: … empty required cell") while valid rows stayed
   visible; ENOENT still reads as "no pipeline".
 - **Central migrations:** one shared registry owns the state-database version
-  sequence (documents v1–v2, topics v3, gate-check v4, architecture reserved v5)
-  with upgrade tests from v2/v3/v4 shapes.
+  sequence (documents v1–v2, topics v3, gate-check v4; fix wave 2 later made it
+  a once-per-version chain with the handoff saga at v5 and architecture
+  reserved at v6) with upgrade tests from v2/v3/v4 shapes.
 
 ## Verdict
 
