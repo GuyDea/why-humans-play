@@ -26,6 +26,26 @@ function sha256(content: string): string {
   return createHash('sha256').update(content).digest('hex');
 }
 
+function expectParkedVersions(
+  result: unknown,
+  target: string,
+  expected: Partial<Record<'conflict' | 'displaced', string>>,
+): string[] {
+  const parked = (result as { parked?: string[] }).parked;
+  expect(parked).toBeDefined();
+  expect(parked).toHaveLength(Object.keys(expected).length);
+
+  for (const [kind, content] of Object.entries(expected)) {
+    const path = parked?.find((candidate) =>
+      candidate.startsWith(`${target}.sc-${kind}-`)
+    );
+    expect(path, `missing parked ${kind} version`).toBeDefined();
+    expect(readFileSync(path!, 'utf8')).toBe(content);
+  }
+
+  return parked!;
+}
+
 describe('writeArtifact', () => {
   it.each([
     'whp-youtube/topics/example.md',
@@ -194,57 +214,7 @@ describe('writeArtifact', () => {
     expect(readFileSync(target, 'utf8')).toBe('external file');
   });
 
-  it('preserves an external mutation at the final replacement boundary', async () => {
-    const repoRoot = makeRepo();
-    const relPath = 'whp-youtube/topics/example.md';
-    const target = join(repoRoot, relPath);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, 'expected content');
-
-    const result = await writeArtifact(
-      repoRoot,
-      relPath,
-      'our replacement',
-      { expectedHash: sha256('expected content') },
-      {
-        afterSnapshotCreated: () => {
-          writeFileSync(target, 'external mutation');
-        },
-      },
-    );
-
-    expect(result).toEqual({
-      conflict: true,
-      currentHash: sha256('external mutation'),
-    });
-    expect(readFileSync(target, 'utf8')).toBe('external mutation');
-    expect(readdirSync(dirname(target))).toEqual(['example.md']);
-  });
-
-  it('preserves an external deletion at the final replacement boundary', async () => {
-    const repoRoot = makeRepo();
-    const relPath = 'whp-youtube/topics/example.md';
-    const target = join(repoRoot, relPath);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, 'expected content');
-
-    const result = await writeArtifact(
-      repoRoot,
-      relPath,
-      'our replacement',
-      { expectedHash: sha256('expected content') },
-      {
-        afterSnapshotCreated: () => {
-          rmSync(target);
-        },
-      },
-    );
-
-    expect(result).toEqual({ conflict: true, currentHash: 'absent' });
-    expect(readdirSync(dirname(target))).toEqual([]);
-  });
-
-  it('restores the snapshot when an external rename displaces our replacement', async () => {
+  it('preserves a pre-exchange replacement and parks both losing versions', async () => {
     const repoRoot = makeRepo();
     const relPath = 'whp-youtube/topics/example.md';
     const target = join(repoRoot, relPath);
@@ -258,7 +228,113 @@ describe('writeArtifact', () => {
       'our replacement',
       { expectedHash: sha256('expected content') },
       {
-        afterRename: () => {
+        beforeExchange: () => {
+          writeFileSync(external, 'external replacement');
+          renameSync(external, target);
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external replacement'),
+      parked: expect.any(Array),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('external replacement');
+    const parked = expectParkedVersions(result, target, {
+      conflict: 'our replacement',
+      displaced: 'expected content',
+    });
+    expect(readdirSync(dirname(target)).sort()).toEqual([
+      'example.md',
+      ...parked.map((path) => path.slice(dirname(target).length + 1)),
+    ].sort());
+  });
+
+  it('preserves a pre-exchange deletion and parks both losing versions', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        beforeExchange: () => {
+          rmSync(target);
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: 'absent',
+      parked: expect.any(Array),
+    });
+    expect(() => statSync(target)).toThrow();
+    const parked = expectParkedVersions(result, target, {
+      conflict: 'our replacement',
+      displaced: 'expected content',
+    });
+    expect(readdirSync(dirname(target)).sort()).toEqual(
+      parked.map((path) => path.slice(dirname(target).length + 1)).sort(),
+    );
+  });
+
+  it('preserves a post-exchange in-place mutation and parks both losing versions', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        afterExchange: () => {
+          writeFileSync(target, 'external mutation');
+        },
+      },
+    );
+
+    expect(result).toEqual({
+      conflict: true,
+      currentHash: sha256('external mutation'),
+      parked: expect.any(Array),
+    });
+    expect(readFileSync(target, 'utf8')).toBe('external mutation');
+    const parked = expectParkedVersions(result, target, {
+      conflict: 'our replacement',
+      displaced: 'expected content',
+    });
+    expect(readdirSync(dirname(target)).sort()).toEqual([
+      'example.md',
+      ...parked.map((path) => path.slice(dirname(target).length + 1)),
+    ].sort());
+  });
+
+  it('preserves a post-exchange rename-over and parks both losing versions', async () => {
+    const repoRoot = makeRepo();
+    const relPath = 'whp-youtube/topics/example.md';
+    const target = join(repoRoot, relPath);
+    const external = join(dirname(target), 'external.md');
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'expected content');
+
+    const result = await writeArtifact(
+      repoRoot,
+      relPath,
+      'our replacement',
+      { expectedHash: sha256('expected content') },
+      {
+        afterExchange: () => {
           writeFileSync(external, 'external displacement');
           renameSync(external, target);
         },
@@ -268,9 +344,17 @@ describe('writeArtifact', () => {
     expect(result).toEqual({
       conflict: true,
       currentHash: sha256('external displacement'),
+      parked: expect.any(Array),
     });
-    expect(readFileSync(target, 'utf8')).toBe('expected content');
-    expect(readdirSync(dirname(target))).toEqual(['example.md']);
+    expect(readFileSync(target, 'utf8')).toBe('external displacement');
+    const parked = expectParkedVersions(result, target, {
+      conflict: 'our replacement',
+      displaced: 'expected content',
+    });
+    expect(readdirSync(dirname(target)).sort()).toEqual([
+      'example.md',
+      ...parked.map((path) => path.slice(dirname(target).length + 1)),
+    ].sort());
   });
 });
 
@@ -373,7 +457,7 @@ describe('upsertPipelineRow', () => {
         ref: 'whp-youtube/topics/why-we-play.md',
       },
       {
-        afterSnapshotCreated: () => {
+        beforeExchange: () => {
           writeFileSync(pipelinePath, 'external pipeline edit\n');
         },
       },
@@ -382,8 +466,21 @@ describe('upsertPipelineRow', () => {
     expect(result).toEqual({
       conflict: true,
       currentHash: sha256('external pipeline edit\n'),
+      parked: expect.any(Array),
     });
     expect(readFileSync(pipelinePath, 'utf8')).toBe('external pipeline edit\n');
-    expect(readdirSync(dirname(pipelinePath))).toEqual(['PIPELINE.md']);
+    const parked = expectParkedVersions(result, pipelinePath, {
+      conflict: [
+        '| Episode | Milestone | Ref |',
+        '| --- | --- | --- |',
+        '| existing | draft | whp-youtube/drafts/existing.md |',
+        '| why-we-play | topic-approved | whp-youtube/topics/why-we-play.md |',
+        '',
+      ].join('\n'),
+    });
+    expect(readdirSync(dirname(pipelinePath)).sort()).toEqual([
+      'PIPELINE.md',
+      ...parked.map((path) => path.slice(dirname(pipelinePath).length + 1)),
+    ].sort());
   });
 });

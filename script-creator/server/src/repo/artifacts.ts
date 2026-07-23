@@ -39,13 +39,17 @@ export type ArtifactExpectedState =
   | WriteNewArtifactOptions;
 
 export interface ArtifactWriteHooks {
-  afterSnapshotCreated?(): void;
-  afterRename?(): void;
+  beforeExchange?(): void;
+  afterExchange?(): void;
 }
 
 export type ArtifactWriteResult =
   | { conflict: false; hash: string }
-  | { conflict: true; currentHash: string | 'absent' };
+  | {
+    conflict: true;
+    currentHash: string | 'absent';
+    parked?: string[];
+  };
 
 export interface PipelineRow {
   episodeSlug: string;
@@ -218,12 +222,71 @@ function sameIdentity(left: FileIdentity, right: FileIdentity): boolean {
     && left.hash === right.hash;
 }
 
+function sameIdentityStat(
+  identity: FileIdentity,
+  stat: ReturnType<typeof lstatSync>,
+): boolean {
+  const candidate = stat as unknown as {
+    dev: bigint;
+    ino: bigint;
+    size: bigint;
+    mtimeNs: bigint;
+    ctimeNs: bigint;
+  };
+  return identity.dev === candidate.dev
+    && identity.ino === candidate.ino
+    && identity.size === candidate.size
+    && identity.mtimeNs === candidate.mtimeNs
+    && identity.ctimeNs === candidate.ctimeNs;
+}
+
 function stateHash(read: IdentityRead): string | 'absent' {
   return read.identity === 'absent' ? 'absent' : read.identity.hash;
 }
 
 function contentHash(content: string): string {
   return createHash('sha256').update(content).digest('hex');
+}
+
+function createParkedPath(
+  target: string,
+  kind: 'conflict' | 'displaced',
+  create: (path: string) => void,
+): string {
+  let timestamp = Date.now();
+  for (;;) {
+    const path = `${target}.sc-${kind}-${timestamp}`;
+    try {
+      create(path);
+      return path;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error;
+      timestamp += 1;
+    }
+  }
+}
+
+function parkContent(
+  target: string,
+  kind: 'conflict' | 'displaced',
+  content: string | Buffer,
+): string {
+  return createParkedPath(target, kind, (path) => {
+    let descriptor: number | undefined;
+    let created = false;
+    try {
+      descriptor = openSync(path, 'wx', 0o666);
+      created = true;
+      writeFileSync(descriptor, content);
+      fsyncSync(descriptor);
+      closeSync(descriptor);
+      descriptor = undefined;
+    } catch (error) {
+      if (descriptor !== undefined) closeSync(descriptor);
+      if (created) rmSync(path, { force: true });
+      throw error;
+    }
+  });
 }
 
 function parseTableRow(line: string): string[] | undefined {
@@ -365,6 +428,9 @@ async function writeArtifactLocked(
     return { conflict: true, currentHash: stateHash(initial) };
   }
 
+  /*
+   * Detects human-timescale concurrent edits; never silently overwrites; on any detected conflict both versions survive. A sub-millisecond window between the final identity check and rename is irreducible without OS-level locks and is accepted for this single-user local tool.
+   */
   const tempPath = join(
     dirname(resolved.target),
     `.${basename(resolved.target)}.${process.pid}.${randomBytes(8).toString('hex')}.tmp`,
@@ -375,12 +441,12 @@ async function writeArtifactLocked(
   );
   let tempFd: number | undefined;
   let snapshotCreated = false;
-  let oursDisplacedTarget = false;
   try {
     tempFd = openSync(tempPath, 'wx', 0o666);
     writeFileSync(tempFd, content, 'utf8');
     fsyncSync(tempFd);
     const tempIdentity = fstatSync(tempFd, { bigint: true });
+    const intendedHash = contentHash(content);
 
     if (creating) {
       try {
@@ -405,7 +471,7 @@ async function writeArtifactLocked(
           currentHash: stateHash(readIdentity(resolved.target, relPath)),
         };
       }
-      return { conflict: false, hash: contentHash(content) };
+      return { conflict: false, hash: intendedHash };
     }
 
     try {
@@ -418,7 +484,6 @@ async function writeArtifactLocked(
       throw error;
     }
 
-    hooks.afterSnapshotCreated?.();
     const snapshot = readIdentity(snapshotPath, relPath);
     const current = readIdentity(resolved.target, relPath);
     if (
@@ -435,33 +500,69 @@ async function writeArtifactLocked(
       return { conflict: true, currentHash };
     }
 
-    renameSync(tempPath, resolved.target);
-    oursDisplacedTarget = true;
-    hooks.afterRename?.();
-    const targetIdentity = lstatSync(resolved.target, { bigint: true });
-    if (
-      !targetIdentity.isFile()
-      || targetIdentity.dev !== tempIdentity.dev
-      || targetIdentity.ino !== tempIdentity.ino
-    ) {
-      const currentHash = stateHash(readIdentity(resolved.target, relPath));
-      renameSync(snapshotPath, resolved.target);
+    const recoverConflict = (
+      winner: IdentityRead,
+    ): ArtifactWriteResult => {
+      const parked = [
+        parkContent(resolved.target, 'conflict', content),
+      ];
+      const displaced = readIdentity(snapshotPath, relPath);
+      if (
+        displaced.identity !== 'absent'
+        && displaced.stable
+        && displaced.identity.hash !== stateHash(winner)
+      ) {
+        parked.push(parkContent(
+          resolved.target,
+          'displaced',
+          displaced.identity.bytes,
+        ));
+      }
+      unlinkSync(snapshotPath);
       snapshotCreated = false;
-      oursDisplacedTarget = false;
-      return { conflict: true, currentHash };
+      return {
+        conflict: true,
+        currentHash: stateHash(winner),
+        parked,
+      };
+    };
+
+    hooks.beforeExchange?.();
+    let exchangeIdentity: ReturnType<typeof lstatSync>;
+    try {
+      exchangeIdentity = lstatSync(resolved.target, { bigint: true });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+        return recoverConflict({ identity: 'absent', stable: true });
+      }
+      throw error;
+    }
+    if (
+      !exchangeIdentity.isFile()
+      || !sameIdentityStat(snapshot.identity, exchangeIdentity)
+    ) {
+      return recoverConflict(readIdentity(resolved.target, relPath));
+    }
+
+    renameSync(tempPath, resolved.target);
+    hooks.afterExchange?.();
+    const installed = readIdentity(resolved.target, relPath);
+    if (
+      installed.identity === 'absent'
+      || !installed.stable
+      || installed.identity.dev !== tempIdentity.dev
+      || installed.identity.ino !== tempIdentity.ino
+      || installed.identity.hash !== intendedHash
+    ) {
+      return recoverConflict(installed);
     }
 
     unlinkSync(snapshotPath);
     snapshotCreated = false;
-    oursDisplacedTarget = false;
-    return { conflict: false, hash: contentHash(content) };
+    return { conflict: false, hash: intendedHash };
   } catch (error) {
     if (snapshotCreated) {
-      if (oursDisplacedTarget) {
-        renameSync(snapshotPath, resolved.target);
-      } else {
-        unlinkSync(snapshotPath);
-      }
+      unlinkSync(snapshotPath);
       snapshotCreated = false;
     }
     throw error;

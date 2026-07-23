@@ -80,12 +80,14 @@ supervisor retries escaped the binding limits); artifact writes were atomic-for-
 but not compare-and-swap. One fix wave resolved all of them: durable `operations` rows
 with attempt chains (`jobs.operation_id`, retries inherited, all public reads resolve
 the active attempt, one terminal `done`), persisted deadlines re-armed or fired on
-boot and inherited by retries, CAS artifact writes requiring `{expectedHash}` or
-`{expectNew}` behind a single mutex with boundary mutation/deletion regressions,
-no-follow symlink-rejecting validator path containment, a fail-closed E2E, and the
-progress-ledger corrections. Suite grew to 30 files / 170 tests, green three
-consecutive host runs, typecheck clean. The real E2E was rerun with the strengthened
-assertions and again returned ALL CHECKS VERIFIED — active pre-kill state with zero
+boot and inherited by retries. Artifact replacement detects human-timescale concurrent
+edits, never silently overwrites, and ensures both versions survive any detected
+conflict, with an accepted irreducible sub-millisecond window between the final identity
+check and rename because OS-level locks are out of scope for this single-user local tool.
+The hardening also added no-follow symlink-rejecting validator path containment, a
+fail-closed E2E, and the progress-ledger corrections. Suite grew to 30 files / 170
+tests, green three consecutive host runs, typecheck clean. The real E2E was rerun with
+the strengthened assertions and again returned ALL CHECKS VERIFIED — active pre-kill state with zero
 early `done`, five resumed codex events after `Last-Event-ID`, tokens
 in=49424/out=932/reasoning=690, and the cancelled stream showing two codex events plus
 exactly one terminal `done`.
