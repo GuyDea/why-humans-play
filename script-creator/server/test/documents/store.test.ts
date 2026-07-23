@@ -36,6 +36,13 @@ function draft(
       attrs: { format: 'narration', preamble: '' },
       content: [],
     },
+    architecture: {
+      sections: [],
+      approvedMd: null,
+      approvedAt: null,
+    },
+    architectureArtifactHash: null,
+    narrationReconciliationRequired: false,
     updatedAt: '2026-07-23T08:00:00.000Z',
     ...overrides,
   };
@@ -80,6 +87,9 @@ describe('DocumentStore', () => {
       'format',
       'doc_json',
       'updated_at',
+      'architecture_json',
+      'architecture_artifact_hash',
+      'narration_reconciliation_required',
     ]);
     expect(revisions).toEqual([
       'id',
@@ -89,6 +99,7 @@ describe('DocumentStore', () => {
       'disposition',
       'doc_json',
       'created_at',
+      'kind',
     ]);
   });
 
@@ -99,6 +110,27 @@ describe('DocumentStore', () => {
     expect(created).toEqual(draft());
     expect(store.getDraft('draft-1')).toEqual(draft());
     expect(store.getDraft('missing')).toBeNull();
+  });
+
+  it('persists architecture sibling state, its CAS hash, and reconciliation flag', () => {
+    const store = openStore();
+    const record = draft({
+      architecture: {
+        sections: [{
+          key: 'core-answer',
+          title: 'Core answer',
+          md: '### Core answer\n\nA mechanism.\n',
+        }],
+        approvedMd: '### Core answer\n\nA mechanism.\n',
+        approvedAt: '2026-07-24T09:00:00.000Z',
+      },
+      architectureArtifactHash: 'sha256:architecture',
+      narrationReconciliationRequired: true,
+    });
+
+    store.createDraft(record);
+
+    expect(store.getDraft(record.id)).toEqual(record);
   });
 
   it('returns an empty draft summary list', () => {
@@ -181,7 +213,9 @@ describe('DocumentStore', () => {
     });
 
     expect(first.revision.seq).toBe(1);
+    expect(first.revision.kind).toBe('narration');
     expect(second.revision.seq).toBe(2);
+    expect(second.revision.kind).toBe('narration');
     expect(store.getDraft('draft-1')).toMatchObject({
       title: 'Final',
       format: 'annotated',
@@ -195,6 +229,7 @@ describe('DocumentStore', () => {
         seq: 1,
         opId: null,
         disposition: 'manual-save',
+        kind: 'narration',
         doc: firstDoc,
         createdAt: '2026-07-23T08:01:00.000Z',
       },
@@ -204,6 +239,7 @@ describe('DocumentStore', () => {
         seq: 2,
         opId: 'operation-7',
         disposition: 'accepted',
+        kind: 'narration',
         doc: secondDoc,
         createdAt: '2026-07-23T08:02:00.000Z',
       },

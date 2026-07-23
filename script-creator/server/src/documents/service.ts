@@ -92,6 +92,13 @@ export class DocumentService {
       title: input.title,
       format,
       doc: input.doc,
+      architecture: {
+        sections: [],
+        approvedMd: null,
+        approvedAt: null,
+      },
+      architectureArtifactHash: null,
+      narrationReconciliationRequired: false,
       updatedAt: this.now(),
     });
   }
@@ -136,6 +143,7 @@ export class DocumentService {
         id: this.idFactory(),
         opId: input.opId ?? null,
         disposition,
+        kind: 'narration',
         createdAt: timestamp,
       },
     });

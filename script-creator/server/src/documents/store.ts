@@ -1,8 +1,16 @@
 import Database from 'better-sqlite3';
 import { migrateStateDatabase } from '../state-migrations.js';
+import type { ArchitectureSection } from '../architecture/codec.js';
 
 export type DraftFormat = 'annotated' | 'narration';
 export type DraftDocument = Record<string, unknown>;
+export type RevisionKind = 'narration' | 'architecture';
+
+export interface DraftArchitecture {
+  sections: ArchitectureSection[];
+  approvedMd: string | null;
+  approvedAt: string | null;
+}
 
 export interface DraftSummary {
   id: string;
@@ -14,6 +22,16 @@ export interface DraftSummary {
 
 export interface DraftRecord extends DraftSummary {
   doc: DraftDocument;
+  architecture?: DraftArchitecture;
+  architectureArtifactHash?: string | null;
+  narrationReconciliationRequired?: boolean;
+}
+
+export interface CreateDraftRecord extends DraftSummary {
+  doc: DraftDocument;
+  architecture?: DraftArchitecture;
+  architectureArtifactHash?: string | null;
+  narrationReconciliationRequired?: boolean;
 }
 
 export interface RevisionRecord {
@@ -22,6 +40,7 @@ export interface RevisionRecord {
   seq: number;
   opId: string | null;
   disposition: string;
+  kind: RevisionKind;
   doc: DraftDocument;
   createdAt: string;
 }
@@ -35,6 +54,7 @@ export interface SaveDraftRecord {
     id: string;
     opId: string | null;
     disposition: string;
+    kind?: RevisionKind;
     createdAt: string;
   };
 }
@@ -46,6 +66,9 @@ interface DraftRow {
   format: DraftFormat;
   doc_json: string;
   updated_at: string;
+  architecture_json: string;
+  architecture_artifact_hash: string | null;
+  narration_reconciliation_required: number;
 }
 
 type DraftSummaryRow = Omit<DraftRow, 'doc_json'>;
@@ -58,6 +81,7 @@ interface RevisionRow {
   disposition: string;
   doc_json: string;
   created_at: string;
+  kind: RevisionKind;
 }
 
 interface NextSequenceRow {
@@ -71,6 +95,10 @@ function draftFrom(row: DraftRow): DraftRecord {
     title: row.title,
     format: row.format,
     doc: JSON.parse(row.doc_json) as DraftDocument,
+    architecture: JSON.parse(row.architecture_json) as DraftArchitecture,
+    architectureArtifactHash: row.architecture_artifact_hash,
+    narrationReconciliationRequired:
+      row.narration_reconciliation_required === 1,
     updatedAt: row.updated_at,
   };
 }
@@ -92,6 +120,7 @@ function revisionFrom(row: RevisionRow): RevisionRecord {
     seq: row.seq,
     opId: row.op_id,
     disposition: row.disposition,
+    kind: row.kind,
     doc: JSON.parse(row.doc_json) as DraftDocument,
     createdAt: row.created_at,
   };
@@ -108,11 +137,14 @@ export class DocumentStore {
     this.migrate();
   }
 
-  createDraft(draft: DraftRecord): DraftRecord {
+  createDraft(draft: CreateDraftRecord): DraftRecord {
+    const architecture = draft.architecture ?? emptyArchitecture();
     this.db.prepare(
       `INSERT INTO drafts (
-        id, episode_slug, title, format, doc_json, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?)`,
+        id, episode_slug, title, format, doc_json, updated_at,
+        architecture_json, architecture_artifact_hash,
+        narration_reconciliation_required
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       draft.id,
       draft.episodeSlug,
@@ -120,6 +152,9 @@ export class DocumentStore {
       draft.format,
       JSON.stringify(draft.doc),
       draft.updatedAt,
+      JSON.stringify(architecture),
+      draft.architectureArtifactHash ?? null,
+      draft.narrationReconciliationRequired === true ? 1 : 0,
     );
     return this.getDraft(draft.id)!;
   }
@@ -164,8 +199,8 @@ export class DocumentStore {
       ).get(id)!;
       this.db.prepare(
         `INSERT INTO revisions (
-          id, draft_id, seq, op_id, disposition, doc_json, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       ).run(
         update.revision.id,
         id,
@@ -174,6 +209,7 @@ export class DocumentStore {
         update.revision.disposition,
         JSON.stringify(update.doc),
         update.revision.createdAt,
+        update.revision.kind ?? 'narration',
       );
 
       return {
@@ -202,4 +238,12 @@ export class DocumentStore {
   private migrate(): void {
     migrateStateDatabase(this.db);
   }
+}
+
+function emptyArchitecture(): DraftArchitecture {
+  return {
+    sections: [],
+    approvedMd: null,
+    approvedAt: null,
+  };
 }

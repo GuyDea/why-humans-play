@@ -60,6 +60,13 @@ describe('DocumentService', () => {
       title: 'Opening',
       format: 'narration',
       doc,
+      architecture: {
+        sections: [],
+        approvedMd: null,
+        approvedAt: null,
+      },
+      architectureArtifactHash: null,
+      narrationReconciliationRequired: false,
       updatedAt: '2026-07-23T09:00:00.000Z',
     });
     expect(fixture.service.getDraft(created.id)).toEqual(created);
@@ -90,6 +97,7 @@ describe('DocumentService', () => {
       seq: 1,
       opId: 'operation-1',
       disposition: 'accepted',
+      kind: 'narration',
       doc: revised,
     });
     expect(fixture.service.listRevisions(created.id)).toEqual([

@@ -88,6 +88,32 @@ CREATE TABLE IF NOT EXISTS topic_handoff_sagas (
 );
 `;
 
+const EMPTY_ARCHITECTURE_JSON = JSON.stringify({
+  sections: [],
+  approvedMd: null,
+  approvedAt: null,
+});
+
+const ARCHITECTURE_V6 = `
+CREATE TABLE IF NOT EXISTS architecture_sagas (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  action TEXT NOT NULL CHECK (action IN ('approve', 'reopen')),
+  expected_revision_seq INTEGER NOT NULL,
+  input_json TEXT NOT NULL,
+  revision_appended INTEGER NOT NULL DEFAULT 0
+    CHECK (revision_appended IN (0, 1)),
+  artifact_written INTEGER NOT NULL DEFAULT 0
+    CHECK (artifact_written IN (0, 1)),
+  pipeline_upserted INTEGER NOT NULL DEFAULT 0
+    CHECK (pipeline_upserted IN (0, 1)),
+  draft_updated INTEGER NOT NULL DEFAULT 0
+    CHECK (draft_updated IN (0, 1)),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (draft_id, action, expected_revision_seq)
+);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -127,8 +153,38 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 6,
     owner: 'architecture',
-    name: 'reserved-placeholder',
-    apply: () => {},
+    name: 'architecture-stage',
+    apply: (db) => {
+      ensureColumn(
+        db,
+        'drafts',
+        'architecture_json',
+        `ALTER TABLE drafts ADD COLUMN architecture_json TEXT NOT NULL DEFAULT '${EMPTY_ARCHITECTURE_JSON}'`,
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'architecture_artifact_hash',
+        'ALTER TABLE drafts ADD COLUMN architecture_artifact_hash TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'narration_reconciliation_required',
+        `ALTER TABLE drafts
+         ADD COLUMN narration_reconciliation_required INTEGER NOT NULL DEFAULT 0
+         CHECK (narration_reconciliation_required IN (0, 1))`,
+      );
+      ensureColumn(
+        db,
+        'revisions',
+        'kind',
+        `ALTER TABLE revisions
+         ADD COLUMN kind TEXT NOT NULL DEFAULT 'narration'
+         CHECK (kind IN ('narration', 'architecture'))`,
+      );
+      db.exec(ARCHITECTURE_V6);
+    },
   },
 ];
 
