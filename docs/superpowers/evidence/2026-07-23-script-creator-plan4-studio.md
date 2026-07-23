@@ -94,6 +94,13 @@ panel; a rewrite over a locked range produced the conflicted proposal rendering
 decoration for findings is panel-verified; its visual treatment in the editor gutter is
 styling-level and tracked for Plan 5 polish.)
 
+The confirmation rounds closed everything: findings 1–7 RESOLVED, and the last item —
+a stale debounce callback able to cancel a superseding autosave snapshot's retry (a
+data-loss path the reviewer reproduced with retryable 503s) — was fixed with
+generation-aware timer ownership and the reviewer's exact scenario as a regression.
+Final confirmation: PASS / APPROVED, no new findings. Final suites: app 21 files green
+three consecutive runs, server 30, editor-core 11, typecheck and build clean.
+
 ## Verdict
 
 **The Script Studio is real and usable.** Martin can open a browser page served by the
