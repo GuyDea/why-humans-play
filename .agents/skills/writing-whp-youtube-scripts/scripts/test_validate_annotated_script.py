@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 import subprocess
 import sys
@@ -470,10 +471,17 @@ class ValidatorTests(unittest.TestCase):
             f"Expected {fragment!r} in {errors!r}",
         )
 
-    def run_cli(self, path: Path, cwd: Path) -> subprocess.CompletedProcess[str]:
+    def run_cli(
+        self, path: Path, cwd: Path, *flags: str
+    ) -> subprocess.CompletedProcess[str]:
         self.assertNotEqual(cwd.resolve(), SCRIPT_DIR.resolve())
         return subprocess.run(
-            [sys.executable, str(SCRIPT_DIR / "validate_annotated_script.py"), str(path)],
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "validate_annotated_script.py"),
+                *flags,
+                str(path),
+            ],
             cwd=cwd,
             check=False,
             capture_output=True,
@@ -1766,6 +1774,56 @@ class ValidatorTests(unittest.TestCase):
                 with self.subTest(path=path.name):
                     result = self.run_cli(path, cwd)
                     self.assert_cli_result(result, 2)
+
+    def test_cli_json_valid_file_emits_ok_payload_and_returns_0(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cwd = Path(directory)
+            path = cwd / "valid.md"
+            path.write_text(VALID_DOCUMENT, encoding="utf-8")
+            result = self.run_cli(path, cwd, "--json")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload, {"ok": True, "errors": []})
+
+    def test_cli_json_invalid_file_lists_errors_and_returns_1(self) -> None:
+        invalid = replace_exact(
+            VALID_DOCUMENT,
+            "- **Viewer promise:**",
+            "- **Removed:**",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            cwd = Path(directory)
+            path = cwd / "invalid.md"
+            path.write_text(invalid, encoding="utf-8")
+            result = self.run_cli(path, cwd, "--json")
+        self.assertEqual(result.returncode, 1, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertGreater(len(payload["errors"]), 0)
+        for error in payload["errors"]:
+            self.assertIsInstance(error["message"], str)
+            self.assertTrue(
+                error["line"] is None or isinstance(error["line"], int)
+            )
+
+    def test_cli_json_unreadable_input_returns_2_with_error(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cwd = Path(directory)
+            missing = cwd / "missing.md"
+            result = self.run_cli(missing, cwd, "--json")
+        self.assertEqual(result.returncode, 2, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertIn("cannot read", payload["errors"][0]["message"])
+
+    def test_cli_json_accepts_separator_before_path(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            cwd = Path(directory)
+            path = cwd / "valid.md"
+            path.write_text(VALID_DOCUMENT, encoding="utf-8")
+            result = self.run_cli(path, cwd, "--json", "--")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue(json.loads(result.stdout)["ok"])
 
 
 if __name__ == "__main__":

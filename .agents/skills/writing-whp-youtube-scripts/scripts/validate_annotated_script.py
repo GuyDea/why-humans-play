@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 from dataclasses import dataclass
 from pathlib import Path
 import re
@@ -1098,26 +1099,47 @@ def main(argv: list[str] | None = None) -> int:
         description="Validate an annotated Why Humans Play YouTube script."
     )
     parser.add_argument("input", nargs="?", help="UTF-8 Markdown file to validate")
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Emit machine-readable JSON diagnostics instead of human output.",
+    )
     try:
         args = parser.parse_args(argv)
     except SystemExit as exc:
         print(LIMITATION_SENTENCE)
         return int(exc.code)
 
+    def emit_json(errors: list[str]) -> None:
+        payload = {
+            "ok": not errors,
+            "errors": [{"message": error, "line": None} for error in errors],
+        }
+        print(json.dumps(payload))
+
     if args.input is None:
-        print("ERROR: no input file was provided.")
-        print(LIMITATION_SENTENCE)
+        if args.json:
+            emit_json(["no input file was provided."])
+        else:
+            print("ERROR: no input file was provided.")
+            print(LIMITATION_SENTENCE)
         return 2
 
     path = Path(args.input)
     try:
         text = path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
-        print(f"ERROR: cannot read input {str(path)!r}: {exc}")
-        print(LIMITATION_SENTENCE)
+        if args.json:
+            emit_json([f"cannot read input {str(path)!r}: {exc}"])
+        else:
+            print(f"ERROR: cannot read input {str(path)!r}: {exc}")
+            print(LIMITATION_SENTENCE)
         return 2
 
     errors = validate_document(text)
+    if args.json:
+        emit_json(errors)
+        return 1 if errors else 0
     if errors:
         for error in errors:
             print(f"ERROR: {error}")
