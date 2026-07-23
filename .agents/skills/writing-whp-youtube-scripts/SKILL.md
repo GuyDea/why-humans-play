@@ -52,20 +52,29 @@ and creative status. Do not make an operation depend on invisible chat history.
 Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, humor or voice
 passes, and scoped refinement.
 
-Return the requested artifact directly. Do not perform web research, write an assignment
-contract or evidence packet, force three opening candidates, create annotated-script
-scaffolding, plan visuals or rights, run the production rubric, or invoke the validator
-unless Martin explicitly asks for that work.
+Return the requested artifact directly. Outside the bounded architecture
+concept-discovery scan, do not perform web research, write an assignment contract or
+evidence packet, force three opening candidates, create annotated-script scaffolding, plan
+visuals or rights, run the production rubric, or invoke the validator unless Martin
+explicitly asks for that work.
 
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in Phase 1. Inventory explanatory mechanisms, consequences,
+named laws or effects, interventions, and countermeasures before deciding which concepts
+belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
+the full production workflow. Use the discovery source only to establish the concept and
+its meaning; defer episode-claim and example verification to Phase 2.
+
 For a new episode or a thesis-level rethink, produce and refine the script architecture
-before writing any opening or narration. Stop after returning the architecture. Do not draft
-the hook, beats, or narration until Martin explicitly approves it. Approval of a topic,
-title, isolated insight, or earlier script does not approve the architecture.
+before writing any opening or narration. Put the sourced concept inventory first in the
+artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
+until Martin explicitly approves it. Approval of a topic, title, isolated insight, or
+earlier script does not approve the architecture.
 
 Once Martin approves the architecture, use it as the content baseline for the first
 narration prototype. Preserve its central question, core answer, belief shift, insight
@@ -109,6 +118,11 @@ For episode-scale work without an approved architecture, return only the archite
 artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
 Positive feedback on one insight, example, phenomenon, or reframe does not approve the
 complete architecture.
+
+Do not present an architecture as approval-ready until its concept-discovery scan is
+complete. If source access is unavailable or Martin explicitly requests an offline pass,
+mark the inventory provisional exactly as required by the architecture method and surface
+the resulting omission risk.
 
 Do not approve a familiar summary with generic advice attached. The non-obvious
 understanding must revise the viewer's prior model, and the response must name a relevant

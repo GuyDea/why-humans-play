@@ -4,6 +4,7 @@
 
 - [Purpose](#purpose)
 - [Route episode-scale work](#route-episode-scale-work)
+- [Discover the concept field](#discover-the-concept-field)
 - [Architecture artifact](#architecture-artifact)
 - [Refine the architecture](#refine-the-architecture)
 - [Approve the architecture](#approve-the-architecture)
@@ -36,10 +37,83 @@ For a scoped review, rewrite, or alternatives request against existing narration
 on the supplied selection. Rebuild the architecture only when Martin asks or when the
 requested change materially alters the episode's central message.
 
+## Discover the concept field
+
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in Phase 1. Inventory first and distill second. The scan prevents
+a familiar concept recalled early from crowding out a more precise mechanism, consequence,
+or practical method discovered later.
+
+Start by stating the topic's mechanism in plain language. Build query vocabulary from the
+topic's plain-language mechanism, synonyms, causes, consequences, and possible remedies.
+Search every one of these buckets:
+
+- core mechanisms;
+- human cognitive and social biases;
+- AI- or system-specific behaviors;
+- named laws, rules, paradoxes, and effects;
+- authority, trust, and anthropomorphism effects;
+- interventions, debiasing tools, decision methods, and countermeasures;
+- near-neighbors and tempting but imprecise labels.
+
+Use materially different query passes rather than repeating one phrase. Search first from
+the problem and mechanism, then from consequences and adjacent disciplines, then from
+remedies and countermeasures. Follow candidate terminology back to an original, primary,
+or authoritative source. Batch independent queries and source opens wherever possible. Use
+at most three broad discovery batches and two targeted saturation batches. A batch may
+contain several parallel queries or source opens; it is one planned pass through a distinct
+part of the query vocabulary, not one URL. Treat each batch as one grouped research round
+trip, for no more than five research round trips total.
+
+Continue until two materially different query passes add no new decision-relevant concept.
+Treat this as systematic best-effort coverage, not a literal guarantee that no term exists.
+If that budget ends while a materially relevant lead remains unresolved, label the map
+`INCOMPLETE—SEARCH BUDGET REACHED` and list the unresolved lead. Return the provisional
+architecture instead of silently extending rapid discovery into production research.
+
+For every candidate, record:
+
+- its exact name and type;
+- its plain-language meaning and exact relevance to this episode;
+- whether it explains the problem, predicts a consequence, or supplies an intervention or
+  countermeasure;
+- whether it is an established term, an analogical application, a disputed label, or an
+  original synthesis;
+- a primary or authoritative source or attribution;
+- its confidence, overlap with stronger candidates, and important boundary;
+- whether it belongs in narration, architecture background, or the exclusion list;
+- the reason to include or exclude it.
+
+Distinguish established terms from original labels or novel synthesis. Never give an
+original phrase the borrowed authority of a named scientific effect. A concept-discovery
+source establishes that a named concept exists and what it means; it does not verify every
+episode claim or example. Full claim wording, factual cases, dates, causal claims, and
+production evidence remain Phase 2 work.
+
+If research is unavailable or Martin explicitly requests an offline pass, label the map
+`INCOMPLETE—DISCOVERY NOT RUN`; never present recall as a complete map. Such an artifact is
+useful as provisional thinking, but it is not approval-ready until the scan runs or Martin
+explicitly accepts the omission risk.
+
 ## Architecture artifact
 
 Return the following fields in this order. Use compact prose and tables where they make
 comparisons clearer. Do not pad the artifact with narration.
+
+### Concept inventory
+
+Put the exact candidate list at the start of the artifact so omissions are visible before
+the thesis hardens. Include:
+
+- discovery status: `COMPLETE`, `INCOMPLETE—DISCOVERY NOT RUN`, or
+  `INCOMPLETE—SEARCH BUDGET REACHED`;
+- plain-language mechanism and query vocabulary;
+- query-pass summary and saturation result;
+- a compact table containing every candidate and all fields required by
+  [Discover the concept field](#discover-the-concept-field).
+
+The inventory is deliberately broader than the eventual episode. Keep useful exclusions
+visible; they show that a tempting term was considered rather than forgotten.
 
 ### Package and audience
 
@@ -83,7 +157,8 @@ an earlier step.
 ### Phenomenon and paradox map
 
 Map every useful established phenomenon, paradox, bias, law, or tension to the exact
-insight it explains. For each candidate concept, record:
+insight it explains. Distill this narration-facing map from the complete concept inventory;
+do not perform a second recall-only brainstorm. For each selected concept, record:
 
 - its name;
 - its plain-language meaning;
@@ -128,8 +203,8 @@ For each insight and the earned reframe, list:
 - a backup case when the primary example may be too familiar, too complex, or too weak.
 
 Prefer examples from different regions when this improves scope and surprise. Do not
-research or invent missing specificity during ordinary rapid architecture work; mark what
-the later evidence pass must verify.
+research or invent missing case specificity during ordinary rapid architecture work beyond
+the bounded concept-discovery scan; mark what the later evidence pass must verify.
 
 ### Learning and action contract
 
@@ -177,6 +252,10 @@ from becoming a summary of everything known about the topic.
 
 Review the architecture without drafting around its weaknesses:
 
+- Is the concept inventory first, sourced, complete across explanation and intervention
+  buckets, and searched to the stated saturation rule?
+- Does every candidate have an explicit include-or-exclude decision, and are original
+  syntheses clearly distinguished from established terms?
 - Can the core answer explain the whole episode without examples or jokes?
 - Does each insight add a new causal relationship?
 - Does the ladder escalate toward the earned reframe?
@@ -202,6 +281,11 @@ Reject the architecture when either half of the learning-and-action contract is 
 A novel idea with no usable response is incomplete; an actionable checklist with no new
 understanding is generic self-help rather than a WHP payload.
 
+Reject an architecture presented as complete when its concept inventory is absent,
+recall-only, unsourced, omits the intervention and countermeasure bucket, or hides
+near-neighbor exclusions. An offline provisional map may be refined, but it is not
+approval-ready unless Martin explicitly accepts the documented omission risk.
+
 After presenting or revising the complete architecture, stop and wait. Proceed to beat
 ordering, hook writing, and narration only after Martin explicitly approves the architecture
 or directly instructs you to draft from that displayed version.
@@ -213,6 +297,10 @@ answer, insight ladder, earned reframe, practical payoff, or final lesson.
 ## Common mistakes
 
 - Drafting a polished opening before the central answer is approved.
+- Building the phenomenon map from recall instead of a sourced concept inventory.
+- Searching only for explanations and therefore omitting interventions or decision methods.
+- Claiming exhaustive coverage without a bounded search and saturation record.
+- Presenting an original phrase as though it were an established law or effect.
 - Treating a beat outline as message architecture.
 - Producing a generic topic summary with no earned reframe.
 - Producing a surprising reframe with no concrete viewer response.

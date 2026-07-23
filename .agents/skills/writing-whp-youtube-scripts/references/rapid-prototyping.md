@@ -12,6 +12,15 @@ important unknowns. Route a new episode through the
 fields do not block a useful architecture or prototype. Ask only when a missing choice
 would materially change the requested artifact.
 
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in Phase 1. This is the required exception to rapid mode's
+usual research deferral: inventory relevant explanatory concepts and practical
+countermeasures before selecting the episode's thesis. Put the sourced inventory first,
+then distill the smaller phenomenon map used by the argument. Obey the method's fixed batch
+budget and parallelize independent searches. If the scan cannot run or reaches its budget
+with an unresolved lead, use the architecture method's exact incomplete label and treat the
+result as provisional.
+
 Do not depend on hidden conversational state. Work from the supplied topic brief, artifact
 or selection, surrounding context, requested operation, and creative status. In ordinary
 chat, use the visible conversation; a future local workbench may provide the same inputs
@@ -308,6 +317,9 @@ supplies them.
 
 Before returning rapid work, check internally:
 
+- For a new or thesis-level architecture, did the bounded concept-discovery scan cover both
+  explanations and interventions, show sources and exclusions, and reach its saturation
+  rule before the architecture was presented?
 - For episode-scale work, was the complete architecture explicitly approved before any
   opening, beat outline, or narration was drafted?
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
@@ -349,6 +361,9 @@ Keep this audit internal unless Martin asks to see it.
 ## Common mistakes
 
 - Jumping from a selected topic or one promising insight directly into narration.
+- Treating a recall-based list as a complete concept inventory.
+- Searching for causes and effects while forgetting interventions, debiasing methods, or
+  countermeasures.
 - Treating a beat outline, list of facts, or generic topic summary as script architecture.
 - Using hooks, jokes, or examples to hide a weak or unapproved intellectual payload.
 - Starting with process, caveats, or a mechanism lecture instead of the event.

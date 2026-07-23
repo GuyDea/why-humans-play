@@ -356,10 +356,11 @@ class SkillPackageTests(unittest.TestCase):
             "Default to Phase 1 for ideas, openings, hooks, rough drafts, short "
             "narration, humor or voice passes, and scoped refinement.",
             "Return the requested artifact directly.",
-            "Do not perform web research, write an assignment contract or evidence "
-            "packet, force three opening candidates, create annotated-script "
-            "scaffolding, plan visuals or rights, run the production rubric, or invoke "
-            "the validator unless Martin explicitly asks for that work.",
+            "Outside the bounded architecture concept-discovery scan, do not perform "
+            "web research, write an assignment contract or evidence packet, force "
+            "three opening candidates, create annotated-script scaffolding, plan "
+            "visuals or rights, run the production rubric, or invoke the validator "
+            "unless Martin explicitly asks for that work.",
         )
         for contract in contracts:
             with self.subTest(contract=contract):
@@ -553,6 +554,77 @@ class SkillPackageTests(unittest.TestCase):
         for contract in contracts:
             with self.subTest(contract=contract):
                 self.assertIn(contract, architecture)
+
+    def test_architecture_requires_sourced_concept_discovery_across_explanations_and_interventions(
+        self,
+    ) -> None:
+        architecture_text = ARCHITECTURE_MD.read_text(encoding="utf-8")
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "architecture": " ".join(architecture_text.split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+
+        gate = (
+            "Before presenting a new or thesis-level architecture, run a bounded "
+            "primary-source concept-discovery scan even in Phase 1."
+        )
+        for source_name in ("skill", "architecture", "rapid"):
+            with self.subTest(source=source_name, contract="discovery-gate"):
+                self.assertIn(gate, sources[source_name])
+
+        with self.subTest(contract="inventory-first"):
+            self.assertLess(
+                architecture_text.index("### Concept inventory"),
+                architecture_text.index("### Package and audience"),
+            )
+
+        category_contracts = (
+            "core mechanisms",
+            "human cognitive and social biases",
+            "AI- or system-specific behaviors",
+            "named laws, rules, paradoxes, and effects",
+            "authority, trust, and anthropomorphism effects",
+            "interventions, debiasing tools, decision methods, and countermeasures",
+            "near-neighbors and tempting but imprecise labels",
+        )
+        for category in category_contracts:
+            with self.subTest(category=category):
+                self.assertIn(category, sources["architecture"])
+
+        architecture_contracts = (
+            "Build query vocabulary from the topic's plain-language mechanism, "
+            "synonyms, causes, consequences, and possible remedies.",
+            "Continue until two materially different query passes add no new "
+            "decision-relevant concept.",
+            "Treat this as systematic best-effort coverage, not a literal guarantee "
+            "that no term exists.",
+            "A concept-discovery source establishes that a named concept exists and "
+            "what it means; it does not verify every episode claim or example.",
+            "Distinguish established terms from original labels or novel synthesis.",
+            "If research is unavailable or Martin explicitly requests an offline pass, "
+            "label the map `INCOMPLETE—DISCOVERY NOT RUN`; never present recall as a "
+            "complete map.",
+            "Use at most three broad discovery batches and two targeted saturation "
+            "batches.",
+            "Treat each batch as one grouped research round trip, for no more than five "
+            "research round trips total.",
+            "Batch independent queries and source opens wherever possible.",
+            "If that budget ends while a materially relevant lead remains unresolved, "
+            "label the map `INCOMPLETE—SEARCH BUDGET REACHED` and list the unresolved "
+            "lead.",
+            "whether it explains the problem, predicts a consequence, or supplies an "
+            "intervention or countermeasure",
+            "a primary or authoritative source or attribution",
+            "the reason to include or exclude it",
+        )
+        for contract in architecture_contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, sources["architecture"])
 
     def test_architecture_gate_prevents_premature_script_fluff(self) -> None:
         architecture = " ".join(

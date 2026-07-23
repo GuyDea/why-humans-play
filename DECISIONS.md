@@ -627,3 +627,30 @@ examples and prose.
 ledger.
 The current Episode 1 script and launch sequence remain unchanged because this decision
 changes the authoring gate, not an approved episode topic or narration.
+
+## 2026-07-23 — Start every episode architecture with a sourced concept inventory
+
+**Decision:** Before presenting a new or thesis-level WHP script architecture, run a
+bounded primary- or authoritative-source concept-discovery scan and put its exact candidate
+inventory first. Search explanatory mechanisms, consequences, named laws and effects,
+authority and trust effects, interventions and countermeasures, and imprecise
+near-neighbors; record sources and inclusion or exclusion reasons; distinguish established
+terms from original synthesis; and stop only after materially different searches reach the
+documented saturation rule. Cap rapid discovery at three broad batches plus two targeted
+saturation batches—five grouped research round trips total—and mark unresolved work
+incomplete rather than letting concept discovery become a production evidence pass.
+Distill the smaller narration-facing phenomenon map only after that inventory exists.
+
+**Rationale:** A recall-based phenomenon map omitted premortem because it searched mainly
+for explanations of the problem and had no required category for interventions or decision
+methods. Gathering the related laws, rules, paradoxes, effects, and countermeasures at the
+start makes omissions visible before prose or a thesis hardens.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`, and this
+ledger. `BRAND.md` remains unchanged because this is an authoring and discovery control,
+not a change to the channel promise. Existing design and implementation plans remain
+historical records of the earlier learning-and-action gate.

@@ -193,37 +193,56 @@ without weakening the audience-first test for problem-led growth episodes.
 
 Use this order for WHP scripts:
 
-1. Build one script architecture from the selected topic before writing an opening,
+1. Before shaping the thesis, run a bounded concept-discovery scan using primary or
+   authoritative sources. State the topic's mechanism and search vocabulary, then inventory
+   core mechanisms; human cognitive and social biases; AI- or system-specific behaviors;
+   named laws, rules, paradoxes, and effects; authority, trust, and anthropomorphism
+   effects; interventions, debiasing tools, decision methods, and countermeasures; and
+   tempting but imprecise near-neighbors. Record each candidate's meaning, source, role,
+   established or original status, and reason to include or exclude it. Search with
+   materially different problem, consequence, and remedy queries until two new passes add
+   no decision-relevant concept. Batch independent work and cap discovery at three broad
+   batches plus two targeted saturation batches—five grouped research round trips total.
+   If a relevant lead remains unresolved at the cap, return a visibly incomplete inventory
+   rather than delaying the architecture or pretending coverage is complete. Describe the
+   result as systematic best-effort coverage, never a guarantee that no obscure term
+   exists.
+2. Put that exact sourced concept inventory at the start of one script architecture from
+   the selected topic before writing an opening,
    beat outline, joke, transition, or narration. State the central question and core
    answer, the viewer's before-and-after belief, a three-to-five-step insight ladder,
    the relevant phenomenon and paradox map, the earned reframe, real-world proof cases,
    learning-and-action contract, practical payoff, final lesson, and scope boundary.
-2. Refine that architecture with Martin and obtain explicit approval of the complete
+3. Refine that architecture with Martin and obtain explicit approval of the complete
    intellectual payload. Approval of the topic, title, one example, or one clever insight
    does not approve the architecture.
-3. Write one complete narration prototype from the approved architecture, testing the
+4. Write one complete narration prototype from the approved architecture, testing the
    hook, humor, human connection, examples, and ending as one continuous story. Do not
    quietly replace the approved question, core answer, insight ladder, earned reframe,
    payoff, or final lesson because a different anecdote is easier to write.
-4. Show Martin the complete narration before running editorial, retention, or timing
+5. Show Martin the complete narration before running editorial, retention, or timing
    audits. Do not pre-cut context from a version he has not seen.
-5. Refine it with Martin at line level, preserving approved language and changing only
+6. Refine it with Martin at line level, preserving approved language and changing only
    the requested scope.
-6. Obtain explicit approval of the complete narration and creative direction.
-7. Only then gather or refresh evidence, add production structure, and run claims, rights,
+7. Obtain explicit approval of the complete narration and creative direction.
+8. Only then gather or refresh evidence, add production structure, and run claims, rights,
    editorial, retention, timing, and format checks.
-8. Present audit concerns separately before making any context-losing rewrite. An audit
+9. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
-9. Close the central lesson with a short declarative button. A final question or forward
+10. Close the central lesson with a short declarative button. A final question or forward
    hook may follow only when it does not leave the episode's main answer unresolved.
 
 The architecture must go beyond a competent summary of familiar material. Its insight
 ladder should converge on one defensible deeper conclusion—an earned reframe that changes
-how the viewer interprets or predicts another situation. Map established laws, biases,
-paradoxes, signaling problems, and other named phenomena during architecture work, but
-name them in narration only when they clarify a demonstrated pattern rather than creating
-a glossary recital. A controversial conclusion is useful only when the preceding mechanism
-earns it and a stated boundary keeps it honest.
+how the viewer interprets or predicts another situation. The complete concept inventory is
+a discovery and omission-control record; the phenomenon map is its smaller,
+narration-facing distillation. Map established laws, biases, paradoxes, signaling problems,
+interventions, and other named phenomena during architecture work, but name them in
+narration only when they clarify a demonstrated pattern rather than creating a glossary
+recital. Mark original labels or synthesis as original instead of lending them scientific
+authority. A concept source establishes the term and meaning, not every episode claim or
+case. A controversial conclusion is useful only when the preceding mechanism earns it and
+a stated boundary keeps it honest.
 
 Every architecture must also pass a double-payoff gate before narration begins. It must
 state the non-obvious understanding the viewer gains and the concrete action, observation,
