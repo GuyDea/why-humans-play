@@ -1,0 +1,328 @@
+import { randomBytes } from 'node:crypto';
+import {
+  closeSync,
+  fchmodSync,
+  fsyncSync,
+  mkdirSync,
+  openSync,
+  renameSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { FastifyInstance } from 'fastify';
+import { DocumentService } from './documents/service.js';
+import { DocumentStore } from './documents/store.js';
+import { buildApp } from './http/app.js';
+import { JobStore } from './job-store.js';
+import { OperationService } from './operations/service.js';
+import {
+  upsertPipelineRow,
+  writeArtifact,
+} from './repo/artifacts.js';
+import { runValidatorJson } from './repo/validator.js';
+import { JobSupervisor } from './supervisor.js';
+import {
+  type AppDirEnvironment,
+  type AppDirs,
+  resolveAppDirs,
+} from './xdg.js';
+
+export interface RuntimeHandshake {
+  port: number;
+  nonce: string;
+  pid: number;
+  startedAt: string;
+}
+
+export interface DaemonContext {
+  app: FastifyInstance;
+  dirs: AppDirs;
+  nonce: string;
+  stateDbFile: string;
+  supervisor: JobSupervisor;
+  close(): Promise<void>;
+}
+
+export interface CreateDaemonContextOptions {
+  repoRoot: string;
+  env: AppDirEnvironment;
+}
+
+type DaemonSignal = 'SIGINT' | 'SIGTERM';
+
+export interface DaemonSignalTarget {
+  once(signal: DaemonSignal, listener: () => void): void;
+  removeListener(signal: DaemonSignal, listener: () => void): void;
+}
+
+export interface StartDaemonContextOptions {
+  port: number;
+  pid?: number;
+  now?: () => Date;
+  log?: (line: string) => void;
+  signalTarget?: DaemonSignalTarget | null;
+  onSignalError?: (error: unknown) => void;
+}
+
+export interface RunningDaemon {
+  port: number;
+  nonce: string;
+  url: string;
+  runtimeFile: string;
+  shutdown(): Promise<void>;
+}
+
+export interface StartDaemonOptions {
+  port?: number;
+  repoRoot?: string;
+  env?: AppDirEnvironment;
+}
+
+const PROCESS_SIGNALS: DaemonSignalTarget = {
+  once(signal, listener) {
+    process.once(signal, listener);
+  },
+  removeListener(signal, listener) {
+    process.removeListener(signal, listener);
+  },
+};
+
+export function generateNonce(): string {
+  return randomBytes(16).toString('hex');
+}
+
+export function parsePort(args: readonly string[]): number {
+  if (args.length === 0) return 0;
+  if (args.length === 2 && args[0] === '--port') {
+    const rawPort = args[1]!;
+    const port = Number(rawPort);
+    if (
+      rawPort.trim() === ''
+      || !Number.isInteger(port)
+      || port < 0
+      || port > 65_535
+    ) {
+      throw new Error(`invalid port: ${rawPort}`);
+    }
+    return port;
+  }
+  throw new Error('usage: daemon [--port <port>]');
+}
+
+export function createDaemonContext(
+  options: CreateDaemonContextOptions,
+): DaemonContext {
+  const repoRoot = resolve(options.repoRoot);
+  const dirs = resolveAppDirs(repoRoot, options.env);
+  const stateDbFile = join(dirs.stateDir, 'state.sqlite3');
+  const nonce = generateNonce();
+  const jobStore = new JobStore(stateDbFile);
+  let documentStore: DocumentStore | undefined;
+  let supervisor: JobSupervisor | undefined;
+
+  try {
+    documentStore = new DocumentStore(stateDbFile);
+    supervisor = new JobSupervisor({
+      store: jobStore,
+      jobsRoot: dirs.jobsRoot,
+    });
+    const operationService = new OperationService({
+      supervisor,
+      store: jobStore,
+    });
+    const documentService = new DocumentService({ store: documentStore });
+    const app = buildApp({
+      nonce,
+      operationService,
+      documentService,
+      artifactService: {
+        write: (
+          relPath: string,
+          content: string,
+          expectedHash?: string,
+        ) => writeArtifact(
+          repoRoot,
+          relPath,
+          content,
+          expectedHash === undefined ? {} : { expectedHash },
+        ),
+        upsertPipelineRow: (
+          row: Parameters<typeof upsertPipelineRow>[1],
+        ) => upsertPipelineRow(repoRoot, row),
+      },
+      validatorService: {
+        validate: (scriptRelPath) =>
+          runValidatorJson(repoRoot, scriptRelPath),
+      },
+    });
+    supervisor.reattach();
+    const activeSupervisor = supervisor;
+    const activeDocumentStore = documentStore;
+
+    let closed = false;
+    return {
+      app,
+      dirs,
+      nonce,
+      stateDbFile,
+      supervisor: activeSupervisor,
+      async close() {
+        if (closed) return;
+        closed = true;
+        try {
+          activeSupervisor.stop();
+        } finally {
+          try {
+            await app.close();
+          } finally {
+            activeDocumentStore.close();
+          }
+        }
+      },
+    };
+  } catch (error) {
+    if (supervisor) supervisor.stop();
+    else jobStore.close();
+    documentStore?.close();
+    throw error;
+  }
+}
+
+export async function startDaemonContext(
+  context: DaemonContext,
+  options: StartDaemonContextOptions,
+): Promise<RunningDaemon> {
+  let unregisterSignals = () => {};
+  let runtimePublished = false;
+  try {
+    const address = await context.app.listen({
+      host: '127.0.0.1',
+      port: options.port,
+    });
+    const addressMatch = /^http:\/\/127\.0\.0\.1:(\d{1,5})\/?$/.exec(address);
+    const port = Number(addressMatch?.[1]);
+    if (
+      !addressMatch
+      || !Number.isInteger(port)
+      || port < 1
+      || port > 65_535
+    ) {
+      throw new Error(`daemon returned an invalid listen address: ${address}`);
+    }
+
+    const url = `http://127.0.0.1:${port}`;
+    let shutdownPromise: Promise<void> | undefined;
+    const shutdown = (): Promise<void> => {
+      shutdownPromise ??= (async () => {
+        unregisterSignals();
+        try {
+          removeRuntimeFile(context.dirs.runtimeFile);
+        } finally {
+          await context.close();
+        }
+      })();
+      return shutdownPromise;
+    };
+
+    const signalTarget = options.signalTarget === undefined
+      ? PROCESS_SIGNALS
+      : options.signalTarget;
+    if (signalTarget) {
+      const handleSignal = () => {
+        void shutdown().catch(
+          options.onSignalError ?? ((error: unknown) => {
+            console.error('Script Creator daemon shutdown failed:', error);
+            process.exitCode = 1;
+          }),
+        );
+      };
+      signalTarget.once('SIGINT', handleSignal);
+      signalTarget.once('SIGTERM', handleSignal);
+      unregisterSignals = () => {
+        signalTarget.removeListener('SIGINT', handleSignal);
+        signalTarget.removeListener('SIGTERM', handleSignal);
+      };
+    }
+
+    writeRuntimeFile(context.dirs.runtimeFile, {
+      port,
+      nonce: context.nonce,
+      pid: options.pid ?? process.pid,
+      startedAt: (options.now ?? (() => new Date()))().toISOString(),
+    });
+    runtimePublished = true;
+
+    (options.log ?? console.log)(`Script Creator daemon listening at ${url}`);
+    return {
+      port,
+      nonce: context.nonce,
+      url,
+      runtimeFile: context.dirs.runtimeFile,
+      shutdown,
+    };
+  } catch (error) {
+    unregisterSignals();
+    if (runtimePublished) removeRuntimeFile(context.dirs.runtimeFile);
+    await context.close();
+    throw error;
+  }
+}
+
+export async function startDaemon(
+  options: StartDaemonOptions = {},
+): Promise<RunningDaemon> {
+  const repoRoot = options.repoRoot
+    ?? resolve(import.meta.dirname, '../../..');
+  const env = options.env ?? {
+    HOME: process.env.HOME,
+    XDG_DATA_HOME: process.env.XDG_DATA_HOME,
+    XDG_STATE_HOME: process.env.XDG_STATE_HOME,
+  };
+  const context = createDaemonContext({ repoRoot, env });
+  return startDaemonContext(context, { port: options.port ?? 0 });
+}
+
+export function writeRuntimeFile(
+  runtimeFile: string,
+  handshake: RuntimeHandshake,
+): void {
+  mkdirSync(dirname(runtimeFile), { recursive: true });
+  const tempFile = join(
+    dirname(runtimeFile),
+    `.${basename(runtimeFile)}.${process.pid}.${randomBytes(8).toString('hex')}.tmp`,
+  );
+  let fd: number | undefined;
+  try {
+    fd = openSync(tempFile, 'wx', 0o600);
+    writeFileSync(fd, JSON.stringify(handshake), 'utf8');
+    fchmodSync(fd, 0o600);
+    fsyncSync(fd);
+    closeSync(fd);
+    fd = undefined;
+    renameSync(tempFile, runtimeFile);
+  } finally {
+    if (fd !== undefined) closeSync(fd);
+    rmSync(tempFile, { force: true });
+  }
+}
+
+export function removeRuntimeFile(runtimeFile: string): void {
+  rmSync(runtimeFile, { force: true });
+}
+
+async function main(): Promise<void> {
+  await startDaemon({ port: parsePort(process.argv.slice(2)) });
+}
+
+const entrypoint = process.argv[1];
+if (
+  entrypoint !== undefined
+  && resolve(entrypoint) === fileURLToPath(import.meta.url)
+) {
+  void main().catch((error: unknown) => {
+    console.error('Script Creator daemon failed to start:', error);
+    process.exitCode = 1;
+  });
+}

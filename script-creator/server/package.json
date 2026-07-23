@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "daemon": "tsx src/daemon.ts",
     "test": "vitest run",
     "spike:e2e": "tsx e2e/real-codex-spike.ts"
   },
