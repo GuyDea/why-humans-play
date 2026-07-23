@@ -55,4 +55,13 @@ describe('JobSupervisor', () => {
     const rec = await s.waitForTerminal(id);
     expect(rec.state).toBe('failed');
   });
+
+  it('exposes the turn.failed error message on the job record', async () => {
+    const s = makeSupervisor('turn-failed');
+    const id = s.enqueue({ prompt: 'p', cwd: tmpdir(), sandbox: 'read-only', codexBin: FAKE });
+    const rec = await s.waitForTerminal(id);
+    expect(rec.state).toBe('failed');
+    expect(rec.error).toContain('invalid_json_schema');
+    expect(rec.usageAvailable).toBe(0);
+  });
 });

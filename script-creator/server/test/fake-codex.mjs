@@ -14,7 +14,9 @@ const schemaIdx = argv.indexOf('--output-schema');
 const hasSchema = schemaIdx >= 0;
 
 const fixture = join(import.meta.dirname, 'fixtures',
-  hasSchema ? 'events-schema.jsonl' : 'events-plain.jsonl');
+  mode === 'turn-failed'
+    ? 'events-failed.jsonl'
+    : hasSchema ? 'events-schema.jsonl' : 'events-plain.jsonl');
 let lines = readFileSync(fixture, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
 
 if (resumeId) lines = lines.map((e) => e.type === 'thread.started' ? { ...e, thread_id: resumeId } : e);

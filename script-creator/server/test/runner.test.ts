@@ -35,6 +35,15 @@ describe('runner', () => {
     expect(status.usage).toBeUndefined();
   });
 
+  it('surfaces turn.failed distinctly with its error message', async () => {
+    const jobDir = makeJobDir({});
+    await runRunner(jobDir, 'turn-failed');
+    const status = readStatus(jobPaths(jobDir).statusFile)!;
+    expect(status.state).toBe('failed');
+    expect(status.errorMessage).toContain('invalid_json_schema');
+    expect(status.usage).toBeUndefined();
+  });
+
   it('waits for stdout close and captures usage written after the codex process exits', async () => {
     const jobDir = makeJobDir({});
     const code = await runRunner(jobDir, 'late-usage');

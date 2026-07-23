@@ -51,6 +51,7 @@ writeStatus(paths.statusFile, status);
 const child = spawn(bin!, args, { stdio: ['pipe', 'pipe', 'pipe'] });
 
 let usage: RunnerUsage | undefined;
+let turnFailedError: string | undefined;
 const rl = createInterface({ input: child.stdout });
 rl.on('line', (line) => {
   log.append(line);
@@ -61,6 +62,11 @@ rl.on('line', (line) => {
       writeStatus(paths.statusFile, status);
     }
     if (e.type === 'turn.completed') usage = validUsage(e.usage);
+    if (e.type === 'turn.failed') {
+      turnFailedError = typeof e.error?.message === 'string'
+        ? e.error.message
+        : 'turn failed';
+    }
   } catch { /* malformed line already journaled raw */ }
 });
 
@@ -89,13 +95,17 @@ child.on('close', (code) => {
   const finalCode = exitCode ?? code;
   const final: RunnerStatus = {
     ...(readStatus(paths.statusFile) ?? status),
-    state: cancelling ? 'cancelled' : !spawnError && finalCode === 0 ? 'completed' : 'failed',
+    state: cancelling
+      ? 'cancelled'
+      : !turnFailedError && !spawnError && finalCode === 0 ? 'completed' : 'failed',
     exitCode: finalCode ?? -1,
     finishedAt: new Date().toISOString(),
     usage,
     errorMessage: cancelling
       ? undefined
-      : spawnError?.message || (finalCode === 0 ? undefined : stderrTail || `codex exited ${finalCode}`),
+      : turnFailedError
+        ?? spawnError?.message
+        ?? (finalCode === 0 ? undefined : stderrTail || `codex exited ${finalCode}`),
   };
   writeStatus(paths.statusFile, final);
   process.exit(cancelling ? 0 : finalCode ?? 1);
