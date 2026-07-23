@@ -1,6 +1,25 @@
 import Database from 'better-sqlite3';
 import type { JobEnvelope, JobRecord, JobState, RunnerUsage } from './types.js';
 
+interface JobRow {
+  id: string;
+  state: JobState;
+  envelope_json: string;
+  job_dir: string;
+  thread_id: string | null;
+  retry_of: string | null;
+  resumed_from: string | null;
+  created_at: string;
+  started_at: string | null;
+  finished_at: string | null;
+  input_tokens: number | null;
+  cached_input_tokens: number | null;
+  output_tokens: number | null;
+  reasoning_output_tokens: number | null;
+  usage_available: 0 | 1;
+  error: string | null;
+}
+
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS jobs (
   id TEXT PRIMARY KEY,
@@ -21,24 +40,24 @@ CREATE TABLE IF NOT EXISTS jobs (
   error TEXT
 );`;
 
-function toRecord(row: Record<string, unknown>): JobRecord {
+function toRecord(row: JobRow): JobRecord {
   return {
-    id: row.id as string,
-    state: row.state as JobState,
-    envelopeJson: row.envelope_json as string,
-    jobDir: row.job_dir as string,
-    threadId: (row.thread_id as string) ?? null,
-    retryOf: (row.retry_of as string) ?? null,
-    resumedFrom: (row.resumed_from as string) ?? null,
-    createdAt: row.created_at as string,
-    startedAt: (row.started_at as string) ?? null,
-    finishedAt: (row.finished_at as string) ?? null,
-    inputTokens: (row.input_tokens as number) ?? null,
-    cachedInputTokens: (row.cached_input_tokens as number) ?? null,
-    outputTokens: (row.output_tokens as number) ?? null,
-    reasoningOutputTokens: (row.reasoning_output_tokens as number) ?? null,
-    usageAvailable: (row.usage_available as 0 | 1) ?? 0,
-    error: (row.error as string) ?? null,
+    id: row.id,
+    state: row.state,
+    envelopeJson: row.envelope_json,
+    jobDir: row.job_dir,
+    threadId: row.thread_id,
+    retryOf: row.retry_of,
+    resumedFrom: row.resumed_from,
+    createdAt: row.created_at,
+    startedAt: row.started_at,
+    finishedAt: row.finished_at,
+    inputTokens: row.input_tokens,
+    cachedInputTokens: row.cached_input_tokens,
+    outputTokens: row.output_tokens,
+    reasoningOutputTokens: row.reasoning_output_tokens,
+    usageAvailable: row.usage_available,
+    error: row.error,
   };
 }
 
@@ -61,7 +80,7 @@ export class JobStore {
   }
 
   get(id: string): JobRecord | null {
-    const row = this.db.prepare('SELECT * FROM jobs WHERE id = ?').get(id) as Record<string, unknown> | undefined;
+    const row = this.db.prepare<[string], JobRow>('SELECT * FROM jobs WHERE id = ?').get(id);
     return row ? toRecord(row) : null;
   }
 
@@ -94,18 +113,18 @@ export class JobStore {
   }
 
   nextQueued(): JobRecord | null {
-    const row = this.db.prepare("SELECT * FROM jobs WHERE state = 'queued' ORDER BY rowid LIMIT 1")
-      .get() as Record<string, unknown> | undefined;
+    const row = this.db.prepare<[], JobRow>("SELECT * FROM jobs WHERE state = 'queued' ORDER BY rowid LIMIT 1")
+      .get();
     return row ? toRecord(row) : null;
   }
 
   runningJobs(): JobRecord[] {
-    return (this.db.prepare("SELECT * FROM jobs WHERE state IN ('running','cancelling') ORDER BY created_at")
-      .all() as Record<string, unknown>[]).map(toRecord);
+    return this.db.prepare<[], JobRow>("SELECT * FROM jobs WHERE state IN ('running','cancelling') ORDER BY created_at")
+      .all().map(toRecord);
   }
 
   jobsRetriedFrom(id: string): JobRecord[] {
-    return (this.db.prepare('SELECT * FROM jobs WHERE retry_of = ?').all(id) as Record<string, unknown>[]).map(toRecord);
+    return this.db.prepare<[string], JobRow>('SELECT * FROM jobs WHERE retry_of = ?').all(id).map(toRecord);
   }
 
   close(): void {
