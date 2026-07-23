@@ -46,12 +46,17 @@ the gate.
   which took v4 for gate-check persistence and v5 for the topic-handoff saga);
   revisions of the architecture append to the existing revision history with a
   `kind: 'architecture'` discriminator.
-- The nine section keys/titles are fixed constants mirroring the skill reference
-  (package-and-audience, central-question, core-answer, belief-shift, insight-ladder,
-  phenomenon-map, earned-reframe, evidence-map, practical-payoff, final-lesson — the
-  reference's exact order; splitter is mechanical on the `###` headings the skill
-  emits). Unrecognized extra sections round-trip opaquely, same philosophy as the
-  narration codec.
+- The section keys/titles are fixed constants mirroring the skill reference's
+  "Architecture artifact" headings exactly — eleven sections in the reference's
+  order: package-and-audience, central-question, core-answer, viewer-belief-shift,
+  insight-ladder, phenomenon-and-paradox-map, earned-reframe,
+  real-world-evidence-map, practical-payoff, final-lesson, scope-boundary. The
+  splitter is mechanical on the `###` headings the skill emits, and a server sync
+  test parses the reference so any future drift fails the suite. *(Corrected
+  2026-07-24: this list previously said "nine" and omitted the reference's
+  "Viewer belief shift" naming and "Scope boundary" section; the
+  mirror-the-reference rule was always primary.)* Unrecognized extra sections
+  round-trip opaquely, same philosophy as the narration codec.
 - Canonical Markdown: `whp-youtube/architectures/<slug>.md` (new whitelisted CAS
   artifact path — repo-layout addition to record in the ledger on acceptance), written
   at approval: the joined sections verbatim plus a small header (title, date, approved
