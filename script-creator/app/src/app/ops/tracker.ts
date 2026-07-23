@@ -39,6 +39,7 @@ export interface OpTrackerOptions {
 
 export interface TrackedOperation<Meta = unknown, ConsoleEntry = unknown> {
   readonly operation: OperationName;
+  readonly completion: Promise<void>;
   readonly id: Signal<string | null>;
   readonly phase: Signal<OperationPhase>;
   readonly state: Signal<OperationState | null>;
@@ -55,6 +56,7 @@ export interface TrackedOperation<Meta = unknown, ConsoleEntry = unknown> {
 
 interface MutableTrackedOperation<Meta, ConsoleEntry>
   extends TrackedOperation<Meta, ConsoleEntry> {
+  readonly resolveCompletion: () => void;
   readonly id: WritableSignal<string | null>;
   readonly phase: WritableSignal<OperationPhase>;
   readonly state: WritableSignal<OperationState | null>;
@@ -138,8 +140,14 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     const id = signal<string | null>(null);
     const phase = signal<OperationPhase>('submitting');
     const remaining = signal(remainingHops);
+    let resolveCompletion!: () => void;
+    const completion = new Promise<void>((resolve) => {
+      resolveCompletion = resolve;
+    });
 
     return {
+      completion,
+      resolveCompletion,
       id,
       phase,
       state: signal<OperationState | null>(null),
@@ -247,6 +255,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       if (statusTimer !== undefined) {
         globalThis.clearInterval(statusTimer);
       }
+      tracked.resolveCompletion();
     }
   }
 

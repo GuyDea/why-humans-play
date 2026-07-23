@@ -564,6 +564,23 @@ ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content c
 because this is an internal workbench runtime and transport contract. The Fix 5 report is
 preserved as a historical verification record; Fix 6 will record the implementation.
 
+## 2026-07-23 — Make durable topic runs authoritative in Script Creator Topics
+
+**Decision:** Script Creator's Topics Decide section lists recent durable topic runs newest
+first, hydrates the selected run's checklist, report, and structured summary through the
+same renderer used for a live launch, auto-selects newly launched runs, refreshes the list
+when they finish, and runs package-test and handoff actions from the selected durable
+summary.
+
+**Rationale:** A completed full topic run already survives server-side, but the Topics page
+held its rendered board and downstream actions only in the mounted launch component's
+memory, so reloading the page hid durable work.
+
+**Documents:** `docs/superpowers/plans/2026-07-23-script-creator-plan5-topics.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
+because this is an internal workbench runtime and transport contract. The Task 8 report
+records the implementation and verification under Fix 5.
+
 ## 2026-07-23 — Close Script Studio provenance and live-runtime gaps before merge
 
 **Decision:** Script Studio operation inputs contain only explicit stored draft state, live
@@ -583,3 +600,39 @@ newer draft state or survive editor teardown.
 ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
 because this decision tightens an internal workbench implementation without changing WHP
 brand or channel doctrine. The final-review report remains the detailed fix-wave record.
+## 2026-07-23 — Accept the Script Creator architecture stage contract
+
+**Decision:** Accept the architecture stage design amendment at
+`docs/superpowers/specs/2026-07-23-script-creator-architecture-ui-design.md`: drafts gain
+an architecture phase gating episode-scale narration behind explicit whole-architecture
+approval; the artifact is stored as the skill's nine fixed sections with section-grain
+operations (`generate-architecture`, `review-architecture`,
+`rewrite-architecture-section`) and a canonical milestone written to the new whitelisted
+path `whp-youtube/architectures/<slug>.md`; implementation is Plan 6's first block.
+
+**Rationale:** The 2026-07-23 architecture-first amendment required a focused app design
+before implementation; this contract adds only transport, storage, UI, and the gate while
+the skill keeps every editorial rule.
+
+**Documents:** `docs/superpowers/specs/2026-07-23-script-creator-architecture-ui-design.md`,
+`docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` needed no content change because
+the amendment implements the recorded editorial decision inside the workbench boundary.
+
+## 2026-07-23 — Close Plan 5 persistence and transport gaps before merge
+
+**Decision:** Script Creator Plan 5 adopts the skill-owned `WHP_PROGRESS/2` thirteen-row
+transport; validates complete topic summaries across finalists, packages, winner, and all
+seven score/grade pairs; performs topic handoff as one durable idempotent server saga;
+uses one centralized state-database migration sequence; persists gate checks within their
+per-idea operation generation; deep-links repository-only pipeline cards to their topic
+briefs; and surfaces malformed pipeline diagnostics instead of treating them as no data.
+
+**Rationale:** The Plan 5 final review found protocol drift, retry-unsafe partial writes, a
+shared migration-version collision, stale-result races, incomplete navigation, and hidden
+repository parse failures.
+
+**Documents:** `docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/plans/2026-07-23-script-creator-plan5-topics.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain unchanged because these
+decisions tighten the internal workbench contract without changing WHP doctrine.

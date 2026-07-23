@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   type OnInit,
   input,
   signal,
   viewChild,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import type { DaemonClient } from '../api/client';
 import { EditorHost } from '../editor/editor-host';
 import { BriefPanel } from '../panels/brief-panel';
@@ -432,6 +434,7 @@ import { RevisionTimeline } from './revision-timeline';
   `,
 })
 export class DraftManagerComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
   readonly client = input.required<DaemonClient>();
   readonly session = input.required<StudioSession>();
   readonly manager = signal<DraftManager | null>(null);
@@ -440,7 +443,16 @@ export class DraftManagerComponent implements OnInit {
   ngOnInit(): void {
     const manager = new DraftManager(this.client());
     this.manager.set(manager);
-    void manager.loadDrafts();
+    void manager.loadDrafts().then(() => {
+      const requestedDraft = this.route.snapshot.queryParamMap.get('draft');
+      if (
+        requestedDraft
+        && manager.drafts().some((draft) => draft.id === requestedDraft)
+      ) {
+        return manager.openDraft(requestedDraft);
+      }
+      return undefined;
+    });
   }
 
   protected create(

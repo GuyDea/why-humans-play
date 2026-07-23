@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { migrateStateDatabase } from '../state-migrations.js';
 
 export type DraftFormat = 'annotated' | 'narration';
 export type DraftDocument = Record<string, unknown>;
@@ -62,32 +63,6 @@ interface RevisionRow {
 interface NextSequenceRow {
   seq: number;
 }
-
-const SCHEMA_VERSION = 2;
-const MIGRATION_V2 = `
-CREATE TABLE IF NOT EXISTS drafts (
-  id TEXT PRIMARY KEY,
-  episode_slug TEXT NOT NULL,
-  title TEXT NOT NULL,
-  format TEXT NOT NULL CHECK (format IN ('annotated', 'narration')),
-  doc_json TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS revisions (
-  id TEXT PRIMARY KEY,
-  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
-  seq INTEGER NOT NULL,
-  op_id TEXT,
-  disposition TEXT NOT NULL,
-  doc_json TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  UNIQUE (draft_id, seq)
-);
-
-CREATE INDEX IF NOT EXISTS revisions_draft_seq
-  ON revisions (draft_id, seq);
-`;
 
 function draftFrom(row: DraftRow): DraftRecord {
   return {
@@ -225,17 +200,6 @@ export class DocumentStore {
   }
 
   private migrate(): void {
-    const version = this.db.pragma('user_version', { simple: true }) as number;
-    if (version > SCHEMA_VERSION) {
-      throw new Error(
-        `state database schema version ${version} is newer than supported version ${SCHEMA_VERSION}`,
-      );
-    }
-    if (version < SCHEMA_VERSION) {
-      this.db.transaction(() => {
-        this.db.exec(MIGRATION_V2);
-        this.db.pragma(`user_version = ${SCHEMA_VERSION}`);
-      })();
-    }
+    migrateStateDatabase(this.db);
   }
 }

@@ -34,6 +34,61 @@ afterEach(() => {
 });
 
 describe('DaemonClient', () => {
+  it('loads the merged pipeline with the nonce', async () => {
+    const response = {
+      diagnostics: [],
+      rows: [{
+        episodeSlug: 'voluntary-obstacles',
+        state: 'architecture',
+        milestone: 'selected',
+        ref: 'whp-youtube/topics/voluntary-obstacles.md',
+        draftId: 'draft-1',
+        title: 'Why We Make Games Harder',
+        creativePhase: 'architecture',
+      }],
+    };
+    const fetchMock = vi.fn(async () => jsonResponse(response));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const getPipeline = (
+      client as DaemonClient & {
+        getPipeline?: () => Promise<typeof response>;
+      }
+    ).getPipeline;
+
+    expect(getPipeline).toBeTypeOf('function');
+    if (!getPipeline) return;
+    await expect(getPipeline.call(client)).resolves.toEqual(response);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/api/pipeline`,
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+    expect(new Headers(fetchMock.mock.calls[0]?.[1]?.headers).get('x-sc-nonce'))
+      .toBe(NONCE);
+  });
+
+  it('loads a repository topic brief by its encoded ref', async () => {
+    const response = {
+      ref: 'whp-youtube/topics/the-queue-game.md',
+      markdown: '# The Queue Game\n\nRepository topic brief.',
+    };
+    const fetchMock = vi.fn(async () => jsonResponse(response));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await expect(client.getTopicBrief(response.ref)).resolves.toEqual(response);
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${BASE_URL}/api/topic-brief?ref=${
+        encodeURIComponent(response.ref)
+      }`,
+      expect.objectContaining({
+        headers: expect.any(Headers),
+      }),
+    );
+  });
+
   it('lists durable operation summaries with the nonce', async () => {
     const response = {
       operations: [
@@ -214,6 +269,195 @@ describe('DaemonClient', () => {
         method: 'POST',
         nonce: NONCE,
         body: JSON.stringify({ path: 'whp-youtube/episodes/episode.md' }),
+      },
+    ]);
+  });
+
+  it('maps idea inbox calls and authenticates every request', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await client.listIdeas();
+    await client.createIdea({
+      text: 'Why players choose harsher rules',
+      source: 'inbox',
+    });
+    await client.updateIdea('idea/one', { status: 'discarded' });
+    await client.deleteIdea('idea/one');
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/ideas`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/ideas`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          text: 'Why players choose harsher rules',
+          source: 'inbox',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone`,
+        method: 'PATCH',
+        nonce: NONCE,
+        body: JSON.stringify({ status: 'discarded' }),
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone`,
+        method: 'DELETE',
+        nonce: NONCE,
+        body: undefined,
+      },
+    ]);
+  });
+
+  it('maps package-test history and the single topic-handoff command', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const direction = {
+      working_title: 'Why We Make Games Harder',
+      intended_viewer: 'Players who choose harder rules',
+      familiar_markdown: 'A no-hit run.',
+      surprise_markdown: 'Constraint can create meaning.',
+      visual_promise_markdown: 'One level under two rule sets.',
+      delivered_payoff_markdown: 'Why chosen difficulty changes effort.',
+      survives_honestly: true,
+      reason_markdown: 'The episode can deliver the promise.',
+    };
+
+    await client.listPackageTests('idea/one');
+    await client.createPackageTest('idea/one', {
+      opId: 'op-package-1',
+      directions: [direction],
+    });
+    await client.handoffTopicRun('run/one', {
+      ideaId: 'idea/one',
+      episodeSlug: 'voluntary-obstacles',
+      title: 'Voluntary Obstacles',
+      briefMarkdown: '# Selected topic brief',
+      draft: {
+        format: 'narration',
+        doc: { type: 'doc' },
+      },
+    });
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone/package-tests`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/ideas/idea%2Fone/package-tests`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          opId: 'op-package-1',
+          directions: [direction],
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/topic-runs/run%2Fone/handoff`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          ideaId: 'idea/one',
+          episodeSlug: 'voluntary-obstacles',
+          title: 'Voluntary Obstacles',
+          briefMarkdown: '# Selected topic brief',
+          draft: {
+            format: 'narration',
+            doc: { type: 'doc' },
+          },
+        }),
+      },
+    ]);
+  });
+
+  it('lists, registers, and polls topic runs with authenticated requests', async () => {
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse([{
+        id: 'run-2',
+        opId: 'op-2',
+        state: 'completed',
+        createdAt: '2026-07-23T12:30:00.000Z',
+      }]))
+      .mockResolvedValueOnce(jsonResponse({
+        id: 'run-1',
+        opId: 'op-1',
+        state: 'running',
+        createdAt: '2026-07-23T12:00:00.000Z',
+      }))
+      .mockResolvedValueOnce(jsonResponse({
+        state: 'running',
+        progress: [{
+          id: '01-frame',
+          status: 'active',
+          text: 'Record the decision frame and current WHP context.',
+        }],
+      }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const topicClient = client as DaemonClient & {
+      listTopicRuns?: () => Promise<unknown>;
+      registerTopicRun?: (opId: string) => Promise<unknown>;
+      getTopicRun?: (id: string) => Promise<unknown>;
+    };
+
+    expect(topicClient.listTopicRuns).toBeTypeOf('function');
+    expect(topicClient.registerTopicRun).toBeTypeOf('function');
+    expect(topicClient.getTopicRun).toBeTypeOf('function');
+    if (
+      !topicClient.listTopicRuns
+      || !topicClient.registerTopicRun
+      || !topicClient.getTopicRun
+    ) return;
+
+    await topicClient.listTopicRuns();
+    await topicClient.registerTopicRun('op/one');
+    await topicClient.getTopicRun('run/one');
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/topic-runs`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/topic-runs`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ opId: 'op/one' }),
+      },
+      {
+        url: `${BASE_URL}/api/topic-runs/run%2Fone`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
       },
     ]);
   });

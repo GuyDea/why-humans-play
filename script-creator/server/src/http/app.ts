@@ -19,6 +19,13 @@ import {
   InvalidValidatorPathError,
   type ValidatorResult,
 } from '../repo/validator.js';
+import type { TopicService } from '../topics/service.js';
+import type {
+  ArtifactExpectedState,
+  ArtifactWriteResult,
+  PipelineRow,
+} from '../repo/artifacts.js';
+import type { PackageDirection } from '../topics/store.js';
 import {
   hasSseQueryNonce,
   parseFromSeq,
@@ -45,12 +52,39 @@ export interface ValidatorHttpService {
   validate(path: string): Promise<ValidatorResult>;
 }
 
+export type TopicHttpService = Pick<
+  TopicService,
+  | 'createIdea'
+  | 'getIdea'
+  | 'listIdeas'
+  | 'updateIdea'
+  | 'deleteIdea'
+  | 'createPackageTest'
+  | 'listPackageTests'
+  | 'registerRun'
+  | 'listRuns'
+  | 'getRun'
+  | 'handoff'
+  | 'pipeline'
+  | 'topicBrief'
+>;
+
+export interface ArtifactHttpService {
+  write?(
+    path: string,
+    content: string,
+    expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult>;
+  upsertPipelineRow?(row: PipelineRow): Promise<ArtifactWriteResult>;
+}
+
 export interface BuildAppOptions {
   nonce: string;
   staticRoot?: string;
   operationService: OperationHttpService;
   documentService: DocumentHttpService;
-  artifactService: unknown;
+  topicService?: TopicHttpService;
+  artifactService: ArtifactHttpService;
   validatorService: ValidatorHttpService;
 }
 
@@ -69,6 +103,62 @@ interface OperationParams {
 
 interface DraftParams {
   id: string;
+}
+
+interface IdeaParams {
+  id: string;
+}
+
+interface TopicRunParams {
+  id: string;
+}
+
+interface TopicBriefQuery {
+  ref?: string;
+}
+
+interface CreateIdeaBody {
+  text?: unknown;
+  source?: unknown;
+  status?: unknown;
+}
+
+interface UpdateIdeaBody {
+  text?: unknown;
+  source?: unknown;
+  status?: unknown;
+  latestCheck?: unknown;
+  latestCheckOpId?: unknown;
+}
+
+interface RegisterTopicRunBody {
+  opId?: unknown;
+}
+
+interface TopicHandoffBody {
+  resumeKey?: unknown;
+  ideaId?: unknown;
+  episodeSlug?: unknown;
+  title?: unknown;
+  briefMarkdown?: unknown;
+  draft?: unknown;
+}
+
+interface CreatePackageTestBody {
+  opId?: unknown;
+  directions?: unknown;
+}
+
+interface WriteArtifactBody {
+  path?: unknown;
+  content?: unknown;
+  expectedState?: unknown;
+}
+
+interface UpsertPipelineBody {
+  episodeSlug?: unknown;
+  milestone?: unknown;
+  ref?: unknown;
 }
 
 interface CreateDraftBody {
@@ -116,6 +206,7 @@ function isAllowedOrigin(origin: string): boolean {
 
 export function buildApp(options: BuildAppOptions): FastifyInstance {
   const app = Fastify();
+  const topicService = options.topicService ?? UNCONFIGURED_TOPIC_SERVICE;
 
   app.addHook('onRequest', async (request, reply) => {
     const origin = request.headers.origin;
@@ -362,6 +453,230 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  app.post<{ Body: CreateIdeaBody }>(
+    '/api/ideas',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(topicService.createIdea({
+          text: requiredString(request.body?.text, 'text'),
+          source: requiredIdeaSource(request.body?.source),
+          status: request.body?.status === undefined
+            ? undefined
+            : requiredIdeaStatus(request.body.status),
+        }));
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/ideas', async (_request, reply) => {
+    try {
+      return topicService.listIdeas();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
+  app.get<{ Params: IdeaParams }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        return topicService.getIdea(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.patch<{ Params: IdeaParams; Body: UpdateIdeaBody }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        const update: {
+          text?: string;
+          source?: 'inbox' | 'ideate';
+          status?: 'open' | 'promoted' | 'discarded';
+          latestCheck?: unknown;
+          latestCheckOpId?: string;
+        } = {};
+        if (hasOwn(request.body, 'text')) {
+          update.text = requiredString(request.body.text, 'text');
+        }
+        if (hasOwn(request.body, 'source')) {
+          update.source = requiredIdeaSource(request.body.source);
+        }
+        if (hasOwn(request.body, 'status')) {
+          update.status = requiredIdeaStatus(request.body.status);
+        }
+        if (hasOwn(request.body, 'latestCheck')) {
+          update.latestCheck = request.body.latestCheck;
+        }
+        if (hasOwn(request.body, 'latestCheckOpId')) {
+          update.latestCheckOpId = requiredString(
+            request.body.latestCheckOpId,
+            'latestCheckOpId',
+          );
+        }
+        return topicService.updateIdea(request.params.id, update);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.delete<{ Params: IdeaParams }>(
+    '/api/ideas/:id',
+    async (request, reply) => {
+      try {
+        topicService.deleteIdea(request.params.id);
+        return reply.code(204).send();
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: IdeaParams; Body: CreatePackageTestBody }>(
+    '/api/ideas/:id/package-tests',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(topicService.createPackageTest(
+          request.params.id,
+          {
+            opId: requiredString(request.body?.opId, 'opId'),
+            directions: requiredArray(
+              request.body?.directions,
+              'directions',
+            ) as PackageDirection[],
+          },
+        ));
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: IdeaParams }>(
+    '/api/ideas/:id/package-tests',
+    async (request, reply) => {
+      try {
+        return topicService.listPackageTests(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: RegisterTopicRunBody }>(
+    '/api/topic-runs',
+    async (request, reply) => {
+      try {
+        return reply.code(201).send(
+          topicService.registerRun(
+            requiredString(request.body?.opId, 'opId'),
+          ),
+        );
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/topic-runs', async (_request, reply) => {
+    try {
+      return topicService.listRuns();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
+  app.get<{ Params: TopicRunParams }>(
+    '/api/topic-runs/:id',
+    async (request, reply) => {
+      try {
+        return topicService.getRun(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: TopicRunParams; Body: TopicHandoffBody }>(
+    '/api/topic-runs/:id/handoff',
+    async (request, reply) => {
+      try {
+        return await topicService.handoff(request.params.id, request.body);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.get('/api/pipeline', async (_request, reply) => {
+    try {
+      return await topicService.pipeline();
+    } catch (error) {
+      return sendTopicError(reply, error);
+    }
+  });
+
+  app.get<{ Querystring: TopicBriefQuery }>(
+    '/api/topic-brief',
+    async (request, reply) => {
+      try {
+        return await topicService.topicBrief(
+          requiredString(request.query.ref, 'ref'),
+        );
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: WriteArtifactBody }>(
+    '/api/artifacts',
+    async (request, reply) => {
+      try {
+        const write = options.artifactService.write;
+        if (!write) throw new Error('artifact service is not configured');
+        const result = await write(
+          requiredString(request.body?.path, 'path'),
+          requiredStringValue(request.body?.content, 'content'),
+          requiredArtifactExpectedState(request.body?.expectedState),
+        );
+        return result.conflict
+          ? reply.code(409).send(result)
+          : reply.send(result);
+      } catch (error) {
+        return sendArtifactError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: UpsertPipelineBody }>(
+    '/api/pipeline',
+    async (request, reply) => {
+      try {
+        const upsert = options.artifactService.upsertPipelineRow;
+        if (!upsert) throw new Error('artifact service is not configured');
+        const result = await upsert({
+          episodeSlug: requiredString(
+            request.body?.episodeSlug,
+            'episodeSlug',
+          ),
+          milestone: requiredString(request.body?.milestone, 'milestone'),
+          ref: requiredString(request.body?.ref, 'ref'),
+        });
+        return result.conflict
+          ? reply.code(409).send(result)
+          : reply.send(result);
+      } catch (error) {
+        return sendArtifactError(reply, error);
+      }
+    },
+  );
+
   if (options.staticRoot !== undefined) {
     const staticRoot = resolve(options.staticRoot);
     const serveStatic = (
@@ -453,6 +768,55 @@ function requiredString(value: unknown, field: string): string {
   return value;
 }
 
+function requiredStringValue(value: unknown, field: string): string {
+  if (typeof value !== 'string') {
+    throw new Error(`${field} must be a string`);
+  }
+  return value;
+}
+
+function requiredArray(value: unknown, field: string): unknown[] {
+  if (!Array.isArray(value)) {
+    throw new Error(`${field} must be an array`);
+  }
+  return value;
+}
+
+function requiredArtifactExpectedState(
+  value: unknown,
+): ArtifactExpectedState {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('expectedState is required');
+  }
+  const state = value as Record<string, unknown>;
+  const hasExpectNew = Object.prototype.hasOwnProperty.call(
+    state,
+    'expectNew',
+  );
+  const hasExpectedHash = Object.prototype.hasOwnProperty.call(
+    state,
+    'expectedHash',
+  );
+  if (
+    hasExpectNew
+    && state['expectNew'] === true
+    && !hasExpectedHash
+  ) {
+    return { expectNew: true };
+  }
+  if (
+    hasExpectedHash
+    && typeof state['expectedHash'] === 'string'
+    && state['expectedHash'].trim() !== ''
+    && !hasExpectNew
+  ) {
+    return { expectedHash: state['expectedHash'] };
+  }
+  throw new Error(
+    'expectedState must contain exactly expectNew or expectedHash',
+  );
+}
+
 function optionalString(value: unknown, field: string): string | null {
   if (value === null) return null;
   if (typeof value !== 'string') {
@@ -473,6 +837,22 @@ function requiredDocument(value: unknown): Record<string, unknown> {
     throw new Error('doc is required');
   }
   return value as Record<string, unknown>;
+}
+
+function requiredIdeaSource(value: unknown): 'inbox' | 'ideate' {
+  if (value !== 'inbox' && value !== 'ideate') {
+    throw new Error('source must be inbox or ideate');
+  }
+  return value;
+}
+
+function requiredIdeaStatus(
+  value: unknown,
+): 'open' | 'promoted' | 'discarded' {
+  if (!['open', 'promoted', 'discarded'].includes(String(value))) {
+    throw new Error('status must be open, promoted, or discarded');
+  }
+  return value as 'open' | 'promoted' | 'discarded';
 }
 
 function waitForStreamDrain(stream: PassThrough): Promise<void> {
@@ -573,3 +953,77 @@ function sendValidatorError(
   reply.log.error({ err: error }, 'validator request failed');
   return reply.code(500).send({ error: 'internal server error' });
 }
+
+function sendTopicError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error ? error.message : 'topic request failed';
+  if (/^(?:idea|topic run|topic brief|operation) not found:/i.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (isTopicClientError(message)) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'topic request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+function isTopicClientError(message: string): boolean {
+  return [
+    /^(?:text|opId|latestCheckOpId) is required$/,
+    /^directions must be an array$/,
+    /^directions\[\d+\]/,
+    /^source must be inbox or ideate$/,
+    /^status must be open, promoted, or discarded$/,
+    /^latestCheck\./,
+    /^latestCheck is required with latestCheckOpId$/,
+    /^idea update is required$/,
+    /^operation .+ is not a full-topic-run$/,
+    /^topic run has no selected winner to hand off$/,
+    /^topic handoff /,
+    /^(?:ideaId|episodeSlug|title|briefMarkdown) is required$/,
+    /^draft\.(?:doc is required|format must be narration)$/,
+    /^ref is required$/,
+    /^invalid topic brief ref:/,
+  ].some((pattern) => pattern.test(message));
+}
+
+function sendArtifactError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error ? error.message : 'artifact failed';
+  if ([
+    /^(?:path|episodeSlug|milestone|ref) is required$/,
+    /^content must be a string$/,
+    /^expectedState /,
+    /^invalid or non-whitelisted artifact path:/,
+  ].some((pattern) => pattern.test(message))) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'artifact request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+const topicNotConfigured = (): never => {
+  throw new Error('topic service is not configured');
+};
+
+const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {
+  createIdea: topicNotConfigured,
+  getIdea: topicNotConfigured,
+  listIdeas: topicNotConfigured,
+  updateIdea: topicNotConfigured,
+  deleteIdea: topicNotConfigured,
+  createPackageTest: topicNotConfigured,
+  listPackageTests: topicNotConfigured,
+  registerRun: topicNotConfigured,
+  listRuns: topicNotConfigured,
+  getRun: topicNotConfigured,
+  handoff: topicNotConfigured,
+  pipeline: topicNotConfigured,
+  topicBrief: topicNotConfigured,
+};

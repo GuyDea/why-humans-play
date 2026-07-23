@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
-import { REVIEW_SCHEMA } from '../src/operations/schemas.js';
+import {
+  GATE_CHECK_SCHEMA,
+  REVIEW_SCHEMA,
+} from '../src/operations/schemas.js';
 
 const run = promisify(execFile);
 const FAKE = join(import.meta.dirname, 'fake-codex.mjs');
@@ -68,5 +71,27 @@ describe('fake codex', () => {
       }],
       guardrail_markdown: null,
     });
+  });
+
+  it('synthesizes the schema minItems count for arrays', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fake-gate-check-'));
+    const schema = join(dir, 'gate-check.schema.json');
+    const out = join(dir, 'final.json');
+    writeFileSync(schema, JSON.stringify(GATE_CHECK_SCHEMA));
+
+    await run(process.execPath, [
+      FAKE,
+      'exec',
+      '--json',
+      '--output-schema',
+      schema,
+      '-o',
+      out,
+      '-',
+    ], {
+      env: { ...process.env, FAKE_CODEX_MODE: 'operation-schema' },
+    });
+
+    expect(JSON.parse(readFileSync(out, 'utf8')).gates).toHaveLength(6);
   });
 });

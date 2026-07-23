@@ -6,6 +6,7 @@ import {
   PACKAGE_TEST_SCHEMA,
   REVIEW_SCHEMA,
   REWRITE_SCHEMA,
+  TOPIC_SUMMARY_SCHEMA,
   type JsonSchema,
 } from './schemas.js';
 
@@ -18,7 +19,7 @@ export type OperationTimeoutClass = 'scoped' | 'episode' | 'long';
 
 export type OperationResult =
   | { kind: 'schema'; schema: JsonSchema }
-  | { kind: 'raw' };
+  | { kind: 'raw'; summarySchema?: JsonSchema };
 
 export interface OperationDefinition {
   name: string;
@@ -118,7 +119,10 @@ export const OPERATIONS = {
     operationLabel: 'Full topic-selection run',
     sandbox: 'workspace-write',
     timeoutClass: 'long',
-    result: { kind: 'raw' },
+    result: {
+      kind: 'raw',
+      summarySchema: TOPIC_SUMMARY_SCHEMA,
+    },
     resumable: false,
   },
   'handoff-preview': {

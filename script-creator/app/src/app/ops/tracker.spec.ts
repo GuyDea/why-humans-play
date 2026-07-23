@@ -151,6 +151,20 @@ describe('OpTracker', () => {
     );
   });
 
+  it('exposes completion only after terminal result signals are settled', async () => {
+    const result = schemaResult();
+    const tracker = new OpTracker(mockClient({
+      getResult: vi.fn(async () => result),
+    }), mapConsoleEvents);
+
+    const tracked = tracker.launch('rewrite-selection', inputs, meta);
+    await tracked.completion;
+
+    expect(tracked.phase()).toBe('done');
+    expect(tracked.state()).toBe('completed');
+    expect(tracked.result()).toBe(result);
+  });
+
   it('treats a declined schema result as a first-class guardrail', async () => {
     const result = schemaResult('declined');
     const tracker = new OpTracker(mockClient({

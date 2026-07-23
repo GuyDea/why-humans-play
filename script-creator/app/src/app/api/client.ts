@@ -62,6 +62,182 @@ export interface OperationListResponse {
   operations: OperationSummary[];
 }
 
+export type IdeaSource = 'inbox' | 'ideate';
+export type IdeaStatus = 'open' | 'promoted' | 'discarded';
+
+export interface GateCheckResult {
+  verdict: 'pass' | 'fail' | 'unknown';
+  gates: Array<{
+    gate: TopicGateName;
+    verdict: 'pass' | 'fail' | 'unknown';
+    reasonMarkdown: string;
+  }>;
+}
+
+export interface IdeaRecord {
+  id: string;
+  text: string;
+  source: IdeaSource;
+  status: IdeaStatus;
+  latestCheck: GateCheckResult | null;
+  createdAt: string;
+}
+
+export interface CreateIdeaInput {
+  text: string;
+  source: IdeaSource;
+  status?: IdeaStatus;
+}
+
+export interface UpdateIdeaInput {
+  text?: string;
+  source?: IdeaSource;
+  status?: IdeaStatus;
+  latestCheck?: GateCheckResult | null;
+  latestCheckOpId?: string;
+}
+
+export interface PackageDirection {
+  working_title: string;
+  intended_viewer: string;
+  familiar_markdown: string;
+  surprise_markdown: string;
+  visual_promise_markdown: string;
+  delivered_payoff_markdown: string;
+  survives_honestly: boolean;
+  reason_markdown: string;
+}
+
+export interface PackageTestRecord {
+  id: string;
+  ideaId: string;
+  opId: string;
+  directions: PackageDirection[];
+  createdAt: string;
+}
+
+export interface CreatePackageTestInput {
+  opId: string;
+  directions: PackageDirection[];
+}
+
+export type TopicGateName =
+  | 'game_play_centrality'
+  | 'human_revelation'
+  | 'recognized_payoff'
+  | 'evidence_path'
+  | 'production_reality'
+  | 'portfolio_fit';
+
+export type TopicScoreName =
+  | 'demand'
+  | 'opening'
+  | 'package'
+  | 'satisfaction'
+  | 'whp'
+  | 'evidence'
+  | 'feasibility';
+
+export type TopicEvidenceGrade = 'A' | 'B' | 'C' | 'unknown';
+
+export interface TopicSummary {
+  candidates: Array<{
+    subject: string;
+    angle_markdown: string;
+    gates: Array<{
+      gate: TopicGateName;
+      verdict: 'pass' | 'fail' | 'unknown';
+      reason_markdown: string;
+    }>;
+    disposition: string;
+  }>;
+  shortlist: Array<{
+    rank: number;
+    subject: string;
+    angle_markdown: string;
+    scores: Record<TopicScoreName, {
+      score: number | null;
+      grade: TopicEvidenceGrade;
+    }>;
+    total: number | null;
+    confidence: 'high' | 'medium' | 'low';
+    decisive_risk_markdown: string;
+  }>;
+  packages: Array<PackageDirection & {
+    finalist: string;
+    direction: string;
+  }>;
+  winner: {
+    decision_status:
+      | 'winner-selected'
+      | 'provisional-winner'
+      | 'incomplete';
+    subject: string | null;
+    angle_markdown: string | null;
+    confidence: 'high' | 'medium' | 'low';
+    why_now_markdown: string;
+    strongest_package_markdown: string | null;
+  };
+}
+
+export interface TopicRunSummary {
+  id: string;
+  opId: string;
+  state: OperationState;
+  createdAt: string;
+}
+
+export interface TopicRunSnapshot {
+  state: OperationState;
+  progress: Array<{
+    id: string;
+    status: 'pending' | 'active' | 'done' | 'unknown';
+    text: string;
+  }>;
+  summary?: TopicSummary | null;
+  summaryError?: string;
+  reportMd?: string;
+  handoff?: TopicHandoffState;
+}
+
+export interface TopicHandoffInput {
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
+  briefMarkdown: string;
+  draft: {
+    format: DraftFormat;
+    doc: DraftDocument;
+  };
+}
+
+export interface TopicHandoffResumeInput {
+  resumeKey: string;
+}
+
+export type TopicHandoffCommand =
+  | TopicHandoffInput
+  | TopicHandoffResumeInput;
+
+export interface TopicHandoffResult {
+  draftId: string;
+  complete: boolean;
+  steps: {
+    draftCreated: 'pending' | 'completed';
+    artifactWritten: 'pending' | 'completed';
+    pipelineUpserted: 'pending' | 'completed';
+    ideaPromoted: 'pending' | 'completed';
+  };
+  error: string | null;
+}
+
+export interface TopicHandoffState extends TopicHandoffResult {
+  resumeKey: string;
+  ideaId: string;
+  episodeSlug: string;
+  title: string;
+}
+
 export type OperationResult =
   | { kind: 'schema'; value: unknown; guardrail: string | null }
   | { kind: 'raw'; markdown: string }
@@ -127,6 +303,42 @@ export type ArtifactWriteResult =
     currentHash: string | 'absent';
     parked?: string[];
   };
+
+export interface PipelineRowInput {
+  episodeSlug: string;
+  milestone: string;
+  ref: string;
+}
+
+export interface PipelineItem {
+  episodeSlug: string;
+  state: string;
+  milestone: string | null;
+  ref: string | null;
+  draftId: string | null;
+  title: string | null;
+  creativePhase: string | null;
+}
+
+export interface PipelineDiagnostic {
+  code:
+    | 'bad-header'
+    | 'bad-row'
+    | 'empty-required-cell'
+    | 'duplicate-slug';
+  line: number | null;
+  message: string;
+}
+
+export interface PipelineResponse {
+  rows: PipelineItem[];
+  diagnostics: PipelineDiagnostic[];
+}
+
+export interface TopicBrief {
+  ref: string;
+  markdown: string;
+}
 
 export interface ValidatorDiagnostic {
   message: string;
@@ -209,6 +421,80 @@ export class DaemonClient {
       method: 'POST',
       body: JSON.stringify({ inputs }),
     });
+  }
+
+  async listIdeas(): Promise<IdeaRecord[]> {
+    return this.request('/api/ideas');
+  }
+
+  async createIdea(input: CreateIdeaInput): Promise<IdeaRecord> {
+    return this.request('/api/ideas', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async updateIdea(
+    id: string,
+    input: UpdateIdeaInput,
+  ): Promise<IdeaRecord> {
+    return this.request(`/api/ideas/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(input),
+    });
+  }
+
+  async deleteIdea(id: string): Promise<void> {
+    await this.request(`/api/ideas/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async listPackageTests(id: string): Promise<PackageTestRecord[]> {
+    return this.request(
+      `/api/ideas/${encodeURIComponent(id)}/package-tests`,
+    );
+  }
+
+  async createPackageTest(
+    id: string,
+    input: CreatePackageTestInput,
+  ): Promise<PackageTestRecord> {
+    return this.request(
+      `/api/ideas/${encodeURIComponent(id)}/package-tests`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async registerTopicRun(opId: string): Promise<TopicRunSummary> {
+    return this.request('/api/topic-runs', {
+      method: 'POST',
+      body: JSON.stringify({ opId }),
+    });
+  }
+
+  async listTopicRuns(): Promise<TopicRunSummary[]> {
+    return this.request('/api/topic-runs');
+  }
+
+  async getTopicRun(id: string): Promise<TopicRunSnapshot> {
+    return this.request(`/api/topic-runs/${encodeURIComponent(id)}`);
+  }
+
+  async handoffTopicRun(
+    id: string,
+    input: TopicHandoffCommand,
+  ): Promise<TopicHandoffResult> {
+    return this.request(
+      `/api/topic-runs/${encodeURIComponent(id)}/handoff`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
   }
 
   async streamEvents(
@@ -300,6 +586,25 @@ export class DaemonClient {
       method: 'POST',
       body: JSON.stringify({ path, content, expectedState }),
     });
+  }
+
+  async upsertPipelineRow(
+    row: PipelineRowInput,
+  ): Promise<ArtifactWriteResult> {
+    return this.request('/api/pipeline', {
+      method: 'POST',
+      body: JSON.stringify(row),
+    });
+  }
+
+  async getPipeline(): Promise<PipelineResponse> {
+    return this.request('/api/pipeline');
+  }
+
+  async getTopicBrief(ref: string): Promise<TopicBrief> {
+    return this.request(
+      `/api/topic-brief?ref=${encodeURIComponent(ref)}`,
+    );
   }
 
   async validate(path: string): Promise<ValidatorResult> {

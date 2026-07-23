@@ -19,12 +19,38 @@ describe('operation schemas', () => {
     }
   });
 
+  it('registers a strict summary sidecar schema for the raw full topic run', () => {
+    const result = OPERATIONS['full-topic-run'].result as {
+      kind: 'raw';
+      summarySchema?: Record<string, unknown>;
+    };
+
+    expect(result.kind).toBe('raw');
+    expect(result.summarySchema).toBeDefined();
+    assertStrict(result.summarySchema!, 'full-topic-run.summary');
+  });
+
   it('every schema shares the status/guardrail frame', () => {
     for (const op of Object.values(OPERATIONS)) {
       if (op.result.kind !== 'schema') continue;
       const props = (op.result.schema as { properties: Record<string, unknown> }).properties;
       expect(Object.keys(props), op.name).toEqual(expect.arrayContaining(['status', 'guardrail_markdown']));
     }
+  });
+
+  it('requires exactly the six fixed quick-gate-check gates', () => {
+    const operation = OPERATIONS['quick-gate-check'];
+    expect(operation.result.kind).toBe('schema');
+    if (operation.result.kind !== 'schema') return;
+
+    const gates = (operation.result.schema as {
+      properties: Record<string, Record<string, unknown>>;
+    }).properties['gates'];
+    expect(gates).toMatchObject({
+      type: 'array',
+      minItems: 6,
+      maxItems: 6,
+    });
   });
 });
 

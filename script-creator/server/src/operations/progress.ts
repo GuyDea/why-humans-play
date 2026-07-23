@@ -1,19 +1,63 @@
 import type { CodexEvent } from '../types.js';
 
-export const WHP_PROGRESS_IDS = [
-  '01-frame',
-  '02-mode',
-  '03-signals',
-  '04-pool',
-  '05-angles',
-  '06-gates',
-  '07-shallow',
-  '08-deep',
-  '09-shortlist',
-  '10-packages',
-  '11-winner',
-  '12-audit',
+export const WHP_PROGRESS_VERSION = 'WHP_PROGRESS/2';
+
+export const WHP_PROGRESS_ROWS = [
+  {
+    id: '01-frame',
+    text: 'Record the decision frame and current WHP context.',
+  },
+  {
+    id: '02-mode',
+    text: 'Select and state the evidence mode.',
+  },
+  {
+    id: '03-signals',
+    text: 'Collect independent audience-demand, competitive-supply, and timing signals.',
+  },
+  {
+    id: '04-pool',
+    text: 'Record at least 30 distinct, diverse subjects before ranking.',
+  },
+  {
+    id: '05-angles',
+    text: 'Develop materially different angles for promising subjects.',
+  },
+  {
+    id: '06-proof-cases',
+    text: 'Identify a first-hearing opening proof case and any needed current echo for each finalist.',
+  },
+  {
+    id: '07-gates',
+    text: 'Audit every advancing angle against all six hard gates.',
+  },
+  {
+    id: '08-shallow',
+    text: 'Run a shallow scan and narrow to roughly 8–12 candidates.',
+  },
+  {
+    id: '09-deep',
+    text: 'Deeply research the finalists with multiple signals.',
+  },
+  {
+    id: '10-shortlist',
+    text: 'Rank a shortlist of roughly five with the required scorecard.',
+  },
+  {
+    id: '11-packages',
+    text: 'Test three package promises for each top-three finalist.',
+  },
+  {
+    id: '12-winner',
+    text: 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.',
+  },
+  {
+    id: '13-audit',
+    text: 'Complete the output and evidence audit.',
+  },
 ] as const;
+
+export const WHP_PROGRESS_IDS = WHP_PROGRESS_ROWS.map(({ id }) => id);
 
 export type WhpProgressStatus = 'pending' | 'active' | 'done' | 'unknown';
 
@@ -41,7 +85,7 @@ export interface ConsoleEntry {
 }
 
 const PROGRESS_LINE =
-  /^WHP_PROGRESS\/1 (\S+) (pending|active|done|unknown) :: (.*)$/;
+  /^WHP_PROGRESS\/2 (\S+) (pending|active|done|unknown) :: (.*)$/;
 const KNOWN_IDS = new Set<string>(WHP_PROGRESS_IDS);
 const TOOL_ITEM_TYPES = new Set([
   'command_execution',

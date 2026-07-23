@@ -53,6 +53,10 @@ Read [references/research-method.md](references/research-method.md) completely *
 
 Read [references/output-contract.md](references/output-contract.md) completely **before composing the answer**. It governs the report structure, tables, research trail, and completeness audit.
 
+When a caller's envelope requests machine progress transport, follow
+[references/run-progress-transport.md](references/run-progress-transport.md); its row
+identities mirror this checklist and change with it.
+
 Do not substitute an improvised rubric or ad hoc report for either reference.
 
 ## Generate before judging
