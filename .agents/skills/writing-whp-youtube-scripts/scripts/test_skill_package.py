@@ -8,6 +8,7 @@ from pathlib import Path
 SKILL_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = SKILL_ROOT.parents[2]
 SKILL_MD = SKILL_ROOT / "SKILL.md"
+ARCHITECTURE_MD = SKILL_ROOT / "references/script-architecture.md"
 CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
@@ -363,6 +364,138 @@ class SkillPackageTests(unittest.TestCase):
         for contract in contracts:
             with self.subTest(contract=contract):
                 self.assertIn(contract, skill)
+
+    def test_episode_scale_generation_requires_approved_architecture(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        contracts = (
+            "For a new episode or a thesis-level rethink, produce and refine the "
+            "script architecture before writing any opening or narration.",
+            "Stop after returning the architecture. Do not draft the hook, beats, or "
+            "narration until Martin explicitly approves it.",
+            "Approval of a topic, title, isolated insight, or earlier script does not "
+            "approve the architecture.",
+            "Once Martin approves the architecture, use it as the content baseline "
+            "for the first narration prototype.",
+            "Preserve its central question, core answer, belief shift, insight ladder, "
+            "phenomenon map, earned reframe, boundaries, payoff, and final lesson.",
+            "Scoped work on existing narration does not require rebuilding the "
+            "architecture unless the requested change alters the episode's central "
+            "message.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, skill)
+
+    def test_script_architecture_has_the_complete_message_contract(self) -> None:
+        self.assertTrue(ARCHITECTURE_MD.is_file())
+        architecture = ARCHITECTURE_MD.read_text(encoding="utf-8")
+        for heading in (
+            "## Architecture artifact",
+            "### Central question",
+            "### Core answer",
+            "### Viewer belief shift",
+            "### Insight ladder",
+            "### Phenomenon and paradox map",
+            "### Earned reframe",
+            "### Real-world evidence map",
+            "### Practical payoff",
+            "### Final lesson",
+            "### Scope boundary",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, architecture)
+
+        normalized = " ".join(architecture.split())
+        for insight_field in (
+            "**Claim:**",
+            "**Why it is surprising:**",
+            "**Mechanism:**",
+            "**Real-world case or example:**",
+            "**Human consequence:**",
+            "**Boundary:**",
+        ):
+            with self.subTest(insight_field=insight_field):
+                self.assertIn(insight_field, architecture)
+
+        earned_reframe_fields = (
+            "Conventional explanation",
+            "Hidden assumption",
+            "Mechanism that breaks it",
+            "Surprising conclusion",
+            "What it predicts",
+            "Where it stops",
+        )
+        for field in earned_reframe_fields:
+            with self.subTest(earned_reframe=field):
+                self.assertIn(field, architecture)
+
+        self.assertIn(
+            "The architecture is the episode's intellectual payload, not a prose "
+            "outline.",
+            normalized,
+        )
+
+    def test_architecture_requires_an_earned_deeper_insight(self) -> None:
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
+        contracts = (
+            "Do not settle for a competent summary of what is already commonly said "
+            "about the topic.",
+            "A controversial conclusion must be earned by the preceding mechanism "
+            "and bounded by what would make it false.",
+            "The earned reframe must help the viewer reinterpret or predict at least "
+            "one situation beyond the opening example.",
+            "If the reframe could sit unchanged in the first paragraph of a generic "
+            "explainer, deepen it before scripting.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, architecture)
+
+    def test_architecture_maps_known_phenomena_without_a_jargon_parade(self) -> None:
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
+        contracts = (
+            "Map every useful established phenomenon, paradox, bias, law, or tension "
+            "to the exact insight it explains.",
+            "Distinguish the primary mechanism from supporting concepts and nearby "
+            "terms that are similar but less precise.",
+            "Demonstrate a phenomenon through the story before naming it in "
+            "narration.",
+            "Do not create a Wikipedia parade: include a name only when it compresses "
+            "understanding, sharpens the reframe, or lets the viewer recognize the "
+            "pattern elsewhere.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, architecture)
+
+    def test_architecture_gate_prevents_premature_script_fluff(self) -> None:
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        contracts = (
+            "Do not write hook copy, jokes, transitions, scene direction, or complete "
+            "narration inside the architecture artifact.",
+            "Refine weak, redundant, obvious, or disconnected ideas at architecture "
+            "level before spending prose on them.",
+            "Treat examples, stories, humor, and hooks as the delivery system for an "
+            "approved payload, not as substitutes for that payload.",
+        )
+        for source_name, source in (
+            ("architecture", architecture),
+            ("rapid", rapid),
+        ):
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source)
 
     def test_rapid_mode_defers_verification_without_permitting_fabrication(
         self,
@@ -1164,6 +1297,7 @@ class SkillPackageTests(unittest.TestCase):
             "references/quality-rubric.md",
             "references/rapid-prototyping.md",
             "references/research-and-rights.md",
+            "references/script-architecture.md",
             "references/story-and-hook-method.md",
             "scripts/validate_annotated_script.py",
         }
@@ -1172,8 +1306,8 @@ class SkillPackageTests(unittest.TestCase):
         expected_openai = (
             b"interface:\n"
             b'  display_name: "WHP YouTube Script Writer"\n'
-            b'  short_description: "Prototype and finalize compelling WHP scripts"\n'
-            b'  default_prompt: "Use $writing-whp-youtube-scripts to rapidly '
+            b'  short_description: "Architect, prototype, and finalize WHP scripts"\n'
+            b'  default_prompt: "Use $writing-whp-youtube-scripts to architect, '
             b'prototype, refine, or production-finalize a Why Humans Play episode '
             b'script."\n'
         )
@@ -1252,6 +1386,7 @@ class SkillPackageTests(unittest.TestCase):
             and target != "Original URL"
         ]
         expected = [
+            "references/script-architecture.md",
             "references/rapid-prototyping.md",
             "references/story-and-hook-method.md",
             "references/research-and-rights.md",

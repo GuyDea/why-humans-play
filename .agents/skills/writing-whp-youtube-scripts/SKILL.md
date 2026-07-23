@@ -7,9 +7,10 @@ description: "Use when ideating, drafting, reviewing, or revising Why Humans Pla
 
 ## Overview
 
-Use one skill for two phases: rapid creative prototyping and evidence-backed production.
-Default to the rapid phase and protect creative momentum; enter production only through the
-explicit approval gate. Put the viewer promise and honest inquiry before retention tricks.
+Use one skill for two phases: rapid creative development and evidence-backed production.
+Within the rapid phase, approve the episode's intellectual architecture before drafting
+narration. Enter production only after the separate creative approval gate. Put the viewer
+promise and honest inquiry before retention tricks.
 
 Do not use this skill for unrelated ads, social posts, or general marketing copy.
 
@@ -33,7 +34,8 @@ change the requested artifact.
 
 Honor the requested scope before choosing a phase:
 
-- **Generate:** return one requested structure, opening, passage, or narration.
+- **Generate:** return one requested architecture, structure, opening, passage, or narration,
+  routed through the applicable approval gate.
 - **Review:** return findings without rewriting the supplied text.
 - **Rewrite selection:** replace only the selection and preserve its surrounding language
   and narrative job.
@@ -60,6 +62,17 @@ specificity to make a draft sound authoritative. Preserve accepted language and 
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+For a new episode or a thesis-level rethink, produce and refine the script architecture
+before writing any opening or narration. Stop after returning the architecture. Do not draft
+the hook, beats, or narration until Martin explicitly approves it. Approval of a topic,
+title, isolated insight, or earlier script does not approve the architecture.
+
+Once Martin approves the architecture, use it as the content baseline for the first
+narration prototype. Preserve its central question, core answer, belief shift, insight
+ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson. Scoped work
+on existing narration does not require rebuilding the architecture unless the requested
+change alters the episode's central message.
+
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
 case, label a hypothetical clearly instead of making one sound historical.
@@ -82,6 +95,17 @@ diagnostic, not a drafting gate. Report audit concerns and tradeoffs separately 
 rewriting the narration; never silently cut context to satisfy an audit.
 
 Do not add these source markers to Phase 1 prototypes unless Martin explicitly asks.
+
+## Architecture approval gate
+
+For episode-scale work without an approved architecture, return only the architecture
+artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
+Positive feedback on one insight, example, phenomenon, or reframe does not approve the
+complete architecture.
+
+Architecture approval authorizes beat ordering and narration prototyping, not evidence
+production. Preserve the approved architecture as the message baseline during prose
+iteration.
 
 ## Creative approval gate
 
@@ -165,7 +189,10 @@ For evidence-backed finalization:
 
 ## Resource routing
 
-- For Phase 1 and scoped operations, read [the rapid prototyping method](references/rapid-prototyping.md).
+- For a new episode, an unapproved message, or a thesis-level rethink, read
+  [the script architecture method](references/script-architecture.md).
+- For Phase 1 narration and scoped operations, read
+  [the rapid prototyping method](references/rapid-prototyping.md).
 - In Phase 2, or when Martin explicitly requests opening comparison or story restructuring,
   read [the story and hook method](references/story-and-hook-method.md).
 - Before web research, claim approval, visual sourcing, or rights labeling, read

@@ -4,6 +4,7 @@
 **Status:** Accepted — V1 scope decided; amended same day with FR-8 (learning loop) and
 resolved decisions 5–9 on acceptance of the
 [technical design](2026-07-22-script-creator-technical-design.md)
+and amended 2026-07-23 for the architecture-first script workflow
 **Scope:** Local script-ideation and editing app ("Script Creator") for the WHP editorial workflow
 
 ## 1. Purpose
@@ -45,14 +46,15 @@ invocable.
 
 1. **Skills own editorial rules; the app never duplicates them** into a second prompt
    system that can drift.
-2. **The topic skill owns topic comparison and selection; the script skill owns narration
-   onward**, receiving a selected topic brief.
+2. **The topic skill owns topic comparison and selection; the script skill owns script
+   architecture onward**, receiving a selected topic brief.
 3. **Approved artifacts are portable repo Markdown** — the canonical source of truth.
    App-local storage holds working and operational state (in-progress drafts, variants,
    revisions, decision logs, telemetry, job records) — durable but noncanonical;
    anything approved or milestone-worthy must land in repo Markdown.
-4. **Explicit human gates:** creative approval (premise, voice, hook, story direction)
-   precedes Phase 2; `RECORD-READY` is never self-promoted by the app or agent.
+4. **Explicit human gates:** architecture approval precedes episode-scale narration;
+   creative approval of the complete narration then precedes Phase 2; `RECORD-READY` is
+   never self-promoted by the app or agent.
 5. **Rapid mode never fabricates facts** — the app must surface the factual boundary
    (supplied anchors versus unknowns), not hide it.
 6. **Stack decisions deferred:** this document defines capabilities, not framework,
@@ -85,15 +87,24 @@ invocable.
   promise, payoff, factual anchors, unknowns) and opens the Script Studio with it — the
   handoff contract the skills already define.
 - **FR-1.8 Pipeline board.** The episode backlog as a kanban: idea → candidate → selected
-  → prototyping → creative-approved → production → record-ready → recorded → published;
-  shows the accepted EP1–EP4 sequence and parked drafts.
+  → architecture → architecture-approved → prototyping → creative-approved → production
+  → record-ready → recorded → published; shows the accepted EP1–EP4 sequence and parked
+  drafts.
 
 ### FR-2 — Script Studio (generate and refine)
 
-- **FR-2.1 Structure first.** Generate and edit a beat outline before narration; reorder
-  beats by drag; the agent re-stitches transitions on request.
-- **FR-2.2 Rapid prototype generation.** One-click Phase 1 narration draft from the topic
-  brief — fast, no research overhead, honoring the rapid-prototyping method.
+- **FR-2.1 Message architecture first.** Generate and edit the intellectual payload before
+  prose: central question and answer, viewer belief shift, three-to-five-step insight
+  ladder, phenomenon and paradox map, earned reframe, real-world evidence map, practical
+  payoff, final lesson, and scope boundary. Each insight exposes its claim, surprise,
+  mechanism, example, human consequence, and boundary. After architecture approval, allow
+  a beat outline to order that payload before narration; reorder beats by drag and let the
+  agent re-stitch transitions on request.
+- **FR-2.2 Architecture gate and rapid prototype generation.** Require a deliberate
+  architecture approval action before enabling an episode-scale Phase 1 narration draft.
+  Generate that draft from the approved architecture without research overhead, preserving
+  the approved core answer, insight ladder, earned reframe, payoff, boundaries, and final
+  lesson.
 - **FR-2.3 Scoped regeneration.** Regenerate any unit (hook, beat, transition, ending)
   without touching the rest — the skill's "change only the requested scope" rule made
   visible.

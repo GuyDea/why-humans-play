@@ -1,7 +1,8 @@
 # WHP Script Creator — V1 Technical Design
 
 **Date:** 2026-07-22
-**Status:** Accepted
+**Status:** Accepted for the original V1; architecture-first editorial requirement recorded
+2026-07-23, with its app contract pending a focused design amendment
 **Scope:** Technical design for the V1 scope of
 [the accepted business requirements](2026-07-22-script-creator-requirements.md); includes
 the FR-8 learning loop added on acceptance day
@@ -93,6 +94,15 @@ content never contaminate exported Markdown; export is blocked until variants ar
 settled and proposals resolved. External file edits are detected by content hash and
 imported as a new revision — never silently overwritten.
 
+> **Architecture-first amendment boundary:** The accepted requirements now require an
+> architecture draft, explicit whole-architecture approval, and an approved portable
+> Markdown milestone before episode-scale narration. This earlier technical design does not
+> yet define the architecture field schema, operation transport, editor model, persistence
+> shape, approval transition, codec, or canonical Markdown location. Specify and test those
+> together in the focused architecture-UI design before implementation. Until then, the
+> `ScriptDocument` shape and normative operation schemas below remain the pre-architecture
+> app contract and are not sufficient to enable episode-scale narration generation.
+
 **Safe agent merge.** Every request freezes `baseRevision`, the selected slice, stable
 endpoint IDs, and a text fingerprint. On result: validate the typed response (never
 accept a whole returned document); map the original endpoints through all transactions
@@ -144,7 +154,7 @@ Operations and their results:
 | Operation | Skill | Result | Repo side effect |
 |---|---|---|---|
 | Generate (scoped) | script | schema (rewrite shape) | none |
-| Generate (episode-scale) | script | raw Markdown via `-o` | none (app writes `drafts/` on approval) |
+| Generate narration (episode-scale) | script | blocked until the architecture-UI contract is accepted; afterward architecture-approved only | none |
 | Review | script | schema (findings) | none |
 | Rewrite selection | script | schema (replacement) | none |
 | Generate alternatives | script | schema (options) | none |
@@ -418,8 +428,9 @@ implementation, field sets normative here):
 
 ## Reconciliation
 
-The business requirements gain FR-8 (learning loop) in V1, the guyditor deferral in
-later-version candidates, and resolved decisions 5–9; `DECISIONS.md` records the design
-acceptance. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content
-change: the design conforms to the recorded workbench boundary, and the app remains an
-internal authoring tool.
+The original design reconciliation added FR-8 (learning loop), the guyditor deferral, and
+resolved decisions 5–9. The 2026-07-23 editorial amendment also changes
+`whp-youtube/STEERING.md`, the script skill, the business requirements, and `DECISIONS.md`
+to require approved architecture before narration. `BRAND.md` and `CLAUDE.md` still need
+no content change. The architecture app transport, storage, editor, approval transition,
+and Markdown codec remain deliberately unresolved until the focused architecture-UI design.

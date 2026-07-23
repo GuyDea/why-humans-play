@@ -1,8 +1,14 @@
 # WHP Rapid Script Prototyping Design
 
 **Date:** 2026-07-22
-**Status:** Implemented and verified
+**Status:** Implemented and verified; phase order partially superseded 2026-07-23
 **Scope:** `.agents/skills/writing-whp-youtube-scripts`
+
+> **Current workflow note:** This document preserves the design that introduced rapid
+> prototyping. The later accepted architecture-first decision now requires an approved
+> intellectual architecture before the first episode-scale narration. Current behavior
+> lives in `whp-youtube/STEERING.md` and the script skill; statements below that require an
+> immediate narration are historical.
 
 ## Decision
 

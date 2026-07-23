@@ -487,3 +487,33 @@ must be visible where the claim is read.
 `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
 `whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` remains unchanged
 because this refines evidence-review presentation rather than brand scope or identity.
+
+## 2026-07-23 — Approve script architecture before narration
+
+**Decision:** Every new WHP episode or thesis-level rethink begins with a separately
+reviewed script architecture—central question and answer, viewer belief shift, insight
+ladder, phenomenon and paradox map, earned reframe, real-world evidence map, practical
+payoff, final lesson, and scope boundary—and no episode-scale opening, beat outline, or
+narration begins until Martin explicitly approves that complete intellectual payload.
+
+**Rationale:** Drafting polished narration first made Martin discover shallow, redundant,
+or disconnected ideas inside expensive prose. Refining the payload first is faster and
+creates room for a defensible deeper insight rather than a summary of familiar material.
+Mapping established phenomena also lets the episode connect its examples to useful known
+ideas without becoming a list of terminology.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/agents/openai.yaml`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`docs/superpowers/specs/2026-07-22-script-creator-requirements.md`,
+`docs/superpowers/specs/2026-07-22-script-creator-technical-design.md`,
+`docs/superpowers/evidence/2026-07-23-whp-script-architecture-baseline.md`,
+`docs/superpowers/evidence/2026-07-23-whp-script-architecture-forward-evaluation.md`,
+`docs/superpowers/evidence/2026-07-23-whp-script-architecture-evaluation.md`, and this
+ledger. `BRAND.md`, `CLAUDE.md`, historical research, Episode 1, and app implementation
+remain unchanged because this is an authoring-order decision consistent with existing
+brand doctrine and the local app is being changed separately on another branch.
