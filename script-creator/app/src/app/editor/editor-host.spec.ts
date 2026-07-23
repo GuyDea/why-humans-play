@@ -3,6 +3,7 @@ import { DaemonClientError } from '../api/client';
 import { DebouncedAutosave } from './editor-host';
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.useRealTimers();
 });
 
@@ -123,6 +124,85 @@ describe('DebouncedAutosave', () => {
     expect(attempts).toHaveLength(4);
     expect(attempts.slice(1).map((time, index) =>
       time - attempts[index]!)).toEqual([100, 200, 250]);
+  });
+
+  it('keeps a superseding snapshot queued until its retry persists', async () => {
+    vi.useFakeTimers();
+    const attempts: string[] = [];
+    const persisted: string[] = [];
+    const queueSizes: number[] = [];
+    let persistNewestRetry!: () => void;
+    const autosave = new DebouncedAutosave<string>(
+      async (snapshot) => {
+        attempts.push(snapshot);
+        if (attempts.length <= 2) {
+          throw new DaemonClientError(503, { error: 'daemon unavailable' });
+        }
+        await new Promise<void>((resolve) => {
+          persistNewestRetry = resolve;
+        });
+        persisted.push(snapshot);
+      },
+      1_000,
+      1_000,
+      (size) => queueSizes.push(size),
+    );
+
+    autosave.schedule('first');
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(attempts).toEqual(['first']);
+    expect(queueSizes.at(-1)).toBe(1);
+
+    autosave.schedule('newest');
+    await vi.advanceTimersByTimeAsync(0);
+    expect(attempts).toEqual(['first', 'newest']);
+    expect(queueSizes.at(-1)).toBe(1);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    expect(attempts).toEqual(['first', 'newest', 'newest']);
+    expect(persisted).toEqual([]);
+    expect(queueSizes.at(-1)).toBe(1);
+
+    persistNewestRetry();
+    await autosave.whenIdle();
+    expect(persisted).toEqual(['newest']);
+    expect(queueSizes.at(-1)).toBe(0);
+  });
+
+  it('ignores cleared debounce callbacks that fire during a newer retry', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(globalThis, 'clearTimeout').mockImplementation(() => undefined);
+    const attempts: string[] = [];
+    let finishFirst!: () => void;
+    const autosave = new DebouncedAutosave<string>(
+      async (snapshot) => {
+        attempts.push(snapshot);
+        if (snapshot === 'first') {
+          await new Promise<void>((resolve) => {
+            finishFirst = resolve;
+          });
+          return;
+        }
+        if (attempts.filter((attempt) => attempt === 'newest').length === 1) {
+          throw new DaemonClientError(503, { error: 'daemon unavailable' });
+        }
+      },
+      1_000,
+      1_000,
+    );
+
+    autosave.schedule('first');
+    autosave.flush();
+    expect(attempts).toEqual(['first']);
+
+    autosave.schedule('newest');
+    finishFirst();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(attempts).toEqual(['first', 'newest']);
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    await autosave.whenIdle();
+    expect(attempts).toEqual(['first', 'newest', 'newest']);
   });
 
   it('cancels retry activity without reporting the dirty snapshot as saved', async () => {

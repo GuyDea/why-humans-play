@@ -47,9 +47,14 @@ import {
 } from './studio-composition';
 
 export class DebouncedAutosave<T> {
-  private timer: ReturnType<typeof setTimeout> | null = null;
-  private pending: T | undefined;
-  private hasPending = false;
+  private timer: {
+    generation: number;
+    handle: ReturnType<typeof setTimeout>;
+  } | null = null;
+  private pending: {
+    generation: number;
+    snapshot: T;
+  } | null = null;
   private generation = 0;
   private activeGeneration: number | null = null;
   private activePromise: Promise<void> | null = null;
@@ -71,21 +76,27 @@ export class DebouncedAutosave<T> {
   ) {}
 
   schedule(snapshot: T): void {
-    this.pending = snapshot;
-    this.hasPending = true;
+    const generation = this.generation + 1;
+    this.generation = generation;
+    this.pending = { generation, snapshot };
     this.clearTimer();
-    this.wakeRetry(false);
-    this.timer = setTimeout(() => {
-      this.timer = null;
-      this.flush();
+    const retryGeneration = this.retryWait?.generation;
+    if (
+      retryGeneration !== undefined
+      && retryGeneration !== generation
+    ) {
+      this.wakeRetry(retryGeneration, false);
+    }
+    const handle = setTimeout(() => {
+      this.flushGeneration(generation, handle);
     }, this.delayMs);
+    this.timer = { generation, handle };
   }
 
   flush(): Promise<void> | null {
-    this.clearTimer();
-    this.wakeRetry(false);
-    if (!this.hasPending) return this.activePromise;
-    return this.ensureDrain();
+    const pending = this.pending;
+    if (!pending) return this.activePromise;
+    return this.flushGeneration(pending.generation);
   }
 
   async whenIdle(): Promise<void> {
@@ -98,27 +109,53 @@ export class DebouncedAutosave<T> {
   cancel(): void {
     this.generation += 1;
     this.clearTimer();
-    this.pending = undefined;
-    this.hasPending = false;
-    this.wakeRetry(false);
+    this.pending = null;
+    const retryGeneration = this.retryWait?.generation;
+    if (retryGeneration !== undefined) {
+      this.wakeRetry(retryGeneration, false);
+    }
     this.activeGeneration = null;
     this.activePromise = null;
     this.onQueueSizeChange(0);
     this.resolveIdle();
   }
 
-  private ensureDrain(): Promise<void> | null {
-    const generation = this.generation;
-    if (this.activeGeneration === generation) return this.activePromise;
-    if (!this.hasPending) return null;
+  private flushGeneration(
+    generation: number,
+    handle?: ReturnType<typeof setTimeout>,
+  ): Promise<void> | null {
+    if (
+      generation !== this.generation
+      || this.pending?.generation !== generation
+      || (
+        handle !== undefined
+        && (
+          this.timer?.generation !== generation
+          || this.timer.handle !== handle
+        )
+      )
+    ) {
+      return this.activePromise;
+    }
+    this.clearTimer(generation);
+    return this.ensureDrain();
+  }
 
+  private ensureDrain(): Promise<void> | null {
+    if (this.activeGeneration !== null) return this.activePromise;
+    const pending = this.pending;
+    if (!pending || pending.generation !== this.generation) return null;
+
+    this.pending = null;
+    this.clearTimer(pending.generation);
+    const { generation, snapshot } = pending;
     this.activeGeneration = generation;
     this.onQueueSizeChange(1);
-    const active = this.drain(generation).finally(() => {
+    const active = this.saveWithRetries(snapshot, generation).finally(() => {
       if (this.activeGeneration !== generation) return;
       this.activeGeneration = null;
       this.activePromise = null;
-      if (this.hasPending) {
+      if (this.pending) {
         this.ensureDrain();
         return;
       }
@@ -127,15 +164,6 @@ export class DebouncedAutosave<T> {
     });
     this.activePromise = active;
     return active;
-  }
-
-  private async drain(generation: number): Promise<void> {
-    while (generation === this.generation && this.hasPending) {
-      const snapshot = this.pending as T;
-      this.pending = undefined;
-      this.hasPending = false;
-      await this.saveWithRetries(snapshot, generation);
-    }
   }
 
   private async saveWithRetries(
@@ -151,7 +179,6 @@ export class DebouncedAutosave<T> {
         if (
           generation !== this.generation
           || !this.shouldRetry(error)
-          || this.hasPending
         ) {
           return;
         }
@@ -174,30 +201,47 @@ export class DebouncedAutosave<T> {
   ): Promise<boolean> {
     return new Promise((resolve) => {
       const timer = setTimeout(() => {
-        if (this.retryWait?.timer === timer) this.retryWait = null;
+        if (
+          generation !== this.generation
+          || this.retryWait?.generation !== generation
+          || this.retryWait.timer !== timer
+        ) {
+          resolve(false);
+          return;
+        }
+        this.retryWait = null;
         resolve(true);
       }, milliseconds);
       this.retryWait = { generation, timer, resolve };
     });
   }
 
-  private wakeRetry(elapsed: boolean): void {
+  private wakeRetry(generation: number, elapsed: boolean): void {
     const wait = this.retryWait;
-    if (!wait) return;
+    if (!wait || wait.generation !== generation) return;
     clearTimeout(wait.timer);
     this.retryWait = null;
     wait.resolve(elapsed);
   }
 
-  private clearTimer(): void {
-    if (this.timer === null) return;
-    clearTimeout(this.timer);
+  private clearTimer(generation?: number): void {
+    const timer = this.timer;
+    if (
+      timer === null
+      || (
+        generation !== undefined
+        && timer.generation !== generation
+      )
+    ) {
+      return;
+    }
+    clearTimeout(timer.handle);
     this.timer = null;
   }
 
   private isIdle(): boolean {
     return this.timer === null
-      && !this.hasPending
+      && this.pending === null
       && this.activeGeneration === null
       && this.retryWait === null;
   }

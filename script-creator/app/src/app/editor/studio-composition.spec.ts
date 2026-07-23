@@ -1,6 +1,7 @@
 import '@angular/compiler';
 import {
   createComponent,
+  getDebugNode,
   provideZonelessChangeDetection,
   ɵgetComponentDef,
   ɵresolveComponentResources,
@@ -14,6 +15,7 @@ import {
   Router,
 } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DaemonClientError } from '../api/client';
 import type {
   DaemonClient,
   DraftDocument,
@@ -202,6 +204,7 @@ afterEach(() => {
   document.body.replaceChildren();
   globalThis.history.replaceState(null, '', '/');
   vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe('mounted Script Studio composition', () => {
@@ -473,6 +476,77 @@ describe('mounted Script Studio composition', () => {
         );
     });
     expect(studio.client.submitOp).not.toHaveBeenCalled();
+  });
+
+  it('clears the unsaved badge only after a superseding retry persists', async () => {
+    const studio = await mountStudio();
+    vi.useFakeTimers();
+    const persist = studio.client.save.getMockImplementation();
+    if (!persist) throw new Error('the controllable save implementation is unavailable');
+    const attempts: string[] = [];
+    let persistNewestRetry!: () => void;
+    studio.client.save.mockImplementation(async (id, input) => {
+      const serialized = JSON.stringify(input.doc);
+      const snapshot = serialized.includes('newest autosave target')
+        ? 'newest'
+        : 'first';
+      attempts.push(snapshot);
+      if (attempts.length <= 2) {
+        throw new DaemonClientError(503, { error: 'daemon unavailable' });
+      }
+      await new Promise<void>((resolve) => {
+        persistNewestRetry = resolve;
+      });
+      return persist(id, input);
+    });
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'first autosave target',
+    );
+    studio.tick();
+    const hostElement = studio.root.querySelector<HTMLElement>('app-editor-host');
+    if (!hostElement) throw new Error('EditorHost was not mounted');
+    const host = getDebugNode(hostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!host) throw new Error('EditorHost instance was not discoverable');
+    expect(host.unsaved()).toBe(true);
+    expect(hostElement.querySelector('[data-testid="unsaved-badge"]')).not.toBeNull();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    studio.tick();
+    expect(attempts).toEqual(['first']);
+    expect(host.saving()).toBe(true);
+    expect(host.unsaved()).toBe(true);
+
+    await replaceRenderedText(
+      studio,
+      'first autosave target',
+      'newest autosave target',
+    );
+    await vi.advanceTimersByTimeAsync(0);
+    studio.tick();
+    expect(attempts).toEqual(['first', 'newest']);
+    expect(host.saving()).toBe(true);
+    expect(host.unsaved()).toBe(true);
+    expect(hostElement.querySelector('[data-testid="unsaved-badge"]')).not.toBeNull();
+
+    await vi.advanceTimersByTimeAsync(1_000);
+    studio.tick();
+    expect(attempts).toEqual(['first', 'newest', 'newest']);
+    expect(host.saving()).toBe(true);
+    expect(host.unsaved()).toBe(true);
+    expect(hostElement.querySelector('[data-testid="unsaved-badge"]')).not.toBeNull();
+
+    persistNewestRetry();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(host.saving()).toBe(false);
+      expect(host.unsaved()).toBe(false);
+      expect(hostElement.querySelector('[data-testid="unsaved-badge"]')).toBeNull();
+    });
   });
 });
 
