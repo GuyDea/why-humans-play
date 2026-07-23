@@ -58,11 +58,17 @@ describe('DaemonClient', () => {
       opId: 'op-1',
       disposition: 'accepted',
     });
+    await client.listRevisions('draft-1');
     await client.import('# Imported episode');
     await client.export('draft-1');
+    await client.writeArtifact(
+      'whp-youtube/drafts/episode.md',
+      '# Exported episode',
+      { expectNew: true },
+    );
     await client.validate('whp-youtube/episodes/episode.md');
 
-    expect(fetchMock).toHaveBeenCalledTimes(12);
+    expect(fetchMock).toHaveBeenCalledTimes(14);
     expect(fetchMock.mock.calls.map(([input, init]) => ({
       url: input,
       method: init?.method ?? 'GET',
@@ -136,6 +142,12 @@ describe('DaemonClient', () => {
         }),
       },
       {
+        url: `${BASE_URL}/api/drafts/draft-1/revisions`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
         url: `${BASE_URL}/api/drafts/import`,
         method: 'POST',
         nonce: NONCE,
@@ -146,6 +158,16 @@ describe('DaemonClient', () => {
         method: 'GET',
         nonce: NONCE,
         body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/artifacts`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          path: 'whp-youtube/drafts/episode.md',
+          content: '# Exported episode',
+          expectedState: { expectNew: true },
+        }),
       },
       {
         url: `${BASE_URL}/api/validate`,

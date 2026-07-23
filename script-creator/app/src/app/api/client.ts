@@ -95,6 +95,18 @@ export interface SavedDraft {
   revision: RevisionRecord;
 }
 
+export type ArtifactExpectedState =
+  | { expectNew: true }
+  | { expectedHash: string };
+
+export type ArtifactWriteResult =
+  | { conflict: false; hash: string }
+  | {
+    conflict: true;
+    currentHash: string | 'absent';
+    parked?: string[];
+  };
+
 export interface ValidatorDiagnostic {
   message: string;
   line: number | null;
@@ -237,6 +249,12 @@ export class DaemonClient {
     });
   }
 
+  async listRevisions(id: string): Promise<RevisionRecord[]> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/revisions`,
+    );
+  }
+
   async import(markdown: string): Promise<DraftRecord> {
     return this.request('/api/drafts/import', {
       method: 'POST',
@@ -246,6 +264,17 @@ export class DaemonClient {
 
   async export(id: string): Promise<{ markdown: string }> {
     return this.request(`/api/drafts/${encodeURIComponent(id)}/export`);
+  }
+
+  async writeArtifact(
+    path: string,
+    content: string,
+    expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult> {
+    return this.request('/api/artifacts', {
+      method: 'POST',
+      body: JSON.stringify({ path, content, expectedState }),
+    });
   }
 
   async validate(path: string): Promise<ValidatorResult> {
