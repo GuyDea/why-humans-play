@@ -64,7 +64,7 @@ interface NextSequenceRow {
 }
 
 const SCHEMA_VERSION = 2;
-const MAX_SUPPORTED_SCHEMA_VERSION = 3;
+const MAX_SUPPORTED_SCHEMA_VERSION = 4;
 export const MIGRATION_V2 = `
 CREATE TABLE IF NOT EXISTS drafts (
   id TEXT PRIMARY KEY,

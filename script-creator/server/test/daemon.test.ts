@@ -69,6 +69,20 @@ describe('writeRuntimeFile', () => {
 });
 
 describe('createDaemonContext', () => {
+  it('reopens the same state database across context recreations', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-reopen-'));
+    const repoRoot = join(root, 'repo');
+    mkdirSync(repoRoot);
+    const env = {
+      XDG_DATA_HOME: join(root, 'data'),
+      XDG_STATE_HOME: join(root, 'state'),
+    };
+    const first = createDaemonContext({ repoRoot, env });
+    await first.close();
+    const second = createDaemonContext({ repoRoot, env });
+    await second.close();
+  });
+
   it('serves the built Angular browser output when it exists', async () => {
     const root = mkdtempSync(join(tmpdir(), 'daemon-static-root-'));
     const repoRoot = join(root, 'repo');
