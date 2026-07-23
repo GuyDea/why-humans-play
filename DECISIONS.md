@@ -564,6 +564,23 @@ ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content c
 because this is an internal workbench runtime and transport contract. The Fix 5 report is
 preserved as a historical verification record; Fix 6 will record the implementation.
 
+## 2026-07-23 — Make durable topic runs authoritative in Script Creator Topics
+
+**Decision:** Script Creator's Topics Decide section lists recent durable topic runs newest
+first, hydrates the selected run's checklist, report, and structured summary through the
+same renderer used for a live launch, auto-selects newly launched runs, refreshes the list
+when they finish, and runs package-test and handoff actions from the selected durable
+summary.
+
+**Rationale:** A completed full topic run already survives server-side, but the Topics page
+held its rendered board and downstream actions only in the mounted launch component's
+memory, so reloading the page hid durable work.
+
+**Documents:** `docs/superpowers/plans/2026-07-23-script-creator-plan5-topics.md` and this
+ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` need no content change
+because this is an internal workbench runtime and transport contract. The Task 8 report
+records the implementation and verification under Fix 5.
+
 ## 2026-07-23 — Close Script Studio provenance and live-runtime gaps before merge
 
 **Decision:** Script Studio operation inputs contain only explicit stored draft state, live

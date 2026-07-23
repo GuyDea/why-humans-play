@@ -359,8 +359,14 @@ describe('DaemonClient', () => {
     ]);
   });
 
-  it('registers and polls topic runs with authenticated requests', async () => {
+  it('lists, registers, and polls topic runs with authenticated requests', async () => {
     const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse([{
+        id: 'run-2',
+        opId: 'op-2',
+        state: 'completed',
+        createdAt: '2026-07-23T12:30:00.000Z',
+      }]))
       .mockResolvedValueOnce(jsonResponse({
         id: 'run-1',
         opId: 'op-1',
@@ -378,14 +384,21 @@ describe('DaemonClient', () => {
     vi.stubGlobal('fetch', fetchMock);
     const client = new DaemonClient(BASE_URL, () => NONCE);
     const topicClient = client as DaemonClient & {
+      listTopicRuns?: () => Promise<unknown>;
       registerTopicRun?: (opId: string) => Promise<unknown>;
       getTopicRun?: (id: string) => Promise<unknown>;
     };
 
+    expect(topicClient.listTopicRuns).toBeTypeOf('function');
     expect(topicClient.registerTopicRun).toBeTypeOf('function');
     expect(topicClient.getTopicRun).toBeTypeOf('function');
-    if (!topicClient.registerTopicRun || !topicClient.getTopicRun) return;
+    if (
+      !topicClient.listTopicRuns
+      || !topicClient.registerTopicRun
+      || !topicClient.getTopicRun
+    ) return;
 
+    await topicClient.listTopicRuns();
     await topicClient.registerTopicRun('op/one');
     await topicClient.getTopicRun('run/one');
 
@@ -395,6 +408,12 @@ describe('DaemonClient', () => {
       nonce: new Headers(init?.headers).get('x-sc-nonce'),
       body: init?.body,
     }))).toEqual([
+      {
+        url: `${BASE_URL}/api/topic-runs`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
       {
         url: `${BASE_URL}/api/topic-runs`,
         method: 'POST',

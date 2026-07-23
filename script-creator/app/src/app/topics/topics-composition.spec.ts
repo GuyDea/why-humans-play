@@ -139,6 +139,7 @@ class TopicClientStub {
     conflict: false,
     hash: 'topic-brief-hash',
   };
+  private topicRuns: TopicRunSummary[] = [];
   private topicRunSnapshots: Array<TopicRunSnapshot | Error> = [];
   private topicRunSnapshotIndex = 0;
   private gateState: OperationRecord['state'] = 'completed';
@@ -202,13 +203,21 @@ class TopicClientStub {
   });
   readonly registerTopicRun = vi.fn(async (
     opId: string,
-  ): Promise<TopicRunSummary> => ({
-    id: 'run-1',
-    opId,
-    state: 'running',
-    createdAt: '2026-07-23T12:00:00.000Z',
-  }));
-  readonly getTopicRun = vi.fn(async (): Promise<TopicRunSnapshot> => {
+  ): Promise<TopicRunSummary> => {
+    const run: TopicRunSummary = {
+      id: 'run-1',
+      opId,
+      state: 'running',
+      createdAt: '2026-07-23T12:00:00.000Z',
+    };
+    this.topicRuns = [run, ...this.topicRuns];
+    return run;
+  });
+  readonly listTopicRuns = vi.fn(async (): Promise<TopicRunSummary[]> =>
+    [...this.topicRuns]);
+  readonly getTopicRun = vi.fn(async (
+    id: string,
+  ): Promise<TopicRunSnapshot> => {
     const snapshot = this.topicRunSnapshots[
       Math.min(
         this.topicRunSnapshotIndex,
@@ -218,6 +227,8 @@ class TopicClientStub {
     if (!snapshot) throw new Error('topic run snapshots were not configured');
     this.topicRunSnapshotIndex += 1;
     if (snapshot instanceof Error) throw snapshot;
+    this.topicRuns = this.topicRuns.map((run) =>
+      run.id === id ? { ...run, state: snapshot.state } : run);
     return snapshot;
   });
   readonly submitOp = vi.fn(async (
@@ -390,6 +401,18 @@ class TopicClientStub {
     this.topicRunSnapshotIndex = 0;
   }
 
+  seedTopicRun(
+    run: TopicRunSummary,
+    snapshot: TopicRunSnapshot,
+  ): void {
+    this.topicRuns = [run];
+    this.queueTopicRun(snapshot);
+  }
+
+  seedTopicRuns(...runs: TopicRunSummary[]): void {
+    this.topicRuns = runs;
+  }
+
   setArtifactResult(result: ArtifactWriteResult): void {
     this.artifactResult = result;
   }
@@ -454,6 +477,123 @@ afterEach(() => {
 });
 
 describe('routed Topics composition', () => {
+  it('hydrates a selected durable topic run after a fresh mount', async () => {
+    const client = new TopicClientStub();
+    client.seedTopicRun(
+      {
+        id: 'run-durable-1',
+        opId: 'op-durable-1',
+        state: 'completed',
+        createdAt: '2026-07-23T10:30:00.000Z',
+      },
+      {
+        ...snapshot('completed', 'done'),
+        summary: SUMMARY,
+        reportMd: '# Durable topic report\n\nStill here after reload.',
+      },
+    );
+
+    const topics = await mountTopics(client);
+
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(client.listTopicRuns).toHaveBeenCalledOnce();
+      expect(topics.root.querySelectorAll(
+        '[data-testid="topic-run-row"]',
+      )).toHaveLength(1);
+    });
+    const runRow = topics.root.querySelector('[data-testid="topic-run-row"]');
+    expect(runRow?.textContent?.toLowerCase()).toContain('completed');
+    expect(runRow?.querySelector('time')?.dateTime)
+      .toBe('2026-07-23T10:30:00.000Z');
+
+    findButton(runRow, 'Select run').click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(client.getTopicRun).toHaveBeenCalledWith('run-durable-1');
+      expect(topics.root.querySelectorAll(
+        '[data-testid="shortlist-row"]',
+      )).toHaveLength(SUMMARY.shortlist.length);
+    });
+
+    expect(topics.root.querySelector('[data-testid="topic-report"]')?.textContent)
+      .toContain('Still here after reload.');
+    const packageAction = findButton(
+      topics.root.querySelector('[data-testid="shortlist-row"]'),
+      'Test packages',
+    );
+    const handoffAction = findButton(
+      topics.root.querySelector('[data-testid="winner-card"]'),
+      'Preview handoff',
+    );
+    expect(packageAction.disabled).toBe(false);
+    expect(handoffAction.disabled).toBe(false);
+
+    packageAction.click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(client.submissions.at(-1)).toMatchObject({
+        operation: 'package-test',
+        inputs: {
+          run_artifacts: {
+            summary: SUMMARY,
+            reportMd: '# Durable topic report\n\nStill here after reload.',
+          },
+        },
+      });
+    });
+
+    handoffAction.click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(client.submissions.at(-1)).toMatchObject({
+        operation: 'handoff-preview',
+        inputs: {
+          selected_winner: SUMMARY.winner,
+          run_artifacts: {
+            summary: SUMMARY,
+            reportMd: '# Durable topic report\n\nStill here after reload.',
+          },
+        },
+      });
+    });
+  });
+
+  it('lists durable topic runs newest first', async () => {
+    const client = new TopicClientStub();
+    client.seedTopicRuns(
+      {
+        id: 'run-older',
+        opId: 'op-older',
+        state: 'completed',
+        createdAt: '2026-07-23T09:00:00.000Z',
+      },
+      {
+        id: 'run-newer',
+        opId: 'op-newer',
+        state: 'running',
+        createdAt: '2026-07-23T11:00:00.000Z',
+      },
+    );
+
+    const topics = await mountTopics(client);
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.root.querySelectorAll(
+        '[data-testid="topic-run-row"]',
+      )).toHaveLength(2);
+    });
+
+    expect(Array.from(
+      topics.root.querySelectorAll<HTMLTimeElement>(
+        '[data-testid="topic-run-row"] time',
+      ),
+    ).map((time) => time.dateTime)).toEqual([
+      '2026-07-23T11:00:00.000Z',
+      '2026-07-23T09:00:00.000Z',
+    ]);
+  });
+
   it('captures an idea, ideates cards, changes status, and gate-checks all six gates', async () => {
     const topics = await mountTopics();
 
@@ -881,6 +1021,12 @@ describe('routed Topics composition', () => {
     expect(winner?.textContent).toContain(
       'Why We Make Games Harder Than They Need to Be',
     );
+    expect(topics.client.listTopicRuns).toHaveBeenCalledTimes(2);
+    const launchedRun = topics.root.querySelector(
+      '[data-testid="topic-run-row"]',
+    );
+    expect(launchedRun?.getAttribute('data-selected')).toBe('true');
+    expect(launchedRun?.textContent?.toLowerCase()).toContain('completed');
   });
 
   it('keeps package-test history and confirms a winner handoff into an architecture draft', async () => {

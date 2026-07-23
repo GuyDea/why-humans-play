@@ -904,6 +904,84 @@ app-full-run-panel .handoff-actions p {
   font-size: 0.72rem;
 }
 
+.run-history {
+  border-bottom: 1px solid var(--whp-line);
+  padding: 0.8rem 1rem;
+  background: var(--whp-ground);
+}
+
+.run-history > header,
+.run-list li,
+.run-list li > div {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.run-history > header,
+.run-list li {
+  justify-content: space-between;
+}
+
+.run-history h3 {
+  margin: 0.1rem 0 0;
+  font-family: var(--whp-font-editor);
+  font-size: 0.95rem;
+  font-weight: 560;
+}
+
+.run-history button {
+  border: 1px solid var(--whp-line-strong);
+  padding: 0.42rem 0.58rem;
+  color: var(--whp-ink);
+  background: var(--whp-surface);
+}
+
+.run-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.run-list li {
+  border: 1px solid var(--whp-line);
+  padding: 0.55rem 0.65rem;
+  background: var(--whp-surface);
+}
+
+.run-list li[data-selected='true'] {
+  box-shadow: inset 3px 0 var(--whp-accent);
+}
+
+.run-list li > div {
+  align-items: baseline;
+}
+
+.run-list strong {
+  color: var(--whp-ink);
+  font-family: var(--whp-font-mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+}
+
+.run-list time,
+.run-list-empty,
+.run-list-error {
+  color: var(--whp-muted);
+  font-size: 0.68rem;
+}
+
+.run-list-empty,
+.run-list-error {
+  margin: 0.65rem 0 0;
+}
+
+.run-list-error {
+  color: var(--whp-accent);
+}
+
 @keyframes proposal-pulse {
   from {
     background-color: transparent;

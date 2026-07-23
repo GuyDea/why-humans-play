@@ -416,6 +416,10 @@ export class DaemonClient {
     });
   }
 
+  async listTopicRuns(): Promise<TopicRunSummary[]> {
+    return this.request('/api/topic-runs');
+  }
+
   async getTopicRun(id: string): Promise<TopicRunSnapshot> {
     return this.request(`/api/topic-runs/${encodeURIComponent(id)}`);
   }

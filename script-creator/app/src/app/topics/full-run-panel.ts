@@ -5,6 +5,7 @@ import {
   inject,
   signal,
   type OnDestroy,
+  type OnInit,
 } from '@angular/core';
 import { Router } from '@angular/router';
 import type {
@@ -16,6 +17,7 @@ import type {
   PackageTestRecord,
   TopicGateName,
   TopicRunSnapshot,
+  TopicRunSummary,
   TopicScoreName,
   TopicSummary,
 } from '../api/client';
@@ -95,6 +97,62 @@ interface OperationOutcome {
           <span class="run-state" data-state="ready">Ready</span>
         }
       </header>
+
+      <section class="run-history" aria-labelledby="recent-runs-heading">
+        <header>
+          <div>
+            <p class="console-kicker">Durable history</p>
+            <h3 id="recent-runs-heading">Recent runs</h3>
+          </div>
+          <button
+            type="button"
+            [disabled]="runListLoading()"
+            (click)="reloadRuns()"
+          >
+            {{ runListLoading() ? 'Refreshing…' : 'Refresh runs' }}
+          </button>
+        </header>
+
+        @if (runListError(); as listError) {
+          <p class="run-list-error" data-testid="topic-run-list-error" role="alert">
+            {{ listError }}
+          </p>
+        }
+
+        @if (runs().length > 0) {
+          <ol class="run-list" data-testid="topic-run-list">
+            @for (run of runs(); track run.id) {
+              <li
+                data-testid="topic-run-row"
+                [attr.data-selected]="selectedRunId() === run.id"
+              >
+                <div>
+                  <strong>{{ stateLabel(run.state) }}</strong>
+                  <time [attr.datetime]="run.createdAt">
+                    {{ runCreatedLabel(run.createdAt) }}
+                  </time>
+                </div>
+                <button
+                  type="button"
+                  [disabled]="selectingRunId() !== null
+                    || (selectedRunId() === run.id && snapshot() !== null)"
+                  (click)="selectRun(run)"
+                >
+                  {{
+                    selectedRunId() === run.id && snapshot() !== null
+                      ? 'Selected run'
+                      : selectingRunId() === run.id
+                        ? 'Loading run…'
+                        : 'Select run'
+                  }}
+                </button>
+              </li>
+            }
+          </ol>
+        } @else if (!runListLoading() && !runListError()) {
+          <p class="run-list-empty">No durable topic runs yet.</p>
+        }
+      </section>
 
       <form class="run-launcher" (submit)="launch($event)">
         <div class="run-field">
@@ -1100,7 +1158,7 @@ interface OperationOutcome {
 
   `,
 })
-export class FullRunPanel implements OnDestroy {
+export class FullRunPanel implements OnInit, OnDestroy {
   private readonly client = inject(STUDIO_SESSION).client;
   private readonly router = inject(Router);
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
@@ -1115,6 +1173,11 @@ export class FullRunPanel implements OnDestroy {
   protected readonly runError = signal<string | null>(null);
   protected readonly pollRecovering = signal(false);
   protected readonly snapshot = signal<TopicRunSnapshot | null>(null);
+  protected readonly runs = signal<readonly TopicRunSummary[]>([]);
+  protected readonly selectedRunId = signal<string | null>(null);
+  protected readonly selectingRunId = signal<string | null>(null);
+  protected readonly runListLoading = signal(false);
+  protected readonly runListError = signal<string | null>(null);
   protected readonly sortKey = signal<SortKey>('total');
   protected readonly packageBusy = signal<string | null>(null);
   protected readonly packageError = signal<string | null>(null);
@@ -1148,6 +1211,10 @@ export class FullRunPanel implements OnDestroy {
     });
   });
 
+  ngOnInit(): void {
+    void this.refreshRuns();
+  }
+
   ngOnDestroy(): void {
     this.pollGeneration += 1;
     this.clearPollTimer();
@@ -1177,6 +1244,29 @@ export class FullRunPanel implements OnDestroy {
 
   protected stateLabel(state: OperationState): string {
     return state.replace('-', ' ');
+  }
+
+  protected runCreatedLabel(createdAt: string): string {
+    const date = new Date(createdAt);
+    return Number.isNaN(date.valueOf())
+      ? createdAt
+      : new Intl.DateTimeFormat(undefined, {
+          dateStyle: 'medium',
+          timeStyle: 'short',
+        }).format(date);
+  }
+
+  protected reloadRuns(): void {
+    if (this.runListLoading()) return;
+    void this.refreshRuns();
+  }
+
+  protected selectRun(run: TopicRunSummary): void {
+    if (
+      this.selectingRunId() !== null
+      || (this.selectedRunId() === run.id && this.snapshot() !== null)
+    ) return;
+    void this.loadRun(run);
   }
 
   protected scoreValue(value: number | null): string {
@@ -1239,6 +1329,8 @@ export class FullRunPanel implements OnDestroy {
     this.runError.set(null);
     this.pollRecovering.set(false);
     this.snapshot.set(null);
+    this.selectedRunId.set(null);
+    this.selectingRunId.set(null);
     this.sortKey.set('total');
     this.resetPackageTest();
     this.resetHandoff();
@@ -1257,6 +1349,7 @@ export class FullRunPanel implements OnDestroy {
       if (generation !== this.pollGeneration) return;
       const run = await this.client.registerTopicRun(opId);
       if (generation !== this.pollGeneration) return;
+      this.selectedRunId.set(run.id);
       await this.poll(run.id, generation);
     } catch (error) {
       if (generation !== this.pollGeneration) return;
@@ -1465,6 +1558,40 @@ export class FullRunPanel implements OnDestroy {
     this.handoffPipelineWritten = false;
   }
 
+  private async loadRun(run: TopicRunSummary): Promise<void> {
+    const generation = ++this.pollGeneration;
+    this.clearPollTimer();
+    this.selectedRunId.set(run.id);
+    this.selectingRunId.set(run.id);
+    this.snapshot.set(null);
+    this.runBusy.set(POLLING_STATES.has(run.state));
+    this.runError.set(null);
+    this.pollRecovering.set(false);
+    this.sortKey.set('total');
+    this.resetPackageTest();
+    this.resetHandoff();
+
+    await this.poll(run.id, generation);
+    if (generation === this.pollGeneration) {
+      this.selectingRunId.set(null);
+    }
+  }
+
+  private async refreshRuns(): Promise<void> {
+    this.runListLoading.set(true);
+    this.runListError.set(null);
+    try {
+      const runs = await this.client.listTopicRuns();
+      this.runs.set([...runs].sort(compareRunsNewestFirst));
+    } catch (error) {
+      this.runListError.set(
+        `Recent runs could not be loaded. ${errorMessage(error)}`,
+      );
+    } finally {
+      this.runListLoading.set(false);
+    }
+  }
+
   private async poll(runId: string, generation: number): Promise<void> {
     try {
       const next = await this.client.getTopicRun(runId);
@@ -1474,11 +1601,14 @@ export class FullRunPanel implements OnDestroy {
       this.pollRecovering.set(false);
 
       if (POLLING_STATES.has(next.state)) {
+        this.runBusy.set(true);
         this.schedulePoll(runId, generation);
         return;
       }
 
       this.runBusy.set(false);
+      await this.refreshRuns();
+      if (generation !== this.pollGeneration) return;
       if (next.state !== 'completed' && !next.summaryError) {
         this.runError.set(
           `Run ended in ${this.stateLabel(next.state)} before a summary became available.`,
@@ -1517,6 +1647,13 @@ function compareNullableScoreDescending(
   if (left === null) return 1;
   if (right === null) return -1;
   return right - left;
+}
+
+function compareRunsNewestFirst(
+  left: TopicRunSummary,
+  right: TopicRunSummary,
+): number {
+  return right.createdAt.localeCompare(left.createdAt);
 }
 
 function finalistIdeaText(finalist: ShortlistEntry): string {

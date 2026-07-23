@@ -84,6 +84,12 @@ Commit `feat(script-creator): pipeline board`.
 
 Deterministic sweep (daemon + fake codex): capture idea → ideate cards → gate-check chips → full run with live checklist advancing → board sorting → package directions → handoff confirm → draft exists with brief + topics/ artifact + pipeline card moved. Then real codex: one quick-gate-check and one small ideate through the UI (full run deliberately excluded — recorded). Fix loops as needed (composition net should make them rare).
 
+**Live finding — durable topic runs are authoritative:** the Decide section lists recent
+runs from `GET /api/topic-runs`, newest first. Selecting a run hydrates its checklist,
+report, and structured summary through the same renderer used during a live launch. A new
+run auto-selects and refreshes the list when it becomes terminal. Package testing and
+handoff consume the selected run's durable summary rather than launch-local memory.
+
 ### Task 9: evidence + close-out
 
 Evidence doc from real outputs; final whole-branch review (fresh reviewer); fix loops to PASS/APPROVED.
