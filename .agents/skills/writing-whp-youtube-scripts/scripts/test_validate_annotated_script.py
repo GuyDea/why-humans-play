@@ -215,7 +215,7 @@ _Time: 00:00–00:30 · Target: ~80 words_
 > In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
 > food reward. The researchers said this met their operational play criteria. That
-> does not tell us what a bee feels—but makes the detour hard to dismiss.
+> does not tell us what a bee feels—but makes the detour hard to dismiss. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
 > <!-- PI-001: Martin input -->
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
@@ -490,14 +490,7 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn(LIMITATION_SENTENCE, result.stdout)
 
     def test_fixture_narration_count_matches_metadata(self) -> None:
-        narration = extract_exact(BEAT_BLOCK, "### Narration\n", "\n### Story function")
-        words = [
-            word
-            for line in narration.splitlines()
-            if line.startswith("> ") and "<!--" not in line
-            for word in line.removeprefix("> ").split()
-        ]
-        self.assertEqual(len(words), 80)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
         self.assertIn("- **Target runtime:** 00:30", HEADER_BLOCK)
         self.assertIn("- **Word count:** 80", HEADER_BLOCK)
         self.assertIn("_Time: 00:00–00:30 · Target: ~80 words_", BEAT_BLOCK)
@@ -916,6 +909,239 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotIn("PI-001", narration)
         self.assertNotIn("<!--", narration)
         self.assertEqual(count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_inline_evidence_indicator_is_excluded_from_narration_and_word_count(
+        self,
+    ) -> None:
+        narration = validator.extract_narration(VALID_DOCUMENT)
+        self.assertNotIn("[F-001]", narration)
+        self.assertNotIn("10.1016/j.anbehav.2022.08.013", narration)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
+
+    def test_inline_evidence_indicator_between_words_preserves_word_boundary(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        for case, annotated in (
+            ("preserve-separator", f"alpha {marker}beta"),
+            ("insert-separator", f"alpha{marker}beta"),
+        ):
+            with self.subTest(case=case):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    "Those clues can sharpen the question",
+                    annotated,
+                )
+                narration = validator.extract_narration(document)
+                self.assertIn("alpha beta", narration)
+                self.assertNotIn("alphabeta", narration)
+
+    def test_inline_evidence_indicator_stripping_preserves_existing_cases(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        cases = {
+            "before-punctuation": replace_exact(
+                COMPLETED_DOCUMENT,
+                "feels—but",
+                f"feels {marker}—but",
+            ),
+            "multiple-markers": replace_exact(
+                COMPLETED_DOCUMENT,
+                marker,
+                f"{marker} {marker}",
+                expected_count=1,
+            ),
+        }
+        for case, document in cases.items():
+            with self.subTest(case=case):
+                self.assertEqual(validator.extract_narration(document), expected)
+
+    def test_claim_mapping_requires_inline_evidence_indicator(self) -> None:
+        marker = " [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        document = replace_exact(APPENDIX_DOCUMENT, marker, "")
+        self.assert_error(
+            document,
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator",
+        )
+
+    def test_claim_mapping_requires_a_visible_clickable_inline_indicator(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        missing_indicator = (
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator"
+        )
+        non_visible_lookalikes = {
+            "html-comment": f"<!--{marker}-->",
+            "inline-code": f"`{marker}`",
+            "escaped-markdown": "\\" + marker,
+            "markdown-image": f"!{marker}",
+        }
+        for context, lookalike in non_visible_lookalikes.items():
+            with self.subTest(context=context):
+                document = replace_exact(
+                    APPENDIX_DOCUMENT,
+                    marker,
+                    lookalike,
+                    expected_count=1,
+                )
+                if context == "markdown-image":
+                    document = replace_exact(
+                        document,
+                        "- **Word count:** 80",
+                        "- **Word count:** 81",
+                    )
+                self.assert_error(document, missing_indicator)
+                self.assertIn(lookalike, validator.extract_narration(document))
+
+        with self.subTest(context="visible-control"):
+            self.assertEqual(validate_document(APPENDIX_DOCUMENT), [])
+            self.assertNotIn(marker, validator.extract_narration(APPENDIX_DOCUMENT))
+
+    def test_multiline_non_visible_contexts_are_not_stripped_as_indicators(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        missing_indicator = (
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator"
+        )
+        non_visible_lookalikes = {
+            "html-comment": f"<!-- review note\n> {marker}\n> -->",
+            "inline-code": f"`review note\n> {marker}\n> continues here`",
+        }
+        for context, lookalike in non_visible_lookalikes.items():
+            with self.subTest(context=context):
+                document = replace_exact(
+                    APPENDIX_DOCUMENT,
+                    marker,
+                    lookalike,
+                    expected_count=1,
+                )
+                actual_count = validator.count_narration_words(document)
+                document = replace_exact(
+                    document,
+                    "- **Word count:** 80",
+                    f"- **Word count:** {actual_count}",
+                )
+                errors = validate_document(document)
+                self.assertTrue(
+                    any(missing_indicator in error for error in errors),
+                    errors,
+                )
+                self.assertFalse(
+                    any("Word count metadata" in error for error in errors),
+                    errors,
+                )
+                self.assertIn(marker, validator.extract_narration(document))
+
+    def test_inline_evidence_indicator_must_be_mapped_in_same_beat(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-002](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-002 is not mapped in Claims",
+        )
+
+    def test_inline_evidence_indicator_requires_one_record(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-777](https://example.org/missing)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-777 has no matching evidence record",
+        )
+
+    def test_inline_evidence_indicator_url_must_match_original_url(self) -> None:
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-001](https://example.org/wrong-source)",
+            expected_count=1,
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-001 URL does not match its Original URL",
+        )
+
+    def test_claim_mapping_checks_every_claims_section(self) -> None:
+        second_record = extract_exact(
+            APPENDIX_DOCUMENT,
+            "##### F-001",
+            "\n#### Visual and archival sources",
+        )
+        second_record = replace_exact(
+            second_record,
+            "##### F-001",
+            "##### F-002",
+        )
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "\n#### Visual\n",
+            "\n#### Claims\n"
+            "- `F-002` — A second factual claim (`VERIFIED`).\n\n"
+            "#### Visual\n",
+        )
+        document = replace_exact(
+            document,
+            "\n#### Visual and archival sources",
+            "\n" + second_record + "\n#### Visual and archival sources",
+        )
+        self.assert_error(
+            document,
+            "Beat 01 Claims references F-002 but narration has no inline evidence indicator",
+        )
+
+    def test_inline_indicator_mapping_checks_every_narration_section(self) -> None:
+        second_record = extract_exact(
+            APPENDIX_DOCUMENT,
+            "##### F-001",
+            "\n#### Visual and archival sources",
+        )
+        second_record = replace_exact(
+            second_record,
+            "##### F-001",
+            "##### F-002",
+        )
+        document = replace_exact(
+            APPENDIX_DOCUMENT,
+            "#### Story function\n",
+            "#### Narration\n"
+            "> A second narration section. "
+            "[F-002](https://doi.org/10.1016/j.anbehav.2022.08.013)\n\n"
+            "#### Story function\n",
+        )
+        document = replace_exact(
+            document,
+            "#### Visual\n",
+            "#### Visual\n- Supporting evidence record: `F-002`.\n",
+        )
+        document = replace_exact(
+            document,
+            "\n#### Visual and archival sources",
+            "\n" + second_record + "\n#### Visual and archival sources",
+        )
+        self.assert_error(
+            document,
+            "Beat 01 inline evidence indicator F-002 is not mapped in Claims",
+        )
+
+    def test_ordinary_markdown_link_is_not_removed_as_evidence_metadata(self) -> None:
+        document = replace_exact(
+            COMPLETED_DOCUMENT,
+            "Those clues can sharpen the question",
+            "See [the ordinary link](https://example.org/guide). Those clues can sharpen the question",
+        )
+        narration = validator.extract_narration(document)
+        self.assertIn("[the ordinary link](https://example.org/guide)", narration)
 
     def test_duplicate_personal_markers_are_rejected(self) -> None:
         marker = "> <!-- PI-001: Martin input -->\n"

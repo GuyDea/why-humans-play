@@ -28,12 +28,19 @@ accepted current launch sequence, dated launch research, and historical episode 
 1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
    specification gaming to reveal the hidden incentive game created whenever a score is
    used as a proxy for a real goal. Research-draft title: *Why AI Cheats—Even When It
-   Follows Every Rule*. Research-draft thumbnail promise: an obviously wrong outcome
-   beside a green `100%` score and the words **100% WRONG**. The selected opening is an
-   original WHP reconstruction of the verified block-flip example, with the green
-   `100%` labeled conceptual rather than reported. Its application asks viewers to
-   inspect one everyday score conditionally and treats any apparent distortion as a
-   hypothesis, not a diagnosis or causal finding.
+   Follows Every Rule*. Research-draft thumbnail promise: a burning race boat circling
+   three targets while the finish line sits empty, with the words **AI WON?**. The selected opening uses
+   OpenAI's verified 2016 CoastRunners case: an agent repeatedly hits respawning targets
+   and earns a higher score without finishing the race. A compact 2025 coding-agent echo
+   shows the same score-versus-goal failure in current reasoning-model training without
+   opening a second full story. The human bridge skips hypothetical
+   warm-ups and uses attributed real-world cases to make Goodhart's and Campbell's laws
+   concrete. For this worldwide pattern, use a strong lesser-known case for useful surprise,
+   then follow the developed examples with a compact montage of recognizable cases from
+   other parts of the world. Each developed case must make the damaged real goal and human
+   cost explicit. The application gives viewers four questions
+   they can ask an AI to check whether its answer solved their real problem, without
+   treating the AI's self-assessment as proof of correctness or intent.
 2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
    distinguish evidence of job performance from performance inside the interview.
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
@@ -143,6 +150,15 @@ These are laws, not suggestions. They apply to every WHP video forever.
   name the year and responsible institution or team in the opening. Do not flatten a known
   attribution into generic “scientists,” and never invent a university, city, lab,
   location, or affiliation.
+- **Demand first-hearing causal clarity.** A factual hook must make the intended goal, the
+  visible score or proxy, the shortcut, and the absurd outcome understandable in a few plain
+  sentences. If the first honest reaction is “why would that improve the score?”, replace
+  the example instead of adding a technical lecture. Establish the causal link before the
+  punchline; the joke may compress the consequence but cannot supply missing logic.
+- **Use time bridges when persistence matters.** Pair one vivid early warning with one
+  compact current echo that demonstrates the same bounded mechanism. The older case earns
+  the story; the current echo proves present relevance. Do not open two competing stories
+  or turn two examples into a universal claim.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
@@ -172,6 +188,8 @@ Use this order for WHP scripts:
    editorial, retention, timing, and format checks.
 6. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
+7. Close the central lesson with a short declarative button. A final question or forward
+   hook may follow only when it does not leave the episode's main answer unresolved.
 
 In the final production document, the readable script comes first as numbered beats that
 contain spoken narration only. Put all timestamps, targets, story functions, claims,
@@ -244,8 +262,12 @@ millions on junk science).
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
 - **Keep facts traceable inside the production script.** In Phase 2, map every factual
   narration sentence or separable factual clause to an `F-###` claim entry in the matching
-  appendix beat that quotes the supported wording. Keep those source markers out of spoken
-  narration and out of initial rapid prototypes unless Martin explicitly requests them.
+  appendix beat that quotes the supported wording. In the evidence-backed production
+  version, append a clickable `[F-###](Original URL)` review indicator immediately after
+  each mapped factual sentence or separable clause. These markers are visible for review
+  but excluded from spoken narration and word count. Keep those source markers out of
+  spoken narration and out of initial rapid prototypes unless Martin explicitly requests
+  them.
 - **Model the caveat.** When the evidence is soft, say so. The gold-standard move is the
   *equifinality* beat Vsauce used: "juvenile rats deprived of play grew smaller, less
   developed brains — *but* the evidence doesn't prove play is *vital*; exercise or teaching
@@ -259,6 +281,27 @@ millions on junk science).
   short verified fact when its origin, scale, reversal, or consequence makes the idea
   more useful or memorable. Keep the tidbit fast and connected to the next thought;
   decorative trivia that slows the story does not qualify.
+- **Make humor legible across English fluency.** A joke may personify a law, metric, or
+  institution, but include enough of the causal link that an international viewer will not
+  mistake the joke for a literal factual claim. Prefer a slightly more on-the-nose setup
+  over wordplay that needs a second explanation.
+- **Prepare every unfamiliar name.** Before the first spoken mention of a person,
+  institution, place, or concept, signal why a new name is entering, identify it in plain
+  language, and explain its immediate relevance. Never make the viewer wonder whether they
+  missed an earlier introduction.
+- **Prove substantial points through consequence chains.** For each non-obvious point,
+  look first for a compact documented real-world case. Tell it as `goal → measure or
+  target → changed behavior → improved number → damaged goal and human cost`.
+  Earn humor from the absurd mechanism or institution, then state plainly what got worse
+  and who absorbed the cost; the punchline never substitutes for the implication. Use a
+  clearly labeled hypothetical when a real case is unavailable, unverified, or would
+  obscure the story rather than sharpen it.
+- **Use novelty for the story and recognition for scale.** When a pattern is worldwide,
+  prefer a strong, well-supported lesser-known case for the developed story when it offers
+  useful surprise. After the developed examples, a compact montage may name roughly three
+  familiar cases with years, spread across regions when possible, to prove the pattern is
+  widespread without opening three new stories. Evidence quality, causal fit, human
+  consequence, and factual support remain gates.
 - **Hand the insight back.** Every complete script gives the viewer one specific,
   evidence-bounded action, observation, or reflection, names what to notice, preserves a
   real limitation, and connects the exercise to a larger benefit. Do not disguise generic

@@ -53,6 +53,19 @@ Create this compact card for each candidate:
 - **Visual anchor:** The concrete evidence, asset candidate, demonstration, or graphic.
 - **Payoff connection:** How the opening creates a need for the final answer.
 
+Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
+outcome`. Do this before scoring it. The listener must understand the causal link before the
+punchline; humor may compress the consequence, but it never supplies missing logic. If a
+first-hearing listener must ask why the score improved, replace the example with a clearer
+documented case instead of adding a mechanism lecture to the hook. Treat the opening case as
+replaceable: strong evidence cannot rescue weak causal or visual legibility.
+
+For an enduring failure pattern, pair one vivid early warning with one compact current echo
+that demonstrates persistence and present relevance. Keep the echo to the same causal
+mechanism; do not open a second full story or turn two examples into a universal claim. The
+first case earns attention and teaches the mechanism; the echo proves that the question is
+not trapped in history.
+
 Score every candidate from 0 to 2 on each criterion:
 
 | Criterion | 0 | 1 | 2 |
@@ -124,6 +137,29 @@ Arrange beats so each answer changes the question that follows. Remove any beat 
 only repeats context, showcases research effort, or delays the next consequence.
 Make caveats advance the inquiry: use a limitation to sharpen what remains unknown,
 rule out an attractive explanation, or motivate the next piece of evidence.
+
+When a beat teaches through a metric, target, or incentive failure, map the full chain:
+
+`goal → measure or target → changed behavior → improved number → damaged goal and human cost`
+
+Prefer a compact documented case over a generic hypothetical when the evidence supports
+one. Earn humor from the mechanism or institution without aiming it at the people who absorb
+the harm, then state the damaged goal and human cost plainly before moving on.
+
+When the pattern is worldwide, use familiarity and novelty for different jobs. Prefer a
+well-supported lesser-known case for a developed consequence chain when it teaches the
+mechanism as clearly as a famous case; useful surprise gives the viewer a reason to listen.
+After the developed examples, name roughly three familiar cases with years in one compact
+line, spread across regions when possible, and give only enough context to reveal the shared
+pattern rather than opening three new stories. Evidence quality, causal fit, human
+consequence, and factual support remain gates; novelty and recognition serve different
+narrative jobs.
+
+Prepare every unfamiliar proper name before its first spoken mention. Use `prepare the new
+idea or role → give the name → identify the person, institution, place, or concept → explain
+why it matters here`. A sentence such as ‘Donald Campbell warned’ is incomplete when the
+viewer has not met him; first signal the harsher phenomenon, name Campbell's law, and
+identify Campbell in plain language.
 
 ## Open and close specific loops
 
@@ -215,6 +251,12 @@ Reject endings such as “be more mindful,” “use this knowledge,” or “tr
 Narration—not only the structured block—must voice all five application elements: the
 insight; the action, observation, or reflection to try; the observable signal; the
 boundary; and the larger benefit.
+
+Close a complete narration with a declarative line that resolves the central question and
+states the lesson; do not end on an unanswered question alone. Make that final line an earned
+payoff to the opening, not a new slogan or a fresh idea.
+Carry the opening's concrete vocabulary into the viewer application and final line when it
+clarifies the lesson; do not force a callback that makes the explanation less direct.
 
 ## Choose visual treatment claim by claim
 

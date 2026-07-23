@@ -130,6 +130,10 @@ REFERENCES_HEADING_RE = re.compile(
     r"^## References and source materials\s*$", re.MULTILINE
 )
 REFERENCE_ID_RE = re.compile(r"`([FA]-\d{3})`")
+INLINE_EVIDENCE_LINK_RE = re.compile(
+    r"(?<!!)\[(?P<record_id>F-\d{3})\]"
+    r"\((?P<url>https?://[^)\s]+)\)"
+)
 RECORD_HEADING_RE = re.compile(r"^#### ([FA]-\d{3})(?:\s|$)", re.MULTILINE)
 LEVEL_THREE_HEADING_RE = re.compile(
     r"^### ([^#\r\n].*?)[ \t]*$", re.MULTILINE
@@ -212,6 +216,108 @@ def _mask_fenced_blocks(text: str) -> str:
                     fence_in_blockquote = False
         masked_lines.append(re.sub(r"[^\r\n]", " ", line))
     return "".join(masked_lines)
+
+
+def _mask_non_visible_inline_contexts(text: str) -> str:
+    """Mask HTML comments, code spans, and escaped opening brackets in place."""
+
+    masked = list(text)
+    index = 0
+    while index < len(text):
+        if text.startswith("<!--", index):
+            closing = text.find("-->", index + 4)
+            end = len(text) if closing == -1 else closing + 3
+            for position in range(index, end):
+                if text[position] not in "\r\n":
+                    masked[position] = " "
+            index = end
+            continue
+
+        if text[index] == "`":
+            run_end = index + 1
+            while run_end < len(text) and text[run_end] == "`":
+                run_end += 1
+            delimiter = text[index:run_end]
+            closing = text.find(delimiter, run_end)
+            if closing != -1:
+                end = closing + len(delimiter)
+                for position in range(index, end):
+                    if text[position] not in "\r\n":
+                        masked[position] = " "
+                index = end
+                continue
+            index = run_end
+            continue
+
+        if text[index] == "[":
+            backslashes = 0
+            previous = index - 1
+            while previous >= 0 and text[previous] == "\\":
+                backslashes += 1
+                previous -= 1
+            if backslashes % 2:
+                masked[index] = " "
+        index += 1
+    return "".join(masked)
+
+
+def _inline_evidence_indicator_matches(text: str) -> list[re.Match[str]]:
+    """Find visible canonical evidence links while preserving original positions."""
+
+    visible_text = _mask_non_visible_inline_contexts(text)
+    return list(INLINE_EVIDENCE_LINK_RE.finditer(visible_text))
+
+
+def _is_word_character(character: str) -> bool:
+    return re.fullmatch(r"\w", character) is not None
+
+
+def _strip_inline_evidence_indicators(text: str) -> str:
+    """Remove visible evidence links without joining neighboring words."""
+
+    matches = _inline_evidence_indicator_matches(text)
+    if not matches:
+        return text
+
+    stripped: list[str] = []
+    cursor = 0
+    match_index = 0
+    while match_index < len(matches):
+        run_start = matches[match_index].start()
+        run_end = matches[match_index].end()
+        match_index += 1
+        while (
+            match_index < len(matches)
+            and not text[run_end : matches[match_index].start()].strip(" \t")
+        ):
+            run_end = matches[match_index].end()
+            match_index += 1
+
+        replacement_start = run_start
+        while replacement_start > cursor and text[replacement_start - 1] in " \t":
+            replacement_start -= 1
+        replacement_end = run_end
+        while replacement_end < len(text) and text[replacement_end] in " \t":
+            replacement_end += 1
+
+        left = text[replacement_start - 1] if replacement_start > 0 else ""
+        right = text[replacement_end] if replacement_end < len(text) else ""
+        had_separator = replacement_start < run_start or replacement_end > run_end
+        if left and right and _is_word_character(left) and _is_word_character(right):
+            replacement = " "
+        elif right and not _is_word_character(right):
+            replacement = ""
+        elif left and right and had_separator:
+            replacement = " "
+        else:
+            replacement = ""
+
+        stripped.append(text[cursor:replacement_start])
+        stripped.append(replacement)
+        cursor = replacement_end
+
+    stripped.append(text[cursor:])
+    return "".join(stripped)
 
 
 def _level_three_blocks(text: str, masked_text: str) -> list[tuple[str, str]]:
@@ -535,6 +641,7 @@ def _extract_narration_from_masked(masked_text: str) -> str:
         body = _section_body(block, "Narration")
         if body is None:
             continue
+        body = _strip_inline_evidence_indicators(body)
         current: list[str] = []
         for line in body.splitlines():
             match = re.match(r"^[ ]{0,3}>[ \t]?(.*)$", line)
@@ -556,7 +663,9 @@ def _extract_narration_from_masked(masked_text: str) -> str:
 
 
 def extract_narration(text: str) -> str:
-    """Return spoken blockquote copy under Narration headings, without input markers."""
+    """Return spoken blockquote copy without review-only personal-input markers
+    or inline evidence indicators.
+    """
 
     masked = _mask_fenced_blocks(text)
     if APPENDIX_HEADING_RE.search(masked):
@@ -962,6 +1071,60 @@ def _validate_asset_record(
             errors.append(f"Record {record.record_id} has invalid asset Status: {status!r}.")
 
 
+def _validate_inline_evidence_indicators(
+    beats_text: str,
+    records_by_id: dict[str, list[Record]],
+    fields_by_record: dict[int, dict[str, str]],
+    errors: list[str],
+) -> None:
+    for beat_id, beat in _beat_blocks(beats_text):
+        narration = "\n".join(_section_bodies(beat, "Narration"))
+        claims = "\n".join(_section_bodies(beat, "Claims"))
+        claim_ids = {
+            record_id
+            for record_id in REFERENCE_ID_RE.findall(claims)
+            if record_id.startswith("F-")
+        }
+        indicators = _inline_evidence_indicator_matches(narration)
+        indicator_ids = {match.group("record_id") for match in indicators}
+
+        for record_id in sorted(claim_ids - indicator_ids):
+            errors.append(
+                f"Beat {beat_id} Claims references {record_id} but narration has no "
+                "inline evidence indicator."
+            )
+
+        for match in indicators:
+            record_id = match.group("record_id")
+            url = match.group("url")
+            if record_id not in claim_ids:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} is not "
+                    "mapped in Claims."
+                )
+
+            records = records_by_id.get(record_id, [])
+            if not records:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} has no "
+                    "matching evidence record."
+                )
+                continue
+            if len(records) != 1:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} requires "
+                    f"exactly one evidence record; found {len(records)}."
+                )
+                continue
+
+            expected_url = fields_by_record[id(records[0])].get("Original URL")
+            if expected_url and url != expected_url:
+                errors.append(
+                    f"Beat {beat_id} inline evidence indicator {record_id} URL does "
+                    f"not match its Original URL: {expected_url}."
+                )
+
+
 def _validate_references(
     reference_text: str,
     references_text: str,
@@ -1005,6 +1168,13 @@ def _validate_references(
             _validate_evidence_record(record, fields, errors)
         else:
             _validate_asset_record(record, fields, errors)
+
+    _validate_inline_evidence_indicators(
+        reference_text,
+        records_by_id,
+        fields_by_record,
+        errors,
+    )
 
     for record_id in sorted(referenced_ids):
         count = len(records_by_id.get(record_id, []))

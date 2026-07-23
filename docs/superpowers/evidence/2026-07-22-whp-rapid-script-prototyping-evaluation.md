@@ -1164,3 +1164,192 @@ Runtime-reported model token counts were unavailable for every task.
 
 The token counts are marked unavailable rather than estimated. Artifact word counts are
 reported separately and are not presented as model-usage telemetry.
+
+## Real-world consequence-chain refinement
+
+### Pre-change semantic baseline
+
+Before changing the example guidance, a fresh agent received this neutral request:
+
+```text
+Write a short WHP narration explaining Goodhart's law through a school and a
+customer-service example. Make examples funny.
+```
+
+Its complete output was:
+
+```text
+A school wants students to learn, so it measures test scores. Sensible. Then it makes higher scores the target.
+
+Now the hidden game changes. The goal is no longer “understand the subject.” It’s “make the number go up.” Lessons become exam rehearsals. Students master the ancient academic art of remembering everything until 10:02 on Tuesday. Scores rise; understanding quietly exits through the fire door.
+
+A customer-service team can get caught in the same trap. Management measures how quickly calls end, hoping faster means more efficient. Then short calls become the target. Suddenly, the best way to “win” isn’t to fix your broken internet. It’s to end the call at Olympic speed. Congratulations: your Wi-Fi still thinks it’s 1998, but the spreadsheet is having a fantastic quarter.
+
+That’s Goodhart’s law: when a measure becomes a target, it often stops being a good measure. The number was meant to represent the real goal. Once rewards attach to it, people learn to play the number instead.
+
+So whenever a score looks impressively green, ask: what was it supposed to measure—and what does this system actually reward?
+```
+
+**Observed result:** The unmodified skill produced clear, funny hypotheticals and showed that
+the real goal remained unmet. It did not seek a documented real-world case, clearly distinguish
+a hypothetical fallback from preferred evidence, or consistently complete the chain through
+the improved number to the specific damaged goal and person who absorbed the cost. This was
+the failing behavior used to write the new deterministic consequence-chain contracts before
+the guidance changed.
+
+### Post-change semantic forward test
+
+A fresh agent then received the same neutral request, with no access to the baseline,
+evaluation record, implementation diff, or Episode 1:
+
+```text
+Imagine a school wants students to learn, so it tracks test scores. Sensible.
+
+Then the score becomes the target. Teachers drill the exact test format. Students master the ancient scholarly art of guessing “C.” Scores rise, understanding doesn’t, and the school produces world-class bubble-coloring specialists.
+
+Now imagine a customer-service team measured by call length. The real goal is solving problems. But if shorter calls earn rewards, agents learn that fixing your bill is optional; getting you off the phone is essential.
+
+“Have you tried turning your entire life off and on again?”
+
+Click.
+
+Call times fall. The dashboard glows green. Customers call back furious, and the agents inherit the fury.
+
+That’s Goodhart’s law: when a measure becomes a target, it stops being a good measure. The test score was meant to represent learning. Call length was meant to represent efficiency. Once rewards were attached, people started playing for the number instead of the goal.
+
+So whenever a metric looks spectacular, ask: what was this number supposed to represent—and what behavior does rewarding it invite?
+
+If the score is winning while the real goal is losing, you’re keeping score of the wrong game.
+```
+
+**Verdict:** PASS for the intended refinement. Because the neutral prompt supplied no factual
+anchor for a named school or customer-service case and rapid mode forbids invented
+specificity, the agent correctly used and twice labeled hypothetical fallbacks with
+“Imagine.” Each example now completes the
+consequence chain: learning or resolution is the goal; test score or call length is the
+measure; drilling or ending calls is the changed behavior; the number improves; and students,
+customers, and agents absorb the stated cost. Humor remains attached to the mechanism, and a
+declarative final line closes the lesson. This single run demonstrates the revised behavior;
+it does not guarantee compliance by every future model.
+
+## Global example-selection refinement
+
+### Pre-change semantic baseline
+
+A fresh agent used the current script skill and was asked to choose three documented,
+recognizable incentive-gaming cases for a broad international audience, using only facts
+already available in the repository. It selected DeepMind's block task, Atlanta schools,
+and Wells Fargo.
+
+The response explicitly observed that the two institutional cases were both based in the
+United States. It also developed two already-familiar cases and included no fast global
+montage. This is the failing behavior: the existing skill optimized for evidence, clarity,
+and domain variety, but did not assign novelty and recognition different narrative jobs.
+
+An initial high-profile tie-breaker was tested and implemented, then superseded before its
+forward test when Martin clarified the intended story shape. The replacement deterministic
+contract was added first and failed because the skill did not yet require a lesser-known
+developed case followed by a compact, dated global montage. A post-change semantic forward
+test was then run with the revised skill.
+
+### Post-change semantic forward test
+
+A fresh agent received five supplied fact cards covering Victoria Police, Wells Fargo,
+Volkswagen, Atlanta schools, and LIBOR/EURIBOR, then chose the narrative jobs without seeing
+the expected structure. Its narration developed Victoria Police and Wells Fargo before
+closing with a single dated montage of Volkswagen, Atlanta, and Barclays:
+
+```text
+In 2018, an independent investigation into Victoria Police found widespread falsification of preliminary breath tests.
+
+Numerically based targets were a major cause. Some tests were self-tests. Some operations maximized the test count while minimizing likely positive results.
+
+The number said, “Busy.” The operation said, “Please don’t find anything.”
+
+A breath test is useful when it can reveal a likely positive. But here, the institution could satisfy the target while weakening the part that mattered.
+
+Then the same pattern reached into people’s bank accounts.
+
+In 2016, the CFPB reported that Wells Fargo’s sales goals and incentives were linked to unauthorized accounts. Some cases included unauthorized transfers of customers’ money and fees.
+
+The target wanted more banking. Customers got volunteered.
+
+An unauthorized account could still register as another account, while the customer lost control over whether it existed, whether money moved, and whether a fee appeared.
+
+And this is bigger than two institutions. In 2015, the EPA alleged that Volkswagen used software to circumvent emissions tests. A 2011 Georgia investigation found answer-sheet changes in 44 of 56 Atlanta schools examined, and some students missed remediation. In 2012, regulators penalized Barclays over attempted manipulation and false reporting involving LIBOR and EURIBOR.
+
+Different sectors. Different borders. The same dangerous possibility: people can start managing the measure instead of the mission.
+
+That is metric gaming. The scoreboard can look satisfied while the people the system exists to serve are not.
+```
+
+**Verdict:** PASS for the revised selection rule. The agent assigned useful surprise to the
+lesser-known Australian case, used Wells Fargo for immediate personal stakes, and compressed
+three more familiar, dated cases into one global-scale montage rather than three new stories.
+Every case stayed within the supplied factual boundary. This single run demonstrates the
+intended behavior but does not guarantee every future generation will comply.
+
+## Prepared-name refinement
+
+### Pre-change evidence
+
+The Episode 1 narration contained the cold introduction “Donald Campbell warned about this
+harsher version,” even though Campbell had not appeared earlier. This is the concrete failing
+artifact: the viewer received a surname before the narration created a reason for the person
+to enter or explained who he was.
+
+A controlled baseline using the unchanged skill did produce “Campbell's law is its close
+cousin” before identifying “Donald T. Campbell, an American social scientist,” but only after
+the prompt explicitly supplied Campbell's identity and asked for the relationship between
+the two laws. That success under scaffolded input did not close the unscaffolded production
+loophole. The deterministic contract was added before the guidance and failed because the
+skill did not require prepared first mentions. A post-change semantic forward test remains
+pending.
+
+### Post-change semantic forward test
+
+A fresh agent used the revised skill to continue from a Wells Fargo example with only the
+Campbell factual anchor. It first prepared Campbell's law as Goodhart's “close, more
+institutional cousin,” then introduced Donald T. Campbell and his warning. The name arrived
+only after the viewer had a reason for it to enter, and the passage immediately explained
+its relevance.
+
+**Verdict:** PASS for the prepared-name refinement. The result followed `prepare → name →
+identify → relevance` without assuming prior familiarity. This single run demonstrates the
+intended behavior but does not guarantee every future generation will comply.
+
+## First-hearing hook and temporal-bridge refinement
+
+### Pre-change evidence
+
+Episode 1's block-flip opening repeatedly triggered the same listener question: why would
+flipping the block make the measurement rise? Without the bottom-face geometry, the reward
+looked like a bug. With the geometry, the opening became a mechanism lecture. The causal
+chain was documented but weak on first hearing.
+
+The replacement candidate used OpenAI's 2016 CoastRunners case. Its intended goal, scored
+proxy, shortcut, and absurd outcome remained legible in plain language: finish a boat race;
+earn points by hitting targets; loop over respawning targets; score higher without finishing.
+The line “It did not win the race. It won the spreadsheet” could therefore compress logic
+the viewer already understood instead of hiding a missing step. A compact 2025 coding-agent
+example then supplied present relevance by repeating the score-versus-goal mechanism in a
+current domain.
+
+Before the guidance changed, new deterministic contracts failed in both skill packages. The
+topic skill lacked a first-hearing opening-case test and temporal echo. The script skill
+lacked the causal-hook sequence, replacement rule, present-day echo boundary, and opening
+callback contract; its worked example still used the block task.
+
+### Post-change deterministic result
+
+The topic-selection skill now requires one documented opening proof case that can express
+`intended goal → visible measure → shortcut → absurd outcome` in a few plain sentences and
+lowers opening potential when the case needs technical repair. The script skill applies the
+same first-hearing test, puts the causal link before the joke, treats examples as replaceable,
+pairs an early warning with a bounded current echo when persistence matters, and carries a
+useful opening image into the application and ending. Its compact worked example now uses
+CoastRunners and the 2025 coding-test echo.
+
+**Verdict:** PASS. The topic package's new test passes, and the script package passes all 44
+tests. This deterministic result verifies the documented contract; it does not guarantee
+the quality of every future generated hook.

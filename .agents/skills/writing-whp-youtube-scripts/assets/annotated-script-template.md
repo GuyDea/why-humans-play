@@ -2,15 +2,16 @@
 
 ## 1. The detour
 
-> In a 2022 experiment, bumblebees had an unobstructed path to food. Some detoured
+> In a 2022 experiment, bumblebees had an unobstructed path to food. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
+> Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
-> food reward.
+> food reward. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
 > <!-- PI-001: Martin input -->
-> The researchers said this met their operational play criteria. That
-> does not tell us what a bee feels—but makes the detour hard to dismiss.
+> The researchers said this met their operational play criteria. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013) That
+> does not tell us what a bee feels [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)—but makes the detour hard to dismiss.
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
-> experience.
+> experience. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
 
 ## Appendix
 

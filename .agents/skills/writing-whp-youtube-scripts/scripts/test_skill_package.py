@@ -504,6 +504,74 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_opening_proof_case_is_clear_on_first_hearing(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        first_hearing_contract = (
+            "Test every factual hook as `intended goal → visible score or proxy → "
+            "shortcut → absurd outcome`."
+        )
+        failure_contract = (
+            "If a first-hearing listener must ask why the score improved, replace the "
+            "example with a clearer documented case instead of adding a mechanism "
+            "lecture to the hook."
+        )
+        joke_contract = (
+            "The listener must understand the causal link before the punchline; humor "
+            "may compress the consequence, but it never supplies missing logic."
+        )
+
+        self.assertIn(first_hearing_contract, skill)
+        for source_name, source in (("rapid", rapid), ("story", story)):
+            with self.subTest(source=source_name):
+                self.assertIn(first_hearing_contract, source)
+                self.assertIn(failure_contract, source)
+                self.assertIn(joke_contract, source)
+
+    def test_enduring_failure_uses_an_early_case_and_current_echo(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        temporal_bridge = (
+            "For an enduring failure pattern, pair one vivid early warning with one "
+            "compact current echo that demonstrates persistence and present relevance."
+        )
+        echo_boundary = (
+            "Keep the echo to the same causal mechanism; do not open a second full "
+            "story or turn two examples into a universal claim."
+        )
+        callback_contract = (
+            "Carry the opening's concrete vocabulary into the viewer application and "
+            "final line when it clarifies the lesson; do not force a callback that "
+            "makes the explanation less direct."
+        )
+
+        self.assertIn(temporal_bridge, skill)
+        for source_name, source in (("rapid", rapid), ("story", story)):
+            with self.subTest(source=source_name):
+                self.assertIn(temporal_bridge, source)
+                self.assertIn(echo_boundary, source)
+                self.assertIn(callback_contract, source)
+
     def test_rapid_viewer_promise_is_literal_and_joke_free(self) -> None:
         rapid = " ".join(
             (
@@ -551,6 +619,154 @@ class SkillPackageTests(unittest.TestCase):
         ):
             with self.subTest(contract=contract):
                 self.assertIn(contract, rapid)
+
+    def test_examples_follow_a_real_world_consequence_chain(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        consequence_chain = (
+            "goal → measure or target → changed behavior → improved number → "
+            "damaged goal and human cost"
+        )
+
+        self.assertIn(
+            "For each substantial point, prefer a compact documented real-world "
+            "case already available within the factual boundary.",
+            rapid,
+        )
+        self.assertIn(consequence_chain, rapid)
+        self.assertIn(consequence_chain, story)
+        self.assertIn(
+            "Earn humor from the mechanism, incentive, or institution, then state "
+            "plainly what got worse and who absorbed the cost.",
+            rapid,
+        )
+        self.assertIn(
+            "If no suitable verified case is available, use a clearly labeled "
+            "hypothetical; never make a plausible example sound historical.",
+            rapid,
+        )
+        self.assertIn(
+            "Prefer a documented real-world case for each substantial point and make "
+            "its damaged goal and human cost explicit.",
+            skill,
+        )
+
+    def test_worldwide_patterns_use_novel_cases_then_a_global_montage(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        main_contract = (
+            "For a worldwide pattern, prefer a strong lesser-known case for the "
+            "developed story when it offers useful surprise, then use a short "
+            "montage of recognizable cases to demonstrate global scope."
+        )
+        detailed_contract = (
+            "After the developed examples, name roughly three familiar cases with "
+            "years in one compact line, spread across regions when possible, and "
+            "give only enough context to reveal the shared pattern rather than "
+            "opening three new stories."
+        )
+        priority_contract = (
+            "Evidence quality, causal fit, human consequence, and factual support "
+            "remain gates; novelty and recognition serve different narrative jobs."
+        )
+
+        self.assertIn(main_contract, skill)
+        for source_name, source_text in (("rapid", rapid), ("story", story)):
+            with self.subTest(source=source_name):
+                self.assertIn(detailed_contract, source_text)
+                self.assertIn(priority_contract, source_text)
+
+    def test_unfamiliar_names_are_prepared_and_introduced(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        self.assertIn(
+            "Prepare every unfamiliar proper name before first use, then identify "
+            "it and explain its relevance; never drop a name as if the viewer "
+            "missed an earlier introduction.",
+            skill,
+        )
+        detailed_contract = (
+            "Use `prepare the new idea or role → give the name → identify the "
+            "person, institution, place, or concept → explain why it matters here`."
+        )
+        cold_name_warning = (
+            "A sentence such as ‘Donald Campbell warned’ is incomplete when the "
+            "viewer has not met him; first signal the harsher phenomenon, name "
+            "Campbell's law, and identify Campbell in plain language."
+        )
+        for source_name, source_text in (("rapid", rapid), ("story", story)):
+            with self.subTest(source=source_name):
+                self.assertIn(detailed_contract, source_text)
+                self.assertIn(cold_name_warning, source_text)
+
+    def test_complete_narration_closes_with_a_declarative_lesson(self) -> None:
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        contract = (
+            "Close a complete narration with a declarative line that resolves the "
+            "central question and states the lesson; do not end on an unanswered "
+            "question alone."
+        )
+        self.assertIn(contract, story)
+        self.assertIn(contract, rapid)
+
+    def test_compact_promise_gives_questions_the_viewer_can_ask_ai(self) -> None:
+        rapid = (
+            SKILL_ROOT / "references/rapid-prototyping.md"
+        ).read_text(encoding="utf-8")
+        spoken_example = " ".join(
+            line.removeprefix("> ").strip()
+            for line in rapid.splitlines()
+            if line.startswith(">")
+        )
+        self.assertIn(
+            "By the end, you will know four questions you can ask an AI to check "
+            "whether its answer addresses your real problem.",
+            spoken_example,
+        )
+        self.assertIn(
+            "When the promise asks an AI to help audit its own answer, describe the "
+            "questions as a way to surface gaps or help check the result, not as proof "
+            "that the answer is correct.",
+            " ".join(rapid.split()),
+        )
 
     def test_phase_two_maps_each_factual_statement_to_an_adjacent_source(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
@@ -600,6 +816,64 @@ class SkillPackageTests(unittest.TestCase):
             "they cannot reveal the animal's inner experience",
             template,
         )
+
+    def test_phase_two_factual_claims_have_clickable_inline_source_indicators(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "research": " ".join(
+                (SKILL_ROOT / "references/research-and-rights.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "format": " ".join(
+                (SKILL_ROOT / "references/annotated-script-format.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "template": (
+                SKILL_ROOT / "assets/annotated-script-template.md"
+            ).read_text(encoding="utf-8"),
+        }
+        core_contract = (
+            "Append a visible `[F-###](Original URL)` indicator immediately after every "
+            "mapped factual narration sentence or separable factual clause."
+        )
+        non_spoken_contract = (
+            "Treat inline evidence indicators as review annotations, not spoken words; "
+            "exclude them from narration extraction, word count, table reads, and "
+            "teleprompter output."
+        )
+        for source_name in ("skill", "research", "format"):
+            with self.subTest(source=source_name, contract="core"):
+                self.assertIn(core_contract, sources[source_name])
+            with self.subTest(source=source_name, contract="non-spoken"):
+                self.assertIn(non_spoken_contract, sources[source_name])
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        template_narration = sources["template"].split(
+            "## 1. The detour\n", 1
+        )[1].split("\n## Appendix", 1)[0]
+        worked_narration = " ".join(
+            line.removeprefix("> ").strip()
+            for line in template_narration.splitlines()
+            if line.startswith("> ")
+        )
+        required_placements = (
+            "In a 2022 experiment, bumblebees had an unobstructed path to "
+            f"food. {marker}",
+            "Some detoured into an object area, contacted wooden balls, and rolled "
+            f"them repeatedly without a food reward. {marker}",
+            "The researchers said this met their operational play criteria. "
+            f"{marker}",
+            f"That does not tell us what a bee feels {marker}—but",
+            "Those clues can sharpen the question; they cannot reveal the animal's "
+            f"inner experience. {marker}",
+        )
+        for placement in required_placements:
+            with self.subTest(template_placement=placement):
+                self.assertIn(placement, worked_narration)
+        self.assertEqual(worked_narration.count(marker), 5)
 
     def test_rapid_hook_supports_an_honest_question_first_entry(self) -> None:
         rapid = " ".join(
@@ -715,7 +989,7 @@ class SkillPackageTests(unittest.TestCase):
             skill,
         )
 
-    def test_compact_example_does_not_assert_an_unsupplied_mechanism(self) -> None:
+    def test_compact_example_demonstrates_a_first_hearing_causal_hook(self) -> None:
         rapid = (
             SKILL_ROOT / "references/rapid-prototyping.md"
         ).read_text(encoding="utf-8")
@@ -728,27 +1002,20 @@ class SkillPackageTests(unittest.TestCase):
             for line in example.splitlines()
             if line.startswith(">")
         )
-        self.assertIn(
-            "The supplied facts establish the outcome mismatch, not its mechanism.",
-            normalized_example,
-        )
         self.assertTrue(
             spoken_example.startswith(
-                "How can an AI receive a reward—and still leave the intended job "
-                "unfinished?"
+                "How can an AI follow the rules—and completely fail the job?"
             )
         )
         self.assertIn(
-            "In 2017, researchers at DeepMind reported a strange AI failure. They had "
-            "given the AI a simple job: put one block on top of another.",
+            "In 2016, OpenAI trained an AI to play a boat-racing game.",
             spoken_example,
         )
-        self.assertNotIn("block-stacking experiment", spoken_example)
-        self.assertIn("if an AI can receive a reward without", normalized_example)
-        self.assertIn("completing the intended task", normalized_example)
-        self.assertIsNone(
-            re.search(r"(?i)\b(?:score|metric)\b", normalized_example)
-        )
+        self.assertIn("three targets that kept reappearing", spoken_example)
+        self.assertIn("It did not win the race. It won the spreadsheet.", spoken_example)
+        self.assertIn("In 2025, OpenAI reported", spoken_example)
+        self.assertNotIn("block-stacking", normalized_example)
+        self.assertNotIn("red block", normalized_example)
 
     def test_rapid_factual_boundary_forbids_inferred_cognition_and_result_state(
         self,
@@ -838,7 +1105,7 @@ class SkillPackageTests(unittest.TestCase):
             skill,
         )
         self.assertIn(
-            "Put all metadata and production annotations in a final appendix whose "
+            "Put all other metadata and production annotations in a final appendix whose "
             "beat entries match the narration beat numbers and titles.",
             skill,
         )
@@ -980,7 +1247,9 @@ class SkillPackageTests(unittest.TestCase):
         local = [
             target
             for target in targets
-            if "://" not in target and not target.startswith("#")
+            if "://" not in target
+            and not target.startswith("#")
+            and target != "Original URL"
         ]
         expected = [
             "references/rapid-prototyping.md",

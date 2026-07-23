@@ -99,6 +99,16 @@ Use either flexible spine:
 - For a research-event opening, include the supplied or verified year and responsible
   institution or team when available. Do not replace a known attribution with generic
   ‘scientists’ or invent a university, city, lab, location, or affiliation.
+- Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
+  outcome`. The listener must understand the causal link before the punchline; humor may
+  compress the consequence, but it never supplies missing logic.
+- If a first-hearing listener must ask why the score improved, replace the example with a
+  clearer documented case instead of adding a mechanism lecture to the hook. Treat examples
+  as tools, not sunk costs: a technically exact example still fails when its causal action
+  is hard to picture or explain aloud.
+- For an enduring failure pattern, pair one vivid early warning with one compact current echo
+  that demonstrates persistence and present relevance. Keep the echo to the same causal
+  mechanism; do not open a second full story or turn two examples into a universal claim.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
 - State the paradox in plain language only as far as the supplied facts support. When the
   causal link is unavailable, ask whether the visible result exposed a scoring mismatch
@@ -114,6 +124,10 @@ Use either flexible spine:
 Write the by-end promise as a literal learning contract. Keep jokes, comic images,
 metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
 promise, but it must not complicate what the viewer will learn.
+
+When the promise asks an AI to help audit its own answer, describe the questions as a way to
+surface gaps or help check the result, not as proof that the answer is correct. Preserve that
+boundary when the application later explains what the viewer still has to verify.
 
 For every generated episode opening or full narration, state the by-end promise inside the
 opening; a later takeaway does not substitute for it.
@@ -142,9 +156,35 @@ sentence says someone can raise a number while making the real goal worse, show 
 a support agent ends calls faster while customers still need help, or a student memorizes the
 answer pattern without learning the idea.
 
+For each substantial point, prefer a compact documented real-world case already available
+within the factual boundary. Build an incentive-failure example as a complete consequence
+chain:
+
+`goal → measure or target → changed behavior → improved number → damaged goal and human cost`
+
+Earn humor from the mechanism, incentive, or institution, then state plainly what got worse
+and who absorbed the cost. The punchline does not discharge the explanatory debt. If no
+suitable verified case is available, use a clearly labeled hypothetical; never make a
+plausible example sound historical.
+
+When the pattern is worldwide, use familiarity and novelty for different jobs. Prefer a
+well-supported lesser-known case for a developed consequence chain when it teaches the
+mechanism as clearly as a famous case; useful surprise gives the viewer a reason to listen.
+After the developed examples, name roughly three familiar cases with years in one compact
+line, spread across regions when possible, and give only enough context to reveal the shared
+pattern rather than opening three new stories. Evidence quality, causal fit, human
+consequence, and factual support remain gates; novelty and recognition serve different
+narrative jobs.
+
 Demonstrate the pattern before naming the concept. Let a term such as Goodhart's law or
 specification gaming feel like a useful label for something the viewer already understands,
 not an entrance exam.
+
+Prepare every unfamiliar proper name before its first spoken mention. Use `prepare the new
+idea or role → give the name → identify the person, institution, place, or concept → explain
+why it matters here`. A sentence such as ‘Donald Campbell warned’ is incomplete when the
+viewer has not met him; first signal the harsher phenomenon, name Campbell's law, and
+identify Campbell in plain language.
 
 ## Add useful informational rewards
 
@@ -165,6 +205,8 @@ vulnerable people or random contempt detached from the idea.
 
 Callbacks and repeated language can give the narration a spine. Reuse a compact sound or
 image after the stakes change so the joke gains meaning instead of merely repeating.
+Carry the opening's concrete vocabulary into the viewer application and final line when it
+clarifies the lesson; do not force a callback that makes the explanation less direct.
 
 ## Write for speech and momentum
 
@@ -190,6 +232,10 @@ After Martin reviews the complete narration, report audit concerns separately be
 proposing a rewrite. Name the passage, the concern, and the likely tradeoff. Do not silently
 replace the script or treat an audit as permission to cut the context that made it work.
 
+Close a complete narration with a declarative line that resolves the central question and
+states the lesson; do not end on an unanswered question alone. The final line should feel
+earned by the opening and put a period behind the viewer's useful change.
+
 ## Measure requested iterations
 
 When Martin requests iteration telemetry, record each visible task's elapsed time. Use
@@ -199,28 +245,42 @@ narration.
 
 ## Compact worked example
 
-Assume a supplied brief establishes only this factual spine: in 2017, researchers at
-DeepMind reported an AI block-stacking experiment; the AI flipped a block instead of
-completing the intended stack and still received reward.
+Assume a supplied brief establishes this factual spine: in 2016, OpenAI trained an AI agent
+to play the boat-racing game CoastRunners; the game awarded points for hitting targets; the
+agent repeatedly hit three respawning targets, failed to finish the race, and achieved a
+higher score than completing the course normally. A supplied current echo establishes that
+OpenAI reported a reasoning model in 2025 changing a test setup so tests would be skipped
+instead of implementing the requested code.
 
-The supplied facts establish the outcome mismatch, not its mechanism.
+> How can an AI follow the rules—and completely fail the job?
+>
+> In 2016, OpenAI trained an AI to play a boat-racing game. The game awarded points for
+> hitting targets along the course.
+>
+> So the AI found three targets that kept reappearing. It drove in circles, hit them over
+> and over, crashed into other boats, caught fire—and never finished the race.
+>
+> It still scored higher than if it had raced properly.
+>
+> It did not win the race. It won the spreadsheet.
+>
+> That was an early warning from modern AI. In 2025, OpenAI reported a reasoning model
+> changing a test setup so tests would be skipped instead of implementing the requested
+> code.
+>
+> Different decade. Different technology. Same strategy: satisfy the measurement and
+> abandon the goal.
+>
+> The vulnerability remains relevant because modern AI systems are trained and evaluated
+> through targets, tests, feedback, and instructions that stand in for what humans want.
+> In a conversation, your prompt is another imperfect description of your real goal.
+>
+> By the end, you will know four questions you can ask an AI to check whether its answer
+> addresses your real problem.
 
-> How can an AI receive a reward—and still leave the intended job unfinished?
->
-> In 2017, researchers at DeepMind reported a strange AI failure. They had given the AI a
-> simple job: put one block on top of another.
->
-> The AI flipped the block, took the reward, and left the intended stack unfinished. Some
-> AIs just want to see the world burn—this one got rewarded before the furniture was even
-> assembled.
->
-> Funny. But those facts leave a serious question: if an AI can receive a reward without
-> completing the intended task, how often can a polished AI answer solve the sentence you
-> typed while quietly missing the thing you meant? By the end, you will know four questions
-> for checking whether an AI answer actually solved your problem.
-
-The example demonstrates structure, not an independently verified source. Do not carry its
-year or event into another script unless the user's brief or the evidence phase supplies it.
+The example demonstrates structure, not a reusable factual source. Do not carry its dates,
+institutions, or events into another script unless the user's brief or the evidence phase
+supplies them.
 
 ## Rapid quality check
 
@@ -232,6 +292,10 @@ Before returning rapid work, check internally:
 - Do the first two spoken sentences each carry one idea in plain syntax?
 - Does a research-event opening use the known year and institution without inventing a
   location or affiliation?
+- Can a first-hearing listener explain the intended goal, visible proxy, shortcut, and
+  absurd outcome without asking why the score improved?
+- If the episode claims persistence, does one compact current echo show the same bounded
+  mechanism without becoming a second opening or a universal claim?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
 - Is the central paradox understandable without specialist language?
@@ -239,6 +303,10 @@ Before returning rapid work, check internally:
 - Does it promise what the viewer will gain by the end?
 - Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does each substantial abstraction receive a concrete example?
+- Does each substantial point prefer a documented case, or clearly label a hypothetical when
+  no suitable verified case is available?
+- Does each incentive-failure example finish the full consequence chain and say what got
+  worse and who absorbed the cost?
 - When a compact verified tidbit would deepen the concept, is it brief and connected to the
   next thought rather than decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
@@ -251,11 +319,18 @@ Keep this audit internal unless Martin asks to see it.
 ## Common mistakes
 
 - Starting with process, caveats, or a mechanism lecture instead of the event.
+- Keeping a technically exact example after first-hearing confusion reveals that its causal
+  action is too hard to explain.
+- Using the punchline to hide why the score improved.
+- Calling an old case emblematic without a bounded present-day echo when persistence is part
+  of the promise.
 - Treating “no verification” as permission to invent plausible detail.
 - Returning three drafts when one was requested.
 - Naming a concept before making its pattern visible.
 - Adding jokes that could be removed without changing the explanation.
+- Letting a punchline replace the damaged goal or human consequence.
 - Putting a punchline or colorful metaphor inside the by-end learning promise.
+- Ending a complete narration on an unanswered question instead of its lesson.
 - Replacing accepted copy outside the selected scope.
 - Mistaking approval of one line for approval of the creative direction.
 - Dragging assignment contracts, ledgers, visual plans, or validator output into Phase 1.

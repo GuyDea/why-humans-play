@@ -97,6 +97,10 @@ remains unchanged apart from its current-status note.
 
 ## 2026-07-22 — Lock the AI pilot package and story contract
 
+**Status:** Opening case and thumbnail superseded later on 2026-07-22 by “Prefer
+first-hearing proof cases and connect them to the present.” The title, central question, and
+launch-order decision remain current.
+
 **Decision:** Episode 1 uses the verified block-flip reconstruction as its opening and
 the exact package *Why AI Cheats—Even When It Follows Every Rule* with
 **100% WRONG**; it closes with a conditional inspection of one everyday score, without
@@ -314,3 +318,172 @@ format compatibility.
 `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, the accepted requirements, and the
 live episode needed no content change because they already state the correct brand,
 authority, narration-first, and opaque-appendix direction.
+
+## 2026-07-22 — Ground substantial points in real-world consequences
+
+**Decision:** For each non-obvious WHP point, prefer a compact documented real-world case
+told with mechanism-derived humor, then state which number improved, which real goal was
+damaged, and who absorbed the cost; use a clearly labeled hypothetical only when a real
+case is unavailable, unverified, or would obscure the story.
+
+**Rationale:** A joke or abstract example can demonstrate how someone games a measure while
+still leaving the viewer asking why the gap matters. The negative implication must be part
+of the explanation rather than metadata the viewer has to infer.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-22-whp-rapid-script-prototyping-design.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`, and this
+ledger. `BRAND.md` and `CLAUDE.md` already require useful, rigorous, human storytelling and
+need no change.
+
+## 2026-07-22 — Make the AI check conversational and close the lesson
+
+**Decision:** Episode 1 promises four questions viewers can ask an AI to check whether its
+answer solved their real problem, integrates Goodhart's and Campbell's laws through funny
+examples with explicit human consequences, and ends on a declarative lesson rather than an
+unresolved question.
+
+**Rationale:** The check should be directly usable inside an AI conversation, and the
+episode's last sentence should put a clear period behind the insight the story earned.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`whp-youtube/episodes/01-why-ai-cheats.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`, and this
+ledger. Historical proposals and parked drafts remain unchanged.
+
+## 2026-07-22 — Start Episode 1's human bridge with real cases
+
+**Decision:** Remove the hypothetical school and customer-service warm-ups from Episode 1
+and begin its human bridge directly with attributed real-world cases.
+
+**Rationale:** Not separately stated; the settled direction is to skip the hypothetical
+section completely and start with real-world examples.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`whp-youtube/episodes/01-why-ai-cheats.md`,
+`docs/superpowers/plans/2026-07-22-episode-1-real-world-examples.md`, and this ledger.
+`BRAND.md` and `CLAUDE.md` remain unchanged because this is an episode-level story choice.
+
+## 2026-07-22 — Prefer high-profile examples from across the world
+
+**Status:** Superseded later on 2026-07-22 by “Use novelty for developed cases and
+recognition for the global montage.”
+
+**Decision:** When multiple documented cases are comparably strong, WHP scripts prefer the
+more widely recognized, high-profile case and vary the countries or regions represented
+across their examples.
+
+**Rationale:** Martin wants examples drawn from different parts of the world when possible
+and considers higher-profile cases preferable.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`, and this
+ledger. `BRAND.md`, `CLAUDE.md`, and historical topic research remain unchanged because the
+decision refines example selection rather than brand scope or past findings.
+
+## 2026-07-22 — Make conceptual jokes explicit enough to travel
+
+**Decision:** WHP jokes that personify a law, metric, or institution must state enough of
+the causal connection that an international viewer will not mistake the joke for a literal
+factual claim.
+
+**Rationale:** Subtle wording such as a law finding “a second career reviewing performance
+dashboards” may leave non-native English speakers unsure whether it describes a real second
+use rather than a joke.
+
+**Documents:** `whp-youtube/STEERING.md` and this ledger. `BRAND.md` and `CLAUDE.md` need no
+change because this refines channel-level delivery rather than brand scope or repository
+authority. The script skill already requires humor to remain legible, so no additional skill
+text was necessary.
+
+## 2026-07-22 — Prepare unfamiliar names before first mention
+
+**Decision:** Before any unfamiliar person, institution, place, or concept is first named in
+WHP narration, prepare why it is entering, identify it in plain language, and explain its
+immediate relevance.
+
+**Rationale:** Dropping in “Donald Campbell warned” without first introducing Campbell's
+law can make viewers wonder who he is or whether they missed an earlier reference.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`, and this
+ledger. `BRAND.md`, `CLAUDE.md`, historical plans, and the unapproved Episode 1 preview remain
+unchanged because this is a reusable delivery rule recorded in current channel doctrine and
+the script skill.
+
+## 2026-07-22 — Use novelty for developed cases and recognition for the global montage
+
+**Decision:** For a worldwide pattern, WHP develops a strong lesser-known case when it
+offers useful surprise, then uses one compact montage of roughly three familiar, dated cases
+from different regions when possible to demonstrate the pattern's global scale.
+
+**Rationale:** A familiar case can bore viewers when the same mechanism has a less-known,
+equally useful example; recognizable cases still work as fast proof that the behavior is
+widespread.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`, and this
+ledger. `BRAND.md`, `CLAUDE.md`, and historical topic research remain unchanged because the
+decision refines example selection rather than brand scope or past findings.
+
+## 2026-07-22 — Prefer first-hearing proof cases and connect them to the present
+
+**Decision:** A WHP factual hook must make its goal, visible measure, shortcut, and absurd
+outcome understandable on first hearing; replace an example that needs a technical repair,
+and when persistence is part of the point, pair one vivid early warning with one compact
+current echo of the same bounded mechanism.
+
+**Rationale:** The block-flip case sounded like an unexplained bug until its geometry was
+unpacked. OpenAI's CoastRunners case makes the race, scoring loophole, behavior, and failure
+immediately visible, while the 2025 coding-test example shows that the same class of failure
+still matters in current AI systems. The punchline works only after the causal link is clear.
+
+**Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
+`.agents/skills/choosing-whp-video-topic/SKILL.md`,
+`.agents/skills/choosing-whp-video-topic/references/research-method.md`,
+`.agents/skills/choosing-whp-video-topic/scripts/test_skill_package.py`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/episodes/01-why-ai-cheats.md`,
+`docs/superpowers/plans/2026-07-22-episode-1-real-world-examples.md`,
+`docs/superpowers/evidence/2026-07-22-whp-rapid-script-prototyping-evaluation.md`, and this
+ledger. Historical evaluation examples remain preserved as records of the behavior that was
+tested; `CLAUDE.md` and parked episode drafts are unchanged because the decision affects
+current editorial doctrine and Episode 1 rather than repository authority or historical work.
+
+## 2026-07-23 — Put clickable evidence indicators beside production claims
+
+**Decision:** Every factual sentence or separable factual clause in an evidence-backed WHP
+production script carries a visible `[F-###](Original URL)` indicator beside the claim;
+the indicator is review metadata and is excluded from spoken narration and word count.
+
+**Rationale:** Martin could not readily locate the source for Episode 1's opening OpenAI
+claim because the URL was buried in the appendix evidence ledger. The source relationship
+must be visible where the claim is read.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/research-and-rights.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`,
+`.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/validate_annotated_script.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_validate_annotated_script.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/episodes/01-why-ai-cheats.md`, and this ledger. `BRAND.md` remains unchanged
+because this refines evidence-review presentation rather than brand scope or identity.
