@@ -131,7 +131,7 @@ REFERENCES_HEADING_RE = re.compile(
 )
 REFERENCE_ID_RE = re.compile(r"`([FA]-\d{3})`")
 INLINE_EVIDENCE_LINK_RE = re.compile(
-    r"[ \t]*\[(?P<record_id>F-\d{3})\]"
+    r"(?<!!)\[(?P<record_id>F-\d{3})\]"
     r"\((?P<url>https?://[^)\s]+)\)"
 )
 RECORD_HEADING_RE = re.compile(r"^#### ([FA]-\d{3})(?:\s|$)", re.MULTILINE)
@@ -216,6 +216,108 @@ def _mask_fenced_blocks(text: str) -> str:
                     fence_in_blockquote = False
         masked_lines.append(re.sub(r"[^\r\n]", " ", line))
     return "".join(masked_lines)
+
+
+def _mask_non_visible_inline_contexts(text: str) -> str:
+    """Mask HTML comments, code spans, and escaped opening brackets in place."""
+
+    masked = list(text)
+    index = 0
+    while index < len(text):
+        if text.startswith("<!--", index):
+            closing = text.find("-->", index + 4)
+            end = len(text) if closing == -1 else closing + 3
+            for position in range(index, end):
+                if text[position] not in "\r\n":
+                    masked[position] = " "
+            index = end
+            continue
+
+        if text[index] == "`":
+            run_end = index + 1
+            while run_end < len(text) and text[run_end] == "`":
+                run_end += 1
+            delimiter = text[index:run_end]
+            closing = text.find(delimiter, run_end)
+            if closing != -1:
+                end = closing + len(delimiter)
+                for position in range(index, end):
+                    if text[position] not in "\r\n":
+                        masked[position] = " "
+                index = end
+                continue
+            index = run_end
+            continue
+
+        if text[index] == "[":
+            backslashes = 0
+            previous = index - 1
+            while previous >= 0 and text[previous] == "\\":
+                backslashes += 1
+                previous -= 1
+            if backslashes % 2:
+                masked[index] = " "
+        index += 1
+    return "".join(masked)
+
+
+def _inline_evidence_indicator_matches(text: str) -> list[re.Match[str]]:
+    """Find visible canonical evidence links while preserving original positions."""
+
+    visible_text = _mask_non_visible_inline_contexts(text)
+    return list(INLINE_EVIDENCE_LINK_RE.finditer(visible_text))
+
+
+def _is_word_character(character: str) -> bool:
+    return re.fullmatch(r"\w", character) is not None
+
+
+def _strip_inline_evidence_indicators(text: str) -> str:
+    """Remove visible evidence links without joining neighboring words."""
+
+    matches = _inline_evidence_indicator_matches(text)
+    if not matches:
+        return text
+
+    stripped: list[str] = []
+    cursor = 0
+    match_index = 0
+    while match_index < len(matches):
+        run_start = matches[match_index].start()
+        run_end = matches[match_index].end()
+        match_index += 1
+        while (
+            match_index < len(matches)
+            and not text[run_end : matches[match_index].start()].strip(" \t")
+        ):
+            run_end = matches[match_index].end()
+            match_index += 1
+
+        replacement_start = run_start
+        while replacement_start > cursor and text[replacement_start - 1] in " \t":
+            replacement_start -= 1
+        replacement_end = run_end
+        while replacement_end < len(text) and text[replacement_end] in " \t":
+            replacement_end += 1
+
+        left = text[replacement_start - 1] if replacement_start > 0 else ""
+        right = text[replacement_end] if replacement_end < len(text) else ""
+        had_separator = replacement_start < run_start or replacement_end > run_end
+        if left and right and _is_word_character(left) and _is_word_character(right):
+            replacement = " "
+        elif right and not _is_word_character(right):
+            replacement = ""
+        elif left and right and had_separator:
+            replacement = " "
+        else:
+            replacement = ""
+
+        stripped.append(text[cursor:replacement_start])
+        stripped.append(replacement)
+        cursor = replacement_end
+
+    stripped.append(text[cursor:])
+    return "".join(stripped)
 
 
 def _level_three_blocks(text: str, masked_text: str) -> list[tuple[str, str]]:
@@ -539,6 +641,7 @@ def _extract_narration_from_masked(masked_text: str) -> str:
         body = _section_body(block, "Narration")
         if body is None:
             continue
+        body = _strip_inline_evidence_indicators(body)
         current: list[str] = []
         for line in body.splitlines():
             match = re.match(r"^[ ]{0,3}>[ \t]?(.*)$", line)
@@ -548,8 +651,7 @@ def _extract_narration_from_masked(masked_text: str) -> str:
                     current = []
                 continue
             quoted = match.group(1)
-            spoken = PERSONAL_MARKER_RE.sub("", quoted)
-            spoken = INLINE_EVIDENCE_LINK_RE.sub("", spoken).strip()
+            spoken = PERSONAL_MARKER_RE.sub("", quoted).strip()
             if spoken:
                 current.append(spoken)
             elif not PERSONAL_MARKER_RE.search(quoted) and current:
@@ -983,7 +1085,7 @@ def _validate_inline_evidence_indicators(
             for record_id in REFERENCE_ID_RE.findall(claims)
             if record_id.startswith("F-")
         }
-        indicators = list(INLINE_EVIDENCE_LINK_RE.finditer(narration))
+        indicators = _inline_evidence_indicator_matches(narration)
         indicator_ids = {match.group("record_id") for match in indicators}
 
         for record_id in sorted(claim_ids - indicator_ids):

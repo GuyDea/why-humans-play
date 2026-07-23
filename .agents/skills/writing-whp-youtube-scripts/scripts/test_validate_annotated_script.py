@@ -918,6 +918,46 @@ class ValidatorTests(unittest.TestCase):
         self.assertNotIn("10.1016/j.anbehav.2022.08.013", narration)
         self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
 
+    def test_inline_evidence_indicator_between_words_preserves_word_boundary(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        for case, annotated in (
+            ("preserve-separator", f"alpha {marker}beta"),
+            ("insert-separator", f"alpha{marker}beta"),
+        ):
+            with self.subTest(case=case):
+                document = replace_exact(
+                    COMPLETED_DOCUMENT,
+                    "Those clues can sharpen the question",
+                    annotated,
+                )
+                narration = validator.extract_narration(document)
+                self.assertIn("alpha beta", narration)
+                self.assertNotIn("alphabeta", narration)
+
+    def test_inline_evidence_indicator_stripping_preserves_existing_cases(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        expected = validator.extract_narration(COMPLETED_DOCUMENT)
+        cases = {
+            "before-punctuation": replace_exact(
+                COMPLETED_DOCUMENT,
+                "feels—but",
+                f"feels {marker}—but",
+            ),
+            "multiple-markers": replace_exact(
+                COMPLETED_DOCUMENT,
+                marker,
+                f"{marker} {marker}",
+                expected_count=1,
+            ),
+        }
+        for case, document in cases.items():
+            with self.subTest(case=case):
+                self.assertEqual(validator.extract_narration(document), expected)
+
     def test_claim_mapping_requires_inline_evidence_indicator(self) -> None:
         marker = " [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
         document = replace_exact(APPENDIX_DOCUMENT, marker, "")
@@ -925,6 +965,76 @@ class ValidatorTests(unittest.TestCase):
             document,
             "Beat 01 Claims references F-001 but narration has no inline evidence indicator",
         )
+
+    def test_claim_mapping_requires_a_visible_clickable_inline_indicator(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        missing_indicator = (
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator"
+        )
+        non_visible_lookalikes = {
+            "html-comment": f"<!--{marker}-->",
+            "inline-code": f"`{marker}`",
+            "escaped-markdown": "\\" + marker,
+            "markdown-image": f"!{marker}",
+        }
+        for context, lookalike in non_visible_lookalikes.items():
+            with self.subTest(context=context):
+                document = replace_exact(
+                    APPENDIX_DOCUMENT,
+                    marker,
+                    lookalike,
+                    expected_count=1,
+                )
+                if context == "markdown-image":
+                    document = replace_exact(
+                        document,
+                        "- **Word count:** 80",
+                        "- **Word count:** 81",
+                    )
+                self.assert_error(document, missing_indicator)
+                self.assertIn(lookalike, validator.extract_narration(document))
+
+        with self.subTest(context="visible-control"):
+            self.assertEqual(validate_document(APPENDIX_DOCUMENT), [])
+            self.assertNotIn(marker, validator.extract_narration(APPENDIX_DOCUMENT))
+
+    def test_multiline_non_visible_contexts_are_not_stripped_as_indicators(
+        self,
+    ) -> None:
+        marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
+        missing_indicator = (
+            "Beat 01 Claims references F-001 but narration has no inline evidence indicator"
+        )
+        non_visible_lookalikes = {
+            "html-comment": f"<!-- review note\n> {marker}\n> -->",
+            "inline-code": f"`review note\n> {marker}\n> continues here`",
+        }
+        for context, lookalike in non_visible_lookalikes.items():
+            with self.subTest(context=context):
+                document = replace_exact(
+                    APPENDIX_DOCUMENT,
+                    marker,
+                    lookalike,
+                    expected_count=1,
+                )
+                actual_count = validator.count_narration_words(document)
+                document = replace_exact(
+                    document,
+                    "- **Word count:** 80",
+                    f"- **Word count:** {actual_count}",
+                )
+                errors = validate_document(document)
+                self.assertTrue(
+                    any(missing_indicator in error for error in errors),
+                    errors,
+                )
+                self.assertFalse(
+                    any("Word count metadata" in error for error in errors),
+                    errors,
+                )
+                self.assertIn(marker, validator.extract_narration(document))
 
     def test_inline_evidence_indicator_must_be_mapped_in_same_beat(self) -> None:
         document = replace_exact(
