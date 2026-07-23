@@ -103,6 +103,13 @@ Every piece must use a rigorous lens on a recognizable hidden game, the human fa
 or an explicit game worth understanding — then hand the insight back so the viewer can see or act
 differently.
 
+That hand-back has two inseparable parts. Every episode must leave the viewer with **one
+non-obvious understanding** that revises a familiar mental model and **one concrete,
+evidence-bounded response** they can use in a relevant situation. The response may be an
+action, observation, or reflection, but it must say what to try, what to notice, and where
+the lesson stops. A familiar summary followed by “be careful” or “think critically” does
+not meet the bar.
+
 ## What's genuinely new (the wedge)
 
 - **Rigor is the moat.** Real behavioral science + game theory + honesty (show the caveats,

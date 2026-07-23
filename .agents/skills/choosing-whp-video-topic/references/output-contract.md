@@ -116,6 +116,7 @@ Use this compact row shape; create separate rows for materially different angles
 
 ```text
 # | WHP lane or signal seed | subject | source/seed | exact angle
+intended viewer | Audience pain or shared tension | recognizable moment | human stake or cost, where applicable
 all-six gate results + concise rejection reason | disposition
 ```
 
@@ -249,6 +250,7 @@ Use a compact field/value table or equally scannable labeled blocks. Include eve
 | Exact subject and angle | The same winner named in `## Decision` |
 | Working logline | One sentence serving the whole episode |
 | Intended viewer | A concrete viewer beyond existing followers |
+| Audience pain or shared tension | The specific recognizable problem, mystery, desire, or tension that makes the intended viewer care, including the lived moment and human cost where applicable |
 | Why now | Classify as evergreen, growth, seasonal, or news-driven and explain the timing |
 | Familiar entry point and central tension | What earns recognition and opens the question |
 | Game/play mechanism | The mechanism central to the angle |

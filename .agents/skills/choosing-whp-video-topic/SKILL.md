@@ -17,6 +17,7 @@ Track this checklist during the run. Do not compose the recommendation until eve
 - [ ] Select and state the evidence mode.
 - [ ] Collect independent audience-demand, competitive-supply, and timing signals.
 - [ ] Record at least 30 distinct, diverse subjects before ranking.
+- [ ] For problem-led candidates, compare specific lived painpoints before choosing the mechanism.
 - [ ] Develop materially different angles for promising subjects.
 - [ ] Identify a first-hearing opening proof case and any needed current echo for each finalist.
 - [ ] Audit every advancing angle against all six hard gates.
@@ -73,6 +74,27 @@ Collect multiple independent audience-demand, competitive-supply, and timing sig
 - philosophy, ethics, meaning, cooperation, competition, and the future of play.
 
 Actual games and their histories are first-class candidates. Intelligence is one WHP pillar, not the whole brand. Avoid semantic duplicates and continue beyond the first fashionable cluster.
+
+Before choosing a mechanism for a problem-led candidate, generate and compare the specific
+lived painpoints first. Prioritize the widest specific, recognizable, recurring pain that
+credible evidence supports, not the broadest subject label. Do not begin with a technical
+mechanism and manufacture human relevance afterward.
+
+For each problem-led candidate, record:
+
+- the **target viewer**;
+- the exact **lived moment** in which the problem appears;
+- the **human cost**;
+- evidence of **reach or recurrence**;
+- the familiar **surface explanation** or misconception;
+- the **hidden game or mechanism** that can explain it;
+- the **new understanding** the episode can earn; and
+- the **usable response** the viewer can apply.
+
+Use the mechanism as the explanation of a supported human problem, not as a substitute for
+one. For wonder-, history-, and explicit-game-led candidates, use a widely shared mystery,
+desire, or tension instead of requiring suffering. Those candidates still need a
+recognizable human stake, earned understanding, and useful response.
 
 For every promising subject, create at least two materially different angles. Build each angle with this editorial bridge:
 

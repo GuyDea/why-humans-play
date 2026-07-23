@@ -52,26 +52,42 @@ and creative status. Do not make an operation depend on invisible chat history.
 Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, humor or voice
 passes, and scoped refinement.
 
-Return the requested artifact directly. Do not perform web research, write an assignment
-contract or evidence packet, force three opening candidates, create annotated-script
-scaffolding, plan visuals or rights, run the production rubric, or invoke the validator
-unless Martin explicitly asks for that work.
+Return the requested artifact directly. Outside the bounded architecture
+concept-discovery scan, do not perform web research, write an assignment contract or
+evidence packet, force three opening candidates, create annotated-script scaffolding, plan
+visuals or rights, run the production rubric, or invoke the validator unless Martin
+explicitly asks for that work.
 
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
 
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in Phase 1. Inventory explanatory mechanisms, consequences,
+named laws or effects, interventions, and countermeasures before deciding which concepts
+belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
+the full production workflow. Use the discovery source only to establish the concept and
+its meaning; defer episode-claim and example verification to Phase 2.
+
 For a new episode or a thesis-level rethink, produce and refine the script architecture
-before writing any opening or narration. Stop after returning the architecture. Do not draft
-the hook, beats, or narration until Martin explicitly approves it. Approval of a topic,
-title, isolated insight, or earlier script does not approve the architecture.
+before writing any opening or narration. Put the sourced concept inventory first in the
+artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
+until Martin explicitly approves it. Approval of a topic, title, isolated insight, or
+earlier script does not approve the architecture.
 
 Once Martin approves the architecture, use it as the content baseline for the first
 narration prototype. Preserve its central question, core answer, belief shift, insight
 ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson. Scoped work
 on existing narration does not require rebuilding the architecture unless the requested
 change alters the episode's central message.
+
+An architecture cannot be approved unless it contains both a non-obvious understanding
+and a concrete, evidence-bounded viewer response with an observable result. Check the
+complete transformation explicitly: `Before, I thought X. Now, I understand Y. Next time,
+I will do Z. I will know it helped when I observe W.` Preserve that approved
+learning-and-action contract when drafting the opening promise, explanation, viewer
+application, and final lesson.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
@@ -102,6 +118,16 @@ For episode-scale work without an approved architecture, return only the archite
 artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
 Positive feedback on one insight, example, phenomenon, or reframe does not approve the
 complete architecture.
+
+Do not present an architecture as approval-ready until its concept-discovery scan is
+complete. If source access is unavailable or Martin explicitly requests an offline pass,
+mark the inventory provisional exactly as required by the architecture method and surface
+the resulting omission risk.
+
+Do not approve a familiar summary with generic advice attached. The non-obvious
+understanding must revise the viewer's prior model, and the response must name a relevant
+situation, a concrete decision rule or sequence, an observable result, a real boundary,
+and at least one transfer case.
 
 Architecture approval authorizes beat ordering and narration prototyping, not evidence
 production. Preserve the approved architecture as the message baseline during prose
@@ -172,6 +198,9 @@ For evidence-backed finalization:
   evidence-bounded insight; low-risk action, observation, or reflection; observable signal;
   real boundary; and larger benefit. The structured block does not substitute for spoken
   copy.
+- Preserve the approved learning-and-action contract from architecture through the
+  opening promise, explanation, viewer application, and final lesson; do not replace it
+  with generic caution or an unrelated checklist.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique
   image.

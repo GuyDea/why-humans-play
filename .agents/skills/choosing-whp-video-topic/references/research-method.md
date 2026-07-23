@@ -97,9 +97,37 @@ Do not require every lane in every run or use lane coverage as a mechanical quot
 
 For every promising subject, develop at least **two materially different angles**. A materially different angle changes the central tension, human stake, evidence spine, or payoff—not merely the title wording.
 
+Before choosing a mechanism for a problem-led candidate, generate and compare the specific
+lived painpoints first. Prioritize the widest specific, recognizable, recurring pain that
+credible evidence supports, not the broadest subject label. Do not begin with a technical
+mechanism and manufacture human relevance afterward.
+
+Record these fields for every problem-led candidate:
+
+- **target viewer** — the person beyond existing followers who experiences the problem;
+- **lived moment** — the exact situation in which they recognize it;
+- **human cost** — what the problem wastes, damages, delays, or makes harder;
+- **reach or recurrence** — evidence that the pain is broad, repeated, or both;
+- **surface explanation** — the familiar story or misconception people use now;
+- **hidden game or mechanism** — the WHP explanation that makes the pattern legible;
+- **new understanding** — the non-obvious model the episode can earn; and
+- **usable response** — the evidence-bounded change the viewer can make afterward.
+
+Compare **reach**, **recognition**, **frequency**, **consequence**, and
+**unresolvedness**. Treat these as separate evidence-backed dimensions; do not multiply
+them into a fabricated market-size number. A large category does not rescue a vague pain
+statement, and a frequent annoyance does not automatically outrank a rarer serious cost.
+Record the evidence and editorial tradeoff.
+
+For wonder-, history-, and explicit-game-led candidates, use a widely shared mystery,
+desire, or tension instead of requiring suffering. Apply the same specificity discipline:
+name the intended viewer, recognizable moment, human stake, new understanding, and usable
+response without pretending curiosity is pain.
+
 For each angle, identify:
 
 - the familiar entry point;
+- the audience pain or shared tension;
 - one documented opening proof case that is legible on first hearing;
 - the tension, puzzle, or misconception;
 - the recognizable human stake;

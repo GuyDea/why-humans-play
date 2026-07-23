@@ -12,6 +12,15 @@ important unknowns. Route a new episode through the
 fields do not block a useful architecture or prototype. Ask only when a missing choice
 would materially change the requested artifact.
 
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in Phase 1. This is the required exception to rapid mode's
+usual research deferral: inventory relevant explanatory concepts and practical
+countermeasures before selecting the episode's thesis. Put the sourced inventory first,
+then distill the smaller phenomenon map used by the argument. Obey the method's fixed batch
+budget and parallelize independent searches. If the scan cannot run or reaches its budget
+with an unresolved lead, use the architecture method's exact incomplete label and treat the
+result as provisional.
+
 Do not depend on hidden conversational state. Work from the supplied topic brief, artifact
 or selection, surrounding context, requested operation, and creative status. In ordinary
 chat, use the visible conversation; a future local workbench may provide the same inputs
@@ -88,6 +97,13 @@ and refining only what Martin targets. Keep the prototype easy to discard and fa
 but preserve the approved central question, core answer, insight ladder, earned reframe,
 practical payoff, boundaries, and final lesson.
 
+Carry the approved learning-and-action contract into the opening promise, explanation,
+viewer application, and final lesson. The narration must teach the new model before asking
+the viewer to use the response. Preserve its concrete situation, decision rule or sequence,
+observable result, boundary, and transfer instead of replacing them with advice that merely
+sounds responsible. `Be careful`, `think critically`, `ask better questions`, and a loose
+checklist without a decision rule, sequence, or observable result do not pass.
+
 Aim each paragraph at curiosity, laughter, insight, or more than one. Cut background that
 does not sharpen the next question. Escalate from the concrete incident to ordinary human
 experience and then to the larger system without losing the central mechanism.
@@ -135,6 +151,10 @@ Use either flexible spine:
 Write the by-end promise as a literal learning contract. Keep jokes, comic images,
 metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
 promise, but it must not complicate what the viewer will learn.
+
+For a complete episode, make that promise reflect both halves of the approved contract:
+the new understanding and the concrete response the viewer will be able to use. Keep the
+wording concise; do not recite the full method before the episode has earned it.
 
 When the promise asks an AI to help audit its own answer, describe the questions as a way to
 surface gaps or help check the result, not as proof that the answer is correct. Preserve that
@@ -297,10 +317,17 @@ supplies them.
 
 Before returning rapid work, check internally:
 
+- For a new or thesis-level architecture, did the bounded concept-discovery scan cover both
+  explanations and interventions, show sources and exclusions, and reach its saturation
+  rule before the architecture was presented?
 - For episode-scale work, was the complete architecture explicitly approved before any
   opening, beat outline, or narration was drafted?
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
   without adding a competing thesis?
+- Does it teach the approved new understanding before asking the viewer to use the
+  concrete response?
+- Do the opening promise, viewer application, and final lesson preserve the approved
+  decision rule or sequence, observable result, and boundary?
 - Does the first sentence feel like a concrete event or irresistible proposition?
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
@@ -334,6 +361,9 @@ Keep this audit internal unless Martin asks to see it.
 ## Common mistakes
 
 - Jumping from a selected topic or one promising insight directly into narration.
+- Treating a recall-based list as a complete concept inventory.
+- Searching for causes and effects while forgetting interventions, debiasing methods, or
+  countermeasures.
 - Treating a beat outline, list of facts, or generic topic summary as script architecture.
 - Using hooks, jokes, or examples to hide a weak or unapproved intellectual payload.
 - Starting with process, caveats, or a mechanism lecture instead of the event.
