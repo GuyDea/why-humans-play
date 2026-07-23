@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, it } from 'vitest';
 import { buildApp } from '../../src/http/app.js';
+import { UNUSED_DOCUMENT_SERVICE } from './stubs.js';
 
 const NONCE = 'test-launch-nonce';
 const app = buildApp({
@@ -13,7 +14,7 @@ const app = buildApp({
     cancel: () => {},
     result: () => ({ kind: 'pending' }),
   },
-  documentService: {},
+  documentService: UNUSED_DOCUMENT_SERVICE,
   artifactService: {},
   validatorService: {},
 });

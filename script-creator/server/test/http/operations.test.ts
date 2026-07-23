@@ -8,6 +8,7 @@ import { OperationService } from '../../src/operations/service.js';
 import { JobSupervisor } from '../../src/supervisor.js';
 import type { JobRecord, JobState } from '../../src/types.js';
 import { waitFor } from '../helpers.js';
+import { UNUSED_DOCUMENT_SERVICE } from './stubs.js';
 
 const NONCE = 'task-11-test-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
@@ -43,7 +44,7 @@ function makeFixture(mode: string): Fixture {
   const app = buildApp({
     nonce: NONCE,
     operationService: service,
-    documentService: {},
+    documentService: UNUSED_DOCUMENT_SERVICE,
     artifactService: {},
     validatorService: {},
   });
@@ -251,7 +252,7 @@ describe('operations HTTP API', () => {
         cancel: () => {},
         result: () => ({ kind: 'pending' }),
       },
-      documentService: {},
+      documentService: UNUSED_DOCUMENT_SERVICE,
       artifactService: {},
       validatorService: {},
     });
@@ -287,7 +288,7 @@ describe('operations HTTP API', () => {
         cancel: () => {},
         result: () => ({ kind: 'pending' }),
       },
-      documentService: {},
+      documentService: UNUSED_DOCUMENT_SERVICE,
       artifactService: {},
       validatorService: {},
     });

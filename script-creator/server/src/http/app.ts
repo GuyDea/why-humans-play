@@ -3,6 +3,12 @@ import Fastify, {
   type FastifyInstance,
   type FastifyReply,
 } from 'fastify';
+import {
+  ExportBlockedError,
+  type CreateDraftInput,
+  type DocumentService,
+  type SaveDraftInput,
+} from '../documents/service.js';
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
 import {
@@ -16,10 +22,20 @@ type OperationHttpService = Pick<
   'submit' | 'get' | 'events' | 'cancel' | 'result'
 >;
 
+export type DocumentHttpService = Pick<
+  DocumentService,
+  | 'createDraft'
+  | 'getDraft'
+  | 'saveDraft'
+  | 'listRevisions'
+  | 'importMarkdown'
+  | 'exportMarkdown'
+>;
+
 export interface BuildAppOptions {
   nonce: string;
   operationService: OperationHttpService;
-  documentService: unknown;
+  documentService: DocumentHttpService;
   artifactService: unknown;
   validatorService: unknown;
 }
@@ -35,6 +51,29 @@ interface ResumeBody {
 
 interface OperationParams {
   id: string;
+}
+
+interface DraftParams {
+  id: string;
+}
+
+interface CreateDraftBody {
+  episodeSlug?: unknown;
+  title?: unknown;
+  format?: unknown;
+  doc?: unknown;
+}
+
+interface SaveDraftBody {
+  title?: unknown;
+  format?: unknown;
+  doc?: unknown;
+  opId?: unknown;
+  disposition?: unknown;
+}
+
+interface ImportDraftBody {
+  markdown?: unknown;
 }
 
 interface EventsQuery {
@@ -74,6 +113,103 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
   });
 
   app.get('/api/health', async () => ({ ok: true }));
+
+  app.post<{ Body: CreateDraftBody }>(
+    '/api/drafts',
+    async (request, reply) => {
+      try {
+        const input: CreateDraftInput = {
+          episodeSlug: requiredString(request.body?.episodeSlug, 'episodeSlug'),
+          title: requiredString(request.body?.title, 'title'),
+          format: requiredFormat(request.body?.format),
+          doc: requiredDocument(request.body?.doc),
+        };
+        return reply.code(201).send(
+          options.documentService.createDraft(input),
+        );
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Body: ImportDraftBody }>(
+    '/api/drafts/import',
+    async (request, reply) => {
+      try {
+        const markdown = requiredString(request.body?.markdown, 'markdown');
+        return reply.code(201).send(
+          options.documentService.importMarkdown(markdown),
+        );
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id',
+    async (request, reply) => {
+      try {
+        return options.documentService.getDraft(request.params.id);
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.put<{ Params: DraftParams; Body: SaveDraftBody }>(
+    '/api/drafts/:id',
+    async (request, reply) => {
+      try {
+        const input: SaveDraftInput = {
+          doc: requiredDocument(request.body?.doc),
+        };
+        if (hasOwn(request.body, 'title')) {
+          input.title = requiredString(request.body.title, 'title');
+        }
+        if (hasOwn(request.body, 'format')) {
+          input.format = requiredFormat(request.body.format);
+        }
+        if (hasOwn(request.body, 'opId')) {
+          input.opId = optionalString(request.body.opId, 'opId');
+        }
+        if (hasOwn(request.body, 'disposition')) {
+          input.disposition = requiredString(
+            request.body.disposition,
+            'disposition',
+          );
+        }
+        return options.documentService.saveDraft(request.params.id, input);
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/revisions',
+    async (request, reply) => {
+      try {
+        return options.documentService.listRevisions(request.params.id);
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/export',
+    async (request, reply) => {
+      try {
+        return {
+          markdown: options.documentService.exportMarkdown(request.params.id),
+        };
+      } catch (error) {
+        return sendDocumentError(reply, error);
+      }
+    },
+  );
 
   app.post<{ Body: SubmitBody }>('/api/ops', async (request, reply) => {
     try {
@@ -192,6 +328,35 @@ function hasOwn(value: unknown, key: string): value is Record<string, unknown> {
     && Object.prototype.hasOwnProperty.call(value, key);
 }
 
+function requiredString(value: unknown, field: string): string {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`${field} is required`);
+  }
+  return value;
+}
+
+function optionalString(value: unknown, field: string): string | null {
+  if (value === null) return null;
+  if (typeof value !== 'string') {
+    throw new Error(`${field} must be a string or null`);
+  }
+  return value;
+}
+
+function requiredFormat(value: unknown): 'annotated' | 'narration' {
+  if (value !== 'annotated' && value !== 'narration') {
+    throw new Error('format must be annotated or narration');
+  }
+  return value;
+}
+
+function requiredDocument(value: unknown): Record<string, unknown> {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('doc is required');
+  }
+  return value as Record<string, unknown>;
+}
+
 function waitForStreamDrain(stream: PassThrough): Promise<void> {
   return new Promise((resolve) => {
     if (stream.destroyed) {
@@ -208,6 +373,41 @@ function waitForStreamDrain(stream: PassThrough): Promise<void> {
     stream.once('close', finish);
     stream.once('error', finish);
   });
+}
+
+function sendDocumentError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  if (error instanceof ExportBlockedError) {
+    return reply.code(409).send({
+      error: error.message,
+      reasons: error.reasons,
+    });
+  }
+
+  const message = error instanceof Error ? error.message : 'document failed';
+  if (/^draft not found:/i.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (isDocumentClientError(message)) {
+    return reply.code(400).send({ error: message });
+  }
+
+  reply.log.error({ err: error }, 'document request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+function isDocumentClientError(message: string): boolean {
+  return [
+    /^(?:episodeSlug|title|markdown|disposition) is required$/,
+    /^format must be annotated or narration$/,
+    /^doc is required$/,
+    /^opId must be a string or null$/,
+    /^invalid draft document:/,
+    /^draft format .+ does not match document format /,
+    /^Markdown contains no beat headers$/,
+  ].some((pattern) => pattern.test(message));
 }
 
 function sendOperationError(
