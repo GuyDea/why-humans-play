@@ -2,7 +2,12 @@ import type Database from 'better-sqlite3';
 
 export interface StateMigration {
   version: number;
-  owner: 'documents' | 'topics' | 'architecture' | 'milestones';
+  owner:
+    | 'documents'
+    | 'topics'
+    | 'architecture'
+    | 'milestones'
+    | 'learning';
   name: string;
   apply(db: Database.Database): void;
 }
@@ -247,6 +252,193 @@ CREATE INDEX pending_milestones_draft_state
   ON pending_milestones (draft_id, state, created_at DESC);
 `;
 
+const LEARNING_LIFECYCLE_V10 = `
+ALTER TABLE narration_proposals RENAME TO narration_proposals_v9;
+
+CREATE TABLE narration_proposals (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL
+    CHECK (state IN (
+      'pending', 'accepted', 'rejected', 'rerolled', 'dismissed'
+    )),
+  created_at TEXT NOT NULL,
+  resolved_at TEXT,
+  reason_note TEXT,
+  successor_operation_id TEXT,
+  PRIMARY KEY (draft_id, operation_id)
+);
+
+INSERT INTO narration_proposals (
+  draft_id, operation_id, state, created_at, resolved_at,
+  reason_note, successor_operation_id
+)
+SELECT
+  draft_id, operation_id, state, created_at, resolved_at, NULL, NULL
+FROM narration_proposals_v9;
+
+DROP TABLE narration_proposals_v9;
+
+CREATE INDEX narration_proposals_draft_state
+  ON narration_proposals (draft_id, state);
+
+ALTER TABLE package_tests
+  ADD COLUMN selected_direction_index INTEGER;
+ALTER TABLE package_tests
+  ADD COLUMN selected_at TEXT;
+
+CREATE TABLE learning_sessions (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  start_cursor INTEGER NOT NULL DEFAULT 0,
+  end_cursor INTEGER,
+  created_at TEXT NOT NULL,
+  closed_at TEXT,
+  CHECK (end_cursor IS NULL OR end_cursor >= start_cursor)
+);
+
+CREATE UNIQUE INDEX learning_sessions_open_draft
+  ON learning_sessions (draft_id)
+  WHERE closed_at IS NULL;
+
+CREATE TABLE decision_events (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  seq INTEGER NOT NULL,
+  kind TEXT NOT NULL,
+  source_type TEXT NOT NULL,
+  source_id TEXT NOT NULL,
+  disposition TEXT NOT NULL,
+  source_timestamp TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  UNIQUE (draft_id, seq),
+  UNIQUE (source_type, source_id, disposition)
+);
+
+CREATE INDEX decision_events_draft_seq
+  ON decision_events (draft_id, seq);
+
+CREATE TABLE decision_notes (
+  decision_id TEXT PRIMARY KEY
+    REFERENCES decision_events(id) ON DELETE CASCADE,
+  note TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE distillation_runs (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  session_id TEXT NOT NULL REFERENCES learning_sessions(id) ON DELETE CASCADE,
+  trigger TEXT NOT NULL CHECK (trigger IN ('on-demand', 'session-end')),
+  state TEXT NOT NULL CHECK (state IN (
+    'frozen', 'queued', 'running', 'completed', 'failed',
+    'cancelled', 'interrupted', 'ingested', 'no-op'
+  )),
+  operation_id TEXT,
+  resume_key TEXT NOT NULL UNIQUE,
+  guardrail_markdown TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE lessons (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  distillation_run_id TEXT
+    REFERENCES distillation_runs(id) ON DELETE SET NULL,
+  classification TEXT NOT NULL
+    CHECK (classification IN ('episode-local', 'durable')),
+  state TEXT NOT NULL CHECK (state IN (
+    'proposed', 'approved', 'rejected', 'retired', 'superseded',
+    'approved-pending-reconcile', 'applied',
+    'retirement-pending', 'supersession-pending'
+  )),
+  proposed_markdown TEXT,
+  reviewed_markdown TEXT,
+  rationale_markdown TEXT NOT NULL,
+  proposed_target TEXT,
+  supersedes_lesson_id TEXT REFERENCES lessons(id) ON DELETE RESTRICT,
+  version INTEGER NOT NULL DEFAULT 1 CHECK (version > 0),
+  repository_commit TEXT,
+  repository_path TEXT,
+  repository_anchor TEXT,
+  repository_content_hash TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX lessons_draft_state
+  ON lessons (draft_id, state, created_at);
+
+CREATE TABLE distillation_run_decisions (
+  run_id TEXT NOT NULL REFERENCES distillation_runs(id) ON DELETE CASCADE,
+  decision_id TEXT NOT NULL REFERENCES decision_events(id) ON DELETE RESTRICT,
+  ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+  snapshot_json TEXT NOT NULL,
+  PRIMARY KEY (run_id, decision_id),
+  UNIQUE (run_id, ordinal)
+);
+
+CREATE TABLE distillation_run_lessons (
+  run_id TEXT NOT NULL REFERENCES distillation_runs(id) ON DELETE CASCADE,
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  ordinal INTEGER NOT NULL CHECK (ordinal >= 0),
+  snapshot_json TEXT NOT NULL,
+  PRIMARY KEY (run_id, lesson_id),
+  UNIQUE (run_id, ordinal)
+);
+
+CREATE TABLE lesson_evidence (
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  decision_id TEXT NOT NULL REFERENCES decision_events(id) ON DELETE RESTRICT,
+  PRIMARY KEY (lesson_id, decision_id)
+);
+
+CREATE TABLE lesson_reconciliations (
+  id TEXT PRIMARY KEY,
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
+  kind TEXT NOT NULL CHECK (kind IN ('apply', 'retire', 'supersede')),
+  state TEXT NOT NULL
+    CHECK (state IN ('prepared', 'awaiting-reconciliation', 'verified')),
+  resume_key TEXT NOT NULL UNIQUE,
+  prepared_markdown TEXT NOT NULL,
+  repository_commit TEXT,
+  paths_json TEXT NOT NULL,
+  anchors_json TEXT NOT NULL,
+  content_hashes_json TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  verified_at TEXT
+);
+
+CREATE UNIQUE INDEX lesson_reconciliations_active_lesson
+  ON lesson_reconciliations (lesson_id)
+  WHERE state != 'verified';
+
+CREATE TABLE validator_attempts (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  path TEXT NOT NULL,
+  content_hash TEXT NOT NULL,
+  ok INTEGER NOT NULL CHECK (ok IN (0, 1)),
+  diagnostics_json TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX validator_attempts_draft_created
+  ON validator_attempts (draft_id, created_at, id);
+
+CREATE TABLE operation_lessons (
+  operation_id TEXT NOT NULL,
+  lesson_id TEXT NOT NULL REFERENCES lessons(id) ON DELETE RESTRICT,
+  lesson_version INTEGER NOT NULL CHECK (lesson_version > 0),
+  content_hash TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  PRIMARY KEY (operation_id, lesson_id)
+);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -363,6 +555,15 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
     name: 'milestone-supersession',
     apply: (db) => db.exec(MILESTONE_SUPERSESSION_V9),
   },
+  {
+    version: 10,
+    owner: 'learning',
+    name: 'learning-lifecycle',
+    apply: (db) => {
+      db.exec(LEARNING_LIFECYCLE_V10);
+      backfillProvableV9Decisions(db);
+    },
+  },
 ];
 
 export const LATEST_STATE_SCHEMA_VERSION =
@@ -397,4 +598,139 @@ function ensureColumn(
       .map(({ name }) => name),
   );
   if (!columns.has(column)) db.exec(sql);
+}
+
+function backfillProvableV9Decisions(db: Database.Database): void {
+  const revisions = db.prepare<[], {
+    id: string;
+    draft_id: string;
+    disposition: string;
+    created_at: string;
+  }>(
+    `SELECT id, draft_id, disposition, created_at
+     FROM revisions
+     WHERE disposition IN (
+       'episode-generation-accepted',
+       'architecture-proposal-accepted',
+       'architecture-proposals-accepted',
+       'selection-proposal-accepted',
+       'personal-input-proposal-accepted',
+       'architecture-approved',
+       'architecture-reopened',
+       'narration-reconciled',
+       'narration-approved'
+     )
+       OR disposition LIKE 'variant-picked/%'
+     ORDER BY draft_id, created_at, seq, id`,
+  ).all();
+  const handoffs = db.prepare<[], {
+    run_id: string;
+    winner_subject: string;
+    draft_id: string;
+    updated_at: string;
+  }>(
+    `SELECT run_id, winner_subject, draft_id, updated_at
+     FROM topic_handoff_sagas
+     WHERE draft_created = 1
+       AND artifact_written = 1
+       AND pipeline_upserted = 1
+       AND idea_promoted = 1
+     ORDER BY draft_id, updated_at, run_id, winner_subject`,
+  ).all();
+  const rejectedProposals = db.prepare<[], {
+    operation_id: string;
+    draft_id: string;
+    resolved_at: string;
+  }>(
+    `SELECT operation_id, draft_id, resolved_at
+     FROM narration_proposals
+     WHERE state = 'rejected' AND resolved_at IS NOT NULL
+     ORDER BY draft_id, resolved_at, operation_id`,
+  ).all();
+  const promotions = db.prepare<[], {
+    operation_id: string;
+    draft_id: string;
+    updated_at: string;
+  }>(
+    `SELECT operation_id, draft_id, updated_at
+     FROM promotions
+     WHERE state = 'complete'
+     ORDER BY draft_id, updated_at, operation_id`,
+  ).all();
+  const seqByDraft = new Map<string, number>();
+  const insert = db.prepare(
+    `INSERT OR IGNORE INTO decision_events (
+      id, draft_id, seq, kind, source_type, source_id, disposition,
+      source_timestamp, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  );
+  const nextSeq = (draftId: string): number => {
+    const seq = (seqByDraft.get(draftId) ?? 0) + 1;
+    seqByDraft.set(draftId, seq);
+    return seq;
+  };
+  for (const revision of revisions) {
+    const kind = revision.disposition.startsWith('variant-picked/')
+      ? 'variant-picked'
+      : [
+          'architecture-approved',
+          'architecture-reopened',
+          'narration-reconciled',
+          'narration-approved',
+        ].includes(revision.disposition)
+        ? 'gate-action'
+        : revision.disposition === 'personal-input-proposal-accepted'
+          ? 'personal-input-integrated'
+          : 'proposal-accepted';
+    insert.run(
+      `v10:revision:${revision.id}`,
+      revision.draft_id,
+      nextSeq(revision.draft_id),
+      kind,
+      'revision',
+      revision.id,
+      revision.disposition,
+      revision.created_at,
+      revision.created_at,
+    );
+  }
+  for (const proposal of rejectedProposals) {
+    insert.run(
+      `v10:narration-proposal:${proposal.operation_id}:rejected`,
+      proposal.draft_id,
+      nextSeq(proposal.draft_id),
+      'proposal-rejected',
+      'narration-proposal',
+      proposal.operation_id,
+      'rejected',
+      proposal.resolved_at,
+      proposal.resolved_at,
+    );
+  }
+  for (const handoff of handoffs) {
+    insert.run(
+      `v10:topic-handoff:${handoff.run_id}:${handoff.winner_subject}`,
+      handoff.draft_id,
+      nextSeq(handoff.draft_id),
+      'winner-handed-off',
+      'topic-handoff',
+      `${handoff.run_id}:${handoff.winner_subject}`,
+      'winner-handed-off',
+      handoff.updated_at,
+      handoff.updated_at,
+    );
+  }
+  for (const promotion of promotions) {
+    insert.run(
+      `v10:promotion:${promotion.operation_id}`,
+      promotion.draft_id,
+      nextSeq(promotion.draft_id),
+      'gate-action',
+      'promotion',
+      promotion.operation_id,
+      'promotion-completed',
+      promotion.updated_at,
+      promotion.updated_at,
+    );
+  }
 }

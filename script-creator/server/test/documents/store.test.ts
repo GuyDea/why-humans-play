@@ -60,7 +60,7 @@ afterEach(() => {
 });
 
 describe('DocumentStore', () => {
-  it('migrates a v1 state database through the shared v9 registry', () => {
+  it('migrates a v1 state database through the shared v10 registry', () => {
     const dbFile = databaseFile();
     const before = new Database(dbFile);
     before.exec(`
@@ -83,7 +83,7 @@ describe('DocumentStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(9);
+    expect(version).toBe(10);
     expect(drafts).toEqual([
       'id',
       'episode_slug',
@@ -159,6 +159,36 @@ describe('DocumentStore', () => {
     });
     expect(updated.doc).toEqual(draft().doc);
     expect(updated.architecture).toEqual(draft().architecture);
+  });
+
+  it('atomically records an explicit narration reconciliation revision', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      narrationReconciliationRequired: true,
+    }));
+
+    const reconciled = store.markNarrationReconciled('draft-1', {
+      expectedRevisionSeq: 0,
+      revisionId: 'revision-reconciled',
+      updatedAt: '2026-07-24T10:00:00.000Z',
+    });
+
+    expect(reconciled).toMatchObject({
+      draft: { narrationReconciliationRequired: false },
+      revision: {
+        id: 'revision-reconciled',
+        seq: 1,
+        opId: null,
+        disposition: 'narration-reconciled',
+        doc: draft().doc,
+      },
+    });
+    expect(store.markNarrationReconciled('draft-1', {
+      expectedRevisionSeq: 0,
+      revisionId: 'stale-revision',
+      updatedAt: '2026-07-24T10:01:00.000Z',
+    })).toBeNull();
+    expect(store.listRevisions('draft-1')).toHaveLength(1);
   });
 
   it('returns an empty draft summary list', () => {

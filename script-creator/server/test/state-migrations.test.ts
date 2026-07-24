@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('shared state migration registry', () => {
-  it('owns one documented global sequence through milestone workspaces', () => {
+  it('owns one documented global sequence through the learning lifecycle', () => {
     expect(STATE_MIGRATIONS.map(({ version, owner, name }) => ({
       version,
       owner,
@@ -39,8 +39,9 @@ describe('shared state migration registry', () => {
       { version: 7, owner: 'architecture', name: 'staged-promotion' },
       { version: 8, owner: 'milestones', name: 'episode-milestones' },
       { version: 9, owner: 'milestones', name: 'milestone-supersession' },
+      { version: 10, owner: 'learning', name: 'learning-lifecycle' },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(9);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(10);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -111,7 +112,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v8 schema for a fresh database', () => {
+  it('creates the complete v10 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -181,6 +182,17 @@ describe('shared state migration registry', () => {
       'state',
       'created_at',
       'resolved_at',
+      'reason_note',
+      'successor_operation_id',
+    ]);
+    expect(columns(inspected, 'package_tests')).toEqual([
+      'id',
+      'idea_id',
+      'op_id',
+      'directions_json',
+      'created_at',
+      'selected_direction_index',
+      'selected_at',
     ]);
     expect(columns(inspected, 'episode_workspaces')).toEqual([
       'draft_id',
@@ -212,6 +224,114 @@ describe('shared state migration registry', () => {
     ).get('pending_milestones')!.sql;
     expect(milestoneSql).toContain("'superseded'");
     inspected.close();
+  });
+
+  it('applies v10 once to populated v9 without changing document bytes', () => {
+    const dbFile = simulatedV9Database();
+    const before = new Database(dbFile);
+    const docJson = '{"type":"doc","attrs":{"format":"narration"},"content":[]}';
+    before.prepare(
+      `INSERT INTO drafts (
+        id, episode_slug, title, format, doc_json, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-v9',
+      'draft-v9',
+      'Draft V9',
+      'narration',
+      docJson,
+      '2026-07-24T08:00:00.000Z',
+    );
+    before.prepare(
+      `INSERT INTO revisions (
+        id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'revision-v9',
+      'draft-v9',
+      1,
+      'operation-accepted',
+      'selection-proposal-accepted',
+      docJson,
+      '2026-07-24T08:01:00.000Z',
+      'narration',
+    );
+    before.prepare(
+      `INSERT INTO narration_proposals (
+        draft_id, operation_id, state, created_at, resolved_at
+      ) VALUES (?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-v9',
+      'operation-accepted',
+      'accepted',
+      '2026-07-24T08:00:30.000Z',
+      '2026-07-24T08:01:00.000Z',
+    );
+    before.prepare(
+      `INSERT INTO narration_proposals (
+        draft_id, operation_id, state, created_at, resolved_at
+      ) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-v9',
+      'operation-rejected',
+      'rejected',
+      '2026-07-24T08:01:30.000Z',
+      '2026-07-24T08:02:00.000Z',
+      'draft-v9',
+      'operation-dismissed',
+      'dismissed',
+      '2026-07-24T08:02:30.000Z',
+      '2026-07-24T08:03:00.000Z',
+    );
+    before.close();
+
+    const migration = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
+    const apply = vi.spyOn(migration, 'apply');
+    documentStores.push(new DocumentStore(dbFile));
+    topicStores.push(new TopicStore(dbFile));
+
+    const inspected = new Database(dbFile, { readonly: true });
+    expect(inspected.prepare<[], { doc_json: string }>(
+      `SELECT doc_json FROM drafts WHERE id = 'draft-v9'`,
+    ).get()!.doc_json).toBe(docJson);
+    expect(inspected.prepare<[], { doc_json: string }>(
+      `SELECT doc_json FROM revisions WHERE id = 'revision-v9'`,
+    ).get()!.doc_json).toBe(docJson);
+    expect(inspected.prepare<[], { state: string }>(
+      `SELECT state FROM narration_proposals
+       WHERE operation_id = 'operation-accepted'`,
+    ).get()!.state).toBe('accepted');
+    expect(inspected.prepare<[], { state: string }>(
+      `SELECT state FROM narration_proposals
+       WHERE operation_id = 'operation-rejected'`,
+    ).get()!.state).toBe('rejected');
+    expect(inspected.prepare<[], { state: string }>(
+      `SELECT state FROM narration_proposals
+       WHERE operation_id = 'operation-dismissed'`,
+    ).get()!.state).toBe('dismissed');
+    expect(inspected.prepare<[], { count: number }>(
+      `SELECT COUNT(*) AS count FROM decision_events
+       WHERE draft_id = 'draft-v9'`,
+    ).get()!.count).toBe(2);
+    expect(inspected.prepare<[], { count: number }>(
+      `SELECT COUNT(*) AS count FROM decision_events
+       WHERE source_id = 'operation-dismissed'`,
+    ).get()!.count).toBe(0);
+    inspected.close();
+    expect(apply).toHaveBeenCalledOnce();
+  });
+
+  it('does not reapply v10 to an already-v10 database', () => {
+    const dbFile = simulatedV9Database();
+    documentStores.push(new DocumentStore(dbFile));
+    documentStores.pop()!.close();
+    const migration = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
+    const apply = vi.spyOn(migration, 'apply');
+
+    documentStores.push(new DocumentStore(dbFile));
+    topicStores.push(new TopicStore(dbFile));
+
+    expect(apply).not.toHaveBeenCalled();
   });
 
   it('does not reapply migration v6 to an already-v6 database', () => {
@@ -494,6 +614,20 @@ function simulatedV7Database(): string {
   const db = new Database(dbFile);
   for (const migration of STATE_MIGRATIONS) {
     if (migration.version > 7) break;
+    migration.apply(db);
+    db.pragma(`user_version = ${migration.version}`);
+  }
+  db.close();
+  return dbFile;
+}
+
+function simulatedV9Database(): string {
+  const root = mkdtempSync(join(tmpdir(), 'state-v9-'));
+  roots.push(root);
+  const dbFile = join(root, 'state.sqlite3');
+  const db = new Database(dbFile);
+  for (const migration of STATE_MIGRATIONS) {
+    if (migration.version > 9) break;
     migration.apply(db);
     db.pragma(`user_version = ${migration.version}`);
   }

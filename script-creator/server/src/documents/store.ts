@@ -147,6 +147,7 @@ export type NarrationProposalState =
   | 'pending'
   | 'accepted'
   | 'rejected'
+  | 'rerolled'
   | 'dismissed';
 
 export interface NarrationProposalRecord {
@@ -155,6 +156,8 @@ export interface NarrationProposalRecord {
   state: NarrationProposalState;
   createdAt: string;
   resolvedAt: string | null;
+  reasonNote?: string | null;
+  successorOperationId?: string | null;
 }
 
 export interface ImportPromotionRecord {
@@ -257,6 +260,8 @@ interface NarrationProposalRow {
   state: NarrationProposalState;
   created_at: string;
   resolved_at: string | null;
+  reason_note: string | null;
+  successor_operation_id: string | null;
 }
 
 function draftFrom(row: DraftRow): DraftRecord {
@@ -354,6 +359,8 @@ function narrationProposalFrom(
     state: row.state,
     createdAt: row.created_at,
     resolvedAt: row.resolved_at,
+    reasonNote: row.reason_note,
+    successorOperationId: row.successor_operation_id,
   };
 }
 
@@ -549,8 +556,9 @@ export class DocumentStore {
   ): NarrationProposalRecord {
     this.db.prepare(
       `INSERT INTO narration_proposals (
-        draft_id, operation_id, state, created_at, resolved_at
-      ) VALUES (?, ?, ?, ?, ?)
+        draft_id, operation_id, state, created_at, resolved_at,
+        reason_note, successor_operation_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (draft_id, operation_id) DO NOTHING`,
     ).run(
       record.draftId,
@@ -558,6 +566,8 @@ export class DocumentStore {
       record.state,
       record.createdAt,
       record.resolvedAt,
+      record.reasonNote ?? null,
+      record.successorOperationId ?? null,
     );
     return this.getNarrationProposal(
       record.draftId,
@@ -594,12 +604,24 @@ export class DocumentStore {
     operationId: string,
     state: Exclude<NarrationProposalState, 'pending'>,
     resolvedAt: string,
+    options: {
+      reasonNote?: string | null;
+      successorOperationId?: string | null;
+    } = {},
   ): NarrationProposalRecord {
     const result = this.db.prepare(
       `UPDATE narration_proposals
-       SET state = ?, resolved_at = ?
+       SET state = ?, resolved_at = ?, reason_note = ?,
+           successor_operation_id = ?
        WHERE draft_id = ? AND operation_id = ? AND state = 'pending'`,
-    ).run(state, resolvedAt, draftId, operationId);
+    ).run(
+      state,
+      resolvedAt,
+      options.reasonNote ?? null,
+      options.successorOperationId ?? null,
+      draftId,
+      operationId,
+    );
     const current = this.getNarrationProposal(draftId, operationId);
     if (!current) {
       throw new Error(`narration proposal not found: ${operationId}`);
@@ -616,6 +638,19 @@ export class DocumentStore {
        WHERE draft_id = ? AND op_id = ?
        LIMIT 1`,
     ).get(draftId, operationId)?.present === 1;
+  }
+
+  getRevisionForOperation(
+    draftId: string,
+    operationId: string,
+  ): RevisionRecord | null {
+    const row = this.db.prepare<[string, string], RevisionRow>(
+      `SELECT * FROM revisions
+       WHERE draft_id = ? AND op_id = ?
+       ORDER BY seq DESC
+       LIMIT 1`,
+    ).get(draftId, operationId);
+    return row ? revisionFrom(row) : null;
   }
 
   replaceNarrationArtifactHash(
@@ -766,6 +801,50 @@ export class DocumentStore {
     ).run(required ? 1 : 0, updatedAt, id);
     if (result.changes === 0) throw new Error(`draft not found: ${id}`);
     return this.getDraft(id)!;
+  }
+
+  markNarrationReconciled(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+      revisionId: string;
+      updatedAt: string;
+    },
+  ): { draft: DraftRecord; revision: RevisionRecord } | null {
+    return this.db.transaction(() => {
+      const current = this.getDraft(id);
+      if (!current) throw new Error(`draft not found: ${id}`);
+      this.assertDraftWriteAvailable(id);
+      const currentSeq = this.currentRevisionSeq(id);
+      if (currentSeq !== input.expectedRevisionSeq) return null;
+      const nextSeq = currentSeq + 1;
+      this.db.prepare(
+        `UPDATE drafts
+         SET narration_reconciliation_required = 0, updated_at = ?
+         WHERE id = ?`,
+      ).run(input.updatedAt, id);
+      this.db.prepare(
+        `INSERT INTO revisions (
+          id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+        ) VALUES (
+          ?, ?, ?, NULL, 'narration-reconciled', ?, ?, 'narration'
+        )`,
+      ).run(
+        input.revisionId,
+        id,
+        nextSeq,
+        JSON.stringify(current.doc),
+        input.updatedAt,
+      );
+      return {
+        draft: this.getDraft(id)!,
+        revision: revisionFrom(
+          this.db.prepare<[string], RevisionRow>(
+            'SELECT * FROM revisions WHERE id = ?',
+          ).get(input.revisionId)!,
+        ),
+      };
+    })();
   }
 
   replaceDraftWorkflowState(
