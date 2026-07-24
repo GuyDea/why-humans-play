@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+  writeSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const mode = process.env.FAKE_CODEX_MODE ?? 'happy';
 const argv = process.argv.slice(2);
@@ -13,8 +20,14 @@ const resumeId = resumeIdx >= 0 ? argv[resumeIdx + 1] : null;
 const schemaIdx = argv.indexOf('--output-schema');
 const hasSchema = schemaIdx >= 0;
 const schemaFile = hasSchema ? argv[schemaIdx + 1] : null;
+const submittedPrompt = mode === 'plan6-flow'
+  ? await readSubmittedPrompt(outFile)
+  : '';
 let attemptMode = mode;
 if (mode === 'slow-operation-schema') attemptMode = 'operation-schema';
+if (mode === 'plan6-flow') {
+  attemptMode = plan6Mode(submittedPrompt, hasSchema);
+}
 if (
   mode === 'invalid-schema-once'
   || mode === 'invalid-schema-then-hang'
@@ -50,11 +63,41 @@ if (attemptMode === 'bad-schema-output') {
     e.type === 'item.completed' && e.item?.type === 'agent_message'
       ? { ...e, item: { ...e.item, text: '{"unexpected":true}' } } : e);
 }
+if (attemptMode === 'generate-architecture') {
+  lines = withAgentResult(lines, architectureMarkdown());
+}
+if (attemptMode === 'generate-episode') {
+  lines = withAgentResult(lines, episodeNarrationMarkdown());
+}
+if (
+  attemptMode === 'promote'
+  || attemptMode === 'promote-invalid-production'
+  || attemptMode === 'promote-guardrail'
+) {
+  const report = writePromotionFixture(
+    attemptMode,
+    submittedPrompt,
+    argv,
+  );
+  lines = withAgentResult(lines, report);
+}
 if (hasSchema && attemptMode !== 'bad-schema-output') {
   if (!schemaFile) throw new Error('--output-schema requires a schema file');
   const schema = JSON.parse(readFileSync(schemaFile, 'utf8'));
   const output = synthesizeSchema(schema);
-  if (attemptMode === 'operation-guardrail') {
+  if (attemptMode === 'rewrite-architecture-section') {
+    const inputs = submittedInputs(submittedPrompt);
+    const sectionKey = typeof inputs.section_key === 'string'
+      ? inputs.section_key
+      : 'core-answer';
+    output.replacement_markdown = architectureRewrite(sectionKey);
+  }
+  const requestedGuardrail = process.env.FAKE_OPERATION_STATUS;
+  if (
+    attemptMode === 'operation-guardrail'
+    || requestedGuardrail === 'declined'
+    || requestedGuardrail === 'narrowed'
+  ) {
     output.status = process.env.FAKE_OPERATION_STATUS ?? 'declined';
     output.guardrail_markdown = 'This request crosses the approved scope.';
     if ('replacement_markdown' in output) output.replacement_markdown = '';
@@ -70,9 +113,6 @@ if (hasSchema && attemptMode !== 'bad-schema-output') {
         }
       : e);
 }
-
-process.stdin.on('data', () => {});
-process.stdin.resume();
 
 if (mode === 'surviving-descendant') {
   const readyFile = join(tmpdir(), `fake-descendant-${process.pid}-${Date.now()}`);
@@ -406,9 +446,14 @@ function synthesizeSchema(schema, propertyName = '', itemIndex = 0) {
       ]));
     }
     case 'array': {
-      const count = Number.isInteger(schema.minItems) && schema.minItems >= 0
+      const minimum = Number.isInteger(schema.minItems) && schema.minItems >= 0
         ? schema.minItems
         : 1;
+      const cycleLength = enumCycleLength(schema.items);
+      const desired = Math.max(minimum, cycleLength);
+      const count = Number.isInteger(schema.maxItems) && schema.maxItems >= 0
+        ? Math.min(desired, schema.maxItems)
+        : desired;
       return Array.from(
         { length: count },
         (_, index) => synthesizeSchema(schema.items, propertyName, index),
@@ -430,4 +475,156 @@ function synthesizeSchema(schema, propertyName = '', itemIndex = 0) {
         `unsupported schema type for property ${propertyName || '<root>'}`,
       );
   }
+}
+
+function enumCycleLength(schema) {
+  if (!schema || typeof schema !== 'object' || Array.isArray(schema)) return 1;
+  if (Array.isArray(schema.enum) && schema.enum.length > 0) {
+    return schema.enum.length;
+  }
+  if (schema.type === 'array') return enumCycleLength(schema.items);
+  if (
+    schema.type === 'object'
+    && schema.properties
+    && typeof schema.properties === 'object'
+    && !Array.isArray(schema.properties)
+  ) {
+    return Math.max(
+      1,
+      ...Object.values(schema.properties).map(enumCycleLength),
+    );
+  }
+  return 1;
+}
+
+async function readSubmittedPrompt(resultFile) {
+  const chunks = [];
+  for await (const chunk of process.stdin) chunks.push(chunk);
+  const stdinPrompt = Buffer.concat(chunks).toString('utf8');
+  if (stdinPrompt !== '' || !resultFile) return stdinPrompt;
+  const envelopeFile = join(dirname(resultFile), 'envelope.json');
+  if (!existsSync(envelopeFile)) return '';
+  const envelope = JSON.parse(readFileSync(envelopeFile, 'utf8'));
+  return typeof envelope.prompt === 'string' ? envelope.prompt : '';
+}
+
+function plan6Mode(prompt, schemaOutput) {
+  const label = /^Operation: (.+)$/m.exec(prompt)?.[1];
+  switch (label) {
+    case 'Generate architecture':
+      return 'generate-architecture';
+    case 'Review architecture':
+      return 'review-architecture';
+    case 'Rewrite architecture section':
+      return 'rewrite-architecture-section';
+    case 'Generate (episode-scale)':
+      return 'generate-episode';
+    case 'Promote':
+      return process.env.FAKE_PROMOTE_MODE === 'invalid-production'
+        ? 'promote-invalid-production'
+        : process.env.FAKE_PROMOTE_MODE === 'guardrail'
+          ? 'promote-guardrail'
+          : 'promote';
+    default:
+      return schemaOutput ? 'operation-schema' : 'happy';
+  }
+}
+
+function writePromotionFixture(attempt, prompt, args) {
+  if (attempt === 'promote-guardrail') {
+    return 'Guardrail: promotion declined.';
+  }
+  const inputs = submittedInputs(prompt);
+  const target = typeof inputs.target_path === 'string'
+    ? inputs.target_path
+    : '';
+  const cwdIndex = args.indexOf('-C');
+  const repo = cwdIndex >= 0 ? args[cwdIndex + 1] : null;
+  if (!repo || target === '') {
+    throw new Error('fake Promote requires -C and target_path');
+  }
+  const output = resolve(repo, target);
+  mkdirSync(dirname(output), { recursive: true });
+  if (attempt === 'promote-invalid-production') {
+    writeFileSync(output, '# Invalid production fixture\n');
+    return 'Invalid production fixture written.';
+  }
+  const fixture = resolve(
+    import.meta.dirname,
+    '../../..',
+    '.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md',
+  );
+  writeFileSync(output, readFileSync(fixture));
+  return 'Promotion output written.';
+}
+
+function submittedInputs(prompt) {
+  const raw = /^Inputs: (.+)$/m.exec(prompt)?.[1];
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
+      ? parsed
+      : {};
+  } catch {
+    return {};
+  }
+}
+
+function withAgentResult(events, result) {
+  return events.map((event) =>
+    event.type === 'item.completed' && event.item?.type === 'agent_message'
+      ? { ...event, item: { ...event.item, text: result } }
+      : event);
+}
+
+function episodeNarrationMarkdown() {
+  return [
+    '## Beat 1 — The queue opening',
+    '',
+    '> A queue quietly turns waiting into a strategic game.',
+    '',
+    '## Beat 2 — The hidden choice',
+    '',
+    '> Choosing a line is a bet made with incomplete information.',
+    '',
+  ].join('\n');
+}
+
+function architectureHeadings() {
+  return [
+    ['package-and-audience', 'Package and audience'],
+    ['central-question', 'Central question'],
+    ['core-answer', 'Core answer'],
+    ['viewer-belief-shift', 'Viewer belief shift'],
+    ['insight-ladder', 'Insight ladder'],
+    ['phenomenon-and-paradox-map', 'Phenomenon and paradox map'],
+    ['earned-reframe', 'Earned reframe'],
+    ['real-world-evidence-map', 'Real-world evidence map'],
+    ['practical-payoff', 'Practical payoff'],
+    ['final-lesson', 'Final lesson'],
+    ['scope-boundary', 'Scope boundary'],
+  ];
+}
+
+function architectureMarkdown() {
+  return [
+    ...architectureHeadings().flatMap(([key, title]) => [
+      `### ${title}`,
+      '',
+      `Deterministic fixture content for ${key}.`,
+      '',
+    ]),
+    '### Fixture-only production note',
+    '',
+    'This opaque extra section proves lossless forward compatibility.',
+    '',
+  ].join('\n');
+}
+
+function architectureRewrite(sectionKey) {
+  const title = architectureHeadings()
+    .find(([key]) => key === sectionKey)?.[1]
+    ?? sectionKey;
+  return `### ${title}\n\nFake rewrite for ${sectionKey}.\n`;
 }

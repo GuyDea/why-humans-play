@@ -264,6 +264,32 @@ describe('DraftManager', () => {
       'revision-saved',
     ]);
   });
+
+  it('routes a revision-restore write error before keeping its local failure', async () => {
+    const revisions = [
+      revision('revision-1', 1, firstDoc),
+    ];
+    const refusal = new DaemonClientError(409, {
+      error: 'draft write refused',
+      recoverable: true,
+      state: { pendingSaga: { kind: 'reopen' } },
+    });
+    const fixture = clientFixture({
+      listRevisions: vi.fn(async () => revisions),
+      save: vi.fn(async () => {
+        throw refusal;
+      }),
+    });
+    const onWriteError = vi.fn();
+    const manager = new DraftManager(fixture.client, { onWriteError });
+    await manager.openDraft('draft-1');
+
+    await manager.restoreRevision('revision-1');
+
+    expect(onWriteError).toHaveBeenCalledOnce();
+    expect(onWriteError).toHaveBeenCalledWith(refusal);
+    expect(manager.actionError()).toBe('draft write refused');
+  });
 });
 
 describe('draft artifact path guard', () => {

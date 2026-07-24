@@ -1,10 +1,22 @@
-import { execFile } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFile, spawn } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
 import { describe, expect, it } from 'vitest';
 import {
+  ARCHITECTURE_SECTIONS,
+  splitArchitecture,
+} from '../src/architecture/codec.js';
+import {
+  ARCHITECTURE_REVIEW_SCHEMA,
+  ARCHITECTURE_REWRITE_SCHEMA,
   GATE_CHECK_SCHEMA,
   REVIEW_SCHEMA,
 } from '../src/operations/schemas.js';
@@ -63,12 +75,26 @@ describe('fake codex', () => {
 
     expect(JSON.parse(readFileSync(out, 'utf8'))).toEqual({
       status: 'complete',
-      findings: [{
-        anchor: 'Fake anchor.',
-        severity: 'blocking',
-        finding_markdown: 'Fake finding_markdown.',
-        optional_direction_markdown: null,
-      }],
+      findings: [
+        {
+          anchor: 'Fake anchor.',
+          severity: 'blocking',
+          finding_markdown: 'Fake finding_markdown.',
+          optional_direction_markdown: null,
+        },
+        {
+          anchor: 'Fake anchor.',
+          severity: 'important',
+          finding_markdown: 'Fake finding_markdown.',
+          optional_direction_markdown: null,
+        },
+        {
+          anchor: 'Fake anchor.',
+          severity: 'optional',
+          finding_markdown: 'Fake finding_markdown.',
+          optional_direction_markdown: null,
+        },
+      ],
       guardrail_markdown: null,
     });
   });
@@ -94,4 +120,151 @@ describe('fake codex', () => {
 
     expect(JSON.parse(readFileSync(out, 'utf8')).gates).toHaveLength(6);
   });
+
+  it('writes a complete heading-structured Generate Architecture result with one opaque extra section', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fake-generate-architecture-'));
+    const out = join(dir, 'architecture.md');
+
+    await run(process.execPath, [
+      FAKE,
+      'exec',
+      '--json',
+      '-o',
+      out,
+      '-',
+    ], {
+      env: { ...process.env, FAKE_CODEX_MODE: 'generate-architecture' },
+    });
+
+    const markdown = readFileSync(out, 'utf8');
+    const parsed = splitArchitecture(markdown);
+    expect(parsed.filter((section) =>
+      ARCHITECTURE_SECTIONS.some(({ key }) => key === section.key)
+    ).map(({ key }) => key)).toEqual(
+      ARCHITECTURE_SECTIONS.map(({ key }) => key),
+    );
+    expect(parsed.filter((section) => section.key.startsWith('opaque-')))
+      .toMatchObject([{
+        title: 'Fixture-only production note',
+      }]);
+  });
+
+  it('cycles every architecture section key and severity in strict schema output', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fake-review-architecture-'));
+    const schema = join(dir, 'review.schema.json');
+    const out = join(dir, 'review.json');
+    writeFileSync(schema, JSON.stringify(ARCHITECTURE_REVIEW_SCHEMA));
+
+    await run(process.execPath, [
+      FAKE,
+      'exec',
+      '--json',
+      '--output-schema',
+      schema,
+      '-o',
+      out,
+      '-',
+    ], {
+      env: { ...process.env, FAKE_CODEX_MODE: 'review-architecture' },
+    });
+
+    const result = JSON.parse(readFileSync(out, 'utf8'));
+    expect(result).toEqual({
+      status: 'complete',
+      findings: ARCHITECTURE_SECTIONS.map(({ key }, index) => ({
+        section_key: key,
+        severity: ['blocking', 'important', 'optional'][index % 3],
+        finding_markdown: 'Fake finding_markdown.',
+      })),
+      guardrail_markdown: null,
+    });
+  });
+
+  it('emits a strict rewrite result in Rewrite Architecture Section mode', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'fake-rewrite-architecture-'));
+    const schema = join(dir, 'rewrite.schema.json');
+    const out = join(dir, 'rewrite.json');
+    writeFileSync(schema, JSON.stringify(ARCHITECTURE_REWRITE_SCHEMA));
+
+    await run(process.execPath, [
+      FAKE,
+      'exec',
+      '--json',
+      '--output-schema',
+      schema,
+      '-o',
+      out,
+      '-',
+    ], {
+      env: {
+        ...process.env,
+        FAKE_CODEX_MODE: 'rewrite-architecture-section',
+      },
+    });
+
+    expect(JSON.parse(readFileSync(out, 'utf8'))).toEqual({
+      status: 'complete',
+      replacement_markdown:
+        '### Core answer\n\nFake rewrite for core-answer.\n',
+      guardrail_markdown: null,
+    });
+  });
+
+  it.each([
+    ['valid', true, 'Promotion output written.'],
+    ['invalid-production', true, 'Invalid production fixture written.'],
+    ['guardrail', false, 'Guardrail: promotion declined.'],
+  ] as const)(
+    'runs the %s deterministic Promote fixture mode',
+    async (promoteMode, writesTarget, report) => {
+      const repo = mkdtempSync(join(tmpdir(), `fake-promote-${promoteMode}-`));
+      const out = join(repo, 'result.md');
+      const target = 'whp-youtube/episodes/01-fixture.md';
+      mkdirSync(join(repo, 'whp-youtube', 'episodes'), { recursive: true });
+      writeFileSync(join(repo, 'envelope.json'), JSON.stringify({
+        prompt: [
+          '$writing-whp-youtube-scripts',
+          'Operation: Promote',
+          `Inputs: ${JSON.stringify({ target_path: target })}`,
+        ].join('\n'),
+      }));
+      const child = spawn(
+        process.execPath,
+        [FAKE, 'exec', '--json', '-C', repo, '-o', out, '-'],
+        {
+          env: {
+            ...process.env,
+            FAKE_CODEX_MODE: 'plan6-flow',
+            FAKE_PROMOTE_MODE: promoteMode,
+          },
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      );
+      child.stdin.end();
+      await new Promise<void>((resolve, reject) => {
+        let stderr = '';
+        child.stderr.on('data', (chunk) => {
+          stderr += chunk.toString();
+        });
+        child.once('error', reject);
+        child.once('exit', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`fake Promote exited ${code}: ${stderr}`));
+        });
+      });
+
+      expect(readFileSync(out, 'utf8')).toBe(report);
+      expect(existsSync(join(repo, target))).toBe(writesTarget);
+      if (promoteMode === 'valid') {
+        expect(readFileSync(join(repo, target), 'utf8')).toContain(
+          '### Script metadata',
+        );
+      }
+      if (promoteMode === 'invalid-production') {
+        expect(readFileSync(join(repo, target), 'utf8')).toBe(
+          '# Invalid production fixture\n',
+        );
+      }
+    },
+  );
 });

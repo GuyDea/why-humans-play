@@ -1,3 +1,5 @@
+import { ARCHITECTURE_SECTION_KEYS } from '../architecture/codec.js';
+
 export type JsonSchema = Record<string, unknown>;
 
 function strictObject<const Properties extends Record<string, JsonSchema>>(
@@ -64,6 +66,19 @@ export const REVIEW_SCHEMA = strictObject({
   guardrail_markdown: GUARDRAIL_MARKDOWN,
 });
 
+export const ARCHITECTURE_REVIEW_SCHEMA = strictObject({
+  status: STATUS,
+  findings: {
+    type: 'array',
+    items: strictObject({
+      section_key: { enum: ARCHITECTURE_SECTION_KEYS },
+      severity: { enum: ['blocking', 'important', 'optional'] },
+      finding_markdown: { type: 'string' },
+    }),
+  },
+  guardrail_markdown: GUARDRAIL_MARKDOWN,
+});
+
 export const ALTERNATIVES_SCHEMA = strictObject({
   status: STATUS,
   options: {
@@ -106,6 +121,12 @@ export const GATE_CHECK_SCHEMA = strictObject({
 });
 
 export const REWRITE_SCHEMA = strictObject({
+  status: STATUS,
+  replacement_markdown: { type: 'string' },
+  guardrail_markdown: GUARDRAIL_MARKDOWN,
+});
+
+export const ARCHITECTURE_REWRITE_SCHEMA = strictObject({
   status: STATUS,
   replacement_markdown: { type: 'string' },
   guardrail_markdown: GUARDRAIL_MARKDOWN,

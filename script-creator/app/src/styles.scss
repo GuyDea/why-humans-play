@@ -1013,3 +1013,18 @@ app-full-run-panel .handoff-actions p {
     transition-duration: 0.01ms !important;
   }
 }
+app-architecture-panel,
+app-narration-actions {
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--whp-accent);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 46rem) {
+  app-architecture-panel,
+  app-narration-actions {
+    width: 100%;
+  }
+}

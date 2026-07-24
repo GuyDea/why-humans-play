@@ -13,6 +13,7 @@ import {
   relative,
   resolve,
 } from 'node:path';
+import { withCreativePhase } from '../documents/service.js';
 import type {
   DraftDocument,
   DraftFormat,
@@ -37,6 +38,10 @@ import type {
   ArtifactWriteResult,
   PipelineRow,
 } from '../repo/artifacts.js';
+import type {
+  MilestoneKind,
+  PendingMilestone,
+} from '../repo/milestones.js';
 import {
   type GateCheckResult,
   type IdeaRecord,
@@ -361,6 +366,16 @@ interface TopicArtifactService {
   upsertPipelineRow(row: PipelineRow): Promise<ArtifactWriteResult>;
 }
 
+interface TopicWorkspaceService {
+  hasWorkspace(draftId: string): boolean;
+  recordPending(input: {
+    draftId: string;
+    kind: MilestoneKind;
+    files: string[];
+    reconciliationRequired: boolean;
+  }): Promise<PendingMilestone | void>;
+}
+
 export interface TopicHandoffInput {
   ideaId: string;
   episodeSlug: string;
@@ -411,6 +426,7 @@ export class TopicService {
   private readonly operationService: TopicOperationService;
   private readonly documentService: TopicDocumentService;
   private readonly artifactService: TopicArtifactService | null;
+  private readonly workspaceService: TopicWorkspaceService | null;
   private readonly repoRoot: string;
   private readonly idFactory: () => string;
   private readonly now: () => string;
@@ -421,6 +437,7 @@ export class TopicService {
     operationService: TopicOperationService;
     documentService: TopicDocumentService;
     artifactService?: TopicArtifactService;
+    workspaceService?: TopicWorkspaceService;
     repoRoot: string;
     idFactory?: () => string;
     now?: () => string;
@@ -429,6 +446,7 @@ export class TopicService {
     this.operationService = options.operationService;
     this.documentService = options.documentService;
     this.artifactService = options.artifactService ?? null;
+    this.workspaceService = options.workspaceService ?? null;
     this.repoRoot = options.repoRoot;
     this.idFactory = options.idFactory ?? randomUUID;
     this.now = options.now ?? (() => new Date().toISOString());
@@ -761,9 +779,19 @@ export class TopicService {
         episodeSlug: input.episodeSlug,
         title: input.title,
         format: input.draft.format,
-        doc: input.draft.doc,
+        doc: withCreativePhase(input.draft.doc, 'architecture'),
       });
       saga = this.advanceHandoff(saga, { draftCreated: true });
+    }
+
+    if (
+      this.workspaceService
+      && !this.workspaceService.hasWorkspace(saga.draftId)
+    ) {
+      return handoffResult(
+        saga,
+        `workspace choice required for draft ${saga.draftId}`,
+      );
     }
 
     const artifactPath = `whp-youtube/topics/${input.episodeSlug}.md`;
@@ -788,7 +816,7 @@ export class TopicService {
     if (!saga.pipelineUpserted) {
       const result = await this.artifactService.upsertPipelineRow({
         episodeSlug: input.episodeSlug,
-        milestone: 'selected',
+        milestone: 'architecture',
         ref: artifactPath,
       });
       if (result.conflict) {
@@ -801,6 +829,14 @@ export class TopicService {
     }
 
     if (!saga.ideaPromoted) {
+      if (this.workspaceService) {
+        await this.workspaceService.recordPending({
+          draftId: saga.draftId,
+          kind: 'topic-selection',
+          files: [artifactPath, 'whp-youtube/PIPELINE.md'],
+          reconciliationRequired: true,
+        });
+      }
       this.updateIdea(input.ideaId, { status: 'promoted' });
       saga = this.advanceHandoff(saga, { ideaPromoted: true });
     }

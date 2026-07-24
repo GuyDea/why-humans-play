@@ -6,7 +6,8 @@
   "scripts": {
     "daemon": "tsx src/daemon.ts",
     "test": "vitest run",
-    "spike:e2e": "tsx e2e/real-codex-spike.ts"
+    "spike:e2e": "tsx e2e/real-codex-spike.ts",
+    "e2e:plan6-real": "node --import tsx e2e/plan6-real-ops.ts"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

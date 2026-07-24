@@ -1,8 +1,11 @@
 export type OperationName =
   | 'generate-scoped'
   | 'generate-episode'
+  | 'generate-architecture'
   | 'review'
+  | 'review-architecture'
   | 'rewrite-selection'
+  | 'rewrite-architecture-section'
   | 'generate-alternatives'
   | 'promote'
   | 'ideate'
@@ -250,6 +253,59 @@ export interface DraftDocument {
 
 export type DraftFormat = 'annotated' | 'narration';
 
+export type ArchitectureOperationName =
+  | 'generate-architecture'
+  | 'review-architecture'
+  | 'rewrite-architecture-section';
+
+export interface ArchitectureSection {
+  key: string;
+  title: string;
+  md: string;
+}
+
+export interface ArchitectureState {
+  sections: ArchitectureSection[];
+  approvedMd: string | null;
+  approvedAt: string | null;
+  revisionSeq: number;
+  narrationReconciliationRequired: boolean;
+  pendingSaga: ArchitectureSagaState | null;
+}
+
+export interface ArchitectureSagaState {
+  kind: 'approve' | 'reopen';
+  resumeKey: string;
+  steps: ArchitectureActionSteps;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SaveArchitectureInput {
+  expectedRevisionSeq: number;
+  sections: ArchitectureSection[];
+  opId: string | null;
+  disposition: string;
+}
+
+export interface SavedArchitecture {
+  state: ArchitectureState;
+  revision: RevisionRecord;
+}
+
+export interface ArchitectureActionSteps {
+  revisionAppended: 'pending' | 'completed';
+  artifactWritten: 'pending' | 'completed';
+  pipelineUpserted: 'pending' | 'completed';
+  draftUpdated: 'pending' | 'completed';
+}
+
+export interface ArchitectureActionResult {
+  complete: boolean;
+  steps: ArchitectureActionSteps;
+  state: ArchitectureState;
+}
+
 export interface DraftSummary {
   id: string;
   episodeSlug: string;
@@ -260,6 +316,10 @@ export interface DraftSummary {
 
 export interface DraftRecord extends DraftSummary {
   doc: DraftDocument;
+  approvedNarrationMd?: string | null;
+  approvedNarrationAt?: string | null;
+  approvedNarrationRevisionSeq?: number | null;
+  narrationArtifactHash?: string | null;
 }
 
 export interface RevisionRecord {
@@ -270,6 +330,15 @@ export interface RevisionRecord {
   disposition: string;
   doc: DraftDocument;
   createdAt: string;
+}
+
+export interface NarrationProposalRecord {
+  draftId: string;
+  operationId: string;
+  state: 'pending';
+  createdAt: string;
+  resolvedAt: null;
+  acceptedRevisionPresent: boolean;
 }
 
 export interface CreateDraftInput {
@@ -348,7 +417,86 @@ export interface ValidatorDiagnostic {
 export interface ValidatorResult {
   ok: boolean;
   errors: ValidatorDiagnostic[];
+  path: string;
+  hash: string;
 }
+
+export type PromotionState =
+  | 'running'
+  | 'output-ready'
+  | 'validation-required'
+  | 'complete'
+  | 'failed';
+
+export interface PromotionRecord {
+  draftId: string;
+  operationId: string;
+  state: PromotionState;
+  targetPath: string;
+  targetHash: string | null;
+  importRevisionId?: string;
+  validationHash: string | null;
+  error: string | null;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export type WorkspaceChoice = 'new-branch' | 'current-branch';
+
+export type MilestoneKind =
+  | 'topic-selection'
+  | 'architecture-approval'
+  | 'architecture-reopen'
+  | 'creative-narration-approval'
+  | 'production-promotion';
+
+export interface EpisodeWorkspace {
+  draftId: string;
+  episodeSlug: string;
+  choice: WorkspaceChoice;
+  branch: string;
+  worktreePath: string;
+  baseBranch: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkspaceRecommendation {
+  defaultBranch: string;
+  taskName: string;
+  branch: string;
+  worktreePath: string;
+}
+
+export interface MilestoneStatus {
+  workspace: EpisodeWorkspace | null;
+  recommendation: WorkspaceRecommendation;
+  dirtyFiles: string[];
+}
+
+export interface MilestoneRecord {
+  id: string;
+  draftId: string;
+  episodeSlug: string;
+  kind: MilestoneKind;
+  files: string[];
+  commitMessage: string;
+  sourceHashes: Record<string, string>;
+  baseCommitHash: string;
+  reconciliationRequired: boolean;
+  state: 'pending' | 'committed' | 'superseded';
+  resultingCommitHash: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PendingMilestone extends MilestoneRecord {
+  diffSummary: string;
+}
+
+export type ChooseWorkspaceInput =
+  | { choice: 'new-branch'; taskName: string }
+  | { choice: 'current-branch'; confirmed: true };
 
 export interface SseFrame {
   id: string;
@@ -558,6 +706,251 @@ export class DaemonClient {
       method: 'PUT',
       body: JSON.stringify(input),
     });
+  }
+
+  async getArchitecture(id: string): Promise<ArchitectureState> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture`,
+    );
+  }
+
+  async saveArchitecture(
+    id: string,
+    input: SaveArchitectureInput,
+  ): Promise<SavedArchitecture> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async approveArchitecture(
+    id: string,
+    input: { expectedRevisionSeq: number },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/approve`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async resumeArchitectureSaga(
+    id: string,
+    input: { resumeKey: string },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/resume`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async reopenArchitecture(
+    id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/reopen`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async getMilestoneStatus(id: string): Promise<MilestoneStatus> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/status`,
+    );
+  }
+
+  async chooseMilestoneWorkspace(
+    id: string,
+    input: ChooseWorkspaceInput,
+  ): Promise<EpisodeWorkspace> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/workspace`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async listPendingMilestones(
+    id: string,
+  ): Promise<{ milestones: PendingMilestone[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones`,
+    );
+  }
+
+  async commitMilestone(
+    id: string,
+    kind: MilestoneKind,
+    input: { pendingMilestoneId: string; confirmed: true },
+  ): Promise<MilestoneRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/${
+        encodeURIComponent(kind)
+      }/commit`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async prepareNarrationApproval(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+      expectedNarrationMd: string;
+    },
+  ): Promise<{ settledExportToken: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/settled-export`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async markNarrationReconciled(
+    id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureState> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/reconcile`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async resolveNarrationProposal(
+    draftId: string,
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+  ): Promise<{
+    draftId: string;
+    operationId: string;
+    state: 'accepted' | 'rejected' | 'dismissed';
+  }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(
+        draftId,
+      )}/narration/proposals/${encodeURIComponent(
+        operationId,
+      )}/resolve`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ decision }),
+      },
+    );
+  }
+
+  async listNarrationProposals(
+    draftId: string,
+  ): Promise<{ proposals: NarrationProposalRecord[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(
+        draftId,
+      )}/narration/proposals`,
+    );
+  }
+
+  async approveNarration(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+      settledExportToken: string;
+    },
+  ): Promise<DraftRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/approve`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async getPromotion(
+    id: string,
+  ): Promise<{ promotion: PromotionRecord | null }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/promote`,
+    );
+  }
+
+  async syncProduction(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+    },
+  ): Promise<PromotionRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/production/sync`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async validateDraft(id: string): Promise<ValidatorResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/validate`,
+      { method: 'POST' },
+    );
+  }
+
+  async completePromote(id: string): Promise<PromotionRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/promote/complete`,
+      { method: 'POST' },
+    );
+  }
+
+  async submitDraftOp(
+    draftId: string,
+    operation: OperationName,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/ops`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ operation, inputs }),
+      },
+    );
+  }
+
+  async resumeDraftOp(
+    draftId: string,
+    operationId: string,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/ops/${
+        encodeURIComponent(operationId)
+      }/resume`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ inputs }),
+      },
+    );
   }
 
   async listRevisions(id: string): Promise<RevisionRecord[]> {

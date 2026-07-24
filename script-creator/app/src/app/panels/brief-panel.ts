@@ -62,6 +62,10 @@ export interface BriefPanelSaver {
   save(id: string, input: SaveDraftInput): Promise<SavedDraft>;
 }
 
+export interface BriefPanelModelOptions {
+  onSaveError?: (error: unknown) => void;
+}
+
 export interface PromotionMeta {
   operation: 'promote';
   draftId: string;
@@ -155,15 +159,18 @@ export class BriefPanelModel {
 
   private saveQueue: Promise<void> = Promise.resolve();
   private pendingSaves = 0;
+  private readonly onSaveError: (error: unknown) => void;
 
   constructor(
     initialDraft: DraftRecord,
     private readonly saver: BriefPanelSaver,
+    options: BriefPanelModelOptions = {},
   ) {
     this.draft = signal<DraftRecord>(initialDraft);
     this.metadata = signal<ScriptDraftMetadata>(
       readDraftMetadata(initialDraft.doc),
     );
+    this.onSaveError = options.onSaveError ?? (() => undefined);
   }
 
   update(
@@ -199,6 +206,20 @@ export class BriefPanelModel {
     }));
   }
 
+  refreshWorkflowMetadata(serverDraft: DraftRecord): void {
+    const serverMetadata = readDraftMetadata(serverDraft.doc);
+    const metadata = cloneMetadata({
+      ...this.metadata(),
+      creativeStatus: serverMetadata.creativeStatus,
+      directionApproved: serverMetadata.directionApproved,
+    });
+    this.metadata.set(metadata);
+    this.draft.update((draft) => ({
+      ...serverDraft,
+      doc: withDraftMetadata(draft.doc, metadata),
+    }));
+  }
+
   save(id: string, input: SaveDraftInput): Promise<SavedDraft> {
     return this.enqueueSave(id, () => input);
   }
@@ -229,6 +250,7 @@ export class BriefPanelModel {
         this.saveError.set(null);
         return saved;
       } catch (error) {
+        this.onSaveError(error);
         this.saveError.set(errorMessage(error));
         throw error;
       } finally {
@@ -346,7 +368,7 @@ export class ApprovalGate {
         <input
           type="text"
           [value]="model().metadata().creativeStatus.phase"
-          (change)="setPhase($event)"
+          readonly
         />
       </label>
       @if (model().metadata().creativeStatus.phase.trim() === '') {
@@ -360,12 +382,13 @@ export class ApprovalGate {
           <input
             type="checkbox"
             [checked]="model().metadata().directionApproved"
-            (change)="setApproved($event)"
+            disabled
           />
-          <span>Approve premise/voice/hook/story direction</span>
+          <span>Legacy direction approval (read-only)</span>
         </label>
         <p>
-          Passage approval does not approve the episode direction.
+          Complete narration approval is a separate server action in the
+          Production document panel.
         </p>
       </div>
 
@@ -377,35 +400,37 @@ export class ApprovalGate {
         </p>
       }
 
-      <button
-        type="button"
-        class="promote"
-        [disabled]="!gate().canPromote()"
-        (click)="gate().promote()"
-      >
-        Promote
-      </button>
+      @if (showPromote()) {
+        <button
+          type="button"
+          class="promote"
+          [disabled]="!gate().canPromote()"
+          (click)="gate().promote()"
+        >
+          Promote
+        </button>
 
-      @if (gate().activeOperation(); as operation) {
-        <section class="promote-stream" aria-labelledby="promote-stream-heading">
-          <div class="stream-heading">
-            <strong id="promote-stream-heading">Promotion console</strong>
-            <span>{{ operation.phase() }}</span>
-          </div>
-          <ol aria-live="polite">
-            @for (
-              entry of operation.consoleEntries();
-              track entry.seq + '-' + $index
-            ) {
-              <li>
-                <span>{{ entry.kind }}</span>
-                <pre>{{ entry.text }}</pre>
-              </li>
-            } @empty {
-              <li class="empty">Waiting for the first console event…</li>
-            }
-          </ol>
-        </section>
+        @if (gate().activeOperation(); as operation) {
+          <section class="promote-stream" aria-labelledby="promote-stream-heading">
+            <div class="stream-heading">
+              <strong id="promote-stream-heading">Promotion console</strong>
+              <span>{{ operation.phase() }}</span>
+            </div>
+            <ol aria-live="polite">
+              @for (
+                entry of operation.consoleEntries();
+                track entry.seq + '-' + $index
+              ) {
+                <li>
+                  <span>{{ entry.kind }}</span>
+                  <pre>{{ entry.text }}</pre>
+                </li>
+              } @empty {
+                <li class="empty">Waiting for the first console event…</li>
+              }
+            </ol>
+          </section>
+        }
       }
     </section>
   `,
@@ -581,6 +606,7 @@ export class ApprovalGate {
 export class BriefPanel {
   readonly model = input.required<BriefPanelModel>();
   readonly gate = input.required<ApprovalGate>();
+  readonly showPromote = input(true);
   protected readonly missingCreativePhaseMessage =
     MISSING_CREATIVE_PHASE_MESSAGE;
 
@@ -602,22 +628,6 @@ export class BriefPanel {
     void this.model().update({ [field]: splitLines(value) });
   }
 
-  protected setPhase(event: Event): void {
-    const phase = controlValue(event)?.trim();
-    if (!phase) return;
-    void this.model().update({
-      creativeStatus: {
-        ...this.model().metadata().creativeStatus,
-        phase,
-      },
-    });
-  }
-
-  protected setApproved(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    void this.model().setDirectionApproved(target.checked);
-  }
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {

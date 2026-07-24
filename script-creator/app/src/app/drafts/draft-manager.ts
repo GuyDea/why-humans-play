@@ -37,6 +37,7 @@ export interface ArtifactConflict {
 
 export interface DraftManagerOptions {
   nextBeatId?: () => string;
+  onWriteError?: (error: unknown) => void;
 }
 
 export class DraftManager {
@@ -65,6 +66,7 @@ export class DraftManager {
   readonly artifactHash = signal<string | null>(null);
 
   private readonly nextBeatId: () => string;
+  private readonly onWriteError: (error: unknown) => void;
   private readonly artifactHashes = new Map<string, string>();
 
   constructor(
@@ -72,6 +74,7 @@ export class DraftManager {
     options: DraftManagerOptions = {},
   ) {
     this.nextBeatId = options.nextBeatId ?? createBeatId;
+    this.onWriteError = options.onWriteError ?? (() => undefined);
   }
 
   async loadDrafts(): Promise<void> {
@@ -195,6 +198,7 @@ export class DraftManager {
       this.selectRevisions([revision.id, saved.revision.id]);
       this.resetExport();
     } catch (error) {
+      this.onWriteError(error);
       this.actionError.set(errorMessage(error));
     }
   }

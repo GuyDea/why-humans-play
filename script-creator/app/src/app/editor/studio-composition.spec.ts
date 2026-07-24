@@ -15,18 +15,39 @@ import {
   Router,
 } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  exportMarkdown,
+  parseMarkdown,
+  schema,
+} from '@whp/script-creator-editor-core';
 import { DaemonClientError } from '../api/client';
 import type {
+  ArchitectureActionResult,
+  ArchitectureSection,
+  ArchitectureState,
   DaemonClient,
   DraftDocument,
   DraftRecord,
+  EpisodeWorkspace,
+  MilestoneKind,
+  MilestoneStatus,
   OperationName,
   OperationRecord,
   OperationResult,
   OperationSummary,
+  PendingMilestone,
+  RevisionRecord,
   SavedDraft,
   StreamEventsOptions,
 } from '../api/client';
+import {
+  ARCHITECTURE_SECTIONS,
+  joinArchitecture,
+} from '../architecture/model';
+import { ArchitecturePanel } from '../architecture/architecture-panel';
+import { NarrationActions } from '../narration/narration-actions';
+import { MilestonePanel } from '../milestones/milestone-panel';
+import { ProductionPanel } from '../production/production-panel';
 import { App } from '../app';
 import { routes } from '../app.routes';
 import appTemplate from '../app.html?raw';
@@ -52,9 +73,26 @@ interface ControlledOutcome {
   result: OperationResult;
 }
 
+interface ControlledPromotion {
+  draftId: string;
+  operationId: string;
+  state:
+    | 'running'
+    | 'output-ready'
+    | 'validation-required'
+    | 'complete'
+    | 'failed';
+  targetPath: string;
+  targetHash: string | null;
+  validationHash: string | null;
+  error: string | null;
+}
+
 class ControllableDaemonClient {
   private sequence = 0;
   private revisionSequence = 0;
+  private milestoneSequence = 0;
+  private readonly revisionHistory: RevisionRecord[] = [];
   private readonly finishes = new Map<string, () => void>();
   private readonly outcomes = new Map<string, ControlledOutcome>();
   readonly submissions: Array<{
@@ -62,12 +100,95 @@ class ControllableDaemonClient {
     operation: OperationName;
     inputs: unknown;
   }> = [];
+  readonly draftSubmissions: Array<{
+    draftId: string;
+    id: string;
+    operation: OperationName;
+    inputs: unknown;
+    approvedArchitectureMd: string | null;
+  }> = [];
+  readonly canonicalArchitectureWrites: string[] = [];
+  readonly pipelineMilestones: string[] = [];
+  readonly milestoneCommitRequests: Array<{
+    draftId: string;
+    kind: MilestoneKind;
+    input: { pendingMilestoneId: string; confirmed: true };
+  }> = [];
+  milestoneWorkspace: EpisodeWorkspace | null;
+  milestoneDirtyFiles: string[] = [];
+  pendingMilestones: PendingMilestone[] = [];
+  failNextMilestoneCommit = false;
+  pauseNextArchitectureApproval = false;
+  pauseNextArchitectureMilestone = false;
+  pauseNextArchitectureReopen = false;
+  readonly architectureSagaResumes: string[] = [];
+  readonly narrationApprovals: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    settledExportToken: string;
+  }> = [];
+  readonly narrationSettledExports: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    expectedNarrationMd: string;
+  }> = [];
+  readonly productionSyncs: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+  }> = [];
+  readonly narrationProposalResolutions: Array<{
+    draftId: string;
+    operationId: string;
+    decision: 'accepted' | 'rejected';
+  }> = [];
+  readonly narrationReconciliations: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    confirmed: true;
+  }> = [];
+  pendingNarrationProposals: Array<{
+    draftId: string;
+    operationId: string;
+    state: 'pending';
+    createdAt: string;
+    resolvedAt: null;
+    acceptedRevisionPresent: boolean;
+  }> = [];
+  promotion: ControlledPromotion | null = null;
+  validatorResults: Array<{
+    ok: boolean;
+    errors: Array<{ message: string; line: number | null }>;
+    path: string;
+    hash: string;
+  }> = [];
+  architectureState: ArchitectureState = {
+    sections: [],
+    approvedMd: null,
+    approvedAt: null,
+    revisionSeq: 0,
+    narrationReconciliationRequired: false,
+    pendingSaga: null,
+  };
 
-  constructor(readonly storedDraft: DraftRecord) {}
+  constructor(readonly storedDraft: DraftRecord) {
+    this.milestoneWorkspace = {
+      draftId: storedDraft.id,
+      episodeSlug: storedDraft.episodeSlug,
+      choice: 'new-branch',
+      branch: `episode/${storedDraft.episodeSlug}`,
+      worktreePath: `/tmp/script-creator-worktrees/${
+        storedDraft.episodeSlug
+      }`,
+      baseBranch: 'main',
+      createdAt: '2026-07-24T11:00:00.000Z',
+      updatedAt: '2026-07-24T11:00:00.000Z',
+    };
+  }
 
   readonly list = vi.fn(async () => [draftSummary(this.storedDraft)]);
   readonly get = vi.fn(async (_id: string) => this.storedDraft);
-  readonly listRevisions = vi.fn(async () => []);
+  readonly listRevisions = vi.fn(async () =>
+    this.revisionHistory.map((revision) => ({ ...revision })));
   readonly create = vi.fn(async () => this.storedDraft);
   readonly import = vi.fn(async () => this.storedDraft);
   readonly export = vi.fn(async () => ({ markdown: '# Exported' }));
@@ -76,25 +197,445 @@ class ControllableDaemonClient {
     hash: 'artifact-hash',
   }));
   readonly validate = vi.fn(async () => ({ ok: true, errors: [] }));
+  readonly prepareNarrationApproval = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      expectedNarrationMd: string;
+    },
+  ) => {
+    this.narrationSettledExports.push({ draftId, ...input });
+    if (input.expectedNarrationMd !== this.currentMarkdown()) {
+      throw new Error('editor export mismatch');
+    }
+    return { settledExportToken: 'settled-export-token' };
+  });
+  readonly approveNarration = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      settledExportToken: string;
+    },
+  ) => {
+    this.narrationApprovals.push({ draftId, ...input });
+    const markdown = this.currentMarkdown();
+    if (input.settledExportToken !== 'settled-export-token') {
+      throw new Error('settled export token mismatch');
+    }
+    const record = this.storedDraft as DraftRecord & {
+      approvedNarrationMd?: string | null;
+      approvedNarrationAt?: string | null;
+      approvedNarrationRevisionSeq?: number | null;
+      narrationArtifactHash?: string | null;
+    };
+    record.approvedNarrationMd = markdown;
+    record.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    const revision = this.appendRevision(
+      'narration-approved',
+      this.storedDraft.doc,
+    );
+    record.approvedNarrationRevisionSeq = revision.seq;
+    record.narrationArtifactHash = 'narration-hash';
+    setDraftPhase(this.storedDraft, 'creative-approved');
+    this.recordPendingMilestone(
+      'creative-narration-approval',
+      [
+        `whp-youtube/drafts/${this.storedDraft.episodeSlug}.md`,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
+    return this.storedDraft;
+  });
+  readonly resolveNarrationProposal = vi.fn(async (
+    draftId: string,
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+  ) => {
+    if (
+      decision === 'accepted'
+      && !this.revisionHistory.some(
+        (revision) => revision.opId === operationId,
+      )
+    ) {
+      throw new DaemonClientError(409, {
+        error:
+          'accepted narration proposal requires a persisted operation revision',
+      });
+    }
+    this.narrationProposalResolutions.push({
+      draftId,
+      operationId,
+      decision,
+    });
+    this.pendingNarrationProposals =
+      this.pendingNarrationProposals.filter(
+        (proposal) => proposal.operationId !== operationId,
+      );
+    const submission = this.submissions.find(({ id }) => id === operationId);
+    if (
+      decision === 'accepted'
+      && submission?.operation === 'generate-episode'
+    ) {
+      this.architectureState = {
+        ...this.architectureState,
+        narrationReconciliationRequired: false,
+      };
+    }
+    return {
+      draftId,
+      operationId,
+      state: decision,
+    };
+  });
+  readonly markNarrationReconciled = vi.fn(async (
+    draftId: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ) => {
+    this.narrationReconciliations.push({ draftId, ...input });
+    this.architectureState = {
+      ...this.architectureState,
+      narrationReconciliationRequired: false,
+    };
+    return cloneArchitectureState(this.architectureState);
+  });
+  readonly listNarrationProposals = vi.fn(async () => ({
+    proposals: this.pendingNarrationProposals.map(
+      (proposal) => ({ ...proposal }),
+    ),
+  }));
+  readonly getPromotion = vi.fn(async () => ({
+    promotion: this.promotion,
+  }));
+  readonly syncProduction = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+    },
+  ) => {
+    this.productionSyncs.push({ draftId, ...input });
+    if (!this.promotion) throw new Error('promotion missing');
+    this.promotion = {
+      ...this.promotion,
+      state: 'validation-required',
+      targetHash: 'production-hash',
+      validationHash: null,
+    };
+    return this.promotion;
+  });
+  readonly validateDraft = vi.fn(async () =>
+    this.validatorResults.shift() ?? {
+      ok: true,
+      errors: [],
+      path: 'whp-youtube/episodes/01-composition-net.md',
+      hash: 'production-hash',
+    });
+  readonly completePromote = vi.fn(async () => {
+    if (!this.promotion) throw new Error('promotion missing');
+    this.promotion = {
+      ...this.promotion,
+      state: 'complete',
+      validationHash: 'production-hash',
+    };
+    setDraftPhase(this.storedDraft, 'production');
+    this.pipelineMilestones.push('production');
+    this.recordPendingMilestone(
+      'production-promotion',
+      [
+        this.promotion.targetPath,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
+    return this.promotion;
+  });
+
+  readonly getMilestoneStatus = vi.fn(async (): Promise<MilestoneStatus> => ({
+    workspace: this.milestoneWorkspace
+      ? { ...this.milestoneWorkspace }
+      : null,
+    recommendation: {
+      defaultBranch: 'main',
+      taskName: this.storedDraft.episodeSlug,
+      branch: `episode/${this.storedDraft.episodeSlug}`,
+      worktreePath:
+        `/tmp/script-creator-worktrees/${this.storedDraft.episodeSlug}`,
+    },
+    dirtyFiles: [...this.milestoneDirtyFiles],
+  }));
+  readonly chooseMilestoneWorkspace = vi.fn(async (
+    draftId: string,
+    input:
+      | { choice: 'new-branch'; taskName: string }
+      | { choice: 'current-branch'; confirmed: true },
+  ): Promise<EpisodeWorkspace> => {
+    this.milestoneWorkspace = input.choice === 'new-branch'
+      ? {
+        draftId,
+        episodeSlug: this.storedDraft.episodeSlug,
+        choice: input.choice,
+        branch: `episode/${input.taskName}`,
+        worktreePath: `/tmp/script-creator-worktrees/${input.taskName}`,
+        baseBranch: 'main',
+        createdAt: '2026-07-24T11:00:00.000Z',
+        updatedAt: '2026-07-24T11:00:00.000Z',
+      }
+      : {
+        draftId,
+        episodeSlug: this.storedDraft.episodeSlug,
+        choice: input.choice,
+        branch: 'script-creator-plan6-architecture',
+        worktreePath: '/tmp/current-repository',
+        baseBranch: 'main',
+        createdAt: '2026-07-24T11:00:00.000Z',
+        updatedAt: '2026-07-24T11:00:00.000Z',
+      };
+    return { ...this.milestoneWorkspace };
+  });
+  readonly listPendingMilestones = vi.fn(async () => ({
+    milestones: this.pendingMilestones.map((milestone) => ({
+      ...milestone,
+      files: [...milestone.files],
+      sourceHashes: { ...milestone.sourceHashes },
+    })),
+  }));
+  readonly commitMilestone = vi.fn(async (
+    draftId: string,
+    kind: MilestoneKind,
+    input: { pendingMilestoneId: string; confirmed: true },
+  ): Promise<PendingMilestone> => {
+    this.milestoneCommitRequests.push({ draftId, kind, input });
+    const pending = this.pendingMilestones.find(
+      (milestone) =>
+        milestone.id === input.pendingMilestoneId
+        && milestone.kind === kind,
+    );
+    if (!pending) throw new Error('pending milestone missing');
+    if (this.failNextMilestoneCommit) {
+      this.failNextMilestoneCommit = false;
+      throw new Error('simulated milestone commit failure');
+    }
+    this.pendingMilestones = this.pendingMilestones.filter(
+      ({ id }) => id !== pending.id,
+    );
+    return {
+      ...pending,
+      state: 'committed',
+      resultingCommitHash: 'milestone-commit-hash',
+      updatedAt: '2026-07-24T14:00:00.000Z',
+    };
+  });
 
   readonly save = vi.fn(async (
     _id: string,
-    input: { doc: DraftDocument; disposition?: string },
+    input: {
+      doc: DraftDocument;
+      opId?: string | null;
+      disposition?: string;
+    },
   ): Promise<SavedDraft> => {
     this.storedDraft.doc = input.doc;
-    const seq = ++this.revisionSequence;
+    const revision = this.appendRevision(
+      input.disposition ?? 'edit',
+      input.doc,
+      input.opId ?? null,
+    );
     return {
       draft: this.storedDraft,
+      revision,
+    };
+  });
+
+  readonly getArchitecture = vi.fn(async () =>
+    cloneArchitectureState(this.architectureState));
+  readonly saveArchitecture = vi.fn(async (
+    _id: string,
+    input: {
+      expectedRevisionSeq: number;
+      sections: ArchitectureSection[];
+      opId: string | null;
+      disposition: string;
+    },
+  ) => {
+    if (input.expectedRevisionSeq !== this.architectureState.revisionSeq) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      sections: input.sections.map((section) => ({ ...section })),
+      revisionSeq: this.architectureState.revisionSeq + 1,
+    };
+    return {
+      state: cloneArchitectureState(this.architectureState),
       revision: {
-        id: `revision-${seq}`,
+        id: `architecture-revision-${this.architectureState.revisionSeq}`,
         draftId: this.storedDraft.id,
-        seq,
-        opId: null,
-        disposition: input.disposition ?? 'edit',
-        doc: input.doc,
-        createdAt: `2026-07-23T12:00:${String(seq).padStart(2, '0')}.000Z`,
+        seq: this.architectureState.revisionSeq,
+        opId: input.opId,
+        disposition: input.disposition,
+        doc: {},
+        createdAt: '2026-07-24T12:00:00.000Z',
       },
     };
+  });
+  readonly approveArchitecture = vi.fn(async (
+    _id: string,
+    input: { expectedRevisionSeq: number },
+  ): Promise<ArchitectureActionResult> => {
+    if (input.expectedRevisionSeq !== this.architectureState.revisionSeq) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      approvedMd: joinArchitecture(this.architectureState.sections),
+      approvedAt: '2026-07-24T12:00:00.000Z',
+      revisionSeq: this.architectureState.revisionSeq + 1,
+      pendingSaga: (
+        this.pauseNextArchitectureApproval
+        || this.pauseNextArchitectureMilestone
+      )
+        ? {
+            kind: 'approve',
+            resumeKey: 'approval-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'pending',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          }
+        : null,
+    };
+    if (this.pauseNextArchitectureApproval) {
+      this.pauseNextArchitectureApproval = false;
+      throw new DaemonClientError(409, {
+        error: 'architecture artifact conflict',
+        currentHash: 'pre-planted-conflict-hash',
+        steps: this.architectureState.pendingSaga!.steps,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
+    if (this.pauseNextArchitectureMilestone) {
+      this.pauseNextArchitectureMilestone = false;
+      this.architectureState.pendingSaga!.steps = {
+        revisionAppended: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'completed',
+        draftUpdated: 'pending',
+      };
+      throw new DaemonClientError(409, {
+        error:
+          'pending milestone source conflict for architecture-approval',
+        recoverable: true,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
+    setDraftPhase(this.storedDraft, 'rapid-prototype');
+    this.canonicalArchitectureWrites.push(
+      `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+    );
+    this.pipelineMilestones.push('prototyping');
+    this.recordPendingMilestone(
+      'architecture-approval',
+      [
+        `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
+    return completedArchitectureAction(this.architectureState);
+  });
+  readonly resumeArchitectureSaga = vi.fn(async (
+    _id: string,
+    input: { resumeKey: string },
+  ): Promise<ArchitectureActionResult> => {
+    const saga = this.architectureState.pendingSaga;
+    if (input.resumeKey !== saga?.resumeKey) {
+      throw new Error('architecture saga resume key mismatch');
+    }
+    this.architectureSagaResumes.push(input.resumeKey);
+    this.architectureState = {
+      ...this.architectureState,
+      pendingSaga: null,
+    };
+    if (saga.kind === 'approve') {
+      setDraftPhase(this.storedDraft, 'rapid-prototype');
+      this.canonicalArchitectureWrites.push(
+        `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+      );
+      this.pipelineMilestones.push('prototyping');
+      this.recordPendingMilestone(
+        'architecture-approval',
+        [
+          `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+          'whp-youtube/PIPELINE.md',
+        ],
+      );
+    } else {
+      setDraftPhase(this.storedDraft, 'architecture');
+      this.pipelineMilestones.push('architecture');
+      this.recordPendingMilestone(
+        'architecture-reopen',
+        ['whp-youtube/PIPELINE.md'],
+      );
+    }
+    return completedArchitectureAction(this.architectureState);
+  });
+  readonly reopenArchitecture = vi.fn(async (
+    _id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureActionResult> => {
+    if (
+      input.confirmed !== true
+      || input.expectedRevisionSeq !== this.architectureState.revisionSeq
+    ) {
+      throw new DaemonClientError(409, {
+        error: 'architecture revision conflict',
+        current: cloneArchitectureState(this.architectureState),
+      });
+    }
+    this.architectureState = {
+      ...this.architectureState,
+      approvedMd: null,
+      approvedAt: null,
+      revisionSeq: this.architectureState.revisionSeq + 1,
+      narrationReconciliationRequired: true,
+      pendingSaga: this.pauseNextArchitectureReopen
+        ? {
+            kind: 'reopen',
+            resumeKey: 'reopen-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'completed',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          }
+        : null,
+    };
+    if (this.pauseNextArchitectureReopen) {
+      this.pauseNextArchitectureReopen = false;
+      throw new DaemonClientError(409, {
+        error: 'architecture pipeline conflict',
+        currentHash: 'pre-planted-pipeline-conflict-hash',
+        steps: this.architectureState.pendingSaga!.steps,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
+    setDraftPhase(this.storedDraft, 'architecture');
+    this.pipelineMilestones.push('architecture');
+    this.recordPendingMilestone(
+      'architecture-reopen',
+      ['whp-youtube/PIPELINE.md'],
+    );
+    return completedArchitectureAction(this.architectureState);
   });
 
   readonly submitOp = vi.fn(async (
@@ -105,6 +646,45 @@ class ControllableDaemonClient {
     this.submissions.push({ id, operation, inputs });
     return { id };
   });
+  readonly submitDraftOp = vi.fn(async (
+    draftId: string,
+    operation: OperationName,
+    inputs: unknown,
+  ) => {
+    const result = await this.submitOp(operation, inputs);
+    this.draftSubmissions.push({
+      draftId,
+      id: result.id,
+      operation,
+      inputs,
+      approvedArchitectureMd: this.architectureState.approvedMd,
+    });
+    if (operation === 'promote') {
+      const targetPath = (
+        inputs as Record<string, unknown>
+      )['target_path'] as string;
+      this.promotion = {
+        draftId,
+        operationId: result.id,
+        state: 'running',
+        targetPath,
+        targetHash: null,
+        validationHash: null,
+        error: null,
+      };
+    }
+    return result;
+  });
+  readonly resumeDraftOp = vi.fn(async (
+    draftId: string,
+    operationId: string,
+    inputs: unknown,
+  ) => this.submitDraftOp(
+    draftId,
+    this.submissions.find(({ id }) => id === operationId)?.operation
+      ?? 'review-architecture',
+    inputs,
+  ));
 
   readonly streamEvents = vi.fn(async (
     id: string,
@@ -172,7 +752,95 @@ class ControllableDaemonClient {
       }),
       result,
     });
+    if (submission.operation === 'promote' && result.kind === 'raw') {
+      const currentMetadata = this.storedDraft.doc['metadata'];
+      this.storedDraft.doc = {
+        ...parseProductionFixture(),
+        metadata: currentMetadata,
+      };
+      this.promotion = this.promotion
+        ? {
+            ...this.promotion,
+            state: 'validation-required',
+            targetHash: 'production-hash',
+          }
+        : null;
+      this.appendRevision(
+        'production-import',
+        this.storedDraft.doc,
+        submission.id,
+      );
+    }
     finish();
+  }
+
+  private currentMarkdown(): string {
+    const result = exportMarkdown(schema.nodeFromJSON(this.storedDraft.doc));
+    if (!result.ok) throw new Error('fixture export is unsettled');
+    return result.markdown;
+  }
+
+  private appendRevision(
+    disposition: string,
+    doc: DraftDocument,
+    opId: string | null = null,
+  ): RevisionRecord {
+    const seq = ++this.revisionSequence;
+    const revision = {
+      id: `revision-${seq}`,
+      draftId: this.storedDraft.id,
+      seq,
+      opId,
+      disposition,
+      doc: structuredClone(doc),
+      createdAt:
+        `2026-07-23T12:00:${String(seq).padStart(2, '0')}.000Z`,
+    };
+    this.revisionHistory.push(revision);
+    return revision;
+  }
+
+  private recordPendingMilestone(
+    kind: MilestoneKind,
+    files: string[],
+  ): PendingMilestone {
+    const existing = this.pendingMilestones.find((milestone) =>
+      milestone.kind === kind
+      && JSON.stringify(milestone.files) === JSON.stringify(files));
+    if (existing) return existing;
+    const id = `milestone-${++this.milestoneSequence}`;
+    const timestamp = '2026-07-24T13:30:00.000Z';
+    const labels: Record<MilestoneKind, string> = {
+      'topic-selection': 'topic selection',
+      'architecture-approval': 'architecture approval',
+      'architecture-reopen': 'architecture reopen',
+      'creative-narration-approval': 'creative narration approval',
+      'production-promotion': 'production promotion',
+    };
+    const milestone: PendingMilestone = {
+      id,
+      draftId: this.storedDraft.id,
+      episodeSlug: this.storedDraft.episodeSlug,
+      kind,
+      files: [...files],
+      commitMessage:
+        `feat(${this.storedDraft.episodeSlug}): record ${
+          labels[kind]
+        } milestone`,
+      sourceHashes: Object.fromEntries(files.map((file) => [
+        file,
+        `hash-${file}`,
+      ])),
+      baseCommitHash: 'base-commit-hash',
+      reconciliationRequired: true,
+      state: 'pending',
+      resultingCommitHash: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      diffSummary: files.map((file) => ` ${file} | 2 ++`).join('\n'),
+    };
+    this.pendingMilestones.push(milestone);
+    return milestone;
   }
 }
 
@@ -208,6 +876,1808 @@ afterEach(() => {
 });
 
 describe('mounted Script Studio composition', () => {
+  it('refreshes milestone state when the routed active draft changes', async () => {
+    const first = studioDraft();
+    const second = studioDraft();
+    second.id = 'draft-2';
+    second.episodeSlug = 'second-episode';
+    second.title = 'Second episode';
+    second.updatedAt = '2026-07-22T12:00:00.000Z';
+    const pendingByDraft = new Map([
+      [first.id, pendingMilestoneFixture(
+        first,
+        'pending-first',
+        'first milestone message',
+      )],
+      [second.id, pendingMilestoneFixture(
+        second,
+        'pending-second',
+        'second milestone message',
+      )],
+    ]);
+    const studio = await mountStudio(first, (client) => {
+      client.list.mockImplementation(async () => [
+        draftSummary(first),
+        draftSummary(second),
+      ]);
+      client.get.mockImplementation(async (id: string) =>
+        id === second.id ? second : first);
+      client.getMilestoneStatus.mockImplementation(async (id: string) => ({
+        workspace: {
+          draftId: id,
+          episodeSlug: id === second.id
+            ? second.episodeSlug
+            : first.episodeSlug,
+          choice: 'new-branch',
+          branch: `episode/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          worktreePath: `/tmp/script-creator-worktrees/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          baseBranch: 'main',
+          createdAt: '2026-07-24T11:00:00.000Z',
+          updatedAt: '2026-07-24T11:00:00.000Z',
+        },
+        recommendation: {
+          defaultBranch: 'main',
+          taskName: id === second.id
+            ? second.episodeSlug
+            : first.episodeSlug,
+          branch: `episode/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          worktreePath: `/tmp/script-creator-worktrees/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+        },
+        dirtyFiles: [],
+      }));
+      client.listPendingMilestones.mockImplementation(async (id: string) => ({
+        milestones: [pendingByDraft.get(id)!],
+      }));
+    });
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(milestonePanel?.textContent).toContain(
+        'first milestone message',
+      );
+    });
+
+    const secondCard = Array.from(
+      studio.root.querySelectorAll<HTMLButtonElement>('.draft-card'),
+    ).find((card) => card.textContent?.includes('Second episode'));
+    expect(secondCard).not.toBeUndefined();
+    secondCard!.click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.get).toHaveBeenCalledWith(second.id);
+      expect(studio.client.listPendingMilestones).toHaveBeenCalledWith(
+        second.id,
+      );
+      expect(milestonePanel?.textContent).toContain(
+        'second milestone message',
+      );
+      expect(milestonePanel?.textContent).not.toContain(
+        'first milestone message',
+      );
+    });
+  });
+
+  it('keeps complete-narration approval disabled while an editor save is pending', async () => {
+    const studio = await mountStudio(productionDraft());
+    const panel = studio.root.querySelector('app-production-panel')!;
+
+    await replaceRenderedText(
+      studio,
+      'Opening narration.',
+      'Unsaved opening narration.',
+    );
+    studio.tick();
+
+    expect(findButton(panel, 'Approve complete narration').disabled).toBe(true);
+    expect(studio.client.approveNarration).not.toHaveBeenCalled();
+  });
+
+  it('resumes an interrupted narration approval reservation from the routed controls', async () => {
+    const draft = productionDraft();
+    setDraftPhase(draft, 'rapid-prototype');
+    const markdown = exportMarkdown(schema.nodeFromJSON(draft.doc));
+    if (!markdown.ok) throw new Error('fixture export is unsettled');
+    draft.approvedNarrationMd = markdown.markdown;
+    draft.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    draft.approvedNarrationRevisionSeq = 0;
+    const studio = await mountStudio(draft);
+    const panel = studio.root.querySelector('app-production-panel')!;
+
+    expect(findButton(panel, 'Approve complete narration').disabled)
+      .toBe(false);
+    findButton(panel, 'Approve complete narration').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.approveNarration).toHaveBeenCalledOnce();
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('creative-approved');
+    });
+  });
+
+  it('automatically resumes persisted production synchronization and completion reservations', async () => {
+    const targetPath =
+      'whp-youtube/episodes/01-composition-net.md';
+    const synchronization = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.promotion = {
+          draftId: client.storedDraft.id,
+          operationId: 'promote-sync',
+          state: 'output-ready',
+          targetPath,
+          targetHash: 'production-hash',
+          validationHash: null,
+          error: 'production synchronization in progress',
+        };
+      },
+    );
+    await vi.waitFor(() => {
+      synchronization.tick();
+      expect(synchronization.client.syncProduction).toHaveBeenCalledOnce();
+      expect(synchronization.client.validateDraft).toHaveBeenCalledOnce();
+    });
+    synchronization.destroy();
+    mounted.splice(mounted.indexOf(synchronization), 1);
+
+    const completion = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.promotion = {
+          draftId: client.storedDraft.id,
+          operationId: 'promote-complete',
+          state: 'output-ready',
+          targetPath,
+          targetHash: 'production-hash',
+          validationHash: 'production-hash',
+          error: 'promotion completion in progress',
+        };
+      },
+    );
+    await vi.waitFor(() => {
+      completion.tick();
+      expect(completion.client.completePromote).toHaveBeenCalledOnce();
+      expect(readDraftPhase(completion.client.storedDraft))
+        .toBe('production');
+    });
+  });
+
+  it('routes a narration-approval reservation into routed Reopen recovery', async () => {
+    const studio = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.architectureState = approvedArchitectureState(
+          client.architectureState,
+        );
+        client.approveNarration.mockImplementationOnce(async () => {
+          const paused = pausedReopenArchitectureState(
+            client.architectureState,
+          );
+          client.architectureState = paused;
+          throw architectureReservationError(paused);
+        });
+      },
+    );
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+
+    expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    findButton(productionPanel, 'Approve complete narration').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes Promote-result import refusal into routed Reopen recovery', async () => {
+    const draft = productionDraft();
+    const markdown = exportMarkdown(schema.nodeFromJSON(draft.doc));
+    if (!markdown.ok) throw new Error('fixture export is unsettled');
+    draft.approvedNarrationMd = markdown.markdown;
+    draft.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    draft.approvedNarrationRevisionSeq = 0;
+    const studio = await mountStudio(draft, (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.getResult.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    setInputValue(
+      productionPanel?.querySelector('input[aria-label="Production target"]')
+        ?? null,
+      'whp-youtube/episodes/01-composition-net.md',
+    );
+    studio.tick();
+
+    findButton(productionPanel, 'Promote to Phase 2').click();
+    await expectDraftSubmission(studio, 'promote', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: 'Promote output ready.',
+    });
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes production synchronization refusal into routed Reopen recovery', async () => {
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.promotion = {
+        draftId: client.storedDraft.id,
+        operationId: 'promote-sync-conflict',
+        state: 'validation-required',
+        targetPath: 'whp-youtube/episodes/01-composition-net.md',
+        targetHash: 'production-hash',
+        validationHash: null,
+        error: null,
+      };
+      client.syncProduction.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(productionPanel, 'Run validator').disabled).toBe(false);
+    });
+    findButton(productionPanel, 'Run validator').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes persisted Promote reconciliation refusal into routed Reopen recovery', async () => {
+    let rejectReconciliation:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.promotion = {
+        draftId: client.storedDraft.id,
+        operationId: 'promote-reconciliation-conflict',
+        state: 'output-ready',
+        targetPath: 'whp-youtube/episodes/01-composition-net.md',
+        targetHash: 'production-hash',
+        validationHash: null,
+        error: null,
+      };
+      client.getResult.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectReconciliation = reject;
+        }));
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(rejectReconciliation).toBeTypeOf('function');
+      expect(narrationComponent?.model().state?.pendingSaga).toBeNull();
+      expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    });
+    const paused = pausedReopenArchitectureState(
+      studio.client.architectureState,
+    );
+    studio.client.architectureState = paused;
+    rejectReconciliation!(architectureReservationError(paused));
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('surfaces a durable pending proposal after reload and lets Martin retry settlement', async () => {
+    const studio = await mountStudio(studioDraft(), (client) => {
+      client.pendingNarrationProposals = [{
+        draftId: 'draft-1',
+        operationId: 'orphaned-proposal-op',
+        state: 'pending',
+        createdAt: '2026-07-24T13:00:00.000Z',
+        resolvedAt: null,
+        acceptedRevisionPresent: false,
+      }];
+    });
+    const panel = studio.root.querySelector('app-production-panel');
+    const editorElement = studio.root.querySelector('app-editor-host');
+    const editor = editorElement
+      ? getDebugNode(editorElement)?.componentInstance as EditorHost
+      : null;
+    expect(editor).not.toBeNull();
+    const clearSettlementError = vi.spyOn(
+      editor!,
+      'clearProposalSettlementError',
+    );
+    const recovery = await waitForElement(
+      studio,
+      '[data-testid="proposal-recovery"]',
+    );
+    expect(recovery.textContent).toContain('orphaned-proposal-op');
+
+    findButton(panel, 'Reject durable proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'orphaned-proposal-op',
+        decision: 'rejected',
+      });
+      expect(clearSettlementError).toHaveBeenCalledOnce();
+      expect(studio.root.querySelector(
+        '[data-testid="proposal-recovery"]',
+      )).toBeNull();
+    });
+  });
+
+  it('gates Promote completion on pinned exact-hash validator diagnostics', async () => {
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.milestoneDirtyFiles = ['unrelated-notes.md'];
+    });
+    const panel = studio.root.querySelector('app-production-panel')!;
+    studio.client.validatorResults.push(
+      {
+        ok: false,
+        errors: [{
+          message: 'Personal input must be completed.',
+          line: 24,
+        }],
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        hash: 'production-hash',
+      },
+      {
+        ok: true,
+        errors: [],
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        hash: 'production-hash',
+      },
+    );
+
+    findButton(panel, 'Approve complete narration').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.approveNarration).toHaveBeenCalledOnce();
+      expect(readDraftPhase(studio.client.storedDraft)).toBe(
+        'creative-approved',
+      );
+    });
+    const target = panel.querySelector<HTMLInputElement>(
+      'input[aria-label="Production target"]',
+    )!;
+    target.value = 'whp-youtube/episodes/01-composition-net.md';
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(panel, 'Promote to Phase 2').click();
+    await expectDraftSubmission(studio, 'promote', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: 'Promotion output written.',
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('validation-required');
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('creative-approved');
+    });
+
+    findButton(panel, 'Run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('FAIL');
+      expect(panel.textContent).toContain('1 diagnostic');
+      expect(panel.textContent).toContain('Line 24');
+      expect(panel.textContent).toContain(
+        'Personal input must be completed.',
+      );
+    });
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+    expect(findButton(panel, 'Complete Promote').disabled).toBe(true);
+
+    const metadata = studio.client.storedDraft.doc['metadata'];
+    studio.client.storedDraft.doc = {
+      ...parseProductionFixture(true),
+      metadata,
+    };
+    findButton(panel, 'Re-run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('PASS');
+      expect(panel.textContent).toContain('COMPLETED');
+      expect(findButton(panel, 'Complete Promote').disabled).toBe(false);
+    });
+    expect(readDraftPhase(studio.client.storedDraft))
+      .toBe('creative-approved');
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+
+    await replaceRenderedText(
+      studio,
+      'Opening narration.',
+      'Edited after validator pass.',
+    );
+    studio.tick();
+    expect(panel.textContent).toContain('STALE');
+    expect(findButton(panel, 'Complete Promote').disabled).toBe(true);
+    findButton(panel, 'Re-run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('PASS');
+      expect(findButton(panel, 'Complete Promote').disabled).toBe(false);
+    });
+
+    findButton(panel, 'Complete Promote').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('complete');
+      expect(readDraftPhase(studio.client.storedDraft)).toBe('production');
+      expect(studio.client.pipelineMilestones).toContain('production');
+    });
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+    expect(studio.client.productionSyncs).toHaveLength(3);
+    expect(studio.client.productionSyncs.map(
+      ({ expectedRevisionSeq }) => expectedRevisionSeq,
+    )).toEqual([2, 2, 3]);
+
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    expect(milestonePanel).not.toBeNull();
+    findButton(milestonePanel, 'Refresh milestones').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.pendingMilestones.map(({ kind }) => kind))
+        .toEqual([
+          'creative-narration-approval',
+          'production-promotion',
+        ]);
+      expect(milestonePanel?.querySelectorAll(
+        '[data-milestone-id]',
+      )).toHaveLength(2);
+    });
+    expect(new Set(
+      studio.client.pendingMilestones.map(({ id }) => id),
+    ).size).toBe(2);
+    expect(studio.client.pendingMilestones.every(
+      ({ files }) => !files.includes('unrelated-notes.md'),
+    )).toBe(true);
+    expect(milestonePanel?.textContent).toContain('unrelated-notes.md');
+
+    const narrationMilestone = studio.client.pendingMilestones.find(
+      ({ kind }) => kind === 'creative-narration-approval',
+    )!;
+    const narrationCard = milestonePanel?.querySelector(
+      `[data-milestone-id="${narrationMilestone.id}"]`,
+    ) ?? null;
+    const narrationConfirmation =
+      narrationCard?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    expect(narrationConfirmation).not.toBeNull();
+    narrationConfirmation!.checked = true;
+    narrationConfirmation!.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
+    studio.tick();
+    studio.client.failNextMilestoneCommit = true;
+    findButton(narrationCard, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledOnce();
+      expect(milestonePanel?.textContent).toContain(
+        'simulated milestone commit failure',
+      );
+      expect(studio.client.pendingMilestones).toContain(narrationMilestone);
+    });
+
+    findButton(narrationCard, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledTimes(2);
+      expect(studio.client.pendingMilestones).not.toContain(
+        narrationMilestone,
+      );
+      expect(milestonePanel?.querySelector(
+        `[data-milestone-id="${narrationMilestone.id}"]`,
+      )).toBeNull();
+    });
+  });
+
+  it('integrates Phase-2 cards, clean narration, and PI proposals on the routed draft page', async () => {
+    const studio = await mountStudio(productionDraft());
+    const panel = studio.root.querySelector('app-production-panel');
+    expect(panel).not.toBeNull();
+    expect(panel?.textContent).toContain('Script metadata');
+    expect(panel?.textContent).toContain('Beat 01 — Opening');
+    expect(panel?.textContent).toContain('Unrecognized production note');
+
+    const cards = panel!.querySelectorAll<HTMLDetailsElement>(
+      '[data-testid="production-card"]',
+    );
+    expect(cards.length).toBeGreaterThan(2);
+    cards[1]!.open = false;
+    cards[1]!.dispatchEvent(new Event('toggle'));
+    studio.tick();
+    expect(cards[1]!.open).toBe(false);
+    cards[1]!.open = true;
+    cards[1]!.dispatchEvent(new Event('toggle'));
+    studio.tick();
+    expect(cards[1]!.open).toBe(true);
+
+    const editorElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    )!;
+    const editor = getDebugNode(editorElement)?.componentInstance as EditorHost;
+    const beforeToggle = editor.currentMarkdown();
+    const cleanToggle = panel!.querySelector<HTMLInputElement>(
+      'input[aria-label="Clean narration"]',
+    )!;
+    cleanToggle.click();
+    studio.tick();
+    expect(editorElement.querySelector('.editor')?.classList)
+      .toContain('clean-narration');
+    cleanToggle.click();
+    studio.tick();
+    expect(editor.currentMarkdown()).toBe(beforeToggle);
+
+    const response = panel!.querySelector<HTMLTextAreaElement>(
+      'textarea[aria-label="Response for PI-001"]',
+    )!;
+    response.value = 'I noticed it while teaching a friend.';
+    response.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(panel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    expect(studio.client.draftSubmissions.at(-1)?.inputs).toEqual({
+      topic_brief: {
+        topic: 'Why constraints create play',
+        factual_anchors: ['Players accept the rule.'],
+        unknowns: ['Which example survives?'],
+      },
+      approved_lessons: ['Keep it concrete.'],
+      selection: '<!-- PI-001: Martin input -->',
+      surrounding_context: {
+        before: 'Opening narration.',
+        after: 'Closing narration.',
+      },
+      beat_title: '1. Opening',
+      narrative_job: '',
+      creative_status: {
+        phase: 'creative-approved',
+        readiness: 'EDITORIAL-DRAFT',
+      },
+      requested_scope: {
+        kind: 'personal-input',
+        personal_input_id: 'PI-001',
+      },
+      supplied_personal_input: 'I noticed it while teaching a friend.',
+      personal_input_block: expect.stringContaining(
+        '- **Decision:** INPUT-REQUESTED',
+      ),
+    });
+    studio.client.resolve('op-1', rewriteResult(
+      'Martin supplied first paragraph.\n\n'
+        + 'Martin supplied **exact** second paragraph.',
+    ));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain(
+        'Martin supplied first paragraph.',
+      );
+    });
+    findButton(panel, 'Reject proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-1',
+        decision: 'rejected',
+      });
+    });
+    expect(editor.currentMarkdown()).toContain(
+      '<!-- PI-001: Martin input -->',
+    );
+    expect(editor.currentMarkdown()).toContain(
+      '- **Decision:** INPUT-REQUESTED',
+    );
+
+    findButton(panel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 2);
+    studio.client.resolve('op-2', rewriteResult(
+      'Martin supplied first paragraph.\n\n'
+        + 'Martin supplied **exact** second paragraph.',
+    ));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain(
+        'Martin supplied first paragraph.',
+      );
+    });
+    findButton(panel, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editor.currentMarkdown()).toContain(
+        '> Opening narration. Martin supplied first paragraph.\n\n'
+          + '> Martin supplied **exact** second paragraph. Closing narration.',
+      );
+      expect(editor.currentMarkdown()).not.toContain(
+        '<!-- PI-001: Martin input -->',
+      );
+      expect(editor.currentMarkdown()).toContain(
+        '- **Decision:** COMPLETED',
+      );
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-2',
+        decision: 'accepted',
+      });
+    });
+    expect(editor.undoPersonalInputAcceptance()).toBe(true);
+    studio.tick();
+    expect(editor.currentMarkdown()).toContain(
+      '<!-- PI-001: Martin input -->',
+    );
+    expect(editor.currentMarkdown()).toContain(
+      '- **Decision:** INPUT-REQUESTED',
+    );
+  });
+
+  it('drives architecture approval, reopen, and episode reconciliation through production controls', async () => {
+    const confirm = vi.fn(() => true);
+    vi.stubGlobal('confirm', confirm);
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.milestoneWorkspace = null;
+      client.milestoneDirtyFiles = ['unrelated-notes.md'];
+    });
+
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const editorHost = studio.root.querySelector('app-editor-host');
+    expect(architecturePanel).not.toBeNull();
+    expect(narrationActions).not.toBeNull();
+    expect(editorHost).not.toBeNull();
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    expect(milestonePanel).not.toBeNull();
+    expect(milestonePanel?.textContent).toContain('Recommended new branch');
+    expect(milestonePanel?.textContent).toContain('Use current branch');
+    findButton(milestonePanel, 'Use recommended branch').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.chooseMilestoneWorkspace).toHaveBeenCalledWith(
+        'draft-1',
+        {
+          choice: 'new-branch',
+          taskName: 'composition-net',
+        },
+      );
+      expect(milestonePanel?.textContent).toContain(
+        'episode/composition-net',
+      );
+    });
+    expect(
+      architecturePanel!.compareDocumentPosition(editorHost!)
+        & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(studio.root.querySelector('app-brief-panel')).not.toBeNull();
+
+    findButton(architecturePanel, 'Generate architecture').click();
+    await expectDraftSubmission(studio, 'generate-architecture', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: generatedArchitectureMarkdown(),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelectorAll(
+        '[data-testid="architecture-proposal"]',
+      )).toHaveLength(12);
+    });
+    const unsafeProposal = Array.from(studio.root.querySelectorAll(
+      '[data-testid="architecture-proposal"]',
+    )).find((element) => element.textContent?.includes('Optional comparison'));
+    expect(unsafeProposal).not.toBeNull();
+    expect(unsafeProposal?.querySelector('img')).toBeNull();
+    expect(unsafeProposal?.innerHTML).not.toContain('onerror=');
+    findButton(unsafeProposal ?? null, 'Reject proposal').click();
+    studio.tick();
+    findButton(architecturePanel, 'Accept all proposals').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.saveArchitecture).toHaveBeenCalledOnce();
+      expect(studio.root.querySelectorAll(
+        '[data-testid="architecture-proposal"]',
+      )).toHaveLength(0);
+      expect(studio.client.architectureState.sections).toHaveLength(11);
+    });
+
+    const coreAnswer = studio.root.querySelector<HTMLElement>(
+      '[data-section-key="core-answer"]',
+    )!;
+    setInputValue(
+      coreAnswer.querySelector('input[aria-label="Refine Core answer"]'),
+      'Make the causal step explicit.',
+    );
+    studio.tick();
+    findButton(coreAnswer, 'Refine section').click();
+    await expectDraftSubmission(
+      studio,
+      'rewrite-architecture-section',
+      1,
+    );
+    studio.client.resolve('op-2', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        replacement_markdown:
+          '### Core answer\n\nThe refined causal answer.\n',
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(coreAnswer.textContent).toContain('The refined causal answer.');
+    });
+    findButton(coreAnswer, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureState.sections.find(
+        ({ key }) => key === 'core-answer',
+      )?.md).toContain('The refined causal answer.');
+      expect(findButton(architecturePanel, 'Review architecture').disabled)
+        .toBe(false);
+    });
+
+    findButton(architecturePanel, 'Review architecture').click();
+    await expectDraftSubmission(studio, 'review-architecture', 1);
+    studio.client.resolve('op-3', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        findings: [{
+          section_key: 'core-answer',
+          severity: 'important',
+          finding_markdown: 'Pin this finding to the core answer.',
+        }],
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(coreAnswer.textContent).toContain(
+        'Pin this finding to the core answer.',
+      );
+    });
+
+    findButton(architecturePanel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(architecturePanel.textContent).toContain('Approved Jul 24, 2026');
+      expect(
+        studio.root.querySelector<HTMLInputElement>(
+          'app-brief-panel input[type="text"]',
+        )?.value,
+      ).toBe('rapid-prototype');
+      expect(studio.client.canonicalArchitectureWrites).toEqual([
+        'whp-youtube/architectures/composition-net.md',
+      ]);
+      expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
+    });
+    expect(
+      architecturePanel.querySelector<HTMLInputElement>(
+        'input[aria-label="Architecture generation constraints"]',
+      )?.disabled,
+    ).toBe(true);
+    expect(findButton(architecturePanel, 'Generate architecture').disabled)
+      .toBe(true);
+    expect(findButton(architecturePanel, 'Review architecture').disabled)
+      .toBe(true);
+    expect(
+      coreAnswer.querySelector<HTMLInputElement>(
+        'input[aria-label="Refine Core answer"]',
+      )?.disabled,
+    ).toBe(true);
+    expect(findButton(coreAnswer, 'Refine section').disabled).toBe(true);
+    expect(studio.client.commitMilestone).not.toHaveBeenCalled();
+    findButton(milestonePanel, 'Refresh milestones').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(milestonePanel?.querySelector(
+        '[data-milestone-id="milestone-1"]',
+      )).not.toBeNull();
+      expect(milestonePanel?.textContent).toContain(
+        'feat(composition-net): record architecture approval milestone',
+      );
+    });
+    const architectureMilestone = milestonePanel?.querySelector(
+      '[data-milestone-id="milestone-1"]',
+    ) ?? null;
+    const architectureConfirmation =
+      architectureMilestone?.querySelector<HTMLInputElement>(
+        'input[type="checkbox"]',
+      );
+    expect(architectureConfirmation).not.toBeNull();
+    architectureConfirmation!.checked = true;
+    architectureConfirmation!.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
+    studio.tick();
+    findButton(architectureMilestone, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledOnce();
+      expect(studio.client.milestoneCommitRequests).toEqual([{
+        draftId: 'draft-1',
+        kind: 'architecture-approval',
+        input: {
+          pendingMilestoneId: 'milestone-1',
+          confirmed: true,
+        },
+      }]);
+    });
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+    const generateEpisode = findButton(narrationActions, 'Generate episode');
+    expect(
+      generateEpisode.disabled,
+      `narration actions: ${narrationActions?.textContent}; state: ${
+        JSON.stringify(narrationComponent?.model().state)
+      }`,
+    ).toBe(false);
+
+    const narrationBeforeReopen = editorText(studio);
+    findButton(architecturePanel, 'Reopen architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(confirm).toHaveBeenCalledWith(
+        'Reopen architecture? Existing narration is preserved but must be reconciled.',
+      );
+      expect(architecturePanel.textContent).toContain(
+        'Reopened — narration reconciliation required',
+      );
+      expect(editorText(studio)).toBe(narrationBeforeReopen);
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(true);
+      expect(findButton(narrationActions, 'Promote').disabled).toBe(true);
+    });
+
+    findButton(architecturePanel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(false);
+      expect(narrationActions.textContent).toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+
+    findButton(narrationActions, 'Mark narration reconciled').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(confirm).toHaveBeenCalledWith(
+        'Mark narration reconciled at the current revision?',
+      );
+      expect(studio.client.narrationReconciliations).toEqual([{
+        draftId: 'draft-1',
+        expectedRevisionSeq: studio.client.architectureState.revisionSeq,
+        confirmed: true,
+      }]);
+      expect(studio.client.architectureState
+        .narrationReconciliationRequired).toBe(false);
+      expect(narrationActions.textContent).not.toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 1);
+    const approvedAtGeneration =
+      studio.client.draftSubmissions.at(-1)?.approvedArchitectureMd;
+    expect(approvedAtGeneration).toBe(
+      studio.client.architectureState.approvedMd,
+    );
+    expect(studio.client.draftSubmissions.at(-1)?.inputs).not.toHaveProperty(
+      'approved_architecture_md',
+    );
+    studio.client.resolve('op-4', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Rejected fresh narration.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions.textContent).toContain(
+        'Rejected fresh narration.',
+      );
+    });
+    findButton(narrationActions, 'Reject episode proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(false);
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-4',
+        decision: 'rejected',
+      });
+    });
+    expect(editorText(studio)).toBe(narrationBeforeReopen);
+
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 2);
+    studio.client.resolve('op-5', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Accepted fresh narration.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions.textContent).toContain(
+        'Accepted fresh narration.',
+      );
+    });
+    const architectureLoadsBeforeAccept =
+      studio.client.getArchitecture.mock.calls.length;
+    findButton(narrationActions, 'Accept episode proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorText(studio)).toContain('Accepted fresh narration.');
+      expect(editorText(studio)).not.toContain('rewrite target');
+      expect(studio.client.save).toHaveBeenCalledWith(
+        'draft-1',
+        expect.objectContaining({
+          opId: 'op-5',
+          disposition: 'episode-generation-accepted',
+        }),
+      );
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-5',
+        decision: 'accepted',
+      });
+      expect(studio.client.architectureState
+        .narrationReconciliationRequired).toBe(false);
+      expect(studio.client.getArchitecture).toHaveBeenCalledTimes(
+        architectureLoadsBeforeAccept + 1,
+      );
+      expect(narrationActions.textContent).not.toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+  });
+
+  it('shows a paused approval after conflict and resumes it from production controls', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    expect(panel).not.toBeNull();
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain(
+        'Approval paused — resume required',
+      );
+      expect(findButton(panel, 'Resume approval').disabled).toBe(false);
+      expect(Array.from(panel?.querySelectorAll('button') ?? [])
+        .some((button) => button.textContent?.includes('Reopen architecture')))
+        .toBe(false);
+      expect(findButton(panel, 'Generate architecture').disabled).toBe(true);
+      expect(findButton(panel, 'Review architecture').disabled).toBe(true);
+      expect(editorHostElement.textContent).toContain(
+        'Architecture action paused — resume or resolve first.',
+      );
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+    const savesBeforeBlockedAttempt = studio.client.save.mock.calls.length;
+    await expect(editorHost.replaceNarrationFromMarkdown(
+      generatedNarrationMarkdown('Blocked narration replacement.'),
+      'blocked-proposal',
+    )).rejects.toThrow(
+      'Architecture action paused — resume or resolve first.',
+    );
+    expect(studio.client.save).toHaveBeenCalledTimes(
+      savesBeforeBlockedAttempt,
+    );
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureSagaResumes)
+        .toEqual(['approval-resume-key']);
+      expect(panel?.textContent).toContain('Approved Jul 24, 2026');
+      expect(studio.client.architectureState.pendingSaga).toBeNull();
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('rapid-prototype');
+      expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
+      expect(studio.client.pendingMilestones).toEqual([
+        expect.objectContaining({ kind: 'architecture-approval' }),
+      ]);
+      expect(editorHostElement.textContent).not.toContain(
+        'Architecture action paused — resume or resolve first.',
+      );
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('true');
+    });
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'resumed editor target',
+    );
+    await editorHost.flushPendingChanges();
+    expect(studio.client.save).toHaveBeenCalledTimes(
+      savesBeforeBlockedAttempt + 1,
+    );
+    expect(editorText(studio)).toContain('resumed editor target');
+  });
+
+  it('adopts milestone-conflict state immediately so the routed editor blocks and exposes Resume', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureMilestone = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    findButton(panel, 'Approve architecture').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain(
+        'pending milestone source conflict for architecture-approval',
+      );
+      expect(panel?.textContent).toContain(
+        'Approval paused — resume required',
+      );
+      expect(findButton(panel, 'Resume approval').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+  });
+
+  it('shows a paused Reopen saga and resumes it through the shared routed surface', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      const approvedSections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+        key,
+        title,
+        md: `### ${title}\n\nApproved ${key}.\n`,
+      }));
+      client.architectureState = {
+        ...client.architectureState,
+        sections: approvedSections,
+        approvedMd: joinArchitecture(approvedSections),
+        approvedAt: '2026-07-24T12:00:00.000Z',
+      };
+      client.pauseNextArchitectureReopen = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    findButton(panel, 'Reopen architecture').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain('Reopen paused — resume required');
+      expect(findButton(panel, 'Resume Reopen').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+
+    findButton(panel, 'Resume Reopen').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureSagaResumes)
+        .toEqual(['reopen-resume-key']);
+      expect(studio.client.architectureState.pendingSaga).toBeNull();
+      expect(readDraftPhase(studio.client.storedDraft)).toBe('architecture');
+      expect(editorHost.narrationBlocked()).toBe(false);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('true');
+    });
+  });
+
+  it('surfaces a recoverable autosave refusal that races with paused approval', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'racing autosave target',
+    );
+    const flush = editorHost.flushPendingChanges();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+    await expect(flush).rejects.toThrow('Narration remains unsaved.');
+    studio.tick();
+    expect(editorHostElement.textContent).toContain(
+      'Unsaved — Architecture action paused — resume or resolve first. Narration remains unsaved.',
+    );
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+    studio.tick();
+    expect(studio.client.save).toHaveBeenCalledTimes(2);
+    expect(editorHostElement.querySelector(
+      '[data-testid="unsaved-badge"]',
+    )).toBeNull();
+  });
+
+  it('adopts a reservation response state and blocks the routed editor without a reload', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.save.mockImplementationOnce(async () => {
+        client.architectureState = {
+          ...client.architectureState,
+          pendingSaga: {
+            kind: 'reopen',
+            resumeKey: 'remote-reopen-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'completed',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          },
+        };
+        throw new DaemonClientError(409, {
+          error:
+            'draft write refused: an architecture saga is paused; resume or resolve it first',
+          code: 'draft-write-reserved',
+          reservation: 'architecture-saga',
+          sagaKind: 'reopen',
+          recoverable: true,
+          state: cloneArchitectureState(client.architectureState),
+        });
+      });
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'remote saga race target',
+    );
+    await expect(editorHost.flushPendingChanges()).rejects.toThrow(
+      'Narration remains unsaved.',
+    );
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain('Reopen paused — resume required');
+      expect(findButton(panel, 'Resume Reopen').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+  });
+
+  it('blocks on a stale-model direct whole-episode save refusal without autosave or reload', async () => {
+    const studio = await mountStudio(studioDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.save.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+    const architectureLoadsBeforeAcceptance =
+      studio.client.getArchitecture.mock.calls.length;
+
+    expect(narrationComponent?.model().state?.pendingSaga).toBeNull();
+    expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    expect(studio.client.save).not.toHaveBeenCalled();
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Refused direct replacement.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions?.textContent).toContain(
+        'Refused direct replacement.',
+      );
+    });
+    findButton(narrationActions, 'Accept episode proposal').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+    expect(studio.client.save).toHaveBeenCalledOnce();
+    expect(studio.client.save).toHaveBeenCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'episode-generation-accepted',
+      }),
+    );
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave')).toBe(false);
+    expect(studio.client.getArchitecture).toHaveBeenCalledTimes(
+      architectureLoadsBeforeAcceptance,
+    );
+    expect(editorText(studio)).not.toContain('Refused direct replacement.');
+  });
+
+  it('rolls back a proposal replacement refused by a racing approval pause', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'dirty before replacement',
+    );
+    expect(editorHost.unsaved()).toBe(true);
+    expect(studio.client.save).not.toHaveBeenCalled();
+    const narrationBeforeReplacement = editorText(studio);
+
+    const replacement = editorHost.replaceNarrationFromMarkdown(
+      generatedNarrationMarkdown('Racing proposal replacement.'),
+      'racing-proposal',
+    );
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorText(studio)).toContain('Racing proposal replacement.');
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+
+    await expect(replacement).rejects.toThrow(
+      'draft write refused: an architecture saga is paused; resume or resolve it first',
+    );
+    studio.tick();
+    expect(editorText(studio)).toBe(narrationBeforeReplacement);
+    expect(editorHost.editorState()?.doc.textContent).toContain(
+      'dirty before replacement',
+    );
+    expect(editorHost.unsaved()).toBe(true);
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+    expect(editorHost.unsaved()).toBe(false);
+    expect(studio.client.save).toHaveBeenCalledTimes(2);
+    await editorHost.replaceNarrationFromMarkdown(
+      generatedNarrationMarkdown('Racing proposal replacement.'),
+      'racing-proposal',
+    );
+    studio.tick();
+    expect(editorText(studio)).toContain('Racing proposal replacement.');
+    expect(studio.client.save).toHaveBeenCalledTimes(3);
+  });
+
+  it('preserves inline-acceptance provenance across a saga pause and settles after Resume', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await selectText(studio, 'rewrite target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
+    studio.client.resolve('op-1', rewriteResult('accepted inline target'));
+    let proposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('accepted inline target');
+    });
+    findButton(proposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    expect(studio.client.save).toHaveBeenLastCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'selection-proposal-accepted',
+      }),
+    );
+    expect(studio.client.narrationProposalResolutions).toContainEqual({
+      draftId: 'draft-1',
+      operationId: 'op-1',
+      decision: 'accepted',
+    });
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave' && input.opId === null)).toBe(false);
+  });
+
+  it('queues every overlapping accepted provenance across one saga pause', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await selectText(studio, 'rewrite target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
+    studio.client.resolve('op-1', rewriteResult('first accepted target'));
+    let firstProposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      firstProposal = studio.root.querySelector('.proposal-diff');
+      expect(firstProposal?.textContent).toContain('first accepted target');
+    });
+    findButton(firstProposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    await selectText(studio, 'failure target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-2.');
+    studio.client.resolve('op-2', rewriteResult('second accepted target'));
+    let secondProposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      secondProposal = studio.root.querySelector('.proposal-diff');
+      expect(secondProposal?.textContent).toContain('second accepted target');
+    });
+    findButton(secondProposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorText(studio)).toContain('second accepted target');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    const acceptedRevisions = studio.client.revisionHistory.filter(
+      (revision) => revision.disposition === 'selection-proposal-accepted',
+    );
+    expect(acceptedRevisions.map(({ opId }) => opId)).toEqual([
+      'op-1',
+      'op-2',
+    ]);
+    expect(studio.client.narrationProposalResolutions).toEqual(
+      expect.arrayContaining([
+        {
+          draftId: 'draft-1',
+          operationId: 'op-1',
+          decision: 'accepted',
+        },
+        {
+          draftId: 'draft-1',
+          operationId: 'op-2',
+          decision: 'accepted',
+        },
+      ]),
+    );
+  });
+
+  it('preserves PI-acceptance provenance across a Reopen pause and settles after Resume', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(productionDraft(), (client) => {
+      const approvedSections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+        key,
+        title,
+        md: `### ${title}\n\nApproved ${key}.\n`,
+      }));
+      client.architectureState = {
+        ...client.architectureState,
+        sections: approvedSections,
+        approvedMd: joinArchitecture(approvedSections),
+        approvedAt: '2026-07-24T12:00:00.000Z',
+      };
+      client.pauseNextArchitectureReopen = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector('app-production-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    const response = productionPanel!.querySelector<HTMLTextAreaElement>(
+      'textarea[aria-label="Response for PI-001"]',
+    )!;
+    response.value = 'I noticed it while teaching a friend.';
+    response.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(productionPanel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    studio.client.resolve('op-1', rewriteResult('Accepted supplied detail.'));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(productionPanel?.textContent).toContain(
+        'Accepted supplied detail.',
+      );
+    });
+    findButton(productionPanel, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(architecturePanel, 'Reopen architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(architecturePanel?.textContent).toContain(
+        'Reopen paused — resume required',
+      );
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'reopen',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(architecturePanel, 'Resume Reopen').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    expect(studio.client.save).toHaveBeenLastCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'personal-input-proposal-accepted',
+      }),
+    );
+    expect(studio.client.narrationProposalResolutions).toContainEqual({
+      draftId: 'draft-1',
+      operationId: 'op-1',
+      decision: 'accepted',
+    });
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave' && input.opId === null)).toBe(false);
+  });
+
   it('drives the full production Studio and routed Console surface', async () => {
     const cancelAutosave = vi.spyOn(
       DebouncedAutosave.prototype,
@@ -250,11 +2720,17 @@ describe('mounted Script Studio composition', () => {
     await vi.waitFor(() => {
       expect(editorText(studio)).toContain('rewritten target');
       expect(editorText(studio)).not.toContain('rewrite target');
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-1',
+        decision: 'accepted',
+      });
     });
 
     await selectText(studio, 'failure target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-2.');
     studio.client.resolve('op-2', {
       kind: 'failed',
       error: 'invalid operation result',
@@ -272,6 +2748,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'guardrail target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-3.');
     studio.client.resolve('op-3', {
       kind: 'schema',
       value: {
@@ -291,6 +2768,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'alternatives target');
     clickToolbar(studio, 'alternatives');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-4.');
     expect(studio.root.querySelector('.proposal-diff')).toBeNull();
     studio.client.resolve('op-4', {
       kind: 'schema',
@@ -330,6 +2808,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'review target');
     clickToolbar(studio, 'review');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-5.');
     studio.client.resolve('op-5', {
       kind: 'schema',
       value: {
@@ -353,24 +2832,18 @@ describe('mounted Script Studio composition', () => {
       expect(findings?.textContent).toContain('Anchored');
     });
 
-    const promote = findButton(
-      studio.root.querySelector('app-brief-panel'),
-      'Promote',
-    );
-    expect(promote.disabled).toBe(true);
-    const approval = studio.root.querySelector<HTMLInputElement>(
-      'app-brief-panel input[type="checkbox"]',
-    )!;
-    approval.checked = true;
-    approval.dispatchEvent(new Event('change', { bubbles: true }));
-    await vi.waitFor(() => {
-      studio.tick();
-      expect(promote.disabled).toBe(false);
-    });
+    expect(
+      Array.from(
+        studio.root.querySelectorAll<HTMLButtonElement>(
+          'app-brief-panel button',
+        ),
+      ).some((button) => button.textContent?.trim() === 'Promote'),
+    ).toBe(false);
 
     await selectText(studio, 'reroll target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-6.');
     studio.client.resolve('op-6', rewriteResult('rerolled target'));
     await waitForElement(studio, '.proposal-diff');
     await vi.waitFor(() => {
@@ -444,6 +2917,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'lock target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
     studio.client.resolve('op-1', rewriteResult('locked proposal'));
 
     const conflict = await waitForElement(
@@ -552,6 +3026,8 @@ describe('mounted Script Studio composition', () => {
 
 async function mountStudio(
   draft = studioDraft(),
+  configureClient: (client: ControllableDaemonClient) => void =
+    () => {},
 ): Promise<MountedStudio> {
   if (!appResourcesResolved) {
     await ɵresolveComponentResources(async (url) =>
@@ -562,13 +3038,39 @@ async function mountStudio(
     // Vitest transpiles TypeScript without Angular's AOT input transform. Hydrate
     // only the signal-input metadata so the real production component tree can
     // bind and run under JIT in jsdom.
-    hydrateSignalInputs(BriefPanel, ['model', 'gate']);
+    hydrateSignalInputs(BriefPanel, ['model', 'gate', 'showPromote']);
     hydrateSignalInputs(FindingsPanel, ['findings']);
     hydrateSignalInputs(ParkingLot, ['model']);
     hydrateSignalInputs(RevisionTimeline, ['manager']);
     hydrateSignalInputs(DraftTransfer, ['manager']);
-    hydrateSignalInputs(EditorHost, ['draft', 'client', 'session', 'wpm']);
+    hydrateSignalInputs(EditorHost, [
+      'draft',
+      'client',
+      'session',
+      'wpm',
+      'narrationBlocked',
+      'architectureModel',
+    ]);
+    hydrateSignalOutputs(EditorHost, ['architectureConflict']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
+    hydrateSignalInputs(ArchitecturePanel, ['model', 'draft', 'version']);
+    hydrateSignalInputs(NarrationActions, [
+      'model',
+      'draft',
+      'client',
+      'editor',
+      'version',
+    ]);
+    hydrateSignalInputs(ProductionPanel, [
+      'draft',
+      'client',
+      'editor',
+      'architectureModel',
+    ]);
+    hydrateSignalOutputs(ProductionPanel, ['architectureConflict']);
+    hydrateSignalOutputs(ArchitecturePanel, ['changed', 'workflowChanged']);
+    hydrateSignalOutputs(NarrationActions, ['changed']);
     hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
     const draftManagerDefinition = ɵgetComponentDef(DraftManagerComponent);
     if (!draftManagerDefinition) {
@@ -586,6 +3088,7 @@ async function mountStudio(
   }
   globalThis.history.replaceState(null, '', '/');
   const client = new ControllableDaemonClient(draft);
+  configureClient(client);
   const session = new StudioSession(client as unknown as DaemonClient);
   const application = await createApplication({
     providers: [
@@ -633,6 +3136,8 @@ async function mountStudio(
     studio.tick();
     expect(client.get).toHaveBeenCalledWith(draft.id);
     expect(root.querySelector('app-editor-host .ProseMirror')).not.toBeNull();
+    expect(root.querySelector('app-architecture-panel')).not.toBeNull();
+    expect(root.querySelector('app-narration-actions')).not.toBeNull();
     expect(root.querySelector('app-brief-panel')).not.toBeNull();
     expect(root.querySelector('app-findings-panel')).not.toBeNull();
     expect(root.querySelector('app-parking-lot')).not.toBeNull();
@@ -654,6 +3159,17 @@ function hydrateSignalInputs(
   }
   definition.inputs = inputs;
   definition.declaredInputs = declaredInputs;
+}
+
+function hydrateSignalOutputs(
+  component: object,
+  names: string[],
+): void {
+  const definition = ɵgetComponentDef(component as never);
+  if (!definition) throw new Error('Angular component definition is unavailable');
+  const outputs = { ...definition.outputs };
+  for (const name of names) outputs[name] = name;
+  definition.outputs = outputs;
 }
 
 async function selectText(
@@ -743,9 +3259,9 @@ async function expectEmbeddedConsole(
 ): Promise<void> {
   await vi.waitFor(() => {
     studio.tick();
-    expect(studio.root.querySelector(
+    expect(Array.from(studio.root.querySelectorAll(
       '[data-testid="console-operation"]',
-    )?.textContent).toContain(text);
+    )).some((entry) => entry.textContent?.includes(text))).toBe(true);
   });
 }
 
@@ -781,11 +3297,22 @@ function findTextNode(
 function findButton(
   element: Element | null,
   label: string,
-): HTMLButtonElement {
+): HTMLButtonElement;
+function findButton(
+  element: Element | null,
+  label: string,
+  optional: true,
+): HTMLButtonElement | null;
+function findButton(
+  element: Element | null,
+  label: string,
+  optional = false,
+): HTMLButtonElement | null {
   const button = Array.from(
     element?.querySelectorAll<HTMLButtonElement>('button') ?? [],
   ).find((candidate) =>
     candidate.textContent?.replace(/\s+/gu, ' ').trim().startsWith(label));
+  if (optional) return button ?? null;
   if (!button) throw new Error(`button ${label} was not rendered`);
   return button;
 }
@@ -870,6 +3397,30 @@ function draftSummary(draft: DraftRecord): Omit<DraftRecord, 'doc'> {
   return summary;
 }
 
+function pendingMilestoneFixture(
+  draft: DraftRecord,
+  id: string,
+  commitMessage: string,
+): PendingMilestone {
+  const file = `whp-youtube/architectures/${draft.episodeSlug}.md`;
+  return {
+    id,
+    draftId: draft.id,
+    episodeSlug: draft.episodeSlug,
+    kind: 'architecture-approval',
+    files: [file],
+    commitMessage,
+    sourceHashes: { [file]: `hash-${id}` },
+    baseCommitHash: `base-${id}`,
+    reconciliationRequired: true,
+    state: 'pending',
+    resultingCommitHash: null,
+    createdAt: '2026-07-24T09:00:00.000Z',
+    updatedAt: '2026-07-24T09:00:00.000Z',
+    diffSummary: `${file} | 1 +`,
+  };
+}
+
 function completedOperation(
   id: string,
   overrides: Partial<OperationRecord> = {},
@@ -911,6 +3462,273 @@ function operationSummary(operation: OperationRecord): OperationSummary {
     outputTokens: operation.outputTokens,
     reasoningOutputTokens: operation.reasoningOutputTokens,
   };
+}
+
+function generatedArchitectureMarkdown(): string {
+  return [
+    ...ARCHITECTURE_SECTIONS.map(({ key, title }) =>
+      `### ${title}\n\nGenerated ${key}.\n`),
+    [
+      '### Optional comparison',
+      '',
+      '<img src=x onerror="globalThis.__unsafe = true">',
+      '',
+    ].join('\n'),
+  ].join('');
+}
+
+function generatedNarrationMarkdown(narration: string): string {
+  return [
+    '# Generated episode',
+    '',
+    '## 1. Opening',
+    '',
+    `> ${narration}`,
+    '',
+  ].join('\n');
+}
+
+function architectureDraft(): DraftRecord {
+  const draft = studioDraft();
+  setDraftPhase(draft, 'architecture');
+  return draft;
+}
+
+function productionDraft(): DraftRecord {
+  const draft = studioDraft();
+  draft.format = 'narration';
+  draft.doc = {
+    ...parseProductionFixture(),
+    metadata: {
+      topic: 'Why constraints create play',
+      anchors: ['Players accept the rule.'],
+      unknowns: ['Which example survives?'],
+      approvedLessons: ['Keep it concrete.'],
+      creativeStatus: {
+        phase: 'creative-approved',
+        readiness: 'EDITORIAL-DRAFT',
+      },
+      directionApproved: false,
+    },
+  };
+  return draft;
+}
+
+function approvedArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  const sections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+    key,
+    title,
+    md: `### ${title}\n\nApproved ${key}.\n`,
+  }));
+  return {
+    ...state,
+    sections,
+    approvedMd: joinArchitecture(sections),
+    approvedAt: '2026-07-24T12:00:00.000Z',
+    pendingSaga: null,
+  };
+}
+
+function pausedReopenArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  return {
+    ...state,
+    approvedMd: null,
+    approvedAt: null,
+    revisionSeq: state.revisionSeq + 1,
+    narrationReconciliationRequired: true,
+    pendingSaga: {
+      kind: 'reopen',
+      resumeKey: 'remote-reopen-resume-key',
+      steps: {
+        revisionAppended: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'pending',
+        draftUpdated: 'pending',
+      },
+      createdAt: '2026-07-24T15:00:00.000Z',
+      updatedAt: '2026-07-24T15:00:00.000Z',
+    },
+  };
+}
+
+function architectureReservationError(
+  state: ArchitectureState,
+): DaemonClientError {
+  return new DaemonClientError(409, {
+    error:
+      'draft write refused: an architecture saga is paused; resume or resolve it first',
+    code: 'draft-write-reserved',
+    reservation: 'architecture-saga',
+    sagaKind: state.pendingSaga?.kind,
+    recoverable: true,
+    state: cloneArchitectureState(state),
+  });
+}
+
+async function expectRoutedReopenRecovery(
+  studio: MountedStudio,
+  architecturePanel: Element | null,
+  editorHostElement: HTMLElement | null,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(architecturePanel?.textContent).toContain(
+      'Reopen paused — resume required',
+    );
+    expect(findButton(architecturePanel, 'Resume Reopen').disabled).toBe(false);
+    expect(editorHostElement?.textContent).toContain(
+      'Architecture action paused — resume or resolve first.',
+    );
+    expect(editorHostElement?.querySelector('.ProseMirror')
+      ?.getAttribute('contenteditable')).toBe('false');
+  });
+}
+
+function parseProductionFixture(
+  personalInputCompleted = false,
+): DraftDocument {
+  const markdown = [
+    '# Production fixture',
+    '',
+    '## 1. Opening',
+    '',
+    '> Opening narration.',
+    ...(personalInputCompleted
+      ? ['> Martin supplied exact narration.']
+      : ['> <!-- PI-001: Martin input -->']),
+    '> Closing narration.',
+    '',
+    '## Appendix',
+    '',
+    '### Script metadata',
+    '',
+    '- **Status:** RESEARCH-DRAFT',
+    '- **Title:** Production fixture',
+    '',
+    '### Beat 01 — Opening',
+    '',
+    '- **Time:** 00:00–00:30',
+    '',
+    '#### Story function',
+    '',
+    'Open the question.',
+    '',
+    '#### Personal input',
+    '',
+    '- **ID:** PI-001',
+    `- **Decision:** ${
+      personalInputCompleted ? 'COMPLETED' : 'INPUT-REQUESTED'
+    }`,
+    '- **Story purpose:** Ground the question in a truthful moment.',
+    '- **Primary prompt:** What exact moment changed your view?',
+    '- **Follow-up prompts:** What did you see; what did you assume?',
+    '- **Bridge in:** Exact stored bridge in.',
+    '- **Bridge out:** Exact stored bridge out.',
+    '- **Personal visuals:** Exact stored visual note.',
+    '- **Omit when:** Exact stored omit condition.',
+    '',
+    '#### Viewer application',
+    '',
+    '- **Insight:** A bounded insight.',
+    '',
+    '### Editorial audit',
+    '',
+    '- Exact audit text.',
+    '',
+    '### References and source materials',
+    '',
+    '#### Evidence references',
+    '',
+    '##### F-001 — Source',
+    '',
+    '- **Status:** VERIFIED',
+    '',
+    '### Unrecognized production note',
+    '',
+    'Preserve this unknown section exactly.',
+  ].join('\n');
+  return parseMarkdown(markdown).toJSON() as DraftDocument;
+}
+
+function setDraftPhase(draft: DraftRecord, phase: string): void {
+  const metadata = draft.doc['metadata'] as Record<string, unknown>;
+  metadata['creativeStatus'] = {
+    ...metadata['creativeStatus'] as Record<string, unknown>,
+    phase,
+  };
+}
+
+function readDraftPhase(draft: DraftRecord): unknown {
+  return ((draft.doc['metadata'] as Record<string, unknown>)
+    ['creativeStatus'] as Record<string, unknown>)['phase'];
+}
+
+function readDraftReadiness(draft: DraftRecord): unknown {
+  return ((draft.doc['metadata'] as Record<string, unknown>)
+    ['creativeStatus'] as Record<string, unknown>)['readiness'];
+}
+
+function cloneArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  return {
+    ...state,
+    sections: state.sections.map((section) => ({ ...section })),
+    pendingSaga: state.pendingSaga
+      ? {
+          ...state.pendingSaga,
+          steps: { ...state.pendingSaga.steps },
+        }
+      : null,
+  };
+}
+
+function completedArchitectureAction(
+  state: ArchitectureState,
+): ArchitectureActionResult {
+  return {
+    complete: true,
+    steps: {
+      revisionAppended: 'completed',
+      artifactWritten: 'completed',
+      pipelineUpserted: 'completed',
+      draftUpdated: 'completed',
+    },
+    state: cloneArchitectureState(state),
+  };
+}
+
+async function expectDraftSubmission(
+  studio: MountedStudio,
+  operation: OperationName,
+  count: number,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(
+      studio.client.draftSubmissions.filter(
+        (submission) => submission.operation === operation,
+      ),
+      `${operation} draft submissions; panel text: ${
+        studio.root.querySelector('app-architecture-panel')?.textContent
+      }`,
+    ).toHaveLength(count);
+  });
+}
+
+function setInputValue(
+  element: Element | null,
+  value: string,
+): void {
+  if (!(element instanceof HTMLInputElement)) {
+    throw new Error('input was not rendered');
+  }
+  element.value = value;
+  element.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function domRect(): DOMRect {

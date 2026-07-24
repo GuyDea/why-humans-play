@@ -1,11 +1,19 @@
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+  assertWorkspaceIdentity,
+  gitDirtyFiles,
   gitStatus,
   milestoneCommit,
+  prepareManagedWorktree,
 } from '../../src/repo/git.js';
 
 function git(repoRoot: string, args: string[]): string {
@@ -53,6 +61,119 @@ describe('gitStatus', () => {
     git(repoRoot, ['switch', '-c', 'episode/why-we-play']);
 
     expect(gitStatus(repoRoot).defaultBranch).toBe('main');
+  });
+
+  it('does not adopt a remote default name with no matching local branch', () => {
+    const repoRoot = makeRepo();
+    git(repoRoot, ['switch', '-c', 'trunk']);
+    git(repoRoot, ['branch', '-D', 'main']);
+    git(repoRoot, ['update-ref', 'refs/remotes/origin/main', 'HEAD']);
+    git(repoRoot, [
+      'symbolic-ref',
+      'refs/remotes/origin/HEAD',
+      'refs/remotes/origin/main',
+    ]);
+
+    expect(gitStatus(repoRoot).defaultBranch).toBe('trunk');
+  });
+});
+
+describe('managed episode worktrees', () => {
+  it('creates the recommended branch from the detected local default branch', () => {
+    const repoRoot = makeRepo();
+    git(repoRoot, ['switch', '-c', 'controller-feature']);
+    writeFileSync(join(repoRoot, 'feature-only.md'), 'feature\n');
+    git(repoRoot, ['add', '--', 'feature-only.md']);
+    git(repoRoot, ['commit', '-m', 'feature-only']);
+    const managedRoot = mkdtempSync(join(tmpdir(), 'git-worktrees-'));
+    const worktreePath = join(managedRoot, 'episode-one');
+
+    const prepared = prepareManagedWorktree(repoRoot, {
+      branch: 'episode/episode-one',
+      worktreePath,
+      baseBranch: 'main',
+    });
+
+    expect(prepared).toEqual({
+      branch: 'episode/episode-one',
+      worktreePath: realpathSync(worktreePath),
+      baseBranch: 'main',
+      reused: false,
+    });
+    expect(git(worktreePath, ['rev-parse', 'HEAD'])).toBe(
+      git(repoRoot, ['rev-parse', 'main']),
+    );
+    expect(() => git(worktreePath, ['show', 'HEAD:feature-only.md'])).toThrow();
+  });
+
+  it('reuses only the exact recorded worktree identity', () => {
+    const repoRoot = makeRepo();
+    const managedRoot = mkdtempSync(join(tmpdir(), 'git-worktrees-resume-'));
+    const worktreePath = join(managedRoot, 'episode-one');
+    prepareManagedWorktree(repoRoot, {
+      branch: 'episode/episode-one',
+      worktreePath,
+      baseBranch: 'main',
+    });
+
+    expect(prepareManagedWorktree(repoRoot, {
+      branch: 'episode/episode-one',
+      worktreePath,
+      baseBranch: 'main',
+    })).toMatchObject({ reused: true });
+
+    git(worktreePath, ['switch', '-c', 'episode/changed']);
+    expect(() => assertWorkspaceIdentity({
+      repoRoot,
+      branch: 'episode/episode-one',
+      worktreePath,
+    })).toThrow(/workspace identity conflict/i);
+  });
+
+  it('refuses a different repository at a recorded branch and path', () => {
+    const repoRoot = makeRepo();
+    const replacementRoot = makeRepo();
+    git(replacementRoot, ['switch', '-c', 'episode/episode-one']);
+
+    expect(() => assertWorkspaceIdentity({
+      repoRoot,
+      branch: 'episode/episode-one',
+      worktreePath: replacementRoot,
+    })).toThrow(/workspace identity conflict/i);
+  });
+
+  it('refuses a same-name branch checked out at a different path', () => {
+    const repoRoot = makeRepo();
+    git(repoRoot, ['branch', 'episode/taken', 'main']);
+    const managedRoot = mkdtempSync(join(tmpdir(), 'git-worktrees-taken-'));
+
+    expect(() => prepareManagedWorktree(repoRoot, {
+      branch: 'episode/taken',
+      worktreePath: join(managedRoot, 'episode-one'),
+      baseBranch: 'main',
+    })).toThrow(/branch conflict/i);
+  });
+
+  it('reports dirty staged, unstaged, and untracked paths without changing them', () => {
+    const repoRoot = makeRepo();
+    writeFileSync(join(repoRoot, 'staged.md'), 'baseline\n');
+    writeFileSync(join(repoRoot, 'unstaged.md'), 'baseline\n');
+    git(repoRoot, ['add', '--', 'staged.md', 'unstaged.md']);
+    git(repoRoot, ['commit', '-m', 'fixtures']);
+    writeFileSync(join(repoRoot, 'staged.md'), 'staged\n');
+    git(repoRoot, ['add', '--', 'staged.md']);
+    writeFileSync(join(repoRoot, 'unstaged.md'), 'unstaged\n');
+    mkdirSync(join(repoRoot, 'untracked'));
+    writeFileSync(join(repoRoot, 'untracked', 'file.md'), 'untracked\n');
+
+    expect(gitDirtyFiles(repoRoot)).toEqual([
+      'staged.md',
+      'unstaged.md',
+      'untracked/file.md',
+    ]);
+    expect(git(repoRoot, ['diff', '--cached', '--name-only'])).toBe(
+      'staged.md',
+    );
   });
 });
 

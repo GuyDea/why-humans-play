@@ -220,6 +220,64 @@ describe('OperationService', () => {
     expect(envelope.outputSchema).toBeUndefined();
   });
 
+  it('routes a draft-scoped operation through its recorded workspace cwd', async () => {
+    const fixture = makeFixture('happy');
+    const workspace = mkdtempSync(join(tmpdir(), 'operation-workspace-'));
+    const id = submit(
+      fixture,
+      'generate-episode',
+      { brief: 'A workspace-routed test.' },
+      { cwd: workspace },
+    );
+
+    await terminal(fixture, id);
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.cwd).toBe(workspace);
+  });
+
+  it('dispatches Generate Architecture to the complete raw Markdown fixture', async () => {
+    const fixture = makeFixture('plan6-flow');
+    const id = submit(fixture, 'generate-architecture', {
+      topic_brief: 'A selected topic.',
+      approved_lessons: [],
+      user_constraints: '',
+    });
+
+    await terminal(fixture, id);
+
+    const result = fixture.service.result(id);
+    expect(result.kind).toBe('raw');
+    if (result.kind !== 'raw') throw new Error('expected raw result');
+    expect(result.markdown).toContain('### Package and audience');
+    expect(result.markdown).toContain('### Scope boundary');
+    expect(result.markdown).toContain('### Fixture-only production note');
+  });
+
+  it('dispatches Review Architecture through strict enum-cycling schema output', async () => {
+    const fixture = makeFixture('plan6-flow');
+    const id = submit(fixture, 'review-architecture', {
+      architecture_md: '### Core answer\n\nA mechanism.',
+      topic_brief: 'A selected topic.',
+    });
+
+    expect((await terminal(fixture, id)).state).toBe('completed');
+
+    const result = fixture.service.result(id);
+    expect(result.kind).toBe('schema');
+    if (result.kind !== 'schema') throw new Error('expected schema result');
+    const value = result.value as {
+      findings: Array<{ section_key: string; severity: string }>;
+    };
+    expect(value.findings).toHaveLength(11);
+    expect(value.findings.slice(0, 4)).toMatchObject([
+      { section_key: 'package-and-audience', severity: 'blocking' },
+      { section_key: 'central-question', severity: 'important' },
+      { section_key: 'core-answer', severity: 'optional' },
+      { section_key: 'viewer-belief-shift', severity: 'blocking' },
+    ]);
+  });
+
   it.each(['declined', 'narrowed'] as const)(
     'passes through a %s guardrail as a schema result, not an error',
     async (status) => {
@@ -235,6 +293,29 @@ describe('OperationService', () => {
       if (result.kind !== 'schema') throw new Error('expected schema result');
       expect(result.value).toMatchObject({ status });
       expect(result.guardrail).toBe('This request crosses the approved scope.');
+    },
+  );
+
+  it.each(['declined', 'narrowed'] as const)(
+    'keeps a Plan 6 architecture %s guardrail as a schema result',
+    async (status) => {
+      const fixture = makeFixture('plan6-flow', {
+        FAKE_OPERATION_STATUS: status,
+      });
+      const id = submit(fixture, 'review-architecture', {
+        architecture_md: '### Core answer\n\nA mechanism.',
+        topic_brief: 'A selected topic.',
+      });
+
+      expect((await terminal(fixture, id)).state).toBe('completed');
+      expect(fixture.service.result(id)).toMatchObject({
+        kind: 'schema',
+        value: {
+          status,
+          guardrail_markdown: 'This request crosses the approved scope.',
+        },
+        guardrail: 'This request crosses the approved scope.',
+      });
     },
   );
 
@@ -501,6 +582,47 @@ describe('OperationService', () => {
       undefined,
       { resumeOf: id },
     )).toThrow(/inputs/i);
+  });
+
+  it('keeps the same rewrite target when Plan 6 resumes with fresh inputs', async () => {
+    const fixture = makeFixture('plan6-flow');
+    const original = submit(fixture, 'rewrite-architecture-section', {
+      section_key: 'earned-reframe',
+      section_markdown: '### Earned reframe\n\nOriginal.',
+      architecture_md: '### Earned reframe\n\nOriginal.',
+      topic_brief: 'A selected topic.',
+      user_instruction: 'Make it clearer.',
+    });
+    await terminal(fixture, original);
+
+    const resumed = submit(
+      fixture,
+      'rewrite-architecture-section',
+      {
+        section_key: 'earned-reframe',
+        section_markdown: '### Earned reframe\n\nOriginal.',
+        architecture_md: '### Earned reframe\n\nOriginal.',
+        topic_brief: 'A selected topic.',
+        user_instruction: 'Now make it shorter.',
+      },
+      { resumeOf: original },
+    );
+    await terminal(fixture, resumed);
+
+    expect(fixture.service.result(original)).toMatchObject({
+      kind: 'schema',
+      value: {
+        replacement_markdown:
+          '### Earned reframe\n\nFake rewrite for earned-reframe.\n',
+      },
+    });
+    expect(fixture.service.result(resumed)).toMatchObject({
+      kind: 'schema',
+      value: {
+        replacement_markdown:
+          '### Earned reframe\n\nFake rewrite for earned-reframe.\n',
+      },
+    });
   });
 
   it('keeps persisted resume depth across a schema retry', async () => {

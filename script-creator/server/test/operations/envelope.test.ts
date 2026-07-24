@@ -9,4 +9,44 @@ describe('operation envelope', () => {
     const prompt = buildEnvelopePrompt(op, inputs);
     expect(prompt).toBe(`$writing-whp-youtube-scripts\nOperation: Rewrite selection\nInputs: ${JSON.stringify(inputs)}`);
   });
+
+  it.each([
+    [
+      'generate-architecture',
+      'Generate architecture',
+      {
+        topic_brief: '# Brief',
+        approved_lessons: ['Keep the causal chain explicit.'],
+        user_constraints: null,
+      },
+    ],
+    [
+      'review-architecture',
+      'Review architecture',
+      {
+        architecture_md: '### Core answer\n\nA mechanism.',
+        topic_brief: '# Brief',
+      },
+    ],
+    [
+      'rewrite-architecture-section',
+      'Rewrite architecture section',
+      {
+        section_key: 'core-answer',
+        section_markdown: '### Core answer\n\nA mechanism.',
+        architecture_md: '### Core answer\n\nA mechanism.',
+        topic_brief: '# Brief',
+        user_instruction: 'Make the mechanism more specific.',
+      },
+    ],
+  ] as const)(
+    'keeps the %s prompt provenance-pure',
+    (name, operationLabel, inputs) => {
+      const prompt = buildEnvelopePrompt(OPERATIONS[name], inputs);
+
+      expect(prompt).toBe(
+        `$writing-whp-youtube-scripts\nOperation: ${operationLabel}\nInputs: ${JSON.stringify(inputs)}`,
+      );
+    },
+  );
 });

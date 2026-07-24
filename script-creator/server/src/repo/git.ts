@@ -1,4 +1,10 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
+import {
+  mkdirSync,
+  realpathSync,
+} from 'node:fs';
+import { dirname, resolve } from 'node:path';
 
 export interface GitStatus {
   branch: string;
@@ -10,6 +16,30 @@ export interface MilestoneCommitOptions {
   files: string[];
   message: string;
   allowDefault?: boolean;
+}
+
+export interface ManagedWorktreeOptions {
+  branch: string;
+  worktreePath: string;
+  baseBranch: string;
+}
+
+export interface ManagedWorktreeResult extends ManagedWorktreeOptions {
+  reused: boolean;
+}
+
+export interface WorkspaceIdentity {
+  repoRoot: string;
+  branch: string;
+  worktreePath: string;
+}
+
+export interface RecordedMilestoneCommit {
+  commitHash: string;
+  baseCommitHash: string;
+  files: string[];
+  message: string;
+  sourceHashes: Record<string, string>;
 }
 
 function runGit(repoRoot: string, args: string[]): string {
@@ -35,6 +65,13 @@ function tryGit(repoRoot: string, args: string[]): string | undefined {
   }
 }
 
+function runGitBytes(repoRoot: string, args: string[]): Buffer {
+  return execFileSync('git', args, {
+    cwd: repoRoot,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  });
+}
+
 function resolveDefaultBranch(repoRoot: string, currentBranch: string): string {
   const remoteHead = tryGit(repoRoot, [
     'symbolic-ref',
@@ -42,18 +79,18 @@ function resolveDefaultBranch(repoRoot: string, currentBranch: string): string {
     '--short',
     'refs/remotes/origin/HEAD',
   ]);
-  if (remoteHead?.startsWith('origin/')) return remoteHead.slice('origin/'.length);
+  if (remoteHead?.startsWith('origin/')) {
+    const localName = remoteHead.slice('origin/'.length);
+    if (localBranchExists(repoRoot, localName)) return localName;
+  }
 
   const configured = tryGit(repoRoot, ['config', '--get', 'init.defaultBranch']);
-  if (
-    configured
-    && tryGit(repoRoot, ['show-ref', '--verify', '--hash', `refs/heads/${configured}`])
-  ) {
+  if (configured && localBranchExists(repoRoot, configured)) {
     return configured;
   }
 
   for (const candidate of ['main', 'master', 'trunk']) {
-    if (tryGit(repoRoot, ['show-ref', '--verify', '--hash', `refs/heads/${candidate}`])) {
+    if (localBranchExists(repoRoot, candidate)) {
       return candidate;
     }
   }
@@ -72,6 +109,214 @@ export function gitStatus(repoRoot: string): GitStatus {
     clean: dirty.length === 0,
     defaultBranch: resolveDefaultBranch(repoRoot, branch),
   };
+}
+
+export function gitDirtyFiles(repoRoot: string): string[] {
+  const status = runGit(repoRoot, [
+    'status',
+    '--porcelain=v1',
+    '-z',
+    '--untracked-files=all',
+  ]);
+  if (status.length === 0) return [];
+  const paths: string[] = [];
+  const entries = status.split('\0').filter(Boolean);
+  for (let index = 0; index < entries.length; index += 1) {
+    const entry = entries[index]!;
+    if (entry.length >= 4 && entry[2] === ' ') {
+      paths.push(entry.slice(3));
+      if (entry[0] === 'R' || entry[1] === 'R') index += 1;
+    }
+  }
+  return [...new Set(paths)].sort();
+}
+
+export function milestoneDiffSummary(
+  repoRoot: string,
+  files: string[],
+): string {
+  const status = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'status',
+    '--short',
+    '--untracked-files=all',
+    '--',
+    ...files,
+  ]);
+  const stat = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'diff',
+    '--stat',
+    'HEAD',
+    '--',
+    ...files,
+  ]);
+  return [status, stat].filter(Boolean).join('\n');
+}
+
+export function gitHead(repoRoot: string): string {
+  return runGit(repoRoot, ['rev-parse', 'HEAD']);
+}
+
+export function isExactRecordedMilestoneCommit(
+  repoRoot: string,
+  recorded: RecordedMilestoneCommit,
+): boolean {
+  if (gitHead(repoRoot) !== recorded.commitHash) return false;
+  if (
+    tryGit(repoRoot, ['rev-parse', `${recorded.commitHash}^`])
+      !== recorded.baseCommitHash
+  ) {
+    return false;
+  }
+  if (
+    runGit(repoRoot, [
+      'log',
+      '-1',
+      '--format=%B',
+      recorded.commitHash,
+    ]) !== recorded.message
+  ) {
+    return false;
+  }
+  const committedFiles = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'diff-tree',
+    '--no-commit-id',
+    '--name-only',
+    '-r',
+    '-z',
+    recorded.commitHash,
+  ]).split('\0').filter(Boolean).sort();
+  if (
+    JSON.stringify(committedFiles)
+      !== JSON.stringify([...recorded.files].sort())
+  ) {
+    return false;
+  }
+  return recorded.files.every((file) =>
+    createHash('sha256')
+      .update(runGitBytes(repoRoot, [
+        'show',
+        `${recorded.commitHash}:${file}`,
+      ]))
+      .digest('hex') === recorded.sourceHashes[file]);
+}
+
+export function prepareManagedWorktree(
+  repoRoot: string,
+  options: ManagedWorktreeOptions,
+): ManagedWorktreeResult {
+  requireLocalBranch(repoRoot, options.baseBranch, 'base branch');
+  assertBranchName(repoRoot, options.branch);
+  const requestedPath = resolve(options.worktreePath);
+  const worktrees = listWorktrees(repoRoot);
+  const existingAtPath = worktrees.find(
+    ({ path }) => resolve(path) === requestedPath,
+  );
+  if (existingAtPath) {
+    if (existingAtPath.branch !== options.branch) {
+      throw new Error(
+        `workspace identity conflict: ${requestedPath} is on branch ${
+          existingAtPath.branch ?? '<detached>'
+        }, expected ${options.branch}`,
+      );
+    }
+    assertWorkspaceIdentity({
+      repoRoot,
+      branch: options.branch,
+      worktreePath: requestedPath,
+    });
+    return {
+      ...options,
+      worktreePath: realpathSync(requestedPath),
+      reused: true,
+    };
+  }
+
+  if (tryGit(repoRoot, [
+    'show-ref',
+    '--verify',
+    '--hash',
+    `refs/heads/${options.branch}`,
+  ])) {
+    throw new Error(
+      `managed worktree branch conflict: ${options.branch} already exists`,
+    );
+  }
+
+  mkdirSync(dirname(requestedPath), { recursive: true });
+  runGit(repoRoot, [
+    'worktree',
+    'add',
+    '-b',
+    options.branch,
+    requestedPath,
+    options.baseBranch,
+  ]);
+  return {
+    ...options,
+    worktreePath: realpathSync(requestedPath),
+    reused: false,
+  };
+}
+
+export function assertWorkspaceIdentity(
+  identity: WorkspaceIdentity,
+): void {
+  try {
+    const expectedCommonDir = gitCommonDir(identity.repoRoot);
+    const canonicalPath = realpathSync(identity.worktreePath);
+    const root = realpathSync(runGit(canonicalPath, [
+      'rev-parse',
+      '--show-toplevel',
+    ]));
+    const commonDir = gitCommonDir(canonicalPath);
+    const branch = runGit(canonicalPath, [
+      'symbolic-ref',
+      '--quiet',
+      '--short',
+      'HEAD',
+    ]);
+    const registered = listWorktrees(identity.repoRoot).some(
+      (worktree) =>
+        resolve(worktree.path) === canonicalPath
+        && worktree.branch === identity.branch,
+    );
+    if (
+      root !== canonicalPath
+      || commonDir !== expectedCommonDir
+      || branch !== identity.branch
+      || !registered
+    ) {
+      throw new Error(
+        `workspace identity conflict: expected ${identity.branch} at ${
+          identity.worktreePath
+        }, found ${branch} at ${root}`,
+      );
+    }
+  } catch (error) {
+    if (
+      error instanceof Error
+      && /workspace identity conflict/i.test(error.message)
+    ) {
+      throw error;
+    }
+    const detail = error instanceof Error ? error.message : String(error);
+    throw new Error(
+      `workspace identity conflict: expected ${identity.branch} at ${
+        identity.worktreePath
+      }; ${detail}`,
+      { cause: error },
+    );
+  }
+}
+
+function gitCommonDir(repoRoot: string): string {
+  return realpathSync(resolve(
+    repoRoot,
+    runGit(repoRoot, ['rev-parse', '--git-common-dir']),
+  ));
 }
 
 export function milestoneCommit(
@@ -121,4 +366,52 @@ export function milestoneCommit(
     ...options.files,
   ]);
   return runGit(repoRoot, ['rev-parse', 'HEAD']);
+}
+
+interface WorktreeEntry {
+  path: string;
+  branch: string | null;
+}
+
+function listWorktrees(repoRoot: string): WorktreeEntry[] {
+  const output = runGit(repoRoot, ['worktree', 'list', '--porcelain']);
+  if (output.length === 0) return [];
+  return output.split(/\n\n+/).map((block) => {
+    const lines = block.split('\n');
+    const path = lines.find((line) => line.startsWith('worktree '))?.slice(9);
+    if (!path) throw new Error('git worktree list returned an invalid entry');
+    const branchRef = lines.find((line) => line.startsWith('branch '))?.slice(7);
+    return {
+      path,
+      branch: branchRef?.startsWith('refs/heads/')
+        ? branchRef.slice('refs/heads/'.length)
+        : null,
+    };
+  });
+}
+
+function assertBranchName(repoRoot: string, branch: string): void {
+  if (branch.trim() !== branch || branch.length === 0) {
+    throw new Error('managed worktree branch name is invalid');
+  }
+  runGit(repoRoot, ['check-ref-format', '--branch', branch]);
+}
+
+function requireLocalBranch(
+  repoRoot: string,
+  branch: string,
+  label: string,
+): void {
+  if (!localBranchExists(repoRoot, branch)) {
+    throw new Error(`${label} does not exist locally: ${branch}`);
+  }
+}
+
+function localBranchExists(repoRoot: string, branch: string): boolean {
+  return Boolean(tryGit(repoRoot, [
+    'show-ref',
+    '--verify',
+    '--hash',
+    `refs/heads/${branch}`,
+  ]));
 }

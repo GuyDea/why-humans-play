@@ -155,6 +155,33 @@ describe('draft brief metadata', () => {
     });
   });
 
+  it('routes a saver error before keeping its local save failure', async () => {
+    const refusal = new Error('draft write refused');
+    const observedLocalErrors: Array<string | null> = [];
+    let model!: BriefPanelModel;
+    model = new BriefPanelModel(
+      draft,
+      {
+        save: vi.fn(async () => {
+          throw refusal;
+        }),
+      },
+      {
+        onSaveError: () => {
+          observedLocalErrors.push(model.saveError());
+        },
+      },
+    );
+
+    await expect(model.save('draft-1', {
+      doc: draft.doc,
+      disposition: 'autosave',
+    })).rejects.toBe(refusal);
+
+    expect(observedLocalErrors).toEqual([null]);
+    expect(model.saveError()).toBe('draft write refused');
+  });
+
   it('persists brief edits against the latest editor document', async () => {
     const save = vi.fn<BriefPanelSaver['save']>(async (_id, input) =>
       savedDraft(input, 1));

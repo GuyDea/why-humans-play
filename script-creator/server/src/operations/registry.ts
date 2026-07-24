@@ -1,5 +1,7 @@
 import {
   ALTERNATIVES_SCHEMA,
+  ARCHITECTURE_REVIEW_SCHEMA,
+  ARCHITECTURE_REWRITE_SCHEMA,
   DISTILL_SCHEMA,
   GATE_CHECK_SCHEMA,
   IDEATE_SCHEMA,
@@ -50,6 +52,15 @@ export const OPERATIONS = {
     result: { kind: 'raw' },
     resumable: false,
   },
+  'generate-architecture': {
+    name: 'generate-architecture',
+    skill: 'writing-whp-youtube-scripts',
+    operationLabel: 'Generate architecture',
+    sandbox: 'read-only',
+    timeoutClass: 'episode',
+    result: { kind: 'raw' },
+    resumable: false,
+  },
   review: {
     name: 'review',
     skill: 'writing-whp-youtube-scripts',
@@ -59,6 +70,15 @@ export const OPERATIONS = {
     result: { kind: 'schema', schema: REVIEW_SCHEMA },
     resumable: true,
   },
+  'review-architecture': {
+    name: 'review-architecture',
+    skill: 'writing-whp-youtube-scripts',
+    operationLabel: 'Review architecture',
+    sandbox: 'read-only',
+    timeoutClass: 'scoped',
+    result: { kind: 'schema', schema: ARCHITECTURE_REVIEW_SCHEMA },
+    resumable: true,
+  },
   'rewrite-selection': {
     name: 'rewrite-selection',
     skill: 'writing-whp-youtube-scripts',
@@ -66,6 +86,15 @@ export const OPERATIONS = {
     sandbox: 'read-only',
     timeoutClass: 'scoped',
     result: { kind: 'schema', schema: REWRITE_SCHEMA },
+    resumable: true,
+  },
+  'rewrite-architecture-section': {
+    name: 'rewrite-architecture-section',
+    skill: 'writing-whp-youtube-scripts',
+    operationLabel: 'Rewrite architecture section',
+    sandbox: 'read-only',
+    timeoutClass: 'scoped',
+    result: { kind: 'schema', schema: ARCHITECTURE_REWRITE_SCHEMA },
     resumable: true,
   },
   'generate-alternatives': {

@@ -4,8 +4,11 @@ import { OPERATIONS } from '../../src/operations/registry.js';
 const OPERATION_NAMES = [
   'generate-scoped',
   'generate-episode',
+  'generate-architecture',
   'review',
+  'review-architecture',
   'rewrite-selection',
+  'rewrite-architecture-section',
   'generate-alternatives',
   'promote',
   'ideate',
@@ -17,7 +20,7 @@ const OPERATION_NAMES = [
 ] as const;
 
 describe('operation registry', () => {
-  it('contains exactly the twelve supported operations', () => {
+  it('contains exactly the fifteen supported operations', () => {
     expect(Object.keys(OPERATIONS)).toEqual(OPERATION_NAMES);
     for (const name of OPERATION_NAMES) {
       expect(OPERATIONS[name].name).toBe(name);
@@ -33,8 +36,11 @@ describe('operation registry', () => {
     )).toEqual({
       'generate-scoped': ['read-only', 'scoped'],
       'generate-episode': ['read-only', 'episode'],
+      'generate-architecture': ['read-only', 'episode'],
       review: ['read-only', 'scoped'],
+      'review-architecture': ['read-only', 'scoped'],
       'rewrite-selection': ['read-only', 'scoped'],
+      'rewrite-architecture-section': ['read-only', 'scoped'],
       'generate-alternatives': ['read-only', 'scoped'],
       promote: ['workspace-write', 'long'],
       ideate: ['read-only', 'scoped'],
@@ -54,7 +60,9 @@ describe('operation registry', () => {
     expect(resumable).toEqual([
       'generate-scoped',
       'review',
+      'review-architecture',
       'rewrite-selection',
+      'rewrite-architecture-section',
       'generate-alternatives',
     ]);
   });
@@ -66,9 +74,37 @@ describe('operation registry', () => {
 
     expect(raw).toEqual([
       'generate-episode',
+      'generate-architecture',
       'promote',
       'full-topic-run',
       'handoff-preview',
     ]);
+  });
+
+  it('registers the architecture operations with their exact result and resume contracts', () => {
+    expect(OPERATIONS['generate-architecture']).toMatchObject({
+      skill: 'writing-whp-youtube-scripts',
+      operationLabel: 'Generate architecture',
+      sandbox: 'read-only',
+      timeoutClass: 'episode',
+      result: { kind: 'raw' },
+      resumable: false,
+    });
+    expect(OPERATIONS['review-architecture']).toMatchObject({
+      skill: 'writing-whp-youtube-scripts',
+      operationLabel: 'Review architecture',
+      sandbox: 'read-only',
+      timeoutClass: 'scoped',
+      result: { kind: 'schema' },
+      resumable: true,
+    });
+    expect(OPERATIONS['rewrite-architecture-section']).toMatchObject({
+      skill: 'writing-whp-youtube-scripts',
+      operationLabel: 'Rewrite architecture section',
+      sandbox: 'read-only',
+      timeoutClass: 'scoped',
+      result: { kind: 'schema' },
+      resumable: true,
+    });
   });
 });

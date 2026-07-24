@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3';
 
 export interface StateMigration {
   version: number;
-  owner: 'documents' | 'topics' | 'architecture';
+  owner: 'documents' | 'topics' | 'architecture' | 'milestones';
   name: string;
   apply(db: Database.Database): void;
 }
@@ -88,6 +88,165 @@ CREATE TABLE IF NOT EXISTS topic_handoff_sagas (
 );
 `;
 
+const EMPTY_ARCHITECTURE_JSON = JSON.stringify({
+  sections: [],
+  approvedMd: null,
+  approvedAt: null,
+});
+
+const ARCHITECTURE_V6 = `
+CREATE TABLE IF NOT EXISTS architecture_sagas (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  action TEXT NOT NULL CHECK (action IN ('approve', 'reopen')),
+  expected_revision_seq INTEGER NOT NULL,
+  input_json TEXT NOT NULL,
+  revision_appended INTEGER NOT NULL DEFAULT 0
+    CHECK (revision_appended IN (0, 1)),
+  artifact_written INTEGER NOT NULL DEFAULT 0
+    CHECK (artifact_written IN (0, 1)),
+  pipeline_upserted INTEGER NOT NULL DEFAULT 0
+    CHECK (pipeline_upserted IN (0, 1)),
+  draft_updated INTEGER NOT NULL DEFAULT 0
+    CHECK (draft_updated IN (0, 1)),
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (draft_id, action, expected_revision_seq)
+);
+`;
+
+const STAGED_PROMOTION_V7 = `
+CREATE TABLE IF NOT EXISTS promotions (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL
+    CHECK (state IN (
+      'running', 'output-ready', 'validation-required', 'complete', 'failed'
+    )),
+  target_path TEXT NOT NULL,
+  target_hash TEXT,
+  import_revision_id TEXT NOT NULL,
+  validation_hash TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (draft_id, operation_id)
+);
+
+CREATE INDEX IF NOT EXISTS promotions_draft_created
+  ON promotions (draft_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS narration_settled_exports (
+  token TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  revision_seq INTEGER NOT NULL,
+  narration_md TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS narration_settled_exports_draft
+  ON narration_settled_exports (draft_id, revision_seq);
+
+CREATE TABLE IF NOT EXISTS narration_proposals (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'accepted', 'rejected', 'dismissed')),
+  created_at TEXT NOT NULL,
+  resolved_at TEXT,
+  PRIMARY KEY (draft_id, operation_id)
+);
+
+CREATE INDEX IF NOT EXISTS narration_proposals_draft_state
+  ON narration_proposals (draft_id, state);
+`;
+
+const EPISODE_MILESTONES_V8 = `
+CREATE TABLE IF NOT EXISTS episode_workspaces (
+  draft_id TEXT PRIMARY KEY REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL UNIQUE,
+  choice TEXT NOT NULL
+    CHECK (choice IN ('new-branch', 'current-branch')),
+  branch_name TEXT NOT NULL,
+  worktree_path TEXT NOT NULL,
+  base_branch TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pending_milestones (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL,
+  kind TEXT NOT NULL
+    CHECK (kind IN (
+      'topic-selection',
+      'architecture-approval',
+      'architecture-reopen',
+      'creative-narration-approval',
+      'production-promotion'
+    )),
+  files_json TEXT NOT NULL,
+  commit_message TEXT NOT NULL,
+  source_hashes_json TEXT NOT NULL,
+  base_commit_hash TEXT NOT NULL,
+  reconciliation_required INTEGER NOT NULL DEFAULT 0
+    CHECK (reconciliation_required IN (0, 1)),
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'committed')),
+  resulting_commit_hash TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS pending_milestones_draft_state
+  ON pending_milestones (draft_id, state, created_at DESC);
+`;
+
+const MILESTONE_SUPERSESSION_V9 = `
+ALTER TABLE pending_milestones RENAME TO pending_milestones_v8;
+
+CREATE TABLE pending_milestones (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL,
+  kind TEXT NOT NULL
+    CHECK (kind IN (
+      'topic-selection',
+      'architecture-approval',
+      'architecture-reopen',
+      'creative-narration-approval',
+      'production-promotion'
+    )),
+  files_json TEXT NOT NULL,
+  commit_message TEXT NOT NULL,
+  source_hashes_json TEXT NOT NULL,
+  base_commit_hash TEXT NOT NULL,
+  reconciliation_required INTEGER NOT NULL DEFAULT 0
+    CHECK (reconciliation_required IN (0, 1)),
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'committed', 'superseded')),
+  resulting_commit_hash TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+INSERT INTO pending_milestones (
+  id, draft_id, episode_slug, kind, files_json, commit_message,
+  source_hashes_json, base_commit_hash, reconciliation_required, state,
+  resulting_commit_hash, created_at, updated_at
+)
+SELECT
+  id, draft_id, episode_slug, kind, files_json, commit_message,
+  source_hashes_json, base_commit_hash, reconciliation_required, state,
+  resulting_commit_hash, created_at, updated_at
+FROM pending_milestones_v8;
+
+DROP TABLE pending_milestones_v8;
+
+CREATE INDEX pending_milestones_draft_state
+  ON pending_milestones (draft_id, state, created_at DESC);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -127,8 +286,82 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 6,
     owner: 'architecture',
-    name: 'reserved-placeholder',
-    apply: () => {},
+    name: 'architecture-stage',
+    apply: (db) => {
+      ensureColumn(
+        db,
+        'drafts',
+        'architecture_json',
+        `ALTER TABLE drafts ADD COLUMN architecture_json TEXT NOT NULL DEFAULT '${EMPTY_ARCHITECTURE_JSON}'`,
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'architecture_artifact_hash',
+        'ALTER TABLE drafts ADD COLUMN architecture_artifact_hash TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'narration_reconciliation_required',
+        `ALTER TABLE drafts
+         ADD COLUMN narration_reconciliation_required INTEGER NOT NULL DEFAULT 0
+         CHECK (narration_reconciliation_required IN (0, 1))`,
+      );
+      ensureColumn(
+        db,
+        'revisions',
+        'kind',
+        `ALTER TABLE revisions
+         ADD COLUMN kind TEXT NOT NULL DEFAULT 'narration'
+         CHECK (kind IN ('narration', 'architecture'))`,
+      );
+      db.exec(ARCHITECTURE_V6);
+    },
+  },
+  {
+    version: 7,
+    owner: 'architecture',
+    name: 'staged-promotion',
+    apply: (db) => {
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_md',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_md TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_at',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_at TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_revision_seq',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_revision_seq INTEGER',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'narration_artifact_hash',
+        'ALTER TABLE drafts ADD COLUMN narration_artifact_hash TEXT',
+      );
+      db.exec(STAGED_PROMOTION_V7);
+    },
+  },
+  {
+    version: 8,
+    owner: 'milestones',
+    name: 'episode-milestones',
+    apply: (db) => db.exec(EPISODE_MILESTONES_V8),
+  },
+  {
+    version: 9,
+    owner: 'milestones',
+    name: 'milestone-supersession',
+    apply: (db) => db.exec(MILESTONE_SUPERSESSION_V9),
   },
 ];
 

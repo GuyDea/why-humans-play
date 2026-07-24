@@ -594,4 +594,168 @@ describe('operations HTTP API', () => {
     expect(response.body).not.toContain('database');
     await app.close();
   });
+
+  it('submits and resumes draft-scoped operations without putting draftId in inputs', async () => {
+    const submitOperation = vi.fn(() => 'draft-operation-1');
+    const resumeOperation = vi.fn(() => 'draft-operation-2');
+    const app = buildApp({
+      nonce: NONCE,
+      operationService: {
+        submit: () => 'unused',
+        list: () => [],
+        events: () => [],
+        get: () => {
+          throw new Error('operation not found: unused');
+        },
+        cancel: () => {},
+        result: () => ({ kind: 'pending' }),
+      },
+      documentService: UNUSED_DOCUMENT_SERVICE,
+      architectureService: {
+        get: () => {
+          throw new Error('unused');
+        },
+        save: () => {
+          throw new Error('unused');
+        },
+        submitOperation,
+        resumeOperation,
+      },
+      artifactService: {},
+      validatorService: UNUSED_VALIDATOR_SERVICE,
+    });
+
+    const submitted = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-7/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'review-architecture',
+        inputs: {
+          draftId: 'forged',
+          architecture_md: '### Core answer\n\nA mechanism.',
+        },
+      },
+    });
+    const resumed = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-7/ops/draft-operation-1/resume',
+      headers: AUTH,
+      payload: {
+        inputs: {
+          draftId: 'forged',
+          architecture_md: '### Core answer\n\nA revised mechanism.',
+        },
+      },
+    });
+
+    expect(submitted.statusCode).toBe(200);
+    expect(submitted.json()).toEqual({ id: 'draft-operation-1' });
+    expect(submitOperation).toHaveBeenCalledWith(
+      'draft-7',
+      'review-architecture',
+      {
+        draftId: 'forged',
+        architecture_md: '### Core answer\n\nA mechanism.',
+      },
+    );
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toEqual({ id: 'draft-operation-2' });
+    expect(resumeOperation).toHaveBeenCalledWith(
+      'draft-7',
+      'draft-operation-1',
+      {
+        draftId: 'forged',
+        architecture_md: '### Core answer\n\nA revised mechanism.',
+      },
+    );
+    await app.close();
+  });
+
+  it.each(['generate-episode', 'promote'])(
+    'requires %s to use the draft-scoped submission route',
+    async (operation) => {
+      const fixture = makeFixture('happy');
+
+      const response = await fixture.app.inject({
+        method: 'POST',
+        url: '/api/ops',
+        headers: AUTH,
+        payload: {
+          operation,
+          inputs: {
+            creative_status: { phase: 'creative-approved' },
+            approved_architecture_md: 'forged approval',
+          },
+        },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json()).toEqual({
+        error: `operation ${operation} requires a draft-scoped submission`,
+      });
+      expect(fixture.store.recentOperations()).toEqual([]);
+    },
+  );
+
+  it('runs the Plan 6 dispatcher for raw and strict architecture operations over HTTP', async () => {
+    const fixture = makeFixture('plan6-flow');
+    const generatedId = await submit(
+      fixture,
+      'generate-architecture',
+      {
+        topic_brief: 'A selected topic.',
+        approved_lessons: [],
+        user_constraints: '',
+      },
+    );
+    const reviewedId = await submit(
+      fixture,
+      'review-architecture',
+      {
+        architecture_md: '### Core answer\n\nA mechanism.',
+        topic_brief: 'A selected topic.',
+      },
+    );
+    await waitForTerminal(fixture, generatedId);
+    await waitForTerminal(fixture, reviewedId);
+
+    const generated = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${generatedId}/result`,
+      headers: AUTH,
+    });
+    const reviewed = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${reviewedId}/result`,
+      headers: AUTH,
+    });
+
+    expect(generated.statusCode).toBe(200);
+    expect(generated.json()).toMatchObject({
+      kind: 'raw',
+      markdown: expect.stringContaining('### Scope boundary'),
+    });
+    expect(reviewed.statusCode).toBe(200);
+    expect(reviewed.json()).toMatchObject({
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        findings: expect.arrayContaining([
+          {
+            section_key: 'package-and-audience',
+            severity: 'blocking',
+            finding_markdown: 'Fake finding_markdown.',
+          },
+          {
+            section_key: 'central-question',
+            severity: 'important',
+            finding_markdown: 'Fake finding_markdown.',
+          },
+        ]),
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+  });
 });

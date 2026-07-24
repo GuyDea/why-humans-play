@@ -36,6 +36,17 @@ function draft(
       attrs: { format: 'narration', preamble: '' },
       content: [],
     },
+    architecture: {
+      sections: [],
+      approvedMd: null,
+      approvedAt: null,
+    },
+    architectureArtifactHash: null,
+    narrationReconciliationRequired: false,
+    approvedNarrationMd: null,
+    approvedNarrationAt: null,
+    approvedNarrationRevisionSeq: null,
+    narrationArtifactHash: null,
     updatedAt: '2026-07-23T08:00:00.000Z',
     ...overrides,
   };
@@ -49,7 +60,7 @@ afterEach(() => {
 });
 
 describe('DocumentStore', () => {
-  it('migrates a v1 state database through the shared v6 registry', () => {
+  it('migrates a v1 state database through the shared v9 registry', () => {
     const dbFile = databaseFile();
     const before = new Database(dbFile);
     before.exec(`
@@ -72,7 +83,7 @@ describe('DocumentStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(6);
+    expect(version).toBe(9);
     expect(drafts).toEqual([
       'id',
       'episode_slug',
@@ -80,6 +91,13 @@ describe('DocumentStore', () => {
       'format',
       'doc_json',
       'updated_at',
+      'architecture_json',
+      'architecture_artifact_hash',
+      'narration_reconciliation_required',
+      'approved_narration_md',
+      'approved_narration_at',
+      'approved_narration_revision_seq',
+      'narration_artifact_hash',
     ]);
     expect(revisions).toEqual([
       'id',
@@ -89,6 +107,7 @@ describe('DocumentStore', () => {
       'disposition',
       'doc_json',
       'created_at',
+      'kind',
     ]);
   });
 
@@ -99,6 +118,47 @@ describe('DocumentStore', () => {
     expect(created).toEqual(draft());
     expect(store.getDraft('draft-1')).toEqual(draft());
     expect(store.getDraft('missing')).toBeNull();
+  });
+
+  it('persists architecture sibling state, its CAS hash, and reconciliation flag', () => {
+    const store = openStore();
+    const record = draft({
+      architecture: {
+        sections: [{
+          key: 'core-answer',
+          title: 'Core answer',
+          md: '### Core answer\n\nA mechanism.\n',
+        }],
+        approvedMd: '### Core answer\n\nA mechanism.\n',
+        approvedAt: '2026-07-24T09:00:00.000Z',
+      },
+      architectureArtifactHash: 'sha256:architecture',
+      narrationReconciliationRequired: true,
+    });
+
+    store.createDraft(record);
+
+    expect(store.getDraft(record.id)).toEqual(record);
+  });
+
+  it('updates only the narration reconciliation flag and draft timestamp', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      narrationReconciliationRequired: true,
+    }));
+
+    const updated = store.setNarrationReconciliationRequired(
+      'draft-1',
+      false,
+      '2026-07-24T10:00:00.000Z',
+    );
+
+    expect(updated).toMatchObject({
+      narrationReconciliationRequired: false,
+      updatedAt: '2026-07-24T10:00:00.000Z',
+    });
+    expect(updated.doc).toEqual(draft().doc);
+    expect(updated.architecture).toEqual(draft().architecture);
   });
 
   it('returns an empty draft summary list', () => {
@@ -181,7 +241,9 @@ describe('DocumentStore', () => {
     });
 
     expect(first.revision.seq).toBe(1);
+    expect(first.revision.kind).toBe('narration');
     expect(second.revision.seq).toBe(2);
+    expect(second.revision.kind).toBe('narration');
     expect(store.getDraft('draft-1')).toMatchObject({
       title: 'Final',
       format: 'annotated',
@@ -195,6 +257,7 @@ describe('DocumentStore', () => {
         seq: 1,
         opId: null,
         disposition: 'manual-save',
+        kind: 'narration',
         doc: firstDoc,
         createdAt: '2026-07-23T08:01:00.000Z',
       },
@@ -204,10 +267,65 @@ describe('DocumentStore', () => {
         seq: 2,
         opId: 'operation-7',
         disposition: 'accepted',
+        kind: 'narration',
         doc: secondDoc,
         createdAt: '2026-07-23T08:02:00.000Z',
       },
     ]);
+  });
+
+  it('preserves server-owned workflow metadata across production imports', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      doc: {
+        type: 'doc',
+        attrs: { format: 'narration', preamble: '' },
+        metadata: {
+          topic: 'Stored topic',
+          creativeStatus: {
+            phase: 'rapid-prototype',
+            readiness: 'EDITORIAL-DRAFT',
+          },
+          directionApproved: false,
+        },
+        content: [],
+      },
+    }));
+
+    const imported = store.importPromotion('draft-1', {
+      format: 'annotated',
+      doc: {
+        type: 'doc',
+        attrs: { format: 'annotated', preamble: '' },
+        metadata: {
+          topic: 'Imported topic',
+          creativeStatus: {
+            phase: 'architecture',
+            readiness: 'forged',
+          },
+          directionApproved: true,
+        },
+        content: [],
+      },
+      updatedAt: '2026-07-24T10:00:00.000Z',
+      revision: {
+        id: 'production-import-1',
+        opId: 'promote-1',
+        createdAt: '2026-07-24T10:00:00.000Z',
+      },
+    });
+
+    expect(imported.draft.doc).toMatchObject({
+      metadata: {
+        topic: 'Imported topic',
+        creativeStatus: {
+          phase: 'rapid-prototype',
+          readiness: 'EDITORIAL-DRAFT',
+        },
+        directionApproved: false,
+      },
+    });
+    expect(imported.revision.doc).toEqual(imported.draft.doc);
   });
 
   it('does not append a revision when the draft does not exist', () => {
@@ -227,4 +345,46 @@ describe('DocumentStore', () => {
     })).toThrow(/draft not found: missing/i);
     expect(store.listRevisions('missing')).toEqual([]);
   });
+
+  it.each(['approve', 'reopen'] as const)(
+    'reserves narration approval while a pre-revision %s saga is pending',
+    (sagaKind) => {
+      const store = openStore();
+      const record = draft();
+      store.createDraft(record);
+      store.createArchitectureSaga({
+        draftId: record.id,
+        action: sagaKind,
+        expectedRevisionSeq: 0,
+        input: {},
+        revisionAppended: false,
+        artifactWritten: false,
+        pipelineUpserted: false,
+        draftUpdated: false,
+        createdAt: '2026-07-24T10:00:00.000Z',
+        updatedAt: '2026-07-24T10:00:00.000Z',
+      });
+
+      expect(() => store.approveNarration(record.id, {
+        expectedRevisionSeq: 0,
+        doc: record.doc,
+        approvedNarrationMd: 'Approved narration.\n',
+        approvedNarrationAt: '2026-07-24T10:01:00.000Z',
+        narrationArtifactHash: 'approved-hash',
+        updatedAt: '2026-07-24T10:01:00.000Z',
+        revision: {
+          id: `narration-approval-during-${sagaKind}`,
+          createdAt: '2026-07-24T10:01:00.000Z',
+        },
+      })).toThrow(
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      );
+      expect(store.currentRevisionSeq(record.id)).toBe(0);
+      expect(store.getDraft(record.id)).toMatchObject({
+        approvedNarrationMd: null,
+        approvedNarrationAt: null,
+        approvedNarrationRevisionSeq: null,
+      });
+    },
+  );
 });

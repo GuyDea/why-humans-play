@@ -708,3 +708,57 @@ start makes omissions visible before prose or a thesis hardens.
 ledger. `BRAND.md` remains unchanged because this is an authoring and discovery control,
 not a change to the channel promise. Existing design and implementation plans remain
 historical records of the earlier learning-and-action gate.
+
+## 2026-07-24 — Reserve narration writes during paused architecture approval
+
+**Decision:** While a Script Creator draft has a pending architecture-approval saga,
+reserve every generic narration revision write—including autosaves,
+proposal-acceptance replacement saves, and imports—with a structured recoverable
+conflict; keep the routed narration editor and autosave blocked until the approval is
+resumed or resolved, without weakening the saga's latest-revision requirement.
+
+**Rationale:** Any narration revision appended after the saga's approval revision made
+every Resume conflict while save, approve, and Reopen were also unavailable, permanently
+stranding the draft.
+
+**Documents:** `.superpowers/sdd/p6-final-review-report.md`,
+`.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
+`whp-youtube/STEERING.md` remain unchanged because this is an internal workbench
+concurrency and recovery contract, not a change to WHP doctrine.
+
+## 2026-07-24 — Generalize persisted architecture-saga recovery across kinds
+
+**Decision:** Treat approval, Reopen, and any future persisted architecture-saga kind
+through one recovery contract: every pending kind reserves generic narration revision
+writes, is exposed with its kind and opaque resume key, resumes through one route, and
+returns current architecture state on recoverable pauses; if a pause cancels a racing
+accepted-proposal save, preserve its operation provenance with the pending dirty state
+for the post-resume save and settlement.
+
+**Rationale:** Approval-specific reservation, exposure, and resume machinery left the
+same permanent revision strand available to Reopen, while state-less pause responses and
+cancelled-save-only provenance prevented immediate routed recovery and accepted-proposal
+settlement.
+
+**Documents:** `docs/superpowers/plans/2026-07-24-script-creator-plan6-architecture.md`,
+`.superpowers/sdd/p6-final-review-report.md`, `.superpowers/sdd/progress.md`, and
+this ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain
+unchanged because this is an internal Script Creator concurrency and recovery
+contract.
+
+## 2026-07-24 — Route every recoverable architecture conflict through shared state
+
+**Decision:** Every routed Script Creator write catch that can receive a state-bearing
+recoverable architecture reservation or conflict must pass the caught error through one
+shared conflict router before local failure handling, so a stale client immediately
+adopts the pending saga, blocks narration editing, and exposes the correct Resume action
+without an autosave or reload.
+
+**Rationale:** Only the debounced autosave catch adopted reservation state; direct
+whole-episode saves, Promote-result reconciliation, and production synchronization could
+discard the same server state and leave a stale client writable with no Resume action.
+
+**Documents:** `.superpowers/sdd/p6-final-review-report.md`,
+`.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
+`whp-youtube/STEERING.md` remain unchanged because this is an internal Script Creator
+client recovery contract.

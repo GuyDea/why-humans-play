@@ -57,11 +57,19 @@ export interface PipelineRow {
   ref: string;
 }
 
+export interface ArtifactReadResult {
+  path: string;
+  content: string;
+  hash: string;
+}
+
 const ALLOWED_DIRECTORY_PREFIXES = [
   'whp-youtube/topics/',
   'whp-youtube/drafts/',
+  'whp-youtube/architectures/',
   'whp-youtube/topic-runs/',
 ] as const;
+const EPISODE_DIRECTORY_PREFIX = 'whp-youtube/episodes/';
 const PIPELINE_PATH = 'whp-youtube/PIPELINE.md';
 
 class AsyncMutex {
@@ -103,7 +111,11 @@ function invalidArtifactPath(relPath: string): Error {
   return new Error(`invalid or non-whitelisted artifact path: ${relPath}`);
 }
 
-function resolveArtifactPath(repoRoot: string, relPath: string): {
+function resolveArtifactPath(
+  repoRoot: string,
+  relPath: string,
+  additionalDirectoryPrefixes: readonly string[] = [],
+): {
   repoRoot: string;
   target: string;
 } {
@@ -119,7 +131,7 @@ function resolveArtifactPath(repoRoot: string, relPath: string): {
   }
 
   const allowed = relPath === PIPELINE_PATH
-    || ALLOWED_DIRECTORY_PREFIXES.some(
+    || [...ALLOWED_DIRECTORY_PREFIXES, ...additionalDirectoryPrefixes].some(
       (prefix) => relPath.startsWith(prefix) && relPath.length > prefix.length,
     );
   if (!allowed) throw invalidArtifactPath(relPath);
@@ -391,7 +403,45 @@ export function writeArtifact(
     content,
     expectedState,
     hooks,
+    [],
   ));
+}
+
+export function writeEpisodeArtifact(
+  repoRoot: string,
+  relPath: string,
+  content: string,
+  expectedState: ArtifactExpectedState,
+  hooks: ArtifactWriteHooks = {},
+): Promise<ArtifactWriteResult> {
+  return WRITE_MUTEX.run(() => writeArtifactLocked(
+    repoRoot,
+    relPath,
+    content,
+    expectedState,
+    hooks,
+    [EPISODE_DIRECTORY_PREFIX],
+  ));
+}
+
+export function readArtifact(
+  repoRoot: string,
+  relPath: string,
+): ArtifactReadResult {
+  const resolved = resolveArtifactPath(
+    repoRoot,
+    relPath,
+    [EPISODE_DIRECTORY_PREFIX],
+  );
+  const current = readIdentity(resolved.target, relPath);
+  if (current.identity === 'absent' || !current.stable) {
+    throw new Error(`artifact not found or unstable: ${relPath}`);
+  }
+  return {
+    path: relPath,
+    content: current.identity.bytes.toString('utf8'),
+    hash: current.identity.hash,
+  };
 }
 
 async function writeArtifactLocked(
@@ -400,8 +450,13 @@ async function writeArtifactLocked(
   content: string,
   expectedState: ArtifactExpectedState | undefined,
   hooks: ArtifactWriteHooks,
+  additionalDirectoryPrefixes: readonly string[],
 ): Promise<ArtifactWriteResult> {
-  const resolved = resolveArtifactPath(repoRoot, relPath);
+  const resolved = resolveArtifactPath(
+    repoRoot,
+    relPath,
+    additionalDirectoryPrefixes,
+  );
   ensureSafeParent(resolved.repoRoot, resolved.target, relPath);
 
   const initial = readIdentity(resolved.target, relPath);
@@ -601,6 +656,7 @@ export function upsertPipelineRow(
       content,
       expectedState,
       hooks,
+      [],
     );
   });
 }

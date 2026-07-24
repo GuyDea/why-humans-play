@@ -655,7 +655,7 @@ describe('TopicService', () => {
             creativeStatus: {
               phase: id === 'draft-1'
                 ? 'creative-approved'
-                : 'rapid-prototype',
+                : 'architecture',
             },
           },
         },
@@ -686,12 +686,12 @@ describe('TopicService', () => {
       },
       {
         episodeSlug: 'voluntary-difficulty',
-        state: 'prototyping',
+        state: 'architecture',
         milestone: null,
         ref: null,
         draftId: 'draft-2',
         title: 'Voluntary Difficulty',
-        creativePhase: 'rapid-prototype',
+        creativePhase: 'architecture',
       },
       {
         episodeSlug: 'why-sudoku-spread',

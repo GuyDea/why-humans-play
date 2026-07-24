@@ -9,10 +9,14 @@ import {
   ViewChild,
   computed,
   input,
+  output,
   signal,
 } from '@angular/core';
 import {
   corePlugins,
+  exportMarkdown,
+  pendingProposalIds,
+  parseMarkdown,
   schema,
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
@@ -24,6 +28,10 @@ import {
   type DraftRecord,
   type RevisionRecord,
 } from '../api/client';
+import {
+  ArchitectureModel,
+  captureRoutedArchitectureConflict,
+} from '../architecture/model';
 import {
   computeMetrics,
   type DocumentJson,
@@ -274,6 +282,13 @@ interface AutosaveSnapshot {
   version: number;
   epoch: number;
   brief: BriefPanelModel;
+  opId: string | null;
+  disposition: string;
+}
+
+interface SaveProvenance {
+  opId: string;
+  disposition: string;
 }
 
 @Component({
@@ -303,7 +318,25 @@ interface AutosaveSnapshot {
         }
       </header>
 
-      <div #editorMount class="editor" data-testid="editor"></div>
+      @if (narrationBlocked()) {
+        <aside
+          class="editor-blocked-callout"
+          data-testid="editor-blocked-callout"
+          role="status"
+        >
+          <strong>Architecture action paused — resume or resolve first.</strong>
+          <span>Narration editing and autosave are blocked.</span>
+        </aside>
+      }
+
+      <div
+        #editorMount
+        class="editor"
+        data-testid="editor"
+        [class.clean-narration]="productionHidden()"
+        [class.editor-blocked]="narrationBlocked()"
+        [attr.aria-readonly]="narrationBlocked()"
+      ></div>
 
       @if (operationError()) {
         <p class="operation-error" role="alert">
@@ -415,6 +448,10 @@ interface AutosaveSnapshot {
       outline: none;
     }
 
+    .editor.clean-narration :where(.opaque-section) {
+      display: none;
+    }
+
     .operation-error {
       margin: 0;
       border-left: 3px solid var(--whp-accent);
@@ -422,6 +459,21 @@ interface AutosaveSnapshot {
       padding: 0.7rem 0.8rem;
       color: var(--whp-accent);
       font-size: 0.78rem;
+    }
+
+    .editor-blocked-callout {
+      display: grid;
+      gap: 0.2rem;
+      border-left: 3px solid var(--whp-warning);
+      background: var(--whp-warning-tint);
+      padding: 0.7rem 0.8rem;
+      color: var(--whp-warning);
+      font-size: 0.78rem;
+    }
+
+    .editor.editor-blocked {
+      background: var(--whp-panel);
+      opacity: 0.78;
     }
 
     .pacing {
@@ -490,6 +542,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly client = input.required<DaemonClient>();
   readonly session = input.required<StudioSession>();
   readonly wpm = input(150);
+  readonly narrationBlocked = input(false);
+  readonly architectureModel = input<ArchitectureModel | null>(null);
+  readonly architectureConflict = output<unknown>();
 
   readonly doc = signal<DocumentJson | null>(null);
   readonly editorState = signal<EditorState | null>(null);
@@ -508,6 +563,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   );
   readonly saving = computed(() => this.queuedAutosaves() > 0);
   readonly saveError = signal<string | null>(null);
+  readonly productionHidden = signal(false);
   readonly revisions = signal<RevisionRecord[]>([]);
   readonly latestRevision = signal<RevisionRecord | null>(null);
 
@@ -530,12 +586,22 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private consoleMount?: ElementRef<HTMLElement>;
 
   private editorView: EditorView | null = null;
+  private applyingAcceptedNarration = false;
   private studioComposition: StudioComposition | null = null;
   private detachRuntime: (() => void) | null = null;
   private selectionContextDocument: DraftDocument | null = null;
   private activeDraftId: string | null = null;
   private draftEpoch = 0;
   private editVersion = 0;
+  private applyingPersonalInputChange = false;
+  private personalInputUndo: (() => boolean) | null = null;
+  private nextSaveProvenance: SaveProvenance | null = null;
+  private pendingDirtyProvenances: SaveProvenance[] = [];
+  private readonly proposalSettlements = new Set<Promise<void>>();
+  private readonly proposalSettlementsByOperation =
+    new Map<string, Promise<void>>();
+  private readonly pendingAcceptedSettlements = new Set<string>();
+  private proposalSettlementError: string | null = null;
   private readonly autosave = new DebouncedAutosave<AutosaveSnapshot>(
     (snapshot) => this.saveSnapshot(snapshot),
     1_000,
@@ -554,6 +620,14 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       && !changes['draft'].firstChange
     ) {
       this.mountDraft(this.draft());
+      return;
+    }
+    if (
+      this.editorMount
+      && changes['narrationBlocked']
+      && !changes['narrationBlocked'].firstChange
+    ) {
+      this.updateNarrationAvailability();
     }
   }
 
@@ -566,6 +640,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.personalInputUndo = null;
     this.editorState.set(null);
   }
 
@@ -586,6 +661,306 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       : `${remainder}s`;
   }
 
+  async replaceNarrationFromMarkdown(
+    markdown: string,
+    opId: string,
+  ): Promise<void> {
+    this.requireNarrationWriteAvailable();
+    const view = this.editorView;
+    const draftId = this.activeDraftId;
+    const brief = this.brief();
+    if (!view || !draftId || !brief) {
+      throw new Error('The narration editor is not ready.');
+    }
+    const parsed = parseMarkdown(markdown);
+    const source = brief.draft().doc;
+    const stateBeforeReplacement = view.state;
+    const dirtyBeforeReplacement = this.currentDirty();
+    const saveErrorBeforeReplacement = this.saveError();
+    const preserved = preserveDraftDocument(
+      parsed.toJSON() as DocumentJson,
+      source,
+    );
+    const documentNode = schema.nodeFromJSON(preserved);
+    documentNode.check();
+    let transaction = view.state.tr.replaceWith(
+      0,
+      view.state.doc.content.size,
+      documentNode.content,
+    );
+    for (const [key, value] of Object.entries(documentNode.attrs)) {
+      transaction = transaction.setDocAttribute(key, value);
+    }
+
+    this.autosave.cancel();
+    this.applyingAcceptedNarration = true;
+    try {
+      view.dispatch(transaction);
+    } finally {
+      this.applyingAcceptedNarration = false;
+    }
+    view.setProps({ editable: () => false });
+    try {
+      const document = this.doc();
+      if (!document) throw new Error('Generated narration could not be parsed.');
+      const saved = await brief.save(draftId, {
+        doc: document,
+        opId,
+        disposition: 'episode-generation-accepted',
+      });
+      this.selectionContextDocument = saved.draft.doc;
+      this.doc.set(saved.draft.doc as DocumentJson);
+      this.currentDirty.set(false);
+      this.saveError.set(null);
+      this.revisions.update((revisions) => [...revisions, saved.revision]);
+      this.latestRevision.set(saved.revision);
+    } catch (error) {
+      this.captureArchitectureConflict(error);
+      if (this.editorView === view && this.activeDraftId === draftId) {
+        this.autosave.cancel();
+        view.updateState(stateBeforeReplacement);
+        this.editorState.set(stateBeforeReplacement);
+        this.selectionContextDocument = source;
+        brief.syncDocument(source);
+        this.doc.set(source as DocumentJson);
+        this.currentDirty.set(dirtyBeforeReplacement);
+        this.saveError.set(saveErrorBeforeReplacement);
+        if (dirtyBeforeReplacement && !this.narrationBlocked()) {
+          this.scheduleAutosave(source as DocumentJson);
+        }
+      }
+      throw error;
+    } finally {
+      if (this.editorView === view) {
+        view.setProps({
+          editable: () => !this.narrationBlocked(),
+        });
+      }
+    }
+  }
+
+  setCleanNarration(clean: boolean): void {
+    this.productionHidden.set(clean);
+  }
+
+  refreshFromServer(draft: DraftRecord): void {
+    this.mountDraft(draft);
+  }
+
+  refreshWorkflowMetadata(draft: DraftRecord): void {
+    if (draft.id !== this.activeDraftId) return;
+    this.brief()?.refreshWorkflowMetadata(draft);
+    const document = this.brief()?.draft().doc;
+    if (document) {
+      this.selectionContextDocument = document;
+      this.doc.set(document as DocumentJson);
+    }
+  }
+
+  currentMarkdown(): string {
+    const view = this.editorView;
+    if (!view) return '';
+    const result = exportMarkdown(view.state);
+    if (!result.ok) {
+      throw new Error(`draft export blocked: ${result.blocked.join('; ')}`);
+    }
+    return result.markdown;
+  }
+
+  unresolvedProposalIds(): string[] {
+    return this.editorView
+      ? pendingProposalIds(this.editorView.state)
+      : [];
+  }
+
+  clearProposalSettlementError(): void {
+    this.proposalSettlementError = null;
+    if (this.operationError()?.startsWith('Proposal settlement failed:')) {
+      this.operationError.set(null);
+    }
+  }
+
+  async flushPendingChanges(): Promise<void> {
+    await this.autosave.flush();
+    await this.autosave.whenIdle();
+    await Promise.all(Array.from(this.proposalSettlements));
+    if (this.proposalSettlementError) {
+      throw new Error(this.proposalSettlementError);
+    }
+    if (this.unsaved()) {
+      throw new Error(
+        this.saveError()
+          ? `Draft save failed: ${this.saveError()}`
+          : 'Draft still has unsaved changes.',
+      );
+    }
+  }
+
+  async freezeForGateAction(): Promise<() => void> {
+    const view = this.editorView;
+    if (!view) throw new Error('The narration editor is not ready.');
+    const previousEditable = view.props.editable;
+    view.setProps({ editable: () => false });
+    const release = () => {
+      if (this.editorView === view) {
+        view.setProps({ editable: previousEditable });
+      }
+    };
+    try {
+      await this.flushPendingChanges();
+      return release;
+    } catch (error) {
+      release();
+      throw error;
+    }
+  }
+
+  applyPersonalInputProposal(input: {
+    opId: string;
+    marker: string;
+    bodyMd: string;
+    replacement: string;
+  }): boolean {
+    if (this.narrationBlocked()) return false;
+    const view = this.editorView;
+    if (!view) return false;
+    let markerCount = 0;
+    let markerParagraphCount = 0;
+    let markerParagraphPosition: number | null = null;
+    let markerParagraphSize: number | null = null;
+    let markerParagraphText: string | null = null;
+    let bodyCount = 0;
+    let bodyPosition: number | null = null;
+    let bodyNode: ReturnType<typeof schema.nodeFromJSON> | null = null;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText) {
+        let from = 0;
+        const text = node.text ?? '';
+        for (;;) {
+          const offset = text.indexOf(input.marker, from);
+          if (offset < 0) break;
+          markerCount += 1;
+          from = offset + input.marker.length;
+        }
+      }
+      if (
+        node.type.name === 'paragraph'
+        && node.childCount === 1
+        && node.firstChild?.isText === true
+        && node.textContent.includes(input.marker)
+      ) {
+        markerParagraphCount += 1;
+        markerParagraphPosition = position;
+        markerParagraphSize = node.nodeSize;
+        markerParagraphText = node.textContent;
+      }
+      if (
+        node.type.name === 'opaqueSection'
+        && String(node.attrs.md).trimEnd() === input.bodyMd.trimEnd()
+      ) {
+        bodyCount += 1;
+        bodyPosition = position;
+        bodyNode = node;
+      }
+      return true;
+    });
+    if (
+      markerCount !== 1
+      || markerParagraphCount !== 1
+      || markerParagraphPosition === null
+      || markerParagraphSize === null
+      || bodyCount !== 1
+      || bodyPosition === null
+      || bodyNode === null
+    ) {
+      return false;
+    }
+    const replacementTexts = narrationReplacementParagraphs(
+      input.replacement,
+    );
+    if (replacementTexts.length === 0 || markerParagraphText === null) {
+      return false;
+    }
+    const matchedMarkerText =
+      markerParagraphText as unknown as string;
+    const markerOffset = matchedMarkerText.indexOf(input.marker);
+    const beforeMarker = matchedMarkerText.slice(0, markerOffset);
+    const afterMarker = matchedMarkerText.slice(
+      markerOffset + input.marker.length,
+    );
+    const replacementParagraphs = replacementTexts.map((text, index) =>
+      schema.node(
+        'paragraph',
+        null,
+        schema.text(
+          `${index === 0 ? beforeMarker : ''}${text}${
+            index === replacementTexts.length - 1 ? afterMarker : ''
+          }`,
+        ),
+      ));
+    const bodyAttrs = (
+      bodyNode as unknown as { attrs: Record<string, unknown> }
+    ).attrs;
+    const currentBody = String(bodyAttrs['md']);
+    const completedBody = currentBody.replace(
+      /^(- \*\*Decision:\*\* )INPUT-REQUESTED$/mu,
+      '$1COMPLETED',
+    );
+    if (completedBody === currentBody) return false;
+
+    let transaction = view.state.tr.replaceWith(
+      markerParagraphPosition,
+      markerParagraphPosition + markerParagraphSize,
+      replacementParagraphs,
+    );
+    const mappedBodyPosition = transaction.mapping.map(bodyPosition);
+    transaction = transaction.setNodeMarkup(
+      mappedBodyPosition,
+      undefined,
+      {
+        ...bodyAttrs,
+        md: completedBody,
+      },
+    );
+    const inverseSteps = transaction.steps
+      .map((step, index) => step.invert(transaction.docs[index]!))
+      .reverse();
+    this.nextSaveProvenance = {
+      opId: input.opId,
+      disposition: 'personal-input-proposal-accepted',
+    };
+    this.applyingPersonalInputChange = true;
+    try {
+      view.dispatch(transaction);
+    } finally {
+      this.applyingPersonalInputChange = false;
+    }
+    this.personalInputUndo = () => {
+      if (this.editorView !== view) return false;
+      try {
+        let inverse = view.state.tr;
+        for (const step of inverseSteps) inverse = inverse.step(step);
+        this.applyingPersonalInputChange = true;
+        try {
+          view.dispatch(inverse);
+        } finally {
+          this.applyingPersonalInputChange = false;
+        }
+        this.personalInputUndo = null;
+        return true;
+      } catch {
+        this.personalInputUndo = null;
+        return false;
+      }
+    };
+    this.settleNarrationProposal(input.opId, 'accepted', true);
+    return true;
+  }
+
+  undoPersonalInputAcceptance(): boolean {
+    return this.personalInputUndo?.() ?? false;
+  }
+
   private mountDraft(draft: DraftRecord): void {
     const mount = this.editorMount?.nativeElement;
     const failures = this.failureMount?.nativeElement;
@@ -600,6 +975,11 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.personalInputUndo = null;
+    this.nextSaveProvenance = null;
+    this.pendingDirtyProvenances = [];
+    this.pendingAcceptedSettlements.clear();
+    this.proposalSettlementError = null;
     this.editorState.set(null);
     mount.replaceChildren();
 
@@ -612,7 +992,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
     this.activeDraftId = draft.id;
     this.selectionContextDocument = draft.doc;
-    const brief = new BriefPanelModel(draft, this.client());
+    const brief = new BriefPanelModel(draft, this.client(), {
+      onSaveError: (error) => this.captureArchitectureConflict(error),
+    });
     this.brief.set(brief);
     this.approvalGate.set(null);
     this.draftEpoch += 1;
@@ -629,8 +1011,10 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     mountedView = new EditorView(mount, {
       state,
       nodeViews: variantNodeViews,
+      editable: () => !this.narrationBlocked(),
       dispatchTransaction: (transaction) => {
         if (this.editorView !== mountedView || mountedView === null) return;
+        if (transaction.docChanged && this.narrationBlocked()) return;
         const nextState = mountedView.state.apply(transaction);
         mountedView.updateState(nextState);
         this.editorState.set(nextState);
@@ -638,15 +1022,21 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
           nextState.doc.toJSON() as DocumentJson,
         );
         this.doc.set(doc);
-        if (transaction.docChanged) this.scheduleAutosave(doc);
+        if (transaction.docChanged && !this.applyingAcceptedNarration) {
+          if (!this.applyingPersonalInputChange) {
+            this.personalInputUndo = null;
+          }
+          this.scheduleAutosave(doc);
+        }
         this.studioComposition?.handleEditorDispatch();
       },
     });
     this.editorView = mountedView;
+    this.updateNarrationAvailability();
     this.editorState.set(mountedView.state);
     const composition = composeStudio(
       mountedView,
-      this.client(),
+      draftScopedClient(this.client(), draft.id),
       {
         editor: mount,
         failures,
@@ -663,6 +1053,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         },
       },
     );
+    this.bindNarrationProposalSettlements(composition, draft.id);
     this.studioComposition = composition;
     this.detachRuntime = this.session().attachRuntime(
       composition.runtime as unknown as StudioRuntimeHandle,
@@ -675,6 +1066,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private scheduleAutosave(doc: DocumentJson): void {
+    if (this.narrationBlocked()) return;
     const draftId = this.activeDraftId;
     if (!draftId) return;
 
@@ -682,6 +1074,16 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     const epoch = this.draftEpoch;
     const brief = this.brief();
     if (!brief) return;
+    if (
+      this.nextSaveProvenance
+      && !this.pendingDirtyProvenances.some(
+        ({ opId }) => opId === this.nextSaveProvenance?.opId,
+      )
+    ) {
+      this.pendingDirtyProvenances.push(this.nextSaveProvenance);
+    }
+    const provenance = this.pendingDirtyProvenances[0] ?? null;
+    this.nextSaveProvenance = null;
     this.currentDirty.set(true);
     this.autosave.schedule({
       draftId,
@@ -689,28 +1091,255 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       version,
       epoch,
       brief,
+      opId: provenance?.opId ?? null,
+      disposition: provenance?.disposition ?? 'autosave',
     });
   }
 
   private async saveSnapshot(snapshot: AutosaveSnapshot): Promise<void> {
-    const { draftId, doc, version, epoch, brief } = snapshot;
+    const {
+      draftId,
+      doc,
+      version,
+      epoch,
+      brief,
+      opId,
+      disposition,
+    } = snapshot;
     try {
       const saved = await brief.save(draftId, {
         doc,
-        disposition: 'autosave',
+        opId,
+        disposition,
       });
       if (this.isCurrentDraft(draftId, epoch)) {
+        let provenanceAdvanced = false;
         this.saveError.set(null);
         this.revisions.update((revisions) => [...revisions, saved.revision]);
         this.latestRevision.set(saved.revision);
         if (version === this.editVersion) this.currentDirty.set(false);
+        if (
+          opId
+          && this.pendingDirtyProvenances[0]?.opId === opId
+          && this.pendingDirtyProvenances[0].disposition === disposition
+        ) {
+          this.pendingDirtyProvenances.shift();
+          provenanceAdvanced = true;
+        }
+        if (
+          provenanceAdvanced
+          && (
+            this.pendingDirtyProvenances.length > 0
+            || version !== this.editVersion
+          )
+        ) {
+          const currentDocument = this.doc();
+          if (currentDocument) this.scheduleAutosave(currentDocument);
+        }
+      }
+      if (
+        opId
+        && isAcceptedProposalDisposition(disposition)
+        && this.pendingAcceptedSettlements.has(opId)
+        && !this.proposalSettlementsByOperation.has(opId)
+      ) {
+        void this.settleNarrationProposal(
+          opId,
+          'accepted',
+          false,
+          draftId,
+        );
       }
     } catch (error) {
       if (this.isCurrentDraft(draftId, epoch)) {
+        this.captureArchitectureConflict(error);
         this.saveError.set(saveErrorMessage(error));
       }
       throw error;
     }
+  }
+
+  private captureArchitectureConflict(error: unknown): void {
+    if (
+      captureRoutedArchitectureConflict(this.architectureModel(), error)
+    ) {
+      this.architectureConflict.emit(error);
+    }
+  }
+
+  private bindNarrationProposalSettlements(
+    composition: StudioComposition,
+    draftId: string,
+  ): void {
+    const runtime = composition.runtime;
+    const accept = runtime.acceptProposal.bind(runtime);
+    runtime.acceptProposal = (proposalId: string) => {
+      if (this.narrationBlocked()) {
+        this.operationError.set(
+          'Architecture action paused — resume or resolve first.',
+        );
+        return false;
+      }
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      if (operationId) {
+        this.nextSaveProvenance = {
+          opId: operationId,
+          disposition: 'selection-proposal-accepted',
+        };
+      }
+      const accepted = accept(proposalId);
+      if (!accepted) {
+        this.nextSaveProvenance = null;
+        return false;
+      }
+      if (operationId) {
+        this.settleNarrationProposal(
+          operationId,
+          'accepted',
+          true,
+          draftId,
+        );
+      }
+      return true;
+    };
+
+    const reject = runtime.rejectProposal.bind(runtime);
+    runtime.rejectProposal = (proposalId: string) => {
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      if (operationId) {
+        const settlement = this.settleNarrationProposal(
+          operationId,
+          'rejected',
+          false,
+          draftId,
+        );
+        void settlement.then(
+          () => {
+            if (this.studioComposition === composition) {
+              reject(proposalId);
+            }
+          },
+          () => undefined,
+        );
+        return true;
+      }
+      const rejected = reject(proposalId);
+      return rejected;
+    };
+
+    const rerollProposal = runtime.rerollProposal.bind(runtime);
+    runtime.rerollProposal = (proposalId: string) => {
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      const launch = rerollProposal(proposalId);
+      if (operationId) {
+        this.settleNarrationProposal(
+          operationId,
+          'rejected',
+          false,
+          draftId,
+        );
+      }
+      return launch;
+    };
+
+    const reroll = runtime.reroll.bind(runtime);
+    runtime.reroll = (operationId: string) => {
+      const launch = reroll(operationId);
+      this.settleNarrationProposal(
+        operationId,
+        'rejected',
+        false,
+        draftId,
+      );
+      return launch;
+    };
+  }
+
+  private updateNarrationAvailability(): void {
+    const view = this.editorView;
+    if (!view) return;
+    view.setProps({ editable: () => !this.narrationBlocked() });
+    if (this.narrationBlocked()) {
+      this.autosave.cancel();
+      return;
+    }
+    const document = this.doc();
+    if (this.currentDirty() && document) this.scheduleAutosave(document);
+  }
+
+  private requireNarrationWriteAvailable(): void {
+    if (this.narrationBlocked()) {
+      throw new Error(
+        'Architecture action paused — resume or resolve first.',
+      );
+    }
+  }
+
+  private operationIdForProposal(
+    composition: StudioComposition,
+    proposalId: string,
+  ): string | null {
+    for (const operation of composition.runtime.tracker.history()) {
+      const meta = operation.meta as {
+        proposalId?: unknown;
+      };
+      if (meta.proposalId === proposalId) return operation.id();
+    }
+    return null;
+  }
+
+  private settleNarrationProposal(
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+    waitForSave: boolean,
+    draftId = this.activeDraftId,
+  ): Promise<void> {
+    if (!draftId) return Promise.resolve();
+    if (decision === 'accepted') {
+      this.pendingAcceptedSettlements.add(operationId);
+    }
+    const existing = this.proposalSettlementsByOperation.get(operationId);
+    if (existing) return existing;
+    const settlement = (async () => {
+      if (waitForSave) {
+        await this.autosave.flush();
+        await this.autosave.whenIdle();
+      }
+      await this.client().resolveNarrationProposal(
+        draftId,
+        operationId,
+        decision,
+      );
+      if (decision === 'accepted') {
+        this.pendingAcceptedSettlements.delete(operationId);
+      }
+      this.proposalSettlementError = null;
+      if (this.operationError()?.startsWith('Proposal settlement failed:')) {
+        this.operationError.set(null);
+      }
+    })();
+    this.proposalSettlements.add(settlement);
+    this.proposalSettlementsByOperation.set(operationId, settlement);
+    void settlement.catch((error: unknown) => {
+      this.proposalSettlementError =
+        `Proposal settlement failed: ${operationErrorMessage(error)}`;
+      this.operationError.set(this.proposalSettlementError);
+    }).finally(() => {
+      this.proposalSettlements.delete(settlement);
+      if (this.proposalSettlementsByOperation.get(operationId) === settlement) {
+        this.proposalSettlementsByOperation.delete(operationId);
+      }
+    });
+    return settlement;
   }
 
   private isCurrentDraft(draftId: string, epoch: number): boolean {
@@ -747,6 +1376,24 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 }
 
+function narrationReplacementParagraphs(markdown: string): string[] {
+  const blocks = markdown
+    .replace(/\r\n?/gu, '\n')
+    .trim()
+    .split(/\n\s*\n/gu)
+    .filter((block) => block.trim() !== '');
+  return blocks.flatMap((block) => {
+    const lines = block.split('\n');
+    const quoted = lines.every((line) =>
+      line === '>' || line.startsWith('> '));
+    const text = lines
+      .map((line) => quoted ? line.replace(/^> ?/u, '') : line)
+      .join(' ')
+      .trim();
+    return text === '' ? [] : [text];
+  });
+}
+
 function promotionLauncher(
   composition: StudioComposition,
 ): PromotionLauncher {
@@ -761,13 +1408,58 @@ function promotionLauncher(
 }
 
 function saveErrorMessage(error: unknown): string {
+  if (isArchitectureSagaReservation(error)) {
+    return 'Architecture action paused — resume or resolve first. Narration remains unsaved.';
+  }
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'save failed';
+}
+
+function isArchitectureSagaReservation(error: unknown): boolean {
+  if (!(error instanceof DaemonClientError) || error.status !== 409) {
+    return false;
+  }
+  const body = error.body;
+  return body !== null
+    && typeof body === 'object'
+    && (body as Record<string, unknown>)['code'] === 'draft-write-reserved'
+    && (body as Record<string, unknown>)['reservation']
+      === 'architecture-saga'
+    && (body as Record<string, unknown>)['recoverable'] === true;
+}
+
+function isAcceptedProposalDisposition(disposition: string): boolean {
+  return disposition === 'selection-proposal-accepted'
+    || disposition === 'personal-input-proposal-accepted';
 }
 
 function operationErrorMessage(error: unknown): string {
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'operation failed';
+}
+
+function draftScopedClient(
+  client: DaemonClient,
+  draftId: string,
+): DaemonClient {
+  return new Proxy(client, {
+    get(target, property) {
+      if (property === 'submitOp') {
+        return (
+          operation: Parameters<DaemonClient['submitOp']>[0],
+          inputs: unknown,
+        ) => target.submitDraftOp(draftId, operation, inputs);
+      }
+      if (property === 'resume') {
+        return (operationId: string, inputs: unknown) =>
+          target.resumeDraftOp(draftId, operationId, inputs);
+      }
+      const value = Reflect.get(target, property, target) as unknown;
+      return typeof value === 'function'
+        ? value.bind(target)
+        : value;
+    },
+  });
 }

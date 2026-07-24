@@ -15,6 +15,7 @@ import {
 import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { FastifyInstance } from 'fastify';
+import { ArchitectureService } from './architecture/service.js';
 import { DocumentService } from './documents/service.js';
 import { DocumentStore } from './documents/store.js';
 import { buildApp } from './http/app.js';
@@ -24,9 +25,15 @@ import {
   type OperationClock,
 } from './operations/service.js';
 import {
+  readArtifact,
   upsertPipelineRow,
   writeArtifact,
+  writeEpisodeArtifact,
 } from './repo/artifacts.js';
+import {
+  MilestoneService,
+  SerializedLane,
+} from './repo/milestones.js';
 import { runValidatorJson } from './repo/validator.js';
 import { JobSupervisor } from './supervisor.js';
 import { TopicService } from './topics/service.js';
@@ -136,10 +143,18 @@ export function createDaemonContext(
   let topicStore: TopicStore | undefined;
   let supervisor: JobSupervisor | undefined;
   let operationService: OperationService | undefined;
+  let milestoneService: MilestoneService | undefined;
 
   try {
     documentStore = new DocumentStore(stateDbFile);
     topicStore = new TopicStore(stateDbFile);
+    const gitValidatorLane = new SerializedLane();
+    milestoneService = new MilestoneService({
+      stateDbFile,
+      repoRoot,
+      worktreesRoot: join(dirs.dataDir, 'worktrees'),
+      lane: gitValidatorLane,
+    });
     supervisor = new JobSupervisor({
       store: jobStore,
       jobsRoot: dirs.jobsRoot,
@@ -153,48 +168,83 @@ export function createDaemonContext(
     operationService.enforceDeadlinesAtBoot();
     supervisor.reattach();
     operationService.reconcileTimedOutAttempts();
-    const documentService = new DocumentService({ store: documentStore });
+    const activeMilestoneService = milestoneService;
+    const workspaceArtifacts = {
+      write: (
+        relPath: string,
+        content: string,
+        expectedState: Parameters<typeof writeArtifact>[3],
+      ) => activeMilestoneService.withWorkspaceForPath(
+        relPath,
+        ({ worktreePath }) =>
+          writeArtifact(worktreePath, relPath, content, expectedState),
+      ),
+      upsertPipelineRow: (
+        row: Parameters<typeof upsertPipelineRow>[1],
+      ) => activeMilestoneService.withWorkspaceForEpisode(
+        row.episodeSlug,
+        ({ worktreePath }) => upsertPipelineRow(worktreePath, row),
+      ),
+      read: (relPath: string) =>
+        activeMilestoneService.withWorkspaceForPath(
+          relPath,
+          ({ worktreePath }) => readArtifact(worktreePath, relPath),
+        ),
+      writeProduction: (
+        relPath: string,
+        content: string,
+        expectedState: Parameters<typeof writeEpisodeArtifact>[3],
+      ) => activeMilestoneService.withWorkspaceForPath(
+        relPath,
+        ({ worktreePath }) => writeEpisodeArtifact(
+          worktreePath,
+          relPath,
+          content,
+          expectedState,
+        ),
+      ),
+    };
+    const documentService = new DocumentService({
+      store: documentStore,
+      milestoneService: activeMilestoneService,
+    });
+    const architectureService = new ArchitectureService({
+      store: documentStore,
+      operationService,
+      artifactService: workspaceArtifacts,
+      workspaceService: activeMilestoneService,
+    });
     const topicService = new TopicService({
       store: topicStore,
       operationService,
       documentService,
       repoRoot,
-      artifactService: {
-        write: (
-          relPath: string,
-          content: string,
-          expectedState: Parameters<typeof writeArtifact>[3],
-        ) => writeArtifact(repoRoot, relPath, content, expectedState),
-        upsertPipelineRow: (
-          row: Parameters<typeof upsertPipelineRow>[1],
-        ) => upsertPipelineRow(repoRoot, row),
-      },
+      artifactService: workspaceArtifacts,
+      workspaceService: activeMilestoneService,
     });
     const app = buildApp({
       nonce,
       staticRoot: findStaticRoot(repoRoot),
       operationService,
       documentService,
+      architectureService,
       topicService,
-      artifactService: {
-        write: (
-          relPath: string,
-          content: string,
-          expectedState: Parameters<typeof writeArtifact>[3],
-        ) => writeArtifact(repoRoot, relPath, content, expectedState),
-        upsertPipelineRow: (
-          row: Parameters<typeof upsertPipelineRow>[1],
-        ) => upsertPipelineRow(repoRoot, row),
-      },
+      artifactService: workspaceArtifacts,
       validatorService: {
         validate: (scriptRelPath) =>
-          runValidatorJson(repoRoot, scriptRelPath),
+          activeMilestoneService.withWorkspaceForPath(
+            scriptRelPath,
+            ({ worktreePath }) =>
+              runValidatorJson(worktreePath, scriptRelPath),
+          ),
       },
+      milestoneService: activeMilestoneService,
     });
     const activeSupervisor = supervisor;
     const activeDocumentStore = documentStore;
     const activeTopicStore = topicStore;
     const activeOperationService = operationService;
+    const daemonMilestoneService = milestoneService;
 
     let closed = false;
     return {
@@ -216,7 +266,11 @@ export function createDaemonContext(
             try {
               activeTopicStore.close();
             } finally {
-              activeDocumentStore.close();
+              try {
+                activeDocumentStore.close();
+              } finally {
+                daemonMilestoneService.close();
+              }
             }
           }
         }
@@ -228,6 +282,7 @@ export function createDaemonContext(
     else jobStore.close();
     topicStore?.close();
     documentStore?.close();
+    milestoneService?.close();
     throw error;
   }
 }
