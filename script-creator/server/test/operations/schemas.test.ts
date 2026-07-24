@@ -73,6 +73,20 @@ describe('operation schemas', () => {
     expect(schema.properties.findings.items.properties.section_key.enum)
       .toEqual(ARCHITECTURE_SECTION_KEYS);
   });
+
+  it('requires the fixed architecture section-key enum in rewrite results', () => {
+    const operation = OPERATIONS['rewrite-architecture-section'];
+    expect(operation.result.kind).toBe('schema');
+    if (operation.result.kind !== 'schema') return;
+
+    const schema = operation.result.schema as {
+      properties: {
+        section_key: { enum: readonly string[] };
+      };
+    };
+    expect(schema.properties.section_key.enum)
+      .toEqual(ARCHITECTURE_SECTION_KEYS);
+  });
 });
 
 describe('operation schema payloads', () => {
@@ -86,7 +100,12 @@ describe('operation schema payloads', () => {
     ['rewrite-selection', ['status', 'replacement_markdown', 'guardrail_markdown']],
     [
       'rewrite-architecture-section',
-      ['status', 'replacement_markdown', 'guardrail_markdown'],
+      [
+        'status',
+        'section_key',
+        'replacement_markdown',
+        'guardrail_markdown',
+      ],
     ],
     ['generate-alternatives', ['status', 'options', 'guardrail_markdown']],
     ['ideate', ['status', 'cards', 'guardrail_markdown']],

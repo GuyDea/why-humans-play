@@ -1641,7 +1641,7 @@ describe('mounted Script Studio composition', () => {
       studio.tick();
       expect(studio.root.querySelectorAll(
         '[data-testid="architecture-proposal"]',
-      )).toHaveLength(12);
+      )).toHaveLength(14);
     });
     const unsafeProposal = Array.from(studio.root.querySelectorAll(
       '[data-testid="architecture-proposal"]',
@@ -1658,7 +1658,7 @@ describe('mounted Script Studio composition', () => {
       expect(studio.root.querySelectorAll(
         '[data-testid="architecture-proposal"]',
       )).toHaveLength(0);
-      expect(studio.client.architectureState.sections).toHaveLength(11);
+      expect(studio.client.architectureState.sections).toHaveLength(13);
     });
 
     const coreAnswer = studio.root.querySelector<HTMLElement>(
@@ -1679,6 +1679,7 @@ describe('mounted Script Studio composition', () => {
       kind: 'schema',
       value: {
         status: 'complete',
+        section_key: 'core-answer',
         replacement_markdown:
           '### Core answer\n\nThe refined causal answer.\n',
         guardrail_markdown: null,

@@ -49,15 +49,16 @@ const PROGRESS = [
   ['02-mode', 'Select and state the evidence mode.'],
   ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
   ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
-  ['05-angles', 'Develop materially different angles for promising subjects.'],
-  ['06-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
-  ['07-gates', 'Audit every advancing angle against all six hard gates.'],
-  ['08-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
-  ['09-deep', 'Deeply research the finalists with multiple signals.'],
-  ['10-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
-  ['11-packages', 'Test three package promises for each top-three finalist.'],
-  ['12-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
-  ['13-audit', 'Complete the output and evidence audit.'],
+  ['05-painpoints', 'For problem-led candidates, compare specific lived painpoints before choosing the mechanism.'],
+  ['06-angles', 'Develop materially different angles for promising subjects.'],
+  ['07-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
+  ['08-gates', 'Audit every advancing angle against all six hard gates.'],
+  ['09-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+  ['10-deep', 'Deeply research the finalists with multiple signals.'],
+  ['11-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+  ['12-packages', 'Test three package promises for each top-three finalist.'],
+  ['13-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
+  ['14-audit', 'Complete the output and evidence audit.'],
 ] as const;
 
 const SUMMARY: TopicSummary = {
@@ -1057,7 +1058,7 @@ describe('routed Topics composition', () => {
         user_constraints: {
           notes: 'Prefer a visually provable opening.',
         },
-        progress_transport: 'WHP_PROGRESS/2',
+        progress_transport: 'WHP_PROGRESS/3',
         summary_transport: 'fenced-whp-summary',
       },
     });
@@ -1066,9 +1067,9 @@ describe('routed Topics composition', () => {
     );
     const checklist = topics.root.querySelector('[data-testid="run-checklist"]');
     expect(checklist?.querySelectorAll('[data-testid="checklist-row"]'))
-      .toHaveLength(13);
+      .toHaveLength(14);
     expect(checklist?.closest('section')?.textContent)
-      .toContain('13-step checklist');
+      .toContain('14-step checklist');
     expect(checklist?.textContent).toContain(PROGRESS[5][1]);
     expect(topics.client.getTopicRun).toHaveBeenCalledTimes(1);
 

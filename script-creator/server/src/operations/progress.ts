@@ -1,6 +1,6 @@
 import type { CodexEvent } from '../types.js';
 
-export const WHP_PROGRESS_VERSION = 'WHP_PROGRESS/2';
+export const WHP_PROGRESS_VERSION = 'WHP_PROGRESS/3';
 
 export const WHP_PROGRESS_ROWS = [
   {
@@ -20,39 +20,43 @@ export const WHP_PROGRESS_ROWS = [
     text: 'Record at least 30 distinct, diverse subjects before ranking.',
   },
   {
-    id: '05-angles',
+    id: '05-painpoints',
+    text: 'For problem-led candidates, compare specific lived painpoints before choosing the mechanism.',
+  },
+  {
+    id: '06-angles',
     text: 'Develop materially different angles for promising subjects.',
   },
   {
-    id: '06-proof-cases',
+    id: '07-proof-cases',
     text: 'Identify a first-hearing opening proof case and any needed current echo for each finalist.',
   },
   {
-    id: '07-gates',
+    id: '08-gates',
     text: 'Audit every advancing angle against all six hard gates.',
   },
   {
-    id: '08-shallow',
+    id: '09-shallow',
     text: 'Run a shallow scan and narrow to roughly 8–12 candidates.',
   },
   {
-    id: '09-deep',
+    id: '10-deep',
     text: 'Deeply research the finalists with multiple signals.',
   },
   {
-    id: '10-shortlist',
+    id: '11-shortlist',
     text: 'Rank a shortlist of roughly five with the required scorecard.',
   },
   {
-    id: '11-packages',
+    id: '12-packages',
     text: 'Test three package promises for each top-three finalist.',
   },
   {
-    id: '12-winner',
+    id: '13-winner',
     text: 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.',
   },
   {
-    id: '13-audit',
+    id: '14-audit',
     text: 'Complete the output and evidence audit.',
   },
 ] as const;
@@ -85,7 +89,7 @@ export interface ConsoleEntry {
 }
 
 const PROGRESS_LINE =
-  /^WHP_PROGRESS\/2 (\S+) (pending|active|done|unknown) :: (.*)$/;
+  /^WHP_PROGRESS\/3 (\S+) (pending|active|done|unknown) :: (.*)$/;
 const KNOWN_IDS = new Set<string>(WHP_PROGRESS_IDS);
 const TOOL_ITEM_TYPES = new Set([
   'command_execution',

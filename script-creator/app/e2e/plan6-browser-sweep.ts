@@ -281,8 +281,8 @@ async function main(): Promise<void> {
   const proposals = architecturePanel.locator(
     '[data-testid="architecture-proposal"]',
   );
-  await waitForCount(proposals, 12);
-  for (let remaining = 12; remaining > 0; remaining -= 1) {
+  await waitForCount(proposals, 14);
+  for (let remaining = 14; remaining > 0; remaining -= 1) {
     await proposals.first().getByRole(
       'button',
       { name: 'Accept proposal' },

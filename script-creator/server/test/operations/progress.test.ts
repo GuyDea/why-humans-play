@@ -14,7 +14,7 @@ function event(
 }
 
 describe('parseWhpProgress', () => {
-  it('accepts only verbatim WHP_PROGRESS/2 grammar lines', () => {
+  it('accepts only verbatim WHP_PROGRESS/3 grammar lines', () => {
     const events = [
       event(1, {
         type: 'item.completed',
@@ -22,11 +22,11 @@ describe('parseWhpProgress', () => {
           type: 'agent_message',
           text: [
             'Progress update:',
-            'WHP_PROGRESS/2 02-mode active :: Comparing audience-fit modes.',
-            'WHP_PROGRESS/2 extra-step unknown :: Skill-authored fallback text.',
-            'WHP_PROGRESS/1 03-signals done :: Retired protocol.',
-            'WHP_PROGRESS/2 04-pool blocked :: Wrong status.',
-            'WHP_PROGRESS/2 05-angles done:: Missing delimiter spaces.',
+            'WHP_PROGRESS/3 02-mode active :: Comparing audience-fit modes.',
+            'WHP_PROGRESS/3 extra-step unknown :: Skill-authored fallback text.',
+            'WHP_PROGRESS/2 03-signals done :: Retired protocol.',
+            'WHP_PROGRESS/3 04-pool blocked :: Wrong status.',
+            'WHP_PROGRESS/3 06-angles done:: Missing delimiter spaces.',
           ].join('\n'),
         },
       }),
@@ -54,9 +54,9 @@ describe('parseWhpProgress', () => {
         item: {
           type: 'agent_message',
           text: [
-            'WHP_PROGRESS/2 extra-b pending :: Waiting for a custom check.',
-            'WHP_PROGRESS/2 11-packages active :: Testing package directions.',
-            'WHP_PROGRESS/2 02-mode pending :: Mode not started.',
+            'WHP_PROGRESS/3 extra-b pending :: Waiting for a custom check.',
+            'WHP_PROGRESS/3 12-packages active :: Testing package directions.',
+            'WHP_PROGRESS/3 02-mode pending :: Mode not started.',
           ].join('\n'),
         },
       }),
@@ -69,9 +69,9 @@ describe('parseWhpProgress', () => {
         item: {
           type: 'agent_message',
           text: [
-            'WHP_PROGRESS/2 extra-a active :: Running another custom check.',
-            'WHP_PROGRESS/2 02-mode done :: Mode selected.',
-            'WHP_PROGRESS/2 extra-b unknown :: Custom check became indeterminate.',
+            'WHP_PROGRESS/3 extra-a active :: Running another custom check.',
+            'WHP_PROGRESS/3 02-mode done :: Mode selected.',
+            'WHP_PROGRESS/3 extra-b unknown :: Custom check became indeterminate.',
           ].join('\n'),
         },
       }),
@@ -80,7 +80,7 @@ describe('parseWhpProgress', () => {
     expect(parseWhpProgress(events)).toEqual([
       { id: '02-mode', status: 'done', text: 'Mode selected.' },
       {
-        id: '11-packages',
+        id: '12-packages',
         status: 'active',
         text: 'Testing package directions.',
       },

@@ -12,7 +12,7 @@ the first block of Plan 6.
 ## Decision
 
 The draft lifecycle gains an **architecture phase** between topic handoff and rapid
-prototyping. The architecture is a section-structured artifact (the skill's nine fixed
+prototyping. The architecture is a section-structured artifact (the skill's thirteen fixed
 sections), edited per-section with agent operations at section grain, approved as a
 whole by an explicit action that writes a canonical repo Markdown milestone and unlocks
 episode-scale narration. The skill already owns all editorial rules for this stage
@@ -47,16 +47,14 @@ the gate.
   revisions of the architecture append to the existing revision history with a
   `kind: 'architecture'` discriminator.
 - The section keys/titles are fixed constants mirroring the skill reference's
-  "Architecture artifact" headings exactly — eleven sections in the reference's
-  order: package-and-audience, central-question, core-answer, viewer-belief-shift,
-  insight-ladder, phenomenon-and-paradox-map, earned-reframe,
-  real-world-evidence-map, practical-payoff, final-lesson, scope-boundary. The
-  splitter is mechanical on the `###` headings the skill emits, and a server sync
-  test parses the reference so any future drift fails the suite. *(Corrected
-  2026-07-24: this list previously said "nine" and omitted the reference's
-  "Viewer belief shift" naming and "Scope boundary" section; the
-  mirror-the-reference rule was always primary.)* Unrecognized extra sections
-  round-trip opaquely, same philosophy as the narration codec.
+  "Architecture artifact" headings exactly — thirteen sections in the reference's
+  order: concept-inventory, package-and-audience, central-question, core-answer,
+  viewer-belief-shift, insight-ladder, phenomenon-and-paradox-map, earned-reframe,
+  real-world-evidence-map, learning-and-action-contract, practical-payoff,
+  final-lesson, scope-boundary. The splitter is mechanical on the `###` headings
+  the skill emits, and a server sync test parses the reference so any future drift
+  fails the suite. The mirror-the-reference rule is primary; unrecognized extra
+  sections round-trip opaquely, same philosophy as the narration codec.
 - Canonical Markdown: `whp-youtube/architectures/<slug>.md` (new whitelisted CAS
   artifact path — repo-layout addition to record in the ledger on acceptance), written
   at approval: the joined sections verbatim plus a small header (title, date, approved
@@ -68,7 +66,7 @@ the gate.
 |---|---|---|---|
 | `generate-architecture` | episode | raw Markdown artifact | topic brief, approved lessons, user constraints |
 | `review-architecture` | scoped | schema findings `{section_key, severity, finding_markdown}` | full architecture md, brief |
-| `rewrite-architecture-section` | scoped | schema `{replacement_markdown}` | section key+md, full architecture md as context, brief, user instruction |
+| `rewrite-architecture-section` | scoped | schema `{section_key, replacement_markdown}` | section key+md, full architecture md as context, brief, user instruction |
 
 `generate-architecture` results parse into sections (mechanical splitter) and land as a
 reviewable proposal per section (accept-all or per-section accept), never a silent
