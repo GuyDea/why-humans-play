@@ -51,6 +51,7 @@ interface ArchitectureCard {
             type="text"
             aria-label="Architecture generation constraints"
             placeholder="Optional supplied constraints"
+            [disabled]="approvalLocked()"
             [value]="generationConstraints()"
             (input)="setGenerationConstraints($event)"
           />
@@ -58,14 +59,14 @@ interface ArchitectureCard {
         <div class="button-row">
           <button
             type="button"
-            [disabled]="busy()"
+            [disabled]="busy() || approvalLocked()"
             (click)="generate()"
           >
             Generate architecture
           </button>
           <button
             type="button"
-            [disabled]="busy() || !hasSections()"
+            [disabled]="busy() || approvalLocked() || !hasSections()"
             (click)="review()"
           >
             Review architecture
@@ -73,7 +74,7 @@ interface ArchitectureCard {
           @if (model().proposals.length > 0) {
             <button
               type="button"
-              [disabled]="busy()"
+              [disabled]="busy() || approvalLocked()"
               (click)="acceptAll()"
             >
               Accept all proposals
@@ -173,7 +174,7 @@ interface ArchitectureCard {
                 <div class="button-row">
                   <button
                     type="button"
-                    [disabled]="busy() || proposal.conflict !== null"
+                    [disabled]="busy() || approvalLocked() || proposal.conflict !== null"
                     (click)="accept(proposal.id)"
                   >
                     Accept proposal
@@ -199,13 +200,14 @@ interface ArchitectureCard {
                   <input
                     type="text"
                     [attr.aria-label]="'Refine ' + (card.title || 'Preamble')"
+                    [disabled]="approvalLocked()"
                     [value]="refineInstruction(card.key)"
                     (input)="setRefineInstruction(card.key, $event)"
                   />
                 </label>
                 <button
                   type="submit"
-                  [disabled]="busy() || refineInstruction(card.key).trim() === ''"
+                  [disabled]="busy() || approvalLocked() || refineInstruction(card.key).trim() === ''"
                 >
                   Refine section
                 </button>
@@ -220,7 +222,16 @@ interface ArchitectureCard {
       </div>
 
       <footer class="approval-actions">
-        @if (isApproved()) {
+        @if (approvalPaused()) {
+          <button
+            type="button"
+            class="approve"
+            [disabled]="busy()"
+            (click)="resumeApproval()"
+          >
+            Resume approval
+          </button>
+        } @else if (isApproved()) {
           <button
             type="button"
             class="reopen"
@@ -513,20 +524,36 @@ export class ArchitecturePanel {
   protected isApproved(): boolean {
     this.viewVersion();
     this.version();
-    return this.model().state?.approvedAt !== null
+    return !this.approvalPaused()
+      && this.model().state?.approvedAt !== null
       && this.model().state?.approvedAt !== undefined;
   }
 
-  protected ribbonState(): 'needed' | 'approved' | 'reopened' {
+  protected approvalPaused(): boolean {
+    this.viewVersion();
+    this.version();
+    return this.model().state?.approvalSaga !== null
+      && this.model().state?.approvalSaga !== undefined;
+  }
+
+  protected approvalLocked(): boolean {
+    return this.isApproved() || this.approvalPaused();
+  }
+
+  protected ribbonState(): 'needed' | 'approved' | 'reopened' | 'paused' {
     this.viewVersion();
     this.version();
     const state = this.model().state;
+    if (state?.approvalSaga) return 'paused';
     if (state?.narrationReconciliationRequired) return 'reopened';
     return state?.approvedAt ? 'approved' : 'needed';
   }
 
   protected ribbonLabel(): string {
     const state = this.ribbonState();
+    if (state === 'paused') {
+      return 'Approval paused — resume required';
+    }
     if (state === 'reopened') {
       return 'Reopened — narration reconciliation required';
     }
@@ -564,7 +591,7 @@ export class ArchitecturePanel {
   }
 
   protected generate(): void {
-    if (this.busy()) return;
+    if (this.busy() || this.approvalLocked()) return;
     void this.run(async () => {
       const metadata = draftMetadata(this.draft());
       const notes = this.generationConstraints();
@@ -577,7 +604,7 @@ export class ArchitecturePanel {
   }
 
   protected review(): void {
-    if (this.busy()) return;
+    if (this.busy() || this.approvalLocked()) return;
     void this.run(() => this.model().review({
       topicBrief: draftMetadata(this.draft()).topicBrief,
     }));
@@ -586,7 +613,11 @@ export class ArchitecturePanel {
   protected refine(event: Event, card: ArchitectureCard): void {
     event.preventDefault();
     const userInstruction = this.refineInstruction(card.key);
-    if (this.busy() || userInstruction.trim() === '') return;
+    if (
+      this.busy()
+      || this.approvalLocked()
+      || userInstruction.trim() === ''
+    ) return;
     void this.run(async () => {
       await this.model().refine(card.key, {
         topicBrief: draftMetadata(this.draft()).topicBrief,
@@ -600,7 +631,7 @@ export class ArchitecturePanel {
   }
 
   protected accept(id: string): void {
-    if (this.busy()) return;
+    if (this.busy() || this.approvalLocked()) return;
     void this.run(() => this.model().accept(id));
   }
 
@@ -610,7 +641,7 @@ export class ArchitecturePanel {
   }
 
   protected acceptAll(): void {
-    if (this.busy()) return;
+    if (this.busy() || this.approvalLocked()) return;
     void this.run(() => this.model().acceptAll());
   }
 
@@ -627,6 +658,12 @@ export class ArchitecturePanel {
     if (!confirmed) return;
     void this.run(() =>
       this.runWorkflowAction(() => this.model().reopen(true)));
+  }
+
+  protected resumeApproval(): void {
+    if (this.busy() || !this.approvalPaused()) return;
+    void this.run(() =>
+      this.runWorkflowAction(() => this.model().resumeApproval()));
   }
 
   private async runWorkflowAction(action: () => Promise<void>): Promise<void> {

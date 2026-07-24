@@ -202,6 +202,51 @@ CREATE INDEX IF NOT EXISTS pending_milestones_draft_state
   ON pending_milestones (draft_id, state, created_at DESC);
 `;
 
+const MILESTONE_SUPERSESSION_V9 = `
+ALTER TABLE pending_milestones RENAME TO pending_milestones_v8;
+
+CREATE TABLE pending_milestones (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL,
+  kind TEXT NOT NULL
+    CHECK (kind IN (
+      'topic-selection',
+      'architecture-approval',
+      'architecture-reopen',
+      'creative-narration-approval',
+      'production-promotion'
+    )),
+  files_json TEXT NOT NULL,
+  commit_message TEXT NOT NULL,
+  source_hashes_json TEXT NOT NULL,
+  base_commit_hash TEXT NOT NULL,
+  reconciliation_required INTEGER NOT NULL DEFAULT 0
+    CHECK (reconciliation_required IN (0, 1)),
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'committed', 'superseded')),
+  resulting_commit_hash TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+INSERT INTO pending_milestones (
+  id, draft_id, episode_slug, kind, files_json, commit_message,
+  source_hashes_json, base_commit_hash, reconciliation_required, state,
+  resulting_commit_hash, created_at, updated_at
+)
+SELECT
+  id, draft_id, episode_slug, kind, files_json, commit_message,
+  source_hashes_json, base_commit_hash, reconciliation_required, state,
+  resulting_commit_hash, created_at, updated_at
+FROM pending_milestones_v8;
+
+DROP TABLE pending_milestones_v8;
+
+CREATE INDEX pending_milestones_draft_state
+  ON pending_milestones (draft_id, state, created_at DESC);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -311,6 +356,12 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
     owner: 'milestones',
     name: 'episode-milestones',
     apply: (db) => db.exec(EPISODE_MILESTONES_V8),
+  },
+  {
+    version: 9,
+    owner: 'milestones',
+    name: 'milestone-supersession',
+    apply: (db) => db.exec(MILESTONE_SUPERSESSION_V9),
   },
 ];
 

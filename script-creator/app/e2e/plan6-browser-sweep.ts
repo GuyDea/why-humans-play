@@ -3,12 +3,15 @@ import { createHash } from 'node:crypto';
 import {
   existsSync,
   closeSync,
+  copyFileSync,
   mkdtempSync,
   mkdirSync,
   openSync,
   readFileSync,
   rmSync,
   symlinkSync,
+  unlinkSync,
+  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
@@ -63,7 +66,7 @@ let temporaryRoot: string | null = null;
 
 async function main(): Promise<void> {
   const sourceHead = gitOutput(SOURCE_REPO, ['rev-parse', 'HEAD']);
-  const sourceStatus = gitOutput(SOURCE_REPO, [
+  const sourceStatus = gitRawOutput(SOURCE_REPO, [
     'status',
     '--porcelain=v1',
     '--untracked-files=all',
@@ -89,6 +92,7 @@ async function main(): Promise<void> {
     SOURCE_REPO,
     cloneRoot,
   ]);
+  applyTrackedWorktreeChanges(SOURCE_REPO, cloneRoot, sourceStatus);
   if (
     runOptional('git', [
       '-C',
@@ -313,6 +317,17 @@ async function main(): Promise<void> {
     0,
   );
 
+  const architecturePath = join(
+    workspace.worktreePath,
+    'whp-youtube',
+    'architectures',
+    'the-queue-game.md',
+  );
+  mkdirSync(dirname(architecturePath), { recursive: true });
+  writeFileSync(
+    architecturePath,
+    'pre-planted architecture approval conflict\n',
+  );
   await architecturePanel.getByRole(
     'button',
     { name: 'Approve architecture' },
@@ -320,19 +335,37 @@ async function main(): Promise<void> {
   await waitForAttribute(
     architecturePanel.locator('[data-testid="architecture-ribbon"]'),
     'data-state',
+    'paused',
+  );
+  await waitForText(
+    architecturePanel,
+    'Approval paused — resume required',
+  );
+  await assertArchitectureEditingDisabled(architecturePanel, coreAnswer);
+  assert(
+    await architecturePanel.getByRole(
+      'button',
+      { name: 'Reopen architecture' },
+    ).count() === 0,
+    'paused approval presented Reopen instead of Resume',
+  );
+
+  unlinkSync(architecturePath);
+  await architecturePanel.getByRole(
+    'button',
+    { name: 'Resume approval' },
+  ).click();
+  await waitForAttribute(
+    architecturePanel.locator('[data-testid="architecture-ribbon"]'),
+    'data-state',
     'approved',
   );
+  await assertArchitectureEditingDisabled(architecturePanel, coreAnswer);
   const narrationActions = page.locator('app-narration-actions');
   await waitForEnabled(narrationActions.getByRole(
     'button',
     { name: 'Generate episode' },
   ));
-  const architecturePath = join(
-    workspace.worktreePath,
-    'whp-youtube',
-    'architectures',
-    'the-queue-game.md',
-  );
   assertFileContains(architecturePath, 'Fake rewrite for core-answer.');
   assertFileContains(pipelinePath, 'prototyping');
   assertNoCommit('architecture approval');
@@ -399,7 +432,26 @@ async function main(): Promise<void> {
     narrationActions,
     'Generate Episode can replace narration from the approved architecture',
   );
-  await acceptEpisodeProposal();
+  await waitForAttribute(
+    architecturePanel.locator('[data-testid="architecture-ribbon"]'),
+    'data-state',
+    'reopened',
+  );
+  let reconciliationDialogMessage = '';
+  page.once('dialog', (dialog) => {
+    reconciliationDialogMessage = dialog.message();
+    void dialog.accept();
+  });
+  const markReconciled = narrationActions.getByRole(
+    'button',
+    { name: 'Mark narration reconciled' },
+  );
+  await waitForEnabled(markReconciled);
+  await markReconciled.click();
+  assert(
+    reconciliationDialogMessage.includes('current revision'),
+    'narration reconciliation confirmation did not identify the current revision',
+  );
   await waitForAttribute(
     architecturePanel.locator('[data-testid="architecture-ribbon"]'),
     'data-state',
@@ -585,7 +637,7 @@ async function main(): Promise<void> {
     'developer checkout HEAD changed during the sweep',
   );
   assert(
-    gitOutput(SOURCE_REPO, [
+    gitRawOutput(SOURCE_REPO, [
       'status',
       '--porcelain=v1',
       '--untracked-files=all',
@@ -884,6 +936,33 @@ function copyNodeModules(
   symlinkSync(source, target, 'dir');
 }
 
+function applyTrackedWorktreeChanges(
+  sourceRoot: string,
+  cloneRoot: string,
+  sourceStatus: string,
+): void {
+  for (const line of sourceStatus.split('\n')) {
+    if (line === '' || line.startsWith('?? ')) continue;
+    const status = line.slice(0, 2);
+    const relativePath = line.slice(3);
+    assert(
+      !status.includes('D')
+        && !status.includes('R')
+        && !status.includes('C')
+        && !relativePath.includes(' -> '),
+      `sweep cannot snapshot non-file worktree change: ${line}`,
+    );
+    const source = join(sourceRoot, relativePath);
+    const target = join(cloneRoot, relativePath);
+    assert(
+      existsSync(source),
+      `tracked source change is missing: ${relativePath}`,
+    );
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(source, target);
+  }
+}
+
 function assertSymlinkFreeSkills(cloneRoot: string): void {
   const result = spawnSync(
     'find',
@@ -944,6 +1023,18 @@ function gitOutput(cwd: string, args: string[]): string {
   return result.stdout.trim();
 }
 
+function gitRawOutput(cwd: string, args: string[]): string {
+  const result = spawnSync('git', ['-C', cwd, ...args], {
+    encoding: 'utf8',
+  });
+  if (result.status !== 0) {
+    throw new Error(
+      `git ${args.join(' ')} failed: ${result.stderr.trim()}`,
+    );
+  }
+  return result.stdout.trimEnd();
+}
+
 function assertFileContains(path: string, expected: string): void {
   assert(existsSync(path), `expected file is missing: ${path}`);
   assert(
@@ -969,6 +1060,34 @@ async function waitForEnabled(locator: Locator): Promise<void> {
     UI_TIMEOUT_MS,
     'button did not become enabled',
   );
+}
+
+async function assertArchitectureEditingDisabled(
+  architecturePanel: Locator,
+  section: Locator,
+): Promise<void> {
+  for (const control of [
+    architecturePanel.getByLabel('Architecture generation constraints'),
+    architecturePanel.getByRole(
+      'button',
+      { name: 'Generate architecture' },
+    ),
+    architecturePanel.getByRole(
+      'button',
+      { name: 'Review architecture' },
+    ),
+    section.getByLabel('Refine Core answer'),
+    section.getByRole('button', { name: 'Refine section' }),
+  ]) {
+    assert(
+      await control.isDisabled(),
+      `approved or paused architecture control remained enabled: ${
+        await control.getAttribute('aria-label')
+          ?? await control.textContent()
+          ?? control.toString()
+      }`,
+    );
+  }
 }
 
 async function waitForCount(

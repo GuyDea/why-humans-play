@@ -270,6 +270,14 @@ export interface ArchitectureState {
   approvedAt: string | null;
   revisionSeq: number;
   narrationReconciliationRequired: boolean;
+  approvalSaga: ArchitectureApprovalSagaState | null;
+}
+
+export interface ArchitectureApprovalSagaState {
+  resumeKey: string;
+  steps: ArchitectureActionSteps;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SaveArchitectureInput {
@@ -475,7 +483,7 @@ export interface MilestoneRecord {
   sourceHashes: Record<string, string>;
   baseCommitHash: string;
   reconciliationRequired: boolean;
-  state: 'pending' | 'committed';
+  state: 'pending' | 'committed' | 'superseded';
   resultingCommitHash: string | null;
   createdAt: string;
   updatedAt: string;
@@ -731,6 +739,19 @@ export class DaemonClient {
     );
   }
 
+  async resumeArchitectureApproval(
+    id: string,
+    input: { resumeKey: string },
+  ): Promise<ArchitectureActionResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/architecture/approve/resume`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
   async reopenArchitecture(
     id: string,
     input: { expectedRevisionSeq: number; confirmed: true },
@@ -796,6 +817,19 @@ export class DaemonClient {
   ): Promise<{ settledExportToken: string }> {
     return this.request(
       `/api/drafts/${encodeURIComponent(id)}/narration/settled-export`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async markNarrationReconciled(
+    id: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ): Promise<ArchitectureState> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/reconcile`,
       {
         method: 'POST',
         body: JSON.stringify(input),

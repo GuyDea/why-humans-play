@@ -41,6 +41,14 @@ import type {
 export interface ArchitectureState extends DraftArchitecture {
   revisionSeq: number;
   narrationReconciliationRequired: boolean;
+  approvalSaga: ArchitectureApprovalSagaState | null;
+}
+
+export interface ArchitectureApprovalSagaState {
+  resumeKey: string;
+  steps: ArchitectureActionSteps;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface SaveArchitectureInput {
@@ -209,7 +217,12 @@ export class ArchitectureService {
 
   get(draftId: string): ArchitectureState {
     const draft = this.requireDraft(draftId);
-    return architectureState(draft, this.store.currentRevisionSeq(draftId));
+    const saga = this.store.getPendingArchitectureSaga(draftId, 'approve');
+    return architectureState(
+      draft,
+      this.store.currentRevisionSeq(draftId),
+      saga ? approvalSagaState(saga) : null,
+    );
   }
 
   save(draftId: string, input: SaveArchitectureInput): SavedArchitecture {
@@ -219,6 +232,22 @@ export class ArchitectureService {
     const disposition = requireNonEmpty(input.disposition, 'disposition');
     const draft = this.requireDraft(draftId);
     const architecture = requireArchitecture(draft);
+    if (this.store.getPendingArchitectureSaga(draftId, 'approve')) {
+      throw new ArchitectureGateError(
+        'architecture save refused: approval is paused; Resume approval first',
+      );
+    }
+    if (
+      (
+        architecture.approvedMd !== null
+        || architecture.approvedAt !== null
+      )
+      && JSON.stringify(sections) !== JSON.stringify(architecture.sections)
+    ) {
+      throw new ArchitectureGateError(
+        'architecture save refused: Reopen architecture before changing approved sections',
+      );
+    }
     const timestamp = this.now();
     const result = this.store.saveArchitecture(draftId, {
       expectedRevisionSeq: input.expectedRevisionSeq,
@@ -239,7 +268,7 @@ export class ArchitectureService {
       throw new ArchitectureRevisionConflictError(this.get(draftId));
     }
     return {
-      state: architectureState(result.draft, result.revision.seq),
+      state: architectureState(result.draft, result.revision.seq, null),
       revision: result.revision,
     };
   }
@@ -299,6 +328,28 @@ export class ArchitectureService {
       this.resumeApprove(draftId, expectedRevisionSeq));
   }
 
+  async resumeApproval(
+    draftId: string,
+    resumeKey: string,
+  ): Promise<ArchitectureActionResult> {
+    requireNonEmpty(resumeKey, 'resumeKey');
+    return this.withActionLock(draftId, () => {
+      const saga = this.store.getPendingArchitectureSaga(
+        draftId,
+        'approve',
+      );
+      if (
+        !saga
+        || resumeKey !== approvalResumeKey(saga)
+      ) {
+        throw new ArchitectureGateError(
+          'approval resume refused: resume key does not match a paused approval',
+        );
+      }
+      return this.resumeApprove(draftId, saga.expectedRevisionSeq);
+    });
+  }
+
   async reopen(
     draftId: string,
     input: { confirmed: boolean; expectedRevisionSeq: number },
@@ -307,6 +358,37 @@ export class ArchitectureService {
     requireRevisionSeq(input.expectedRevisionSeq);
     return this.withActionLock(draftId, () =>
       this.resumeReopen(draftId, input.expectedRevisionSeq));
+  }
+
+  markNarrationReconciled(
+    draftId: string,
+    input: { confirmed: boolean; expectedRevisionSeq: number },
+  ): ArchitectureState {
+    if (input.confirmed !== true) throw new Error('confirmed must be true');
+    requireRevisionSeq(input.expectedRevisionSeq);
+    const draft = this.requireExpectedNarrationRevision(
+      draftId,
+      input.expectedRevisionSeq,
+    );
+    const architecture = requireArchitecture(draft);
+    if (
+      architecture.approvedMd === null
+      || architecture.approvedAt === null
+      || architecture.approvedMd !== joinArchitecture(architecture.sections)
+      || readCreativePhase(draft.doc) !== 'rapid-prototype'
+    ) {
+      throw new ArchitectureGateError(
+        'narration reconciliation refused: current architecture approval is required',
+      );
+    }
+    if (draft.narrationReconciliationRequired === true) {
+      this.store.setNarrationReconciliationRequired(
+        draftId,
+        false,
+        this.now(),
+      );
+    }
+    return this.get(draftId);
   }
 
   async approveNarration(
@@ -818,8 +900,35 @@ export class ArchitectureService {
       expectedRevisionSeq,
     );
     if (!saga) {
+      if (this.store.getPendingArchitectureSaga(draftId, 'approve')) {
+        throw new ArchitectureGateError(
+          'approval refused: approval is paused; use Resume approval',
+        );
+      }
       const draft = this.requireExpectedRevision(draftId, expectedRevisionSeq);
       const architecture = requireArchitecture(draft);
+      if (
+        architecture.approvedMd !== null
+        || architecture.approvedAt !== null
+      ) {
+        if (
+          architecture.approvedMd !== null
+          && architecture.approvedAt !== null
+          && architecture.approvedMd
+            === joinArchitecture(architecture.sections)
+          && readCreativePhase(draft.doc) === 'rapid-prototype'
+        ) {
+          return this.completedActionResult(draftId);
+        }
+        throw new ArchitectureGateError(
+          'approval refused: Reopen architecture before changing approval',
+        );
+      }
+      if (readCreativePhase(draft.doc) !== 'architecture') {
+        throw new ArchitectureGateError(
+          'approval refused: architecture phase is required',
+        );
+      }
       requireExactlyOneFixedSection(architecture.sections);
       const approvedMd = joinArchitecture(architecture.sections);
       const approvedAt = this.now();
@@ -965,6 +1074,11 @@ export class ArchitectureService {
       expectedRevisionSeq,
     );
     if (!saga) {
+      if (this.store.getPendingArchitectureSaga(draftId, 'approve')) {
+        throw new ArchitectureGateError(
+          'reopen refused: approval is paused; Resume approval first',
+        );
+      }
       const draft = this.requireExpectedRevision(draftId, expectedRevisionSeq);
       const architecture = requireArchitecture(draft);
       if (architecture.approvedMd === null || architecture.approvedAt === null) {
@@ -1168,6 +1282,21 @@ export class ArchitectureService {
         artifactWritten: 'pending',
         pipelineUpserted: 'pending',
         draftUpdated: 'pending',
+      },
+      state: this.get(draftId),
+    };
+  }
+
+  private completedActionResult(
+    draftId: string,
+  ): ArchitectureActionResult {
+    return {
+      complete: true,
+      steps: {
+        revisionAppended: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'completed',
+        draftUpdated: 'completed',
       },
       state: this.get(draftId),
     };
@@ -1397,11 +1526,17 @@ export class ArchitectureService {
             proposal.operationId,
           )
         ) {
+          const resolvedAt = this.now();
           this.store.resolveNarrationProposal(
             draftId,
             proposal.operationId,
             'accepted',
-            this.now(),
+            resolvedAt,
+          );
+          this.clearNarrationReconciliationIfEligible(
+            this.requireDraft(draftId),
+            proposal,
+            resolvedAt,
           );
           continue;
         }
@@ -1539,6 +1674,7 @@ function sha256(value: string): string {
 function architectureState(
   draft: DraftRecord,
   revisionSeq: number,
+  approvalSaga: ArchitectureApprovalSagaState | null,
 ): ArchitectureState {
   const architecture = requireArchitecture(draft);
   return {
@@ -1548,7 +1684,27 @@ function architectureState(
     revisionSeq,
     narrationReconciliationRequired:
       draft.narrationReconciliationRequired === true,
+    approvalSaga,
   };
+}
+
+function approvalSagaState(
+  saga: ArchitectureSagaRecord,
+): ArchitectureApprovalSagaState {
+  return {
+    resumeKey: approvalResumeKey(saga),
+    steps: sagaSteps(saga),
+    createdAt: saga.createdAt,
+    updatedAt: saga.updatedAt,
+  };
+}
+
+function approvalResumeKey(saga: ArchitectureSagaRecord): string {
+  return sha256([
+    'architecture-approval',
+    saga.draftId,
+    String(saga.expectedRevisionSeq),
+  ].join('\u0000'));
 }
 
 function requireArchitecture(draft: DraftRecord): DraftArchitecture {

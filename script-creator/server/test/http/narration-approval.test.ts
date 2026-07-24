@@ -107,6 +107,45 @@ describe('complete narration approval HTTP API', () => {
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(0);
   });
 
+  it('marks narration reconciled only with explicit confirmation at the current revision', async () => {
+    const fixture = makeFixture({ reconciliationRequired: true });
+
+    const stale = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/narration/reconcile',
+      headers: AUTH,
+      payload: { expectedRevisionSeq: 1, confirmed: true },
+    });
+    const unconfirmed = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/narration/reconcile',
+      headers: AUTH,
+      payload: { expectedRevisionSeq: 0, confirmed: false },
+    });
+    const reconciled = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/narration/reconcile',
+      headers: AUTH,
+      payload: { expectedRevisionSeq: 0, confirmed: true },
+    });
+
+    expect(stale.statusCode).toBe(409);
+    expect(stale.json()).toMatchObject({
+      error: 'narration revision conflict',
+    });
+    expect(unconfirmed.statusCode).toBe(400);
+    expect(unconfirmed.json()).toEqual({
+      error: 'confirmed must be true',
+    });
+    expect(reconciled.statusCode).toBe(200);
+    expect(reconciled.json()).toMatchObject({
+      revisionSeq: 0,
+      narrationReconciliationRequired: false,
+    });
+    expect(fixture.store.getDraft('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: false });
+  });
+
   it('requires a server-registered proposal decision before issuing a settled export', async () => {
     const fixture = makeFixture();
     const submitted = await fixture.app.inject({

@@ -22,6 +22,7 @@ const initialState = (
   approvedAt: null,
   revisionSeq: 3,
   narrationReconciliationRequired: false,
+  approvalSaga: null,
 });
 
 class ArchitectureClientStub {
@@ -62,13 +63,28 @@ class ArchitectureClientStub {
     approvedMd: joinArchitecture(this.state.sections),
     approvedAt: '2026-07-24T10:00:00.000Z',
     revisionSeq: this.state.revisionSeq + 1,
+    approvalSaga: null,
   }));
+  readonly resumeArchitectureApproval = vi.fn(async (
+    _draftId: string,
+    input: { resumeKey: string },
+  ) => {
+    if (input.resumeKey !== this.state.approvalSaga?.resumeKey) {
+      throw new Error('approval resume key mismatch');
+    }
+    this.state = {
+      ...this.state,
+      approvalSaga: null,
+    };
+    return actionResult(this.state);
+  });
   readonly reopenArchitecture = vi.fn(async () => actionResult({
     ...this.state,
     approvedMd: null,
     approvedAt: null,
     revisionSeq: this.state.revisionSeq + 1,
     narrationReconciliationRequired: true,
+    approvalSaga: null,
   }));
   readonly submitDraftOp = vi.fn(async (
     _draftId: string,
@@ -347,6 +363,52 @@ describe('ArchitectureModel', () => {
     });
   });
 
+  it('adopts a paused approval saga distinctly and resumes with its durable key', async () => {
+    const client = new ArchitectureClientStub();
+    const model = new ArchitectureModel('draft-1', client);
+    await model.load();
+    const paused = {
+      ...client.state,
+      approvedMd: joinArchitecture(client.state.sections),
+      approvedAt: '2026-07-24T10:00:00.000Z',
+      revisionSeq: 4,
+      approvalSaga: {
+        resumeKey: 'approval-resume-key',
+        steps: {
+          revisionAppended: 'completed' as const,
+          artifactWritten: 'pending' as const,
+          pipelineUpserted: 'pending' as const,
+          draftUpdated: 'pending' as const,
+        },
+        createdAt: '2026-07-24T10:00:00.000Z',
+        updatedAt: '2026-07-24T10:00:00.000Z',
+      },
+    };
+    client.approveArchitecture.mockRejectedValueOnce(new DaemonClientError(
+      409,
+      {
+        error: 'architecture artifact conflict',
+        state: paused,
+      },
+    ));
+
+    await model.approve();
+
+    expect(model.state).toEqual(paused);
+    expect(model.state?.approvalSaga?.resumeKey)
+      .toBe('approval-resume-key');
+
+    client.state = cloneState(paused);
+    await model.resumeApproval();
+
+    expect(client.resumeArchitectureApproval).toHaveBeenCalledWith(
+      'draft-1',
+      { resumeKey: 'approval-resume-key' },
+    );
+    expect(model.state?.approvalSaga).toBeNull();
+    expect(model.actionConflict).toBeNull();
+  });
+
   it('requires explicit reopen confirmation and applies only the returned state', async () => {
     const client = new ArchitectureClientStub();
     client.state = {
@@ -386,6 +448,12 @@ function cloneState(state: ArchitectureState): ArchitectureState {
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
+    approvalSaga: state.approvalSaga
+      ? {
+          ...state.approvalSaga,
+          steps: { ...state.approvalSaga.steps },
+        }
+      : null,
   };
 }
 

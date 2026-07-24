@@ -38,8 +38,9 @@ describe('shared state migration registry', () => {
       { version: 6, owner: 'architecture', name: 'architecture-stage' },
       { version: 7, owner: 'architecture', name: 'staged-promotion' },
       { version: 8, owner: 'milestones', name: 'episode-milestones' },
+      { version: 9, owner: 'milestones', name: 'milestone-supersession' },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(8);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(9);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -206,6 +207,10 @@ describe('shared state migration registry', () => {
       'created_at',
       'updated_at',
     ]);
+    const milestoneSql = inspected.prepare<[string], { sql: string }>(
+      `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?`,
+    ).get('pending_milestones')!.sql;
+    expect(milestoneSql).toContain("'superseded'");
     inspected.close();
   });
 

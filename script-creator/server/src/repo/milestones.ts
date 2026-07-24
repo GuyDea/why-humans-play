@@ -67,7 +67,7 @@ export interface PendingMilestone {
   sourceHashes: Record<string, string>;
   baseCommitHash: string;
   reconciliationRequired: boolean;
-  state: 'pending' | 'committed';
+  state: 'pending' | 'committed' | 'superseded';
   resultingCommitHash: string | null;
   createdAt: string;
   updatedAt: string;
@@ -306,7 +306,7 @@ export class MilestoneService {
   }
 
   async recordPending(input: RecordPendingInput): Promise<PendingMilestone> {
-    return this.lane.run(() => {
+    return this.lane.run(() => this.db.transaction(() => {
       const workspace = this.requireWorkspaceRow(input.draftId);
       this.assertIdentity(workspace);
       const files = requireMilestoneFiles(input.files);
@@ -317,6 +317,7 @@ export class MilestoneService {
       );
       const baseCommitHash = gitHead(workspace.worktreePath);
       const existing = this.latestPending(input.draftId, input.kind);
+      const timestamp = this.now();
       if (existing) {
         if (
           JSON.stringify(existing.files) === JSON.stringify(files)
@@ -329,12 +330,18 @@ export class MilestoneService {
         ) {
           return existing;
         }
-        throw new MilestoneConflictError(
-          `pending milestone source conflict for ${input.kind}`,
-        );
+        const superseded = this.db.prepare(
+          `UPDATE pending_milestones
+           SET state = 'superseded', updated_at = ?
+           WHERE id = ? AND state = 'pending'`,
+        ).run(timestamp, existing.id);
+        if (superseded.changes !== 1) {
+          throw new MilestoneConflictError(
+            `pending milestone supersession conflict for ${input.kind}`,
+          );
+        }
       }
 
-      const timestamp = this.now();
       const id = this.idFactory();
       this.db.prepare(
         `INSERT INTO pending_milestones (
@@ -356,7 +363,7 @@ export class MilestoneService {
         timestamp,
       );
       return this.requirePending(id);
-    });
+    })());
   }
 
   async pendingMilestones(
@@ -402,6 +409,11 @@ export class MilestoneService {
         );
       }
       if (pending.state === 'committed') return pending;
+      if (pending.state === 'superseded') {
+        throw new MilestoneConflictError(
+          `superseded milestone ${pending.id} cannot be committed`,
+        );
+      }
       const currentHashes = hashFiles(
         workspace.worktreePath,
         pending.files,
@@ -595,7 +607,7 @@ interface PendingRow {
   source_hashes_json: string;
   base_commit_hash: string;
   reconciliation_required: number;
-  state: 'pending' | 'committed';
+  state: 'pending' | 'committed' | 'superseded';
   resulting_commit_hash: string | null;
   created_at: string;
   updated_at: string;

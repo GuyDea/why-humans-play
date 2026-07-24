@@ -482,7 +482,14 @@ describe('DaemonClient', () => {
     await client.approveArchitecture('draft/one', {
       expectedRevisionSeq: 5,
     });
+    await client.resumeArchitectureApproval('draft/one', {
+      resumeKey: 'approval/key',
+    });
     await client.reopenArchitecture('draft/one', {
+      expectedRevisionSeq: 6,
+      confirmed: true,
+    });
+    await client.markNarrationReconciled('draft/one', {
       expectedRevisionSeq: 6,
       confirmed: true,
     });
@@ -527,7 +534,22 @@ describe('DaemonClient', () => {
         body: JSON.stringify({ expectedRevisionSeq: 5 }),
       },
       {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/approve/resume`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ resumeKey: 'approval/key' }),
+      },
+      {
         url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/reopen`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          expectedRevisionSeq: 6,
+          confirmed: true,
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/narration/reconcile`,
         method: 'POST',
         nonce: NONCE,
         body: JSON.stringify({

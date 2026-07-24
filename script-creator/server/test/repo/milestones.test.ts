@@ -81,11 +81,12 @@ function fixture() {
     updatedAt: '2026-07-24T08:00:00.000Z',
   });
 
+  let pendingSequence = 0;
   const service = new MilestoneService({
     stateDbFile,
     repoRoot,
     worktreesRoot,
-    idFactory: () => 'pending-1',
+    idFactory: () => `pending-${++pendingSequence}`,
     now: () => '2026-07-24T09:00:00.000Z',
   });
   services.push(service);
@@ -274,31 +275,58 @@ describe('MilestoneService pending records', () => {
     expect(JSON.stringify(row)).not.toContain('pipeline bytes');
   });
 
-  it('is idempotent for the same hashes and conflicts if a pending source changes', async () => {
-    const { service } = fixture();
+  it('supersedes approval A after Reopen changes and refuses to commit the superseded record', async () => {
+    const { service, stateDbFile } = fixture();
     const workspace = await service.chooseWorkspace('draft-1', {
       choice: 'new-branch',
       taskName: 'Why We Play',
     });
-    const file = 'whp-youtube/PIPELINE.md';
-    mkdirSync(join(workspace.worktreePath, 'whp-youtube'), {
+    const files = [
+      'whp-youtube/architectures/why-we-play.md',
+      'whp-youtube/PIPELINE.md',
+    ];
+    mkdirSync(join(workspace.worktreePath, 'whp-youtube', 'architectures'), {
       recursive: true,
     });
-    writeFileSync(join(workspace.worktreePath, file), 'first\n');
+    writeFileSync(join(workspace.worktreePath, files[0]!), 'approval A\n');
+    writeFileSync(join(workspace.worktreePath, files[1]!), 'prototyping A\n');
     const input = {
       draftId: 'draft-1',
-      kind: 'architecture-reopen' as const,
-      files: [file],
+      kind: 'architecture-approval' as const,
+      files,
       reconciliationRequired: true,
     };
 
     const first = await service.recordPending(input);
     expect(await service.recordPending(input)).toEqual(first);
 
-    writeFileSync(join(workspace.worktreePath, file), 'changed\n');
-    await expect(service.recordPending(input)).rejects.toBeInstanceOf(
-      MilestoneConflictError,
-    );
+    writeFileSync(join(workspace.worktreePath, files[0]!), 'approval B\n');
+    writeFileSync(join(workspace.worktreePath, files[1]!), 'prototyping B\n');
+    const second = await service.recordPending(input);
+
+    expect(second).toMatchObject({
+      id: 'pending-2',
+      state: 'pending',
+      sourceHashes: {
+        [files[0]!]: createHash('sha256').update('approval B\n').digest('hex'),
+        [files[1]!]: createHash('sha256').update('prototyping B\n').digest('hex'),
+      },
+    });
+    expect(await service.pendingMilestones('draft-1')).toEqual([
+      expect.objectContaining({ id: 'pending-2', state: 'pending' }),
+    ]);
+    const inspected = new Database(stateDbFile, { readonly: true });
+    const old = inspected.prepare<[string], { state: string }>(
+      'SELECT state FROM pending_milestones WHERE id = ?',
+    ).get(first.id);
+    inspected.close();
+    expect(old).toEqual({ state: 'superseded' });
+    await expect(service.commitPending({
+      draftId: 'draft-1',
+      kind: 'architecture-approval',
+      pendingMilestoneId: first.id,
+      confirmed: true,
+    })).rejects.toThrow(/superseded.*cannot be committed/i);
   });
 
   it('commits only the immutable pending files/message after explicit confirmation and preserves unrelated dirt', async () => {

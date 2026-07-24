@@ -118,6 +118,8 @@ class ControllableDaemonClient {
   milestoneDirtyFiles: string[] = [];
   pendingMilestones: PendingMilestone[] = [];
   failNextMilestoneCommit = false;
+  pauseNextArchitectureApproval = false;
+  readonly architectureApprovalResumes: string[] = [];
   readonly narrationApprovals: Array<{
     draftId: string;
     expectedRevisionSeq: number;
@@ -136,6 +138,11 @@ class ControllableDaemonClient {
     draftId: string;
     operationId: string;
     decision: 'accepted' | 'rejected';
+  }> = [];
+  readonly narrationReconciliations: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    confirmed: true;
   }> = [];
   pendingNarrationProposals: Array<{
     draftId: string;
@@ -158,6 +165,7 @@ class ControllableDaemonClient {
     approvedAt: null,
     revisionSeq: 0,
     narrationReconciliationRequired: false,
+    approvalSaga: null,
   };
 
   constructor(readonly storedDraft: DraftRecord) {
@@ -265,6 +273,17 @@ class ControllableDaemonClient {
       operationId,
       state: decision,
     };
+  });
+  readonly markNarrationReconciled = vi.fn(async (
+    draftId: string,
+    input: { expectedRevisionSeq: number; confirmed: true },
+  ) => {
+    this.narrationReconciliations.push({ draftId, ...input });
+    this.architectureState = {
+      ...this.architectureState,
+      narrationReconciliationRequired: false,
+    };
+    return cloneArchitectureState(this.architectureState);
   });
   readonly listNarrationProposals = vi.fn(async () => ({
     proposals: this.pendingNarrationProposals.map(
@@ -457,6 +476,54 @@ class ControllableDaemonClient {
       approvedMd: joinArchitecture(this.architectureState.sections),
       approvedAt: '2026-07-24T12:00:00.000Z',
       revisionSeq: this.architectureState.revisionSeq + 1,
+      approvalSaga: this.pauseNextArchitectureApproval
+        ? {
+            resumeKey: 'approval-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'pending',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          }
+        : null,
+    };
+    if (this.pauseNextArchitectureApproval) {
+      this.pauseNextArchitectureApproval = false;
+      throw new DaemonClientError(409, {
+        error: 'architecture artifact conflict',
+        currentHash: 'pre-planted-conflict-hash',
+        steps: this.architectureState.approvalSaga!.steps,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
+    setDraftPhase(this.storedDraft, 'rapid-prototype');
+    this.canonicalArchitectureWrites.push(
+      `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+    );
+    this.pipelineMilestones.push('prototyping');
+    this.recordPendingMilestone(
+      'architecture-approval',
+      [
+        `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
+    return completedArchitectureAction(this.architectureState);
+  });
+  readonly resumeArchitectureApproval = vi.fn(async (
+    _id: string,
+    input: { resumeKey: string },
+  ): Promise<ArchitectureActionResult> => {
+    if (input.resumeKey !== this.architectureState.approvalSaga?.resumeKey) {
+      throw new Error('approval resume key mismatch');
+    }
+    this.architectureApprovalResumes.push(input.resumeKey);
+    this.architectureState = {
+      ...this.architectureState,
+      approvalSaga: null,
     };
     setDraftPhase(this.storedDraft, 'rapid-prototype');
     this.canonicalArchitectureWrites.push(
@@ -1416,6 +1483,21 @@ describe('mounted Script Studio composition', () => {
       ]);
       expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
     });
+    expect(
+      architecturePanel.querySelector<HTMLInputElement>(
+        'input[aria-label="Architecture generation constraints"]',
+      )?.disabled,
+    ).toBe(true);
+    expect(findButton(architecturePanel, 'Generate architecture').disabled)
+      .toBe(true);
+    expect(findButton(architecturePanel, 'Review architecture').disabled)
+      .toBe(true);
+    expect(
+      coreAnswer.querySelector<HTMLInputElement>(
+        'input[aria-label="Refine Core answer"]',
+      )?.disabled,
+    ).toBe(true);
+    expect(findButton(coreAnswer, 'Refine section').disabled).toBe(true);
     expect(studio.client.commitMilestone).not.toHaveBeenCalled();
     findButton(milestonePanel, 'Refresh milestones').click();
     await vi.waitFor(() => {
@@ -1485,6 +1567,24 @@ describe('mounted Script Studio composition', () => {
       expect(findButton(narrationActions, 'Generate episode').disabled)
         .toBe(false);
       expect(narrationActions.textContent).toContain(
+        'Narration reconciliation is required before Promote.',
+      );
+    });
+
+    findButton(narrationActions, 'Mark narration reconciled').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(confirm).toHaveBeenCalledWith(
+        'Mark narration reconciled at the current revision?',
+      );
+      expect(studio.client.narrationReconciliations).toEqual([{
+        draftId: 'draft-1',
+        expectedRevisionSeq: studio.client.architectureState.revisionSeq,
+        confirmed: true,
+      }]);
+      expect(studio.client.architectureState
+        .narrationReconciliationRequired).toBe(false);
+      expect(narrationActions.textContent).not.toContain(
         'Narration reconciliation is required before Promote.',
       );
     });
@@ -1561,6 +1661,51 @@ describe('mounted Script Studio composition', () => {
       expect(narrationActions.textContent).not.toContain(
         'Narration reconciliation is required before Promote.',
       );
+    });
+  });
+
+  it('shows a paused approval after conflict and resumes it from production controls', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    expect(panel).not.toBeNull();
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain(
+        'Approval paused — resume required',
+      );
+      expect(findButton(panel, 'Resume approval').disabled).toBe(false);
+      expect(Array.from(panel?.querySelectorAll('button') ?? [])
+        .some((button) => button.textContent?.includes('Reopen architecture')))
+        .toBe(false);
+      expect(findButton(panel, 'Generate architecture').disabled).toBe(true);
+      expect(findButton(panel, 'Review architecture').disabled).toBe(true);
+    });
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureApprovalResumes)
+        .toEqual(['approval-resume-key']);
+      expect(panel?.textContent).toContain('Approved Jul 24, 2026');
+      expect(studio.client.architectureState.approvalSaga).toBeNull();
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('rapid-prototype');
+      expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
+      expect(studio.client.pendingMilestones).toEqual([
+        expect.objectContaining({ kind: 'architecture-approval' }),
+      ]);
     });
   });
 
@@ -2469,6 +2614,12 @@ function cloneArchitectureState(
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
+    approvalSaga: state.approvalSaga
+      ? {
+          ...state.approvalSaga,
+          steps: { ...state.approvalSaga.steps },
+        }
+      : null,
   };
 }
 

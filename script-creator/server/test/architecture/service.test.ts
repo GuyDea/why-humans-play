@@ -12,6 +12,7 @@ import {
   ArchitectureRevisionConflictError,
   ArchitectureService,
 } from '../../src/architecture/service.js';
+import { exportDocumentMarkdown } from '../../src/documents/service.js';
 import { DocumentStore } from '../../src/documents/store.js';
 import type { OperationName } from '../../src/operations/registry.js';
 
@@ -225,6 +226,28 @@ describe('ArchitectureService revisions', () => {
         .toMatchObject({ revisionSeq: 1, sections: completeSections() });
     }
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+  });
+
+  it('refuses changed architecture sections while approval exists', () => {
+    const fixture = makeFixture();
+    const changed = completeSections().map((section, index) =>
+      index === 2
+        ? { ...section, md: `${section.md}Changed after approval.\n` }
+        : section);
+
+    expect(() => fixture.service.save('draft-1', {
+      expectedRevisionSeq: 0,
+      sections: changed,
+      opId: null,
+      disposition: 'manual-save',
+    })).toThrow(/reopen architecture/i);
+
+    expect(fixture.service.get('draft-1')).toMatchObject({
+      revisionSeq: 0,
+      sections: completeSections(),
+      approvedMd: joinArchitecture(completeSections()),
+    });
+    expect(fixture.store.listRevisions('draft-1')).toEqual([]);
   });
 });
 
@@ -517,6 +540,35 @@ describe('ArchitectureService narration proposal reconciliation', () => {
       'accepted',
     )).toMatchObject({ state: 'accepted' });
 
+    expect(fixture.service.get('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: false });
+  });
+
+  it('auto-settles a recovered accepted revision and clears eligible reconciliation', () => {
+    const fixture = makeFixture({
+      narration: 'Replacement narration saved before resolution.',
+      reconciliationRequired: true,
+    });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    const operationId = fixture.service.submitOperation(
+      'draft-1',
+      'generate-episode',
+      { topic_brief: 'Brief.' },
+    );
+    appendAcceptedNarrationRevision(fixture, operationId);
+    const current = fixture.store.getDraft('draft-1')!;
+
+    expect(fixture.service.prepareNarrationApproval('draft-1', {
+      expectedRevisionSeq: 1,
+      expectedNarrationMd: exportDocumentMarkdown(current.doc),
+    })).toEqual({
+      settledExportToken: expect.any(String),
+    });
+
+    expect(fixture.store.getNarrationProposal('draft-1', operationId))
+      .toMatchObject({ state: 'accepted' });
     expect(fixture.service.get('draft-1'))
       .toMatchObject({ narrationReconciliationRequired: false });
   });

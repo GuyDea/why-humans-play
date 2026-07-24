@@ -4,6 +4,7 @@ import {
   mkdirSync,
   readFileSync,
   rmSync,
+  unlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -24,6 +25,7 @@ import {
   type ArtifactWriteResult,
   type PipelineRow,
 } from '../../src/repo/artifacts.js';
+import { MilestoneConflictError } from '../../src/repo/milestones.js';
 import { UNUSED_VALIDATOR_SERVICE } from './stubs.js';
 
 const NONCE = 'architecture-action-nonce';
@@ -75,6 +77,7 @@ interface Fixture {
   write: ReturnType<typeof vi.fn>;
   upsert: ReturnType<typeof vi.fn>;
   nextId: number;
+  milestoneFailure: Error | undefined;
 }
 
 const fixtures: Fixture[] = [];
@@ -82,6 +85,7 @@ const fixtures: Fixture[] = [];
 function makeFixture(input: {
   architectureSections?: ArchitectureSection[];
   narration?: string;
+  milestoneFailure?: Error;
 } = {}): Fixture {
   const root = mkdtempSync(join(tmpdir(), 'architecture-http-'));
   const store = new DocumentStore(join(root, 'state.sqlite3'));
@@ -116,6 +120,7 @@ function makeFixture(input: {
     write,
     upsert,
     nextId: 1,
+    milestoneFailure: input.milestoneFailure,
   };
   rebuild(fixture);
   fixtures.push(fixture);
@@ -133,6 +138,14 @@ function rebuild(fixture: Fixture): void {
       write: fixture.write,
       upsertPipelineRow: fixture.upsert,
     },
+    workspaceService: fixture.milestoneFailure
+      ? {
+          workspacePath: () => fixture.root,
+          recordPending: async () => {
+            throw fixture.milestoneFailure;
+          },
+        }
+      : undefined,
     idFactory: () => `architecture-action-revision-${fixture.nextId++}`,
     now: () => '2026-07-24T10:30:00.000Z',
   });
@@ -170,6 +183,15 @@ function approve(fixture: Fixture, expectedRevisionSeq: number) {
     url: '/api/drafts/draft-1/architecture/approve',
     headers: AUTH,
     payload: { expectedRevisionSeq },
+  });
+}
+
+function resumeApproval(fixture: Fixture, resumeKey: string) {
+  return fixture.app.inject({
+    method: 'POST',
+    url: '/api/drafts/draft-1/architecture/approve/resume',
+    headers: AUTH,
+    payload: { resumeKey },
   });
 }
 
@@ -299,6 +321,61 @@ describe('architecture approval and Reopen HTTP API', () => {
     });
   });
 
+  it('refuses approve A, save B, approve B without Reopen', async () => {
+    const fixture = makeFixture();
+    const approvedMd = joinArchitecture(sections());
+    expect((await approve(fixture, 0)).statusCode).toBe(200);
+    const changed = sections().map((section, index) =>
+      index === 2
+        ? { ...section, md: `${section.md}Changed without Reopen.\n` }
+        : section);
+
+    const save = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1/architecture',
+      headers: AUTH,
+      payload: {
+        expectedRevisionSeq: 1,
+        sections: changed,
+        opId: null,
+        disposition: 'manual-save',
+      },
+    });
+    const reapproval = await approve(fixture, 2);
+
+    expect(save.statusCode).toBe(409);
+    expect(save.json().error).toMatch(/reopen architecture/i);
+    expect(reapproval.statusCode).toBe(409);
+    expect(reapproval.json()).toMatchObject({
+      error: 'architecture revision conflict',
+      current: {
+        revisionSeq: 1,
+        sections: sections(),
+        approvedMd,
+      },
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+  });
+
+  it('returns the completed approval idempotently for unchanged content', async () => {
+    const fixture = makeFixture();
+    expect((await approve(fixture, 0)).statusCode).toBe(200);
+
+    const response = await approve(fixture, 1);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      complete: true,
+      state: {
+        revisionSeq: 1,
+        approvedMd: joinArchitecture(sections()),
+      },
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+    expect(fixture.write).toHaveBeenCalledOnce();
+    expect(fixture.upsert).toHaveBeenCalledOnce();
+  });
+
   it.each([
     {
       label: 'missing fixed section',
@@ -379,6 +456,76 @@ describe('architecture approval and Reopen HTTP API', () => {
     expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
       metadata: { creativeStatus: { phase: 'architecture' } },
     });
+  });
+
+  it('exposes a paused approval across reload and resumes it by durable key', async () => {
+    const fixture = makeFixture();
+    const target = join(
+      fixture.root,
+      'whp-youtube',
+      'architectures',
+      'voluntary-obstacles.md',
+    );
+    mkdirSync(dirname(target), { recursive: true });
+    writeFileSync(target, 'pre-planted approval conflict\n');
+
+    const paused = await approve(fixture, 0);
+
+    expect(paused.statusCode).toBe(409);
+    expect(paused.json()).toMatchObject({
+      error: 'architecture artifact conflict',
+      state: {
+        approvedAt: '2026-07-24T10:30:00.000Z',
+        revisionSeq: 1,
+        approvalSaga: {
+          resumeKey: expect.any(String),
+          steps: {
+            revisionAppended: 'completed',
+            artifactWritten: 'pending',
+            pipelineUpserted: 'pending',
+            draftUpdated: 'pending',
+          },
+        },
+      },
+    });
+    expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
+      metadata: { creativeStatus: { phase: 'architecture' } },
+    });
+    const resumeKey = paused.json().state.approvalSaga.resumeKey as string;
+
+    await fixture.app.close();
+    rebuild(fixture);
+    const reloaded = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts/draft-1/architecture',
+      headers: AUTH,
+    });
+    expect(reloaded.statusCode).toBe(200);
+    expect(reloaded.json()).toMatchObject({
+      approvalSaga: { resumeKey },
+    });
+
+    unlinkSync(target);
+    const resumed = await resumeApproval(fixture, resumeKey);
+
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toMatchObject({
+      complete: true,
+      state: {
+        approvalSaga: null,
+        revisionSeq: 1,
+      },
+    });
+    expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
+      metadata: { creativeStatus: { phase: 'rapid-prototype' } },
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+    expect(readFileSync(
+      join(fixture.root, 'whp-youtube', 'PIPELINE.md'),
+      'utf8',
+    )).toContain(
+      '| voluntary-obstacles | prototyping | whp-youtube/architectures/voluntary-obstacles.md |',
+    );
   });
 
   it('refuses to resume a paused approval after a later draft revision', async () => {
@@ -532,6 +679,22 @@ describe('architecture approval and Reopen HTTP API', () => {
         expect.stringContaining('.sc-conflict-'),
         expect.stringContaining('.sc-displaced-'),
       ],
+    });
+  });
+
+  it('maps a nested milestone conflict to a recoverable response', async () => {
+    const fixture = makeFixture({
+      milestoneFailure: new MilestoneConflictError(
+        'pending milestone source conflict for architecture-approval',
+      ),
+    });
+
+    const response = await approve(fixture, 0);
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: 'pending milestone source conflict for architecture-approval',
+      recoverable: true,
     });
   });
 });

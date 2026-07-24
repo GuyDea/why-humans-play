@@ -790,6 +790,22 @@ export class DocumentStore {
     return row ? architectureSagaFrom(row) : null;
   }
 
+  getPendingArchitectureSaga(
+    draftId: string,
+    action: ArchitectureSagaAction,
+  ): ArchitectureSagaRecord | null {
+    const row = this.db.prepare<
+      [string, ArchitectureSagaAction],
+      ArchitectureSagaRow
+    >(
+      `SELECT * FROM architecture_sagas
+       WHERE draft_id = ? AND action = ? AND draft_updated = 0
+       ORDER BY expected_revision_seq DESC
+       LIMIT 1`,
+    ).get(draftId, action);
+    return row ? architectureSagaFrom(row) : null;
+  }
+
   createArchitectureSaga(
     saga: ArchitectureSagaRecord,
   ): ArchitectureSagaRecord {

@@ -42,9 +42,16 @@ interface EpisodeProposal {
         </p>
       }
       @if (model().state?.narrationReconciliationRequired) {
-        <p class="reconciliation-callout" role="status">
-          Narration reconciliation is required before Promote.
-        </p>
+        <div class="reconciliation-callout" role="status">
+          <p>Narration reconciliation is required before Promote.</p>
+          <button
+            type="button"
+            [disabled]="busy() || !canGenerate()"
+            (click)="markNarrationReconciled()"
+          >
+            Mark narration reconciled
+          </button>
+        </div>
       }
 
       <div class="button-row">
@@ -231,6 +238,7 @@ export class NarrationActions {
     return state?.approvedAt !== null
       && state?.approvedAt !== undefined
       && state.approvedMd !== null
+      && state.approvalSaga === null
       && state.approvedMd === joinArchitecture(state.sections);
   }
 
@@ -263,6 +271,20 @@ export class NarrationActions {
   protected promote(): void {
     if (this.busy() || !this.canPromote()) return;
     void this.runSimpleOperation('promote');
+  }
+
+  protected markNarrationReconciled(): void {
+    const state = this.model().state;
+    if (
+      this.busy()
+      || !this.canGenerate()
+      || !state?.narrationReconciliationRequired
+    ) return;
+    const confirmed = globalThis.confirm(
+      'Mark narration reconciled at the current revision?',
+    );
+    if (!confirmed) return;
+    void this.runMarkNarrationReconciled(state.revisionSeq);
   }
 
   protected rejectEpisodeProposal(): void {
@@ -331,6 +353,30 @@ export class NarrationActions {
     } catch (error) {
       this.failure.set(errorMessage(error));
       this.status.set('Promote failed');
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  private async runMarkNarrationReconciled(
+    expectedRevisionSeq: number,
+  ): Promise<void> {
+    this.busy.set(true);
+    this.failure.set(null);
+    this.status.set('Marking narration reconciled');
+    try {
+      this.model().state = await this.client().markNarrationReconciled(
+        this.draft().id,
+        {
+          expectedRevisionSeq,
+          confirmed: true,
+        },
+      );
+      this.status.set('Narration reconciled');
+      this.changed.emit();
+    } catch (error) {
+      this.failure.set(errorMessage(error));
+      this.status.set('Narration reconciliation failed');
     } finally {
       this.busy.set(false);
     }

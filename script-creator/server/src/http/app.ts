@@ -59,9 +59,11 @@ export interface ArchitectureHttpService extends Pick<
   'get' | 'save' | 'submitOperation' | 'resumeOperation'
 > {
   approve?: ArchitectureService['approve'];
+  resumeApproval?: ArchitectureService['resumeApproval'];
   reopen?: ArchitectureService['reopen'];
   prepareNarrationApproval?: ArchitectureService['prepareNarrationApproval'];
   approveNarration?: ArchitectureService['approveNarration'];
+  markNarrationReconciled?: ArchitectureService['markNarrationReconciled'];
   narrationProposals?: ArchitectureService['narrationProposals'];
   resolveNarrationProposal?:
     ArchitectureService['resolveNarrationProposal'];
@@ -254,6 +256,10 @@ interface ApproveArchitectureBody {
   expectedRevisionSeq?: unknown;
 }
 
+interface ResumeArchitectureApprovalBody {
+  resumeKey?: unknown;
+}
+
 interface ReopenArchitectureBody {
   expectedRevisionSeq?: unknown;
   confirmed?: unknown;
@@ -267,6 +273,11 @@ interface ApproveNarrationBody {
 interface PrepareNarrationApprovalBody {
   expectedRevisionSeq?: unknown;
   expectedNarrationMd?: unknown;
+}
+
+interface ReconcileNarrationBody {
+  expectedRevisionSeq?: unknown;
+  confirmed?: unknown;
 }
 
 interface SyncProductionBody {
@@ -783,6 +794,26 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     },
   );
 
+  app.post<{
+    Params: DraftParams;
+    Body: ResumeArchitectureApprovalBody;
+  }>(
+    '/api/drafts/:id/architecture/approve/resume',
+    async (request, reply) => {
+      try {
+        if (!architectureService.resumeApproval) {
+          throw new Error('architecture approval resume is not configured');
+        }
+        return await architectureService.resumeApproval(
+          request.params.id,
+          requiredString(request.body?.resumeKey, 'resumeKey'),
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
   app.post<{ Params: DraftParams; Body: ReopenArchitectureBody }>(
     '/api/drafts/:id/architecture/reopen',
     async (request, reply) => {
@@ -824,6 +855,33 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
               request.body?.expectedNarrationMd,
               'expectedNarrationMd',
             ),
+          },
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: DraftParams;
+    Body: ReconcileNarrationBody;
+  }>(
+    '/api/drafts/:id/narration/reconcile',
+    async (request, reply) => {
+      try {
+        if (!architectureService.markNarrationReconciled) {
+          throw new Error(
+            'narration reconciliation is not configured',
+          );
+        }
+        return architectureService.markNarrationReconciled(
+          request.params.id,
+          {
+            expectedRevisionSeq: requiredRevisionSeq(
+              request.body?.expectedRevisionSeq,
+            ),
+            confirmed: requiredTrue(request.body?.confirmed, 'confirmed'),
           },
         );
       } catch (error) {
@@ -1741,6 +1799,12 @@ function sendArchitectureError(
   if (error instanceof ArchitectureGateError) {
     return reply.code(409).send({ error: error.message });
   }
+  if (error instanceof MilestoneConflictError) {
+    return reply.code(409).send({
+      error: error.message,
+      recoverable: true,
+    });
+  }
   const message = error instanceof Error
     ? error.message
     : 'architecture request failed';
@@ -1755,6 +1819,7 @@ function sendArchitectureError(
     /^opId must be a string or null$/,
     /^disposition is required$/,
     /^confirmed must be true$/,
+    /^resumeKey is required$/,
     /^expectedNarrationMd is required$/,
     /^settledExportToken is required$/,
     /^target_path is required$/,
@@ -1888,8 +1953,10 @@ const UNCONFIGURED_ARCHITECTURE_SERVICE: ArchitectureHttpService = {
   resumeOperation: architectureNotConfigured,
   prepareNarrationApproval: architectureNotConfigured,
   approveNarration: architectureNotConfigured,
+  markNarrationReconciled: architectureNotConfigured,
   promotion: architectureNotConfigured,
   approve: architectureNotConfigured,
+  resumeApproval: architectureNotConfigured,
   reopen: architectureNotConfigured,
 };
 

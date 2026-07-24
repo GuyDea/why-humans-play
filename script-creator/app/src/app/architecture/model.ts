@@ -79,6 +79,10 @@ export interface ArchitectureModelClient {
     draftId: string,
     input: { expectedRevisionSeq: number },
   ): Promise<ArchitectureActionResult>;
+  resumeArchitectureApproval(
+    draftId: string,
+    input: { resumeKey: string },
+  ): Promise<ArchitectureActionResult>;
   reopenArchitecture(
     draftId: string,
     input: { expectedRevisionSeq: number; confirmed: true },
@@ -333,6 +337,22 @@ export class ArchitectureModel {
     }
   }
 
+  async resumeApproval(): Promise<void> {
+    const saga = this.requireState().approvalSaga;
+    if (!saga) return;
+    this.actionConflict = null;
+    this.failure = null;
+    try {
+      const result = await this.client.resumeArchitectureApproval(
+        this.draftId,
+        { resumeKey: saga.resumeKey },
+      );
+      this.state = cloneState(result.state);
+    } catch (error) {
+      this.captureActionConflict(error);
+    }
+  }
+
   private async execute(
     operation: ArchitectureOperationName,
     inputs: unknown,
@@ -564,6 +584,12 @@ function cloneState(state: ArchitectureState): ArchitectureState {
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
+    approvalSaga: state.approvalSaga
+      ? {
+          ...state.approvalSaga,
+          steps: { ...state.approvalSaga.steps },
+        }
+      : null,
   };
 }
 
