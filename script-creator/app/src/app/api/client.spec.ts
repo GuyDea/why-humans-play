@@ -555,6 +555,91 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('maps milestone workspace, pending-list, and explicit commit routes', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+    const milestoneClient = client as DaemonClient & {
+      getMilestoneStatus?: (id: string) => Promise<unknown>;
+      chooseMilestoneWorkspace?: (
+        id: string,
+        input:
+          | { choice: 'new-branch'; taskName: string }
+          | { choice: 'current-branch'; confirmed: true },
+      ) => Promise<unknown>;
+      listPendingMilestones?: (id: string) => Promise<unknown>;
+      commitMilestone?: (
+        id: string,
+        kind: 'architecture-approval',
+        input: { pendingMilestoneId: string; confirmed: true },
+      ) => Promise<unknown>;
+    };
+
+    expect(milestoneClient.getMilestoneStatus).toBeTypeOf('function');
+    expect(milestoneClient.chooseMilestoneWorkspace).toBeTypeOf('function');
+    expect(milestoneClient.listPendingMilestones).toBeTypeOf('function');
+    expect(milestoneClient.commitMilestone).toBeTypeOf('function');
+    if (
+      !milestoneClient.getMilestoneStatus
+      || !milestoneClient.chooseMilestoneWorkspace
+      || !milestoneClient.listPendingMilestones
+      || !milestoneClient.commitMilestone
+    ) return;
+
+    await milestoneClient.getMilestoneStatus('draft/one');
+    await milestoneClient.chooseMilestoneWorkspace('draft/one', {
+      choice: 'new-branch',
+      taskName: 'composition-net',
+    });
+    await milestoneClient.listPendingMilestones('draft/one');
+    await milestoneClient.commitMilestone(
+      'draft/one',
+      'architecture-approval',
+      {
+        pendingMilestoneId: 'milestone/one',
+        confirmed: true,
+      },
+    );
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      nonce: new Headers(init?.headers).get('x-sc-nonce'),
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/milestones/status`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/milestones/workspace`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          choice: 'new-branch',
+          taskName: 'composition-net',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/milestones`,
+        method: 'GET',
+        nonce: NONCE,
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/milestones/architecture-approval/commit`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          pendingMilestoneId: 'milestone/one',
+          confirmed: true,
+        }),
+      },
+    ]);
+  });
+
   it('preserves architecture revision and repository CAS conflict bodies', async () => {
     const revisionBody = {
       error: 'architecture revision conflict',

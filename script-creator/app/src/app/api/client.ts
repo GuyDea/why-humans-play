@@ -432,6 +432,63 @@ export interface PromotionRecord {
   updatedAt?: string;
 }
 
+export type WorkspaceChoice = 'new-branch' | 'current-branch';
+
+export type MilestoneKind =
+  | 'topic-selection'
+  | 'architecture-approval'
+  | 'architecture-reopen'
+  | 'creative-narration-approval'
+  | 'production-promotion';
+
+export interface EpisodeWorkspace {
+  draftId: string;
+  episodeSlug: string;
+  choice: WorkspaceChoice;
+  branch: string;
+  worktreePath: string;
+  baseBranch: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface WorkspaceRecommendation {
+  defaultBranch: string;
+  taskName: string;
+  branch: string;
+  worktreePath: string;
+}
+
+export interface MilestoneStatus {
+  workspace: EpisodeWorkspace | null;
+  recommendation: WorkspaceRecommendation;
+  dirtyFiles: string[];
+}
+
+export interface MilestoneRecord {
+  id: string;
+  draftId: string;
+  episodeSlug: string;
+  kind: MilestoneKind;
+  files: string[];
+  commitMessage: string;
+  sourceHashes: Record<string, string>;
+  baseCommitHash: string;
+  reconciliationRequired: boolean;
+  state: 'pending' | 'committed';
+  resultingCommitHash: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PendingMilestone extends MilestoneRecord {
+  diffSummary: string;
+}
+
+export type ChooseWorkspaceInput =
+  | { choice: 'new-branch'; taskName: string }
+  | { choice: 'current-branch'; confirmed: true };
+
 export interface SseFrame {
   id: string;
   event: string;
@@ -680,6 +737,49 @@ export class DaemonClient {
   ): Promise<ArchitectureActionResult> {
     return this.request(
       `/api/drafts/${encodeURIComponent(id)}/architecture/reopen`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async getMilestoneStatus(id: string): Promise<MilestoneStatus> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/status`,
+    );
+  }
+
+  async chooseMilestoneWorkspace(
+    id: string,
+    input: ChooseWorkspaceInput,
+  ): Promise<EpisodeWorkspace> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/workspace`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async listPendingMilestones(
+    id: string,
+  ): Promise<{ milestones: PendingMilestone[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones`,
+    );
+  }
+
+  async commitMilestone(
+    id: string,
+    kind: MilestoneKind,
+    input: { pendingMilestoneId: string; confirmed: true },
+  ): Promise<MilestoneRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/milestones/${
+        encodeURIComponent(kind)
+      }/commit`,
       {
         method: 'POST',
         body: JSON.stringify(input),

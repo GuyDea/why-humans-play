@@ -28,10 +28,14 @@ import type {
   DaemonClient,
   DraftDocument,
   DraftRecord,
+  EpisodeWorkspace,
+  MilestoneKind,
+  MilestoneStatus,
   OperationName,
   OperationRecord,
   OperationResult,
   OperationSummary,
+  PendingMilestone,
   RevisionRecord,
   SavedDraft,
   StreamEventsOptions,
@@ -42,6 +46,7 @@ import {
 } from '../architecture/model';
 import { ArchitecturePanel } from '../architecture/architecture-panel';
 import { NarrationActions } from '../narration/narration-actions';
+import { MilestonePanel } from '../milestones/milestone-panel';
 import { ProductionPanel } from '../production/production-panel';
 import { App } from '../app';
 import { routes } from '../app.routes';
@@ -86,6 +91,7 @@ interface ControlledPromotion {
 class ControllableDaemonClient {
   private sequence = 0;
   private revisionSequence = 0;
+  private milestoneSequence = 0;
   private readonly revisionHistory: RevisionRecord[] = [];
   private readonly finishes = new Map<string, () => void>();
   private readonly outcomes = new Map<string, ControlledOutcome>();
@@ -103,6 +109,15 @@ class ControllableDaemonClient {
   }> = [];
   readonly canonicalArchitectureWrites: string[] = [];
   readonly pipelineMilestones: string[] = [];
+  readonly milestoneCommitRequests: Array<{
+    draftId: string;
+    kind: MilestoneKind;
+    input: { pendingMilestoneId: string; confirmed: true };
+  }> = [];
+  milestoneWorkspace: EpisodeWorkspace | null;
+  milestoneDirtyFiles: string[] = [];
+  pendingMilestones: PendingMilestone[] = [];
+  failNextMilestoneCommit = false;
   readonly narrationApprovals: Array<{
     draftId: string;
     expectedRevisionSeq: number;
@@ -145,7 +160,20 @@ class ControllableDaemonClient {
     narrationReconciliationRequired: false,
   };
 
-  constructor(readonly storedDraft: DraftRecord) {}
+  constructor(readonly storedDraft: DraftRecord) {
+    this.milestoneWorkspace = {
+      draftId: storedDraft.id,
+      episodeSlug: storedDraft.episodeSlug,
+      choice: 'new-branch',
+      branch: `episode/${storedDraft.episodeSlug}`,
+      worktreePath: `/tmp/script-creator-worktrees/${
+        storedDraft.episodeSlug
+      }`,
+      baseBranch: 'main',
+      createdAt: '2026-07-24T11:00:00.000Z',
+      updatedAt: '2026-07-24T11:00:00.000Z',
+    };
+  }
 
   readonly list = vi.fn(async () => [draftSummary(this.storedDraft)]);
   readonly get = vi.fn(async (_id: string) => this.storedDraft);
@@ -199,6 +227,13 @@ class ControllableDaemonClient {
     record.approvedNarrationRevisionSeq = revision.seq;
     record.narrationArtifactHash = 'narration-hash';
     setDraftPhase(this.storedDraft, 'creative-approved');
+    this.recordPendingMilestone(
+      'creative-narration-approval',
+      [
+        `whp-youtube/drafts/${this.storedDraft.episodeSlug}.md`,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
     return this.storedDraft;
   });
   readonly resolveNarrationProposal = vi.fn(async (
@@ -261,7 +296,90 @@ class ControllableDaemonClient {
     };
     setDraftPhase(this.storedDraft, 'production');
     this.pipelineMilestones.push('production');
+    this.recordPendingMilestone(
+      'production-promotion',
+      [
+        this.promotion.targetPath,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
     return this.promotion;
+  });
+
+  readonly getMilestoneStatus = vi.fn(async (): Promise<MilestoneStatus> => ({
+    workspace: this.milestoneWorkspace
+      ? { ...this.milestoneWorkspace }
+      : null,
+    recommendation: {
+      defaultBranch: 'main',
+      taskName: this.storedDraft.episodeSlug,
+      branch: `episode/${this.storedDraft.episodeSlug}`,
+      worktreePath:
+        `/tmp/script-creator-worktrees/${this.storedDraft.episodeSlug}`,
+    },
+    dirtyFiles: [...this.milestoneDirtyFiles],
+  }));
+  readonly chooseMilestoneWorkspace = vi.fn(async (
+    draftId: string,
+    input:
+      | { choice: 'new-branch'; taskName: string }
+      | { choice: 'current-branch'; confirmed: true },
+  ): Promise<EpisodeWorkspace> => {
+    this.milestoneWorkspace = input.choice === 'new-branch'
+      ? {
+        draftId,
+        episodeSlug: this.storedDraft.episodeSlug,
+        choice: input.choice,
+        branch: `episode/${input.taskName}`,
+        worktreePath: `/tmp/script-creator-worktrees/${input.taskName}`,
+        baseBranch: 'main',
+        createdAt: '2026-07-24T11:00:00.000Z',
+        updatedAt: '2026-07-24T11:00:00.000Z',
+      }
+      : {
+        draftId,
+        episodeSlug: this.storedDraft.episodeSlug,
+        choice: input.choice,
+        branch: 'script-creator-plan6-architecture',
+        worktreePath: '/tmp/current-repository',
+        baseBranch: 'main',
+        createdAt: '2026-07-24T11:00:00.000Z',
+        updatedAt: '2026-07-24T11:00:00.000Z',
+      };
+    return { ...this.milestoneWorkspace };
+  });
+  readonly listPendingMilestones = vi.fn(async () => ({
+    milestones: this.pendingMilestones.map((milestone) => ({
+      ...milestone,
+      files: [...milestone.files],
+      sourceHashes: { ...milestone.sourceHashes },
+    })),
+  }));
+  readonly commitMilestone = vi.fn(async (
+    draftId: string,
+    kind: MilestoneKind,
+    input: { pendingMilestoneId: string; confirmed: true },
+  ): Promise<PendingMilestone> => {
+    this.milestoneCommitRequests.push({ draftId, kind, input });
+    const pending = this.pendingMilestones.find(
+      (milestone) =>
+        milestone.id === input.pendingMilestoneId
+        && milestone.kind === kind,
+    );
+    if (!pending) throw new Error('pending milestone missing');
+    if (this.failNextMilestoneCommit) {
+      this.failNextMilestoneCommit = false;
+      throw new Error('simulated milestone commit failure');
+    }
+    this.pendingMilestones = this.pendingMilestones.filter(
+      ({ id }) => id !== pending.id,
+    );
+    return {
+      ...pending,
+      state: 'committed',
+      resultingCommitHash: 'milestone-commit-hash',
+      updatedAt: '2026-07-24T14:00:00.000Z',
+    };
   });
 
   readonly save = vi.fn(async (
@@ -341,6 +459,13 @@ class ControllableDaemonClient {
       `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
     );
     this.pipelineMilestones.push('prototyping');
+    this.recordPendingMilestone(
+      'architecture-approval',
+      [
+        `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+        'whp-youtube/PIPELINE.md',
+      ],
+    );
     return completedArchitectureAction(this.architectureState);
   });
   readonly reopenArchitecture = vi.fn(async (
@@ -365,6 +490,10 @@ class ControllableDaemonClient {
     };
     setDraftPhase(this.storedDraft, 'architecture');
     this.pipelineMilestones.push('architecture');
+    this.recordPendingMilestone(
+      'architecture-reopen',
+      ['whp-youtube/PIPELINE.md'],
+    );
     return completedArchitectureAction(this.architectureState);
   });
 
@@ -529,6 +658,49 @@ class ControllableDaemonClient {
     this.revisionHistory.push(revision);
     return revision;
   }
+
+  private recordPendingMilestone(
+    kind: MilestoneKind,
+    files: string[],
+  ): PendingMilestone {
+    const existing = this.pendingMilestones.find((milestone) =>
+      milestone.kind === kind
+      && JSON.stringify(milestone.files) === JSON.stringify(files));
+    if (existing) return existing;
+    const id = `milestone-${++this.milestoneSequence}`;
+    const timestamp = '2026-07-24T13:30:00.000Z';
+    const labels: Record<MilestoneKind, string> = {
+      'topic-selection': 'topic selection',
+      'architecture-approval': 'architecture approval',
+      'architecture-reopen': 'architecture reopen',
+      'creative-narration-approval': 'creative narration approval',
+      'production-promotion': 'production promotion',
+    };
+    const milestone: PendingMilestone = {
+      id,
+      draftId: this.storedDraft.id,
+      episodeSlug: this.storedDraft.episodeSlug,
+      kind,
+      files: [...files],
+      commitMessage:
+        `feat(${this.storedDraft.episodeSlug}): record ${
+          labels[kind]
+        } milestone`,
+      sourceHashes: Object.fromEntries(files.map((file) => [
+        file,
+        `hash-${file}`,
+      ])),
+      baseCommitHash: 'base-commit-hash',
+      reconciliationRequired: true,
+      state: 'pending',
+      resultingCommitHash: null,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+      diffSummary: files.map((file) => ` ${file} | 2 ++`).join('\n'),
+    };
+    this.pendingMilestones.push(milestone);
+    return milestone;
+  }
 }
 
 interface MountedStudio {
@@ -563,6 +735,98 @@ afterEach(() => {
 });
 
 describe('mounted Script Studio composition', () => {
+  it('refreshes milestone state when the routed active draft changes', async () => {
+    const first = studioDraft();
+    const second = studioDraft();
+    second.id = 'draft-2';
+    second.episodeSlug = 'second-episode';
+    second.title = 'Second episode';
+    second.updatedAt = '2026-07-22T12:00:00.000Z';
+    const pendingByDraft = new Map([
+      [first.id, pendingMilestoneFixture(
+        first,
+        'pending-first',
+        'first milestone message',
+      )],
+      [second.id, pendingMilestoneFixture(
+        second,
+        'pending-second',
+        'second milestone message',
+      )],
+    ]);
+    const studio = await mountStudio(first, (client) => {
+      client.list.mockImplementation(async () => [
+        draftSummary(first),
+        draftSummary(second),
+      ]);
+      client.get.mockImplementation(async (id: string) =>
+        id === second.id ? second : first);
+      client.getMilestoneStatus.mockImplementation(async (id: string) => ({
+        workspace: {
+          draftId: id,
+          episodeSlug: id === second.id
+            ? second.episodeSlug
+            : first.episodeSlug,
+          choice: 'new-branch',
+          branch: `episode/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          worktreePath: `/tmp/script-creator-worktrees/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          baseBranch: 'main',
+          createdAt: '2026-07-24T11:00:00.000Z',
+          updatedAt: '2026-07-24T11:00:00.000Z',
+        },
+        recommendation: {
+          defaultBranch: 'main',
+          taskName: id === second.id
+            ? second.episodeSlug
+            : first.episodeSlug,
+          branch: `episode/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+          worktreePath: `/tmp/script-creator-worktrees/${
+            id === second.id ? second.episodeSlug : first.episodeSlug
+          }`,
+        },
+        dirtyFiles: [],
+      }));
+      client.listPendingMilestones.mockImplementation(async (id: string) => ({
+        milestones: [pendingByDraft.get(id)!],
+      }));
+    });
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(milestonePanel?.textContent).toContain(
+        'first milestone message',
+      );
+    });
+
+    const secondCard = Array.from(
+      studio.root.querySelectorAll<HTMLButtonElement>('.draft-card'),
+    ).find((card) => card.textContent?.includes('Second episode'));
+    expect(secondCard).not.toBeUndefined();
+    secondCard!.click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.get).toHaveBeenCalledWith(second.id);
+      expect(studio.client.listPendingMilestones).toHaveBeenCalledWith(
+        second.id,
+      );
+      expect(milestonePanel?.textContent).toContain(
+        'second milestone message',
+      );
+      expect(milestonePanel?.textContent).not.toContain(
+        'first milestone message',
+      );
+    });
+  });
+
   it('keeps complete-narration approval disabled while an editor save is pending', async () => {
     const studio = await mountStudio(productionDraft());
     const panel = studio.root.querySelector('app-production-panel')!;
@@ -690,7 +954,9 @@ describe('mounted Script Studio composition', () => {
   });
 
   it('gates Promote completion on pinned exact-hash validator diagnostics', async () => {
-    const studio = await mountStudio(productionDraft());
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.milestoneDirtyFiles = ['unrelated-notes.md'];
+    });
     const panel = studio.root.querySelector('app-production-panel')!;
     studio.client.validatorResults.push(
       {
@@ -796,6 +1062,67 @@ describe('mounted Script Studio composition', () => {
     expect(studio.client.productionSyncs.map(
       ({ expectedRevisionSeq }) => expectedRevisionSeq,
     )).toEqual([2, 2, 3]);
+
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    expect(milestonePanel).not.toBeNull();
+    findButton(milestonePanel, 'Refresh milestones').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.pendingMilestones.map(({ kind }) => kind))
+        .toEqual([
+          'creative-narration-approval',
+          'production-promotion',
+        ]);
+      expect(milestonePanel?.querySelectorAll(
+        '[data-milestone-id]',
+      )).toHaveLength(2);
+    });
+    expect(new Set(
+      studio.client.pendingMilestones.map(({ id }) => id),
+    ).size).toBe(2);
+    expect(studio.client.pendingMilestones.every(
+      ({ files }) => !files.includes('unrelated-notes.md'),
+    )).toBe(true);
+    expect(milestonePanel?.textContent).toContain('unrelated-notes.md');
+
+    const narrationMilestone = studio.client.pendingMilestones.find(
+      ({ kind }) => kind === 'creative-narration-approval',
+    )!;
+    const narrationCard = milestonePanel?.querySelector(
+      `[data-milestone-id="${narrationMilestone.id}"]`,
+    ) ?? null;
+    const narrationConfirmation =
+      narrationCard?.querySelector<HTMLInputElement>('input[type="checkbox"]');
+    expect(narrationConfirmation).not.toBeNull();
+    narrationConfirmation!.checked = true;
+    narrationConfirmation!.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
+    studio.tick();
+    studio.client.failNextMilestoneCommit = true;
+    findButton(narrationCard, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledOnce();
+      expect(milestonePanel?.textContent).toContain(
+        'simulated milestone commit failure',
+      );
+      expect(studio.client.pendingMilestones).toContain(narrationMilestone);
+    });
+
+    findButton(narrationCard, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledTimes(2);
+      expect(studio.client.pendingMilestones).not.toContain(
+        narrationMilestone,
+      );
+      expect(milestonePanel?.querySelector(
+        `[data-milestone-id="${narrationMilestone.id}"]`,
+      )).toBeNull();
+    });
   });
 
   it('integrates Phase-2 cards, clean narration, and PI proposals on the routed draft page', async () => {
@@ -940,7 +1267,10 @@ describe('mounted Script Studio composition', () => {
   it('drives architecture approval, reopen, and episode reconciliation through production controls', async () => {
     const confirm = vi.fn(() => true);
     vi.stubGlobal('confirm', confirm);
-    const studio = await mountStudio(architectureDraft());
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.milestoneWorkspace = null;
+      client.milestoneDirtyFiles = ['unrelated-notes.md'];
+    });
 
     const architecturePanel = studio.root.querySelector(
       'app-architecture-panel',
@@ -952,6 +1282,26 @@ describe('mounted Script Studio composition', () => {
     expect(architecturePanel).not.toBeNull();
     expect(narrationActions).not.toBeNull();
     expect(editorHost).not.toBeNull();
+    const milestonePanel = studio.root.querySelector(
+      'app-milestone-panel',
+    );
+    expect(milestonePanel).not.toBeNull();
+    expect(milestonePanel?.textContent).toContain('Recommended new branch');
+    expect(milestonePanel?.textContent).toContain('Use current branch');
+    findButton(milestonePanel, 'Use recommended branch').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.chooseMilestoneWorkspace).toHaveBeenCalledWith(
+        'draft-1',
+        {
+          choice: 'new-branch',
+          taskName: 'composition-net',
+        },
+      );
+      expect(milestonePanel?.textContent).toContain(
+        'episode/composition-net',
+      );
+    });
     expect(
       architecturePanel!.compareDocumentPosition(editorHost!)
         & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -1056,6 +1406,43 @@ describe('mounted Script Studio composition', () => {
         'whp-youtube/architectures/composition-net.md',
       ]);
       expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
+    });
+    expect(studio.client.commitMilestone).not.toHaveBeenCalled();
+    findButton(milestonePanel, 'Refresh milestones').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(milestonePanel?.querySelector(
+        '[data-milestone-id="milestone-1"]',
+      )).not.toBeNull();
+      expect(milestonePanel?.textContent).toContain(
+        'feat(composition-net): record architecture approval milestone',
+      );
+    });
+    const architectureMilestone = milestonePanel?.querySelector(
+      '[data-milestone-id="milestone-1"]',
+    ) ?? null;
+    const architectureConfirmation =
+      architectureMilestone?.querySelector<HTMLInputElement>(
+        'input[type="checkbox"]',
+      );
+    expect(architectureConfirmation).not.toBeNull();
+    architectureConfirmation!.checked = true;
+    architectureConfirmation!.dispatchEvent(
+      new Event('change', { bubbles: true }),
+    );
+    studio.tick();
+    findButton(architectureMilestone, 'Commit milestone').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.commitMilestone).toHaveBeenCalledOnce();
+      expect(studio.client.milestoneCommitRequests).toEqual([{
+        draftId: 'draft-1',
+        kind: 'architecture-approval',
+        input: {
+          pendingMilestoneId: 'milestone-1',
+          confirmed: true,
+        },
+      }]);
     });
     const narrationComponent = getDebugNode(narrationActions!)
       ?.componentInstance as NarrationActions | undefined;
@@ -1530,6 +1917,7 @@ async function mountStudio(
     hydrateSignalInputs(DraftTransfer, ['manager']);
     hydrateSignalInputs(EditorHost, ['draft', 'client', 'session', 'wpm']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
     hydrateSignalInputs(ArchitecturePanel, ['model', 'draft']);
     hydrateSignalInputs(NarrationActions, [
       'model',
@@ -1858,6 +2246,30 @@ function studioDraft(): DraftRecord {
 function draftSummary(draft: DraftRecord): Omit<DraftRecord, 'doc'> {
   const { doc: _doc, ...summary } = draft;
   return summary;
+}
+
+function pendingMilestoneFixture(
+  draft: DraftRecord,
+  id: string,
+  commitMessage: string,
+): PendingMilestone {
+  const file = `whp-youtube/architectures/${draft.episodeSlug}.md`;
+  return {
+    id,
+    draftId: draft.id,
+    episodeSlug: draft.episodeSlug,
+    kind: 'architecture-approval',
+    files: [file],
+    commitMessage,
+    sourceHashes: { [file]: `hash-${id}` },
+    baseCommitHash: `base-${id}`,
+    reconciliationRequired: true,
+    state: 'pending',
+    resultingCommitHash: null,
+    createdAt: '2026-07-24T09:00:00.000Z',
+    updatedAt: '2026-07-24T09:00:00.000Z',
+    diffSummary: `${file} | 1 +`,
+  };
 }
 
 function completedOperation(

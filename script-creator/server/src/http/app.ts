@@ -24,6 +24,13 @@ import {
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
 import {
+  MilestoneCommitError,
+  MilestoneConflictError,
+  WorkspaceChoiceRequiredError,
+  type MilestoneKind,
+  type MilestoneService,
+} from '../repo/milestones.js';
+import {
   assertValidatorScriptPath,
   InvalidValidatorPathError,
   type ValidatorResult,
@@ -122,7 +129,16 @@ export interface BuildAppOptions {
   topicService?: TopicHttpService;
   artifactService: ArtifactHttpService;
   validatorService: ValidatorHttpService;
+  milestoneService?: MilestoneHttpService;
 }
+
+export type MilestoneHttpService = Pick<
+  MilestoneService,
+  | 'status'
+  | 'chooseWorkspace'
+  | 'pendingMilestones'
+  | 'commitPending'
+>;
 
 interface SubmitBody {
   operation?: unknown;
@@ -139,6 +155,21 @@ interface OperationParams {
 
 interface DraftParams {
   id: string;
+}
+
+interface MilestoneParams extends DraftParams {
+  kind: string;
+}
+
+interface WorkspaceChoiceBody {
+  choice?: unknown;
+  taskName?: unknown;
+  confirmed?: unknown;
+}
+
+interface CommitMilestoneBody {
+  pendingMilestoneId?: unknown;
+  confirmed?: unknown;
 }
 
 interface IdeaParams {
@@ -300,6 +331,88 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
   });
 
   app.get('/api/health', async () => ({ ok: true }));
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/milestones/status',
+    async (request, reply) => {
+      try {
+        const service = requireMilestoneService(options.milestoneService);
+        return await service.status(request.params.id);
+      } catch (error) {
+        return sendMilestoneError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams; Body: WorkspaceChoiceBody }>(
+    '/api/drafts/:id/milestones/workspace',
+    async (request, reply) => {
+      try {
+        const service = requireMilestoneService(options.milestoneService);
+        const choice = request.body?.choice;
+        if (choice === 'new-branch') {
+          return await service.chooseWorkspace(request.params.id, {
+            choice,
+            taskName: requiredString(request.body?.taskName, 'taskName'),
+          });
+        }
+        if (choice === 'current-branch') {
+          return await service.chooseWorkspace(request.params.id, {
+            choice,
+            confirmed: requiredTrue(
+              request.body?.confirmed,
+              'confirmed',
+            ),
+          });
+        }
+        throw new Error(
+          'choice must be new-branch or current-branch',
+        );
+      } catch (error) {
+        return sendMilestoneError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/milestones',
+    async (request, reply) => {
+      try {
+        const service = requireMilestoneService(options.milestoneService);
+        return {
+          milestones: await service.pendingMilestones(request.params.id),
+        };
+      } catch (error) {
+        return sendMilestoneError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: MilestoneParams;
+    Body: CommitMilestoneBody;
+  }>(
+    '/api/drafts/:id/milestones/:kind/commit',
+    async (request, reply) => {
+      try {
+        const service = requireMilestoneService(options.milestoneService);
+        return await service.commitPending({
+          draftId: request.params.id,
+          kind: requiredMilestoneKind(request.params.kind),
+          pendingMilestoneId: requiredString(
+            request.body?.pendingMilestoneId,
+            'pendingMilestoneId',
+          ),
+          confirmed: requiredTrue(
+            request.body?.confirmed,
+            'confirmed',
+          ),
+        });
+      } catch (error) {
+        return sendMilestoneError(reply, error);
+      }
+    },
+  );
 
   app.post<{ Body: ValidateBody }>(
     '/api/validate',
@@ -525,7 +638,7 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
               'promote completion refused: target changed after validation',
             );
           }
-          return options.documentService.completePromotion(
+          return await options.documentService.completePromotion(
             request.params.id,
             validation,
           );
@@ -1387,6 +1500,27 @@ function requiredTrue(value: unknown, field: string): true {
   return true;
 }
 
+function requiredMilestoneKind(value: string): MilestoneKind {
+  const kinds: MilestoneKind[] = [
+    'topic-selection',
+    'architecture-approval',
+    'architecture-reopen',
+    'creative-narration-approval',
+    'production-promotion',
+  ];
+  if (!kinds.includes(value as MilestoneKind)) {
+    throw new Error('invalid milestone kind');
+  }
+  return value as MilestoneKind;
+}
+
+function requireMilestoneService(
+  service: MilestoneHttpService | undefined,
+): MilestoneHttpService {
+  if (!service) throw new Error('milestone service is not configured');
+  return service;
+}
+
 function requiredArtifactExpectedState(
   value: unknown,
 ): ArtifactExpectedState {
@@ -1501,6 +1635,46 @@ function sendDocumentError(
   }
 
   reply.log.error({ err: error }, 'document request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+function sendMilestoneError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error
+    ? error.message
+    : 'milestone request failed';
+  if (
+    error instanceof MilestoneConflictError
+    || error instanceof MilestoneCommitError
+  ) {
+    return reply.code(409).send({ error: message });
+  }
+  if (error instanceof WorkspaceChoiceRequiredError) {
+    return reply.code(428).send({ error: message });
+  }
+  if (/^(?:draft|pending milestone) not found:/i.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (
+    [
+      /^choice must be /,
+      / is required$/,
+      / must be true$/,
+      /^invalid milestone kind$/,
+      /^current branch choice must be explicitly confirmed$/,
+      /^milestone commit must be explicitly confirmed$/,
+      /^task name must /,
+    ].some((pattern) => pattern.test(message))
+  ) {
+    return reply.code(400).send({ error: message });
+  }
+  if (message === 'milestone service is not configured') {
+    reply.log.error({ err: error }, message);
+    return reply.code(500).send({ error: 'internal server error' });
+  }
+  reply.log.error({ err: error }, 'milestone request failed');
   return reply.code(500).send({ error: 'internal server error' });
 }
 

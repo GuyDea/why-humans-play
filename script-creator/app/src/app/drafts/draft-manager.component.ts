@@ -12,6 +12,7 @@ import type { DaemonClient } from '../api/client';
 import { ArchitecturePanel } from '../architecture/architecture-panel';
 import { ArchitectureModel } from '../architecture/model';
 import { EditorHost } from '../editor/editor-host';
+import { MilestonePanel } from '../milestones/milestone-panel';
 import { NarrationActions } from '../narration/narration-actions';
 import { BriefPanel } from '../panels/brief-panel';
 import { ProductionPanel } from '../production/production-panel';
@@ -33,6 +34,7 @@ import { RevisionTimeline } from './revision-timeline';
     DraftTransfer,
     EditorHost,
     FindingsPanel,
+    MilestonePanel,
     ParkingLot,
     NarrationActions,
     ProductionPanel,
@@ -113,6 +115,10 @@ import { RevisionTimeline } from './revision-timeline';
               </div>
               <span>{{ activeDraft.episodeSlug }}</span>
             </header>
+            <app-milestone-panel
+              [draft]="activeDraft"
+              [client]="client()"
+            />
             @if (architectureModel(); as architecture) {
               <app-architecture-panel
                 [model]="architecture"
@@ -360,6 +366,7 @@ import { RevisionTimeline } from './revision-timeline';
       margin: 0 auto;
     }
 
+    app-milestone-panel,
     app-architecture-panel,
     app-narration-actions,
     app-production-panel {
