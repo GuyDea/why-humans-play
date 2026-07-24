@@ -45,6 +45,16 @@ export interface OperationRecord {
   reasoningOutputTokens: number | null;
   usageAvailable: 0 | 1;
   error: string | null;
+  inputs?: unknown;
+  operationLessons?: OperationLessonLink[];
+}
+
+export interface OperationLessonLink {
+  operationId: string;
+  lessonId: string;
+  lessonVersion: number;
+  contentHash: string;
+  createdAt: string;
 }
 
 export interface OperationSummary {
@@ -494,6 +504,140 @@ export interface MilestoneRecord {
 
 export interface PendingMilestone extends MilestoneRecord {
   diffSummary: string;
+}
+
+export interface LearningSessionRecord {
+  id: string;
+  draftId: string;
+  startCursor: number;
+  endCursor: number | null;
+  createdAt: string;
+  closedAt: string | null;
+}
+
+export interface LearningDecision {
+  id: string;
+  draftId: string;
+  seq: number;
+  kind: string;
+  disposition: string;
+  sourceTimestamp: string;
+  createdAt: string;
+  note: string | null;
+  context: {
+    source: {
+      type: string;
+      id: string;
+      disposition: string;
+    };
+    [key: string]: unknown;
+  };
+}
+
+export interface DecisionPage {
+  decisions: LearningDecision[];
+  nextCursor: number | null;
+}
+
+export type DistillationRunState =
+  | 'frozen'
+  | 'queued'
+  | 'running'
+  | 'completed'
+  | 'failed'
+  | 'cancelled'
+  | 'interrupted'
+  | 'ingested'
+  | 'no-op';
+
+export interface DistillationRunRecord {
+  id: string;
+  draftId: string;
+  sessionId: string;
+  trigger: 'on-demand' | 'session-end';
+  state: DistillationRunState;
+  operationId: string | null;
+  resumeKey: string;
+  guardrailMarkdown: string | null;
+  error: string | null;
+  createdAt: string;
+  updatedAt: string;
+  decisions: Array<{ decisionId: string; snapshot: unknown }>;
+  lessons: Array<{ lessonId: string; snapshot: unknown }>;
+}
+
+export type LessonClassification = 'episode-local' | 'durable';
+export type LessonState =
+  | 'proposed'
+  | 'approved'
+  | 'rejected'
+  | 'retired'
+  | 'superseded'
+  | 'approved-pending-reconcile'
+  | 'applied'
+  | 'retirement-pending'
+  | 'supersession-pending';
+
+export interface LessonEvidenceView {
+  id: string;
+  status: 'resolved' | 'stale';
+  decision: LearningDecision | null;
+}
+
+export interface LessonReconciliation {
+  id: string;
+  lessonId: string;
+  kind: 'apply' | 'retire' | 'supersede';
+  state: 'prepared' | 'awaiting-reconciliation' | 'verified';
+  resumeKey: string;
+  preparedMarkdown: string;
+  repositoryCommit: string | null;
+  paths: string[];
+  anchors: string[];
+  contentHashes: string[];
+  createdAt: string;
+  updatedAt: string;
+  verifiedAt: string | null;
+}
+
+export type LessonRepositoryProvenance = {
+  status: 'resolved';
+  lesson_markdown: string;
+  path: string;
+  anchor: string;
+  content_hash: string;
+} | {
+  status: 'unresolved';
+  reason: string;
+  path: string | null;
+  anchor: string | null;
+  content_hash: string | null;
+};
+
+export interface LessonDetail {
+  id: string;
+  draftId: string;
+  distillationRunId: string | null;
+  classification: LessonClassification;
+  state: LessonState;
+  proposedMarkdown: string | null;
+  reviewedMarkdown: string | null;
+  rationaleMarkdown: string;
+  proposedTarget: string | null;
+  supersedesLessonId: string | null;
+  version: number;
+  repositoryCommit: string | null;
+  repositoryPath: string | null;
+  repositoryAnchor: string | null;
+  repositoryContentHash: string | null;
+  createdAt: string;
+  updatedAt: string;
+  evidenceIds: string[];
+  evidence: LessonEvidenceView[];
+  reconciliation: LessonReconciliation | null;
+  reconciliationHistory: LessonReconciliation[];
+  currentMarkdown: string | null;
+  repositoryProvenance: LessonRepositoryProvenance | null;
 }
 
 export type ChooseWorkspaceInput =
@@ -1012,6 +1156,131 @@ export class DaemonClient {
     return this.request(`/api/drafts/${encodeURIComponent(id)}/export`);
   }
 
+  async listLearningSessions(
+    draftId: string,
+  ): Promise<{ sessions: LearningSessionRecord[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/learning-sessions`,
+    );
+  }
+
+  async listDecisions(draftId: string): Promise<DecisionPage> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/decisions`,
+    );
+  }
+
+  async listLessons(
+    draftId: string,
+  ): Promise<{ lessons: LessonDetail[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/lessons`,
+    );
+  }
+
+  async distill(
+    draftId: string,
+    trigger: 'on-demand' | 'session-end',
+  ): Promise<DistillationRunRecord> {
+    const suffix = trigger === 'session-end' ? '/end-session' : '';
+    return this.request(
+      `/api/drafts/${encodeURIComponent(draftId)}/distill${suffix}`,
+      { method: 'POST' },
+    );
+  }
+
+  async getDistillation(runId: string): Promise<DistillationRunRecord> {
+    return this.request(
+      `/api/distillations/${encodeURIComponent(runId)}`,
+    );
+  }
+
+  async reconcileDistillation(
+    runId: string,
+  ): Promise<DistillationRunRecord> {
+    return this.request(
+      `/api/distillations/${encodeURIComponent(runId)}/reconcile`,
+      { method: 'POST' },
+    );
+  }
+
+  async editLesson(
+    draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+    reviewedMarkdown: string,
+  ): Promise<LessonDetail> {
+    return this.request(this.lessonPath(draftId, lessonId), {
+      method: 'PUT',
+      body: JSON.stringify({ expectedVersion, reviewedMarkdown }),
+    });
+  }
+
+  async approveLesson(
+    draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ): Promise<LessonDetail> {
+    return this.lessonAction(draftId, lessonId, 'approve', expectedVersion);
+  }
+
+  async rejectLesson(
+    draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ): Promise<LessonDetail> {
+    return this.lessonAction(draftId, lessonId, 'reject', expectedVersion);
+  }
+
+  async retireLesson(
+    draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ): Promise<LessonDetail> {
+    return this.lessonAction(draftId, lessonId, 'retire', expectedVersion);
+  }
+
+  async supersedeLesson(
+    draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+    predecessorLessonId: string,
+  ): Promise<LessonDetail> {
+    return this.request(
+      `${this.lessonPath(draftId, lessonId)}/supersede`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ expectedVersion, predecessorLessonId }),
+      },
+    );
+  }
+
+  async markLessonReconciliationAwaiting(
+    resumeKey: string,
+  ): Promise<LessonReconciliation> {
+    return this.request(
+      `/api/lesson-reconciliations/${
+        encodeURIComponent(resumeKey)
+      }/awaiting`,
+      { method: 'POST' },
+    );
+  }
+
+  async verifyLessonReconciliation(
+    resumeKey: string,
+    commit: string,
+  ): Promise<LessonDetail> {
+    return this.request(
+      `/api/lesson-reconciliations/${
+        encodeURIComponent(resumeKey)
+      }/verify`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ commit }),
+      },
+    );
+  }
+
   async writeArtifact(
     path: string,
     content: string,
@@ -1063,6 +1332,27 @@ export class DaemonClient {
     });
     if (!response.ok) throw await responseError(response);
     return await readResponseBody(response) as T;
+  }
+
+  private lessonPath(draftId: string, lessonId: string): string {
+    return `/api/drafts/${encodeURIComponent(draftId)}/lessons/${
+      encodeURIComponent(lessonId)
+    }`;
+  }
+
+  private lessonAction(
+    draftId: string,
+    lessonId: string,
+    action: 'approve' | 'reject' | 'retire',
+    expectedVersion: number,
+  ): Promise<LessonDetail> {
+    return this.request(
+      `${this.lessonPath(draftId, lessonId)}/${action}`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ expectedVersion }),
+      },
+    );
   }
 
   private authHeaders(existing?: HeadersInit): Headers {

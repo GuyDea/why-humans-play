@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import type {
   OperationListResponse,
+  OperationRecord,
   OperationSummary,
   SseFrame,
 } from '../api/client';
@@ -41,7 +42,15 @@ export interface AgentConsoleTracker<Meta = unknown> {
 
 export interface AgentConsoleClient {
   listOps(): Promise<OperationListResponse>;
+  getOp?(id: string): Promise<OperationRecord>;
   cancel(id: string): Promise<unknown>;
+}
+
+interface SuppliedLessonRow {
+  markdown: string;
+  lessonId: string | null;
+  lessonVersion: number | null;
+  contentHash: string | null;
 }
 
 export class AgentConsoleModel<Meta = unknown> {
@@ -274,6 +283,45 @@ function stringValue(value: unknown): string {
               }
             </div>
 
+            <section
+              class="supplied-lessons"
+              aria-labelledby="supplied-lessons-heading"
+            >
+              <header>
+                <div>
+                  <p class="eyebrow">Immutable envelope context</p>
+                  <h3 id="supplied-lessons-heading">Supplied lessons</h3>
+                </div>
+              </header>
+              @if (detailLoading()) {
+                <p role="status">Loading immutable operation inputs…</p>
+              } @else {
+                <ol>
+                  @for (row of suppliedLessonRows(); track $index) {
+                    <li>
+                      <p>{{ row.markdown }}</p>
+                      @if (row.lessonId) {
+                        <a [href]="'/lessons#lesson-' + row.lessonId">
+                          {{ row.lessonId }} · version {{ row.lessonVersion }}
+                        </a>
+                        <code>{{ row.contentHash }}</code>
+                      } @else {
+                        <span role="alert">
+                          Applied lesson provenance link unavailable
+                        </span>
+                      }
+                    </li>
+                  } @empty {
+                    <li><strong>None</strong></li>
+                  }
+                </ol>
+                <p class="doctrine-note">
+                  Durable doctrine is repository-native through the loaded skill;
+                  it is not supplied as episode-local envelope context.
+                </p>
+              }
+            </section>
+
             @if (liveOperation(operation); as live) {
               <ol aria-label="Console entries" aria-live="polite">
                 @for (
@@ -418,7 +466,7 @@ function stringValue(value: unknown): string {
 
     .stream {
       display: grid;
-      grid-template-rows: auto minmax(0, 1fr) auto;
+      grid-template-rows: auto auto minmax(0, 1fr) auto;
       min-width: 0;
     }
 
@@ -446,6 +494,34 @@ function stringValue(value: unknown): string {
       color: var(--whp-accent);
       font-weight: 800;
     }
+
+    .supplied-lessons {
+      display: grid;
+      gap: .55rem;
+      border-bottom: 1px solid var(--whp-line);
+      padding: .75rem 1rem;
+      background: var(--whp-panel);
+    }
+
+    .supplied-lessons header { padding: 0; border: 0; }
+    .supplied-lessons h3 { margin: .12rem 0 0; font-size: .82rem; }
+    .supplied-lessons ol {
+      max-height: none;
+      border: 1px solid var(--whp-line);
+    }
+    .supplied-lessons li {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      font-size: .7rem;
+    }
+    .supplied-lessons li p { font-family: var(--whp-font-editor); line-height: 1.45; }
+    .supplied-lessons li a { color: var(--whp-ink); font-weight: 800; }
+    .supplied-lessons li code {
+      grid-column: 2;
+      color: var(--whp-muted);
+      font-size: .6rem;
+    }
+    .doctrine-note { color: var(--whp-muted); font-size: .68rem; line-height: 1.4; }
 
     ol {
       display: grid;
@@ -537,6 +613,25 @@ export class AgentConsole implements OnInit, OnDestroy {
     signal<readonly OperationSummary[]>([]);
   protected readonly loadError = signal<string | null>(null);
   private readonly selectedId = signal<string | null>(null);
+  protected readonly selectedRecord = signal<OperationRecord | null>(null);
+  protected readonly detailLoading = signal(false);
+  protected readonly suppliedLessonRows = computed<SuppliedLessonRow[]>(() => {
+    const record = this.selectedRecord();
+    const inputs = recordValue(record?.inputs);
+    const supplied = inputs?.['approved_lessons'];
+    if (!Array.isArray(supplied)) return [];
+    const links = record?.operationLessons ?? [];
+    return supplied.filter((value): value is string =>
+      typeof value === 'string').map((markdown, index) => {
+      const link = links[index] ?? null;
+      return {
+        markdown,
+        lessonId: link?.lessonId ?? null,
+        lessonVersion: link?.lessonVersion ?? null,
+        contentHash: link?.contentHash ?? null,
+      };
+    });
+  });
   protected readonly selected = computed(() => {
     const operations = this.operations();
     const id = this.selectedId();
@@ -547,6 +642,7 @@ export class AgentConsole implements OnInit, OnDestroy {
   private refreshTimer: ReturnType<typeof globalThis.setInterval> | null =
     null;
   private refreshGeneration = 0;
+  private detailGeneration = 0;
   private destroyed = false;
 
   ngOnInit(): void {
@@ -567,6 +663,7 @@ export class AgentConsole implements OnInit, OnDestroy {
 
   protected selectOperation(operation: OperationSummary): void {
     this.selectedId.set(operation.id);
+    void this.loadOperation(operation.id);
     const live = this.liveOperation(operation);
     if (live) this.model().selectOperation(live);
   }
@@ -623,9 +720,41 @@ export class AgentConsole implements OnInit, OnDestroy {
       if (this.destroyed || generation !== this.refreshGeneration) return;
       this.operations.set(operations);
       this.loadError.set(null);
+      const selected = this.selected();
+      if (selected && this.selectedRecord()?.id !== selected.id) {
+        void this.loadOperation(selected.id);
+      }
     } catch (error) {
       if (!this.destroyed && generation === this.refreshGeneration) {
         this.loadError.set(errorMessage(error));
+      }
+    }
+  }
+
+  private async loadOperation(id: string): Promise<void> {
+    const getOp = this.client().getOp;
+    if (!getOp) {
+      this.selectedRecord.set(null);
+      return;
+    }
+    const generation = ++this.detailGeneration;
+    this.detailLoading.set(true);
+    try {
+      const record = await getOp.call(this.client(), id);
+      if (
+        !this.destroyed
+        && generation === this.detailGeneration
+        && this.selected()?.id === id
+      ) {
+        this.selectedRecord.set(record);
+      }
+    } catch (error) {
+      if (!this.destroyed && generation === this.detailGeneration) {
+        this.loadError.set(errorMessage(error));
+      }
+    } finally {
+      if (generation === this.detailGeneration) {
+        this.detailLoading.set(false);
       }
     }
   }
@@ -635,4 +764,10 @@ function errorMessage(error: unknown): string {
   return error instanceof Error
     ? error.message
     : 'Unable to load durable operations.';
+}
+
+function recordValue(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }

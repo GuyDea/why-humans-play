@@ -353,15 +353,23 @@ export class ApprovalGate {
         ></textarea>
       </label>
 
-      <label>
-        Approved lessons
-        <span class="hint">Only episode-local lessons already approved.</span>
-        <textarea
-          rows="4"
-          [value]="lines(model().metadata().approvedLessons)"
-          (change)="setLines('approvedLessons', $event)"
-        ></textarea>
-      </label>
+      @if (model().metadata().approvedLessons.length > 0) {
+        <aside class="legacy-lessons" aria-labelledby="legacy-lessons-heading">
+          <strong id="legacy-lessons-heading">Legacy approved lessons</strong>
+          <p>
+            This draft metadata is preserved but nonauthoritative. The server
+            supplies reviewed episode lessons from the Lessons queue.
+          </p>
+          <ul>
+            @for (
+              lesson of model().metadata().approvedLessons;
+              track $index
+            ) {
+              <li>{{ lesson }}</li>
+            }
+          </ul>
+        </aside>
+      }
 
       <label>
         Creative phase
@@ -601,6 +609,17 @@ export class ApprovalGate {
       color: var(--whp-muted);
       font-size: 0.7rem;
     }
+
+    .legacy-lessons {
+      border-inline-start: 3px solid var(--whp-accent);
+      padding: 0.65rem 0.8rem;
+      background: color-mix(in srgb, var(--whp-accent) 7%, transparent);
+    }
+
+    .legacy-lessons p,
+    .legacy-lessons ul {
+      margin: 0.35rem 0 0;
+    }
   `,
 })
 export class BriefPanel {
@@ -620,7 +639,7 @@ export class BriefPanel {
   }
 
   protected setLines(
-    field: 'anchors' | 'unknowns' | 'approvedLessons',
+    field: 'anchors' | 'unknowns',
     event: Event,
   ): void {
     const value = controlValue(event);

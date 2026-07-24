@@ -273,6 +273,115 @@ describe('DaemonClient', () => {
     ]);
   });
 
+  it('maps the complete learning review and reconciliation API', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({}));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await client.listLearningSessions('draft/one');
+    await client.listDecisions('draft/one');
+    await client.listLessons('draft/one');
+    await client.distill('draft/one', 'on-demand');
+    await client.distill('draft/one', 'session-end');
+    await client.getDistillation('run/one');
+    await client.reconcileDistillation('run/one');
+    await client.editLesson('draft/one', 'lesson/one', 2, 'Reviewed text.');
+    await client.approveLesson('draft/one', 'lesson/one', 3);
+    await client.rejectLesson('draft/one', 'lesson/two', 1);
+    await client.retireLesson('draft/one', 'lesson/three', 4);
+    await client.supersedeLesson(
+      'draft/one',
+      'lesson/four',
+      2,
+      'lesson/three',
+    );
+    await client.markLessonReconciliationAwaiting('resume/one');
+    await client.verifyLessonReconciliation('resume/one', 'abc123');
+
+    expect(fetchMock.mock.calls.map(([input, init]) => ({
+      url: input,
+      method: init?.method ?? 'GET',
+      body: init?.body,
+    }))).toEqual([
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/learning-sessions`,
+        method: 'GET',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/decisions`,
+        method: 'GET',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons`,
+        method: 'GET',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/distill`,
+        method: 'POST',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/distill/end-session`,
+        method: 'POST',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/distillations/run%2Fone`,
+        method: 'GET',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/distillations/run%2Fone/reconcile`,
+        method: 'POST',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons/lesson%2Fone`,
+        method: 'PUT',
+        body: JSON.stringify({
+          expectedVersion: 2,
+          reviewedMarkdown: 'Reviewed text.',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons/lesson%2Fone/approve`,
+        method: 'POST',
+        body: JSON.stringify({ expectedVersion: 3 }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons/lesson%2Ftwo/reject`,
+        method: 'POST',
+        body: JSON.stringify({ expectedVersion: 1 }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons/lesson%2Fthree/retire`,
+        method: 'POST',
+        body: JSON.stringify({ expectedVersion: 4 }),
+      },
+      {
+        url: `${BASE_URL}/api/drafts/draft%2Fone/lessons/lesson%2Ffour/supersede`,
+        method: 'POST',
+        body: JSON.stringify({
+          expectedVersion: 2,
+          predecessorLessonId: 'lesson/three',
+        }),
+      },
+      {
+        url: `${BASE_URL}/api/lesson-reconciliations/resume%2Fone/awaiting`,
+        method: 'POST',
+        body: undefined,
+      },
+      {
+        url: `${BASE_URL}/api/lesson-reconciliations/resume%2Fone/verify`,
+        method: 'POST',
+        body: JSON.stringify({ commit: 'abc123' }),
+      },
+    ]);
+  });
+
   it('maps idea inbox calls and authenticates every request', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({}));
     vi.stubGlobal('fetch', fetchMock);

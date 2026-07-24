@@ -8,7 +8,10 @@ import {
 } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
-import type { OperationListResponse } from '../api/client';
+import type {
+  OperationListResponse,
+  OperationRecord,
+} from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
 import {
   AgentConsole,
@@ -159,7 +162,37 @@ describe('AgentConsoleModel', () => {
       ],
     }));
     const cancel = vi.fn(async () => ({ id: 'op-running' }));
-    const client = { listOps, cancel };
+    const getOp = vi.fn(async (id: string) => ({
+      id,
+      operation: 'review',
+      state: 'running',
+      stalled: false,
+      envelopeJson: '{}',
+      jobDir: '/tmp/op-running',
+      threadId: 'thread-running',
+      retryOf: null,
+      resumedFrom: null,
+      createdAt: '2026-07-23T11:00:00.000Z',
+      startedAt: '2026-07-23T11:00:00.000Z',
+      finishedAt: null,
+      inputTokens: 120,
+      cachedInputTokens: 40,
+      outputTokens: 30,
+      reasoningOutputTokens: 12,
+      usageAvailable: 1 as const,
+      error: null,
+      inputs: {
+        approved_lessons: ['Keep the reveal concrete.'],
+      },
+      operationLessons: [{
+        operationId: id,
+        lessonId: 'lesson-1',
+        lessonVersion: 3,
+        contentHash: 'hash-lesson-1-v3',
+        createdAt: '2026-07-23T11:00:00.000Z',
+      }],
+    } satisfies OperationRecord));
+    const client = { listOps, getOp, cancel };
     const application = await createApplication({
       providers: [provideZonelessChangeDetection()],
     });
@@ -191,6 +224,15 @@ describe('AgentConsoleModel', () => {
       component.changeDetectorRef.detectChanges();
 
       expect(host.textContent).toContain('Checking the hook.');
+      await vi.waitFor(() => expect(getOp).toHaveBeenCalledWith('op-running'));
+      component.changeDetectorRef.detectChanges();
+      expect(host.textContent).toContain('Supplied lessons');
+      expect(host.textContent).toContain('Keep the reveal concrete.');
+      expect(host.textContent).toContain('lesson-1 · version 3');
+      expect(host.textContent).toContain('repository-native');
+      expect(host.querySelector<HTMLAnchorElement>(
+        'a[href="/lessons#lesson-lesson-1"]',
+      )).not.toBeNull();
       expect(host.textContent).toContain('op-running');
       expect(host.textContent).toContain('op-completed');
       expect(host.textContent).toContain('running');

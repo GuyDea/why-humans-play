@@ -97,6 +97,47 @@ describe('draft brief metadata', () => {
     });
   });
 
+  it('shows legacy approved lesson metadata as nonauthoritative read-only context', async () => {
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const model = new BriefPanelModel({
+      ...draft,
+      doc: { ...draft.doc, metadata },
+    }, { save: vi.fn() });
+    const gate = new ApprovalGate(model, { launch: vi.fn() }, () => ({
+      selection: '',
+      before: '',
+      after: '',
+      beatTitle: '',
+      narrativeJob: '',
+      requestedScope: null,
+    }));
+    const host = document.createElement('div');
+    document.body.append(host);
+    const component = createComponent(BriefPanel, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    setRequiredInput(component.instance.model, model);
+    setRequiredInput(component.instance.gate, gate);
+    application.attachView(component.hostView);
+    component.changeDetectorRef.detectChanges();
+
+    expect(host.textContent).toContain('Legacy approved lessons');
+    expect(host.textContent).toContain('nonauthoritative');
+    expect(host.textContent).toContain('Keep the premise concrete.');
+    expect(
+      [...host.querySelectorAll('textarea')].some((textarea) =>
+        textarea.value.includes('Keep the premise concrete.')),
+    ).toBe(false);
+
+    application.detachView(component.hostView);
+    component.destroy();
+    host.remove();
+    application.destroy();
+  });
+
   it('persists edits in draft metadata and revisions without changing narration', async () => {
     let seq = 0;
     const save = vi.fn<BriefPanelSaver['save']>(async (_id, input) =>
