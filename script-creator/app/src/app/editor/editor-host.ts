@@ -13,6 +13,8 @@ import {
 } from '@angular/core';
 import {
   corePlugins,
+  exportMarkdown,
+  pendingProposalIds,
   parseMarkdown,
   schema,
   variantNodeViews,
@@ -275,6 +277,8 @@ interface AutosaveSnapshot {
   version: number;
   epoch: number;
   brief: BriefPanelModel;
+  opId: string | null;
+  disposition: string;
 }
 
 @Component({
@@ -304,7 +308,12 @@ interface AutosaveSnapshot {
         }
       </header>
 
-      <div #editorMount class="editor" data-testid="editor"></div>
+      <div
+        #editorMount
+        class="editor"
+        data-testid="editor"
+        [class.clean-narration]="productionHidden()"
+      ></div>
 
       @if (operationError()) {
         <p class="operation-error" role="alert">
@@ -416,6 +425,10 @@ interface AutosaveSnapshot {
       outline: none;
     }
 
+    .editor.clean-narration :where(.opaque-section) {
+      display: none;
+    }
+
     .operation-error {
       margin: 0;
       border-left: 3px solid var(--whp-accent);
@@ -509,6 +522,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   );
   readonly saving = computed(() => this.queuedAutosaves() > 0);
   readonly saveError = signal<string | null>(null);
+  readonly productionHidden = signal(false);
   readonly revisions = signal<RevisionRecord[]>([]);
   readonly latestRevision = signal<RevisionRecord | null>(null);
 
@@ -538,6 +552,14 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private activeDraftId: string | null = null;
   private draftEpoch = 0;
   private editVersion = 0;
+  private applyingPersonalInputChange = false;
+  private personalInputUndo: (() => boolean) | null = null;
+  private nextSaveProvenance: {
+    opId: string;
+    disposition: string;
+  } | null = null;
+  private readonly proposalSettlements = new Set<Promise<void>>();
+  private proposalSettlementError: string | null = null;
   private readonly autosave = new DebouncedAutosave<AutosaveSnapshot>(
     (snapshot) => this.saveSnapshot(snapshot),
     1_000,
@@ -568,6 +590,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.personalInputUndo = null;
     this.editorState.set(null);
   }
 
@@ -637,6 +660,217 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.latestRevision.set(saved.revision);
   }
 
+  setCleanNarration(clean: boolean): void {
+    this.productionHidden.set(clean);
+  }
+
+  refreshFromServer(draft: DraftRecord): void {
+    this.mountDraft(draft);
+  }
+
+  currentMarkdown(): string {
+    const view = this.editorView;
+    if (!view) return '';
+    const result = exportMarkdown(view.state);
+    if (!result.ok) {
+      throw new Error(`draft export blocked: ${result.blocked.join('; ')}`);
+    }
+    return result.markdown;
+  }
+
+  unresolvedProposalIds(): string[] {
+    return this.editorView
+      ? pendingProposalIds(this.editorView.state)
+      : [];
+  }
+
+  clearProposalSettlementError(): void {
+    this.proposalSettlementError = null;
+    if (this.operationError()?.startsWith('Proposal settlement failed:')) {
+      this.operationError.set(null);
+    }
+  }
+
+  async flushPendingChanges(): Promise<void> {
+    await this.autosave.flush();
+    await this.autosave.whenIdle();
+    await Promise.all(Array.from(this.proposalSettlements));
+    if (this.proposalSettlementError) {
+      throw new Error(this.proposalSettlementError);
+    }
+    if (this.unsaved()) {
+      throw new Error(
+        this.saveError()
+          ? `Draft save failed: ${this.saveError()}`
+          : 'Draft still has unsaved changes.',
+      );
+    }
+  }
+
+  async freezeForGateAction(): Promise<() => void> {
+    const view = this.editorView;
+    if (!view) throw new Error('The narration editor is not ready.');
+    const previousEditable = view.props.editable;
+    view.setProps({ editable: () => false });
+    const release = () => {
+      if (this.editorView === view) {
+        view.setProps({ editable: previousEditable });
+      }
+    };
+    try {
+      await this.flushPendingChanges();
+      return release;
+    } catch (error) {
+      release();
+      throw error;
+    }
+  }
+
+  applyPersonalInputProposal(input: {
+    opId: string;
+    marker: string;
+    bodyMd: string;
+    replacement: string;
+  }): boolean {
+    const view = this.editorView;
+    if (!view) return false;
+    let markerCount = 0;
+    let markerParagraphCount = 0;
+    let markerParagraphPosition: number | null = null;
+    let markerParagraphSize: number | null = null;
+    let markerParagraphText: string | null = null;
+    let bodyCount = 0;
+    let bodyPosition: number | null = null;
+    let bodyNode: ReturnType<typeof schema.nodeFromJSON> | null = null;
+    view.state.doc.descendants((node, position) => {
+      if (node.isText) {
+        let from = 0;
+        const text = node.text ?? '';
+        for (;;) {
+          const offset = text.indexOf(input.marker, from);
+          if (offset < 0) break;
+          markerCount += 1;
+          from = offset + input.marker.length;
+        }
+      }
+      if (
+        node.type.name === 'paragraph'
+        && node.childCount === 1
+        && node.firstChild?.isText === true
+        && node.textContent.includes(input.marker)
+      ) {
+        markerParagraphCount += 1;
+        markerParagraphPosition = position;
+        markerParagraphSize = node.nodeSize;
+        markerParagraphText = node.textContent;
+      }
+      if (
+        node.type.name === 'opaqueSection'
+        && String(node.attrs.md).trimEnd() === input.bodyMd.trimEnd()
+      ) {
+        bodyCount += 1;
+        bodyPosition = position;
+        bodyNode = node;
+      }
+      return true;
+    });
+    if (
+      markerCount !== 1
+      || markerParagraphCount !== 1
+      || markerParagraphPosition === null
+      || markerParagraphSize === null
+      || bodyCount !== 1
+      || bodyPosition === null
+      || bodyNode === null
+    ) {
+      return false;
+    }
+    const replacementTexts = narrationReplacementParagraphs(
+      input.replacement,
+    );
+    if (replacementTexts.length === 0 || markerParagraphText === null) {
+      return false;
+    }
+    const matchedMarkerText =
+      markerParagraphText as unknown as string;
+    const markerOffset = matchedMarkerText.indexOf(input.marker);
+    const beforeMarker = matchedMarkerText.slice(0, markerOffset);
+    const afterMarker = matchedMarkerText.slice(
+      markerOffset + input.marker.length,
+    );
+    const replacementParagraphs = replacementTexts.map((text, index) =>
+      schema.node(
+        'paragraph',
+        null,
+        schema.text(
+          `${index === 0 ? beforeMarker : ''}${text}${
+            index === replacementTexts.length - 1 ? afterMarker : ''
+          }`,
+        ),
+      ));
+    const bodyAttrs = (
+      bodyNode as unknown as { attrs: Record<string, unknown> }
+    ).attrs;
+    const currentBody = String(bodyAttrs['md']);
+    const completedBody = currentBody.replace(
+      /^(- \*\*Decision:\*\* )INPUT-REQUESTED$/mu,
+      '$1COMPLETED',
+    );
+    if (completedBody === currentBody) return false;
+
+    let transaction = view.state.tr.replaceWith(
+      markerParagraphPosition,
+      markerParagraphPosition + markerParagraphSize,
+      replacementParagraphs,
+    );
+    const mappedBodyPosition = transaction.mapping.map(bodyPosition);
+    transaction = transaction.setNodeMarkup(
+      mappedBodyPosition,
+      undefined,
+      {
+        ...bodyAttrs,
+        md: completedBody,
+      },
+    );
+    const inverseSteps = transaction.steps
+      .map((step, index) => step.invert(transaction.docs[index]!))
+      .reverse();
+    this.nextSaveProvenance = {
+      opId: input.opId,
+      disposition: 'personal-input-proposal-accepted',
+    };
+    this.applyingPersonalInputChange = true;
+    try {
+      view.dispatch(transaction);
+    } finally {
+      this.applyingPersonalInputChange = false;
+    }
+    this.personalInputUndo = () => {
+      if (this.editorView !== view) return false;
+      try {
+        let inverse = view.state.tr;
+        for (const step of inverseSteps) inverse = inverse.step(step);
+        this.applyingPersonalInputChange = true;
+        try {
+          view.dispatch(inverse);
+        } finally {
+          this.applyingPersonalInputChange = false;
+        }
+        this.personalInputUndo = null;
+        return true;
+      } catch {
+        this.personalInputUndo = null;
+        return false;
+      }
+    };
+    this.settleNarrationProposal(input.opId, 'accepted', true);
+    return true;
+  }
+
+  undoPersonalInputAcceptance(): boolean {
+    return this.personalInputUndo?.() ?? false;
+  }
+
   private mountDraft(draft: DraftRecord): void {
     const mount = this.editorMount?.nativeElement;
     const failures = this.failureMount?.nativeElement;
@@ -651,6 +885,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.studioComposition = null;
     this.editorView?.destroy();
     this.editorView = null;
+    this.personalInputUndo = null;
+    this.nextSaveProvenance = null;
+    this.proposalSettlementError = null;
     this.editorState.set(null);
     mount.replaceChildren();
 
@@ -690,6 +927,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         );
         this.doc.set(doc);
         if (transaction.docChanged && !this.applyingAcceptedNarration) {
+          if (!this.applyingPersonalInputChange) {
+            this.personalInputUndo = null;
+          }
           this.scheduleAutosave(doc);
         }
         this.studioComposition?.handleEditorDispatch();
@@ -699,7 +939,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.editorState.set(mountedView.state);
     const composition = composeStudio(
       mountedView,
-      this.client(),
+      draftScopedClient(this.client(), draft.id),
       {
         editor: mount,
         failures,
@@ -716,6 +956,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         },
       },
     );
+    this.bindNarrationProposalSettlements(composition, draft.id);
     this.studioComposition = composition;
     this.detachRuntime = this.session().attachRuntime(
       composition.runtime as unknown as StudioRuntimeHandle,
@@ -735,6 +976,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     const epoch = this.draftEpoch;
     const brief = this.brief();
     if (!brief) return;
+    const provenance = this.nextSaveProvenance;
+    this.nextSaveProvenance = null;
     this.currentDirty.set(true);
     this.autosave.schedule({
       draftId,
@@ -742,15 +985,26 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       version,
       epoch,
       brief,
+      opId: provenance?.opId ?? null,
+      disposition: provenance?.disposition ?? 'autosave',
     });
   }
 
   private async saveSnapshot(snapshot: AutosaveSnapshot): Promise<void> {
-    const { draftId, doc, version, epoch, brief } = snapshot;
+    const {
+      draftId,
+      doc,
+      version,
+      epoch,
+      brief,
+      opId,
+      disposition,
+    } = snapshot;
     try {
       const saved = await brief.save(draftId, {
         doc,
-        disposition: 'autosave',
+        opId,
+        disposition,
       });
       if (this.isCurrentDraft(draftId, epoch)) {
         this.saveError.set(null);
@@ -764,6 +1018,140 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       }
       throw error;
     }
+  }
+
+  private bindNarrationProposalSettlements(
+    composition: StudioComposition,
+    draftId: string,
+  ): void {
+    const runtime = composition.runtime;
+    const accept = runtime.acceptProposal.bind(runtime);
+    runtime.acceptProposal = (proposalId: string) => {
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      if (operationId) {
+        this.nextSaveProvenance = {
+          opId: operationId,
+          disposition: 'selection-proposal-accepted',
+        };
+      }
+      const accepted = accept(proposalId);
+      if (!accepted) {
+        this.nextSaveProvenance = null;
+        return false;
+      }
+      if (operationId) {
+        this.settleNarrationProposal(
+          operationId,
+          'accepted',
+          true,
+          draftId,
+        );
+      }
+      return true;
+    };
+
+    const reject = runtime.rejectProposal.bind(runtime);
+    runtime.rejectProposal = (proposalId: string) => {
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      if (operationId) {
+        const settlement = this.settleNarrationProposal(
+          operationId,
+          'rejected',
+          false,
+          draftId,
+        );
+        void settlement.then(
+          () => {
+            if (this.studioComposition === composition) {
+              reject(proposalId);
+            }
+          },
+          () => undefined,
+        );
+        return true;
+      }
+      const rejected = reject(proposalId);
+      return rejected;
+    };
+
+    const rerollProposal = runtime.rerollProposal.bind(runtime);
+    runtime.rerollProposal = (proposalId: string) => {
+      const operationId = this.operationIdForProposal(
+        composition,
+        proposalId,
+      );
+      const launch = rerollProposal(proposalId);
+      if (operationId) {
+        this.settleNarrationProposal(
+          operationId,
+          'rejected',
+          false,
+          draftId,
+        );
+      }
+      return launch;
+    };
+
+    const reroll = runtime.reroll.bind(runtime);
+    runtime.reroll = (operationId: string) => {
+      const launch = reroll(operationId);
+      this.settleNarrationProposal(
+        operationId,
+        'rejected',
+        false,
+        draftId,
+      );
+      return launch;
+    };
+  }
+
+  private operationIdForProposal(
+    composition: StudioComposition,
+    proposalId: string,
+  ): string | null {
+    for (const operation of composition.runtime.tracker.history()) {
+      const meta = operation.meta as {
+        proposalId?: unknown;
+      };
+      if (meta.proposalId === proposalId) return operation.id();
+    }
+    return null;
+  }
+
+  private settleNarrationProposal(
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+    waitForSave: boolean,
+    draftId = this.activeDraftId,
+  ): Promise<void> {
+    if (!draftId) return Promise.resolve();
+    this.proposalSettlementError = null;
+    const settlement = (async () => {
+      if (waitForSave) {
+        await this.autosave.flush();
+        await this.autosave.whenIdle();
+      }
+      await this.client().resolveNarrationProposal(
+        draftId,
+        operationId,
+        decision,
+      );
+    })();
+    this.proposalSettlements.add(settlement);
+    void settlement.catch((error: unknown) => {
+      this.proposalSettlementError =
+        `Proposal settlement failed: ${operationErrorMessage(error)}`;
+      this.operationError.set(this.proposalSettlementError);
+    }).finally(() => {
+      this.proposalSettlements.delete(settlement);
+    });
+    return settlement;
   }
 
   private isCurrentDraft(draftId: string, epoch: number): boolean {
@@ -800,6 +1188,24 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 }
 
+function narrationReplacementParagraphs(markdown: string): string[] {
+  const blocks = markdown
+    .replace(/\r\n?/gu, '\n')
+    .trim()
+    .split(/\n\s*\n/gu)
+    .filter((block) => block.trim() !== '');
+  return blocks.flatMap((block) => {
+    const lines = block.split('\n');
+    const quoted = lines.every((line) =>
+      line === '>' || line.startsWith('> '));
+    const text = lines
+      .map((line) => quoted ? line.replace(/^> ?/u, '') : line)
+      .join(' ')
+      .trim();
+    return text === '' ? [] : [text];
+  });
+}
+
 function promotionLauncher(
   composition: StudioComposition,
 ): PromotionLauncher {
@@ -823,4 +1229,28 @@ function operationErrorMessage(error: unknown): string {
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'operation failed';
+}
+
+function draftScopedClient(
+  client: DaemonClient,
+  draftId: string,
+): DaemonClient {
+  return new Proxy(client, {
+    get(target, property) {
+      if (property === 'submitOp') {
+        return (
+          operation: Parameters<DaemonClient['submitOp']>[0],
+          inputs: unknown,
+        ) => target.submitDraftOp(draftId, operation, inputs);
+      }
+      if (property === 'resume') {
+        return (operationId: string, inputs: unknown) =>
+          target.resumeDraftOp(draftId, operationId, inputs);
+      }
+      const value = Reflect.get(target, property, target) as unknown;
+      return typeof value === 'function'
+        ? value.bind(target)
+        : value;
+    },
+  });
 }

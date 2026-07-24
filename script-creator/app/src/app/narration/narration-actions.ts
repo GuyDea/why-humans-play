@@ -267,8 +267,23 @@ export class NarrationActions {
   }
 
   protected rejectEpisodeProposal(): void {
-    this.proposal.set(null);
-    this.status.set('Episode proposal rejected');
+    const proposal = this.proposal();
+    if (!proposal || this.busy()) return;
+    this.busy.set(true);
+    this.failure.set(null);
+    void this.client().resolveNarrationProposal(
+      this.draft().id,
+      proposal.opId,
+      'rejected',
+    ).then(() => {
+      this.proposal.set(null);
+      this.status.set('Episode proposal rejected');
+    }).catch((error: unknown) => {
+      this.failure.set(errorMessage(error));
+      this.status.set('Episode proposal rejection failed');
+    }).finally(() => {
+      this.busy.set(false);
+    });
   }
 
   protected acceptEpisodeProposal(): void {
@@ -366,6 +381,11 @@ export class NarrationActions {
       await editor.replaceNarrationFromMarkdown(
         proposal.markdown,
         proposal.opId,
+      );
+      await this.client().resolveNarrationProposal(
+        this.draft().id,
+        proposal.opId,
+        'accepted',
       );
       if (this.model().state?.approvedMd === proposal.approvedArchitectureMd) {
         this.model().markNarrationReconciled();

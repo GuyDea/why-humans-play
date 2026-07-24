@@ -14,6 +14,7 @@ import { ArchitectureModel } from '../architecture/model';
 import { EditorHost } from '../editor/editor-host';
 import { NarrationActions } from '../narration/narration-actions';
 import { BriefPanel } from '../panels/brief-panel';
+import { ProductionPanel } from '../production/production-panel';
 import { FindingsPanel } from '../panels/findings-panel';
 import { ParkingLot } from '../panels/parking-lot';
 import type { StudioSession } from '../studio-session';
@@ -34,6 +35,7 @@ import { RevisionTimeline } from './revision-timeline';
     FindingsPanel,
     ParkingLot,
     NarrationActions,
+    ProductionPanel,
     RevisionTimeline,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -131,6 +133,11 @@ import { RevisionTimeline } from './revision-timeline';
               [client]="client()"
               [session]="session()"
             />
+            <app-production-panel
+              [draft]="activeDraft"
+              [client]="client()"
+              [editor]="editorHost() ?? null"
+            />
           } @else {
             <section class="welcome">
               <p class="eyebrow">Script Studio</p>
@@ -153,6 +160,7 @@ import { RevisionTimeline } from './revision-timeline';
                     <app-brief-panel
                       [model]="brief"
                       [gate]="approvalGate"
+                      [showPromote]="false"
                     />
                   </details>
                 }
@@ -353,7 +361,8 @@ import { RevisionTimeline } from './revision-timeline';
     }
 
     app-architecture-panel,
-    app-narration-actions {
+    app-narration-actions,
+    app-production-panel {
       display: block;
       max-width: 86rem;
       margin-inline: auto;
