@@ -55,10 +55,59 @@ interface MilestoneStatus {
   };
 }
 
+interface LearningDecision {
+  id: string;
+  kind: string;
+  note: string | null;
+}
+
+interface DistillationRun {
+  id: string;
+  state: string;
+  operationId: string | null;
+  sessionId: string;
+  decisions: Array<{ decisionId: string; snapshot: unknown }>;
+}
+
+interface LessonRecord {
+  id: string;
+  classification: 'episode-local' | 'durable';
+  state: string;
+  proposedMarkdown: string | null;
+  reviewedMarkdown: string | null;
+  version: number;
+  evidence: Array<{
+    id: string;
+    status: 'resolved' | 'stale';
+  }>;
+  reconciliation: null | {
+    kind: 'apply' | 'retire' | 'supersede';
+    state: 'prepared' | 'awaiting-reconciliation' | 'verified';
+    resumeKey: string;
+    preparedMarkdown: string;
+  };
+  repositoryProvenance: null | {
+    status: 'resolved' | 'unresolved';
+  };
+}
+
+interface OperationRecord {
+  id: string;
+  operation: string;
+  state: string;
+  inputs: unknown;
+  operationLessons: Array<{
+    lessonId: string;
+    lessonVersion: number;
+    contentHash: string;
+  }>;
+}
+
 const APP_DIR = resolve(__dirname, '..');
 const SOURCE_REPO = resolve(APP_DIR, '../..');
 const POLL_MS = 50;
 const UI_TIMEOUT_MS = 30_000;
+const PLAN7_SWEEP = process.env['PLAN7_SWEEP'] === '1';
 
 let browser: Browser | null = null;
 let daemon: RunningDaemon | null = null;
@@ -77,7 +126,10 @@ async function main(): Promise<void> {
   ]);
   assert(sourceBranch !== '', 'source checkout must be on a branch');
 
-  temporaryRoot = mkdtempSync(join(tmpdir(), 'whp-plan6-browser-'));
+  temporaryRoot = mkdtempSync(join(
+    tmpdir(),
+    PLAN7_SWEEP ? 'whp-plan7-browser-' : 'whp-plan6-browser-',
+  ));
   const cloneRoot = join(temporaryRoot, 'repo');
   const xdgDataHome = join(temporaryRoot, 'xdg-data');
   const xdgStateHome = join(temporaryRoot, 'xdg-state');
@@ -112,13 +164,21 @@ async function main(): Promise<void> {
       'main',
     ]);
   }
-  run('git', ['-C', cloneRoot, 'config', 'user.name', 'Plan 6 Sweep']);
+  run('git', [
+    '-C',
+    cloneRoot,
+    'config',
+    'user.name',
+    PLAN7_SWEEP ? 'Plan 7 Sweep' : 'Plan 6 Sweep',
+  ]);
   run('git', [
     '-C',
     cloneRoot,
     'config',
     'user.email',
-    'plan6-sweep@example.invalid',
+    PLAN7_SWEEP
+      ? 'plan7-sweep@example.invalid'
+      : 'plan6-sweep@example.invalid',
   ]);
 
   copyNodeModules('script-creator/editor-core', cloneRoot);
@@ -167,7 +227,7 @@ async function main(): Promise<void> {
     cloneServer,
     runtimeFile,
     daemonEnvironment,
-    'plan6-flow',
+    PLAN7_SWEEP ? 'plan7-flow' : 'plan6-flow',
   );
 
   const baseUrl = `http://127.0.0.1:${daemon.handshake.port}`;
@@ -187,6 +247,7 @@ async function main(): Promise<void> {
       `an unexpected commit appeared before explicit commit (${stage})`,
     );
   };
+  let plan7ReconcileCommit: string | null = null;
 
   browser = await launchChromium();
   const page = await browser.newPage();
@@ -200,6 +261,25 @@ async function main(): Promise<void> {
   );
   await page.getByRole('link', { name: 'Topics', exact: true }).click();
   await selectTopicRun(page, seededRunId);
+
+  if (PLAN7_SWEEP) {
+    const winnerRow = page.locator(
+      '[data-testid="shortlist-row"]',
+    ).filter({ hasText: 'The Queue Game' });
+    await winnerRow.getByRole(
+      'button',
+      { name: 'Test packages' },
+    ).click();
+    const packageDirections = page.locator(
+      '[data-testid="package-test-direction"]',
+    );
+    await waitForMinimumCount(packageDirections, 1);
+    await packageDirections.first().getByRole(
+      'button',
+      { name: 'Use this package' },
+    ).click();
+    await waitForText(packageDirections.first(), 'Selected package');
+  }
 
   await page.getByRole('button', { name: 'Preview handoff' }).click();
   const handoffPreview = page.locator('[data-testid="handoff-preview"]');
@@ -317,6 +397,31 @@ async function main(): Promise<void> {
     0,
   );
 
+  if (PLAN7_SWEEP) {
+    const finalLesson = architecturePanel.locator(
+      '[data-section-key="final-lesson"]',
+    );
+    await finalLesson.getByLabel('Refine Final lesson').fill(
+      'Make this lesson falsely universal so it can be rejected.',
+    );
+    await finalLesson.getByRole(
+      'button',
+      { name: 'Refine section' },
+    ).click();
+    const rejectedProposal = finalLesson.locator(
+      '[data-testid="architecture-proposal"]',
+    );
+    await waitForText(rejectedProposal, 'Fake rewrite for final-lesson.');
+    await rejectedProposal.locator(
+      'input[aria-label^="Why reject"]',
+    ).fill('Too universal for the evidence.');
+    await rejectedProposal.getByRole(
+      'button',
+      { name: 'Reject proposal' },
+    ).click();
+    await waitForCount(rejectedProposal, 0);
+  }
+
   const architecturePath = join(
     workspace.worktreePath,
     'whp-youtube',
@@ -427,6 +532,56 @@ async function main(): Promise<void> {
     'A queue quietly turns waiting into a strategic game.',
   );
   await waitForEditorSave(page);
+
+  if (PLAN7_SWEEP) {
+    const toolbar = editorHost.getByRole(
+      'toolbar',
+      { name: 'Selected text actions' },
+    );
+
+    await selectEditorParagraph(page, editor, 0);
+    await toolbar.getByRole('button', { name: 'Rewrite' }).click();
+    const rejectedRewrite = editorHost.locator('.proposal-diff');
+    await waitForText(rejectedRewrite, 'Rewritten passage.');
+    page.once('dialog', (dialog) => {
+      void dialog.accept('The rewrite hides the visible choice.');
+    });
+    await rejectedRewrite.getByRole(
+      'button',
+      { name: 'Reject' },
+    ).click();
+    await waitForCount(rejectedRewrite, 0);
+
+    await selectEditorParagraph(page, editor, 0);
+    await toolbar.getByRole('button', { name: 'Rewrite' }).click();
+    const rerolledRewrite = editorHost.locator('.proposal-diff');
+    await waitForText(rerolledRewrite, 'Rewritten passage.');
+    page.once('dialog', (dialog) => {
+      void dialog.accept('The first rewrite was too generic.');
+    });
+    await rerolledRewrite.getByRole(
+      'button',
+      { name: 'Re-roll' },
+    ).click();
+    await waitForText(rerolledRewrite, 'Rewritten passage.');
+    await rerolledRewrite.getByRole(
+      'button',
+      { name: 'Accept' },
+    ).click();
+    await waitForCount(rerolledRewrite, 0);
+    await waitForEditorSave(page);
+
+    await selectEditorParagraph(page, editor, 1);
+    await toolbar.getByRole('button', { name: 'Alternatives' }).click();
+    const variant = page.locator('[data-testid="unsettled-variant"]');
+    await variant.waitFor();
+    await variant.getByRole(
+      'button',
+      { name: 'Pick active' },
+    ).click();
+    await waitForCount(variant, 0);
+    await waitForEditorSave(page);
+  }
 
   let reopenDialogMessage = '';
   page.once('dialog', (dialog) => {
@@ -610,6 +765,18 @@ async function main(): Promise<void> {
     'data-validator-status',
     'pass',
   );
+  if (PLAN7_SWEEP) {
+    plan7ReconcileCommit = await runPlan7LearningSweep({
+      page,
+      cloneRoot,
+      cloneServer,
+      runtimeFile,
+      daemonEnvironment,
+      draft,
+      workspace,
+      initialCommitCount,
+    });
+  }
   const completePromote = productionPanel.getByRole(
     'button',
     { name: 'Complete Promote' },
@@ -621,7 +788,15 @@ async function main(): Promise<void> {
     'complete',
   );
   assertFileContains(pipelinePath, 'production');
-  assertNoCommit('promotion completion');
+  if (PLAN7_SWEEP) {
+    assertCommitCount(
+      cloneRoot,
+      initialCommitCount + 1,
+      'promotion completion after external reconciliation',
+    );
+  } else {
+    assertNoCommit('promotion completion');
+  }
 
   await milestonePanel.getByRole(
     'button',
@@ -631,23 +806,33 @@ async function main(): Promise<void> {
     .locator('[data-milestone-id]')
     .filter({ hasText: 'production-promotion' });
   await productionMilestone.waitFor();
-  assertNoCommit('pending production milestone');
+  if (PLAN7_SWEEP) {
+    assertCommitCount(
+      cloneRoot,
+      initialCommitCount + 1,
+      'pending production milestone',
+    );
+  } else {
+    assertNoCommit('pending production milestone');
 
-  await productionMilestone.locator('input[type="checkbox"]').check();
-  const explicitCommit = productionMilestone.getByRole(
-    'button',
-    { name: 'Commit milestone' },
-  );
-  await waitForEnabled(explicitCommit);
-  await explicitCommit.click();
-  await productionMilestone.waitFor({ state: 'detached' });
+    await productionMilestone.locator('input[type="checkbox"]').check();
+    const explicitCommit = productionMilestone.getByRole(
+      'button',
+      { name: 'Commit milestone' },
+    );
+    await waitForEnabled(explicitCommit);
+    await explicitCommit.click();
+    await productionMilestone.waitFor({ state: 'detached' });
+  }
 
   const finalCommitCount = Number(
     gitOutput(cloneRoot, ['rev-list', '--count', '--all']),
   );
   assert(
     finalCommitCount === initialCommitCount + 1,
-    'explicit milestone action did not create exactly one commit',
+    PLAN7_SWEEP
+      ? 'external reconciliation did not create exactly one commit'
+      : 'explicit milestone action did not create exactly one commit',
   );
   const commitMessage = gitOutput(workspace.worktreePath, [
     'log',
@@ -655,10 +840,20 @@ async function main(): Promise<void> {
     '--pretty=%s',
   ]);
   assert(
-    commitMessage ===
-      'feat(the-queue-game): record production promotion milestone',
+    commitMessage === (PLAN7_SWEEP
+      ? 'docs(whp): simulate reviewed lesson reconciliation'
+      : 'feat(the-queue-game): record production promotion milestone'),
     `unexpected milestone commit message: ${commitMessage}`,
   );
+  if (PLAN7_SWEEP) {
+    assert(
+      plan7ReconcileCommit === gitOutput(workspace.worktreePath, [
+        'rev-parse',
+        'HEAD',
+      ]),
+      'verified reconciliation commit is not the workspace HEAD',
+    );
+  }
   assert(
     pageErrors.length === 0,
     `browser page errors: ${pageErrors.join(' | ')}`,
@@ -675,6 +870,722 @@ async function main(): Promise<void> {
     ]) === sourceStatus,
     'developer checkout files changed during the sweep',
   );
+}
+
+async function runPlan7LearningSweep(options: {
+  page: Page;
+  cloneRoot: string;
+  cloneServer: string;
+  runtimeFile: string;
+  daemonEnvironment: Record<string, string>;
+  draft: DraftRecord;
+  workspace: NonNullable<MilestoneStatus['workspace']>;
+  initialCommitCount: number;
+}): Promise<string> {
+  const {
+    page,
+    cloneRoot,
+    cloneServer,
+    runtimeFile,
+    daemonEnvironment,
+    draft,
+    workspace,
+    initialCommitCount,
+  } = options;
+  assert(daemon, 'Plan 7 learning sweep requires a running daemon');
+
+  const decisionPage = await api<{ decisions: LearningDecision[] }>(
+    daemon.handshake,
+    `/api/drafts/${encodeURIComponent(draft.id)}/decisions?limit=100`,
+  );
+  const kinds = new Set(decisionPage.decisions.map(({ kind }) => kind));
+  for (const expected of [
+    'proposal-accepted',
+    'proposal-rejected',
+    'proposal-rerolled',
+    'variant-picked',
+    'gate-action',
+    'package-picked',
+    'winner-handed-off',
+    'personal-input-integrated',
+    'validator-fix-cycle-accepted',
+  ]) {
+    assert(kinds.has(expected), `captured decisions omitted ${expected}`);
+  }
+  assert(
+    decisionPage.decisions.some((decision) =>
+      decision.kind === 'proposal-rejected'
+      && decision.note === 'Too universal for the evidence.'),
+    'architecture rejection reason was not captured',
+  );
+  assert(
+    decisionPage.decisions.some((decision) =>
+      decision.kind === 'proposal-rerolled'
+      && decision.note === 'The first rewrite was too generic.'),
+    'proposal re-roll reason was not captured',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount,
+    'captured decisions',
+  );
+  assertDoctrineClean(workspace.worktreePath, 'captured decisions');
+
+  await page.route(
+    '**/api/distillations/*/reconcile',
+    (route) => route.abort('blockedbyclient'),
+  );
+  await page.goto(
+    `http://127.0.0.1:${daemon.handshake.port}/lessons`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  const lessonsPage = page.locator('[data-testid="lessons-page"]');
+  await lessonsPage.waitFor();
+  await lessonsPage.getByRole(
+    'button',
+    { name: 'End session & distill' },
+  ).click();
+  await waitForText(
+    lessonsPage.locator('[data-testid="distillation-state"]'),
+    'Distillation queued',
+  );
+
+  const distillOperation = await waitForValue(
+    async () => {
+      const response = await api<{
+        operations: Array<{
+          id: string;
+          operation: string;
+          state: string;
+        }>;
+      }>(daemon!.handshake, '/api/ops');
+      return response.operations.find(
+        ({ operation }) => operation === 'distill',
+      ) ?? null;
+    },
+    (operation): operation is {
+      id: string;
+      operation: string;
+      state: string;
+    } => operation !== null,
+    UI_TIMEOUT_MS,
+    'Distill operation was not durably listed',
+  );
+  assert(distillOperation, 'Distill operation lookup returned null');
+  const runId = (
+    await lessonsPage.locator('.distill-console dl code')
+      .first()
+      .textContent()
+  )?.trim() ?? '';
+  assert(runId !== '', 'Distill run ID was not rendered');
+  await waitForValue(
+    () => api<OperationRecord>(
+      daemon!.handshake,
+      `/api/ops/${encodeURIComponent(distillOperation.id)}`,
+    ),
+    (operation) => operation.state === 'completed',
+    UI_TIMEOUT_MS,
+    'Distill operation did not complete before restart',
+  );
+  const beforeRestart = await api<DistillationRun>(
+    daemon.handshake,
+    `/api/distillations/${encodeURIComponent(runId)}`,
+  );
+  assert(
+    beforeRestart.state !== 'ingested',
+    'blocked Distill polling ingested before the recovery restart',
+  );
+  assert(
+    beforeRestart.decisions.length === decisionPage.decisions.length,
+    'Distill did not freeze the complete decision window',
+  );
+
+  await stopDaemon(daemon);
+  daemon = null;
+  await page.unroute('**/api/distillations/*/reconcile');
+  daemon = await startDaemon(
+    cloneServer,
+    runtimeFile,
+    daemonEnvironment,
+    'plan7-flow',
+  );
+  const recoveredRun = await waitForValue(
+    () => api<DistillationRun>(
+      daemon!.handshake,
+      `/api/distillations/${encodeURIComponent(runId)}`,
+    ),
+    (run) => run.state === 'ingested',
+    UI_TIMEOUT_MS,
+    'restart did not ingest the completed frozen Distill result',
+  );
+  assert(
+    recoveredRun.id === beforeRestart.id
+      && recoveredRun.sessionId === beforeRestart.sessionId
+      && recoveredRun.operationId === beforeRestart.operationId,
+    'Distill recovery changed persisted run identity',
+  );
+
+  let baseUrl = `http://127.0.0.1:${daemon.handshake.port}`;
+  await page.goto(
+    `${baseUrl}/lessons#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  await page.locator('[data-testid="lessons-page"]').waitFor();
+  const proposedLessons = await waitForValue(
+    () => api<{ lessons: LessonRecord[] }>(
+      daemon!.handshake,
+      `/api/drafts/${encodeURIComponent(draft.id)}/lessons`,
+    ),
+    ({ lessons }) =>
+      lessons.length === 2
+      && lessons.every(({ state }) => state === 'proposed'),
+    UI_TIMEOUT_MS,
+    'recovered Distill proposals were missing or duplicated',
+  );
+  const sessions = await api<{
+    sessions: Array<{
+      id: string;
+      endCursor: number | null;
+    }>;
+  }>(
+    daemon.handshake,
+    `/api/drafts/${encodeURIComponent(draft.id)}/learning-sessions`,
+  );
+  assert(
+    sessions.sessions.some((session) =>
+      session.id === recoveredRun.sessionId
+      && session.endCursor !== null),
+    'session-end Distill did not recover its closed cursor',
+  );
+  for (const lesson of proposedLessons.lessons) {
+    assert(
+      lesson.evidence.length > 0
+      && lesson.evidence.every(({ status }) => status === 'resolved'),
+      `lesson ${lesson.id} did not render resolved decision provenance`,
+    );
+  }
+
+  const local = proposedLessons.lessons.find(
+    ({ classification }) => classification === 'episode-local',
+  );
+  const durable = proposedLessons.lessons.find(
+    ({ classification }) => classification === 'durable',
+  );
+  assert(local && durable, 'mixed-scope Distill proposals were not created');
+  const localReviewed =
+    'Use the queue switch as the visible causal turn; do not generalize past this episode.';
+  let localCard = page.locator(`#lesson-${local.id}`);
+  await localCard.waitFor();
+  await localCard.getByLabel('Reviewed lesson text').fill(localReviewed);
+  await localCard.getByRole(
+    'button',
+    { name: 'Save review' },
+  ).click();
+  const editedLocal = await waitForValue(
+    async () => (
+      await api<{ lessons: LessonRecord[] }>(
+        daemon!.handshake,
+        `/api/drafts/${encodeURIComponent(draft.id)}/lessons`,
+      )
+    ).lessons.find(({ id }) => id === local.id) ?? null,
+    (lesson): lesson is LessonRecord =>
+      lesson !== null && lesson.reviewedMarkdown === localReviewed,
+    UI_TIMEOUT_MS,
+    'edited episode lesson was not returned',
+  );
+  assert(editedLocal, 'edited episode lesson lookup returned null');
+  assert(
+    editedLocal.reviewedMarkdown === localReviewed
+      && editedLocal.proposedMarkdown === local.proposedMarkdown
+      && editedLocal.state === 'proposed',
+    'edit-before-approve did not preserve proposal and reviewed text',
+  );
+  await localCard.getByRole(
+    'button',
+    { name: 'Approve', exact: true },
+  ).click();
+  await localCard.getByRole(
+    'button',
+    { name: 'Confirm approve' },
+  ).click();
+  await waitForAttribute(localCard, 'data-state', 'approved');
+
+  const firstEnvelopeId = await submitEnvelopeInspection(
+    daemon.handshake,
+    draft.id,
+    'Envelope inspection while episode lesson is active.',
+  );
+  const firstEnvelope = await waitForTerminalOperation(
+    daemon.handshake,
+    firstEnvelopeId,
+  );
+  const firstInputs = recordValue(firstEnvelope.inputs);
+  assert(
+    JSON.stringify(firstInputs?.['approved_lessons'])
+      === JSON.stringify([localReviewed]),
+    'active episode lesson was not injected as exact reviewed text',
+  );
+  assert(
+    firstEnvelope.operationLessons.length === 1
+      && firstEnvelope.operationLessons[0]?.lessonId === local.id,
+    'active episode lesson provenance was not recorded on the operation',
+  );
+  await page.goto(
+    `${baseUrl}/console#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  const firstConsoleOperation = page.locator(
+    'app-agent-console nav button',
+  ).filter({ hasText: firstEnvelopeId });
+  await firstConsoleOperation.waitFor();
+  await firstConsoleOperation.click();
+  const suppliedLessons = page.locator(
+    'app-agent-console .supplied-lessons',
+  );
+  await waitForText(suppliedLessons, localReviewed);
+  assert(
+    await suppliedLessons.locator('ol li p').allTextContents()
+      .then((values) => JSON.stringify(values))
+      === JSON.stringify([localReviewed]),
+    'console did not show exactly the immutable reviewed lesson text',
+  );
+  await waitForText(suppliedLessons, local.id);
+
+  await page.goto(
+    `${baseUrl}/lessons#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  localCard = page.locator(`#lesson-${local.id}`);
+  await localCard.waitFor();
+  await localCard.getByRole(
+    'button',
+    { name: 'Retire', exact: true },
+  ).click();
+  await localCard.getByRole(
+    'button',
+    { name: 'Confirm retire' },
+  ).click();
+  await waitForAttribute(localCard, 'data-state', 'retired');
+
+  const retiredEnvelopeId = await submitEnvelopeInspection(
+    daemon.handshake,
+    draft.id,
+    'Envelope inspection after episode lesson retirement.',
+  );
+  const retiredEnvelope = await waitForTerminalOperation(
+    daemon.handshake,
+    retiredEnvelopeId,
+  );
+  const retiredInputs = recordValue(retiredEnvelope.inputs);
+  assert(
+    Array.isArray(retiredInputs?.['approved_lessons'])
+      && retiredInputs?.['approved_lessons'].length === 0
+      && retiredEnvelope.operationLessons.length === 0,
+    'retired episode lesson remained in the next operation envelope',
+  );
+  await page.goto(
+    `${baseUrl}/console#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  const retiredConsoleOperation = page.locator(
+    'app-agent-console nav button',
+  ).filter({ hasText: retiredEnvelopeId });
+  await retiredConsoleOperation.waitFor();
+  await retiredConsoleOperation.click();
+  const retiredSupplied = page.locator(
+    'app-agent-console .supplied-lessons',
+  );
+  await waitForText(retiredSupplied, 'None');
+  assert(
+    await retiredSupplied.locator('ol li p').count() === 0,
+    'console showed episode lesson text after retirement',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount,
+    'episode lesson review and retirement',
+  );
+  assertDoctrineClean(
+    workspace.worktreePath,
+    'episode lesson review and retirement',
+  );
+
+  await page.goto(
+    `${baseUrl}/lessons#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  let durableCard = page.locator(`#lesson-${durable.id}`);
+  await durableCard.waitFor();
+  await durableCard.getByRole(
+    'button',
+    { name: 'Approve', exact: true },
+  ).click();
+  await durableCard.getByRole(
+    'button',
+    { name: 'Confirm approve' },
+  ).click();
+  await waitForAttribute(
+    durableCard,
+    'data-state',
+    'approved-pending-reconcile',
+  );
+  const prepared = await getLesson(
+    daemon.handshake,
+    draft.id,
+    durable.id,
+  );
+  assert(
+    prepared.reconciliation?.kind === 'apply'
+      && prepared.reconciliation.state === 'prepared'
+      && prepared.reconciliation.preparedMarkdown.includes(
+        durable.proposedMarkdown ?? '',
+      )
+      && prepared.reconciliation.preparedMarkdown.includes('$reconcile-whp')
+      && prepared.evidence.every(({ id }) =>
+        prepared.reconciliation!.preparedMarkdown.includes(id)),
+    'durable approval did not prepare an evidence-rich reconcile handoff',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount,
+    'prepared durable reconciliation',
+  );
+  assertDoctrineClean(
+    workspace.worktreePath,
+    'prepared durable reconciliation',
+  );
+  await durableCard.getByRole(
+    'button',
+    { name: 'I started external reconciliation' },
+  ).click();
+  const awaiting = await waitForValue(
+    () => getLesson(daemon!.handshake, draft.id, durable.id),
+    (lesson) =>
+      lesson.reconciliation?.state === 'awaiting-reconciliation',
+    UI_TIMEOUT_MS,
+    'durable handoff did not enter awaiting-reconciliation',
+  );
+
+  await stopDaemon(daemon);
+  daemon = null;
+  daemon = await startDaemon(
+    cloneServer,
+    runtimeFile,
+    daemonEnvironment,
+    'plan7-flow',
+  );
+  baseUrl = `http://127.0.0.1:${daemon.handshake.port}`;
+  await page.goto(
+    `${baseUrl}/lessons#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  durableCard = page.locator(`#lesson-${durable.id}`);
+  await durableCard.waitFor();
+  const recoveredLessons = await api<{ lessons: LessonRecord[] }>(
+    daemon.handshake,
+    `/api/drafts/${encodeURIComponent(draft.id)}/lessons`,
+  );
+  const recoveredDurable = recoveredLessons.lessons.find(
+    ({ id }) => id === durable.id,
+  );
+  assert(
+    recoveredLessons.lessons.length === 2
+      && recoveredDurable?.reconciliation?.resumeKey
+        === awaiting.reconciliation?.resumeKey
+      && recoveredDurable?.reconciliation?.state
+        === 'awaiting-reconciliation',
+    'awaiting durable handoff did not recover without duplication',
+  );
+
+  const repositoryHeadBeforeReconcile = gitOutput(
+    workspace.worktreePath,
+    ['rev-parse', 'HEAD'],
+  );
+  await durableCard.getByLabel('Resulting external commit').fill(
+    repositoryHeadBeforeReconcile,
+  );
+  await durableCard.getByRole(
+    'button',
+    { name: 'Verify external commit' },
+  ).click();
+  await waitForText(
+    page.locator('[data-testid="lessons-page"] [role="alert"]'),
+    'reconciliation commit',
+  );
+  const dismiss = page.getByRole('button', { name: 'Dismiss' });
+  if (await dismiss.count()) await dismiss.click();
+  assertDoctrineClean(
+    workspace.worktreePath,
+    'failed reconciliation verification',
+  );
+
+  const durableReviewed = durable.reviewedMarkdown
+    ?? durable.proposedMarkdown
+    ?? '';
+  assert(
+    durableReviewed !== '',
+    'durable proposal has no reviewed reconciliation text',
+  );
+  const decisionsPath = join(workspace.worktreePath, 'DECISIONS.md');
+  const steeringPath = join(
+    workspace.worktreePath,
+    'whp-youtube',
+    'STEERING.md',
+  );
+  writeFileSync(
+    decisionsPath,
+    `${readFileSync(decisionsPath, 'utf8').trimEnd()}\n\n`
+      + '## 2026-07-24 — Simulated reviewed lesson reconciliation\n\n'
+      + `- ${durableReviewed}\n`,
+  );
+  writeFileSync(
+    steeringPath,
+    `${readFileSync(steeringPath, 'utf8').trimEnd()}\n\n`
+      + '## Simulated reviewed lesson doctrine\n\n'
+      + `${durableReviewed}\n`,
+  );
+  run('git', [
+    '-C',
+    workspace.worktreePath,
+    'add',
+    '--',
+    'DECISIONS.md',
+    'whp-youtube/STEERING.md',
+  ]);
+  run('git', [
+    '-C',
+    workspace.worktreePath,
+    'commit',
+    '-m',
+    'docs(whp): simulate reviewed lesson reconciliation',
+  ]);
+  const reconcileCommit = gitOutput(
+    workspace.worktreePath,
+    ['rev-parse', 'HEAD'],
+  );
+  assert(
+    gitRawOutput(workspace.worktreePath, [
+      'status',
+      '--porcelain=v1',
+      '--',
+      '.agents/skills',
+    ]) === '',
+    'external reconciliation simulation changed a skill file',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount + 1,
+    'external reconciliation commit',
+  );
+
+  await durableCard.getByLabel('Resulting external commit').fill(
+    reconcileCommit,
+  );
+  await durableCard.getByRole(
+    'button',
+    { name: 'Verify external commit' },
+  ).click();
+  await waitForAttribute(durableCard, 'data-state', 'applied');
+  const applied = await getLesson(
+    daemon.handshake,
+    draft.id,
+    durable.id,
+  );
+  assert(
+    applied.proposedMarkdown === null
+      && applied.reviewedMarkdown === null
+      && applied.repositoryProvenance?.status === 'resolved'
+      && applied.reconciliation?.state === 'verified',
+    'verified durable application did not become repository-native',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount + 1,
+    'app verification of external reconciliation',
+  );
+  assertDoctrineClean(
+    workspace.worktreePath,
+    'app verification of external reconciliation',
+  );
+
+  await durableCard.getByRole(
+    'button',
+    { name: 'Retire', exact: true },
+  ).click();
+  await durableCard.getByRole(
+    'button',
+    { name: 'Confirm retire' },
+  ).click();
+  await waitForAttribute(
+    durableCard,
+    'data-state',
+    'retirement-pending',
+  );
+  const retirement = await getLesson(
+    daemon.handshake,
+    draft.id,
+    durable.id,
+  );
+  assert(
+    retirement.reconciliation?.kind === 'retire'
+      && retirement.reconciliation.state === 'prepared'
+      && retirement.reconciliation.preparedMarkdown.includes(
+        'retire this applied durable doctrine',
+      ),
+    'durable retirement did not prepare a reconcile handoff',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount + 1,
+    'prepared durable retirement',
+  );
+  assertDoctrineClean(
+    workspace.worktreePath,
+    'prepared durable retirement',
+  );
+
+  const staleBytes = readFileSync(steeringPath, 'utf8').replace(
+    durableReviewed,
+    `${durableReviewed} [externally changed]`,
+  );
+  assert(
+    staleBytes !== readFileSync(steeringPath, 'utf8'),
+    'could not mutate the verified doctrine pointer for stale-state coverage',
+  );
+  writeFileSync(steeringPath, staleBytes);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  durableCard = page.locator(`#lesson-${durable.id}`);
+  await waitForText(
+    durableCard.locator('.stale-pointer'),
+    'Blocking stale repository pointer',
+  );
+  const stale = await getLesson(
+    daemon.handshake,
+    draft.id,
+    durable.id,
+  );
+  assert(
+    stale.repositoryProvenance?.status === 'unresolved',
+    'changed repository doctrine was not shown as stale',
+  );
+  assert(
+    readFileSync(steeringPath, 'utf8') === staleBytes,
+    'stale-state refresh rewrote repository doctrine',
+  );
+  assertCommitCount(
+    cloneRoot,
+    initialCommitCount + 1,
+    'stale repository pointer display',
+  );
+
+  await page.goto(
+    `${baseUrl}/?draft=${encodeURIComponent(draft.id)}`
+      + `#nonce=${daemon.handshake.nonce}`,
+    { waitUntil: 'domcontentloaded' },
+  );
+  await page.locator('app-production-panel').waitFor();
+  return reconcileCommit;
+}
+
+async function submitEnvelopeInspection(
+  handshake: RuntimeHandshake,
+  draftId: string,
+  selection: string,
+): Promise<string> {
+  const submitted = await api<{ id: string }>(
+    handshake,
+    `/api/drafts/${encodeURIComponent(draftId)}/ops`,
+    {
+      method: 'POST',
+      body: {
+        operation: 'rewrite-selection',
+        inputs: {
+          selection,
+          approved_lessons: ['forged browser lesson'],
+          requested_scope: 'Return one bounded replacement.',
+        },
+      },
+    },
+  );
+  return submitted.id;
+}
+
+async function waitForTerminalOperation(
+  handshake: RuntimeHandshake,
+  operationId: string,
+): Promise<OperationRecord> {
+  return waitForValue(
+    () => api<OperationRecord>(
+      handshake,
+      `/api/ops/${encodeURIComponent(operationId)}`,
+    ),
+    (operation) => [
+      'cancelled',
+      'completed',
+      'failed',
+      'interrupted',
+      'invalid-output',
+      'timed-out',
+    ].includes(operation.state),
+    UI_TIMEOUT_MS,
+    `operation ${operationId} did not reach a terminal state`,
+  ).then((operation) => {
+    assert(
+      operation.state === 'completed',
+      `operation ${operationId} ended in ${operation.state}`,
+    );
+    return operation;
+  });
+}
+
+function getLesson(
+  handshake: RuntimeHandshake,
+  draftId: string,
+  lessonId: string,
+): Promise<LessonRecord> {
+  return api<LessonRecord>(
+    handshake,
+    `/api/drafts/${encodeURIComponent(draftId)}/lessons/${
+      encodeURIComponent(lessonId)
+    }`,
+  );
+}
+
+function assertCommitCount(
+  cloneRoot: string,
+  expected: number,
+  stage: string,
+): void {
+  const count = Number(
+    gitOutput(cloneRoot, ['rev-list', '--count', '--all']),
+  );
+  assert(
+    count === expected,
+    `unexpected commit count at ${stage}: expected ${expected}, got ${count}`,
+  );
+}
+
+function assertDoctrineClean(worktreePath: string, stage: string): void {
+  const status = gitRawOutput(worktreePath, [
+    'status',
+    '--porcelain=v1',
+    '--',
+    'DECISIONS.md',
+    'BRAND.md',
+    'STEERING.md',
+    'whp-youtube/STEERING.md',
+    '.agents/skills',
+  ]);
+  assert(
+    status === '',
+    `app changed doctrine before external action at ${stage}: ${status}`,
+  );
+}
+
+function recordValue(value: unknown): Record<string, unknown> | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }
 
 async function selectTopicRun(
@@ -697,6 +1608,7 @@ async function selectTopicRun(
     UI_TIMEOUT_MS,
     'seeded topic run was not listed',
   );
+  assert(matchingRow, 'seeded topic run lookup returned null');
   const select = matchingRow.getByRole(
     'button',
     { name: 'Select run' },
@@ -798,7 +1710,7 @@ async function startDaemon(
   fakeMode: string,
 ): Promise<RunningDaemon> {
   rmSync(runtimeFile, { force: true });
-  const environment = {
+  const environment: NodeJS.ProcessEnv = {
     ...process.env,
     ...injectedEnvironment,
     FAKE_CODEX_MODE: fakeMode,
@@ -829,33 +1741,38 @@ async function startDaemon(
       ? readFileSync(path, 'utf8').slice(-8_192)
       : '';
   try {
-    const running = {
+    const publishedHandshake = await waitForValue(
+      async () => {
+        if (child.exitCode !== null) {
+          await childClosed;
+          throw new Error(
+            `daemon exited ${child.exitCode}; stdout=${
+              readLog(stdoutFile)
+            }; stderr=${readLog(stderrFile)}`,
+          );
+        }
+        if (!existsSync(runtimeFile)) return null;
+        try {
+          const parsed = JSON.parse(
+            readFileSync(runtimeFile, 'utf8'),
+          ) as RuntimeHandshake;
+          return parsed.pid === child.pid ? parsed : null;
+        } catch {
+          return null;
+        }
+      },
+      (value): value is RuntimeHandshake => value !== null,
+      UI_TIMEOUT_MS,
+      `daemon did not publish ${runtimeFile}`,
+    );
+    assert(
+      publishedHandshake,
+      `daemon handshake remained absent: ${runtimeFile}`,
+    );
+    const running: RunningDaemon = {
       child,
       runtimeFile,
-      handshake: await waitForValue(
-        async () => {
-          if (child.exitCode !== null) {
-            await childClosed;
-            throw new Error(
-              `daemon exited ${child.exitCode}; stdout=${
-                readLog(stdoutFile)
-              }; stderr=${readLog(stderrFile)}`,
-            );
-          }
-          if (!existsSync(runtimeFile)) return null;
-          try {
-            const parsed = JSON.parse(
-              readFileSync(runtimeFile, 'utf8'),
-            ) as RuntimeHandshake;
-            return parsed.pid === child.pid ? parsed : null;
-          } catch {
-            return null;
-          }
-        },
-        (value): value is RuntimeHandshake => value !== null,
-        UI_TIMEOUT_MS,
-        `daemon did not publish ${runtimeFile}`,
-      ),
+      handshake: publishedHandshake,
       stdout: () => readLog(stdoutFile),
       stderr: () => readLog(stderrFile),
     };
@@ -1074,6 +1991,25 @@ function assertFileContains(path: string, expected: string): void {
   );
 }
 
+async function selectEditorParagraph(
+  page: Page,
+  editor: Locator,
+  index: number,
+): Promise<void> {
+  const paragraph = editor.locator('p').nth(index);
+  await paragraph.click();
+  await page.keyboard.press('Home');
+  await page.keyboard.press('Shift+End');
+  await waitForValue(
+    () => page.locator(
+      '[role="toolbar"][aria-label="Selected text actions"]',
+    ).isVisible(),
+    Boolean,
+    UI_TIMEOUT_MS,
+    `selection toolbar did not open for paragraph ${index}`,
+  );
+}
+
 async function waitForEditorSave(page: Page): Promise<void> {
   const badge = page.locator('[data-testid="unsaved-badge"]');
   await waitForValue(
@@ -1248,13 +2184,17 @@ async function runSweep(): Promise<void> {
   }
 
   if (failure) {
-    console.error('FAILED — Plan 6 browser sweep');
+    console.error(
+      `FAILED — Plan ${PLAN7_SWEEP ? '7' : '6'} browser sweep`,
+    );
     console.error(
       `DETAIL — ${failure instanceof Error ? failure.stack : String(failure)}`,
     );
     process.exitCode = 1;
   } else {
-    console.log('VERIFIED — Plan 6 browser sweep');
+    console.log(
+      `VERIFIED — Plan ${PLAN7_SWEEP ? '7' : '6'} browser sweep`,
+    );
   }
 }
 

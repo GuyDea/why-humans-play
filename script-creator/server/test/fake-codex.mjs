@@ -20,12 +20,16 @@ const resumeId = resumeIdx >= 0 ? argv[resumeIdx + 1] : null;
 const schemaIdx = argv.indexOf('--output-schema');
 const hasSchema = schemaIdx >= 0;
 const schemaFile = hasSchema ? argv[schemaIdx + 1] : null;
-const submittedPrompt = mode === 'plan6-flow'
+const submittedPrompt = (
+  mode === 'plan6-flow'
+  || mode === 'plan7-flow'
+  || mode.startsWith('distill-')
+)
   ? await readSubmittedPrompt(outFile)
   : '';
 let attemptMode = mode;
 if (mode === 'slow-operation-schema') attemptMode = 'operation-schema';
-if (mode === 'plan6-flow') {
+if (mode === 'plan6-flow' || mode === 'plan7-flow') {
   attemptMode = plan6Mode(submittedPrompt, hasSchema);
 }
 if (
@@ -84,7 +88,10 @@ if (
 if (hasSchema && attemptMode !== 'bad-schema-output') {
   if (!schemaFile) throw new Error('--output-schema requires a schema file');
   const schema = JSON.parse(readFileSync(schemaFile, 'utf8'));
-  const output = synthesizeSchema(schema);
+  let output = synthesizeSchema(schema);
+  if (attemptMode.startsWith('distill-')) {
+    output = distillationResult(attemptMode, submittedPrompt);
+  }
   if (attemptMode === 'rewrite-architecture-section') {
     const inputs = submittedInputs(submittedPrompt);
     const sectionKey = typeof inputs.section_key === 'string'
@@ -527,9 +534,126 @@ function plan6Mode(prompt, schemaOutput) {
         : process.env.FAKE_PROMOTE_MODE === 'guardrail'
           ? 'promote-guardrail'
           : 'promote';
+    case 'Distill session lessons':
+      return 'distill-complete';
     default:
       return schemaOutput ? 'operation-schema' : 'happy';
   }
+}
+
+function distillationResult(attempt, prompt) {
+  const inputs = submittedInputs(prompt);
+  const session = objectValue(inputs.session);
+  const decisions = Array.isArray(session.decisions)
+    ? session.decisions.map(objectValue)
+    : [];
+  const decisionIds = decisions.map(({ id }) => id)
+    .filter((id) => typeof id === 'string' && id !== '');
+  const existingLessons = Array.isArray(inputs.existing_lessons)
+    ? inputs.existing_lessons.map(objectValue)
+    : [];
+  if (decisionIds.length === 0) {
+    throw new Error(
+      `fake ${attempt} requires submitted session decision IDs`,
+    );
+  }
+
+  if (attempt === 'distill-narrowed' || attempt === 'distill-declined') {
+    return {
+      status: attempt === 'distill-narrowed' ? 'narrowed' : 'declined',
+      lessons: [],
+      guardrail_markdown: attempt === 'distill-narrowed'
+        ? 'The submitted window supports no broader lesson than the frozen evidence.'
+        : 'The submitted window does not support a responsible lesson proposal.',
+    };
+  }
+
+  const episodeLesson = {
+    classification: 'episode-local',
+    lesson_markdown:
+      'Keep the causal turn attached to the visible choice in this episode.',
+    rationale_markdown:
+      'The reviewed dispositions favor a concrete causal step over an abstract claim.',
+    evidence: [decisionIds[0]],
+    proposed_target: null,
+    supersedes_lesson_id: null,
+  };
+  const durableLesson = {
+    classification: 'durable',
+    lesson_markdown:
+      'When a causal claim is accepted, preserve the visible choice that demonstrates it.',
+    rationale_markdown:
+      'The frozen decisions suggest a reusable editorial doctrine candidate.',
+    evidence: [decisionIds[1] ?? decisionIds[0]],
+    proposed_target: 'whp-youtube/STEERING.md',
+    supersedes_lesson_id: null,
+  };
+
+  if (attempt === 'distill-duplicate-prior') {
+    const prior = existingLessons[0];
+    const priorMarkdown = prior.lesson_markdown;
+    if (typeof priorMarkdown !== 'string' || priorMarkdown === '') {
+      throw new Error(
+        'fake distill-duplicate-prior requires a submitted prior lesson',
+      );
+    }
+    return {
+      status: 'complete',
+      lessons: [{
+        ...episodeLesson,
+        classification: prior.classification === 'durable'
+          ? 'durable'
+          : 'episode-local',
+        lesson_markdown: priorMarkdown,
+        proposed_target: typeof prior.proposed_target === 'string'
+          ? prior.proposed_target
+          : null,
+      }],
+      guardrail_markdown: null,
+    };
+  }
+
+  if (attempt === 'distill-valid-supersession') {
+    const prior = existingLessons[0];
+    if (typeof prior.id !== 'string' || prior.id === '') {
+      throw new Error(
+        'fake distill-valid-supersession requires a submitted prior lesson ID',
+      );
+    }
+    return {
+      status: 'complete',
+      lessons: [{
+        ...episodeLesson,
+        lesson_markdown:
+          'Keep the causal turn attached to one visible, consequential choice.',
+        supersedes_lesson_id: prior.id,
+      }],
+      guardrail_markdown: null,
+    };
+  }
+
+  if (attempt === 'distill-invalid-evidence') {
+    return {
+      status: 'complete',
+      lessons: [{
+        ...episodeLesson,
+        evidence: ['absent-from-submitted-session'],
+      }],
+      guardrail_markdown: null,
+    };
+  }
+
+  return {
+    status: 'complete',
+    lessons: [episodeLesson, durableLesson],
+    guardrail_markdown: null,
+  };
+}
+
+function objectValue(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? value
+    : {};
 }
 
 function writePromotionFixture(attempt, prompt, args) {

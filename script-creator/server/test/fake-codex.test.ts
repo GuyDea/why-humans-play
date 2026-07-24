@@ -17,9 +17,11 @@ import {
 import {
   ARCHITECTURE_REVIEW_SCHEMA,
   ARCHITECTURE_REWRITE_SCHEMA,
+  DISTILL_SCHEMA,
   GATE_CHECK_SCHEMA,
   REVIEW_SCHEMA,
 } from '../src/operations/schemas.js';
+import { validateAgainstSchema } from '../src/schema-validate.js';
 
 const run = promisify(execFile);
 const FAKE = join(import.meta.dirname, 'fake-codex.mjs');
@@ -212,6 +214,99 @@ describe('fake codex', () => {
   });
 
   it.each([
+    ['distill-complete', 'complete'],
+    ['distill-duplicate-prior', 'complete'],
+    ['distill-valid-supersession', 'complete'],
+    ['distill-invalid-evidence', 'complete'],
+    ['distill-narrowed', 'narrowed'],
+    ['distill-declined', 'declined'],
+    ['plan7-flow', 'complete'],
+    ['plan6-flow', 'complete'],
+  ] as const)(
+    'emits the %s deterministic Distill fixture from submitted frozen inputs',
+    async (mode, status) => {
+      const decisions = [
+        { id: 'submitted-decision-1', kind: 'proposal-accepted' },
+        { id: 'submitted-decision-2', kind: 'proposal-rejected' },
+      ];
+      const existingLessons = [{
+        id: 'submitted-lesson-1',
+        classification: 'episode-local',
+        state: 'approved',
+        lesson_markdown: 'Keep the opening grounded in a visible choice.',
+      }];
+      const result = await runDistillFake(mode, {
+        session: {
+          id: 'submitted-session-1',
+          draft_id: 'submitted-draft-1',
+          trigger: 'on-demand',
+          decisions,
+        },
+        existing_lessons: existingLessons,
+      });
+
+      expect(validateAgainstSchema(
+        DISTILL_SCHEMA,
+        JSON.stringify(result),
+      ).ok).toBe(true);
+      expect(result.status).toBe(status);
+
+      if (status !== 'complete') {
+        expect(result.lessons).toEqual([]);
+        expect(result.guardrail_markdown).toEqual(expect.any(String));
+        return;
+      }
+
+      expect(result.lessons.length).toBeGreaterThan(0);
+      for (const lesson of result.lessons) {
+        expect(Object.keys(lesson)).toEqual([
+          'classification',
+          'lesson_markdown',
+          'rationale_markdown',
+          'evidence',
+          'proposed_target',
+          'supersedes_lesson_id',
+        ]);
+      }
+      if (mode === 'distill-complete' || mode.endsWith('-flow')) {
+        expect(result.lessons.map((lesson: any) => lesson.classification))
+          .toEqual(['episode-local', 'durable']);
+        expect(result.lessons.flatMap((lesson: any) => lesson.evidence))
+          .toEqual([
+            'submitted-decision-1',
+            'submitted-decision-2',
+          ]);
+      }
+      if (mode === 'distill-duplicate-prior') {
+        expect(result.lessons[0]).toMatchObject({
+          lesson_markdown:
+            'Keep the opening grounded in a visible choice.',
+          evidence: ['submitted-decision-1'],
+        });
+      }
+      if (mode === 'distill-valid-supersession') {
+        expect(result.lessons[0]).toMatchObject({
+          evidence: ['submitted-decision-1'],
+          supersedes_lesson_id: 'submitted-lesson-1',
+        });
+      }
+      if (mode === 'distill-invalid-evidence') {
+        expect(result.lessons[0].evidence).not.toContain(
+          'submitted-decision-1',
+        );
+        expect(result.lessons[0].evidence).not.toContain(
+          'submitted-decision-2',
+        );
+      } else {
+        expect(result.lessons.flatMap((lesson: any) => lesson.evidence)
+          .every((id: string) =>
+            decisions.some((decision) => decision.id === id)))
+          .toBe(true);
+      }
+    },
+  );
+
+  it.each([
     ['valid', true, 'Promotion output written.'],
     ['invalid-production', true, 'Invalid production fixture written.'],
     ['guardrail', false, 'Guardrail: promotion declined.'],
@@ -269,3 +364,35 @@ describe('fake codex', () => {
     },
   );
 });
+
+async function runDistillFake(
+  mode: string,
+  inputs: unknown,
+): Promise<any> {
+  const dir = mkdtempSync(join(tmpdir(), `fake-${mode}-`));
+  const schema = join(dir, 'distill.schema.json');
+  const out = join(dir, 'distill.json');
+  writeFileSync(schema, JSON.stringify(DISTILL_SCHEMA));
+  const prompt = [
+    '$writing-whp-youtube-scripts',
+    'Operation: Distill session lessons',
+    `Inputs: ${JSON.stringify(inputs)}`,
+  ].join('\n');
+
+  const pending = run(process.execPath, [
+    FAKE,
+    'exec',
+    '--json',
+    '--output-schema',
+    schema,
+    '-o',
+    out,
+    '-',
+  ], {
+    env: { ...process.env, FAKE_CODEX_MODE: mode },
+  });
+  pending.child.stdin?.end(prompt);
+  await pending;
+
+  return JSON.parse(readFileSync(out, 'utf8'));
+}
