@@ -293,6 +293,12 @@ without weakening the audience-first test for problem-led growth episodes.
   contractions, direct address, and brief controlled hyperbole when they sound natural.
   Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
   learning promise.
+- **Compose the register from concrete conversational moves.** Each major beat carries a
+  first-person narrator reaction and a direct-address check-in; documented cases run as
+  present-tense scenes inside the evidence boundary; transitions are spoken, never
+  outline labels; diction stays everyday when the claim's scope survives; and a run of
+  consecutive polished aphorisms is an essay symptom that needs a conversational turn.
+  Reactions and opinions are voice — invented autobiography is still forbidden.
 - **Give that friend a real personality.** **Precision controls what we claim. Personality
   controls how we say it.** Write like a well-educated best friend with a brutal sense of
   humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,

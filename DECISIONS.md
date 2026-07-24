@@ -1096,3 +1096,27 @@ toward dry rigor exactly where retention sags. Martin accepted the proposed clos
 `.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`, and
 this ledger. Validator enforcement of the `Shorts plan` section is deliberately
 deferred; the structural validator continues to permit additional appendix sections.
+
+## 2026-07-24 — Adopt the full best-friend register via concrete conversational moves
+
+**Decision:** WHP narration uses the full best-friend register: a present first-person
+narrator who reacts to the material, direct-address check-ins with immediate payoffs,
+present-tense storytelling for documented cases, spoken transitions instead of outline
+labels, everyday diction wherever the claim's scope survives, and natural rhythm with
+fragments — composed as required per-beat moves, with invented autobiography still
+forbidden and all evidence boundaries unchanged.
+
+**Rationale:** Martin reviewed the regenerated Episode 1 prototype and found it did not
+feel best-friend casual most of the time. Diagnosis: the draft was composed almost
+entirely of polished aphorisms with no narrator presence, lecture-style transitions,
+and research-register phrasing — the voice doctrine named the register but supplied no
+concrete moves, while the readability gate pushed drafts toward compressed epigrams.
+Martin chose the full best-friend option over a warm-conversational middle ground from
+previewed alternatives.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (conversational
+moves recipe), `whp-youtube/STEERING.md` (Law 2 voice bullets),
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md` (rapid
+quality check), and
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+(narration rewritten in the adopted register).

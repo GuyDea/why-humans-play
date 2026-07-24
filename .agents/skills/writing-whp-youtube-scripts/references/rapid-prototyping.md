@@ -542,6 +542,9 @@ Before returning rapid work, check internally:
   mechanism without becoming a second opening or a universal claim?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
+- Does each major beat carry at least one first-person narrator reaction and one
+  direct-address check-in, with spoken transitions instead of outline labels and no
+  unbroken run of polished aphorisms?
 - In a complete narration, does each major beat land at least one earned comic or
   surprising turn, with any dry stretch of two consecutive beats either reworked or
   reported as a deliberate sobriety exception?
