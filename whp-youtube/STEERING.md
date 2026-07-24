@@ -162,6 +162,17 @@ without weakening the audience-first test for problem-led growth episodes.
   syntax, and replace technical compound phrases with simpler words when meaning survives.
   Do not spend either sentence on a technical setup label. State the human-readable premise
   first; hold experimental qualifiers and mechanism detail until after the hook.
+- **Enforce spoken readability before delivery.** Readability is a delivery gate, not a
+  post-draft editorial audit. A sentence above 25 spoken words fails and must be rewritten
+  before delivery. Every sentence from 21 through 25 spoken words requires a first-hearing
+  review. A shorter sentence also fails when difficult vocabulary and multiple
+  relationships make it hard to process. A sentence of any length fails when a
+  first-hearing listener cannot identify who did what, what changed, and why it matters.
+  Split difficult sentences without deleting evidence boundaries, connective tissue,
+  humor, or personality. Remove source links and every other non-spoken annotation before
+  checking. Treat the word ceiling as a backstop, not as the definition of clarity. Reject
+  stacked conditions, contrasts, comparisons, caveats, unclear references, and unexplained
+  abstractions even when the sentence is short.
 - **Make research events sound real because they are specific.** When supplied or verified,
   name the year and responsible institution or team in the opening. Do not flatten a known
   attribution into generic “scientists,” and never invent a university, city, lab,
@@ -175,12 +186,135 @@ without weakening the audience-first test for problem-led growth episodes.
   compact current echo that demonstrates the same bounded mechanism. The older case earns
   the story; the current echo proves present relevance. Do not open two competing stories
   or turn two examples into a universal claim.
+- **Prove the anti-skip relevance.** When an opening says informed, trained, expert, or
+  skeptical viewers can still be affected, earn that relevance with a documented observed
+  case involving the claimed population. Theory may explain a demonstrated effect, but an
+  analogy, warning, or hypothetical cannot establish that it happens. Match the case's
+  population, behavior, mechanism, and outcome to the claim; state any mismatch and supply
+  separate evidence for the episode's mechanism instead of letting one case imply both.
+- **Use the five-move anti-skip intro when the viewer can claim immunity.** For a
+  problem-led opening with a predictable “not me; I know the tricks” response, use
+  `intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+  Complete the first four moves before detailed case exposition. A short sourced result
+  may tease the case during the disarm; develop the real story only after the promise.
+  Treat measured skepticism, lower trust ratings, expertise, training, or prior warning as
+  sufficient observable resistance; do not require proof of the participants' exact inner
+  monologue. You may say “If you think this cannot happen to me…” and then present a case
+  with observable resistance; that compares the viewer's defense with the case instead of
+  attributing the viewer's words to the participants. Do not invent thoughts, motives, or
+  quotations for the people in the case. Keep the early remedy promise literal, specific,
+  action-focused, and joke-free. This contract overrides a generic hook spine when it
+  applies.
+- **Make every proof handoff explicit.** Connect adjacent evidence as
+  `case → exact takeaway → why it matters here → remaining question → next evidence`.
+  A boundary is necessary, but it is not the transition by itself. State the first case's
+  positive proof job, explain why the episode needs it, then let its unresolved question
+  create the next step.
+  Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
+  equivalent disclaimer. Use the limitation only after the viewer knows why the case
+  belongs.
+- **Apply story construction script-wide.** Apply these story-construction rules to every
+  beat and developed example in the complete script, not only to the opening. Before a
+  surprising result, state the outcome the viewer should reasonably expect when that
+  expectation is necessary to understand why the result matters. Reveal the result in
+  direct contrast to that expectation. After the result, use at most one mechanism-mapped
+  punchline and one precise takeaway before moving forward. Do not restate the same result
+  through a stack of analogies, paraphrases, and thesis lines. When consecutive cases prove
+  different parts of the argument, name each case's distinct proof job before combining
+  them. The synthesis may combine established findings; it must not make either case appear
+  to prove the other case's claim. Prefer everyday spoken language over
+  research-administration phrases when both preserve the same claim. End each beat once:
+  choose the strongest closing image or joke, state one exact lesson, and transition.
+- **Tell the smallest magnetic truthful story.** Tell the smallest story that preserves
+  trust, causal clarity, and surprise. Every story element must earn its place by increasing
+  trust, first-hearing clarity, or magnetism; otherwise cut or collapse it. Open a
+  documented story with a compact trust anchor: verified date and place when available,
+  plus the relevant person, team, or institution when it adds credibility or orientation.
+  Make the stages audible without sounding like slide labels. Use natural connective
+  language that explains what changes next—such as “So that was the setup,” “Then
+  researchers changed one thing,” or “And this is the kicker”—and vary it to fit the story.
+  Do not march through repeated “Here was…” labels or expose the outline as
+  meta-commentary. A transition should explain what changes next, not merely announce the
+  section. When a result creates a clean comic opening, add one short punchline that
+  sharpens the mechanism, consequence, or AHA; skip it when it competes with the lesson.
+  Use the fewest story elements that preserve the causal truth. Remove or collapse
+  technical inputs, intermediate objects, roles, and counts when the mechanism remains
+  accurate without them. Keep separate only the entities the listener must distinguish to
+  understand the manipulation and result. An accurate detail does not earn narration time
+  merely because it appears in the source. Do not simplify past the causal hinge, material
+  caveat, or evidence boundary. Spend the attention you save on the surprising turn,
+  consequence, or AHA that carries the lesson.
+- **Keep compressed stories fully wired.** Compression removes clutter, never connective
+  tissue. Preserve the causal minimum, not the procedural maximum. A teaser and its
+  developed case have different detail budgets. In an anti-skip disarm, state only the
+  relevant qualification or resistance and the fact that it failed to protect; defer the
+  task, group split, metric, and comparator to the developed case. Before naming a result,
+  introduce every actor, group, task, goal, success criterion, metric, and comparison it
+  depends on. For an experiment, preserve this
+  causal-completeness sequence:
+  `participants → exact task → group split → changed variable → measured result → meaning`.
+  Describe a participant task by its audience-facing objective and success condition, not
+  by response controls or interface options that do not advance the story. Compress a
+  formal task to its practical purpose only when the paraphrase preserves the scored
+  objective and does not invent a different instruction.
+  State the task as an observable action with a success criterion, then report the result
+  in the same concrete vocabulary. Lock the story vocabulary before drafting: give each
+  entity one stable spoken name, and do not switch synonyms unless the narration explicitly
+  introduces the relationship. Use the broadest truthful role label that keeps different
+  actors easy to distinguish; preserve a narrower title only when it matters to the causal
+  claim. Describe the changed variable with nouns already established in the story. State
+  a measurement as the measured object plus the measured property, such as
+  `diagnoses → trustworthiness`. Name both the metric and the comparator in every
+  comparison. Do not replace a concrete noun from the setup with an undefined abstraction
+  in the result. Every new noun must perform a necessary causal job or be cut. Distinguish
+  an expressed reaction from an effective behavioral response; do not call the reaction
+  absent when an attitude changed but performance did not. Prefer a concrete real-world
+  analogy whose roles and action map point for point to the mechanism. Do not use an
+  ordinal group label, pronoun, or outcome term before introducing its referent. After each
+  sentence, ask what a first-hearing listener still has to resolve. Questions such as
+  “judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
+  setup that must be restored before polishing. Name the container in a learning promise:
+  write “By the end of this video” rather than leaving “by the end” without a referent.
+- **Make every experiment visible on first hearing.** For a source-label experiment,
+  narrate the visible chain with the story's locked nouns:
+  `item or question → claimed source → participant objective or outcome`. If researchers
+  labeled human-written material as AI-generated, state what was real, what was only a
+  label, and what human behavior the manipulation tested before interpreting the result.
+  Attach every correct-or-incorrect count to its stable noun; never leave the listener
+  guessing which item or final outcome was wrong. Separate what the case proves about human
+  response from what later evidence proves about AI behavior.
+- **Choose the closest strong proof case.** Prefer a well-supported Western case when one
+  can perform the same proof job clearly. Use the strongest non-Western case when no
+  Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity
+  gates. Keep the real location explicit and use later examples to widen geographic scope.
+- **Use the friendly conversation format.** Write like a smart friend walking the viewer
+  through something surprising, not like a paper abstract, conference talk, or legal
+  disclaimer. Move through `fact → plain reaction → why it matters → next question`. Use
+  contractions, direct address, and brief controlled hyperbole when they sound natural.
+  Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
+  learning promise.
+- **Give that friend a real personality.** **Precision controls what we claim. Personality
+  controls how we say it.** Write like a well-educated best friend with a brutal sense of
+  humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,
+  emotionally loaded everyday words, and controlled hyperbole are allowed when they make
+  the stakes clearer and the underlying claim remains supportable. Judge the decision,
+  behavior, mechanism, or institution—not a person's inherent worth. Calling a choice
+  “stupid” or “the dumbest decision of your life” is allowed when the line judges the
+  choice and the episode earns the underlying stakes; do not replace it with a clinical
+  euphemism merely because the subject is serious. Emotional force never lowers the
+  evidence bar, and vulnerable people never become the punchline.
+- **Keep jokes short.** Separate setup from punchline. Keep a standalone punchline to one
+  short spoken sentence—usually no more than 12 words. If the joke needs a relative clause
+  or a second sentence to explain it, rewrite it. Put the factual setup and causal
+  explanation outside the punchline.
 - **Open a consequential question and promise its answer.** The opening must move from
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
   to do by the end. A generic "keep watching" tease is not a viewer promise. Write the
   promise itself as a literal learning contract: keep jokes, comic images, metaphors, and
   colorful callbacks out of that sentence even when humor surrounds it.
+  A complete-episode promise must name both the understanding the viewer will gain and the
+  concrete response they will be able to use.
 - **The Vsauce template `[verified]` (steal this exact shape):** question → concrete
   absurdity reframe ("games are weird — why would I invite a goalie to make scoring
   *harder*?") → intellectual anchor (a named idea / researcher). It lands the hook in
@@ -357,7 +491,9 @@ millions on junk science).
   Earn humor from the absurd mechanism or institution, then state plainly what got worse
   and who absorbed the cost; the punchline never substitutes for the implication. Use a
   clearly labeled hypothetical when a real case is unavailable, unverified, or would
-  obscure the story rather than sharpen it.
+  obscure the story rather than sharpen it. A hypothetical may explain a mechanism or let
+  the viewer rehearse a response; it cannot carry a factual claim about prevalence,
+  consequence, or who is vulnerable.
 - **Use novelty for the story and recognition for scale.** When a pattern is worldwide,
   prefer a strong, well-supported lesser-known case for the developed story when it offers
   useful surprise. After the developed examples, a compact montage may name roughly three

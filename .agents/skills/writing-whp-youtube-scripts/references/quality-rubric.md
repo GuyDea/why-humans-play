@@ -49,49 +49,111 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 - **0:** The opening pursues a different question, the packaging promise is hidden or
   misleading, or the payoff does not resolve it. The work also scores 0 when it supplies
   either a familiar summary with no new model or an action list that does not follow from
-  the episode's mechanism.
+  the episode's mechanism, or when its viewer relevance rests on a theory, analogy, or
+  hypothetical instead of observed proof. A problem-led opening also scores 0 when it
+  develops the proof case before stating the remedy promise.
 - **1:** The components address the same topic, but the viewer promise is delayed,
   vague, overbroad, or only partially paid off.
 - **2:** The title, thumbnail promise, opening question, central answer, and final
   payoff create one clear and explicitly resolved contract. The payoff teaches the
   approved non-obvious understanding and carries it into a concrete, observable, bounded
-  viewer response. Full credit requires the finished script to preserve the approved
-  situation, decision rule or sequence, observable result, boundary, and transfer case.
+  viewer response. The opening promise names both that understanding and the concrete
+  response rather than offering only a tool or only an explanation. Any load-bearing
+  claim that informed or expert viewers remain
+  vulnerable is earned with a documented observed case involving the claimed population.
+  When an immunity defense is predictable, full credit requires the five-move anti-skip
+  sequence and places the remedy promise before detailed case exposition.
+  Full credit requires the finished script to preserve the approved situation, decision
+  rule or sequence, observable result, boundary, and transfer case.
 
 ### 2. Factual precision and status-matched wording
 
 - **0:** A material claim is unsupported, rejected, materially overstated, or voiced
   more confidently than its status permits. When a viewer application is in scope, it
-  also scores 0 if it prescribes more than the evidence can establish.
+  also scores 0 if it prescribes more than the evidence can establish. It also scores 0
+  when an adjacent case silently substitutes a different population, behavior, mechanism,
+  or outcome for the one narrated.
 - **1:** Core claims are supportable, but a scope term, denominator, causal boundary,
   caveat, attribution, or approved wording needs revision.
 - **2:** Every material narration claim preserves scope and causality, uses approved
   or weaker wording, and audibly matches its confidence status. When a viewer
   application is in scope, its action, observation, or reflection audibly preserves
   the same population, causal, confidence, and applicability limits as its supporting
-  evidence.
+  evidence. A hypothetical explains or rehearses only; it never serves as proof of
+  prevalence, consequence, or viewer vulnerability.
 
 ### 3. Story momentum without invented details
 
 - **0:** The narrative depends on invented dialogue, motives, thoughts, feelings,
   weather, chronology, sensory detail, or misleading reconstruction. First-person
-  material is invented, forced, or used as proof.
+  material is invented, forced, or used as proof. A load-bearing transition also scores
+  0 when it says only what the previous case did not prove and leaves the next point
+  logically disconnected.
 - **1:** The sequence is honest and usable, but includes a stalled beat, trivia
-  detour, weak consequence, vague loop, or scene that needs clearer attribution.
+  detour, weak consequence, vague loop, proof handoff, or scene that needs clearer
+  attribution.
 - **2:** Each beat changes viewer understanding, causes the next question, and builds
   momentum without invention; reconstructions and reenactments are unmistakable. When
   personal input is in scope, the work makes one explicit personal decision, uses only
   authentic supplied material, and the sequence performs necessary narrative work or
-  gives a specific reason for `OMIT`.
+  gives a specific reason for `OMIT`. Adjacent cases state the first case's exact
+  takeaway, why it matters, the remaining question, and why the next evidence is needed.
+  Advice experiments make the case, advice, participant decision, label manipulation, and
+  measured outcome understandable on first hearing. Each story uses the fewest distinct
+  inputs, objects, roles, and counts that preserve its causal truth; source detail with no
+  explanatory job is collapsed or omitted. A top-scoring story opens with a compact
+  verified trust anchor, makes its essential stages audible through varied natural
+  transitions rather than repeated outline labels, preserves every causal hinge and
+  material boundary, and spends the saved attention on its surprising result, consequence,
+  and AHA. Before the result, it introduces every actor, group, exact task, success
+  criterion, metric, and comparator the listener needs. It reports the result in the same
+  concrete vocabulary as the task, distinguishes an expressed attitude from effective
+  behavior, and leaves no unresolved “judged what?”, “which group?”, “what accuracy?”, or
+  “compared with whom?” question. It preserves the practical objective and scored success
+  condition without reciting response controls that add no causal value. Its teaser does
+  not carry details that belong in the developed case. Each entity keeps one stable spoken
+  name, every role label helps the listener distinguish actors, and no new noun appears
+  merely because the source used it. Measurements name both the established object and the
+  measured property. A short joke strengthens that turn only when the result itself earns
+  it and its concrete roles map directly to the mechanism. When an expectation is needed
+  to make a reversal surprising, the story states it before the result and contrasts the
+  result directly against it. The result resolves through no more than one
+  mechanism-mapped punchline and one exact takeaway. Adjacent cases keep their proof jobs
+  distinct before the narration synthesizes them, and each beat closes once instead of
+  stacking equivalent analogies or thesis lines.
 
 ### 4. Spoken quality and credible runtime
 
 - **0:** The narration is unperformable, substantially mistimed, or dominated by
-  written-language constructions and uncontrolled density.
+  written-language constructions, paper-abstract phrasing, long explanatory punchlines,
+  uncontrolled density, unresolved readability failures, or emotionally sterilized
+  language that turns a human consequence into institutional copy.
 - **1:** An aloud read is understandable and near target, but stumbles, overloaded
-  sentences, abrupt caveats, or runtime drift remain.
+  sentences, abrupt caveats, sterile transitions, overlong jokes, or runtime drift
+  remain.
 - **2:** The narration has been read aloud and honestly timed; it is conversational,
-  pronounceable, paced, and credible for the stated runtime.
+  pronounceable, paced, and credible for the stated runtime. It sounds like a smart
+  friend guiding the viewer from fact to reaction to meaning to the next question, and
+  keeps standalone punchlines short and separate from their explanation. Precision
+  controls what it claims; personality controls how it says it. The voice can use blunt
+  judgment, emotionally loaded everyday words, and brutal humor without weakening factual
+  support or turning a person's inherent worth or vulnerability into the punchline.
+  Research-administration language gives way to ordinary spoken wording whenever the
+  simpler wording preserves the same claim.
+
+Spoken readability is a non-compensable delivery gate:
+
+- No spoken sentence exceeds 25 words.
+- Every 21–25-word sentence has passed a first-hearing review.
+- Shorter sentences still fail when vocabulary, structure, or unclear relationships make
+  them difficult to process.
+- A sentence of any length fails when the listener cannot identify who did what, what
+  changed, and why it matters after one hearing.
+- The mechanical checker has no unresolved `FAIL` or `REVIEW` result.
+
+Do not raise a script's score or readiness label until this gate passes. Splitting a
+difficult sentence must preserve its evidence boundary, connective tissue, humor, and
+personality.
 
 ### 5. Useful visual treatment and concrete candidates
 
@@ -246,7 +308,8 @@ chains under the status thresholds, and require stable source-native locators.
    necessary narrative work or a specific `OMIT` reason, and no invented first-person
    detail.
 4. **Spoken flow and runtime:** Read aloud, time the narration, and revise density,
-   pronunciation, transitions, and breaths.
+   pronunciation, transitions, breaths, friendly-conversation flow, and any punchline
+   that carries its own setup or explanation.
 5. **Visual relevance and identity accuracy:** Verify that each visual advances its
    claim and depicts or labels the correct person, species, item, place, and date.
 6. **Animation purpose and feasibility:** Confirm explanatory purpose, one cued

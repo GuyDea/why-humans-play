@@ -53,10 +53,10 @@ Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, hu
 passes, and scoped refinement.
 
 Return the requested artifact directly. Outside the bounded architecture
-concept-discovery scan, do not perform web research, write an assignment contract or
-evidence packet, force three opening candidates, create annotated-script scaffolding, plan
-visuals or rights, run the production rubric, or invoke the validator unless Martin
-explicitly asks for that work.
+concept-discovery scan and the targeted viewer-vulnerability proof-case lookup below, do
+not perform web research, write an assignment contract or evidence packet, force three
+opening candidates, create annotated-script scaffolding, plan visuals or rights, run the
+production rubric, or invoke the validator unless Martin explicitly asks for that work.
 
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
@@ -88,10 +88,121 @@ complete transformation explicitly: `Before, I thought X. Now, I understand Y. N
 I will do Z. I will know it helped when I observe W.` Preserve that approved
 learning-and-action contract when drafting the opening promise, explanation, viewer
 application, and final lesson.
+A complete-episode promise must name both the understanding the viewer will gain and the
+concrete response they will be able to use.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
 case, label a hypothetical clearly instead of making one sound historical.
+Do not ask the viewer to accept a material vulnerability claim on theory, analogy, or a
+hypothetical alone. A hypothetical may explain how a demonstrated mechanism works; it
+cannot prove that the mechanism affects real people. Treat any statement or implication
+that knowledge, intelligence, expertise, training, or skepticism fails to protect someone
+as a material vulnerability claim, even when phrased as a modest observation, question, or
+transition. When the opening makes that claim, require a documented observed case involving
+the claimed population. First use supplied or project-known facts; if none exist, run one
+targeted primary-source proof-case lookup. If no matching case is found, narrow or omit the
+claim rather than drafting around the gap. Match the case's population, behavior,
+mechanism, and outcome to the narration; state any gap and use separate evidence for the
+episode mechanism rather than allowing one adjacent finding to imply both.
+For a problem-led opening with a predictable “not me; I know the tricks” response, use the
+five-move anti-skip intro:
+`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+Complete the first four moves before detailed case exposition. A short sourced result may
+tease the case during the disarm; develop the real story only after the promise. Treat
+measured skepticism, lower trust ratings, expertise, training, or prior warning as
+sufficient observable resistance; do not require proof of the participants' exact inner
+monologue. You may say “If you think this cannot happen to me…” and then present a case
+with observable resistance; that compares the viewer's defense with the case instead of
+attributing the viewer's words to the participants. Do not invent thoughts, motives, or
+quotations for the people in the case. Keep the early remedy promise literal, specific,
+action-focused, and joke-free. This five-move contract overrides a generic hook spine when
+it applies.
+
+### Apply story construction across the script
+
+Apply these story-construction rules to every beat and developed example in the complete
+script, not only to the opening.
+Before a surprising result, state the outcome the viewer should reasonably expect when that
+expectation is necessary to understand why the result matters. Reveal the result in direct
+contrast to that expectation.
+After the result, use at most one mechanism-mapped punchline and one precise takeaway before
+moving forward. Do not restate the same result through a stack of analogies, paraphrases,
+and thesis lines.
+When consecutive cases prove different parts of the argument, name each case's distinct
+proof job before combining them. The synthesis may combine established findings; it must
+not make either case appear to prove the other case's claim.
+Prefer everyday spoken language over research-administration phrases when both preserve the
+same claim.
+End each beat once: choose the strongest closing image or joke, state one exact lesson, and
+transition.
+
+When an adjacent case and the episode mechanism need separate evidence, connect them as
+`case → exact takeaway → why it matters here → remaining question → next evidence`.
+Do not stop at a disclaimer about what the first case did not prove. State its positive
+proof job, then make the unanswered part create the need for the next case.
+Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
+equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
+Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
+element must earn its place by increasing trust, first-hearing clarity, or magnetism;
+otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified
+date and place when available, plus the relevant person, team, or institution when it adds
+credibility or orientation. Make the stages audible without sounding like slide labels.
+Use natural connective language that explains what changes next—such as “So that was the
+setup,” “Then researchers changed one thing,” or “And this is the kicker”—and vary it to
+fit the story. Do not march through repeated “Here was…” labels or expose the outline as
+meta-commentary. A transition should explain what changes next, not merely announce the
+section. When a result creates a clean comic opening, add one short punchline that sharpens
+the mechanism, consequence, or AHA; skip it when it competes with the lesson.
+Use the fewest story elements that preserve the causal truth. Remove or collapse technical
+inputs, intermediate objects, roles, and counts when the mechanism remains accurate without
+them. Keep separate only the entities the listener must distinguish to understand the
+manipulation and result. An accurate detail does not earn narration time merely because it
+appears in the source. Do not simplify past the causal hinge, material caveat, or evidence
+boundary. Spend the attention you save on the surprising turn, consequence, or AHA that
+carries the lesson.
+Preserve the causal minimum, not the procedural maximum. A teaser and its developed case
+have different detail budgets. In an anti-skip disarm, state only the relevant qualification
+or resistance and the fact that it failed to protect; defer the task, group split, metric,
+and comparator to the developed case.
+Compression removes clutter, never connective tissue. Before naming a result, introduce
+every actor, group, task, goal, success criterion, metric, and comparison it depends on.
+For an experiment, preserve this causal-completeness sequence:
+`participants → exact task → group split → changed variable → measured result → meaning`.
+Describe a participant task by its audience-facing objective and success condition, not by
+response controls or interface options that do not advance the story. Compress a formal
+task to its practical purpose only when the paraphrase preserves the scored objective and
+does not invent a different instruction.
+State the task as an observable action with a success criterion, then report the result in
+the same concrete vocabulary. Lock the story vocabulary before drafting: give each entity
+one stable spoken name, and do not switch synonyms unless the narration explicitly
+introduces the relationship. Use the broadest truthful role label that keeps different
+actors easy to distinguish; preserve a narrower title only when it matters to the causal
+claim. Describe the changed variable with nouns already established in the story. State a
+measurement as the measured object plus the measured property, such as
+`diagnoses → trustworthiness`. Name both the metric and the comparator in every comparison.
+Do not replace a concrete noun from the setup with an undefined abstraction in the result.
+Every new noun must perform a necessary causal job or be cut.
+Distinguish an expressed reaction from an effective behavioral response; do not call the
+reaction absent when an attitude changed but performance did not. Prefer a concrete
+real-world analogy whose roles and action map point for point to the mechanism. Do not use
+an ordinal group label, pronoun, or outcome term before introducing its referent. After
+each sentence, ask what a first-hearing listener still has to resolve. Questions such as
+“judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
+setup that must be restored before polishing.
+Name the container in a learning promise: write “By the end of this video” rather than
+leaving “by the end” without a referent.
+For a source-label experiment, narrate the visible chain with the story's locked nouns:
+`item or question → claimed source → participant objective or outcome`. If researchers
+labeled human-written material as AI-generated, state what was real, what was only a label,
+and what human behavior the manipulation tested before interpreting the result. Attach
+every correct-or-incorrect count to its stable noun; never leave the listener guessing
+which item or final outcome was wrong. Separate what the case proves about human response
+from what later evidence proves about AI behavior.
+Prefer a well-supported Western case when one can perform the same proof job clearly.
+Use the strongest non-Western case when no Western candidate passes the evidence,
+causal-fit, consequence, and spoken-clarity gates. Never hide, relocate, or imply a
+geography the source does not establish.
 For a worldwide pattern, prefer a strong lesser-known case for the developed story when it
 offers useful surprise, then use a short montage of recognizable cases to demonstrate
 global scope.
@@ -103,6 +214,55 @@ defending it with extra setup.
 For an enduring failure pattern, pair one vivid early warning with one compact current echo
 that demonstrates persistence and present relevance. Carry the opening's concrete vocabulary
 into the application and ending only when it keeps the lesson clearer.
+
+Use the friendly conversation format. Write like a smart friend walking the viewer through
+something surprising, not like a paper abstract, conference talk, or legal disclaimer.
+Move through `fact → plain reaction → why it matters → next question`. Use contractions,
+direct address, and brief controlled hyperbole when they sound natural. Friendly does not
+mean filler, invented dialogue, weakened caveats, or jokes inside the learning promise.
+Keep each standalone punchline short and separate from its factual setup.
+
+**Precision controls what we claim. Personality controls how we say it.** Write like a
+well-educated best friend with a brutal sense of humor. Do not confuse factual precision
+with sterile vocabulary. Blunt judgment, emotionally loaded everyday words, and controlled
+hyperbole are allowed when they make the stakes clearer and the underlying claim remains
+supportable. Judge the decision, behavior, mechanism, or institution—not a person's
+inherent worth. A line may call a choice “stupid” or “the dumbest decision of your life”
+when it judges the choice and the episode earns the underlying stakes. Do not disinfect it
+into clinical language merely because the topic is serious. Emotional force never lowers
+the evidence bar, and vulnerable people never become the punchline.
+
+### Enforce spoken readability before delivery
+
+Readability is a delivery gate, not a post-draft editorial audit.
+A sentence above 25 spoken words fails and must be rewritten before delivery.
+Every sentence from 21 through 25 spoken words requires a first-hearing review.
+A shorter sentence also fails when difficult vocabulary and multiple relationships make it
+hard to process.
+A sentence of any length fails when a first-hearing listener cannot identify who did what,
+what changed, and why it matters.
+Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
+or personality.
+
+Strip inline evidence indicators, URLs, personal-input markers, and every other non-spoken
+annotation before checking. Treat the 25-word ceiling as a backstop, not as the definition
+of clarity. For every sentence, require one main relationship, explicit actors and
+referents, a concrete action or comparison, and no stacked condition, contrast, caveat, or
+unexplained abstraction. Necessary technical terms may remain, but introduce them through a
+short plain sentence rather than surrounding them with more difficult language.
+
+For narration stored in a file, resolve the target to an absolute path, change to the skill
+directory, and run:
+
+```bash
+python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"
+```
+
+Rewrite every `FAIL`. Review every `REVIEW` aloud and rewrite it unless its actor, action,
+relationship, and consequence are immediately clear. After that review, rerun with
+`--reviewed` only when a clear 21–25-word sentence remains. Do not use `--reviewed` to waive
+a difficult sentence. Apply the same sentence-by-sentence gate to chat-only narration
+before returning it.
 
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or
@@ -170,8 +330,9 @@ For evidence-backed finalization:
    its evidence. Voice all five elements in narration—the insight; the low-risk action,
    observation, or reflection; the observable signal; the boundary; and the larger
    benefit—not only in the structured block.
-7. Complete the narration for spoken delivery and show it to Martin before auditing it.
-   Read it aloud and revise for speech without imposing a runtime cut first.
+7. Complete the narration for spoken delivery, pass the spoken-readability delivery gate,
+   and show it to Martin before auditing it. Read it aloud and revise for speech without
+   imposing a runtime cut first.
 8. The readable script comes first as numbered beats containing only the beat heading and
    spoken blockquote narration. Visible inline evidence indicators may appear within those
    blockquotes as the sole non-spoken review annotations. Put all other metadata and
@@ -188,6 +349,9 @@ For evidence-backed finalization:
   chronology, or sensory detail.
 - Let confidence control narration. Omit rejected claims. Use an unverified example only
   when it is attributed, explicitly caveated, and non-load-bearing.
+- Do not use a theory, analogy, anecdote, or hypothetical as proof that a material
+  vulnerability affects real people. Require direct observed evidence for the claimed
+  population and outcome, or narrow or remove the claim.
 - For incentive-failure examples, show the intended goal, the measure or target, the changed
   behavior, the number that improved, and the damaged goal and human cost. Direct humor at
   the mechanism or institution, then say plainly what got worse and who paid.
@@ -201,6 +365,8 @@ For evidence-backed finalization:
 - Preserve the approved learning-and-action contract from architecture through the
   opening promise, explanation, viewer application, and final lesson; do not replace it
   with generic caution or an unrelated checklist.
+- Pass the spoken-readability delivery gate before showing any narration. A later
+  editorial, retention, timing, or validator pass does not substitute for it.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique
   image.
