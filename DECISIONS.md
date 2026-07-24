@@ -1264,3 +1264,61 @@ moves recipe), `whp-youtube/STEERING.md` (Law 2 voice bullets),
 quality check), and
 `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
 (narration rewritten in the adopted register).
+
+## 2026-07-25 — Natural-spoken-register doctrine for narration
+
+**Decision:** Narration is written for spoken delivery by a non-native presenter recording
+while walking, for an audience including non-native listeners: every factual sentence is a
+complete spoken clause (no colon-label fragments, no punctuation-dependent lines); clarity
+and referent completeness outrank rhythm, compression, and humor; diction is plain
+international English where widely understood conversational structures (e.g. "Yeah… no.")
+remain allowed but decoding-heavy idioms and compressed metaphors do not; transitions
+between evidence pieces voice the logical link in plain words; already-mainstream terms are
+acknowledged rather than unveiled; the per-beat humor floor is replaced by an earned-humor
+gate; claimed behaviors (people ask) are shown verbatim in that form.
+
+**Rationale:** Martin reviewed beat 1 of the full prototype and found it unnatural for his
+delivery context: over-compressed fragments dropped referents, "only the name changes"
+misdescribed the manipulation, native-slang constructions excluded non-natives, a bare
+"So:" pivot connected two studies without logic, sycophancy was unveiled as news despite
+being mainstream (and already voiced in the script's own defense line), the doctorate
+aphorism read as forced, and "we ask AI real things" showed no actual question. He
+explicitly calibrated that widely understood conversational structures stay allowed.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`references/rapid-prototyping.md`, `references/story-and-hook-method.md`,
+`references/quality-rubric.md` (branch `feat/skill-natural-spoken-register`).
+
+## 2026-07-25 — Episode 1 rebuilt on the four-moves architecture
+
+**Decision:** Episode 1 ("Why AI Makes Bad Advice Feel Right") uses the rev-2
+architecture: four explicitly named moves of one hidden game — menu (framing), agreement
+(sycophancy), costume (fluency + algorithm appreciation), loop (anchoring + feedback) —
+each section opening with its name card and closing with its counter-question; the promise
+is identifying and countering the four moves; the Second-Opinion Test assembles the four
+counters; the moves are framed as a co-produced game (first move is the viewer's), not as
+AI techniques.
+
+**Rationale:** Martin proposed using the four-phenomena division as the episode premise
+with explicit per-section names for structure and hooks; the framing was adjusted from
+"techniques" to "moves of a game" to avoid implying machine intent, since stage one is the
+user's own move. Anchoring entered the architecture after the Gaube 2021 discussion
+section (verified 2026-07-25) explained the radiologists' rating–performance dissociation.
+
+**Documents:**
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md` (full
+rewrite). Older beat structure in the same file superseded; architecture recorded in
+conversation and the draft's planning notes.
+
+## 2026-07-25 — Episode 1 exempt from the runtime window
+
+**Decision:** Episode 1 carries no word or runtime constraint; the current 1,890-word
+(~11–12 minute) narration stands, and the cut ledger becomes optional polish rather than
+a required trim.
+
+**Rationale:** Martin explicitly removed the constraint for this episode after reviewing
+the four-moves rewrite. Scoped to Episode 1 only; the STEERING "target 6–10 minutes for
+early episodes" law is unchanged as channel doctrine.
+
+**Documents:** `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+(planning notes updated); `whp-youtube/STEERING.md` deliberately unchanged.

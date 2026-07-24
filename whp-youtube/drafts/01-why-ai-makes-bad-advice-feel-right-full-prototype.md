@@ -175,8 +175,9 @@
 
 ### Timing and cut ledger (review-reversible)
 
-Current narration is 1,890 spoken words—approximately 11–12 minutes at a natural pace,
-against the 6–8 minute window. Show-first per skill; no silent cuts made. Candidates,
+Current narration is 1,890 spoken words—approximately 11–12 minutes at a natural pace.
+Martin removed the word/runtime constraint for this episode (2026-07-25, see
+`DECISIONS.md`); the ledger below is optional polish, not a required trim. Candidates,
 roughly 500–700 words available:
 
 - Beat 4 radiologist-objection check-in ("But wait—the radiologists trusted the AI less!" passage) — resolves a real viewer objection; cutting risks a comment-section gotcha.
