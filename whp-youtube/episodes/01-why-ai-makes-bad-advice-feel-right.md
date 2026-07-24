@@ -115,7 +115,7 @@
 - **Status:** RESEARCH-DRAFT
 - **Version:** 0.9
 - **Deliverable:** FULL-SCRIPT
-- **Target runtime:** 03:00
+- **Target runtime:** 08:00
 - **Word count:** 784
 - **Audience:** Curious adults who use conversational AI for advice or decisions
 - **Episode mode:** AI–human interaction
@@ -131,7 +131,7 @@
 
 ### Assignment contract
 
-- **Deliverable:** A complete, approximately three-minute Episode 1 narration plus production appendix.
+- **Deliverable:** A complete, approximately eight-minute Episode 1 narration plus production appendix.
 - **Audience problem:** People ask AI for advice about decisions they already care about, then mistake a fluent reflection of their framing for an independent judgment.
 - **Useful change:** Give the viewer a repeatable four-question inspection they can paste into an AI conversation before acting on consequential advice.
 - **Required scope:** Sycophancy, framing, processing fluency, algorithm appreciation, human–AI feedback loops, considering the opposite, and the premortem.
@@ -479,9 +479,9 @@ Closes on the exact behavioral correction: seek visibility into the prompt's bli
 
 #### Timing
 
-- The target remains 03:00 because that was the approved assignment.
-- The numbered beat timings currently total approximately 03:43. This audit deliberately does not cut or rewrite the approved narration.
-- Editorial decision required after full-script review: authorize a tighter three-minute cut, or revise the runtime target to approximately 03:40 before recording.
+- The approved target is now 08:00.
+- The current 784-word narration is an underlength narrative core, likely around 04:20–05:00 at a natural explanatory pace; it has not been timed aloud.
+- The approved expansion will target approximately 1,350 words and use one recurring hypothetical decision. Timing remains a post-draft audit.
 
 #### Rights and production
 
@@ -497,7 +497,7 @@ Closes on the exact behavioral correction: seek visibility into the prompt's bli
 ### Issue ledger
 
 1. **Canonical Episode 1 conflict — OPEN.** `BRAND.md`, `whp-youtube/STEERING.md`, and the existing `01-why-ai-cheats.md` still identify the older reward-hacking concept as Episode 1. Owner: Martin/editor. Decision needed before merging or publishing.
-2. **Runtime mismatch — OPEN.** The approved narration is longer than the 03:00 target; current production estimate is approximately 03:43. Owner: Martin/editor. Do not let an automatic timing pass rewrite the story.
+2. **Runtime expansion — IN PROGRESS.** The approved target is 08:00 and the current 784-word narration is underlength. Expand it to approximately 1,350 words through the recurring-decision design before running a spoken timing audit. Owner: Martin/editor.
 3. **Thumbnail promise — OPEN.** The thought-bubble/“SECOND OPINION?” treatment is a working production proposal, not an approved final thumbnail. Owner: Martin/editor.
 4. **Original synthesis boundary — OPEN FOR REVIEW.** “Borrowed-authority loop” and the four-question package are clearly labeled original, but their exact wording still needs editorial approval. Owner: Martin/editor.
 5. **Final production review — OPEN.** Captions, audio description, visual contrast, and any newly introduced assets require a picture-lock pass. Owner: production.

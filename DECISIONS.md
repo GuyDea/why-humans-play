@@ -708,3 +708,20 @@ start makes omissions visible before prose or a thesis hardens.
 ledger. `BRAND.md` remains unchanged because this is an authoring and discovery control,
 not a change to the channel promise. Existing design and implementation plans remain
 historical records of the earlier learning-and-action gate.
+
+## 2026-07-24 — Expand the AI-advice episode to eight minutes through one recurring decision
+
+**Decision:** Expand `Why AI Makes Bad Advice Feel Right` to approximately eight minutes
+and about 1,350 spoken words by carrying one explicitly hypothetical quitting decision
+through framing, agreement, persuasive presentation, the borrowed-authority loop, and a
+worked application of all four Second-Opinion Test questions.
+
+**Rationale:** The 784-word evidence-backed draft is only a four-and-a-half- to five-minute
+narrative core. The added runtime should produce deeper insight, consequence, and a visible
+practical demonstration rather than more terminology, disconnected studies, or filler.
+
+**Documents:** `docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`, and this ledger.
+`BRAND.md` and `whp-youtube/STEERING.md` remain unchanged because eight minutes already
+fits the channel's six-to-ten-minute rule, and this decision does not settle the separate
+canonical Episode 1 launch-sequence conflict.
