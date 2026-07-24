@@ -1720,8 +1720,10 @@ class SkillPackageTests(unittest.TestCase):
             if line.startswith(">")
         )
         self.assertIn(
-            "By the end, you will know four questions you can ask an AI to check "
-            "whether its answer addresses your real problem.",
+            "By the end of this video, you will understand how an AI can satisfy "
+            "your words while missing your goal, and you will know four questions "
+            "you can ask it to check whether its answer addresses your real "
+            "problem.",
             spoken_example,
         )
         self.assertIn(

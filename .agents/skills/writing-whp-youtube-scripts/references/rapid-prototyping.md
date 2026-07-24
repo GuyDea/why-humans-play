@@ -477,8 +477,9 @@ instead of implementing the requested code.
 > through targets, tests, feedback, and instructions that stand in for what humans want.
 > In a conversation, your prompt is another imperfect description of your real goal.
 >
-> By the end, you will know four questions you can ask an AI to check whether its answer
-> addresses your real problem.
+> By the end of this video, you will understand how an AI can satisfy your words while
+> missing your goal, and you will know four questions you can ask it to check whether its
+> answer addresses your real problem.
 
 The example demonstrates structure, not a reusable factual source. Do not carry its dates,
 institutions, or events into another script unless the user's brief or the evidence phase
