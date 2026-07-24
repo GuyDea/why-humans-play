@@ -2298,6 +2298,7 @@ class SkillPackageTests(unittest.TestCase):
             "references/annotated-script-format.md",
             "assets/annotated-script-template.md",
             "references/quality-rubric.md",
+            "references/lesson-distillation.md",
         ]
         self.assertEqual(local, expected)
         resolved_skill_root = SKILL_ROOT.resolve(strict=True)
