@@ -15,6 +15,7 @@ const SKILL_REFERENCE_PATH = resolve(
 );
 
 const EXPECTED_SECTIONS = [
+  { key: 'concept-inventory', title: 'Concept inventory' },
   { key: 'package-and-audience', title: 'Package and audience' },
   { key: 'central-question', title: 'Central question' },
   { key: 'core-answer', title: 'Core answer' },
@@ -26,13 +27,17 @@ const EXPECTED_SECTIONS = [
   },
   { key: 'earned-reframe', title: 'Earned reframe' },
   { key: 'real-world-evidence-map', title: 'Real-world evidence map' },
+  {
+    key: 'learning-and-action-contract',
+    title: 'Learning and action contract',
+  },
   { key: 'practical-payoff', title: 'Practical payoff' },
   { key: 'final-lesson', title: 'Final lesson' },
   { key: 'scope-boundary', title: 'Scope boundary' },
 ] as const;
 
 describe('architecture section contract', () => {
-  it('defines the corrected eleven fixed sections in exact order', () => {
+  it('defines the thirteen fixed sections in exact order', () => {
     expect(ARCHITECTURE_SECTIONS).toEqual(EXPECTED_SECTIONS);
   });
 
@@ -45,7 +50,7 @@ describe('architecture section contract', () => {
     const titles = [...section.matchAll(/^### (.+)$/gm)]
       .map((match) => match[1]!.trimEnd());
 
-    expect(titles).toHaveLength(11);
+    expect(titles).toHaveLength(13);
     expect(ARCHITECTURE_SECTIONS.map(({ title }) => title)).toEqual(titles);
     expect(ARCHITECTURE_SECTIONS).toHaveLength(titles.length);
   });
@@ -62,7 +67,7 @@ describe('architecture heading codec', () => {
     expect(sections.map(({ key, title }) => ({ key, title })))
       .toEqual(EXPECTED_SECTIONS);
     expect(sections[0]!.md).toBe(
-      '### Package and audience\n\nBody 1.\n\n',
+      '### Concept inventory\n\nBody 1.\n\n',
     );
     expect(joinArchitecture(sections)).toBe(markdown);
   });

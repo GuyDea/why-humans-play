@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 export const ARCHITECTURE_SECTIONS = [
+  { key: 'concept-inventory', title: 'Concept inventory' },
   { key: 'package-and-audience', title: 'Package and audience' },
   { key: 'central-question', title: 'Central question' },
   { key: 'core-answer', title: 'Core answer' },
@@ -12,6 +13,10 @@ export const ARCHITECTURE_SECTIONS = [
   },
   { key: 'earned-reframe', title: 'Earned reframe' },
   { key: 'real-world-evidence-map', title: 'Real-world evidence map' },
+  {
+    key: 'learning-and-action-contract',
+    title: 'Learning and action contract',
+  },
   { key: 'practical-payoff', title: 'Practical payoff' },
   { key: 'final-lesson', title: 'Final lesson' },
   { key: 'scope-boundary', title: 'Scope boundary' },

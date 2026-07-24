@@ -172,11 +172,11 @@ describe('ArchitectureModel', () => {
       userConstraints: { notes: 'Supplied constraint' },
     });
 
-    expect(model.proposals).toHaveLength(13);
-    expect(model.proposals.slice(1, 12).map(({ key }) => key))
+    expect(model.proposals).toHaveLength(15);
+    expect(model.proposals.slice(1, 14).map(({ key }) => key))
       .toEqual(ARCHITECTURE_SECTIONS.map(({ key }) => key));
     expect(model.proposals[0]?.key).toMatch(/^opaque-/u);
-    expect(model.proposals[12]?.key).toMatch(/^opaque-/u);
+    expect(model.proposals[14]?.key).toMatch(/^opaque-/u);
     expect(client.submitDraftOp).toHaveBeenCalledWith(
       'draft-1',
       'generate-architecture',
@@ -217,7 +217,7 @@ describe('ArchitectureModel', () => {
     await model.acceptAll();
 
     expect(client.saveArchitecture).toHaveBeenCalledTimes(2);
-    expect(model.state?.sections).toHaveLength(11);
+    expect(model.state?.sections).toHaveLength(13);
     expect(model.proposals).toEqual([]);
     expect(client.saveArchitecture.mock.calls[1]?.[1]).toMatchObject({
       expectedRevisionSeq: 4,
@@ -233,6 +233,7 @@ describe('ArchitectureModel', () => {
       kind: 'schema',
       value: {
         status: 'complete',
+        section_key: 'core-answer',
         replacement_markdown:
           '### Core answer\n\nA proposed refined answer.\n',
         guardrail_markdown: null,

@@ -128,6 +128,7 @@ export const REWRITE_SCHEMA = strictObject({
 
 export const ARCHITECTURE_REWRITE_SCHEMA = strictObject({
   status: STATUS,
+  section_key: { enum: ARCHITECTURE_SECTION_KEYS },
   replacement_markdown: { type: 'string' },
   guardrail_markdown: GUARDRAIL_MARKDOWN,
 });

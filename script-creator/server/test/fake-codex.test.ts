@@ -204,6 +204,7 @@ describe('fake codex', () => {
 
     expect(JSON.parse(readFileSync(out, 'utf8'))).toEqual({
       status: 'complete',
+      section_key: 'core-answer',
       replacement_markdown:
         '### Core answer\n\nFake rewrite for core-answer.\n',
       guardrail_markdown: null,

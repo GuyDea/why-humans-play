@@ -269,12 +269,12 @@ describe('OperationService', () => {
     const value = result.value as {
       findings: Array<{ section_key: string; severity: string }>;
     };
-    expect(value.findings).toHaveLength(11);
+    expect(value.findings).toHaveLength(13);
     expect(value.findings.slice(0, 4)).toMatchObject([
-      { section_key: 'package-and-audience', severity: 'blocking' },
-      { section_key: 'central-question', severity: 'important' },
-      { section_key: 'core-answer', severity: 'optional' },
-      { section_key: 'viewer-belief-shift', severity: 'blocking' },
+      { section_key: 'concept-inventory', severity: 'blocking' },
+      { section_key: 'package-and-audience', severity: 'important' },
+      { section_key: 'central-question', severity: 'optional' },
+      { section_key: 'core-answer', severity: 'blocking' },
     ]);
   });
 
@@ -612,6 +612,7 @@ describe('OperationService', () => {
     expect(fixture.service.result(original)).toMatchObject({
       kind: 'schema',
       value: {
+        section_key: 'earned-reframe',
         replacement_markdown:
           '### Earned reframe\n\nFake rewrite for earned-reframe.\n',
       },
@@ -619,6 +620,7 @@ describe('OperationService', () => {
     expect(fixture.service.result(resumed)).toMatchObject({
       kind: 'schema',
       value: {
+        section_key: 'earned-reframe',
         replacement_markdown:
           '### Earned reframe\n\nFake rewrite for earned-reframe.\n',
       },

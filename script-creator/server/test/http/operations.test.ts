@@ -743,12 +743,12 @@ describe('operations HTTP API', () => {
         status: 'complete',
         findings: expect.arrayContaining([
           {
-            section_key: 'package-and-audience',
+            section_key: 'concept-inventory',
             severity: 'blocking',
             finding_markdown: 'Fake finding_markdown.',
           },
           {
-            section_key: 'central-question',
+            section_key: 'package-and-audience',
             severity: 'important',
             finding_markdown: 'Fake finding_markdown.',
           },

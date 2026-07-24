@@ -16,7 +16,7 @@
   current architecture state on recoverable pauses so the routed editor blocks without
   a reload. Cancelling a racing accepted-proposal save preserves its operation
   provenance with the pending dirty state for the post-resume save and settlement.
-- The accepted [architecture-stage amendment](../specs/2026-07-23-script-creator-architecture-ui-design.md) is normative for Block A. The app copies its nine fixed sections and their key/title/order contract, then performs only mechanical split, join, storage, rendering, and gating. It does not encode architecture quality, required insight counts, evidence judgments, or any other editorial rule from the script skill.
+- The accepted [architecture-stage amendment](../specs/2026-07-23-script-creator-architecture-ui-design.md) is normative for Block A. The app copies its thirteen fixed sections and their key/title/order contract, then performs only mechanical split, join, storage, rendering, and gating. It does not encode architecture quality, required insight counts, evidence judgments, or any other editorial rule from the script skill.
 - Architecture section `md` retains the complete `###` section slice, including its heading and separators. This lets fixed and unrecognized sections round-trip byte-for-byte; `key` and `title` are routing metadata, not a second serialization. A rewrite result must mechanically parse to one section with the requested key before it can become a proposal.
 - Architecture approval stores `approvedMd` as the exact joined architecture without the repository header. The canonical `whp-youtube/architectures/<slug>.md` file is a mechanical header containing title, approval date, and approved status followed by that exact `approvedMd`. Narration envelopes receive `approved_architecture_md: approvedMd`, not the header and not text reconstructed by the app.
 - Generate and Promote are draft-scoped submissions. The client supplies a draft ID outside the codex envelope; the server loads the authoritative draft, enforces the phase gate, and adds only stored supplied context. A caller cannot unlock either operation by forging `creative_status` or `approved_architecture_md`.
@@ -25,7 +25,7 @@
 - CAS claims stay bounded to the guarantee implemented by `repo/artifacts.ts`: no silent overwrite across the checked content identity and human-timescale concurrent edits, with both versions parked on a detected race; no claim is made about the documented irreducible sub-millisecond rename window.
 - The Plan 4 F3 law applies to every UI task: the production routed draft page is composed in the same task as its real components, and `studio-composition.spec.ts` drives rendered controls. No detached component is allowed to stand in for integration evidence.
 - All operation envelopes remain provenance-pure: skill reference + operation label + explicit stored/user inputs. The app contributes no hook advice, architecture method, evidence rule, production rubric, or other editorial prose.
-- `WHP_PROGRESS/2` remains the only topic-run progress contract. Plan 6 does not add, rename, or reinterpret any of its thirteen IDs or skill-authored texts.
+- `WHP_PROGRESS/3` remains the only topic-run progress contract. Plan 6 does not add, rename, or reinterpret any of its fourteen IDs or skill-authored texts.
 - Product milestone commits and the conventional implementation commits named below are separate concerns. The implemented app never auto-commits; each product milestone exposes a distinct **Commit milestone** action.
 
 ## Functional-requirement coverage
@@ -114,8 +114,8 @@ app:
 - Test `script-creator/server/test/documents/service.test.ts`
 
 - [ ] Replace the v6 placeholder with columns/tables that persist `architecture: {sections, approvedMd, approvedAt}`, the last canonical artifact hash used for later CAS replacement, `narrationReconciliationRequired`, approval/reopen saga steps, and `revisions.kind` (`narration | architecture`). Existing revisions migrate as `narration`; existing drafts receive an empty, unapproved architecture and retain their document JSON exactly.
-- [ ] Implement the amendment-owned section definitions and a heading-only codec. The fixed contract is the skill reference's "Architecture artifact" heading list — **eleven** sections in its exact order (package-and-audience … scope-boundary, per the corrected amendment). `splitArchitecture(md)` slices on level-three headings without parsing bodies, records fixed keys by exact title, assigns stable opaque keys to unrecognized sections, and retains any preamble as an opaque slice. `joinArchitecture(sections)` concatenates the stored slices exactly.
-- [ ] Add a source-sync test that parses `### ` headings under `## Architecture artifact` in `.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md` and asserts the fixed constants match count, order, and exact titles — skill drift must fail the server suite (same doctrine as the `WHP_PROGRESS/2` sync test).
+- [ ] Implement the amendment-owned section definitions and a heading-only codec. The fixed contract is the skill reference's "Architecture artifact" heading list — **thirteen** sections in its exact order (concept-inventory … scope-boundary). `splitArchitecture(md)` slices on level-three headings without parsing bodies, records fixed keys by exact title, assigns stable opaque keys to unrecognized sections, and retains any preamble as an opaque slice. `joinArchitecture(sections)` concatenates the stored slices exactly.
+- [ ] Add a source-sync test that parses `### ` headings under `## Architecture artifact` in `.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md` and asserts the fixed constants match count, order, and exact titles — skill drift must fail the server suite (same doctrine as the `WHP_PROGRESS/3` sync test).
 - [ ] Implement `renderApprovedArchitecture({title, approvedDate, approvedMd})` as only the three-field mechanical header plus the exact joined body. No section presence, quality, insight-count, or evidence check belongs here.
 - [ ] Add migration tests from fresh, v5 populated, and already-v6 databases; codec tests cover all fixed sections in order, CRLF, missing fixed sections, duplicated/unrecognized headings, opaque preamble, and byte-identical split → join.
 
@@ -134,7 +134,7 @@ app:
 - Modify `script-creator/server/test/operations/envelope.test.ts`
 
 - [ ] Register `generate-architecture` (`episode`, raw Markdown, read-only, fresh), `review-architecture` (`scoped`, read-only, resumable), and `rewrite-architecture-section` (`scoped`, read-only, resumable).
-- [ ] Add the strict review result `{status, findings: [{section_key, severity, finding_markdown}], guardrail_markdown}` and strict rewrite result `{status, replacement_markdown, guardrail_markdown}`. `section_key` uses the fixed key enum; every object recursively has `additionalProperties: false`, every property is required, and optional semantics remain nullable.
+- [ ] Add the strict review result `{status, findings: [{section_key, severity, finding_markdown}], guardrail_markdown}` and strict rewrite result `{status, section_key, replacement_markdown, guardrail_markdown}`. `section_key` uses the fixed key enum; every object recursively has `additionalProperties: false`, every property is required, and optional semantics remain nullable.
 - [ ] Extend the existing meta-tests so registry completeness, sandbox, timeout, result kind, resume policy, shared frame, recursive strictness, and fixed section-key enum fail mechanically on drift.
 - [ ] Preserve the exact envelope builder. Tests prove the new prompts remain only `$writing-whp-youtube-scripts`, the registered operation label, and verbatim JSON inputs.
 
@@ -414,7 +414,7 @@ app:
 
 - [ ] Record two consecutive host-suite totals, typechecks, Angular build, Python validator suite, browser-sweep transcript, real-codex spot results, migration fixtures, canonical/CAS conflict evidence, explicit git file lists and hashes, and all deviations or residual risks.
 - [ ] Run a fresh whole-branch review against the accepted amendment, technical design, requirements, and this plan. Fix every blocker and rerun the affected binding suite twice.
-- [ ] Confirm the diff contains no app-authored editorial prompt text, no changed skill editorial rules, no `WHP_PROGRESS/2` drift, no auto-commit path, no hidden `RECORD-READY` transition, and no unrequested files in milestone commits.
+- [ ] Confirm the diff contains no app-authored editorial prompt text, no changed skill editorial rules, no `WHP_PROGRESS/3` drift, no auto-commit path, no hidden `RECORD-READY` transition, and no unrequested files in milestone commits.
 
 **Binding command:** `git diff --check`
 

@@ -142,7 +142,7 @@ function progressEvent(): CodexEvent {
     type: 'item.completed',
     item: {
       type: 'agent_message',
-      text: 'WHP_PROGRESS/2 02-mode active :: Comparing evidence modes.',
+      text: 'WHP_PROGRESS/3 02-mode active :: Comparing evidence modes.',
     },
   };
   return { seq: 1, raw: JSON.stringify(parsed), parsed };
