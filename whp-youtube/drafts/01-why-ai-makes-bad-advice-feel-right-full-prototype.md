@@ -78,7 +78,7 @@
 >
 > Very impressive. The assumptions did not get audited. They got a font upgrade.
 >
-> Your hunch returns as a three-part framework with executive confidence and a machine badge. Nothing necessarily became more correct. It just received headings and institutional lighting.
+> The framework has executive confidence and a machine badge. Nothing necessarily became more correct. It just received headings and institutional lighting.
 >
 > The advice may still be right. The problem is that its appearance no longer tells you whether the conclusion came from evidence—or from the confident packaging of your own premise.
 >
@@ -114,6 +114,50 @@
 
 ## 6. The Second-Opinion Test
 
+> To break that loop, run what we'll call the Second-Opinion Test. It makes the answer show its scaffolding.
+>
+> First: “What assumptions in my question are you accepting without evidence?”
+>
+> In our example, it should flag “brilliant” and “ignoring” as unproven, and quit-or-stay as artificially narrow. The first answer treated adjectives as evidence—how a courtroom works when every witness is you.
+>
+> Second: “What is the strongest case against the option I seem to prefer?”
+>
+> This adapts a psychological technique called considering the opposite. In two social-judgment experiments, it reduced bias more than simply asking people to be fair and unbiased. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/)
+>
+> The strongest case might be that the boss has constraints you haven't heard, the proposal needs work, or another role solves the problem. That doesn't prove you should stay. It gives the first answer a competitor.
+>
+> Third: “Assume I followed this advice and it failed. What most likely went wrong?”
+>
+> This adapts the premortem, a decision tool popularized by decision researcher Gary Klein. [F-008](https://hbr.org/2007/09/performing-a-project-premortem)
+>
+> It is a postmortem performed early enough that the patient can still object.
+>
+> Failure might mean quitting without an offer, draining your savings, and carrying the same communication problem into the next job. New badge. Same meeting. This doesn't predict doom; it reveals risks the original frame hid.
+>
+> Fourth: “What fact would change your recommendation, and where should I verify it outside this chat?”
+>
+> Now name the deciding facts: written feedback, reasons for rejection, financial runway, and credible openings. Those live with people, job listings, and your bank account—not inside the prompt. Your bank account remains stubbornly resistant to prompting.
+>
+> A better answer becomes conditional. Documented dismissal, enough runway, and a credible alternative strengthen the case for leaving. Missing feedback may make a direct conversation or small test the next move.
+>
+> The questions are not a truth machine. They make the answer inspectable. If no deciding fact can change the recommendation, you received a motivational poster with autocomplete.
+>
+> Expose the assumptions. Test the opposite. Imagine the failure. Verify the deciding fact.
+
 ## 7. Where the method stops
 
+> The test transfers. “My partner is being completely unreasonable” has already cast the relationship. “Customers clearly want this feature” can build a roadmap on the word “clearly.”
+>
+> Inspect the assumptions, force a competing explanation, imagine the failure, and identify the real-world check.
+>
+> An AI-generated objection is useful friction, but it is not independent evidence. It is still one system changing chairs.
+>
+> For medical, legal, financial, or irreversible decisions, verify the important claims using primary sources or a qualified human.
+>
+> The benefit isn't permanent doubt. It's knowing whether an answer examined your problem or merely decorated it.
+
 ## 8. Do not count your vote twice
+
+> The goal isn't to make AI disagree with you. The goal is to expose what your first question made invisible.
+>
+> Fluent agreement is not a second opinion—especially when your first opinion wrote the prompt.
