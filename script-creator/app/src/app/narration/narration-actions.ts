@@ -21,7 +21,6 @@ import { readDraftMetadata } from '../panels/brief-panel';
 interface EpisodeProposal {
   opId: string;
   markdown: string;
-  approvedArchitectureMd: string;
 }
 
 @Component({
@@ -312,7 +311,6 @@ export class NarrationActions {
       this.proposal.set({
         opId: result.id,
         markdown: result.result.markdown,
-        approvedArchitectureMd: state.approvedMd,
       });
       this.status.set('Episode proposal ready');
     } catch (error) {
@@ -387,9 +385,7 @@ export class NarrationActions {
         proposal.opId,
         'accepted',
       );
-      if (this.model().state?.approvedMd === proposal.approvedArchitectureMd) {
-        this.model().markNarrationReconciled();
-      }
+      await this.model().load();
       this.proposal.set(null);
       this.status.set('Episode proposal accepted');
       this.changed.emit();

@@ -400,6 +400,22 @@ async function main(): Promise<void> {
     'Generate Episode can replace narration from the approved architecture',
   );
   await acceptEpisodeProposal();
+  {
+    const diag = await api<{
+      narrationReconciliationRequired: boolean;
+      approvedAt: string | null;
+    }>(
+      daemon!.handshake,
+      `/api/drafts/${encodeURIComponent(draft.id)}/architecture`,
+    );
+    console.log(
+      'DIAG post-accept server state:',
+      JSON.stringify({
+        flag: diag.narrationReconciliationRequired,
+        approvedAt: diag.approvedAt,
+      }),
+    );
+  }
   await waitForAttribute(
     architecturePanel.locator('[data-testid="architecture-ribbon"]'),
     'data-state',

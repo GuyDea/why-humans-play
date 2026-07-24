@@ -333,14 +333,6 @@ export class ArchitectureModel {
     }
   }
 
-  markNarrationReconciled(): void {
-    if (!this.state) return;
-    this.state = {
-      ...this.state,
-      narrationReconciliationRequired: false,
-    };
-  }
-
   private async execute(
     operation: ArchitectureOperationName,
     inputs: unknown,

@@ -108,8 +108,12 @@ function makeFixture(input: {
       submitted.push({ operation, inputs, options });
       return `operation-${submitted.length}`;
     }),
-    get: vi.fn(() => ({
-      operation: 'rewrite-selection' as const,
+    get: vi.fn((): { operation: OperationName } => ({
+      operation: 'rewrite-selection',
+    })),
+    result: vi.fn(() => ({
+      kind: 'raw' as const,
+      markdown: '# Generated narration\n',
     })),
   };
   let revision = 0;
@@ -126,6 +130,25 @@ function makeFixture(input: {
     now: () => '2026-07-24T10:00:00.000Z',
   });
   return { store, service, submitted, operationService };
+}
+
+function appendAcceptedNarrationRevision(
+  fixture: ReturnType<typeof makeFixture>,
+  operationId: string,
+): void {
+  const draft = fixture.store.getDraft('draft-1')!;
+  fixture.store.saveDraft('draft-1', {
+    title: draft.title,
+    format: draft.format,
+    doc: draft.doc,
+    updatedAt: '2026-07-24T10:00:00.000Z',
+    revision: {
+      id: `narration-revision-${operationId}`,
+      opId: operationId,
+      disposition: 'episode-generation-accepted',
+      createdAt: '2026-07-24T10:00:00.000Z',
+    },
+  });
 }
 
 afterEach(() => {
@@ -396,5 +419,105 @@ describe('ArchitectureService draft-scoped operation policy', () => {
       },
       options: { resumeOf: 'parent-operation' },
     });
+  });
+});
+
+describe('ArchitectureService narration proposal reconciliation', () => {
+  it('clears reconciliation after accepting a generate-episode proposal registered under the current approval', () => {
+    const fixture = makeFixture({ reconciliationRequired: true });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    const operationId = fixture.service.submitOperation(
+      'draft-1',
+      'generate-episode',
+      { topic_brief: 'Brief.' },
+    );
+    appendAcceptedNarrationRevision(fixture, operationId);
+
+    expect(fixture.service.resolveNarrationProposal(
+      'draft-1',
+      operationId,
+      'accepted',
+    )).toMatchObject({ state: 'accepted' });
+
+    expect(fixture.service.get('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: false });
+    expect(fixture.store.getDraft('draft-1')).toMatchObject({
+      narrationReconciliationRequired: false,
+      updatedAt: '2026-07-24T10:00:00.000Z',
+    });
+  });
+
+  it('keeps reconciliation required when the accepted proposal predates the current approval', () => {
+    const fixture = makeFixture({ reconciliationRequired: true });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    fixture.store.createNarrationProposal({
+      draftId: 'draft-1',
+      operationId: 'operation-before-approval',
+      state: 'pending',
+      createdAt: '2026-07-24T08:59:59.999Z',
+      resolvedAt: null,
+    });
+    appendAcceptedNarrationRevision(fixture, 'operation-before-approval');
+
+    expect(fixture.service.resolveNarrationProposal(
+      'draft-1',
+      'operation-before-approval',
+      'accepted',
+    )).toMatchObject({ state: 'accepted' });
+
+    expect(fixture.service.get('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: true });
+  });
+
+  it('never clears reconciliation when a generate-episode proposal is rejected', () => {
+    const fixture = makeFixture({ reconciliationRequired: true });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    const operationId = fixture.service.submitOperation(
+      'draft-1',
+      'generate-episode',
+      { topic_brief: 'Brief.' },
+    );
+
+    expect(fixture.service.resolveNarrationProposal(
+      'draft-1',
+      operationId,
+      'rejected',
+    )).toMatchObject({ state: 'rejected' });
+
+    expect(fixture.service.get('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: true });
+  });
+
+  it('converges an already accepted current-approval proposal on replay', () => {
+    const fixture = makeFixture({ reconciliationRequired: true });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    fixture.store.createNarrationProposal({
+      draftId: 'draft-1',
+      operationId: 'operation-accepted-before-clear',
+      state: 'accepted',
+      createdAt: '2026-07-24T10:00:00.000Z',
+      resolvedAt: '2026-07-24T10:00:00.000Z',
+    });
+    appendAcceptedNarrationRevision(
+      fixture,
+      'operation-accepted-before-clear',
+    );
+
+    expect(fixture.service.resolveNarrationProposal(
+      'draft-1',
+      'operation-accepted-before-clear',
+      'accepted',
+    )).toMatchObject({ state: 'accepted' });
+
+    expect(fixture.service.get('draft-1'))
+      .toMatchObject({ narrationReconciliationRequired: false });
   });
 });

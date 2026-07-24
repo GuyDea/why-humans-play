@@ -250,6 +250,16 @@ class ControllableDaemonClient {
       this.pendingNarrationProposals.filter(
         (proposal) => proposal.operationId !== operationId,
       );
+    const submission = this.submissions.find(({ id }) => id === operationId);
+    if (
+      decision === 'accepted'
+      && submission?.operation === 'generate-episode'
+    ) {
+      this.architectureState = {
+        ...this.architectureState,
+        narrationReconciliationRequired: false,
+      };
+    }
     return {
       draftId,
       operationId,
@@ -387,12 +397,6 @@ class ControllableDaemonClient {
     input: { doc: DraftDocument; disposition?: string },
   ): Promise<SavedDraft> => {
     this.storedDraft.doc = input.doc;
-    if (input.disposition === 'episode-generation-accepted') {
-      this.architectureState = {
-        ...this.architectureState,
-        narrationReconciliationRequired: false,
-      };
-    }
     const revision = this.appendRevision(
       input.disposition ?? 'edit',
       input.doc,
@@ -1525,6 +1529,8 @@ describe('mounted Script Studio composition', () => {
         'Accepted fresh narration.',
       );
     });
+    const architectureLoadsBeforeAccept =
+      studio.client.getArchitecture.mock.calls.length;
     findButton(narrationActions, 'Accept episode proposal').click();
     await vi.waitFor(() => {
       studio.tick();
@@ -1544,6 +1550,9 @@ describe('mounted Script Studio composition', () => {
       });
       expect(studio.client.architectureState
         .narrationReconciliationRequired).toBe(false);
+      expect(studio.client.getArchitecture).toHaveBeenCalledTimes(
+        architectureLoadsBeforeAccept + 1,
+      );
       expect(narrationActions.textContent).not.toContain(
         'Narration reconciliation is required before Promote.',
       );

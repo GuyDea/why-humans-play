@@ -545,7 +545,7 @@ export class ArchitectureService {
     operationId: string,
     decision: 'accepted' | 'rejected',
   ): NarrationProposalRecord {
-    this.requireDraft(draftId);
+    const draft = this.requireDraft(draftId);
     requireNonEmpty(operationId, 'operationId');
     if (decision !== 'accepted' && decision !== 'rejected') {
       throw new Error('decision must be accepted or rejected');
@@ -559,7 +559,16 @@ export class ArchitectureService {
         'narration proposal resolution refused: operation is not registered for this draft',
       );
     }
-    if (proposal.state !== 'pending') return proposal;
+    if (proposal.state !== 'pending') {
+      if (decision === 'accepted' && proposal.state === 'accepted') {
+        this.clearNarrationReconciliationIfEligible(
+          draft,
+          proposal,
+          this.now(),
+        );
+      }
+      return proposal;
+    }
     if (!this.operationHasNarrationProposal(operationId)) {
       throw new ArchitectureGateError(
         'narration proposal resolution refused: operation has no proposal result',
@@ -573,12 +582,45 @@ export class ArchitectureService {
         'narration proposal resolution refused: accepted proposal revision is missing',
       );
     }
-    return this.store.resolveNarrationProposal(
+    const resolvedAt = this.now();
+    const resolved = this.store.resolveNarrationProposal(
       draftId,
       operationId,
       decision,
-      this.now(),
+      resolvedAt,
     );
+    if (decision === 'accepted') {
+      this.clearNarrationReconciliationIfEligible(
+        draft,
+        proposal,
+        resolvedAt,
+      );
+    }
+    return resolved;
+  }
+
+  private clearNarrationReconciliationIfEligible(
+    draft: DraftRecord,
+    proposal: NarrationProposalRecord,
+    updatedAt: string,
+  ): void {
+    const architecture = requireArchitecture(draft);
+    const approvedCurrent = architecture.approvedMd !== null
+      && architecture.approvedAt !== null
+      && architecture.approvedMd === joinArchitecture(architecture.sections);
+    if (
+      this.operationService.get(proposal.operationId).operation
+        === 'generate-episode'
+      && approvedCurrent
+      && proposal.createdAt >= architecture.approvedAt!
+      && draft.narrationReconciliationRequired === true
+    ) {
+      this.store.setNarrationReconciliationRequired(
+        draft.id,
+        false,
+        updatedAt,
+      );
+    }
   }
 
   promotion(draftId: string): PromotionRecord | null {

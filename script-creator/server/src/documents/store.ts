@@ -728,6 +728,20 @@ export class DocumentStore {
     return this.getDraft(id)!;
   }
 
+  setNarrationReconciliationRequired(
+    id: string,
+    required: boolean,
+    updatedAt: string,
+  ): DraftRecord {
+    const result = this.db.prepare(
+      `UPDATE drafts
+       SET narration_reconciliation_required = ?, updated_at = ?
+       WHERE id = ?`,
+    ).run(required ? 1 : 0, updatedAt, id);
+    if (result.changes === 0) throw new Error(`draft not found: ${id}`);
+    return this.getDraft(id)!;
+  }
+
   replaceDraftWorkflowState(
     id: string,
     state: ReplaceDraftWorkflowState,

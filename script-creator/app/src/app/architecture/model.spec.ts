@@ -116,6 +116,26 @@ describe('ArchitectureModel', () => {
     expect(model.proposals).toEqual([]);
   });
 
+  it('refreshes the reconciliation flag from the latest server state', async () => {
+    const client = new ArchitectureClientStub();
+    client.state = {
+      ...initialState(),
+      narrationReconciliationRequired: true,
+    };
+    const model = new ArchitectureModel('draft-1', client);
+    await model.load();
+    expect(model.state?.narrationReconciliationRequired).toBe(true);
+
+    client.state = {
+      ...client.state,
+      narrationReconciliationRequired: false,
+    };
+    await model.load();
+
+    expect(model.state?.narrationReconciliationRequired).toBe(false);
+    expect(client.getArchitecture).toHaveBeenCalledTimes(2);
+  });
+
   it('turns fixed and opaque generated slices into per-section proposals', async () => {
     const client = new ArchitectureClientStub();
     client.state = initialState([]);
@@ -303,6 +323,9 @@ describe('ArchitectureModel', () => {
 
     const approval = model.approve();
     expect(model.state?.approvedAt).toBeNull();
+    await vi.waitFor(() => {
+      if (!rejectApproval) throw new Error('approval call still pending');
+    });
     rejectApproval(new DaemonClientError(409, {
       error: 'architecture artifact conflict',
       currentHash: 'external-hash',

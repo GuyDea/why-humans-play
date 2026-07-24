@@ -141,6 +141,26 @@ describe('DocumentStore', () => {
     expect(store.getDraft(record.id)).toEqual(record);
   });
 
+  it('updates only the narration reconciliation flag and draft timestamp', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      narrationReconciliationRequired: true,
+    }));
+
+    const updated = store.setNarrationReconciliationRequired(
+      'draft-1',
+      false,
+      '2026-07-24T10:00:00.000Z',
+    );
+
+    expect(updated).toMatchObject({
+      narrationReconciliationRequired: false,
+      updatedAt: '2026-07-24T10:00:00.000Z',
+    });
+    expect(updated.doc).toEqual(draft().doc);
+    expect(updated.architecture).toEqual(draft().architecture);
+  });
+
   it('returns an empty draft summary list', () => {
     const store = openStore();
 
