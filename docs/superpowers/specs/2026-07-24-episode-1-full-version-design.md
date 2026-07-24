@@ -1,6 +1,6 @@
 # Episode 1 Eight-Minute Expansion — Design
 
-- **Status:** Approved in conversation; written specification awaiting repository review
+- **Status:** Accepted for narration prototyping
 - **Date:** 2026-07-24
 - **Target:** `Why AI Makes Bad Advice Feel Right`
 - **Branch:** `feat/episode-1-full-version`
