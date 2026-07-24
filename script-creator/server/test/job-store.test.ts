@@ -1,4 +1,11 @@
-import { mkdtempSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -52,6 +59,98 @@ describe('JobStore', () => {
     });
     expect(store.operationEnvelope('missing')).toBeNull();
     store.close();
+  });
+
+  it('atomically redacts a durable candidate from every operation artifact', () => {
+    const root = mkdtempSync(join(tmpdir(), 'job-redaction-'));
+    const jobDir = join(root, 'job-1');
+    mkdirSync(jobDir);
+    const store = new JobStore(join(root, 'state.sqlite3'));
+    const proposed = 'Keep the original causal rule visible.';
+    const reviewed = 'Keep the edited causal rule visible.';
+    const inputs = {
+      existing_lessons: [{
+        lesson_markdown: proposed,
+        rationale_markdown: reviewed,
+      }],
+    };
+    const envelope: JobEnvelope = {
+      jobId: 'job-1',
+      prompt:
+        `$writing-whp-youtube-scripts\nOperation: Distill session lessons\nInputs: ${
+          JSON.stringify(inputs)
+        }`,
+      cwd: root,
+      sandbox: 'read-only',
+    };
+    const result = {
+      status: 'complete',
+      lessons: [{
+        classification: 'durable',
+        lesson_markdown: proposed,
+        rationale_markdown: reviewed,
+      }],
+      guardrail_markdown: null,
+    };
+    writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(envelope));
+    writeFileSync(join(jobDir, 'final-message.txt'), JSON.stringify(result));
+    writeFileSync(
+      join(jobDir, 'events.jsonl'),
+      JSON.stringify({
+        type: 'item.completed',
+        item: { type: 'agent_message', text: JSON.stringify(result) },
+      }),
+    );
+    writeFileSync(
+      join(jobDir, 'result-storage.json'),
+      JSON.stringify({ candidate: reviewed }),
+    );
+    store.createOperationWithJob({
+      id: 'operation-1',
+      name: 'distill',
+      draftId: 'draft-1',
+      deadlineAt: '2026-07-24T10:00:00.000Z',
+      createdAt: '2026-07-24T09:00:00.000Z',
+    }, envelope, jobDir);
+
+    const redaction = {
+      kind: 'repository-reference' as const,
+      lesson_id: 'lesson-1',
+      repository_provenance: {
+        commit: 'commit-1',
+        path: 'whp-youtube/STEERING.md',
+        anchor: 'lines:4-4',
+        content_hash: 'sha256:doctrine',
+      },
+      source_provenance: {
+        distillation_run_id: 'run-1',
+        operation_id: 'operation-1',
+      },
+    };
+    store.redactOperationLesson('operation-1', {
+      candidates: [proposed, reviewed],
+      replacement: redaction,
+    });
+    store.redactOperationLesson('operation-1', {
+      candidates: [proposed, reviewed],
+      replacement: redaction,
+    });
+
+    const stored = store.get('job-1')!.envelopeJson;
+    const files = readdirSync(jobDir)
+      .map((name) => readFileSync(join(jobDir, name), 'utf8'))
+      .join('\n');
+    expect(`${stored}\n${files}`).not.toContain(proposed);
+    expect(`${stored}\n${files}`).not.toContain(reviewed);
+    const redactedResult = JSON.parse(
+      readFileSync(join(jobDir, 'final-message.txt'), 'utf8'),
+    ) as {
+      lessons: Array<{ lesson_markdown: unknown }>;
+    };
+    expect(redactedResult.lessons[0]!.lesson_markdown).toEqual(redaction);
+
+    store.close();
+    rmSync(root, { recursive: true, force: true });
   });
 
   it('creates, transitions, and records verbatim usage', () => {

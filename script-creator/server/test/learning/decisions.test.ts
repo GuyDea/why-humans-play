@@ -121,7 +121,18 @@ describe('mechanical decision projection', () => {
       doc: {
         type: 'doc',
         attrs: { format: 'narration', preamble: 'Before' },
-        content: [],
+        content: [{
+          type: 'beat',
+          attrs: {
+            beatId: 'opening',
+            title: 'Opening',
+            timeTargetMs: 30_000,
+          },
+          content: [{
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'Before' }],
+          }],
+        }],
       },
       updatedAt: '2026-07-24T08:01:00.000Z',
       revision: {
@@ -137,7 +148,18 @@ describe('mechanical decision projection', () => {
       doc: {
         type: 'doc',
         attrs: { format: 'narration', preamble: 'After' },
-        content: [],
+        content: [{
+          type: 'beat',
+          attrs: {
+            beatId: 'opening',
+            title: 'Opening',
+            timeTargetMs: 30_000,
+          },
+          content: [{
+            type: 'paragraph',
+            content: [{ type: 'text', text: 'After' }],
+          }],
+        }],
       },
       updatedAt: '2026-07-24T08:02:00.000Z',
       revision: {
@@ -222,10 +244,32 @@ describe('mechanical decision projection', () => {
         }),
         diff: {
           before: expect.objectContaining({
-            attrs: expect.objectContaining({ preamble: 'Before' }),
+            attrs: expect.objectContaining({ preamble: 'Base' }),
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                content: expect.arrayContaining([
+                  expect.objectContaining({
+                    content: [
+                      expect.objectContaining({ text: 'Before' }),
+                    ],
+                  }),
+                ]),
+              }),
+            ]),
           }),
           after: expect.objectContaining({
-            attrs: expect.objectContaining({ preamble: 'After' }),
+            attrs: expect.objectContaining({ preamble: 'Base' }),
+            content: expect.arrayContaining([
+              expect.objectContaining({
+                content: expect.arrayContaining([
+                  expect.objectContaining({
+                    content: [
+                      expect.objectContaining({ text: 'After' }),
+                    ],
+                  }),
+                ]),
+              }),
+            ]),
           }),
         },
       }),

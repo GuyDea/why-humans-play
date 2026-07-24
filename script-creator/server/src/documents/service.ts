@@ -156,14 +156,13 @@ export class DocumentService {
 
   saveDraft(id: string, input: SaveDraftInput): SavedDraft {
     const current = this.getDraft(id);
-    const format = documentFormat(input.doc);
+    const doc = preserveWorkflowMetadata(input.doc, current.doc);
+    const format = documentFormat(doc);
     if (input.format !== undefined && input.format !== format) {
       throw new Error(
         `draft format ${input.format} does not match document format ${format}`,
       );
     }
-    const title = input.title ?? current.title;
-    requireNonEmpty(title, 'title');
     if (
       input.opId !== undefined
       && input.opId !== null
@@ -173,10 +172,13 @@ export class DocumentService {
     }
     const disposition = input.disposition ?? 'manual-save';
     requireNonEmpty(disposition, 'disposition');
+    const acceptedProposal = isAcceptedProposalDisposition(disposition);
+    const title = acceptedProposal
+      ? current.title
+      : input.title ?? current.title;
+    requireNonEmpty(title, 'title');
     const timestamp = this.now();
     const revisionId = this.idFactory();
-    const doc = preserveWorkflowMetadata(input.doc, current.doc);
-    const acceptedProposal = isAcceptedProposalDisposition(disposition);
     let acceptanceValidated = false;
     if (
       acceptedProposal

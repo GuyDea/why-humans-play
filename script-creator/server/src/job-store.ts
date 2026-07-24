@@ -1,4 +1,14 @@
 import Database from 'better-sqlite3';
+import {
+  existsSync,
+  readFileSync,
+  readdirSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { join } from 'node:path';
 import type {
   JobEnvelope,
   JobRecord,
@@ -288,6 +298,101 @@ export class JobStore {
       : null;
   }
 
+  redactOperationLesson(
+    operationId: string,
+    input: {
+      candidates: string[];
+      replacement: unknown;
+    },
+  ): void {
+    const attempts = this.operationAttempts(operationId);
+    if (attempts.length === 0) {
+      throw new Error(
+        `operation ${operationId} has no persisted attempt to redact`,
+      );
+    }
+    const candidates = [...new Set(
+      input.candidates.filter((candidate) => candidate !== ''),
+    )].sort((left, right) =>
+      right.length - left.length || left.localeCompare(right));
+    if (candidates.length === 0) return;
+    const envelopeUpdates = attempts.map((attempt) => ({
+      id: attempt.id,
+      envelopeJson: redactSerializedText(
+        attempt.envelopeJson,
+        candidates,
+        input.replacement,
+      ),
+    }));
+    const fileUpdates: Array<{
+      path: string;
+      temporaryPath: string;
+      original: string;
+      renamed: boolean;
+    }> = [];
+    try {
+      for (const attempt of attempts) {
+        if (!existsSync(attempt.jobDir)) continue;
+        for (const name of readdirSync(attempt.jobDir)) {
+          const path = join(attempt.jobDir, name);
+          if (!statSync(path).isFile()) continue;
+          const original = readFileSync(path, 'utf8');
+          const redacted = redactSerializedText(
+            original,
+            candidates,
+            input.replacement,
+          );
+          if (redacted === original) continue;
+          const temporaryPath = `${path}.redaction.tmp`;
+          writeFileSync(temporaryPath, redacted);
+          fileUpdates.push({
+            path,
+            temporaryPath,
+            original,
+            renamed: false,
+          });
+        }
+      }
+
+      this.db.transaction(() => {
+        const update = this.db.prepare(
+          'UPDATE jobs SET envelope_json = ? WHERE id = ?',
+        );
+        for (const envelope of envelopeUpdates) {
+          update.run(envelope.envelopeJson, envelope.id);
+        }
+        for (const file of fileUpdates) {
+          renameSync(file.temporaryPath, file.path);
+          file.renamed = true;
+        }
+      })();
+    } catch (error) {
+      const recoveryErrors: unknown[] = [];
+      for (const file of fileUpdates.filter(({ renamed }) => renamed)) {
+        const recoveryPath = `${file.temporaryPath}.restore`;
+        try {
+          writeFileSync(recoveryPath, file.original);
+          renameSync(recoveryPath, file.path);
+        } catch (recoveryError) {
+          recoveryErrors.push(recoveryError);
+        } finally {
+          if (existsSync(recoveryPath)) unlinkSync(recoveryPath);
+        }
+      }
+      if (recoveryErrors.length > 0) {
+        throw new AggregateError(
+          [error, ...recoveryErrors],
+          `operation ${operationId} redaction rollback failed`,
+        );
+      }
+      throw error;
+    } finally {
+      for (const file of fileUpdates) {
+        if (existsSync(file.temporaryPath)) unlinkSync(file.temporaryPath);
+      }
+    }
+  }
+
   setState(id: string, state: JobState, error?: string): void {
     const operationId = this.db.transaction(() => {
       const finished = [
@@ -438,4 +543,74 @@ export class JobStore {
 
 function isTerminalState(state: OperationState): boolean {
   return !['queued', 'running', 'cancelling'].includes(state);
+}
+
+function redactSerializedText(
+  text: string,
+  candidates: string[],
+  replacement: unknown,
+): string {
+  try {
+    return JSON.stringify(
+      redactStructuredValue(JSON.parse(text) as unknown, candidates, replacement),
+    );
+  } catch {
+    return candidates.reduce(
+      (redacted, candidate) =>
+        redacted.replaceAll(candidate, JSON.stringify(replacement)),
+      text,
+    );
+  }
+}
+
+function redactStructuredValue(
+  value: unknown,
+  candidates: string[],
+  replacement: unknown,
+): unknown {
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      redactStructuredValue(item, candidates, replacement));
+  }
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, nested]) => [
+        key,
+        redactStructuredValue(nested, candidates, replacement),
+      ]),
+    );
+  }
+  if (typeof value !== 'string') return value;
+  if (candidates.includes(value)) return replacement;
+  if (!candidates.some((candidate) => value.includes(candidate))) {
+    return value;
+  }
+  try {
+    return JSON.stringify(
+      redactStructuredValue(JSON.parse(value) as unknown, candidates, replacement),
+    );
+  } catch {
+    const inputsMarker = '\nInputs: ';
+    const inputsIndex = value.indexOf(inputsMarker);
+    if (inputsIndex !== -1) {
+      const prefix = value.slice(0, inputsIndex + inputsMarker.length);
+      const serializedInputs = value.slice(inputsIndex + inputsMarker.length);
+      try {
+        return prefix + JSON.stringify(
+          redactStructuredValue(
+            JSON.parse(serializedInputs) as unknown,
+            candidates,
+            replacement,
+          ),
+        );
+      } catch {
+        // Fall through for non-envelope strings that merely contain the marker.
+      }
+    }
+    return candidates.reduce(
+      (redacted, candidate) =>
+        redacted.replaceAll(candidate, JSON.stringify(replacement)),
+      value,
+    );
+  }
 }

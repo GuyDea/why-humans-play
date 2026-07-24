@@ -1,7 +1,10 @@
 import { execFileSync } from 'node:child_process';
+import Database from 'better-sqlite3';
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -10,8 +13,11 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentStore } from '../../src/documents/store.js';
 import { buildApp } from '../../src/http/app.js';
+import { JobStore } from '../../src/job-store.js';
 import { LearningService } from '../../src/learning/service.js';
 import { LearningStore } from '../../src/learning/store.js';
+import { OperationService } from '../../src/operations/service.js';
+import type { JobSupervisor } from '../../src/supervisor.js';
 import { TopicStore } from '../../src/topics/store.js';
 import {
   UNUSED_DOCUMENT_SERVICE,
@@ -24,8 +30,12 @@ const roots: string[] = [];
 const documentStores: DocumentStore[] = [];
 const learningStores: LearningStore[] = [];
 const topicStores: TopicStore[] = [];
+const jobStores: JobStore[] = [];
+const operationServices: OperationService[] = [];
 
 afterEach(() => {
+  for (const service of operationServices.splice(0)) service.dispose();
+  for (const store of jobStores.splice(0)) store.close();
   for (const store of topicStores.splice(0)) store.close();
   for (const store of learningStores.splice(0)) store.close();
   for (const store of documentStores.splice(0)) store.close();
@@ -425,6 +435,109 @@ describe('lesson review HTTP API', () => {
     });
     await fixture.app.close();
   });
+
+  it.each([
+    {
+      label: 'unedited',
+      proposed: 'Keep every verified reveal concrete.',
+      reviewed: 'Keep every verified reveal concrete.',
+    },
+    {
+      label: 'edited',
+      proposed: 'Keep every proposed reveal concrete.',
+      reviewed: 'Keep every reviewed reveal concrete.',
+    },
+  ])(
+    'removes all $label durable-candidate bytes from app storage after verification',
+    async ({ proposed, reviewed }) => {
+      const fixture = storedCandidateReconciliationFixture({
+        proposed,
+        reviewed,
+      });
+      writeFileSync(
+        join(fixture.repoRoot, 'DECISIONS.md'),
+        '# Decisions\n\n'
+          + `- ${reviewed}\n`
+          + `Reconciliation: ${fixture.resumeKey}\n`,
+      );
+      writeFileSync(
+        join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),
+        `# Steering\n\n## Reveals\n\n${reviewed}\n`,
+      );
+      git(fixture.repoRoot, [
+        'add',
+        '--',
+        'DECISIONS.md',
+        'whp-youtube/STEERING.md',
+      ]);
+      git(fixture.repoRoot, ['commit', '-m', 'reconcile stored candidate']);
+      const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+      const verified = await fixture.app.inject({
+        method: 'POST',
+        url: `/api/lesson-reconciliations/${
+          encodeURIComponent(fixture.resumeKey)
+        }/verify`,
+        headers: AUTH,
+        payload: { commit },
+      });
+
+      expect(verified.statusCode, verified.body).toBe(200);
+      const run = fixture.learningStore.getDistillationRun('run-1');
+      const lesson = fixture.learningStore.getLesson('lesson-durable');
+      const reconciliations =
+        fixture.learningStore.listLessonReconciliations('lesson-durable');
+      const jobs = fixture.jobStore.operationAttempts('distill-operation');
+      const jobFiles = readdirSync(fixture.jobDir)
+        .map((name) => readFileSync(join(fixture.jobDir, name), 'utf8'));
+      const operation = await fixture.app.inject({
+        method: 'GET',
+        url: '/api/ops/distill-operation',
+        headers: AUTH,
+      });
+      const result = await fixture.app.inject({
+        method: 'GET',
+        url: '/api/ops/distill-operation/result',
+        headers: AUTH,
+      });
+      expect(operation.statusCode, operation.body).toBe(200);
+      expect(result.statusCode, result.body).toBe(200);
+      const appStorage = JSON.stringify({
+        run,
+        lesson,
+        reconciliations,
+        jobs,
+        jobFiles,
+        operation: operation.json(),
+        result: result.json(),
+      });
+      for (const doctrineBytes of new Set([proposed, reviewed])) {
+        expect(appStorage).not.toContain(doctrineBytes);
+      }
+      expect(result.json()).toMatchObject({
+        kind: 'schema',
+        value: {
+          lessons: [{
+            lesson_markdown: {
+              kind: 'repository-reference',
+              lesson_id: 'lesson-durable',
+              repository_provenance: {
+                commit,
+                path: 'whp-youtube/STEERING.md',
+                anchor: expect.stringMatching(/^lines:\d+-\d+$/u),
+                content_hash: expect.stringMatching(/^sha256:/u),
+              },
+              source_provenance: {
+                distillation_run_id: 'run-1',
+                operation_id: 'distill-operation',
+              },
+            },
+          }],
+        },
+      });
+      await fixture.app.close();
+    },
+  );
 });
 
 function realReconciliationFixture() {
@@ -536,6 +649,231 @@ function realReconciliationFixture() {
     service as unknown as Record<string, unknown>,
   );
   return { app, learningStore, repoRoot, resumeKey };
+}
+
+function storedCandidateReconciliationFixture(input: {
+  proposed: string;
+  reviewed: string;
+}) {
+  const root = mkdtempSync(join(tmpdir(), 'lessons-stored-candidate-'));
+  roots.push(root);
+  const repoRoot = join(root, 'repo');
+  mkdirSync(join(repoRoot, 'whp-youtube'), { recursive: true });
+  git(repoRoot, ['init', '--initial-branch=main']);
+  git(repoRoot, ['config', 'user.name', 'Script Creator Tests']);
+  git(repoRoot, [
+    'config',
+    'user.email',
+    'script-creator-tests@example.invalid',
+  ]);
+  writeFileSync(join(repoRoot, 'episode.md'), 'Episode draft.\n');
+  writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+  writeFileSync(
+    join(repoRoot, 'whp-youtube', 'STEERING.md'),
+    '# Steering\n',
+  );
+  git(repoRoot, ['add', '--', '.']);
+  git(repoRoot, ['commit', '-m', 'seed repository']);
+  writeFileSync(join(repoRoot, 'episode.md'), 'Current episode worktree HEAD.\n');
+  git(repoRoot, ['add', '--', 'episode.md']);
+  git(repoRoot, ['commit', '-m', 'episode work']);
+
+  const dbFile = join(root, 'state.sqlite3');
+  const jobStore = new JobStore(dbFile);
+  jobStores.push(jobStore);
+  const documentStore = new DocumentStore(dbFile);
+  const learningStore = new LearningStore(dbFile);
+  const topicStore = new TopicStore(dbFile);
+  documentStores.push(documentStore);
+  learningStores.push(learningStore);
+  topicStores.push(topicStore);
+  documentStore.createDraft({
+    id: 'draft-1',
+    episodeSlug: 'episode-one',
+    title: 'Episode One',
+    format: 'narration',
+    doc: {
+      type: 'doc',
+      attrs: { format: 'narration', preamble: 'Base' },
+      content: [],
+    },
+    updatedAt: '2026-07-24T08:00:00.000Z',
+  });
+
+  const jobDir = join(root, 'jobs', 'distill-job');
+  mkdirSync(jobDir, { recursive: true });
+  const prompt = `$writing-whp-youtube-scripts\nOperation: Distill session lessons\nInputs: ${
+    JSON.stringify({
+      session: {
+        id: 'session-1',
+        draft_id: 'draft-1',
+        decisions: [{
+          id: 'decision-1',
+          lesson_markdown: input.proposed,
+          reviewed_candidate: input.reviewed,
+        }],
+      },
+      existing_lessons: [],
+    })
+  }`;
+  const envelope = {
+    jobId: 'distill-job',
+    prompt,
+    cwd: repoRoot,
+    sandbox: 'read-only' as const,
+  };
+  const result = {
+    status: 'complete',
+    lessons: [{
+      classification: 'durable',
+      lesson_markdown: input.proposed,
+      rationale_markdown:
+        `The reviewed candidate was ${input.reviewed}`,
+      evidence: ['decision-1'],
+      proposed_target: 'whp-youtube/STEERING.md',
+      supersedes_lesson_id: null,
+    }],
+    guardrail_markdown: null,
+  };
+  writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(envelope));
+  writeFileSync(join(jobDir, 'final-message.txt'), JSON.stringify(result));
+  writeFileSync(
+    join(jobDir, 'events.jsonl'),
+    JSON.stringify({
+      type: 'item.completed',
+      item: { type: 'agent_message', text: JSON.stringify(result) },
+    }),
+  );
+  writeFileSync(
+    join(jobDir, 'result-storage.json'),
+    JSON.stringify({ proposed: input.proposed, reviewed: input.reviewed }),
+  );
+  jobStore.createOperationWithJob({
+    id: 'distill-operation',
+    name: 'distill',
+    draftId: 'draft-1',
+    deadlineAt: '2026-07-24T10:00:00.000Z',
+    createdAt: '2026-07-24T08:01:00.000Z',
+  }, envelope, jobDir);
+  jobStore.setState('distill-job', 'completed');
+  const operationService = new OperationService({
+    supervisor: {
+      events: () => [],
+      cancel: () => undefined,
+    } as unknown as JobSupervisor,
+    store: jobStore,
+  });
+  operationServices.push(operationService);
+
+  learningStore.createDistillationRun({
+    id: 'run-1',
+    draftId: 'draft-1',
+    sessionId: 'session-1',
+    trigger: 'on-demand',
+    state: 'completed',
+    operationId: 'distill-operation',
+    resumeKey: 'distill-resume',
+    guardrailMarkdown: null,
+    error: null,
+    createdAt: '2026-07-24T08:01:00.000Z',
+    updatedAt: '2026-07-24T08:02:00.000Z',
+    decisions: [],
+    lessons: [],
+  });
+  learningStore.ingestDistillationRun('run-1', [{
+    record: {
+      id: 'lesson-durable',
+      draftId: 'draft-1',
+      distillationRunId: 'run-1',
+      classification: 'durable',
+      state: 'proposed',
+      proposedMarkdown: input.proposed,
+      reviewedMarkdown: input.proposed,
+      rationaleMarkdown:
+        `The source operation proposed ${input.proposed} and review kept ${
+          input.reviewed
+        }.`,
+      proposedTarget: 'whp-youtube/STEERING.md',
+      supersedesLessonId: null,
+      version: 1,
+      repositoryCommit: null,
+      repositoryPath: null,
+      repositoryAnchor: null,
+      repositoryContentHash: null,
+      createdAt: '2026-07-24T08:02:00.000Z',
+      updatedAt: '2026-07-24T08:02:00.000Z',
+    },
+    evidenceIds: [],
+  }], null, '2026-07-24T08:02:00.000Z');
+  const snapshots = new Database(dbFile);
+  snapshots.prepare(
+    `INSERT INTO distillation_run_lessons (
+      run_id, lesson_id, ordinal, snapshot_json
+    ) VALUES (?, ?, ?, ?)`,
+  ).run(
+    'run-1',
+    'lesson-durable',
+    0,
+    JSON.stringify({
+      id: 'lesson-durable',
+      classification: 'durable',
+      state: 'proposed',
+      lesson_markdown: input.proposed,
+    }),
+  );
+  snapshots.close();
+
+  const service = new LearningService({
+    store: learningStore,
+    documentStore,
+    topicStore,
+    operationService,
+    operationEvidence: (operationId) => {
+      if (operationId !== 'distill-operation') return null;
+      const operation = operationService.get(operationId);
+      return {
+        operationId,
+        draftId: operation.draftId,
+        operation: operation.operation,
+        state: operation.state,
+        envelope: jobStore.operationEnvelope(operationId),
+        inputs: operationService.inputs(operationId),
+        result: operationService.result(operationId),
+      };
+    },
+    repositoryRootForDraft: () => repoRoot,
+    idFactory: () => 'reconcile-1',
+    resumeKeyFactory: () => 'stored-candidate-resume-key',
+    now: () => '2026-07-24T09:00:00.000Z',
+  });
+  if (input.reviewed !== input.proposed) {
+    service.editLesson('draft-1', 'lesson-durable', {
+      expectedVersion: 1,
+      reviewedMarkdown: input.reviewed,
+    });
+  }
+  const approved = service.approveLesson('draft-1', 'lesson-durable', {
+    expectedVersion: input.reviewed === input.proposed ? 1 : 2,
+  });
+  const resumeKey = approved.reconciliation?.resumeKey;
+  if (!resumeKey) throw new Error('reconciliation fixture was not prepared');
+  service.markReconciliationAwaiting(resumeKey);
+  const app = buildApp({
+    nonce: NONCE,
+    operationService,
+    documentService: UNUSED_DOCUMENT_SERVICE,
+    artifactService: {},
+    validatorService: UNUSED_VALIDATOR_SERVICE,
+    learningService: service,
+  });
+  return {
+    app,
+    jobDir,
+    jobStore,
+    learningStore,
+    repoRoot,
+    resumeKey,
+  };
 }
 
 function git(repoRoot: string, args: string[]): string {

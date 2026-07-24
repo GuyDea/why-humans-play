@@ -1240,11 +1240,26 @@ export class LearningStore {
             `lesson application provenance is incomplete: ${lesson.id}`,
           );
         }
+        const rationaleMarkdown = redactCandidateText(
+          lesson.rationaleMarkdown,
+          [lesson.proposedMarkdown, lesson.reviewedMarkdown],
+          JSON.stringify({
+            kind: 'repository-reference',
+            lesson_id: lesson.id,
+            repository_provenance: {
+              commit: input.repositoryCommit,
+              path: input.repositoryPath,
+              anchor: input.repositoryAnchor,
+              content_hash: input.repositoryContentHash,
+            },
+          }),
+        );
         this.db.prepare(
           `UPDATE lessons
            SET state = 'applied',
                proposed_markdown = NULL,
                reviewed_markdown = NULL,
+               rationale_markdown = ?,
                repository_commit = ?,
                repository_path = ?,
                repository_anchor = ?,
@@ -1253,6 +1268,7 @@ export class LearningStore {
                updated_at = ?
            WHERE id = ?`,
         ).run(
+          rationaleMarkdown,
           input.repositoryCommit,
           input.repositoryPath,
           input.repositoryAnchor,
@@ -1549,4 +1565,19 @@ function operationLessonFrom(
     contentHash: row.content_hash,
     createdAt: row.created_at,
   };
+}
+
+function redactCandidateText(
+  text: string,
+  candidates: Array<string | null>,
+  replacement: string,
+): string {
+  return [...new Set(
+    candidates.filter((candidate): candidate is string =>
+      candidate !== null && candidate !== ''),
+  )].sort((left, right) =>
+    right.length - left.length || left.localeCompare(right)).reduce(
+    (redacted, candidate) => redacted.replaceAll(candidate, replacement),
+    text,
+  );
 }

@@ -43,16 +43,20 @@ are skipped, not converted.
 
 ## FR-8.5 no-shadow-doctrine boundary
 
-After a durable lesson verifies: the lesson candidate columns, the
-reconciliation `prepared_markdown`, and frozen distillation snapshots hold no
-doctrine text — only repository provenance (commit, paths, anchors, content
-hashes). Later Distill runs freeze provenance + content hash and resolve
-doctrine text from the repository at envelope-build time. Verification requires
+After a durable lesson verifies, no app storage retains doctrine text — the
+lesson candidate columns, reconciliation `prepared_markdown`, frozen
+distillation snapshots, and the original proposing operation's artifacts
+(`jobs.envelope_json`, job-dir files, result storage, operation APIs) are all
+scrubbed or redacted to structured repository-reference placeholders, verified
+by all-storage scan regressions for both edited and unedited candidates. Later
+Distill envelopes carry only frozen repository references (commit, path,
+anchor, content hash); the skill reads the doctrine file itself at run time. Verification requires
 the commit to be a strict descendant of the recorded pre-handoff HEAD, to add
 this handoff's unique reconciliation token, and to contain the lesson-specific
-content (candidate added / predecessor removed); one verified commit per
-reconciliation and one reconciliation per commit are store-enforced; a
-multi-lesson commit verifies each lesson only through its own token.
+content (candidate added / predecessor removed). Each reconciliation claims
+exactly one verified commit; a deliberate multi-lesson commit may be claimed by
+several reconciliations, each strictly through its own token — a lesson whose
+token the commit does not add can never claim it.
 
 ## Browser sweeps (binding, post-wave-2): both VERIFIED
 
@@ -91,4 +95,4 @@ over frozen evidence, Martin-gated application — episode-local lessons as
 server-authoritative envelope context; durable doctrine only through
 reconcile-whp with causally-bound verification — and no doctrine text stored
 app-side after application. Remaining gate: the confirmation review of fix
-wave 2.
+wave 3.

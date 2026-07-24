@@ -1,4 +1,6 @@
 import type Database from 'better-sqlite3';
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 export interface StateMigration {
   version: number;
@@ -756,6 +758,7 @@ function backfillProvableV9Decisions(db: Database.Database): void {
     );
   }
   for (const proposal of rejectedProposals) {
+    if (!isProvableV9NarrationRejection(db, proposal)) continue;
     insert.run(
       `v10:narration-proposal:${proposal.operation_id}:rejected`,
       proposal.draft_id,
@@ -793,6 +796,142 @@ function backfillProvableV9Decisions(db: Database.Database): void {
       promotion.updated_at,
       promotion.updated_at,
     );
+  }
+}
+
+function isProvableV9NarrationRejection(
+  db: Database.Database,
+  proposal: {
+    operation_id: string;
+    draft_id: string;
+  },
+): boolean {
+  if (
+    !hasTableColumns(db, 'operations', [
+      'id',
+      'name',
+      'draft_id',
+      'state',
+    ])
+    || !hasTableColumns(db, 'jobs', [
+      'id',
+      'operation_id',
+      'state',
+      'envelope_json',
+      'job_dir',
+    ])
+  ) {
+    return false;
+  }
+  const evidence = db.prepare<[string, string], {
+    operation_name: string;
+    job_id: string;
+    envelope_json: string;
+    job_dir: string;
+  }>(
+    `SELECT
+       operations.name AS operation_name,
+       jobs.id AS job_id,
+       jobs.envelope_json,
+       jobs.job_dir
+     FROM operations
+     JOIN jobs ON jobs.operation_id = operations.id
+     WHERE operations.id = ?
+       AND operations.draft_id = ?
+       AND operations.state = 'completed'
+       AND jobs.state = 'completed'
+     ORDER BY jobs.rowid DESC
+     LIMIT 1`,
+  ).get(proposal.operation_id, proposal.draft_id);
+  if (
+    !evidence
+    || (
+      evidence.operation_name !== 'rewrite-selection'
+      && evidence.operation_name !== 'generate-episode'
+    )
+  ) {
+    return false;
+  }
+  let envelope: Record<string, unknown>;
+  try {
+    const parsed = JSON.parse(evidence.envelope_json) as unknown;
+    if (
+      parsed === null
+      || typeof parsed !== 'object'
+      || Array.isArray(parsed)
+    ) {
+      return false;
+    }
+    envelope = parsed as Record<string, unknown>;
+  } catch {
+    return false;
+  }
+  if (
+    envelope['jobId'] !== evidence.job_id
+    || typeof envelope['prompt'] !== 'string'
+    || !isNarrationProposalEnvelope(
+      envelope['prompt'],
+      evidence.operation_name,
+    )
+  ) {
+    return false;
+  }
+  const finalMessage = join(evidence.job_dir, 'final-message.txt');
+  if (!existsSync(finalMessage)) return false;
+  let result: string;
+  try {
+    result = readFileSync(finalMessage, 'utf8');
+  } catch {
+    return false;
+  }
+  if (evidence.operation_name === 'generate-episode') {
+    return result.trim() !== '';
+  }
+  try {
+    const parsed = JSON.parse(result) as Record<string, unknown>;
+    return typeof parsed['replacement_markdown'] === 'string'
+      && parsed['replacement_markdown'].trim() !== '';
+  } catch {
+    return false;
+  }
+}
+
+function hasTableColumns(
+  db: Database.Database,
+  table: string,
+  required: readonly string[],
+): boolean {
+  const exists = db.prepare<[string], { count: number }>(
+    `SELECT COUNT(*) AS count
+     FROM sqlite_master
+     WHERE type = 'table' AND name = ?`,
+  ).get(table)!.count === 1;
+  if (!exists) return false;
+  const columns = new Set(
+    db.prepare<[], { name: string }>(`PRAGMA table_info(${table})`)
+      .all()
+      .map(({ name }) => name),
+  );
+  return required.every((column) => columns.has(column));
+}
+
+function isNarrationProposalEnvelope(
+  prompt: string,
+  operation: string,
+): boolean {
+  const label = operation === 'rewrite-selection'
+    ? 'Rewrite selection'
+    : 'Generate (episode-scale)';
+  const prefix =
+    `$writing-whp-youtube-scripts\nOperation: ${label}\nInputs: `;
+  if (!prompt.startsWith(prefix)) return false;
+  try {
+    const inputs = JSON.parse(prompt.slice(prefix.length)) as unknown;
+    return inputs !== null
+      && typeof inputs === 'object'
+      && !Array.isArray(inputs);
+  } catch {
+    return false;
   }
 }
 

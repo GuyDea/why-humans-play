@@ -850,3 +850,23 @@ decisions or lessons.
 `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 7 implementation plan
 remain unchanged because this corrects the real-operation verification flow without
 changing WHP doctrine or the approved Plan 7 architecture.
+
+## 2026-07-24 — Close Plan 7 operation-storage and proof boundaries
+
+**Decision:** Once a durable lesson's reconciliation is verified, Script Creator retains
+only deterministic repository provenance and content hashes throughout app storage,
+including the proposing operation's envelope and result, and later Distill inputs supply
+repository references that the read-only skill resolves itself; generic draft saves
+preserve every server-owned non-narration metadata field, and v10 backfills a rejected
+narration proposal only when its operation envelope and result prove that proposal for
+the draft.
+
+**Rationale:** Applied durable doctrine must live only in repository steering and skill
+files, while every captured acceptance or rejection must be limited to the state change
+proved by its originating operation.
+
+**Documents:** `.superpowers/sdd/p7-final-review-report.md` and this ledger. `BRAND.md`,
+`CLAUDE.md`, `whp-youtube/STEERING.md`, the Plan 7 implementation plan, and the
+controller-owned lesson-distillation reference remain unchanged because they already
+permit repository-native durable doctrine and server-owned proof boundaries; this fix
+closes implementation and verification gaps without changing that architecture.

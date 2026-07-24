@@ -74,6 +74,22 @@ export interface LearningOperationService {
     state: OperationState;
   };
   result(id: string): OperationServiceResult;
+  redactAppliedDurableLesson?(
+    operationId: string,
+    input: {
+      lessonId: string;
+      candidates: string[];
+      repositoryProvenance: {
+        commit: string;
+        path: string;
+        anchor: string;
+        contentHash: string;
+      };
+      sourceProvenance: {
+        distillationRunId: string;
+      };
+    },
+  ): void;
 }
 
 interface DistilledLesson {
@@ -844,6 +860,14 @@ export class LearningService {
         },
       );
     }
+    if (reconciliation.kind !== 'retire' && pointer !== null) {
+      this.redactAppliedDurableLesson(lesson, {
+        commit: verified.commit,
+        path: pointer.path,
+        anchor: pointer.anchor,
+        contentHash: pointer.contentHash,
+      });
+    }
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       reconciliationTokens: verified.reconciliationTokens,
@@ -912,6 +936,12 @@ export class LearningService {
         },
       );
     }
+    this.redactAppliedDurableLesson(lesson, {
+      commit: verified.commit,
+      path: pointer.path,
+      anchor: pointer.anchor,
+      contentHash: pointer.contentHash,
+    });
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       reconciliationTokens: verified.reconciliationTokens,
@@ -1369,7 +1399,7 @@ export class LearningService {
           decisions: run.decisions.map(({ snapshot }) => snapshot),
         },
         existing_lessons: run.lessons.map(({ snapshot }) =>
-          this.materializeFrozenLesson(run.draftId, snapshot)
+          this.materializeFrozenLesson(snapshot)
         ),
       };
       let cwd: string | undefined;
@@ -1466,7 +1496,6 @@ export class LearningService {
   }
 
   private materializeFrozenLesson(
-    draftId: string,
     snapshot: unknown,
   ): unknown {
     if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
@@ -1500,45 +1529,7 @@ export class LearningService {
         `applied durable lesson ${String(frozen['id'])} repository provenance is unresolved`,
       );
     }
-    const lessonMarkdown = this.readRepositoryPointer(
-      draftId,
-      pointer['path'],
-      pointer['anchor'],
-      pointer['content_hash'],
-    );
-    return {
-      ...frozen,
-      lesson_markdown: lessonMarkdown,
-    };
-  }
-
-  private readRepositoryPointer(
-    draftId: string,
-    repositoryPath: string,
-    repositoryAnchor: string,
-    repositoryContentHash: string,
-  ): string {
-    if (!this.repositoryRootForDraft) {
-      throw new Error('selected repository workspace is unavailable');
-    }
-    const root = resolve(this.repositoryRootForDraft(draftId));
-    const path = resolve(root, repositoryPath);
-    if (path !== root && !path.startsWith(`${root}${sep}`)) {
-      throw new Error('repository path escapes the selected workspace');
-    }
-    const match = /^lines:(\d+)-(\d+)$/u.exec(repositoryAnchor);
-    if (!match) throw new Error('repository anchor is invalid');
-    const start = Number(match[1]);
-    const end = Number(match[2]);
-    const lines = readFileSync(path, 'utf8').split('\n');
-    if (start < 1 || end < start || end > lines.length) {
-      throw new Error('repository anchor no longer resolves');
-    }
-    const lessonMarkdown = lines.slice(start - 1, end).join('\n');
-    if (hashMarkdown(lessonMarkdown) !== repositoryContentHash) {
-      throw new Error('repository doctrine content hash is stale');
-    }
-    return lessonMarkdown;
+    return frozen;
   }
 
   private resolveAppliedDurableLesson(lesson: LessonRecord): {
@@ -1612,6 +1603,41 @@ export class LearningService {
       throw new Error('distillation operation service is not configured');
     }
     return this.operationService;
+  }
+
+  private redactAppliedDurableLesson(
+    lesson: LessonRecord,
+    repositoryProvenance: {
+      commit: string;
+      path: string;
+      anchor: string;
+      contentHash: string;
+    },
+  ): void {
+    if (lesson.distillationRunId === null) return;
+    const run = this.store.getDistillationRun(lesson.distillationRunId);
+    if (!run?.operationId) {
+      throw new Error(
+        `durable lesson ${lesson.id} has no proposing operation provenance`,
+      );
+    }
+    const redact = this.operationService?.redactAppliedDurableLesson;
+    if (!redact) {
+      throw new Error(
+        'durable lesson operation redaction is not configured',
+      );
+    }
+    redact.call(this.operationService, run.operationId, {
+      lessonId: lesson.id,
+      candidates: [...new Set([
+        lesson.proposedMarkdown,
+        lesson.reviewedMarkdown,
+      ].filter((candidate): candidate is string => candidate !== null))],
+      repositoryProvenance,
+      sourceProvenance: {
+        distillationRunId: run.id,
+      },
+    });
   }
 
   private requireDraft(draftId: string): void {
@@ -1883,15 +1909,20 @@ function sameNarrationContent(
 function narrationContent(
   document: ReturnType<typeof editorSchema.nodeFromJSON>,
 ): Array<{
-  title: string;
+  attrs: Record<string, unknown>;
   blocks: unknown[];
 }> {
-  const beats: Array<{ title: string; blocks: unknown[] }> = [];
+  const beats: Array<{
+    attrs: Record<string, unknown>;
+    blocks: unknown[];
+  }> = [];
   document.forEach((beat) => {
     const blocks: unknown[] = [];
     beat.forEach((block) => blocks.push(block.toJSON()));
+    const attrs = { ...beat.attrs };
+    delete attrs['beatId'];
     beats.push({
-      title: String(beat.attrs['title']),
+      attrs,
       blocks,
     });
   });
@@ -1909,6 +1940,13 @@ function rewriteAcceptanceMatches(
   const beforeNode = editorSchema.nodeFromJSON(before);
   const afterNode = editorSchema.nodeFromJSON(after);
   if (beforeNode.content.findDiffStart(afterNode.content) === null) {
+    return false;
+  }
+  const beforeBeatAttrs: unknown[] = [];
+  const afterBeatAttrs: unknown[] = [];
+  beforeNode.forEach((beat) => beforeBeatAttrs.push(beat.attrs));
+  afterNode.forEach((beat) => afterBeatAttrs.push(beat.attrs));
+  if (JSON.stringify(beforeBeatAttrs) !== JSON.stringify(afterBeatAttrs)) {
     return false;
   }
   const beforeText = beforeNode.textBetween(

@@ -796,6 +796,102 @@ describe('LearningService', () => {
     }
   });
 
+  it('keeps all non-narration metadata server-owned during an accepted episode save', async () => {
+    const fixture = episodeAcceptanceFixture();
+    const before = fixture.documentStore.getDraft('draft-1')!;
+    const forged = structuredClone(fixture.accepted);
+    forged['attrs'] = {
+      format: 'annotated',
+      preamble: 'Forged operation preamble.',
+    };
+    forged['metadata'] = {
+      topic: 'Forged topic',
+      anchors: ['Forged anchor'],
+      unknowns: ['Forged unknown'],
+      approvedLessons: ['Forged legacy lesson'],
+      creativeStatus: { phase: 'architecture' },
+      directionApproved: true,
+    };
+    forged['schemaVersion'] = 999;
+    forged['operationOnlyMetadata'] = 'must not persist';
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const saved = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          title: 'Forged operation title',
+          doc: forged,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      expect(saved.statusCode, saved.body).toBe(200);
+      const stored = saved.json().draft as {
+        title: string;
+        format: string;
+        doc: DraftDocument;
+      };
+      const { content: beforeContent, ...beforeMetadata } = before.doc;
+      const { content: storedContent, ...storedMetadata } = stored.doc;
+      expect(stored.title).toBe(before.title);
+      expect(stored.format).toBe(before.format);
+      expect(storedMetadata).toEqual(beforeMetadata);
+      expect(storedContent).toEqual(fixture.accepted['content']);
+
+      const resolved = await app.inject({
+        method: 'POST',
+        url:
+          `/api/drafts/draft-1/narration/proposals/${
+            fixture.operationId
+          }/resolve`,
+        headers: ACCEPTANCE_AUTH,
+        payload: { decision: 'accepted' },
+      });
+      expect(resolved.statusCode, resolved.body).toBe(200);
+      const decision = fixture.service.list('draft-1').decisions[0]!;
+      const evidenceDoc = decision.context.revision!.doc;
+      const { content: evidenceContent, ...evidenceMetadata } = evidenceDoc;
+      expect(evidenceMetadata).toEqual(beforeMetadata);
+      expect(evidenceContent).toEqual(fixture.accepted['content']);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('refuses forged beat timing beside a genuine accepted episode result', async () => {
+    const fixture = episodeAcceptanceFixture();
+    const forged = structuredClone(fixture.accepted);
+    const firstBeat = (
+      forged['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    firstBeat['attrs'] = {
+      ...(firstBeat['attrs'] as Record<string, unknown>),
+      timeTargetMs: 999_999,
+    };
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const refused = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          doc: forged,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      expect(refused.statusCode).toBe(409);
+      expect(fixture.documentStore.currentRevisionSeq('draft-1')).toBe(1);
+      expect(fixture.service.list('draft-1').decisions).toEqual([]);
+    } finally {
+      await app.close();
+    }
+  });
+
   it('auto-settles the fake whole-episode acceptance after an architecture reopen', async () => {
     const fixture = episodeAcceptanceFixture();
     fixture.documentStore.saveDraft('draft-1', {
@@ -830,7 +926,9 @@ describe('LearningService', () => {
       'draft-1',
       {
         expectedRevisionSeq: 3,
-        expectedNarrationMd: exportDocumentMarkdown(fixture.accepted),
+        expectedNarrationMd: exportDocumentMarkdown(
+          fixture.documentStore.getDraft('draft-1')!.doc,
+        ),
       },
     )).toEqual({ settledExportToken: expect.any(String) });
     expect(fixture.documentStore.getNarrationProposal(
@@ -1295,9 +1393,15 @@ describe('LearningService', () => {
     const before = parseMarkdown(
       '## 1. Opening\n\n> Original line.',
     ).toJSON();
-    const after = parseMarkdown(
-      '## 1. Opening\n\n> Accepted replacement.',
-    ).toJSON();
+    const after = structuredClone(before);
+    const acceptedText = (
+      (
+        (
+          after['content'] as Array<Record<string, unknown>>
+        )[0]!['content'] as Array<Record<string, unknown>>
+      )[0]!['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    acceptedText['text'] = 'Accepted replacement.';
     const { documentStore, service } = setup({
       operationEvidence: (operationId) => ({
         operationId,
@@ -1445,6 +1549,75 @@ describe('LearningService', () => {
       'draft-1',
       'rewrite-operation',
     )).toMatchObject({ state: 'pending', acceptedRevisionId: null });
+  });
+
+  it('refuses forged beat metadata beside a genuine accepted selection rewrite', () => {
+    const before = parseMarkdown(
+      '## 1. Opening\n\n> The original line.',
+    ).toJSON();
+    const proposed = parseMarkdown(
+      '## 1. Opening\n\n> The proposed line.',
+    ).toJSON();
+    const forgedBeat = (
+      proposed['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    forgedBeat['attrs'] = {
+      ...(forgedBeat['attrs'] as Record<string, unknown>),
+      beatId: 'forged-beat-id',
+      timeTargetMs: 999_999,
+    };
+    const { documentStore, service } = setup({
+      operationEvidence: (operationId) => ({
+        operationId,
+        draftId: 'draft-1',
+        operation: 'rewrite-selection',
+        state: 'completed',
+        envelope: { prompt: 'persisted' },
+        inputs: {
+          selection: 'The original line.',
+          requested_scope: { kind: 'selection' },
+        },
+        result: {
+          kind: 'schema',
+          value: { replacement_markdown: 'The proposed line.' },
+          guardrail: null,
+        },
+      }),
+    });
+    documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: before,
+      updatedAt: '2026-07-24T08:00:30.000Z',
+      revision: {
+        id: 'metadata-baseline',
+        opId: null,
+        disposition: 'manual-save',
+        createdAt: '2026-07-24T08:00:30.000Z',
+      },
+    });
+    documentStore.createNarrationProposal({
+      draftId: 'draft-1',
+      operationId: 'rewrite-operation',
+      state: 'pending',
+      createdAt: '2026-07-24T08:01:00.000Z',
+      resolvedAt: null,
+      reasonNote: null,
+      successorOperationId: null,
+    });
+    const documentService = new DocumentService({
+      store: documentStore,
+      learningService: service,
+      idFactory: () => 'forged-beat-metadata-save',
+      now: () => '2026-07-24T08:02:00.000Z',
+    });
+
+    expect(() => documentService.saveDraft('draft-1', {
+      doc: proposed,
+      opId: 'rewrite-operation',
+      disposition: 'selection-proposal-accepted',
+    })).toThrow(/acceptance.+refused/iu);
+    expect(documentStore.currentRevisionSeq('draft-1')).toBe(1);
   });
 
   it('rejects architecture rejection capture without a real pending proposal for that draft', () => {
@@ -2253,7 +2426,7 @@ describe('LearningService', () => {
     });
   });
 
-  it('persists only durable provenance while resolving exact doctrine for Distill', () => {
+  it('supplies applied durable lessons to Distill only as repository references', () => {
     const repositoryRoot = mkdtempSync(join(tmpdir(), 'learning-doctrine-'));
     roots.push(repositoryRoot);
     mkdirSync(join(repositoryRoot, 'whp-youtube'));
@@ -2318,16 +2491,23 @@ describe('LearningService', () => {
         content_hash: contentHash,
       },
     });
-    expect(
-      (submissions[0] as {
-        existing_lessons: Array<Record<string, unknown>>;
-      }).existing_lessons[0],
-    ).toMatchObject({
-      lesson_markdown: doctrine,
+    const supplied = (submissions[0] as {
+      existing_lessons: Array<Record<string, unknown>>;
+    }).existing_lessons[0]!;
+    expect(supplied).not.toHaveProperty('lesson_markdown');
+    expect(supplied).toMatchObject({
+      id: 'durable-applied',
+      classification: 'durable',
+      state: 'applied',
       repository_provenance: {
+        status: 'resolved',
+        commit: 'doctrine-commit',
+        path: 'whp-youtube/STEERING.md',
+        anchor: 'lines:3-3',
         content_hash: contentHash,
       },
     });
+    expect(JSON.stringify(submissions[0])).not.toContain(doctrine);
     expect(JSON.stringify(service.getDistillationRun(run.id))).not.toContain(
       doctrine,
     );

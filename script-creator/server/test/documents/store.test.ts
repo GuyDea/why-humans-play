@@ -237,12 +237,22 @@ describe('DocumentStore', () => {
     const firstDoc = {
       type: 'doc',
       attrs: { format: 'narration', preamble: '# Revised\n\n' },
-      content: [],
+      metadata: { topic: 'Forged first topic' },
+      content: [{ type: 'paragraph', content: [] }],
     };
     const secondDoc = {
       type: 'doc',
       attrs: { format: 'annotated', preamble: '# Final\n\n' },
-      content: [],
+      metadata: { topic: 'Forged second topic' },
+      content: [{ type: 'blockquote', content: [] }],
+    };
+    const firstStoredDoc = {
+      ...draft().doc,
+      content: firstDoc.content,
+    };
+    const secondStoredDoc = {
+      ...draft().doc,
+      content: secondDoc.content,
     };
 
     const first = store.saveDraft('draft-1', {
@@ -276,8 +286,8 @@ describe('DocumentStore', () => {
     expect(second.revision.kind).toBe('narration');
     expect(store.getDraft('draft-1')).toMatchObject({
       title: 'Final',
-      format: 'annotated',
-      doc: secondDoc,
+      format: 'narration',
+      doc: secondStoredDoc,
       updatedAt: '2026-07-23T08:02:00.000Z',
     });
     expect(store.listRevisions('draft-1')).toEqual([
@@ -288,7 +298,7 @@ describe('DocumentStore', () => {
         opId: null,
         disposition: 'manual-save',
         kind: 'narration',
-        doc: firstDoc,
+        doc: firstStoredDoc,
         createdAt: '2026-07-23T08:01:00.000Z',
       },
       {
@@ -298,7 +308,7 @@ describe('DocumentStore', () => {
         opId: 'operation-7',
         disposition: 'accepted',
         kind: 'narration',
-        doc: secondDoc,
+        doc: secondStoredDoc,
         createdAt: '2026-07-23T08:02:00.000Z',
       },
     ]);

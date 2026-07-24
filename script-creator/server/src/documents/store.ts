@@ -471,7 +471,7 @@ export class DocumentStore {
          WHERE id = ?`,
       ).run(
         update.title,
-        update.format,
+        current.format,
         JSON.stringify(doc),
         update.updatedAt,
         id,
@@ -851,7 +851,10 @@ export class DocumentStore {
       this.assertDraftWriteAvailable(id, {
         allowProductionSynchronization: true,
       });
-      const doc = preserveWorkflowMetadata(update.doc, current.doc);
+      const doc = preserveProductionImportWorkflowMetadata(
+        update.doc,
+        current.doc,
+      );
       const nextSeq = this.currentRevisionSeq(id) + 1;
       this.db.prepare(
         `UPDATE drafts
@@ -1269,6 +1272,19 @@ function objectValue(
 }
 
 export function preserveWorkflowMetadata(
+  incoming: DraftDocument,
+  stored: DraftDocument,
+): DraftDocument {
+  const preserved = { ...stored };
+  if (Object.prototype.hasOwnProperty.call(incoming, 'content')) {
+    preserved['content'] = incoming['content'];
+  } else {
+    delete preserved['content'];
+  }
+  return preserved;
+}
+
+function preserveProductionImportWorkflowMetadata(
   incoming: DraftDocument,
   stored: DraftDocument,
 ): DraftDocument {

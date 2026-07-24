@@ -995,6 +995,80 @@ describe('operations HTTP API', () => {
     expect(fixture.store.recentOperations()).toEqual([]);
   });
 
+  it('serves a verified durable candidate only through its redacted repository reference', async () => {
+    const fixture = makeFixture('distill-complete');
+    const id = fixture.service.submit('distill', {
+      session: {
+        id: 'session-1',
+        draft_id: 'draft-1',
+        trigger: 'on-demand',
+        decisions: [{ id: 'decision-1', kind: 'proposal-rejected' }],
+      },
+      existing_lessons: [],
+    }, { cwd: fixture.root });
+    fixture.ids.push(id);
+    await waitForTerminal(fixture, id);
+    const doctrine =
+      'When a causal claim is accepted, preserve the visible choice that demonstrates it.';
+    expect(JSON.stringify(fixture.service.result(id))).toContain(doctrine);
+
+    fixture.service.redactAppliedDurableLesson(id, {
+      lessonId: 'lesson-durable',
+      candidates: [doctrine],
+      repositoryProvenance: {
+        commit: 'commit-1',
+        path: 'whp-youtube/STEERING.md',
+        anchor: 'lines:4-4',
+        contentHash: 'sha256:doctrine',
+      },
+      sourceProvenance: {
+        distillationRunId: 'run-1',
+      },
+    });
+
+    const operation = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}`,
+      headers: AUTH,
+    });
+    const result = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}/result`,
+      headers: AUTH,
+    });
+    expect(operation.statusCode).toBe(200);
+    expect(result.statusCode).toBe(200);
+    expect(`${operation.body}\n${result.body}`).not.toContain(doctrine);
+    const responseResult = result.json<{
+      kind: string;
+      value: {
+        lessons: Array<{
+          classification: string;
+          lesson_markdown: unknown;
+        }>;
+      };
+    }>();
+    expect(responseResult.kind).toBe('schema');
+    expect(
+      responseResult.value.lessons.find(
+        ({ classification }) => classification === 'durable',
+      )?.lesson_markdown,
+    ).toEqual({
+      kind: 'repository-reference',
+      lesson_id: 'lesson-durable',
+      repository_provenance: {
+        commit: 'commit-1',
+        path: 'whp-youtube/STEERING.md',
+        anchor: 'lines:4-4',
+        content_hash: 'sha256:doctrine',
+      },
+      source_provenance: {
+        distillation_run_id: 'run-1',
+        operation_id: id,
+      },
+    });
+  });
+
   it('runs the Plan 6 dispatcher for raw and strict architecture operations over HTTP', async () => {
     const fixture = makeFixture('plan6-flow');
     const generatedId = fixture.service.submitDraftScoped(

@@ -175,6 +175,43 @@ export class OperationService {
     return JSON.parse(envelope.prompt.slice(index + marker.length)) as unknown;
   }
 
+  redactAppliedDurableLesson(
+    operationId: string,
+    input: {
+      lessonId: string;
+      candidates: string[];
+      repositoryProvenance: {
+        commit: string;
+        path: string;
+        anchor: string;
+        contentHash: string;
+      };
+      sourceProvenance: {
+        distillationRunId: string;
+      };
+    },
+  ): void {
+    this.requireOperation(operationId);
+    this.store.redactOperationLesson(operationId, {
+      candidates: input.candidates,
+      replacement: {
+        kind: 'repository-reference',
+        lesson_id: input.lessonId,
+        repository_provenance: {
+          commit: input.repositoryProvenance.commit,
+          path: input.repositoryProvenance.path,
+          anchor: input.repositoryProvenance.anchor,
+          content_hash: input.repositoryProvenance.contentHash,
+        },
+        source_provenance: {
+          distillation_run_id:
+            input.sourceProvenance.distillationRunId,
+          operation_id: operationId,
+        },
+      },
+    });
+  }
+
   private submitPrepared(
     opName: OperationName,
     inputs: unknown,

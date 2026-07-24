@@ -1,7 +1,12 @@
 import Database from 'better-sqlite3';
-import { mkdtempSync, rmSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DocumentStore } from '../src/documents/store.js';
 import {
@@ -11,6 +16,7 @@ import {
 import { TopicStore } from '../src/topics/store.js';
 import { LearningStore } from '../src/learning/store.js';
 import { LearningService } from '../src/learning/service.js';
+import { JobStore } from '../src/job-store.js';
 
 const roots: string[] = [];
 const documentStores: DocumentStore[] = [];
@@ -311,7 +317,9 @@ describe('shared state migration registry', () => {
     before.prepare(
       `INSERT INTO narration_proposals (
         draft_id, operation_id, state, created_at, resolved_at
-      ) VALUES (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)`,
+      ) VALUES
+        (?, ?, ?, ?, ?), (?, ?, ?, ?, ?),
+        (?, ?, ?, ?, ?), (?, ?, ?, ?, ?)`,
     ).run(
       'draft-v9',
       'operation-rejected',
@@ -323,8 +331,29 @@ describe('shared state migration registry', () => {
       'dismissed',
       '2026-07-24T08:02:30.000Z',
       '2026-07-24T08:03:00.000Z',
+      'draft-v9',
+      'operation-rejected-provable',
+      'rejected',
+      '2026-07-24T08:03:30.000Z',
+      '2026-07-24T08:04:00.000Z',
+      'draft-v9',
+      'operation-rejected-no-result',
+      'rejected',
+      '2026-07-24T08:04:30.000Z',
+      '2026-07-24T08:05:00.000Z',
     );
     before.close();
+    persistCompletedNarrationOperationEvidence(
+      dbFile,
+      'draft-v9',
+      'operation-rejected-provable',
+    );
+    persistCompletedNarrationOperationEvidence(
+      dbFile,
+      'draft-v9',
+      'operation-rejected-no-result',
+      { writeResult: false },
+    );
 
     const migration = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
     const apply = vi.spyOn(migration, 'apply');
@@ -362,6 +391,14 @@ describe('shared state migration registry', () => {
       `SELECT COUNT(*) AS count FROM decision_events
        WHERE source_id = 'operation-dismissed'`,
     ).get()!.count).toBe(0);
+    expect(inspected.prepare<[], { count: number }>(
+      `SELECT COUNT(*) AS count FROM decision_events
+       WHERE source_id = 'operation-rejected'`,
+    ).get()!.count).toBe(0);
+    expect(inspected.prepare<[], { count: number }>(
+      `SELECT COUNT(*) AS count FROM decision_events
+       WHERE source_id = 'operation-rejected-no-result'`,
+    ).get()!.count).toBe(0);
     inspected.close();
     expect(apply).toHaveBeenCalledOnce();
 
@@ -393,14 +430,15 @@ describe('shared state migration registry', () => {
     const run = learningService.startDistillation('draft-v9', 'on-demand');
     expect(run.state).toBe('queued');
     expect(run.decisions.map(({ decisionId }) => decisionId)).toEqual([
-      'v10:narration-proposal:operation-rejected:rejected',
+      'v10:narration-proposal:operation-rejected-provable:rejected',
     ]);
     expect(frozenInput).toMatchObject({
       session: {
         draft_id: 'draft-v9',
         decisions: expect.arrayContaining([
           expect.objectContaining({
-            id: 'v10:narration-proposal:operation-rejected:rejected',
+            id:
+              'v10:narration-proposal:operation-rejected-provable:rejected',
           }),
         ]),
       },
@@ -468,16 +506,23 @@ describe('shared state migration registry', () => {
       '2026-07-24T08:01:30.000Z',
       '2026-07-24T08:02:00.000Z',
     );
+    db.close();
+    persistCompletedNarrationOperationEvidence(
+      dbFile,
+      'draft-stranded',
+      'operation-rejected-stranded',
+    );
+    const migrationDb = new Database(dbFile);
     const v10 = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
-    v10.apply(db);
-    db.pragma('user_version = 10');
-    db.prepare(
+    v10.apply(migrationDb);
+    migrationDb.pragma('user_version = 10');
+    migrationDb.prepare(
       `UPDATE learning_sessions
        SET start_cursor = 1, end_cursor = 1,
            closed_at = '2026-07-24T08:03:00.000Z'
        WHERE draft_id = 'draft-stranded'`,
     ).run();
-    db.close();
+    migrationDb.close();
 
     const v11 = STATE_MIGRATIONS.find(({ version }) => version === 11)!;
     const applyV11 = vi.spyOn(v11, 'apply');
@@ -821,6 +866,45 @@ function simulatedV9Database(): string {
   }
   db.close();
   return dbFile;
+}
+
+function persistCompletedNarrationOperationEvidence(
+  dbFile: string,
+  draftId: string,
+  operationId: string,
+  options: { writeResult?: boolean } = {},
+): void {
+  const jobDir = join(
+    dirname(dbFile),
+    `${operationId}-job`,
+  );
+  mkdirSync(jobDir);
+  const envelope = {
+    jobId: `${operationId}-attempt`,
+    prompt:
+      '$writing-whp-youtube-scripts\n'
+      + 'Operation: Rewrite selection\n'
+      + 'Inputs: {"selection":"Original line."}',
+    cwd: jobDir,
+    sandbox: 'read-only' as const,
+  };
+  writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(envelope));
+  if (options.writeResult !== false) {
+    writeFileSync(
+      join(jobDir, 'final-message.txt'),
+      JSON.stringify({ replacement_markdown: 'Replacement line.' }),
+    );
+  }
+  const store = new JobStore(dbFile);
+  store.createOperationWithJob({
+    id: operationId,
+    name: 'rewrite-selection',
+    draftId,
+    deadlineAt: '2026-07-24T09:00:00.000Z',
+    createdAt: '2026-07-24T08:01:00.000Z',
+  }, envelope, jobDir);
+  store.setState(envelope.jobId, 'completed');
+  store.close();
 }
 
 function columns(db: Database.Database, table: string): string[] {
