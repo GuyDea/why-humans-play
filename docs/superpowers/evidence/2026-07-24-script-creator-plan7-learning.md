@@ -1,12 +1,12 @@
 # Script Creator — Plan 7 Learning Loop: Evidence
 
-**Date:** 2026-07-24 (rewritten after fix waves 1–2; supersedes the pre-review
+**Date:** 2026-07-24 (rewritten after fix waves 1–3; supersedes the pre-review
 version, whose totals and claims were stale)
 **Plan:** [2026-07-24-script-creator-plan7-learning.md](../plans/2026-07-24-script-creator-plan7-learning.md)
 
-## Deterministic suites (host, two consecutive runs each, post-wave-2)
+## Deterministic suites (host, two consecutive runs each, post-wave-3)
 
-- Server: 49 files / 550 tests, twice; `tsc --noEmit` clean.
+- Server: 49 files / 557 tests, twice; `tsc --noEmit` clean.
 - editor-core: 12 files / 45 tests, twice; clean.
 - App: 28 files / 215 tests, twice; `tsc --noEmit` clean; `ng build` completes
   (pre-existing budget warnings only).
@@ -58,7 +58,7 @@ exactly one verified commit; a deliberate multi-lesson commit may be claimed by
 several reconciliations, each strictly through its own token — a lesson whose
 token the commit does not add can never claim it.
 
-## Browser sweeps (binding, post-wave-2): both VERIFIED
+## Browser sweeps (binding, post-wave-3): both VERIFIED
 
 - `npm run e2e:plan7` (independent script over the shared harness): full
   lifecycle — captured decisions from real dispositions → explicit Distill over
