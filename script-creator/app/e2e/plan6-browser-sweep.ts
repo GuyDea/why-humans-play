@@ -653,20 +653,6 @@ async function main(): Promise<void> {
   await waitForEditorSave(page);
 
   const productionPanel = page.locator('app-production-panel');
-  {
-    const ledger = await api<unknown>(
-      daemon!.handshake,
-      `/api/drafts/${encodeURIComponent(draft.id)}/narration/proposals`,
-    );
-    console.log('DIAG pre-approval ledger:', JSON.stringify(ledger));
-    for (const row of (ledger as { proposals: { operationId: string }[] }).proposals) {
-      const op = await api<{ operation: string; state: string }>(
-        daemon!.handshake,
-        `/api/ops/${encodeURIComponent(row.operationId)}`,
-      );
-      console.log('DIAG pending op:', row.operationId, op.operation, op.state);
-    }
-  }
   const approveNarration = productionPanel.getByRole(
     'button',
     { name: 'Approve complete narration' },
@@ -790,6 +776,33 @@ async function main(): Promise<void> {
       workspace,
       initialCommitCount,
     });
+    await page.goto(
+      `http://127.0.0.1:${daemon!.handshake.port}/?draft=${
+        encodeURIComponent(draft.id)
+      }#nonce=${daemon!.handshake.nonce}`,
+      { waitUntil: 'domcontentloaded' },
+    );
+    await productionPanel.waitFor();
+    await waitForText(productionPanel, 'validation-required');
+    const rejectDurable = productionPanel.getByRole(
+      'button',
+      { name: 'Reject durable proposal' },
+    );
+    while (await rejectDurable.count() > 0) {
+      await rejectDurable.first().click();
+      await sleepMs(300);
+    }
+    const revalidate = productionPanel.getByRole(
+      'button',
+      { name: /Re-run validator|Run validator/ },
+    );
+    await waitForEnabled(revalidate);
+    await revalidate.click();
+    await waitForAttribute(
+      productionPanel.locator('[data-validator-status]'),
+      'data-validator-status',
+      'pass',
+    );
   }
   const completePromote = productionPanel.getByRole(
     'button',
@@ -1158,9 +1171,9 @@ async function runPlan7LearningSweep(options: {
   );
   await waitForText(suppliedLessons, localReviewed);
   assert(
-    await suppliedLessons.locator('ol li p').allTextContents()
-      .then((values) => JSON.stringify(values))
-      === JSON.stringify([localReviewed]),
+    JSON.stringify(
+      await suppliedLessons.locator('ol li p').allTextContents(),
+    ) === JSON.stringify([localReviewed]),
     'console did not show exactly the immutable reviewed lesson text',
   );
   await waitForText(suppliedLessons, local.id);
@@ -2069,6 +2082,10 @@ async function assertArchitectureEditingDisabled(
       }`,
     );
   }
+}
+
+function sleepMs(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function waitForCount(
