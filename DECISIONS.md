@@ -1018,3 +1018,24 @@ than a well-educated friend telling the story.
 `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
 ledger. `BRAND.md` remains unchanged because its smallest-magnetic-story rule already
 applies to the complete piece; this decision clarifies the channel-level scripting method.
+
+## 2026-07-24 — Make spoken readability a delivery gate
+
+**Decision:** Before any WHP narration is shown, remove non-spoken annotations and reject
+every sentence above 25 spoken words. Require a first-hearing clarity review for every
+21–25-word sentence, and reject a sentence of any length when it carries multiple new
+relationships, unclear actors or references, stacked conditions or caveats, or unexplained
+abstractions. A sentence passes only when a listener can identify who did what, what
+changed, and why it matters after hearing it once.
+
+**Rationale:** Readability checkers exposed sentences in the Episode 1 prototype that were
+grammatically valid but difficult to process in one hearing. A spoken script cannot rely on
+the viewer rereading a dense sentence. The fixed ceiling catches measurable overload, while
+the first-hearing review prevents a word-count formula from approving short but tangled
+language or flattening clear rhythmic speech.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`, and this ledger.
+`BRAND.md` remains unchanged because its existing first-hearing clarity doctrine already
+supports this channel-level delivery gate. Historical and published scripts remain
+unchanged.

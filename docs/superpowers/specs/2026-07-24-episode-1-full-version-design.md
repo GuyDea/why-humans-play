@@ -84,6 +84,13 @@ complete narration.
     them, use ordinary spoken language when it preserves the same claim, and end each beat
     once rather than stacking equivalent closing metaphors. The opening promise must name
     both what the viewer will understand and the four-question response they can use.
+16. Treat spoken readability as a delivery gate rather than a later editorial audit.
+    Strip inline sources and other non-spoken annotations before counting. Rewrite every
+    sentence above 25 spoken words. Review every 21–25-word sentence for first-hearing
+    clarity, and reject any sentence of any length that carries multiple new relationships,
+    unclear actors or references, stacked comparisons or caveats, or unexplained
+    abstractions. Split difficult sentences without removing factual boundaries,
+    connective tissue, humor, or voice.
 
 ## Narrative expansion
 
@@ -178,8 +185,9 @@ spoken language into a clinical register.
    underway, except for reconciling its approved runtime metadata.
 2. Draft the complete narration at
    `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`.
-3. Show Martin the whole narration before running timing, retention, evidence, or production
-   audits.
+3. Run the spoken-readability delivery gate, rewrite every failure, clear every
+   21–25-word review sentence, and then show Martin the whole narration before running
+   timing, retention, evidence, or production audits.
 4. Refine only the passages Martin targets and obtain explicit creative approval of the
    complete narration.
 5. Promote the approved narration into
@@ -211,6 +219,9 @@ appendix apparently current when it is not.
   conditional, inspectable decision process.
 - The narration includes a real boundary and at least two brief transfer contexts.
 - The last sentence resolves the opening question and preserves the approved final line.
+- No spoken sentence exceeds 25 words. Every 21–25-word sentence passes the first-hearing
+  review, and every sentence of any length has one clear relationship, stable referents,
+  and an understandable causal job.
 - No new factual specificity is invented.
 
 ## Non-goals
@@ -227,7 +238,9 @@ appendix apparently current when it is not.
 
 1. Check the narration-only prototype against the approved beat jobs and word targets.
 2. Extract and count spoken words without estimating source-link text.
-3. Show the complete narration to Martin before auditing.
+3. Run the spoken-readability gate before showing the complete narration to Martin.
+   Treat sentences above 25 spoken words as failures and 21–25-word sentences as mandatory
+   first-hearing review items.
 4. After creative approval, map every factual narration sentence to its evidence record.
 5. Run the annotated-script validator and both relevant skill-package suites after
    promotion.
