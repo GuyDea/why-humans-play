@@ -298,6 +298,13 @@ partial answer opens a new question, distinguish the paid portion from the new l
 Audit the opening loop separately and ensure the final payoff answers the question
 the packaging and first seconds actually created.
 
+Chain loops across the whole episode: open a question, pay part of it off, and open
+the next before the first fully closes, so that roughly every 60–90 seconds of spoken
+time gives the viewer a live reason to keep watching. Treat that cadence as a
+structural aim while arranging beats and as a post-draft diagnostic afterward — never
+as a clock that erases setup, referents, causality, humor, or the learning promise
+from an unfinished script.
+
 ## Write and test for speech
 
 Write like a smart friend walking the viewer through something surprising, not like a

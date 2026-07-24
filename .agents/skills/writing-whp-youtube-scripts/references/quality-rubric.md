@@ -207,13 +207,21 @@ personality.
 
 ### 10. WHP brand fidelity
 
+The WHP lens is satisfied at the mechanism level, not the vocabulary level. The episode
+reveals a rule-system: who the players are, what the real goal is, what actually gets
+scored, what strategies the scoring rewards, and what that does to the players. Game or
+play vocabulary is never required to pass, and a game or play metaphor that does no
+explanatory work is a defect, not a lens.
+
 - **0:** The script uses hype, woo, fabricated shock, shallow self-help certainty,
   childish framing, or product promotion that displaces the inquiry. The useful viewer
   change is missing, generic, or unsupported; or an in-scope application is missing,
   generic, or unsupported.
-- **1:** The piece is broadly on-brand but lacks a clear hidden-game/play lens,
-  useful viewer change, steelmanned caveat, grounded tone, or Martin's natural voice.
-- **2:** The script makes a hidden game or the nature of play legible, changes how the
+- **1:** The piece is broadly on-brand but lacks a legible rule-system,
+  useful viewer change, steelmanned caveat, grounded tone, or Martin's natural voice;
+  or it decorates the episode with game or play vocabulary that explains nothing.
+- **2:** The script makes the episode's rule-system legible — players, real goal,
+  scored proxy, rewarded strategy, and consequence — changes how the
   viewer can see or act, and stays rigorous, useful, grounded, human, and
   non-promotional. The declared change and WHP lens form one grounded payoff; when a
   viewer application is in scope, its voiced application, observable signal, boundary,
@@ -350,7 +358,17 @@ chains under the status thresholds, and require stable source-native locators.
    unresolved material.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
-10. **Readiness label:** Reapply the score threshold, protected-dimension rules,
+10. **Retention pacing:** Run this pass only after Martin has reviewed the complete
+    narration; it is a diagnostic, never a drafting gate. Walk the script beat by beat
+    and confirm that an open question, unresolved contradiction, promised test, or
+    fresh consequence gives the viewer a reason to keep watching roughly every 60–90
+    seconds of estimated spoken time; name any longer stretch that coasts on delivered
+    information. Confirm the title and thumbnail promise is explicitly paid off in
+    narration, and that the early-episode runtime lands in the 6–10 minute band unless
+    the assignment contract fixes a different target. Report each sag or overrun as a
+    named passage with its tradeoff; do not cut setup, referents, causality, humor, or
+    the learning promise to satisfy this pass without Martin's review.
+11. **Readiness label:** Reapply the score threshold, protected-dimension rules,
     format gate, and substantive blockers. For a `FULL-SCRIPT`, also reapply
     personal-input resolution, absence of unresolved input markers, and both
     authorized-human approval moments; for a targeted artifact, verify that it does not

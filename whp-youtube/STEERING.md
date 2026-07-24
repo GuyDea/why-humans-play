@@ -455,6 +455,13 @@ millions on junk science).
 
 - **Literal and grounded.** Play, intellect, learning, game theory, the human condition.
   **No consciousness / "woo" / spirituality drift. Ever.**
+- **The WHP lens is a mechanism, not a vocabulary.** An episode carries the brand lens
+  when it makes a rule-system legible — the players, the real goal, what actually gets
+  scored, the strategies the scoring rewards, and what that does to the players. Game or
+  play wording is never required to satisfy the lens, and a game or play metaphor that
+  does no explanatory work is a defect to cut, not brand fidelity. Topics such as
+  human–technology intersections qualify through their incentive structure, not through
+  forced play framing.
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
 - **Keep facts traceable inside the production script.** In Phase 2, map every factual
   narration sentence or separable factual clause to an `F-###` claim entry in the matching

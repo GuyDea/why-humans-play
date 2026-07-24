@@ -349,6 +349,28 @@ already performed; write an explicit none-used statement when it is empty. Put t
 exact publication-ready credits required by asset records in the fourth section;
 write an explicit none-required statement when it is empty.
 
+## Shorts plan
+
+Every `FULL-SCRIPT` episode appendix contains one `### Shorts plan` section placed
+after the last beat entry and before any editorial-audit or issue-ledger material.
+Plan the Shorts while the long-form exists as beats, not after production.
+
+List three to five golden-nugget candidates. Each entry names:
+
+- **Beat:** the narration beat the nugget lifts from.
+- **Nugget:** the self-contained thought — a clean statistic, one-line paradox, single
+  vivid example, or complete comic turn that survives without surrounding context.
+- **Short hook:** a Short-specific opening line that lands its question, surprising
+  fact, or striking visual within the first three seconds; do not reuse the long-form
+  opening unless it already does that job standalone.
+- **Cut boundaries:** where the lift starts and ends so no referent dangles, plus any
+  line that must be re-recorded or re-cut so the Short opens on its own hook.
+
+A Short must be enjoyable on its own; reject a candidate that only makes sense after
+the main video. While drafting narration, write these candidate lines as complete
+thoughts in isolation so they lift cleanly. For a `TARGETED-ARTIFACT`, include the
+section only when the assignment asks for it.
+
 ## Readiness states
 
 Use exactly one of these header states:

@@ -103,6 +103,15 @@ bee's motives.
 
 - `A-001` — Experimental-layout figure (`CC-BY-4.0`).
 
+### Shorts plan
+
+- **Beat:** 01
+- **Nugget:** Bumblebees rolled wooden balls they were never fed for — meeting the
+  study's own criteria for play.
+- **Short hook:** "Scientists gave bees a toy. The bees kept coming back to it."
+- **Cut boundaries:** Start at the detour reveal, end on the no-reward line; re-record
+  the opening sentence so the Short does not depend on the long-form setup.
+
 ### Editorial audit
 
 - Not run in the worked template. Complete narration review comes first.

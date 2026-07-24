@@ -337,7 +337,10 @@ For evidence-backed finalization:
    spoken blockquote narration. Visible inline evidence indicators may appear within those
    blockquotes as the sole non-spoken review annotations. Put all other metadata and
    production annotations in a final appendix whose beat entries match the narration beat
-   numbers and titles.
+   numbers and titles. For a `FULL-SCRIPT` episode, include the appendix `Shorts plan`
+   section required by the annotated script format: three to five golden-nugget
+   candidates with beat references, standalone three-second hooks, and cut boundaries,
+   planned while the long-form exists as beats rather than after production.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
    retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
