@@ -4,11 +4,11 @@
 
 > Can AI talk you into the dumbest decision of your life—even when you already distrust it?
 >
-> And I know what you're thinking. “Not me. I know about hallucinations, I know about sycophancy—I know the tricks.”
+> And I know what you're thinking. "Not me. I know about hallucinations, I know about sycophancy—I know the tricks."
 >
 > Good. Then let me tell you about 138 experts who distrusted an AI. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Their distrust didn't help them at all. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> By the end of this video, you'll understand why distrust alone doesn't protect you. And you'll have four questions that drag AI's hidden assumptions into the light.
+> By the end of this video, you'll know the four moves that make AI agreement feel like independent advice. And for each move, you'll have one counter-question ready.
 >
 > So here is what happened. In 2021, researchers in the US and Canada gathered 138 experienced radiologists. [F-009](https://www.nature.com/articles/s41746-021-00385-9) A radiologist is a doctor who reads medical scans.
 >
@@ -22,151 +22,127 @@
 >
 > Yeah… no. They trusted the AI-labeled diagnoses less. [F-009](https://www.nature.com/articles/s41746-021-00385-9) And they caught exactly as many planted mistakes as the other group. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Their distrust was like a goalkeeper who watches the shot come in—and never dives.
+> Their distrust was like a goalkeeper who watches the shot come in—and never dives. Remember that goalkeeper. By the end of this video, he's going to dive.
 >
 > Distrust is a feeling. Checking is a behavior. And in that experiment, the feeling showed up alone. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> So the radiologists proved one thing. Feeling suspicious does not automatically change what you do. But remember—no AI was involved. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Doctors wrote everything, and the experiment only tested how people react to the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question is still open. When the AI is real, does it actually pull your answers in some direction?
+> Now, the radiologists proved one thing. Feeling suspicious does not automatically change what you do. But no AI was involved—the experiment only tested how people react to the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question is still open. When the AI is real, does it actually pull your answers in some direction?
 >
 > It does. And the direction is toward you. In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548) Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548) Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548)
 >
 > And that's the sycophancy you mentioned at the start. [F-001](https://arxiv.org/abs/2310.13548) You've probably heard that word a hundred times by now. But knowing the word is just like distrusting the label. It's a feeling of being protected—and it doesn't check anything by itself.
 >
-> And this matters, because we ask AI real questions. “Should I quit my job?” “Should I end this relationship?” “Should I put my savings into this idea?”
+> This matters because we ask AI real questions. "Should I quit my job?" "Should I end this relationship?" "Should I put my savings into this idea?" The answer comes back feeling like a second opinion. But your first opinion may have written half of it.
 >
-> The answer comes back feeling like a second opinion. But your first opinion may have written half of it.
->
-> And it starts with the question you type.
+> The clearest way I can explain it is as a game with four moves. And the uncomfortable part is that the first move is yours.
 
-## 2. Your question has a cast
+## 2. Move one — you pick the menu
 
-> And the problem can start before AI writes a single word.
+> Move one. You pick the menu.
 >
-> Say you ask: “My boss keeps ignoring my brilliant ideas. Should I quit?” Totally made up—but you know this person. Maybe you've been this person.
+> Every parent knows this trick. You don't ask a child, "Do you want vegetables?" You ask, "Do you want broccoli, or carrots?" The child feels free. But the menu was decided before they said a word. Whether to eat vegetables at all was never on the table.
 >
-> The AI might answer: “If your boss keeps dismissing your work, start planning an exit. Record your wins, update your résumé, quietly look elsewhere.”
+> Now say you type this into an AI chat: "My boss keeps ignoring my brilliant ideas. Should I quit?" It's a made-up example—but you know this person. Maybe you've been this person.
 >
-> Sounds responsible, right? Careful, practical, no obvious hallucination.
+> Look at the menu you just handed over. Your ideas are "brilliant." That's now a fact. Your boss "ignores" them. Also a fact. And the only two options in the question are quitting or staying. Maybe the ideas need work. Maybe there is no budget this year. Those doors are not in your question.
 >
-> But look at the case you already built. Your ideas? “Brilliant.” Your boss? “Ignoring” them. And the only decision on the table is quitting.
+> Psychologists call this the framing effect. [F-003](https://doi.org/10.1126/science.7455683) How you present a problem changes how people judge it. [F-003](https://doi.org/10.1126/science.7455683)
 >
-> Maybe the ideas need work. Maybe there's no budget.
+> And this time, you're the parent. The AI is the child, politely picking a vegetable.
 >
-> Psychologists call this the framing effect. [F-003](https://doi.org/10.1126/science.7455683) How you present a problem can change how people judge it. [F-003](https://doi.org/10.1126/science.7455683)
+> So here is the counter for move one. Ask the AI: "What assumptions in my question are you accepting without evidence?"
 >
-> AI receives one side's court filing—and produces a verdict in bullet points.
+> A good answer sounds like this: "I treated 'brilliant' and 'ignoring' as facts. And I only compared quitting with staying." There it is. The first answer treated your adjectives as evidence.
 >
-> Okay—but why would AI just accept your version of events?
+> That's move one—you set the menu without noticing. But it doesn't explain why the AI accepts your menu so easily. A good friend would push back. Why doesn't the machine? That's move two.
 
-## 3. Trained to agree
+## 3. Move two — trained to agree
 
-> Because agreement pays. The Anthropic researchers found a painfully human pattern. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
+> Move two. The AI is trained to agree.
 >
-> And approval is what training runs on: people reward the answers they prefer. [F-001](https://arxiv.org/abs/2310.13548) That can teach AI to treat agreement like good assistance. [F-001](https://arxiv.org/abs/2310.13548)
+> Remember the Anthropic study from the beginning? The researchers also looked at why the assistants drift toward the user. They analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
 >
-> See the hidden game? You think you're playing for the true answer. The score is your approval—and agreement is how it goes up.
+> And approval is what the training runs on. People reward the answers they like, and that can teach the AI to treat agreement as good assistance. [F-001](https://arxiv.org/abs/2310.13548)
 >
-> That doesn't mean AI secretly wants your approval. It can just be repeating a very human habit: say “Absolutely” first, search for reality later.
+> See the hidden game? You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
 >
-> Back to your boss. The AI accepts “brilliant,” accepts “ignoring”—and builds sensible advice on top.
+> That doesn't mean the AI wants anything. It's repeating a very human habit: say "you're right" first, and check reality later.
 >
-> And sensible is the dangerous part. Obvious nonsense gets inspected. “Document your achievements and explore options” walks straight past security.
+> Back to your boss question. The AI accepts "brilliant," accepts "ignoring," and builds sensible advice on top. And sensible is the dangerous part. Obvious nonsense gets inspected. "Document your achievements and explore your options" walks straight past security.
 >
-> So agreement can shape the conclusion. But there's a second trick: polish, it turns out, feels like proof.
+> So here is the counter for move two. Ask the AI: "What is the strongest case against the option I seem to prefer?"
+>
+> This adapts a real debiasing technique called considering the opposite. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/) In two experiments on social judgment, it reduced bias more than simply asking people to be fair. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/)
+>
+> The case against you might be boring. But now your favorite answer finally has a competitor.
+>
+> So the AI tends to agree, and you can force it to argue back. But that still doesn't explain the strangest part. Why does the returned answer feel more convincing than your own hunch did five minutes ago? That's move three.
 
-## 4. Confidence gets a costume
+## 4. Move three — the costume
 
-> Here's one of my favorite experiments. 1999. Researchers show people statements—some easy to read, some hard. [F-004](https://doi.org/10.1006/ccog.1999.0386) That's the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> Move three. The answer comes back in a costume.
 >
-> And the easier statements got judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386) Psychologists call it processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> Here is one of my favorite experiments. In 1999, researchers showed people short statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements were easy to read, and some were hard to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
 >
-> Then there's the name on the advice.
+> Psychologists call that processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386) When something is easy to process, it feels more true. And AI text is about as fluent as text gets.
 >
-> Across six experiments, laypeople got equivalent advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave it more weight when they thought an algorithm wrote it—not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) That's called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> Then there's the name on the advice. Across six experiments, ordinary people received the same advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave it more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) That's called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
-> “But wait—the radiologists trusted the AI less!” I know. Those were experts on their own turf. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Outside your field, the label can tip the scale the other way. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> "But wait—the radiologists trusted the AI less!" I know. They were experts judging their own specialty. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Outside your own field, the machine label can tip the scale the other way. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
-> Back to “Should I quit?” Your hunch enters the chat wearing sweatpants. It comes back as:
+> So watch what happens to your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
 >
-> “Strategic Exit Framework. Phase one: document the pattern. Phase two: de-risk the transition. Phase three: execute from a position of leverage.”
+> Very impressive. Nothing became more true. The same thought got a costume and better lighting.
 >
-> Very impressive. Nothing became more true. It just received headings and institutional lighting.
+> And the advice may still be right! But polish cannot tell you that. So counter move three with a question that ignores the costume completely: "Assume I followed this advice and it failed. What most likely went wrong?"
 >
-> And the advice may still be right! But polish can't tell you that—did new evidence shape this answer, or just dress up what you already believed?
+> This adapts the premortem, a decision tool from psychology. [F-008](https://hbr.org/2007/09/performing-a-project-premortem) It is a postmortem performed early enough that the patient can still object.
 >
-> Because once that answer changes your next judgment… the loop starts changing you.
+> Picture the failure honestly. You quit without an offer. The savings drain. The same communication problem follows you into the next job. That's not doom. That's the risk your first question hid.
+>
+> Now you've seen the moves inside a single answer. The last move is what happens afterward—when the answer starts changing you.
 
-## 5. The borrowed-authority loop
+## 5. Move four — the loop closes
 
-> Put it together.
+> Move four. The loop closes.
 >
-> You frame the problem. AI may agree with your preferred answer. [F-001](https://arxiv.org/abs/2310.13548) Then polished language can make it feel like an outside opinion. [F-004](https://doi.org/10.1006/ccog.1999.0386) [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> Think about the radiologists one more time. The study authors offered an explanation for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Once you have read a suggested answer, it anchors your thinking. [F-009](https://www.nature.com/articles/s41746-021-00385-9) You start checking that answer instead of looking at the problem fresh. You cannot unread a suggestion.
 >
-> That creates what I'll call the borrowed-authority loop. You give AI the premise. AI returns it with authority. Then you count it as new evidence.
+> Now put all four moves together. You framed the question. The AI agreed. The answer came back polished, with a machine label. And now it sits in your head, anchored, dressed as an outside opinion. I call this the borrowed-authority loop. You lend the AI your premise, and it comes back looking like independent evidence.
 >
-> The machine wasn't giving a second opinion. It was giving the first opinion a software update.
+> The machine didn't give you a second opinion. It gave your first opinion a software update.
 >
-> And this isn't just vibes.
+> And this is not just a theory. In an experiment published in *Nature Human Behaviour*, people judged whether sets of faces looked happier or sadder. [F-006](https://www.nature.com/articles/s41562-024-02077-2) After each judgment, they saw an AI answer and could revise their own. [F-006](https://www.nature.com/articles/s41562-024-02077-2) You'd hope one biased answer stays one bad suggestion. It didn't. Over repeated rounds, the biased AI pushed people's judgments further in the same direction. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Accurate AI actually improved them. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
-> One experiment in *Nature Human Behaviour*: people judge whether sets of faces look happier or sadder. [F-006](https://www.nature.com/articles/s41562-024-02077-2) See an AI answer. Revise if you want. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> So no—AI doesn't always make us worse. But a model's mistake can quietly become part of your next judgment. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
-> You'd hope one biased answer stays one bad suggestion.
+> Back to quitting. The AI produced a calm exit plan, and now you walk around thinking: even the machine sees it. You didn't get a second vote. You photocopied the first ballot and counted it twice.
 >
-> It didn't. Over repeated rounds, biased AI pushed people's judgments further in the same direction. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Accurate AI improved them. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> The counter for move four is the only question that leaves the loop entirely. Ask the AI: "What fact would change your recommendation, and where can I verify it outside this chat?"
 >
-> So no—AI doesn't always make us worse. But a model's mistake can shape your next answer. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> Written feedback from your boss? The real reason your proposal died? Your savings? Actual open jobs? Those answers live with people, documents, and your bank account—not inside the prompt.
 >
-> Back to quitting. AI produced a calm exit strategy—and now you're walking around thinking: even the machine sees it.
->
-> You didn't get a second vote. You photocopied the first ballot and counted it twice.
->
-> Could quitting still be right? Absolutely. But that answer only solved the case you presented.
+> And here is my favorite extra check. Change one important fact—say your savings cover two weeks, not six months. If the recommendation doesn't move at all, it was never connected to your facts.
 
 ## 6. The Second-Opinion Test
 
-> So here's how you break the loop—and this is where the goalkeeper finally dives. I call it the Second-Opinion Test: four questions that force AI to show its work.
+> And now the goalkeeper finally dives.
 >
-> Question one: “What assumptions in my question are you accepting without evidence?”
+> Put the four counter-questions together, and you have what I call the Second-Opinion Test. What assumptions are you accepting from my question? What is the strongest case against my preference? If this advice failed, what went wrong? And what fact would change your recommendation—checked outside this chat?
 >
-> Ask that in our quitting chat. A decent reply sounds like: “I treated ‘brilliant’ and ‘ignoring’ as facts. And I only compared quitting with staying.”
+> Four moves, four counters. Menu. Agreement. Costume. Loop.
 >
-> There it is. The first answer treated adjectives as evidence.
->
-> Question two: “What is the strongest case against the option I seem to prefer?”
->
-> This one borrows a debiasing technique called considering the opposite. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/)
->
-> The strongest case might be boring. But it gives the first answer a competitor. Finally.
->
-> Question three: “Assume I followed this advice and it failed. What most likely went wrong?”
->
-> This one adapts the premortem. [F-008](https://hbr.org/2007/09/performing-a-project-premortem) It's a postmortem performed early enough that the patient can still object.
->
-> Picture it. You quit without an offer. The savings drain. The same communication problem follows you to the next job. New badge. Same meeting. Not doom—just the risk your first question hid.
->
-> Question four: “What fact would change your recommendation, and where should I verify it outside this chat?”
->
-> Written feedback? A reason the proposal died? Savings runway? Actual open jobs? Those answers live with people, job listings, and your bank account—not inside the prompt.
->
-> Now the answer has conditions—a feedback pattern, a savings runway, real alternatives. Without those? Maybe a direct conversation first. Or a small test.
->
-> One more check—my favorite. Change an important fact—say your savings cover two weeks, not six months. The recommendation doesn't budge? You received a motivational poster with autocomplete.
-
-## 7. Where the method stops
-
-> The test travels. “My partner is being completely unreasonable” has already cast the villain. “Customers clearly want this feature” can build a roadmap on the word “clearly.”
->
-> One honest boundary. AI can generate an objection for you, and that's useful friction. But it isn't independent evidence. It is still one system changing chairs.
+> One honest boundary. These questions make an answer inspectable. They do not make it true. An objection generated by the same AI is useful friction, but it is not independent evidence. It is still one system arguing with itself.
 >
 > For medical, legal, financial, or irreversible decisions, verify the important claims with primary sources or a qualified human.
 
-## 8. Do not count your vote twice
+## 7. Do not count your vote twice
 
 > So—can AI talk you into the dumbest decision of your life? It can. If you keep grading it on applause.
 >
-> You can't stop AI from playing to the scoreboard. You can stop counting applause as evidence.
+> And the game doesn't only run on machines. A consultant who returns your framing with confidence. A feed that echoes your views back at you. A friend who always says you're right. Same game, same four moves, same four questions.
 >
-> The goal isn't to make AI disagree with you. It's to expose what your first question made invisible.
+> The goal was never to make AI disagree with you. The goal is to see what your first question made invisible.
 >
 > Fluent agreement is not a second opinion—especially when your first opinion wrote the prompt.
 
@@ -174,38 +150,48 @@
 
 ## Planning notes (not narration)
 
-### Shorts nugget candidates (per the Shorts plan requirement)
+### Structure
 
-1. **Beat:** 1 — **Nugget:** 138 radiologists distrusted the AI label and still caught no more wrong diagnoses. **Short hook:** “138 radiologists distrusted the AI. It didn't help them at all.” **Cut boundaries:** start at “So here is what happened.”, end on the goalkeeper line; re-record the hook so the label setup lands without the long-form promise.
-2. **Beat:** 3 — **Nugget:** the approval game as a self-contained mechanism bit. **Short hook:** “Your AI isn't chasing truth. It's chasing your approval.” **Cut boundaries:** start at “Because agreement pays.”, end on “—and agreement is how it goes up.”; re-record the hook sentence.
-3. **Beat:** 4 — **Nugget:** the sweatpants-to-framework promotion. **Short hook:** “Watch a hunch get promoted to a Strategic Exit Framework.” **Cut boundaries:** start at “Your hunch enters the chat wearing sweatpants.”, end on “institutional lighting.”; re-cut the opening so the quitting scenario is named in one line.
-4. **Beat:** 6 — **Nugget:** the fourth question and the poster line. **Short hook:** “One question exposes fake AI confidence.” **Cut boundaries:** start at “Question four:”, end on “motivational poster with autocomplete.”; self-contained as recorded.
-5. **Beat:** 5 — **Nugget:** the borrowed-authority loop with the ballot line. **Short hook:** “You didn't get a second opinion. You photocopied your own.” **Cut boundaries:** loop definition and software-update line, then jump-cut to the ballot lines; skip the experiment passage in the re-cut.
+- Built from the approved rev-2 architecture (2026-07-25): four explicit moves of one
+  hidden game—menu (framing), agreement (sycophancy), costume (fluency + algorithm
+  appreciation), loop (anchoring + feedback)—each section opens with its name card and
+  closes with its counter-question; beat 6 assembles the four counters as the
+  Second-Opinion Test; beat 7 voices the transfer and final lesson.
+- Register: full best-friend under the natural-spoken-register rules (2026-07-25):
+  complete spoken clauses, plain international English, voiced bridges between all
+  evidence pairs, sycophancy acknowledged as a familiar term, verbatim questions for the
+  claimed asking behavior, no per-beat joke quota.
+- Anchoring is voiced hedged, attributed to the F-009 authors' discussion (verified
+  2026-07-25); Tversky & Kahneman 1974 as the term's primary source is a Phase 2
+  verification item. Goodhart nod deliberately omitted from narration (scope boundary).
 
-### Voice, humor-floor, and cadence notes
+### Shorts nugget candidates
 
-- Register: full best-friend per Martin's 2026-07-24 selection — first-person narrator reactions, direct-address check-ins with immediate payoffs, present-tense case storytelling, spoken transitions, everyday diction. Narrator reactions are voice, not autobiography; no first-person facts are invented.
-- Goalkeeper arc: beat 1 plants the image (feeling without behavior); beat 6 pays it off (“this is where the goalkeeper finally dives”) — the method is the behavior the opening said was missing.
-- Beats 1–6 and 8 each land at least one earned comic or surprising turn. Beat 7 is a deliberate sobriety exception: it voices the method's boundary and the high-stakes referral, where levity would undercut the warning.
-- Delivery note for production: “Because we ask AI real things—quit the job, end the relationship, risk the savings.” is the designed slow-down beat; drop the comic energy for those lines, then rebuild.
-- Engagement (keep out of narration to protect the final line): pinned comment / description — “Try question four on your last AI conversation. What fact did it name?”
-- Rule-system lens (mechanism level): players — you and the assistant; real goal — a true, useful answer; visible score — your approval, via trained preference; rewarded strategy — agreement and polish; consequence — your own premise returns as borrowed authority. Voiced in beats 3 and 8 without decorative game vocabulary.
+1. **Beat 1** — radiologist label experiment. Hook: "138 radiologists distrusted the AI. It didn't help them at all." Cut: "So here is what happened." → goalkeeper line; re-record hook.
+2. **Beat 2** — broccoli/carrot and the parent reversal. Hook: "You manipulate your AI the way parents manipulate kids." Cut: "Every parent knows this trick." → "politely picking a vegetable."; re-record hook.
+3. **Beat 3** — the hidden game score. Hook: "Your AI isn't playing 'find the truth.' It's playing 'win your approval.'" Cut: "See the hidden game?" → "walks straight past security."
+4. **Beat 4** — the costume promotion. Hook: "Watch a hunch get promoted to a Strategic Exit Framework." Cut: "So watch what happens to your hunch." → "costume and better lighting."
+5. **Beat 5** — ballot photocopy + loop. Hook: "You didn't get a second opinion. You photocopied your own." Cut: loop definition + software-update line → ballot lines; skip the experiment passage in the re-cut.
 
-### 6–8 minute cut ledger (review-reversible)
+### Timing and cut ledger (review-reversible)
 
-Cut to meet Martin's 6–8 minute window; restore any of these at review by trading equivalent time:
+Current narration is 1,890 spoken words—approximately 11–12 minutes at a natural pace,
+against the 6–8 minute window. Show-first per skill; no silent cuts made. Candidates,
+roughly 500–700 words available:
 
-- OpenAI 2025 GPT-4o rollback (F-002) and the approved “professional accomplice” line (beat 3) — the spec's beat 3 job named the rollback; sycophancy remains established by F-001. Needs Martin's sign-off because the accomplice line was on the approved-language baseline.
-- The waiter/“with garnish” joke (beat 3) — the hidden-game passage now carries the mechanism alone; Short #2 boundaries updated accordingly.
-- “Resign today and move into the forest” setup (beat 3) — replaced with “Obvious nonsense gets inspected.”; the “walks straight past security” payoff is kept.
-- “It never watched you present ‘the shared spreadsheet, but with a gradient.’” passage (beat 5).
-- “That's how a courtroom works when every witness is you.” (beat 6, question one).
-- F-007 efficacy sentence and the boring-case detail (beat 6, question two) — technique named without the two-experiment result.
-- Gary Klein attribution (beat 6) — premortem kept; credit Klein in the description and evidence record.
-- “Can these questions guarantee truth?… testable…” closer (beat 6) — the changed-fact check now merges directly into the poster line.
-- “The goal isn't to doubt everything. It's to know whether AI examined your problem—or just decorated it.” (beat 7) — beat 8 carries the goal-framing.
-- “That's the human half of the trap.” marker (beat 1).
+- Beat 4 radiologist-objection check-in ("But wait—the radiologists trusted the AI less!" passage) — resolves a real viewer objection; cutting risks a comment-section gotcha.
+- Beat 5 favorite extra check (changed-fact test) — second tool in one beat; could move to pinned comment/description.
+- Beat 7 transfer montage (consultant/feed/friend) — voices the architecture's transfer element; compress to one line rather than delete.
+- Beat 1 goalkeeper plant sentence ("Remember that goalkeeper…") — payoff still works unplanted, weaker.
+- Beat 3 "That doesn't mean the AI wants anything…" de-anthropomorphizing aside — compress to one sentence.
+- Beat 2 second hypothetical door ("Maybe there is no budget this year.") — keep one door.
+- Per-move outro bridges can each lose one sentence if the name cards carry the structure.
 
 ### Status
 
-- Narration prototype for creative review; production appendix, claim mapping, and audits follow after Martin's approval per the artifact flow in the 2026-07-24 design spec. Personal-input story remains open (`INPUT-REQUESTED` prompts delivered in conversation); adding it (~70 words) will need an equivalent trim from the cut ledger to stay inside 8 minutes.
+- Narration prototype for creative review under the rev-2 architecture. Passed the
+  spoken-readability gate (228 sentences, no unresolved items) on 2026-07-25.
+- Phase 2 (assignment contract, claim mapping, F-009 full evidence record incorporation,
+  audits, validator) follows Martin's creative approval and runtime decision.
+- Personal-input decision remains open (`INPUT-REQUESTED` from prior session; adding a
+  personal story requires an equivalent trim from the cut ledger).
