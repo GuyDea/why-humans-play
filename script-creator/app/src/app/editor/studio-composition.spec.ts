@@ -1052,6 +1052,188 @@ describe('mounted Script Studio composition', () => {
     });
   });
 
+  it('routes a narration-approval reservation into routed Reopen recovery', async () => {
+    const studio = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.architectureState = approvedArchitectureState(
+          client.architectureState,
+        );
+        client.approveNarration.mockImplementationOnce(async () => {
+          const paused = pausedReopenArchitectureState(
+            client.architectureState,
+          );
+          client.architectureState = paused;
+          throw architectureReservationError(paused);
+        });
+      },
+    );
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+
+    expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    findButton(productionPanel, 'Approve complete narration').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes Promote-result import refusal into routed Reopen recovery', async () => {
+    const draft = productionDraft();
+    const markdown = exportMarkdown(schema.nodeFromJSON(draft.doc));
+    if (!markdown.ok) throw new Error('fixture export is unsettled');
+    draft.approvedNarrationMd = markdown.markdown;
+    draft.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    draft.approvedNarrationRevisionSeq = 0;
+    const studio = await mountStudio(draft, (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.getResult.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    setInputValue(
+      productionPanel?.querySelector('input[aria-label="Production target"]')
+        ?? null,
+      'whp-youtube/episodes/01-composition-net.md',
+    );
+    studio.tick();
+
+    findButton(productionPanel, 'Promote to Phase 2').click();
+    await expectDraftSubmission(studio, 'promote', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: 'Promote output ready.',
+    });
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes production synchronization refusal into routed Reopen recovery', async () => {
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.promotion = {
+        draftId: client.storedDraft.id,
+        operationId: 'promote-sync-conflict',
+        state: 'validation-required',
+        targetPath: 'whp-youtube/episodes/01-composition-net.md',
+        targetHash: 'production-hash',
+        validationHash: null,
+        error: null,
+      };
+      client.syncProduction.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(productionPanel, 'Run validator').disabled).toBe(false);
+    });
+    findButton(productionPanel, 'Run validator').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
+  it('routes persisted Promote reconciliation refusal into routed Reopen recovery', async () => {
+    let rejectReconciliation:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.promotion = {
+        draftId: client.storedDraft.id,
+        operationId: 'promote-reconciliation-conflict',
+        state: 'output-ready',
+        targetPath: 'whp-youtube/episodes/01-composition-net.md',
+        targetHash: 'production-hash',
+        validationHash: null,
+        error: null,
+      };
+      client.getResult.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectReconciliation = reject;
+        }));
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(rejectReconciliation).toBeTypeOf('function');
+      expect(narrationComponent?.model().state?.pendingSaga).toBeNull();
+      expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    });
+    const paused = pausedReopenArchitectureState(
+      studio.client.architectureState,
+    );
+    studio.client.architectureState = paused;
+    rejectReconciliation!(architectureReservationError(paused));
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+  });
+
   it('surfaces a durable pending proposal after reload and lets Martin retry settlement', async () => {
     const studio = await mountStudio(studioDraft(), (client) => {
       client.pendingNarrationProposals = [{
@@ -2037,6 +2219,71 @@ describe('mounted Script Studio composition', () => {
     });
   });
 
+  it('blocks on a stale-model direct whole-episode save refusal without autosave or reload', async () => {
+    const studio = await mountStudio(studioDraft(), (client) => {
+      client.architectureState = approvedArchitectureState(
+        client.architectureState,
+      );
+      client.save.mockImplementationOnce(async () => {
+        const paused = pausedReopenArchitectureState(
+          client.architectureState,
+        );
+        client.architectureState = paused;
+        throw architectureReservationError(paused);
+      });
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const narrationActions = studio.root.querySelector(
+      'app-narration-actions',
+    );
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    const narrationComponent = getDebugNode(narrationActions!)
+      ?.componentInstance as NarrationActions | undefined;
+    const architectureLoadsBeforeAcceptance =
+      studio.client.getArchitecture.mock.calls.length;
+
+    expect(narrationComponent?.model().state?.pendingSaga).toBeNull();
+    expect(findButton(architecturePanel, 'Resume Reopen', true)).toBeNull();
+    expect(studio.client.save).not.toHaveBeenCalled();
+    findButton(narrationActions, 'Generate episode').click();
+    await expectDraftSubmission(studio, 'generate-episode', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: generatedNarrationMarkdown('Refused direct replacement.'),
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(narrationActions?.textContent).toContain(
+        'Refused direct replacement.',
+      );
+    });
+    findButton(narrationActions, 'Accept episode proposal').click();
+
+    await expectRoutedReopenRecovery(
+      studio,
+      architecturePanel,
+      editorHostElement,
+    );
+    expect(studio.client.save).toHaveBeenCalledOnce();
+    expect(studio.client.save).toHaveBeenCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'episode-generation-accepted',
+      }),
+    );
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave')).toBe(false);
+    expect(studio.client.getArchitecture).toHaveBeenCalledTimes(
+      architectureLoadsBeforeAcceptance,
+    );
+    expect(editorText(studio)).not.toContain('Refused direct replacement.');
+  });
+
   it('rolls back a proposal replacement refused by a racing approval pause', async () => {
     let rejectRacingSave:
       ((error: DaemonClientError) => void) | undefined;
@@ -2802,6 +3049,7 @@ async function mountStudio(
       'session',
       'wpm',
       'narrationBlocked',
+      'architectureModel',
     ]);
     hydrateSignalOutputs(EditorHost, ['architectureConflict']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
@@ -2818,7 +3066,9 @@ async function mountStudio(
       'draft',
       'client',
       'editor',
+      'architectureModel',
     ]);
+    hydrateSignalOutputs(ProductionPanel, ['architectureConflict']);
     hydrateSignalOutputs(ArchitecturePanel, ['changed', 'workflowChanged']);
     hydrateSignalOutputs(NarrationActions, ['changed']);
     hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
@@ -3047,11 +3297,22 @@ function findTextNode(
 function findButton(
   element: Element | null,
   label: string,
-): HTMLButtonElement {
+): HTMLButtonElement;
+function findButton(
+  element: Element | null,
+  label: string,
+  optional: true,
+): HTMLButtonElement | null;
+function findButton(
+  element: Element | null,
+  label: string,
+  optional = false,
+): HTMLButtonElement | null {
   const button = Array.from(
     element?.querySelectorAll<HTMLButtonElement>('button') ?? [],
   ).find((candidate) =>
     candidate.textContent?.replace(/\s+/gu, ' ').trim().startsWith(label));
+  if (optional) return button ?? null;
   if (!button) throw new Error(`button ${label} was not rendered`);
   return button;
 }
@@ -3251,6 +3512,80 @@ function productionDraft(): DraftRecord {
     },
   };
   return draft;
+}
+
+function approvedArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  const sections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+    key,
+    title,
+    md: `### ${title}\n\nApproved ${key}.\n`,
+  }));
+  return {
+    ...state,
+    sections,
+    approvedMd: joinArchitecture(sections),
+    approvedAt: '2026-07-24T12:00:00.000Z',
+    pendingSaga: null,
+  };
+}
+
+function pausedReopenArchitectureState(
+  state: ArchitectureState,
+): ArchitectureState {
+  return {
+    ...state,
+    approvedMd: null,
+    approvedAt: null,
+    revisionSeq: state.revisionSeq + 1,
+    narrationReconciliationRequired: true,
+    pendingSaga: {
+      kind: 'reopen',
+      resumeKey: 'remote-reopen-resume-key',
+      steps: {
+        revisionAppended: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'pending',
+        draftUpdated: 'pending',
+      },
+      createdAt: '2026-07-24T15:00:00.000Z',
+      updatedAt: '2026-07-24T15:00:00.000Z',
+    },
+  };
+}
+
+function architectureReservationError(
+  state: ArchitectureState,
+): DaemonClientError {
+  return new DaemonClientError(409, {
+    error:
+      'draft write refused: an architecture saga is paused; resume or resolve it first',
+    code: 'draft-write-reserved',
+    reservation: 'architecture-saga',
+    sagaKind: state.pendingSaga?.kind,
+    recoverable: true,
+    state: cloneArchitectureState(state),
+  });
+}
+
+async function expectRoutedReopenRecovery(
+  studio: MountedStudio,
+  architecturePanel: Element | null,
+  editorHostElement: HTMLElement | null,
+): Promise<void> {
+  await vi.waitFor(() => {
+    studio.tick();
+    expect(architecturePanel?.textContent).toContain(
+      'Reopen paused — resume required',
+    );
+    expect(findButton(architecturePanel, 'Resume Reopen').disabled).toBe(false);
+    expect(editorHostElement?.textContent).toContain(
+      'Architecture action paused — resume or resolve first.',
+    );
+    expect(editorHostElement?.querySelector('.ProseMirror')
+      ?.getAttribute('contenteditable')).toBe('false');
+  });
 }
 
 function parseProductionFixture(

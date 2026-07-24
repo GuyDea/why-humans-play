@@ -492,6 +492,17 @@ export class ArchitectureModel {
   }
 }
 
+export function captureRoutedArchitectureConflict(
+  model: Pick<ArchitectureModel, 'captureActionConflict'> | null | undefined,
+  error: unknown,
+): boolean {
+  if (!model) return false;
+  const body = conflictBody(error);
+  const state = body?.state ?? body?.current;
+  if (!state?.pendingSaga) return false;
+  return model.captureActionConflict(error);
+}
+
 export function splitArchitecture(markdown: string): ArchitectureSection[] {
   if (markdown === '') return [];
   const headings = [...markdown.matchAll(/^### ([^\r\n]+)(?:\r?\n|$)/gmu)];

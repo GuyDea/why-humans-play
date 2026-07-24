@@ -29,6 +29,10 @@ import {
   type RevisionRecord,
 } from '../api/client';
 import {
+  ArchitectureModel,
+  captureRoutedArchitectureConflict,
+} from '../architecture/model';
+import {
   computeMetrics,
   type DocumentJson,
 } from '../metrics';
@@ -539,6 +543,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly session = input.required<StudioSession>();
   readonly wpm = input(150);
   readonly narrationBlocked = input(false);
+  readonly architectureModel = input<ArchitectureModel | null>(null);
   readonly architectureConflict = output<unknown>();
 
   readonly doc = signal<DocumentJson | null>(null);
@@ -710,6 +715,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       this.revisions.update((revisions) => [...revisions, saved.revision]);
       this.latestRevision.set(saved.revision);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       if (this.editorView === view && this.activeDraftId === draftId) {
         this.autosave.cancel();
         view.updateState(stateBeforeReplacement);
@@ -986,7 +992,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
     this.activeDraftId = draft.id;
     this.selectionContextDocument = draft.doc;
-    const brief = new BriefPanelModel(draft, this.client());
+    const brief = new BriefPanelModel(draft, this.client(), {
+      onSaveError: (error) => this.captureArchitectureConflict(error),
+    });
     this.brief.set(brief);
     this.approvalGate.set(null);
     this.draftEpoch += 1;
@@ -1144,12 +1152,18 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       }
     } catch (error) {
       if (this.isCurrentDraft(draftId, epoch)) {
+        this.captureArchitectureConflict(error);
         this.saveError.set(saveErrorMessage(error));
-        if (isArchitectureSagaReservation(error)) {
-          this.architectureConflict.emit(error);
-        }
       }
       throw error;
+    }
+  }
+
+  private captureArchitectureConflict(error: unknown): void {
+    if (
+      captureRoutedArchitectureConflict(this.architectureModel(), error)
+    ) {
+      this.architectureConflict.emit(error);
     }
   }
 

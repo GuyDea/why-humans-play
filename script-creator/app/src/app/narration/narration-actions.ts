@@ -13,6 +13,7 @@ import type {
 } from '../api/client';
 import {
   ArchitectureModel,
+  captureRoutedArchitectureConflict,
   joinArchitecture,
 } from '../architecture/model';
 import type { EditorHost } from '../editor/editor-host';
@@ -351,6 +352,7 @@ export class NarrationActions {
       await this.execute(operation, generationInputs(this.currentMetadata()));
       this.status.set('Promote operation complete');
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.failure.set(errorMessage(error));
       this.status.set('Promote failed');
     } finally {
@@ -375,6 +377,7 @@ export class NarrationActions {
       this.status.set('Narration reconciled');
       this.changed.emit();
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.failure.set(errorMessage(error));
       this.status.set('Narration reconciliation failed');
     } finally {
@@ -436,6 +439,7 @@ export class NarrationActions {
       this.status.set('Episode proposal accepted');
       this.changed.emit();
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.failure.set(errorMessage(error));
       this.status.set('Episode proposal acceptance failed');
     } finally {
@@ -446,6 +450,12 @@ export class NarrationActions {
   private currentMetadata() {
     return this.editor()?.brief()?.metadata()
       ?? readDraftMetadata(this.draft().doc);
+  }
+
+  private captureArchitectureConflict(error: unknown): void {
+    if (captureRoutedArchitectureConflict(this.model(), error)) {
+      this.changed.emit();
+    }
   }
 }
 

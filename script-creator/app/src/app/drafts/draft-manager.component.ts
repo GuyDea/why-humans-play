@@ -10,7 +10,10 @@ import {
 import { ActivatedRoute } from '@angular/router';
 import type { DaemonClient } from '../api/client';
 import { ArchitecturePanel } from '../architecture/architecture-panel';
-import { ArchitectureModel } from '../architecture/model';
+import {
+  ArchitectureModel,
+  captureRoutedArchitectureConflict,
+} from '../architecture/model';
 import { EditorHost } from '../editor/editor-host';
 import { MilestonePanel } from '../milestones/milestone-panel';
 import { NarrationActions } from '../narration/narration-actions';
@@ -140,15 +143,18 @@ import { RevisionTimeline } from './revision-timeline';
               [draft]="activeDraft"
               [client]="client()"
               [session]="session()"
+              [architectureModel]="architectureModel()"
               [narrationBlocked]="
                 architectureModel()?.state?.pendingSaga != null
               "
-              (architectureConflict)="captureArchitectureConflict($event)"
+              (architectureConflict)="architectureChanged()"
             />
             <app-production-panel
               [draft]="activeDraft"
               [client]="client()"
               [editor]="editorHost() ?? null"
+              [architectureModel]="architectureModel()"
+              (architectureConflict)="architectureChanged()"
             />
           } @else {
             <section class="welcome">
@@ -492,7 +498,15 @@ export class DraftManagerComponent implements OnInit {
   readonly architectureVersion = signal(0);
 
   ngOnInit(): void {
-    const manager = new DraftManager(this.client());
+    const manager = new DraftManager(this.client(), {
+      onWriteError: (error) => {
+        if (
+          captureRoutedArchitectureConflict(this.architectureModel(), error)
+        ) {
+          this.architectureChanged();
+        }
+      },
+    });
     this.manager.set(manager);
     void manager.loadDrafts().then(() => {
       const requestedDraft = this.route.snapshot.queryParamMap.get('draft');
@@ -533,12 +547,6 @@ export class DraftManagerComponent implements OnInit {
 
   protected architectureChanged(): void {
     this.architectureVersion.update((version) => version + 1);
-  }
-
-  protected captureArchitectureConflict(error: unknown): void {
-    if (this.architectureModel()?.captureActionConflict(error)) {
-      this.architectureChanged();
-    }
   }
 
   protected refreshWorkflowDraft(): void {

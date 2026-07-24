@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   input,
+  output,
   type OnInit,
   signal,
 } from '@angular/core';
@@ -14,6 +15,10 @@ import type {
   PromotionRecord,
   ValidatorResult,
 } from '../api/client';
+import {
+  ArchitectureModel,
+  captureRoutedArchitectureConflict,
+} from '../architecture/model';
 import type { EditorHost } from '../editor/editor-host';
 import { readDraftMetadata } from '../panels/brief-panel';
 import {
@@ -477,6 +482,8 @@ export class ProductionPanel implements OnInit {
   readonly draft = input.required<DraftRecord>();
   readonly client = input.required<DaemonClient>();
   readonly editor = input<EditorHost | null>(null);
+  readonly architectureModel = input<ArchitectureModel | null>(null);
+  readonly architectureConflict = output<unknown>();
 
   readonly cleanNarration = signal(false);
   readonly responses = signal<Partial<Record<string, string>>>({});
@@ -708,6 +715,7 @@ export class ProductionPanel implements OnInit {
       this.narrationApprovalVersion.update((version) => version + 1);
       this.editor()?.refreshFromServer(approved);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.workflowError.set(errorMessage(error));
       await this.loadNarrationProposals();
     } finally {
@@ -757,6 +765,7 @@ export class ProductionPanel implements OnInit {
       Object.assign(this.draft(), draft);
       this.editor()?.refreshFromServer(draft);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.workflowError.set(errorMessage(error));
       await this.loadNarrationProposals();
     } finally {
@@ -796,6 +805,7 @@ export class ProductionPanel implements OnInit {
       this.validatorSnapshotMarkdown.set(this.view().markdown);
       this.promotion.set(promotion);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.workflowError.set(errorMessage(error));
       await this.loadNarrationProposals();
     } finally {
@@ -815,6 +825,7 @@ export class ProductionPanel implements OnInit {
       Object.assign(this.draft(), draft);
       this.editor()?.refreshFromServer(draft);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       try {
         this.promotion.set(
           (await this.client().getPromotion(this.draft().id)).promotion,
@@ -845,6 +856,7 @@ export class ProductionPanel implements OnInit {
       Object.assign(this.draft(), draft);
       this.editor()?.refreshFromServer(draft);
     } catch (error) {
+      this.captureArchitectureConflict(error);
       this.workflowError.set(errorMessage(error));
     } finally {
       this.workflowBusy.set(false);
@@ -923,6 +935,14 @@ export class ProductionPanel implements OnInit {
     );
     this.currentRevisionSeq.update((current) =>
       Math.max(current ?? 0, latest));
+  }
+
+  private captureArchitectureConflict(error: unknown): void {
+    if (
+      captureRoutedArchitectureConflict(this.architectureModel(), error)
+    ) {
+      this.architectureConflict.emit(error);
+    }
   }
 
   private async runIntegration(

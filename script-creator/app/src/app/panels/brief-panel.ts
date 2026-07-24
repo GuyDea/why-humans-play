@@ -62,6 +62,10 @@ export interface BriefPanelSaver {
   save(id: string, input: SaveDraftInput): Promise<SavedDraft>;
 }
 
+export interface BriefPanelModelOptions {
+  onSaveError?: (error: unknown) => void;
+}
+
 export interface PromotionMeta {
   operation: 'promote';
   draftId: string;
@@ -155,15 +159,18 @@ export class BriefPanelModel {
 
   private saveQueue: Promise<void> = Promise.resolve();
   private pendingSaves = 0;
+  private readonly onSaveError: (error: unknown) => void;
 
   constructor(
     initialDraft: DraftRecord,
     private readonly saver: BriefPanelSaver,
+    options: BriefPanelModelOptions = {},
   ) {
     this.draft = signal<DraftRecord>(initialDraft);
     this.metadata = signal<ScriptDraftMetadata>(
       readDraftMetadata(initialDraft.doc),
     );
+    this.onSaveError = options.onSaveError ?? (() => undefined);
   }
 
   update(
@@ -243,6 +250,7 @@ export class BriefPanelModel {
         this.saveError.set(null);
         return saved;
       } catch (error) {
+        this.onSaveError(error);
         this.saveError.set(errorMessage(error));
         throw error;
       } finally {

@@ -673,3 +673,20 @@ settlement.
 this ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain
 unchanged because this is an internal Script Creator concurrency and recovery
 contract.
+
+## 2026-07-24 — Route every recoverable architecture conflict through shared state
+
+**Decision:** Every routed Script Creator write catch that can receive a state-bearing
+recoverable architecture reservation or conflict must pass the caught error through one
+shared conflict router before local failure handling, so a stale client immediately
+adopts the pending saga, blocks narration editing, and exposes the correct Resume action
+without an autosave or reload.
+
+**Rationale:** Only the debounced autosave catch adopted reservation state; direct
+whole-episode saves, Promote-result reconciliation, and production synchronization could
+discard the same server state and leave a stale client writable with no Resume action.
+
+**Documents:** `.superpowers/sdd/p6-final-review-report.md`,
+`.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
+`whp-youtube/STEERING.md` remain unchanged because this is an internal Script Creator
+client recovery contract.
