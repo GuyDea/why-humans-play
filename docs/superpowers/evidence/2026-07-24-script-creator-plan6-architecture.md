@@ -73,6 +73,37 @@ raw Markdown; real `review-architecture` and `rewrite-architecture-section`
 returned strict-schema frames. No approval, repository write, Promote, or commit
 was performed.
 
+## Final review loop (Task 14)
+
+The fresh whole-branch review returned FAIL with five lifecycle-integrity
+findings concentrated in the approve/reopen/reconcile state machine
+(`.superpowers/sdd/p6-final-review-report.md`). Four fix waves, each gated by a
+fresh confirmation review, closed them:
+
+1. **Wave 1:** Reopen gate before content changes; recovery-path settlement
+   clears reconciliation with the same eligibility rule; explicit
+   revision-checked Mark-narration-reconciled action; approval sagas pause with
+   a durable resume key instead of presenting as approved; stale uncommitted
+   same-kind milestones supersede (migration v9) instead of deadlocking.
+2. **Wave 2:** generic narration writes (autosave, proposal replacement,
+   import) refuse with a recoverable 409 while an approval saga is paused; the
+   editor blocks with a callout.
+3. **Wave 3:** the saga machinery generalized to one contract — any pending
+   architecture saga kind (approve *and* reopen) reserves writes, exposes its
+   kind + opaque resume key, resumes through one route, and pause responses
+   carry current state; cancelled accepted-proposal saves keep operation
+   provenance for post-resume settlement.
+4. **Wave 4:** a centralized conflict-routing helper wired into every routed
+   write consumer, so a stale client adopts another client's pending saga and
+   shows the correct Resume without reload.
+
+Each wave was re-proven by the extended browser sweep (VERIFIED), which now
+also drives paused-saga resume across reload, approved-state control lockout,
+the reconcile confirmation, and the blocked-editor reservation live.
+**Confirmation review 4: Spec compliance PASS / Code quality APPROVED.**
+Final totals: server 44 files / 411 tests ×2, app 27 files / 203 tests ×2,
+editor-core 11 / 44, typechecks and `ng build` clean, sweep VERIFIED.
+
 ## Verdict
 
 Blocks A–C of Plan 6 are implemented, committed task-by-task, and proven in the
