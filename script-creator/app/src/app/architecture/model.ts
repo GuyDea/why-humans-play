@@ -127,6 +127,14 @@ export class ArchitectureModel {
     }
   }
 
+  private async refreshRevisionState(): Promise<ArchitectureState> {
+    const fresh = cloneState(
+      await this.client.getArchitecture(this.draftId),
+    );
+    this.state = fresh;
+    return fresh;
+  }
+
   async generate<TopicBrief, ApprovedLessons, UserConstraints>(
     context: GenerateArchitectureContext<
       TopicBrief,
@@ -294,10 +302,11 @@ export class ArchitectureModel {
   }
 
   async approve(): Promise<void> {
-    const state = this.requireState();
+    this.requireState();
     this.actionConflict = null;
     this.failure = null;
     try {
+      const state = await this.refreshRevisionState();
       const result = await this.client.approveArchitecture(this.draftId, {
         expectedRevisionSeq: state.revisionSeq,
       });
@@ -309,10 +318,11 @@ export class ArchitectureModel {
 
   async reopen(confirmed: boolean): Promise<void> {
     if (!confirmed) return;
-    const state = this.requireState();
+    this.requireState();
     this.actionConflict = null;
     this.failure = null;
     try {
+      const state = await this.refreshRevisionState();
       const result = await this.client.reopenArchitecture(this.draftId, {
         expectedRevisionSeq: state.revisionSeq,
         confirmed: true,
