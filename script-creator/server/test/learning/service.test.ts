@@ -10,6 +10,7 @@ import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
+  acceptProposal,
   EditorState,
   corePlugins,
   insertInlineVariantSet,
@@ -17,6 +18,8 @@ import {
   personalInputAcceptanceTransaction,
   pickActive,
   preserveDraftDocument,
+  receiveProposal,
+  requestProposal,
   schema,
 } from '@whp/script-creator-editor-core';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -619,6 +622,125 @@ function replaceOrAppend(
   if (index < 0) return [...sections, replacement];
   return sections.map((section, candidateIndex) =>
     candidateIndex === index ? replacement : section);
+}
+
+function narrationBlocks(
+  doc: DraftDocument,
+): Array<Record<string, unknown>> {
+  const beat = (doc['content'] as Array<Record<string, unknown>>)[0]!;
+  return beat['content'] as Array<Record<string, unknown>>;
+}
+
+function selectionAcceptanceFixture() {
+  const operationId = 'structural-selection-operation';
+  const selection = 'Rewrite this selected line.';
+  const replacement = 'Rewritten passage.';
+  const beforeNode = schema.node('doc', {
+    format: 'narration',
+    preamble: '',
+  }, [
+    schema.node('beat', {
+      beatId: 'beat-structural-proof',
+      title: '1. Opening',
+      timeTargetMs: 30_000,
+    }, [
+      schema.node('paragraph', null, [
+        schema.text(selection),
+      ]),
+      schema.node('paragraph', null, [
+        schema.text('Untouched narration.'),
+      ]),
+      schema.node('opaqueSection', {
+        md: '<!-- retained opaque payload -->',
+      }),
+    ]),
+  ]);
+  let state = EditorState.create({
+    doc: beforeNode,
+    plugins: corePlugins(),
+  });
+  let range: { from: number; to: number } | null = null;
+  beforeNode.descendants((node, position) => {
+    if (range === null && node.isText && node.text === selection) {
+      range = { from: position, to: position + selection.length };
+    }
+  });
+  if (!range) throw new Error('selection proof fixture range was not found');
+  const selectionRange = range as { from: number; to: number };
+  const dispatch = (
+    transaction: Parameters<EditorState['apply']>[0],
+  ) => {
+    state = state.apply(transaction);
+  };
+  if (!requestProposal(state, dispatch, {
+    id: operationId,
+    ...selectionRange,
+  })) {
+    throw new Error('selection proof fixture request was refused');
+  }
+  if (!receiveProposal(state, dispatch, {
+    id: operationId,
+    replacement,
+  })) {
+    throw new Error('selection proof fixture result was refused');
+  }
+  if (!acceptProposal(state, dispatch, operationId)) {
+    throw new Error('selection proof fixture acceptance was refused');
+  }
+  const before = beforeNode.toJSON() as DraftDocument;
+  const accepted = state.doc.toJSON() as DraftDocument;
+  const { documentStore, service } = setup({
+    operationEvidence: (evidenceOperationId) => ({
+      operationId: evidenceOperationId,
+      draftId: 'draft-1',
+      operation: 'rewrite-selection',
+      state: 'completed',
+      envelope: { prompt: 'persisted' },
+      inputs: {
+        selection,
+        requested_scope: { kind: 'selection' },
+      },
+      result: {
+        kind: 'schema',
+        value: { replacement_markdown: replacement },
+        guardrail: null,
+      },
+    }),
+  });
+  documentStore.saveDraft('draft-1', {
+    title: 'Episode One',
+    format: 'narration',
+    doc: before,
+    updatedAt: '2026-07-24T08:00:30.000Z',
+    revision: {
+      id: 'structural-selection-baseline',
+      opId: null,
+      disposition: 'manual-save',
+      createdAt: '2026-07-24T08:00:30.000Z',
+    },
+  });
+  documentStore.createNarrationProposal({
+    draftId: 'draft-1',
+    operationId,
+    state: 'pending',
+    createdAt: '2026-07-24T08:01:00.000Z',
+    resolvedAt: null,
+    reasonNote: null,
+    successorOperationId: null,
+  });
+  const documentService = new DocumentService({
+    store: documentStore,
+    learningService: service,
+    idFactory: () => 'structural-selection-accepted',
+    now: () => '2026-07-24T08:02:00.000Z',
+  });
+  return {
+    accepted,
+    documentService,
+    documentStore,
+    operationId,
+    service,
+  };
 }
 
 afterEach(() => {
@@ -1618,6 +1740,104 @@ describe('LearningService', () => {
       disposition: 'selection-proposal-accepted',
     })).toThrow(/acceptance.+refused/iu);
     expect(documentStore.currentRevisionSeq('draft-1')).toBe(1);
+  });
+
+  it.each([
+    {
+      label: 'a forged lock mark on untouched narration',
+      forge(doc: DraftDocument) {
+        const blocks = narrationBlocks(doc);
+        const untouchedText = (
+          blocks[1]!['content'] as Array<Record<string, unknown>>
+        )[0]!;
+        untouchedText['marks'] = [{
+          type: 'lock',
+          attrs: { lockId: 'forged-lock' },
+        }];
+      },
+    },
+    {
+      label: 'a changed block type with the same text',
+      forge(doc: DraftDocument) {
+        const blocks = narrationBlocks(doc);
+        const paragraph = structuredClone(blocks[1]!);
+        blocks[1] = {
+          type: 'variantSet',
+          attrs: {
+            variantId: 'forged-variant',
+            originOperationId: 'forged-operation',
+            activeIndex: 0,
+            settled: true,
+          },
+          content: [{
+            type: 'variantOption',
+            attrs: { label: 'Forged' },
+            content: [paragraph],
+          }],
+        };
+      },
+    },
+    {
+      label: 'a same-text opaque-node edit',
+      forge(doc: DraftDocument) {
+        const blocks = narrationBlocks(doc);
+        blocks[2]!['attrs'] = {
+          md: '<!-- forged opaque payload -->',
+        };
+      },
+    },
+  ])('refuses $label outside a genuine selection replacement', ({ forge }) => {
+    const fixture = selectionAcceptanceFixture();
+    const forged = structuredClone(fixture.accepted);
+    forge(forged);
+    const acceptedNode = schema.nodeFromJSON(fixture.accepted);
+    const forgedNode = schema.nodeFromJSON(forged);
+    expect(forgedNode.textBetween(
+      0,
+      forgedNode.content.size,
+      '\n\n',
+    )).toBe(acceptedNode.textBetween(
+      0,
+      acceptedNode.content.size,
+      '\n\n',
+    ));
+
+    expect(() => fixture.documentService.saveDraft('draft-1', {
+      doc: forged,
+      opId: fixture.operationId,
+      disposition: 'selection-proposal-accepted',
+    })).toThrow(/acceptance.+refused/iu);
+    expect(fixture.documentStore.currentRevisionSeq('draft-1')).toBe(1);
+    expect(fixture.documentStore.getNarrationProposal(
+      'draft-1',
+      fixture.operationId,
+    )).toMatchObject({ state: 'pending', acceptedRevisionId: null });
+  });
+
+  it('accepts and mints the genuine live editor selection transaction', () => {
+    const fixture = selectionAcceptanceFixture();
+
+    const saved = fixture.documentService.saveDraft('draft-1', {
+      doc: fixture.accepted,
+      opId: fixture.operationId,
+      disposition: 'selection-proposal-accepted',
+    });
+    fixture.documentStore.resolveNarrationProposal(
+      'draft-1',
+      fixture.operationId,
+      'accepted',
+      '2026-07-24T08:03:00.000Z',
+      { acceptedRevisionId: saved.revision.id },
+    );
+
+    expect(saved.revision).toMatchObject({
+      opId: fixture.operationId,
+      disposition: 'selection-proposal-accepted',
+    });
+    expect(fixture.service.captureRevision(saved.revision)).toMatchObject({
+      kind: 'proposal-accepted',
+      sourceId: saved.revision.id,
+    });
   });
 
   it('rejects architecture rejection capture without a real pending proposal for that draft', () => {

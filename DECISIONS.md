@@ -870,3 +870,22 @@ proved by its originating operation.
 controller-owned lesson-distillation reference remain unchanged because they already
 permit repository-native durable doctrine and server-owned proof boundaries; this fix
 closes implementation and verification gaps without changing that architecture.
+
+## 2026-07-24 — Close Plan 7 confirmation-review-3 proof boundaries
+
+**Decision:** Script Creator removes verified durable candidate bytes from the
+distillation run guardrail and frozen decision snapshots as well as every existing
+app-local artifact; selection acceptance replays only the operation replacement against
+the complete stored ProseMirror document and refuses every other structural change;
+reconciliation verification transitions learning state before artifact redaction and
+compensates the learning transition if redaction fails.
+
+**Rationale:** A verified candidate must not survive in app-local storage, accepted
+revisions must contain only the operation-proposed selection change, and learning and
+artifact state must remain consistent across either transition failure.
+
+**Documents:** `.superpowers/sdd/p7-final-review-report.md` and this ledger. `BRAND.md`,
+`CLAUDE.md`, `whp-youtube/STEERING.md`, the Plan 7 implementation plan, and `.agents/`
+remain unchanged because the approved architecture already requires repository-native
+durable doctrine and mechanically proved proposal correspondence; this closes
+implementation and failure-atomicity gaps.

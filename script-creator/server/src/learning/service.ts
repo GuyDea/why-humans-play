@@ -54,6 +54,7 @@ import type {
   LessonClassification,
   LessonReconciliationRecord,
   LessonRecord,
+  ReconciliationVerificationRollback,
   ReconciliationKind,
   ValidatorAttemptRecord,
 } from './store.js';
@@ -860,14 +861,6 @@ export class LearningService {
         },
       );
     }
-    if (reconciliation.kind !== 'retire' && pointer !== null) {
-      this.redactAppliedDurableLesson(lesson, {
-        commit: verified.commit,
-        path: pointer.path,
-        anchor: pointer.anchor,
-        contentHash: pointer.contentHash,
-      });
-    }
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       reconciliationTokens: verified.reconciliationTokens,
@@ -881,6 +874,18 @@ export class LearningService {
       repositoryContentHash: pointer?.contentHash ?? null,
       updatedAt: this.now(),
     });
+    if (reconciliation.kind !== 'retire' && pointer !== null) {
+      this.redactVerifiedDurableLesson(
+        lesson,
+        {
+          commit: verified.commit,
+          path: pointer.path,
+          anchor: pointer.anchor,
+          contentHash: pointer.contentHash,
+        },
+        result.rollback,
+      );
+    }
     return this.lessonDetail(result.lesson);
   }
 
@@ -936,12 +941,6 @@ export class LearningService {
         },
       );
     }
-    this.redactAppliedDurableLesson(lesson, {
-      commit: verified.commit,
-      path: pointer.path,
-      anchor: pointer.anchor,
-      contentHash: pointer.contentHash,
-    });
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       reconciliationTokens: verified.reconciliationTokens,
@@ -953,6 +952,16 @@ export class LearningService {
       repositoryContentHash: pointer.contentHash,
       updatedAt: this.now(),
     });
+    this.redactVerifiedDurableLesson(
+      lesson,
+      {
+        commit: verified.commit,
+        path: pointer.path,
+        anchor: pointer.anchor,
+        contentHash: pointer.contentHash,
+      },
+      result.rollback,
+    );
     return this.lessonDetail(result.lesson);
   }
 
@@ -1640,6 +1649,34 @@ export class LearningService {
     });
   }
 
+  private redactVerifiedDurableLesson(
+    lesson: LessonRecord,
+    repositoryProvenance: {
+      commit: string;
+      path: string;
+      anchor: string;
+      contentHash: string;
+    },
+    rollback: ReconciliationVerificationRollback | null,
+  ): void {
+    try {
+      this.redactAppliedDurableLesson(lesson, repositoryProvenance);
+    } catch (error) {
+      if (rollback === null) throw error;
+      try {
+        this.store.rollbackReconciliationVerification(rollback);
+      } catch (rollbackError) {
+        throw new AggregateError(
+          [error, rollbackError],
+          `lesson reconciliation verification rollback failed: ${
+            rollback.reconciliation.resumeKey
+          }`,
+        );
+      }
+      throw error;
+    }
+  }
+
   private requireDraft(draftId: string): void {
     if (!this.documentStore.getDraft(draftId)) {
       throw new Error(`draft not found: ${draftId}`);
@@ -1939,36 +1976,73 @@ function rewriteAcceptanceMatches(
   if (typeof selection !== 'string' || selection === '') return false;
   const beforeNode = editorSchema.nodeFromJSON(before);
   const afterNode = editorSchema.nodeFromJSON(after);
-  if (beforeNode.content.findDiffStart(afterNode.content) === null) {
-    return false;
+  const range = uniqueSelectionRange(beforeNode, selection);
+  if (!range) return false;
+  const state = EditorState.create({ doc: beforeNode });
+  return state.tr
+    .insertText(replacementMarkdown, range.from, range.to)
+    .doc.eq(afterNode);
+}
+
+function uniqueSelectionRange(
+  document: ReturnType<typeof editorSchema.nodeFromJSON>,
+  selection: string,
+): { from: number; to: number } | null {
+  const separator = '\n\n';
+  const positionByCharacter: Array<{
+    from: number;
+    to: number;
+  } | null> = [];
+  let flattened = '';
+  let firstBlock = true;
+  document.nodesBetween(0, document.content.size, (node, position) => {
+    const leafText = node.isLeaf && !node.isText
+      ? typeof node.type.spec.leafText === 'function'
+        ? node.type.spec.leafText(node)
+        : node.type.spec.leafText ?? ''
+      : '';
+    if (
+      node.isBlock
+      && ((node.isLeaf && leafText !== '') || node.isTextblock)
+    ) {
+      if (firstBlock) {
+        firstBlock = false;
+      } else {
+        flattened += separator;
+        positionByCharacter.push(...separator.split('').map(() => null));
+      }
+    }
+    const text = node.isText ? node.text ?? '' : leafText;
+    if (text === '') return;
+    flattened += text;
+    for (let offset = 0; offset < text.length; offset += 1) {
+      positionByCharacter.push(node.isText
+        ? { from: position + offset, to: position + offset + 1 }
+        : { from: position, to: position + node.nodeSize });
+    }
+  });
+
+  const ranges = new Map<string, { from: number; to: number }>();
+  for (
+    let start = flattened.indexOf(selection);
+    start >= 0;
+    start = flattened.indexOf(selection, start + 1)
+  ) {
+    const mapped = positionByCharacter
+      .slice(start, start + selection.length)
+      .filter((position): position is { from: number; to: number } =>
+        position !== null);
+    const first = mapped[0];
+    const last = mapped.at(-1);
+    if (!first || !last) continue;
+    const range = { from: first.from, to: last.to };
+    if (
+      document.textBetween(range.from, range.to, separator) === selection
+    ) {
+      ranges.set(`${range.from}:${range.to}`, range);
+    }
   }
-  const beforeBeatAttrs: unknown[] = [];
-  const afterBeatAttrs: unknown[] = [];
-  beforeNode.forEach((beat) => beforeBeatAttrs.push(beat.attrs));
-  afterNode.forEach((beat) => afterBeatAttrs.push(beat.attrs));
-  if (JSON.stringify(beforeBeatAttrs) !== JSON.stringify(afterBeatAttrs)) {
-    return false;
-  }
-  const beforeText = beforeNode.textBetween(
-    0,
-    beforeNode.content.size,
-    '\n\n',
-  );
-  const first = beforeText.indexOf(selection);
-  if (first < 0 || beforeText.indexOf(selection, first + 1) >= 0) {
-    return false;
-  }
-  const replacement = narrationReplacementParagraphs(
-    replacementMarkdown,
-  ).join('\n\n');
-  const expected = `${beforeText.slice(0, first)}${replacement}${
-    beforeText.slice(first + selection.length)
-  }`;
-  return afterNode.textBetween(
-    0,
-    afterNode.content.size,
-    '\n\n',
-  ) === expected;
+  return ranges.size === 1 ? [...ranges.values()][0]! : null;
 }
 
 function personalInputAcceptanceMatches(
@@ -2020,24 +2094,6 @@ function personalInputOpaqueBody(
         && lines.includes('- **Decision:** INPUT-REQUESTED');
     });
   return candidates.length === 1 ? candidates[0]! : null;
-}
-
-function narrationReplacementParagraphs(markdown: string): string[] {
-  const blocks = markdown
-    .replace(/\r\n?/gu, '\n')
-    .trim()
-    .split(/\n\s*\n/gu)
-    .filter((block) => block.trim() !== '');
-  return blocks.flatMap((block) => {
-    const lines = block.split('\n');
-    const quoted = lines.every((line) =>
-      line === '>' || line.startsWith('> '));
-    const text = lines
-      .map((line) => quoted ? line.replace(/^> ?/u, '') : line)
-      .join(' ')
-      .trim();
-    return text === '' ? [] : [text];
-  });
 }
 
 function architectureAcceptanceMatchesOperation(

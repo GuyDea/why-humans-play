@@ -487,29 +487,32 @@ describe('lesson review HTTP API', () => {
       const lesson = fixture.learningStore.getLesson('lesson-durable');
       const reconciliations =
         fixture.learningStore.listLessonReconciliations('lesson-durable');
-      const jobs = fixture.jobStore.operationAttempts('distill-operation');
-      const jobFiles = readdirSync(fixture.jobDir)
+      const databaseTables = readDatabaseTables(fixture.dbFile);
+      const artifactFiles = readdirSync(fixture.jobDir)
         .map((name) => readFileSync(join(fixture.jobDir, name), 'utf8'));
-      const operation = await fixture.app.inject({
+      const apiResponses = await Promise.all([
+        '/api/distillations/run-1',
+        '/api/drafts/draft-1/learning-sessions',
+        '/api/drafts/draft-1/decisions',
+        '/api/ops',
+        '/api/ops/distill-operation',
+        '/api/ops/distill-operation/result',
+      ].map((url) => fixture.app.inject({
         method: 'GET',
-        url: '/api/ops/distill-operation',
+        url,
         headers: AUTH,
-      });
-      const result = await fixture.app.inject({
-        method: 'GET',
-        url: '/api/ops/distill-operation/result',
-        headers: AUTH,
-      });
-      expect(operation.statusCode, operation.body).toBe(200);
-      expect(result.statusCode, result.body).toBe(200);
+      })));
+      for (const response of apiResponses) {
+        expect(response.statusCode, response.body).toBe(200);
+      }
+      const result = apiResponses.at(-1)!;
       const appStorage = JSON.stringify({
         run,
         lesson,
         reconciliations,
-        jobs,
-        jobFiles,
-        operation: operation.json(),
-        result: result.json(),
+        databaseTables,
+        artifactFiles,
+        apiSurfaces: apiResponses.map((response) => response.json()),
       });
       for (const doctrineBytes of new Set([proposed, reviewed])) {
         expect(appStorage).not.toContain(doctrineBytes);
@@ -538,6 +541,106 @@ describe('lesson review HTTP API', () => {
       await fixture.app.close();
     },
   );
+
+  it('refuses a valid commit while prepared without touching operation artifacts', async () => {
+    const candidate = 'Keep every prepared reveal concrete.';
+    const fixture = storedCandidateReconciliationFixture({
+      proposed: candidate,
+      reviewed: candidate,
+      markAwaiting: false,
+    });
+    const before = operationArtifactSnapshot(fixture);
+    writeFileSync(
+      join(fixture.repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n'
+        + `- ${candidate}\n`
+        + `Reconciliation: ${fixture.resumeKey}\n`,
+    );
+    writeFileSync(
+      join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),
+      `# Steering\n\n## Reveals\n\n${candidate}\n`,
+    );
+    git(fixture.repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(fixture.repoRoot, ['commit', '-m', 'prepare premature verification']);
+    const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+    const response = await verifyCommit(fixture, commit);
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json().error).toMatch(
+      /reconciliation verification conflict/iu,
+    );
+    expect(operationArtifactSnapshot(fixture)).toEqual(before);
+    expect(fixture.learningStore.getLesson('lesson-durable')).toMatchObject({
+      state: 'approved-pending-reconcile',
+      proposedMarkdown: candidate,
+      reviewedMarkdown: candidate,
+    });
+    expect(fixture.learningStore.getReconciliationByResumeKey(
+      fixture.resumeKey,
+    )).toMatchObject({ state: 'prepared' });
+    await fixture.app.close();
+  });
+
+  it('reverts the learning transition when artifact redaction fails afterward', async () => {
+    const candidate = 'Keep every rollback reveal concrete.';
+    const fixture = storedCandidateReconciliationFixture({
+      proposed: candidate,
+      reviewed: candidate,
+      failRedactionAfterTransition: true,
+    });
+    const before = operationArtifactSnapshot(fixture);
+    writeFileSync(
+      join(fixture.repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n'
+        + `- ${candidate}\n`
+        + `Reconciliation: ${fixture.resumeKey}\n`,
+    );
+    writeFileSync(
+      join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),
+      `# Steering\n\n## Reveals\n\n${candidate}\n`,
+    );
+    git(fixture.repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(fixture.repoRoot, ['commit', '-m', 'force redaction rollback']);
+    const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+    const response = await verifyCommit(fixture, commit);
+
+    expect(response.statusCode).toBe(500);
+    expect(fixture.redactionStateObserved()).toEqual({
+      lessonState: 'applied',
+      reconciliationState: 'verified',
+    });
+    expect(operationArtifactSnapshot(fixture)).toEqual(before);
+    expect(fixture.learningStore.getLesson('lesson-durable')).toMatchObject({
+      state: 'approved-pending-reconcile',
+      proposedMarkdown: candidate,
+      reviewedMarkdown: candidate,
+      repositoryCommit: null,
+    });
+    expect(fixture.learningStore.getReconciliationByResumeKey(
+      fixture.resumeKey,
+    )).toMatchObject({
+      state: 'awaiting-reconciliation',
+      preparedMarkdown: expect.stringContaining(candidate),
+      repositoryCommit: null,
+      verifiedAt: null,
+    });
+    expect(JSON.stringify(
+      fixture.learningStore.getDistillationRun('run-1'),
+    )).toContain(candidate);
+    await fixture.app.close();
+  });
 });
 
 function realReconciliationFixture() {
@@ -654,6 +757,8 @@ function realReconciliationFixture() {
 function storedCandidateReconciliationFixture(input: {
   proposed: string;
   reviewed: string;
+  markAwaiting?: boolean;
+  failRedactionAfterTransition?: boolean;
 }) {
   const root = mkdtempSync(join(tmpdir(), 'lessons-stored-candidate-'));
   roots.push(root);
@@ -733,7 +838,8 @@ function storedCandidateReconciliationFixture(input: {
       proposed_target: 'whp-youtube/STEERING.md',
       supersedes_lesson_id: null,
     }],
-    guardrail_markdown: null,
+    guardrail_markdown:
+      `Guardrail repeats ${input.proposed} and ${input.reviewed}`,
   };
   writeFileSync(join(jobDir, 'envelope.json'), JSON.stringify(envelope));
   writeFileSync(join(jobDir, 'final-message.txt'), JSON.stringify(result));
@@ -765,6 +871,18 @@ function storedCandidateReconciliationFixture(input: {
   });
   operationServices.push(operationService);
 
+  learningStore.captureDecision({
+    id: 'decision-1',
+    draftId: 'draft-1',
+    seq: 1,
+    kind: 'proposal-rejected',
+    sourceType: 'architecture-proposal',
+    sourceId: 'architecture-operation',
+    disposition: 'rejected',
+    sourceTimestamp: '2026-07-24T08:00:30.000Z',
+    createdAt: '2026-07-24T08:00:30.000Z',
+    note: null,
+  });
   learningStore.createDistillationRun({
     id: 'run-1',
     draftId: 'draft-1',
@@ -773,11 +891,18 @@ function storedCandidateReconciliationFixture(input: {
     state: 'completed',
     operationId: 'distill-operation',
     resumeKey: 'distill-resume',
-    guardrailMarkdown: null,
+    guardrailMarkdown: result.guardrail_markdown,
     error: null,
     createdAt: '2026-07-24T08:01:00.000Z',
     updatedAt: '2026-07-24T08:02:00.000Z',
-    decisions: [],
+    decisions: [{
+      decisionId: 'decision-1',
+      snapshot: {
+        id: 'decision-1',
+        rationale:
+          `Frozen decision repeats ${input.proposed} and ${input.reviewed}`,
+      },
+    }],
     lessons: [],
   });
   learningStore.ingestDistillationRun('run-1', [{
@@ -804,7 +929,7 @@ function storedCandidateReconciliationFixture(input: {
       updatedAt: '2026-07-24T08:02:00.000Z',
     },
     evidenceIds: [],
-  }], null, '2026-07-24T08:02:00.000Z');
+  }], result.guardrail_markdown, '2026-07-24T08:02:00.000Z');
   const snapshots = new Database(dbFile);
   snapshots.prepare(
     `INSERT INTO distillation_run_lessons (
@@ -846,6 +971,24 @@ function storedCandidateReconciliationFixture(input: {
     resumeKeyFactory: () => 'stored-candidate-resume-key',
     now: () => '2026-07-24T09:00:00.000Z',
   });
+  let redactionStateObserved: {
+    lessonState: string | undefined;
+    reconciliationState: string | undefined;
+  } | null = null;
+  if (input.failRedactionAfterTransition === true) {
+    vi.spyOn(operationService, 'redactAppliedDurableLesson')
+      .mockImplementation(() => {
+        redactionStateObserved = {
+          lessonState:
+            learningStore.getLesson('lesson-durable')?.state,
+          reconciliationState:
+            learningStore.getReconciliationByResumeKey(
+              'stored-candidate-resume-key',
+            )?.state,
+        };
+        throw new Error('forced artifact redaction failure');
+      });
+  }
   if (input.reviewed !== input.proposed) {
     service.editLesson('draft-1', 'lesson-durable', {
       expectedVersion: 1,
@@ -857,7 +1000,9 @@ function storedCandidateReconciliationFixture(input: {
   });
   const resumeKey = approved.reconciliation?.resumeKey;
   if (!resumeKey) throw new Error('reconciliation fixture was not prepared');
-  service.markReconciliationAwaiting(resumeKey);
+  if (input.markAwaiting !== false) {
+    service.markReconciliationAwaiting(resumeKey);
+  }
   const app = buildApp({
     nonce: NONCE,
     operationService,
@@ -868,12 +1013,50 @@ function storedCandidateReconciliationFixture(input: {
   });
   return {
     app,
+    dbFile,
     jobDir,
     jobStore,
     learningStore,
     repoRoot,
+    redactionStateObserved: () => redactionStateObserved,
     resumeKey,
   };
+}
+
+function operationArtifactSnapshot(
+  fixture: Pick<
+    ReturnType<typeof storedCandidateReconciliationFixture>,
+    'jobDir' | 'jobStore'
+  >,
+) {
+  return {
+    envelopes: fixture.jobStore.operationAttempts('distill-operation')
+      .map(({ envelopeJson }) => envelopeJson),
+    files: readdirSync(fixture.jobDir)
+      .sort()
+      .map((name) => ({
+        name,
+        content: readFileSync(join(fixture.jobDir, name), 'utf8'),
+      })),
+  };
+}
+
+function readDatabaseTables(dbFile: string): Record<string, unknown[]> {
+  const database = new Database(dbFile, { readonly: true });
+  try {
+    const tables = database.prepare<[], { name: string }>(
+      `SELECT name
+       FROM sqlite_master
+       WHERE type = 'table' AND name NOT LIKE 'sqlite_%'
+       ORDER BY name`,
+    ).all();
+    return Object.fromEntries(tables.map(({ name }) => [
+      name,
+      database.prepare(`SELECT * FROM "${name.replaceAll('"', '""')}"`).all(),
+    ]));
+  } finally {
+    database.close();
+  }
 }
 
 function git(repoRoot: string, args: string[]): string {

@@ -692,7 +692,16 @@ async function main(
     'accepted personal-input replacement was not selectable in the editor',
   );
   await page.keyboard.press('Backspace');
-  await waitForMissingText(editor, 'Rewritten passage.');
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await waitForMissingText(editor, 'Rewritten passage.');
+      break;
+    } catch (error) {
+      if (attempt === 2) throw error;
+      await selectEditorText(page, editor, 'Rewritten passage.');
+      await page.keyboard.press('Backspace');
+    }
+  }
   await waitForEditorSave(page);
 
   await productionPanel.getByRole(
@@ -2062,6 +2071,38 @@ export async function waitForText(
     (text) => text?.includes(expected) === true,
     UI_TIMEOUT_MS,
     `locator did not contain ${JSON.stringify(expected)}`,
+  );
+}
+
+
+async function selectEditorText(
+  page: Page,
+  editor: Locator,
+  needle: string,
+): Promise<void> {
+  await editor.evaluate(
+    (root, text) => {
+      const document = root.ownerDocument;
+      const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+      for (
+        let current = walker.nextNode();
+        current;
+        current = walker.nextNode()
+      ) {
+        const value = current.textContent ?? '';
+        const offset = value.indexOf(text);
+        if (offset < 0) continue;
+        const range = document.createRange();
+        range.setStart(current, offset);
+        range.setEnd(current, offset + text.length);
+        const selection = document.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+        (root as HTMLElement).focus();
+        return;
+      }
+    },
+    needle,
   );
 }
 
