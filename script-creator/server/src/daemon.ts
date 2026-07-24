@@ -192,6 +192,7 @@ export function createDaemonContext(
           operation: operation.operation,
           state: operation.state,
           envelope,
+          inputs: activeOperationService.inputs(operationId),
           result: activeOperationService.result(operationId),
         };
       },

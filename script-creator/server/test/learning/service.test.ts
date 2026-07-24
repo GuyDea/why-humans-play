@@ -1,4 +1,12 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import {
@@ -6,7 +14,9 @@ import {
   corePlugins,
   insertInlineVariantSet,
   parseMarkdown,
+  personalInputAcceptanceTransaction,
   pickActive,
+  preserveDraftDocument,
   schema,
 } from '@whp/script-creator-editor-core';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -16,8 +26,16 @@ import {
   type ArchitectureSection,
 } from '../../src/architecture/codec.js';
 import { ArchitectureService } from '../../src/architecture/service.js';
-import { DocumentService } from '../../src/documents/service.js';
-import { DocumentStore } from '../../src/documents/store.js';
+import {
+  DocumentService,
+  exportDocumentMarkdown,
+  importProductionMarkdown,
+} from '../../src/documents/service.js';
+import {
+  DocumentStore,
+  type DraftDocument,
+} from '../../src/documents/store.js';
+import { buildApp } from '../../src/http/app.js';
 import {
   encodeVariantPickedDisposition,
 } from '../../src/learning/decisions.js';
@@ -27,15 +45,20 @@ import {
 } from '../../src/learning/service.js';
 import { LearningStore } from '../../src/learning/store.js';
 import { TopicStore } from '../../src/topics/store.js';
+import { UNUSED_VALIDATOR_SERVICE } from '../http/stubs.js';
 
 const roots: string[] = [];
 const documents: DocumentStore[] = [];
 const learning: LearningStore[] = [];
 const topics: TopicStore[] = [];
+const ACCEPTANCE_NONCE = 'episode-acceptance-proof-nonce';
+const ACCEPTANCE_AUTH = { 'x-sc-nonce': ACCEPTANCE_NONCE };
 
 function setup(options: {
   operationService?: LearningOperationService;
   idFactory?: () => string;
+  resumeKeyFactory?: () => string;
+  repositoryRoot?: string;
   operationEvidence?: (operationId: string) => {
     operationId: string;
     draftId: string | null;
@@ -72,6 +95,7 @@ function setup(options: {
     documentStore,
     topicStore,
     idFactory: options.idFactory ?? (() => `learning-${++id}`),
+    resumeKeyFactory: options.resumeKeyFactory,
     now: () => '2026-07-24T09:00:00.000Z',
     operationEvidence: options.operationEvidence ?? ((operationId) => ({
       operationId,
@@ -86,6 +110,9 @@ function setup(options: {
       },
     })),
     operationService: options.operationService,
+    repositoryRootForDraft: options.repositoryRoot
+      ? () => options.repositoryRoot!
+      : undefined,
   });
   return { documentStore, learningStore, topicStore, service };
 }
@@ -200,8 +227,345 @@ function generatedArchitectureMarkdown(): string {
   ].join('');
 }
 
-function architectureAcceptanceFixture() {
-  const markdown = generatedArchitectureMarkdown();
+function fakeGeneratedArchitectureMarkdown(): string {
+  const root = mkdtempSync(join(tmpdir(), 'learning-fake-architecture-'));
+  roots.push(root);
+  const output = join(root, 'architecture.md');
+  execFileSync(process.execPath, [
+    join(import.meta.dirname, '..', 'fake-codex.mjs'),
+    'exec',
+    '--json',
+    '-o',
+    output,
+    '-',
+  ], {
+    env: { ...process.env, FAKE_CODEX_MODE: 'generate-architecture' },
+    stdio: ['ignore', 'ignore', 'pipe'],
+  });
+  return readFileSync(output, 'utf8');
+}
+
+function fakeGeneratedEpisodeMarkdown(): string {
+  const root = mkdtempSync(join(tmpdir(), 'learning-fake-episode-'));
+  roots.push(root);
+  const output = join(root, 'episode.md');
+  execFileSync(process.execPath, [
+    join(import.meta.dirname, '..', 'fake-codex.mjs'),
+    'exec',
+    '--json',
+    '-o',
+    output,
+    '-',
+  ], {
+    env: { ...process.env, FAKE_CODEX_MODE: 'generate-episode' },
+    stdio: ['ignore', 'ignore', 'pipe'],
+  });
+  return readFileSync(output, 'utf8');
+}
+
+function episodeAcceptanceFixture(options: {
+  seedNarrationBaseline?: boolean;
+} = {}) {
+  const markdown = fakeGeneratedEpisodeMarkdown();
+  const operationId = 'generate-episode-operation';
+  const operationResult = {
+    kind: 'raw' as const,
+    markdown,
+  };
+  const operationService = {
+    submit: () => operationId,
+    list: () => [],
+    get: () => ({
+      operation: 'generate-episode' as const,
+      draftId: 'draft-1',
+      state: 'completed' as const,
+    }),
+    events: () => [],
+    cancel: () => undefined,
+    result: () => operationResult,
+  };
+  const fixture = setup({
+    operationService,
+    operationEvidence: (candidateOperationId) =>
+      candidateOperationId === operationId
+        ? {
+            operationId,
+            draftId: 'draft-1',
+            operation: 'generate-episode',
+            state: 'completed',
+            envelope: { prompt: 'persisted generate episode' },
+            result: operationResult,
+          }
+        : null,
+  });
+  const source: DraftDocument = {
+    type: 'doc',
+    attrs: {
+      format: 'narration',
+      preamble: 'Stored preamble that is not proposal narration.\n\n',
+    },
+    metadata: {
+      topic: 'Why queues become games',
+      anchors: ['A queue distributes access.'],
+      unknowns: ['How strongly line choice changes wait time.'],
+      approvedLessons: [],
+      creativeStatus: { phase: 'rapid-prototype' },
+      directionApproved: false,
+    },
+    schemaVersion: 4,
+    content: [{
+      type: 'beat',
+      attrs: {
+        beatId: 'beat_storedbefore',
+        title: 'Stored opening',
+        timeTargetMs: 45_000,
+      },
+      content: [{
+        type: 'paragraph',
+        content: [{
+          type: 'text',
+          text: 'Stored narration before generation.',
+        }],
+      }],
+    }],
+  };
+  const stored = fixture.documentStore.getDraft('draft-1')!;
+  fixture.documentStore.replaceDraftWorkflowState('draft-1', {
+    doc: source,
+    architecture: stored.architecture ?? {
+      sections: [],
+      approvedMd: null,
+      approvedAt: null,
+    },
+    architectureArtifactHash:
+      stored.architectureArtifactHash ?? null,
+    narrationReconciliationRequired:
+      stored.narrationReconciliationRequired === true,
+    updatedAt: '2026-07-24T08:00:15.000Z',
+  });
+  if (options.seedNarrationBaseline !== false) {
+    fixture.documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: source,
+      updatedAt: '2026-07-24T08:00:30.000Z',
+      revision: {
+        id: 'episode-acceptance-baseline',
+        opId: null,
+        disposition: 'manual-save',
+        createdAt: '2026-07-24T08:00:30.000Z',
+      },
+    });
+  } else {
+    fixture.documentStore.saveArchitecture('draft-1', {
+      expectedRevisionSeq: 0,
+      architecture: {
+        sections: [{
+          key: 'premise',
+          title: 'Premise',
+          md: 'Approved handoff architecture.\n',
+        }],
+        approvedMd: '### Premise\n\nApproved handoff architecture.\n',
+        approvedAt: '2026-07-24T08:00:30.000Z',
+      },
+      updatedAt: '2026-07-24T08:00:30.000Z',
+      revision: {
+        idFactory: () => 'episode-handoff-architecture',
+        opId: null,
+        disposition: 'architecture-approved',
+        createdAt: '2026-07-24T08:00:30.000Z',
+      },
+    });
+  }
+  fixture.documentStore.createNarrationProposal({
+    draftId: 'draft-1',
+    operationId,
+    state: 'pending',
+    createdAt: '2026-07-24T08:01:00.000Z',
+    resolvedAt: null,
+    reasonNote: null,
+    successorOperationId: null,
+  });
+  const accepted = preserveDraftDocument(
+    parseMarkdown(markdown).toJSON(),
+    source,
+  ) as DraftDocument;
+  const documentService = new DocumentService({
+    store: fixture.documentStore,
+    learningService: fixture.service,
+    idFactory: () => 'episode-accepted-revision',
+    now: () => '2026-07-24T08:02:00.000Z',
+  });
+  const architectureService = new ArchitectureService({
+    store: fixture.documentStore,
+    operationService,
+    learningService: fixture.service,
+    idFactory: () => 'episode-architecture-revision',
+    now: () => '2026-07-24T08:03:00.000Z',
+  });
+  return {
+    ...fixture,
+    accepted,
+    architectureService,
+    documentService,
+    markdown,
+    operationId,
+    operationService,
+  };
+}
+
+function buildEpisodeAcceptanceApp(
+  fixture: ReturnType<typeof episodeAcceptanceFixture>,
+) {
+  return buildApp({
+    nonce: ACCEPTANCE_NONCE,
+    operationService: fixture.operationService as unknown as
+      Parameters<typeof buildApp>[0]['operationService'],
+    documentService: fixture.documentService,
+    architectureService: fixture.architectureService,
+    artifactService: {},
+    validatorService: UNUSED_VALIDATOR_SERVICE,
+  });
+}
+
+function fakePromotedPersonalInputFixture() {
+  const promotedMarkdown = readFileSync(
+    join(
+      import.meta.dirname,
+      '..',
+      '..',
+      '..',
+      '..',
+      '.agents',
+      'skills',
+      'writing-whp-youtube-scripts',
+      'assets',
+      'annotated-script-template.md',
+    ),
+    'utf8',
+  );
+  const personalInputMatch =
+    /^#### Personal input\r?\n\r?\n([\s\S]*?)(?=\r?\n\r?\n#### )/mu
+      .exec(promotedMarkdown);
+  if (!personalInputMatch) {
+    throw new Error('fake Promote fixture has no Personal input block');
+  }
+  const marker =
+    /<!-- PI-\d{3}: Martin input -->/u.exec(promotedMarkdown)?.[0];
+  if (!marker) {
+    throw new Error('fake Promote fixture has no narration PI marker');
+  }
+  const personalInputBlock = personalInputMatch[0].trimEnd();
+  const bodyMd = personalInputMatch[1]!.trimEnd();
+  const replacement = [
+    'Martin supplied the exact remembered moment.',
+    '',
+    'The evidence then changed how he interpreted it.',
+  ].join('\n');
+  const parsedSource = parseMarkdown(promotedMarkdown).toJSON() as
+    DraftDocument;
+  const imported = importProductionMarkdown(
+    promotedMarkdown,
+    parsedSource,
+  );
+  const state = EditorState.create({
+    doc: schema.nodeFromJSON(imported.doc),
+  });
+  const transaction = personalInputAcceptanceTransaction(state, {
+    marker,
+    bodyMd,
+    replacement,
+  });
+  if (!transaction) {
+    throw new Error('production PI-acceptance transform was not applicable');
+  }
+  const accepted = transaction.doc.toJSON() as DraftDocument;
+  const operationId = 'fake-promote-personal-input-operation';
+  const operationResult = {
+    kind: 'schema' as const,
+    value: { replacement_markdown: replacement },
+    guardrail: null,
+  };
+  const fixture = setup({
+    operationEvidence: (candidateOperationId) =>
+      candidateOperationId === operationId
+        ? {
+            operationId,
+            draftId: 'draft-1',
+            operation: 'rewrite-selection',
+            state: 'completed',
+            envelope: { prompt: 'persisted personal-input integration' },
+            inputs: {
+              selection: marker,
+              requested_scope: {
+                kind: 'personal-input',
+                personal_input_id: 'PI-001',
+              },
+              personal_input_block: personalInputBlock,
+            },
+            result: operationResult,
+          }
+        : null,
+  });
+  fixture.documentStore.saveDraft('draft-1', {
+    title: 'Why Bees Roll Balls',
+    format: imported.format,
+    doc: imported.doc,
+    updatedAt: '2026-07-24T08:00:30.000Z',
+    revision: {
+      id: 'fake-promote-production-import',
+      opId: 'fake-promote-operation',
+      disposition: 'production-import',
+      createdAt: '2026-07-24T08:00:30.000Z',
+    },
+  });
+  fixture.documentStore.createNarrationProposal({
+    draftId: 'draft-1',
+    operationId,
+    state: 'pending',
+    createdAt: '2026-07-24T08:01:00.000Z',
+    resolvedAt: null,
+    reasonNote: null,
+    successorOperationId: null,
+  });
+  const documentService = new DocumentService({
+    store: fixture.documentStore,
+    learningService: fixture.service,
+    idFactory: () => 'fake-promote-personal-input-accepted',
+    now: () => '2026-07-24T08:02:00.000Z',
+  });
+  return {
+    ...fixture,
+    accepted,
+    documentService,
+    marker,
+    operationId,
+    promotedMarkdown,
+  };
+}
+
+function browserParsedArchitecture(
+  markdown: string,
+): ArchitectureSection[] {
+  return splitArchitecture(markdown).map((section) => {
+    if (!section.key.startsWith('opaque-')) return section;
+    let hash = 2_166_136_261;
+    for (const character of section.title) {
+      hash ^= character.codePointAt(0) ?? 0;
+      hash = Math.imul(hash, 16_777_619);
+    }
+    return {
+      ...section,
+      key: `opaque-${(hash >>> 0).toString(16).padStart(8, '0')}`,
+    };
+  });
+}
+
+function architectureAcceptanceFixture(options: {
+  markdown?: string;
+  proposals?: ArchitectureSection[];
+} = {}) {
+  const markdown = options.markdown ?? generatedArchitectureMarkdown();
   const operationId = 'generate-architecture-operation';
   const operationResult = {
     kind: 'raw' as const,
@@ -243,7 +607,7 @@ function architectureAcceptanceFixture() {
     ...learning,
     architectureService,
     operationId,
-    proposals: splitArchitecture(markdown),
+    proposals: options.proposals ?? splitArchitecture(markdown),
   };
 }
 
@@ -267,14 +631,357 @@ afterEach(() => {
 });
 
 describe('LearningService', () => {
+  it('mints episode acceptance when the first narration revision follows only handoff architecture revisions', async () => {
+    const fixture = episodeAcceptanceFixture({
+      seedNarrationBaseline: false,
+    });
+    expect(fixture.documentStore.listRevisions('draft-1')).toEqual([
+      expect.objectContaining({
+        id: 'episode-handoff-architecture',
+        kind: 'architecture',
+      }),
+    ]);
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const saved = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          doc: fixture.accepted,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+      expect(saved.statusCode).toBe(200);
+
+      const resolved = await app.inject({
+        method: 'POST',
+        url:
+          `/api/drafts/draft-1/narration/proposals/${
+            fixture.operationId
+          }/resolve`,
+        headers: ACCEPTANCE_AUTH,
+        payload: { decision: 'accepted' },
+      });
+
+      expect(resolved.statusCode).toBe(200);
+      expect(resolved.json()).toMatchObject({
+        state: 'accepted',
+        acceptedRevisionId: 'episode-accepted-revision',
+      });
+      expect(fixture.service.list('draft-1').decisions).toEqual([
+        expect.objectContaining({
+          kind: 'proposal-accepted',
+          context: expect.objectContaining({
+            source: expect.objectContaining({
+              id: 'episode-accepted-revision',
+            }),
+          }),
+        }),
+      ]);
+
+      const repeated = await app.inject({
+        method: 'POST',
+        url:
+          `/api/drafts/draft-1/narration/proposals/${
+            fixture.operationId
+          }/resolve`,
+        headers: ACCEPTANCE_AUTH,
+        payload: { decision: 'accepted' },
+      });
+      expect(repeated.statusCode).toBe(200);
+      expect(fixture.service.list('draft-1').decisions).toHaveLength(1);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('refuses unchanged episode acceptance when it would be the first narration revision', async () => {
+    const fixture = episodeAcceptanceFixture({
+      seedNarrationBaseline: false,
+    });
+    const current = fixture.documentStore.getDraft('draft-1')!;
+    fixture.documentStore.replaceDraftWorkflowState('draft-1', {
+      doc: fixture.accepted,
+      architecture: current.architecture!,
+      architectureArtifactHash: current.architectureArtifactHash ?? null,
+      narrationReconciliationRequired:
+        current.narrationReconciliationRequired === true,
+      updatedAt: '2026-07-24T08:01:30.000Z',
+    });
+    const metadataOnlyChange = structuredClone(fixture.accepted);
+    const metadata = metadataOnlyChange['metadata'] as Record<
+      string,
+      unknown
+    >;
+    metadata['topic'] = 'A metadata-only attempt to disguise a narration no-op';
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const refused = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          doc: metadataOnlyChange,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      expect(refused.statusCode).toBe(409);
+      expect(fixture.documentStore.currentRevisionSeq('draft-1')).toBe(1);
+      expect(fixture.service.list('draft-1').decisions).toEqual([]);
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('accepts and resolves the fake whole-episode result after the editor preserves draft context', async () => {
+    const fixture = episodeAcceptanceFixture();
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const saved = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          doc: fixture.accepted,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      expect(saved.statusCode).toBe(200);
+      expect(saved.json()).toMatchObject({
+        draft: {
+          doc: {
+            metadata: {
+              topic: 'Why queues become games',
+              creativeStatus: { phase: 'rapid-prototype' },
+            },
+            schemaVersion: 4,
+          },
+        },
+        revision: {
+          id: 'episode-accepted-revision',
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      const resolved = await app.inject({
+        method: 'POST',
+        url:
+          `/api/drafts/draft-1/narration/proposals/${
+            fixture.operationId
+          }/resolve`,
+        headers: ACCEPTANCE_AUTH,
+        payload: { decision: 'accepted' },
+      });
+
+      expect(resolved.statusCode).toBe(200);
+      expect(resolved.json()).toMatchObject({
+        state: 'accepted',
+        acceptedRevisionId: 'episode-accepted-revision',
+      });
+      expect(fixture.service.list('draft-1').decisions[0]).toMatchObject({
+        kind: 'proposal-accepted',
+        context: {
+          source: { id: 'episode-accepted-revision' },
+        },
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('auto-settles the fake whole-episode acceptance after an architecture reopen', async () => {
+    const fixture = episodeAcceptanceFixture();
+    fixture.documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: fixture.accepted,
+      updatedAt: '2026-07-24T08:02:00.000Z',
+      revision: {
+        id: 'episode-accepted-revision',
+        opId: fixture.operationId,
+        disposition: 'episode-generation-accepted',
+        createdAt: '2026-07-24T08:02:00.000Z',
+      },
+    });
+    expect(fixture.documentStore.saveArchitecture('draft-1', {
+      expectedRevisionSeq: 2,
+      architecture: {
+        sections: [],
+        approvedMd: null,
+        approvedAt: null,
+      },
+      updatedAt: '2026-07-24T08:03:00.000Z',
+      revision: {
+        idFactory: () => 'architecture-reopened-revision',
+        opId: null,
+        disposition: 'architecture-reopened',
+        createdAt: '2026-07-24T08:03:00.000Z',
+      },
+    })).not.toBeNull();
+
+    expect(fixture.architectureService.prepareNarrationApproval(
+      'draft-1',
+      {
+        expectedRevisionSeq: 3,
+        expectedNarrationMd: exportDocumentMarkdown(fixture.accepted),
+      },
+    )).toEqual({ settledExportToken: expect.any(String) });
+    expect(fixture.documentStore.getNarrationProposal(
+      'draft-1',
+      fixture.operationId,
+    )).toMatchObject({
+      state: 'accepted',
+      acceptedRevisionId: 'episode-accepted-revision',
+    });
+    expect(fixture.service.list('draft-1').decisions[0]).toMatchObject({
+      kind: 'proposal-accepted',
+      context: {
+        source: { id: 'episode-accepted-revision' },
+      },
+    });
+  });
+
+  it('returns a structured refusal for forged whole-episode narration without saving or settling', async () => {
+    const fixture = episodeAcceptanceFixture();
+    const forged = structuredClone(fixture.accepted);
+    const firstBeat = (
+      forged['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    const firstParagraph = (
+      firstBeat['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    const firstText = (
+      firstParagraph['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    firstText['text'] = 'Forged narration absent from the operation result.';
+    const app = buildEpisodeAcceptanceApp(fixture);
+    try {
+      const refused = await app.inject({
+        method: 'PUT',
+        url: '/api/drafts/draft-1',
+        headers: ACCEPTANCE_AUTH,
+        payload: {
+          doc: forged,
+          opId: fixture.operationId,
+          disposition: 'episode-generation-accepted',
+        },
+      });
+
+      expect(refused.statusCode).toBe(409);
+      expect(refused.json()).toEqual({
+        error:
+          'narration acceptance proof refused: saved revision does not equal the operation proposal',
+        code: 'acceptance-proof-refused',
+        recoverable: true,
+      });
+      expect(fixture.documentStore.currentRevisionSeq('draft-1')).toBe(1);
+      expect(fixture.documentStore.getNarrationProposal(
+        'draft-1',
+        fixture.operationId,
+      )).toMatchObject({
+        state: 'pending',
+        acceptedRevisionId: null,
+      });
+    } finally {
+      await app.close();
+    }
+  });
+
+  it('accepts the fake Promote template PI transaction after production import', () => {
+    const fixture = fakePromotedPersonalInputFixture();
+    const originalLinkCount = fixture.promotedMarkdown
+      .match(/\[F-001\]\([^)]+\)/gu)?.length ?? 0;
+
+    const saved = fixture.documentService.saveDraft('draft-1', {
+      doc: fixture.accepted,
+      opId: fixture.operationId,
+      disposition: 'personal-input-proposal-accepted',
+    });
+    const acceptedMarkdown = exportDocumentMarkdown(saved.draft.doc);
+
+    expect(saved.revision).toMatchObject({
+      id: 'fake-promote-personal-input-accepted',
+      opId: fixture.operationId,
+      disposition: 'personal-input-proposal-accepted',
+    });
+    expect(acceptedMarkdown).not.toContain(fixture.marker);
+    expect(acceptedMarkdown).toContain('- **Decision:** COMPLETED');
+    expect(
+      acceptedMarkdown.match(/\[F-001\]\([^)]+\)/gu)?.length ?? 0,
+    ).toBe(originalLinkCount);
+
+    expect(fixture.service.captureProposalDisposition({
+      draftId: 'draft-1',
+      operationId: fixture.operationId,
+      decision: 'accepted',
+      reason: null,
+      successorOperationId: null,
+      resolvedAt: '2026-07-24T08:03:00.000Z',
+    })).toMatchObject({
+      kind: 'personal-input-integrated',
+      sourceId: 'fake-promote-personal-input-accepted',
+    });
+  });
+
+  it('refuses extra narration content beyond the fake Promote PI transaction', () => {
+    const fixture = fakePromotedPersonalInputFixture();
+    const forged = structuredClone(fixture.accepted);
+    const firstBeat = (
+      forged['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    const firstParagraph = (
+      firstBeat['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    const firstText = (
+      firstParagraph['content'] as Array<Record<string, unknown>>
+    )[0]!;
+    firstText['text'] = `Forged extra narration. ${
+      String(firstText['text'])
+    }`;
+
+    expect(() => fixture.documentService.saveDraft('draft-1', {
+      doc: forged,
+      opId: fixture.operationId,
+      disposition: 'personal-input-proposal-accepted',
+    })).toThrow(
+      'narration acceptance proof refused: saved revision does not equal the operation proposal',
+    );
+    expect(fixture.documentStore.currentRevisionSeq('draft-1')).toBe(1);
+    expect(fixture.documentStore.getNarrationProposal(
+      'draft-1',
+      fixture.operationId,
+    )).toMatchObject({
+      state: 'pending',
+      acceptedRevisionId: null,
+    });
+  });
+
   it('accepts all 14 generated architecture proposals sequentially under one operation', () => {
+    const markdown = fakeGeneratedArchitectureMarkdown();
+    const browserProposals = browserParsedArchitecture(markdown);
     const {
       architectureService,
       operationId,
       proposals,
       service,
-    } = architectureAcceptanceFixture();
+    } = architectureAcceptanceFixture({
+      markdown,
+      proposals: browserProposals,
+    });
     expect(proposals).toHaveLength(14);
+    expect(proposals.at(-1)).toMatchObject({
+      title: 'Fixture-only production note',
+    });
+    expect(proposals.at(-1)?.key).not.toBe(
+      splitArchitecture(markdown).at(-1)?.key,
+    );
     let sections: ArchitectureSection[] = [];
 
     for (const [index, proposal] of proposals.entries()) {
@@ -322,6 +1029,35 @@ describe('LearningService', () => {
       { kind: 'proposal-accepted' },
       { kind: 'proposal-accepted' },
     ]);
+  });
+
+  it('refuses an architecture acceptance with extra non-proposal changes before persisting', () => {
+    const {
+      architectureService,
+      documentStore,
+      operationId,
+      proposals,
+    } = architectureAcceptanceFixture();
+
+    expect(() => architectureService.save('draft-1', {
+      expectedRevisionSeq: 0,
+      sections: [
+        proposals[0]!,
+        {
+          key: 'forged-extra',
+          title: 'Forged extra',
+          md: '### Forged extra\n\nNot proposed by the operation.\n',
+        },
+      ],
+      opId: operationId,
+      disposition: 'architecture-proposals-accepted',
+    })).toThrow(/acceptance.+refused/iu);
+
+    expect(documentStore.currentRevisionSeq('draft-1')).toBe(0);
+    expect(documentStore.getArchitectureProposal(
+      'draft-1',
+      operationId,
+    )).toMatchObject({ state: 'pending', revisionId: null });
   });
 
   it('refuses unchanged and non-proposal architecture acceptance forgeries after a real accept', () => {
@@ -556,7 +1292,42 @@ describe('LearningService', () => {
   });
 
   it('captures an accepted proposal only after its matching row is settled and operation result is durable', () => {
-    const { documentStore, service } = setup();
+    const before = parseMarkdown(
+      '## 1. Opening\n\n> Original line.',
+    ).toJSON();
+    const after = parseMarkdown(
+      '## 1. Opening\n\n> Accepted replacement.',
+    ).toJSON();
+    const { documentStore, service } = setup({
+      operationEvidence: (operationId) => ({
+        operationId,
+        draftId: 'draft-1',
+        operation: 'rewrite-selection',
+        state: 'completed',
+        envelope: { prompt: 'persisted' },
+        inputs: {
+          selection: 'Original line.',
+          requested_scope: { kind: 'selection' },
+        },
+        result: {
+          kind: 'schema',
+          value: { replacement_markdown: 'Accepted replacement.' },
+          guardrail: null,
+        },
+      }),
+    });
+    documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: before,
+      updatedAt: '2026-07-24T08:00:30.000Z',
+      revision: {
+        id: 'accepted-baseline',
+        opId: null,
+        disposition: 'manual-save',
+        createdAt: '2026-07-24T08:00:30.000Z',
+      },
+    });
     documentStore.createNarrationProposal({
       draftId: 'draft-1',
       operationId: 'selection-operation',
@@ -569,11 +1340,7 @@ describe('LearningService', () => {
     const revision = documentStore.saveDraft('draft-1', {
       title: 'Episode One',
       format: 'narration',
-      doc: {
-        type: 'doc',
-        attrs: { format: 'narration', preamble: 'Accepted replacement' },
-        content: [],
-      },
+      doc: after,
       updatedAt: '2026-07-24T08:02:00.000Z',
       revision: {
         id: 'accepted-revision',
@@ -613,6 +1380,71 @@ describe('LearningService', () => {
       },
     }).revision;
     expect(service.captureRevision(forgedReuse)).toBeNull();
+  });
+
+  it('refuses a forged accepted narration before saving or settling its proposal', () => {
+    const before = parseMarkdown(
+      '## 1. Opening\n\n> The original line.',
+    ).toJSON();
+    const forged = parseMarkdown(
+      '## 1. Opening\n\n> An unrelated forged line.',
+    ).toJSON();
+    const { documentStore, service } = setup({
+      operationEvidence: (operationId) => ({
+        operationId,
+        draftId: 'draft-1',
+        operation: 'rewrite-selection',
+        state: 'completed',
+        envelope: { prompt: 'persisted' },
+        inputs: {
+          selection: 'The original line.',
+          requested_scope: { kind: 'selection' },
+        },
+        result: {
+          kind: 'schema',
+          value: { replacement_markdown: 'The proposed line.' },
+          guardrail: null,
+        },
+      }),
+    });
+    documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: before,
+      updatedAt: '2026-07-24T08:00:30.000Z',
+      revision: {
+        id: 'baseline',
+        opId: null,
+        disposition: 'manual-save',
+        createdAt: '2026-07-24T08:00:30.000Z',
+      },
+    });
+    documentStore.createNarrationProposal({
+      draftId: 'draft-1',
+      operationId: 'rewrite-operation',
+      state: 'pending',
+      createdAt: '2026-07-24T08:01:00.000Z',
+      resolvedAt: null,
+      reasonNote: null,
+      successorOperationId: null,
+    });
+    const documentService = new DocumentService({
+      store: documentStore,
+      learningService: service,
+      idFactory: () => 'forged-accepted-save',
+      now: () => '2026-07-24T08:02:00.000Z',
+    });
+
+    expect(() => documentService.saveDraft('draft-1', {
+      doc: forged,
+      opId: 'rewrite-operation',
+      disposition: 'selection-proposal-accepted',
+    })).toThrow(/acceptance.+refused/iu);
+    expect(documentStore.currentRevisionSeq('draft-1')).toBe(1);
+    expect(documentStore.getNarrationProposal(
+      'draft-1',
+      'rewrite-operation',
+    )).toMatchObject({ state: 'pending', acceptedRevisionId: null });
   });
 
   it('rejects architecture rejection capture without a real pending proposal for that draft', () => {
@@ -767,6 +1599,60 @@ describe('LearningService', () => {
 
     expect(service.captureRevision(forgedPick)).toBeNull();
     expect(service.list('draft-1')).toMatchObject({ decisions: [] });
+  });
+
+  it('rejects a real pick when the origin result does not contain its options', () => {
+    const fixture = liveEditorVariantTransition();
+    const { documentStore, service } = setup({
+      operationEvidence: (operationId) => ({
+        operationId,
+        draftId: 'draft-1',
+        operation: 'generate-alternatives',
+        state: 'completed',
+        envelope: { prompt: 'persisted' },
+        result: {
+          kind: 'schema',
+          value: {
+            status: 'complete',
+            options: [{
+              label: 'Forged',
+              markdown: 'Not the inserted options.',
+            }],
+            guardrail_markdown: null,
+          },
+          guardrail: null,
+        },
+      }),
+    });
+    documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: fixture.before,
+      updatedAt: '2026-07-24T08:01:00.000Z',
+      revision: {
+        id: 'mismatched-options-before',
+        opId: null,
+        disposition: 'autosave',
+        createdAt: '2026-07-24T08:01:00.000Z',
+      },
+    });
+    const picked = documentStore.saveDraft('draft-1', {
+      title: 'Episode One',
+      format: 'narration',
+      doc: fixture.after,
+      updatedAt: '2026-07-24T08:02:00.000Z',
+      revision: {
+        id: 'mismatched-options-pick',
+        opId: fixture.operationId,
+        disposition: encodeVariantPickedDisposition(
+          fixture.variantId,
+          'alternative:0',
+        ),
+        createdAt: '2026-07-24T08:02:00.000Z',
+      },
+    }).revision;
+
+    expect(service.captureRevision(picked)).toBeNull();
   });
 
   it('captures reject and reroll separately with exact optional notes and successor', () => {
@@ -1367,6 +2253,86 @@ describe('LearningService', () => {
     });
   });
 
+  it('persists only durable provenance while resolving exact doctrine for Distill', () => {
+    const repositoryRoot = mkdtempSync(join(tmpdir(), 'learning-doctrine-'));
+    roots.push(repositoryRoot);
+    mkdirSync(join(repositoryRoot, 'whp-youtube'));
+    const doctrine = 'Prefer concrete openings.';
+    writeFileSync(
+      join(repositoryRoot, 'whp-youtube', 'STEERING.md'),
+      `# Steering\n\n${doctrine}\n`,
+    );
+    const contentHash = `sha256:${
+      createHash('sha256').update(doctrine).digest('hex')
+    }`;
+    const submissions: unknown[] = [];
+    const operations: LearningOperationService = {
+      submit(_operation, inputs) {
+        submissions.push(inputs);
+        return 'distill-with-durable-provenance';
+      },
+      get: () => ({ operation: 'distill', state: 'running' }),
+      result: () => ({ kind: 'pending' }),
+    };
+    const { documentStore, learningStore, service } = setup({
+      operationService: operations,
+      repositoryRoot,
+    });
+    addPendingArchitectureProposal(documentStore, 'architecture-operation');
+    service.captureArchitectureRejection({
+      draftId: 'draft-1',
+      operationId: 'architecture-operation',
+      reason: null,
+      resolvedAt: '2026-07-24T08:03:00.000Z',
+    });
+    learningStore.createLesson({
+      id: 'durable-applied',
+      draftId: 'draft-1',
+      distillationRunId: null,
+      classification: 'durable',
+      state: 'applied',
+      proposedMarkdown: null,
+      reviewedMarkdown: null,
+      rationaleMarkdown: 'Repeated choice.',
+      proposedTarget: 'writing skill',
+      supersedesLessonId: null,
+      version: 2,
+      repositoryCommit: 'doctrine-commit',
+      repositoryPath: 'whp-youtube/STEERING.md',
+      repositoryAnchor: 'lines:3-3',
+      repositoryContentHash: contentHash,
+      createdAt: '2026-07-24T08:04:00.000Z',
+      updatedAt: '2026-07-24T08:04:00.000Z',
+    }, []);
+
+    const run = service.startDistillation('draft-1', 'on-demand');
+    const frozen = run.lessons[0]!.snapshot as Record<string, unknown>;
+
+    expect(frozen).not.toHaveProperty('lesson_markdown');
+    expect(frozen).toMatchObject({
+      repository_provenance: {
+        status: 'resolved',
+        commit: 'doctrine-commit',
+        path: 'whp-youtube/STEERING.md',
+        anchor: 'lines:3-3',
+        content_hash: contentHash,
+      },
+    });
+    expect(
+      (submissions[0] as {
+        existing_lessons: Array<Record<string, unknown>>;
+      }).existing_lessons[0],
+    ).toMatchObject({
+      lesson_markdown: doctrine,
+      repository_provenance: {
+        content_hash: contentHash,
+      },
+    });
+    expect(JSON.stringify(service.getDistillationRun(run.id))).not.toContain(
+      doctrine,
+    );
+  });
+
   it('rejects malformed evidence without creating lessons', () => {
     let result: ReturnType<LearningOperationService['result']> = {
       kind: 'pending',
@@ -1415,7 +2381,9 @@ describe('LearningService', () => {
   });
 
   it('returns resolved evidence and preserves proposal text through review', () => {
-    const { documentStore, service, learningStore } = setup();
+    const { documentStore, service, learningStore } = setup({
+      resumeKeyFactory: () => 'reconciliation-token-durable',
+    });
     addPendingArchitectureProposal(
       documentStore,
       'architecture-operation',
@@ -1481,7 +2449,9 @@ describe('LearningService', () => {
   });
 
   it('prepares durable reconciliation as a proposal and persists awaiting state', () => {
-    const { documentStore, service, learningStore } = setup();
+    const { documentStore, service, learningStore } = setup({
+      resumeKeyFactory: () => 'reconciliation-token-durable',
+    });
     addPendingArchitectureProposal(
       documentStore,
       'architecture-operation',
@@ -1530,6 +2500,12 @@ describe('LearningService', () => {
     });
     expect(approved.reconciliation?.preparedMarkdown).toContain(
       '$reconcile-whp',
+    );
+    expect(approved.reconciliation?.preparedMarkdown).toContain(
+      'Reconciliation: reconciliation-token-durable',
+    );
+    expect(approved.reconciliation?.preparedMarkdown).toContain(
+      'must add that exact line to DECISIONS.md or a doctrine file',
     );
     expect(approved.reconciliation?.preparedMarkdown).toContain(
       captured.id,

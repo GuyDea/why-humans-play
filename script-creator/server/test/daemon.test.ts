@@ -140,7 +140,7 @@ describe('createDaemonContext', () => {
         url: '/api/ops',
         headers: { 'x-sc-nonce': context.nonce },
         payload: {
-          operation: 'rewrite-selection',
+          operation: 'quick-gate-check',
           inputs: { selection: 'Use the deterministic test binary.' },
         },
       });

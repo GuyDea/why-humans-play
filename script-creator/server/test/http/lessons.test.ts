@@ -346,7 +346,8 @@ describe('lesson review HTTP API', () => {
     const fixture = realReconciliationFixture();
     writeFileSync(
       join(fixture.repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Retain the concrete reveal rule.\n',
+      '# Decisions\n\n- Retain the concrete reveal rule.\n'
+        + 'Reconciliation: reconcile-resume-key\n',
     );
     rmSync(join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'));
     git(fixture.repoRoot, [
@@ -383,7 +384,8 @@ describe('lesson review HTTP API', () => {
     const fixture = realReconciliationFixture();
     writeFileSync(
       join(fixture.repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Keep every reveal concrete.\n',
+      '# Decisions\n\n- Keep every reveal concrete.\n'
+        + 'Reconciliation: reconcile-resume-key\n',
     );
     writeFileSync(
       join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),

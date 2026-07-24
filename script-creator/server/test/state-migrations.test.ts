@@ -49,8 +49,13 @@ describe('shared state migration registry', () => {
         owner: 'learning',
         name: 'handoff-binding-and-shadow-cleanup',
       },
+      {
+        version: 12,
+        owner: 'learning',
+        name: 'causal-binding-and-backfill-repair',
+      },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(11);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(12);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -121,7 +126,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v11 schema for a fresh database', () => {
+  it('creates the complete v12 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -279,6 +284,20 @@ describe('shared state migration registry', () => {
       'narration',
     );
     before.prepare(
+      `INSERT INTO revisions (
+        id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'revision-v9-forged-variant',
+      'draft-v9',
+      2,
+      'operation-alternatives',
+      'variant-picked/set-1/alternative%3A0',
+      docJson,
+      '2026-07-24T08:01:30.000Z',
+      'narration',
+    );
+    before.prepare(
       `INSERT INTO narration_proposals (
         draft_id, operation_id, state, created_at, resolved_at
       ) VALUES (?, ?, ?, ?, ?)`,
@@ -334,7 +353,11 @@ describe('shared state migration registry', () => {
     expect(inspected.prepare<[], { count: number }>(
       `SELECT COUNT(*) AS count FROM decision_events
        WHERE draft_id = 'draft-v9'`,
-    ).get()!.count).toBe(2);
+    ).get()!.count).toBe(1);
+    expect(inspected.prepare<[], { count: number }>(
+      `SELECT COUNT(*) AS count FROM decision_events
+       WHERE source_type = 'revision'`,
+    ).get()!.count).toBe(0);
     expect(inspected.prepare<[], { count: number }>(
       `SELECT COUNT(*) AS count FROM decision_events
        WHERE source_id = 'operation-dismissed'`,
@@ -370,14 +393,12 @@ describe('shared state migration registry', () => {
     const run = learningService.startDistillation('draft-v9', 'on-demand');
     expect(run.state).toBe('queued');
     expect(run.decisions.map(({ decisionId }) => decisionId)).toEqual([
-      'v10:revision:revision-v9',
       'v10:narration-proposal:operation-rejected:rejected',
     ]);
     expect(frozenInput).toMatchObject({
       session: {
         draft_id: 'draft-v9',
         decisions: expect.arrayContaining([
-          expect.objectContaining({ id: 'v10:revision:revision-v9' }),
           expect.objectContaining({
             id: 'v10:narration-proposal:operation-rejected:rejected',
           }),
@@ -386,7 +407,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('does not reapply v10 or v11 to an already-v11 database', () => {
+  it('does not reapply v10, v11, or v12 to an already-v12 database', () => {
     const dbFile = simulatedV9Database();
     documentStores.push(new DocumentStore(dbFile));
     documentStores.pop()!.close();
@@ -394,15 +415,18 @@ describe('shared state migration registry', () => {
     const apply = vi.spyOn(migration, 'apply');
     const v11 = STATE_MIGRATIONS.find(({ version }) => version === 11)!;
     const applyV11 = vi.spyOn(v11, 'apply');
+    const v12 = STATE_MIGRATIONS.find(({ version }) => version === 12)!;
+    const applyV12 = vi.spyOn(v12, 'apply');
 
     documentStores.push(new DocumentStore(dbFile));
     topicStores.push(new TopicStore(dbFile));
 
     expect(apply).not.toHaveBeenCalled();
     expect(applyV11).not.toHaveBeenCalled();
+    expect(applyV12).not.toHaveBeenCalled();
   });
 
-  it('repairs a stranded already-v10 session cursor exactly once in v11', () => {
+  it('repairs a closed stranded v10 session and distills its unfrozen backfill', () => {
     const dbFile = simulatedV9Database();
     const db = new Database(dbFile);
     const docJson =
@@ -433,12 +457,24 @@ describe('shared state migration registry', () => {
       '2026-07-24T08:01:00.000Z',
       'narration',
     );
+    db.prepare(
+      `INSERT INTO narration_proposals (
+        draft_id, operation_id, state, created_at, resolved_at
+      ) VALUES (?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-stranded',
+      'operation-rejected-stranded',
+      'rejected',
+      '2026-07-24T08:01:30.000Z',
+      '2026-07-24T08:02:00.000Z',
+    );
     const v10 = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
     v10.apply(db);
     db.pragma('user_version = 10');
     db.prepare(
       `UPDATE learning_sessions
-       SET start_cursor = 1
+       SET start_cursor = 1, end_cursor = 1,
+           closed_at = '2026-07-24T08:03:00.000Z'
        WHERE draft_id = 'draft-stranded'`,
     ).run();
     db.close();
@@ -448,7 +484,7 @@ describe('shared state migration registry', () => {
     documentStores.push(new DocumentStore(dbFile));
 
     const inspected = new Database(dbFile, { readonly: true });
-    expect(inspected.pragma('user_version', { simple: true })).toBe(11);
+    expect(inspected.pragma('user_version', { simple: true })).toBe(12);
     expect(inspected.prepare<[], { start_cursor: number }>(
       `SELECT start_cursor
        FROM learning_sessions
@@ -456,6 +492,31 @@ describe('shared state migration registry', () => {
     ).get()!.start_cursor).toBe(0);
     inspected.close();
     expect(applyV11).toHaveBeenCalledOnce();
+
+    const topicStore = new TopicStore(dbFile);
+    topicStores.push(topicStore);
+    const learningStore = new LearningStore(dbFile);
+    learningStores.push(learningStore);
+    const service = new LearningService({
+      store: learningStore,
+      documentStore: documentStores[0]!,
+      topicStore,
+      operationEvidence: () => null,
+      operationService: {
+        submit: () => 'closed-repair-distill-operation',
+        get: () => ({ operation: 'distill', state: 'running' }),
+        result: () => ({ kind: 'pending' }),
+      },
+      idFactory: () => 'closed-repair-distill-run',
+      resumeKeyFactory: () => 'closed-repair-distill-resume',
+      now: () => '2026-07-24T09:00:00.000Z',
+    });
+    expect(
+      service.startDistillation('draft-stranded', 'on-demand').decisions
+        .map(({ decisionId }) => decisionId),
+    ).toEqual([
+      'v10:narration-proposal:operation-rejected-stranded:rejected',
+    ]);
 
     documentStores.push(new DocumentStore(dbFile));
     expect(applyV11).toHaveBeenCalledOnce();

@@ -175,3 +175,15 @@ export const OPERATIONS = {
 } as const satisfies Record<string, OperationDefinition>;
 
 export type OperationName = keyof typeof OPERATIONS;
+
+export const DRAFT_WRITING_OPERATIONS = new Set<OperationName>([
+  'generate-scoped',
+  'generate-episode',
+  'generate-architecture',
+  'review',
+  'review-architecture',
+  'rewrite-selection',
+  'rewrite-architecture-section',
+  'generate-alternatives',
+  'promote',
+]);

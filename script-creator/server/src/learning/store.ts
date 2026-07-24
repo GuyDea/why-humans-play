@@ -1149,6 +1149,7 @@ export class LearningStore {
     resumeKey: string,
     input: {
       repositoryCommit: string;
+      reconciliationTokens: string[];
       paths: string[];
       anchors: string[];
       contentHashes: string[];
@@ -1171,11 +1172,44 @@ export class LearningStore {
         throw new Error(`lesson not found: ${reconciliation.lessonId}`);
       }
       if (reconciliation.state === 'verified') {
+        if (reconciliation.repositoryCommit !== input.repositoryCommit) {
+          throw new Error(
+            `lesson reconciliation verification conflict: ${resumeKey}`,
+          );
+        }
         return { lesson, reconciliation };
       }
       if (reconciliation.state !== 'awaiting-reconciliation') {
         throw new Error(
           `lesson reconciliation verification conflict: ${resumeKey}`,
+        );
+      }
+      if (!input.reconciliationTokens.includes(reconciliation.resumeKey)) {
+        throw new Error(
+          `lesson reconciliation commit token missing: ${
+            reconciliation.resumeKey
+          }`,
+        );
+      }
+      const existingClaims = this.db.prepare<
+        [string, string],
+        Pick<ReconciliationRow, 'resume_key'>
+      >(
+        `SELECT resume_key
+         FROM lesson_reconciliations
+         WHERE repository_commit = ?
+           AND state = 'verified'
+           AND id != ?
+         ORDER BY rowid`,
+      ).all(input.repositoryCommit, reconciliation.id);
+      const missingClaims = existingClaims
+        .map(({ resume_key }) => resume_key)
+        .filter((token) => !input.reconciliationTokens.includes(token));
+      if (missingClaims.length > 0) {
+        throw new Error(
+          `lesson reconciliation commit ${input.repositoryCommit} is already claimed by ${
+            missingClaims.join(', ')
+          }; a multi-lesson commit must add every reconciliation token`,
         );
       }
       if (reconciliation.kind === 'retire') {
@@ -1323,10 +1357,14 @@ export class LearningStore {
       if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
         continue;
       }
+      const {
+        lesson_markdown: _shadowText,
+        ...provenanceOnly
+      } = snapshot as Record<string, unknown>;
       update.run(JSON.stringify({
-        ...(snapshot as Record<string, unknown>),
-        lesson_markdown: null,
+        ...provenanceOnly,
         repository_provenance: {
+          status: 'resolved',
           commit: provenance.commit,
           path: provenance.path,
           anchor: provenance.anchor,

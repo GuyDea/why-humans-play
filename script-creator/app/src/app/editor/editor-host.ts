@@ -17,6 +17,7 @@ import {
   exportMarkdown,
   pendingProposalIds,
   parseMarkdown,
+  personalInputAcceptanceTransaction,
   schema,
   variantNodeViews,
 } from '@whp/script-creator-editor-core';
@@ -855,104 +856,11 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     if (this.narrationBlocked()) return false;
     const view = this.editorView;
     if (!view) return false;
-    let markerCount = 0;
-    let markerParagraphCount = 0;
-    let markerParagraphPosition: number | null = null;
-    let markerParagraphSize: number | null = null;
-    let markerParagraphText: string | null = null;
-    let bodyCount = 0;
-    let bodyPosition: number | null = null;
-    let bodyNode: ReturnType<typeof schema.nodeFromJSON> | null = null;
-    view.state.doc.descendants((node, position) => {
-      if (node.isText) {
-        let from = 0;
-        const text = node.text ?? '';
-        for (;;) {
-          const offset = text.indexOf(input.marker, from);
-          if (offset < 0) break;
-          markerCount += 1;
-          from = offset + input.marker.length;
-        }
-      }
-      if (
-        node.type.name === 'paragraph'
-        && node.childCount === 1
-        && node.firstChild?.isText === true
-        && node.textContent.includes(input.marker)
-      ) {
-        markerParagraphCount += 1;
-        markerParagraphPosition = position;
-        markerParagraphSize = node.nodeSize;
-        markerParagraphText = node.textContent;
-      }
-      if (
-        node.type.name === 'opaqueSection'
-        && String(node.attrs.md).trimEnd() === input.bodyMd.trimEnd()
-      ) {
-        bodyCount += 1;
-        bodyPosition = position;
-        bodyNode = node;
-      }
-      return true;
-    });
-    if (
-      markerCount !== 1
-      || markerParagraphCount !== 1
-      || markerParagraphPosition === null
-      || markerParagraphSize === null
-      || bodyCount !== 1
-      || bodyPosition === null
-      || bodyNode === null
-    ) {
-      return false;
-    }
-    const replacementTexts = narrationReplacementParagraphs(
-      input.replacement,
+    const transaction = personalInputAcceptanceTransaction(
+      view.state,
+      input,
     );
-    if (replacementTexts.length === 0 || markerParagraphText === null) {
-      return false;
-    }
-    const matchedMarkerText =
-      markerParagraphText as unknown as string;
-    const markerOffset = matchedMarkerText.indexOf(input.marker);
-    const beforeMarker = matchedMarkerText.slice(0, markerOffset);
-    const afterMarker = matchedMarkerText.slice(
-      markerOffset + input.marker.length,
-    );
-    const replacementParagraphs = replacementTexts.map((text, index) =>
-      schema.node(
-        'paragraph',
-        null,
-        schema.text(
-          `${index === 0 ? beforeMarker : ''}${text}${
-            index === replacementTexts.length - 1 ? afterMarker : ''
-          }`,
-        ),
-      ));
-    const bodyAttrs = (
-      bodyNode as unknown as { attrs: Record<string, unknown> }
-    ).attrs;
-    const currentBody = String(bodyAttrs['md']);
-    const completedBody = currentBody.replace(
-      /^(- \*\*Decision:\*\* )INPUT-REQUESTED$/mu,
-      '$1COMPLETED',
-    );
-    if (completedBody === currentBody) return false;
-
-    let transaction = view.state.tr.replaceWith(
-      markerParagraphPosition,
-      markerParagraphPosition + markerParagraphSize,
-      replacementParagraphs,
-    );
-    const mappedBodyPosition = transaction.mapping.map(bodyPosition);
-    transaction = transaction.setNodeMarkup(
-      mappedBodyPosition,
-      undefined,
-      {
-        ...bodyAttrs,
-        md: completedBody,
-      },
-    );
+    if (!transaction) return false;
     const inverseSteps = transaction.steps
       .map((step, index) => step.invert(transaction.docs[index]!))
       .reverse();
@@ -1413,24 +1321,6 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       requestedScope: { kind: 'full-draft' },
     };
   }
-}
-
-function narrationReplacementParagraphs(markdown: string): string[] {
-  const blocks = markdown
-    .replace(/\r\n?/gu, '\n')
-    .trim()
-    .split(/\n\s*\n/gu)
-    .filter((block) => block.trim() !== '');
-  return blocks.flatMap((block) => {
-    const lines = block.split('\n');
-    const quoted = lines.every((line) =>
-      line === '>' || line.startsWith('> '));
-    const text = lines
-      .map((line) => quoted ? line.replace(/^> ?/u, '') : line)
-      .join(' ')
-      .trim();
-    return text === '' ? [] : [text];
-  });
 }
 
 function promotionLauncher(

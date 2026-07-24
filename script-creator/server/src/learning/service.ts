@@ -3,7 +3,10 @@ import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
 import {
   EditorState,
+  parseMarkdown as parseEditorMarkdown,
+  personalInputAcceptanceTransaction,
   pickActive as pickEditorVariant,
+  preserveDraftDocument,
   schema as editorSchema,
 } from '@whp/script-creator-editor-core';
 import {
@@ -13,6 +16,7 @@ import {
 import type {
   DocumentStore,
   DraftArchitecture,
+  DraftDocument,
   PromotionRecord,
   RevisionRecord,
 } from '../documents/store.js';
@@ -134,6 +138,16 @@ export class ReconciliationVerificationRefusal extends Error {
   }
 }
 
+export class AcceptanceProofRefusal extends Error {
+  readonly code = 'acceptance-proof-refused';
+  readonly recoverable = true;
+
+  constructor(message: string) {
+    super(message);
+    this.name = 'AcceptanceProofRefusal';
+  }
+}
+
 export class LearningService {
   private readonly store: LearningStore;
   private readonly documentStore: DocumentStore;
@@ -201,6 +215,93 @@ export class LearningService {
     });
   }
 
+  validateRevisionAcceptance(
+    revision: RevisionRecord,
+    options: {
+      allowPendingProposal?: boolean;
+      revisions?: RevisionRecord[];
+    } = {},
+  ): void {
+    const kind = decisionKindForRevisionDisposition(revision.disposition);
+    if (
+      kind !== 'proposal-accepted'
+      && kind !== 'personal-input-integrated'
+    ) {
+      throw new AcceptanceProofRefusal(
+        `acceptance proof refused: disposition ${revision.disposition} is not an accepted proposal`,
+      );
+    }
+    if (!revision.opId) {
+      throw new AcceptanceProofRefusal(
+        'acceptance proof refused: operation id is required',
+      );
+    }
+    const operation = this.completedDraftOperation(
+      revision.opId,
+      revision.draftId,
+    );
+    if (!operation) {
+      throw new AcceptanceProofRefusal(
+        'acceptance proof refused: matching completed draft operation is required',
+      );
+    }
+    const revisions = options.revisions
+      ?? this.documentStore.listRevisions(revision.draftId);
+    const proofRevisions = revisions.some(({ id }) => id === revision.id)
+      ? revisions
+      : [...revisions, revision];
+    const architecture = revision.disposition
+        === 'architecture-proposal-accepted'
+      || revision.disposition === 'architecture-proposals-accepted';
+    if (architecture) {
+      const proposal = this.documentStore.getArchitectureProposal(
+        revision.draftId,
+        revision.opId,
+      );
+      const proposalMatches = proposal?.state === 'accepted'
+        ? proposal.revisionId !== null && proposal.resolvedAt !== null
+        : options.allowPendingProposal === true
+          && proposal?.state === 'pending';
+      const contentMatches = architectureAcceptanceMatchesOperation(
+        revision,
+        operation,
+        proofRevisions,
+      );
+      if (!proposalMatches || !contentMatches) {
+        throw new AcceptanceProofRefusal(
+          'architecture acceptance proof refused: revision contains changes outside the accepted operation proposal',
+        );
+      }
+      return;
+    }
+    const proposal = this.documentStore.getNarrationProposal(
+      revision.draftId,
+      revision.opId,
+    );
+    const proposalMatches = proposal?.state === 'accepted'
+      ? proposal.acceptedRevisionId === revision.id
+        && proposal.resolvedAt !== null
+      : options.allowPendingProposal === true
+        && proposal?.state === 'pending'
+        && (
+          proposal.acceptedRevisionId == null
+          || proposal.acceptedRevisionId === revision.id
+        );
+    if (
+      !proposalMatches
+      || !narrationAcceptanceMatchesOperation(
+        revision,
+        operation,
+        proofRevisions,
+        this.documentStore.getDraft(revision.draftId)?.doc ?? null,
+      )
+    ) {
+      throw new AcceptanceProofRefusal(
+        'narration acceptance proof refused: saved revision does not equal the operation proposal',
+      );
+    }
+  }
+
   captureProposalDisposition(input: {
     draftId: string;
     operationId: string;
@@ -236,6 +337,25 @@ export class LearningService {
         `accepted proposal revision missing: ${input.operationId}`,
       );
     }
+    const prevalidatedAcceptance = acceptedRevision !== null
+      && proposal.state === 'pending'
+      && proposal.acceptedRevisionId === acceptedRevision.id;
+    const existingAcceptance = acceptedRevision === null
+      ? null
+      : this.store.getDecisionBySource(
+          'revision',
+          acceptedRevision.id,
+          acceptedRevision.disposition,
+        );
+    if (
+      acceptedRevision
+      && !prevalidatedAcceptance
+      && !existingAcceptance
+    ) {
+      this.validateRevisionAcceptance(acceptedRevision, {
+        allowPendingProposal: true,
+      });
+    }
     if (proposal.state === 'pending') {
       this.documentStore.resolveNarrationProposal(
         input.draftId,
@@ -260,7 +380,21 @@ export class LearningService {
     }
 
     if (input.decision === 'accepted') {
-      const decision = this.captureRevision(acceptedRevision!);
+      const decision = existingAcceptance ?? (
+        prevalidatedAcceptance
+          ? this.capture({
+              draftId: acceptedRevision!.draftId,
+              kind: decisionKindForRevisionDisposition(
+                acceptedRevision!.disposition,
+              )!,
+              sourceType: 'revision',
+              sourceId: acceptedRevision!.id,
+              disposition: acceptedRevision!.disposition,
+              sourceTimestamp: acceptedRevision!.createdAt,
+              note: null,
+            })
+          : this.captureRevision(acceptedRevision!)
+      );
       if (!decision) {
         throw new Error(
           `accepted proposal disposition is not recognized: ${
@@ -567,12 +701,7 @@ export class LearningService {
     const kind: ReconciliationKind = detail.supersedesLessonId
       ? 'supersede'
       : 'apply';
-    const reconciliation = this.newReconciliation(
-      detail,
-      kind,
-      this.prepareReconciliationHandoff(detail, kind),
-      timestamp,
-    );
+    const reconciliation = this.newReconciliation(detail, kind, timestamp);
     const approved = this.store.approveDurableLesson(lessonId, {
       expectedVersion: input.expectedVersion,
       reconciliation,
@@ -624,7 +753,6 @@ export class LearningService {
     const reconciliation = this.newReconciliation(
       detail,
       'retire',
-      this.prepareReconciliationHandoff(detail, 'retire'),
       timestamp,
     );
     const prepared = this.store.prepareDurableRetirement(lessonId, {
@@ -718,6 +846,7 @@ export class LearningService {
     }
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
+      reconciliationTokens: verified.reconciliationTokens,
       paths: verified.changedPaths,
       anchors: verified.doctrinePointers.map(({ anchor }) => anchor),
       contentHashes: verified.doctrinePointers.map(
@@ -785,6 +914,7 @@ export class LearningService {
     }
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
+      reconciliationTokens: verified.reconciliationTokens,
       paths: verified.changedPaths,
       anchors: [pointer.anchor],
       contentHashes: [pointer.contentHash],
@@ -877,6 +1007,7 @@ export class LearningService {
       kind: reconciliation.kind,
       preparedAt: reconciliation.createdAt,
       preparedHead: reconciliation.preparedHead,
+      reconciliationToken: reconciliation.resumeKey,
       candidateMarkdown: reconciliation.kind === 'retire'
         ? null
         : lesson.reviewedMarkdown,
@@ -1136,7 +1267,6 @@ export class LearningService {
   private newReconciliation(
     lesson: LessonRecord,
     kind: ReconciliationKind,
-    preparedMarkdown: string,
     timestamp: string,
   ): LessonReconciliationRecord {
     let preparedHead: string | null = null;
@@ -1146,13 +1276,19 @@ export class LearningService {
     } catch {
       preparedHead = null;
     }
+    const id = this.idFactory();
+    const resumeKey = this.resumeKeyFactory();
     return {
-      id: this.idFactory(),
+      id,
       lessonId: lesson.id,
       kind,
       state: 'prepared',
-      resumeKey: this.resumeKeyFactory(),
-      preparedMarkdown,
+      resumeKey,
+      preparedMarkdown: this.prepareReconciliationHandoff(
+        this.lessonDetail(lesson),
+        kind,
+        resumeKey,
+      ),
       preparedHead,
       repositoryCommit: null,
       paths: [],
@@ -1167,6 +1303,7 @@ export class LearningService {
   private prepareReconciliationHandoff(
     lesson: LessonDetail,
     kind: ReconciliationKind,
+    reconciliationToken: string,
   ): string {
     const action = kind === 'apply'
       ? 'apply this durable doctrine candidate'
@@ -1203,10 +1340,15 @@ export class LearningService {
       `- Classification: ${lesson.classification}`,
       `- Proposed target hint: ${lesson.proposedTarget ?? 'none'}`,
       `- Supersedes lesson: ${lesson.supersedesLessonId ?? 'none'}`,
+      `- Reconciliation token: ${reconciliationToken}`,
       '',
       '```json',
       JSON.stringify(evidence, null, 2),
       '```',
+      '',
+      `The reconcile-whp ledger entry must add that exact line to DECISIONS.md or a doctrine file:`,
+      '',
+      `Reconciliation: ${reconciliationToken}`,
       '',
       'Run `$reconcile-whp` in the selected repository controller. The reconcile skill—not Script Creator—chooses and edits the affected steering or skill files and `DECISIONS.md`. Review that diff and make the deliberate repository commit outside Script Creator.',
       '',
@@ -1218,16 +1360,18 @@ export class LearningService {
     run: DistillationRunRecord,
   ): DistillationRunRecord {
     const operationService = this.requireOperationService();
-    const inputs = {
-      session: {
-        id: run.sessionId,
-        draft_id: run.draftId,
-        trigger: run.trigger,
-        decisions: run.decisions.map(({ snapshot }) => snapshot),
-      },
-      existing_lessons: run.lessons.map(({ snapshot }) => snapshot),
-    };
     try {
+      const inputs = {
+        session: {
+          id: run.sessionId,
+          draft_id: run.draftId,
+          trigger: run.trigger,
+          decisions: run.decisions.map(({ snapshot }) => snapshot),
+        },
+        existing_lessons: run.lessons.map(({ snapshot }) =>
+          this.materializeFrozenLesson(run.draftId, snapshot)
+        ),
+      };
       let cwd: string | undefined;
       try {
         cwd = this.repositoryRootForDraft?.(run.draftId);
@@ -1284,39 +1428,130 @@ export class LearningService {
   }
 
   private freezeLesson(lesson: LessonRecord): unknown {
-    let lessonMarkdown = lesson.reviewedMarkdown
-      ?? lesson.proposedMarkdown;
-    let repositoryProvenance: unknown = null;
     if (lesson.classification === 'durable' && lesson.state === 'applied') {
       const resolved = this.resolveAppliedDurableLesson(lesson);
-      lessonMarkdown = resolved.status === 'resolved'
-        ? resolved.lesson_markdown
-        : null;
-      repositoryProvenance = resolved;
+      const repositoryProvenance = resolved.status === 'resolved'
+        ? {
+            status: resolved.status,
+            commit: resolved.commit,
+            path: resolved.path,
+            anchor: resolved.anchor,
+            content_hash: resolved.content_hash,
+          }
+        : resolved;
+      return {
+        id: lesson.id,
+        draft_id: lesson.draftId,
+        classification: lesson.classification,
+        state: lesson.state,
+        rationale_markdown: lesson.rationaleMarkdown,
+        proposed_target: lesson.proposedTarget,
+        supersedes_lesson_id: lesson.supersedesLessonId,
+        evidence: this.store.listLessonEvidence(lesson.id),
+        repository_provenance: repositoryProvenance,
+      };
     }
     return {
       id: lesson.id,
       draft_id: lesson.draftId,
       classification: lesson.classification,
       state: lesson.state,
-      lesson_markdown: lessonMarkdown,
+      lesson_markdown: lesson.reviewedMarkdown ?? lesson.proposedMarkdown,
       rationale_markdown: lesson.rationaleMarkdown,
       proposed_target: lesson.proposedTarget,
       supersedes_lesson_id: lesson.supersedesLessonId,
       evidence: this.store.listLessonEvidence(lesson.id),
-      repository_provenance: repositoryProvenance,
+      repository_provenance: null,
     };
+  }
+
+  private materializeFrozenLesson(
+    draftId: string,
+    snapshot: unknown,
+  ): unknown {
+    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+      return snapshot;
+    }
+    const frozen = snapshot as Record<string, unknown>;
+    if (
+      frozen['classification'] !== 'durable'
+      || frozen['state'] !== 'applied'
+    ) {
+      return snapshot;
+    }
+    const provenance = frozen['repository_provenance'];
+    if (
+      !provenance
+      || typeof provenance !== 'object'
+      || Array.isArray(provenance)
+    ) {
+      throw new Error(
+        `applied durable lesson ${String(frozen['id'])} has no frozen repository provenance`,
+      );
+    }
+    const pointer = provenance as Record<string, unknown>;
+    if (
+      pointer['status'] !== 'resolved'
+      || typeof pointer['path'] !== 'string'
+      || typeof pointer['anchor'] !== 'string'
+      || typeof pointer['content_hash'] !== 'string'
+    ) {
+      throw new Error(
+        `applied durable lesson ${String(frozen['id'])} repository provenance is unresolved`,
+      );
+    }
+    const lessonMarkdown = this.readRepositoryPointer(
+      draftId,
+      pointer['path'],
+      pointer['anchor'],
+      pointer['content_hash'],
+    );
+    return {
+      ...frozen,
+      lesson_markdown: lessonMarkdown,
+    };
+  }
+
+  private readRepositoryPointer(
+    draftId: string,
+    repositoryPath: string,
+    repositoryAnchor: string,
+    repositoryContentHash: string,
+  ): string {
+    if (!this.repositoryRootForDraft) {
+      throw new Error('selected repository workspace is unavailable');
+    }
+    const root = resolve(this.repositoryRootForDraft(draftId));
+    const path = resolve(root, repositoryPath);
+    if (path !== root && !path.startsWith(`${root}${sep}`)) {
+      throw new Error('repository path escapes the selected workspace');
+    }
+    const match = /^lines:(\d+)-(\d+)$/u.exec(repositoryAnchor);
+    if (!match) throw new Error('repository anchor is invalid');
+    const start = Number(match[1]);
+    const end = Number(match[2]);
+    const lines = readFileSync(path, 'utf8').split('\n');
+    if (start < 1 || end < start || end > lines.length) {
+      throw new Error('repository anchor no longer resolves');
+    }
+    const lessonMarkdown = lines.slice(start - 1, end).join('\n');
+    if (hashMarkdown(lessonMarkdown) !== repositoryContentHash) {
+      throw new Error('repository doctrine content hash is stale');
+    }
+    return lessonMarkdown;
   }
 
   private resolveAppliedDurableLesson(lesson: LessonRecord): {
     status: 'resolved';
     lesson_markdown: string;
+    commit: string | null;
     path: string;
     anchor: string;
     content_hash: string;
   } | {
     status: 'unresolved';
     reason: string;
+    commit: string | null;
     path: string | null;
     anchor: string | null;
     content_hash: string | null;
@@ -1324,6 +1559,7 @@ export class LearningService {
     const unresolved = (reason: string) => ({
       status: 'unresolved' as const,
       reason,
+      commit: lesson.repositoryCommit,
       path: lesson.repositoryPath,
       anchor: lesson.repositoryAnchor,
       content_hash: lesson.repositoryContentHash,
@@ -1361,6 +1597,7 @@ export class LearningService {
       return {
         status: 'resolved',
         lesson_markdown: lessonMarkdown,
+        commit: lesson.repositoryCommit,
         path: lesson.repositoryPath,
         anchor: lesson.repositoryAnchor,
         content_hash: lesson.repositoryContentHash,
@@ -1392,36 +1629,12 @@ export class LearningService {
       kind === 'proposal-accepted'
       || kind === 'personal-input-integrated'
     ) {
-      if (!revision.opId) return false;
-      const operation = this.completedDraftOperation(
-        revision.opId,
-        revision.draftId,
-      );
-      if (!operation) return false;
-      if (
-        revision.disposition === 'architecture-proposal-accepted'
-        || revision.disposition === 'architecture-proposals-accepted'
-      ) {
-        const proposal = this.documentStore.getArchitectureProposal(
-          revision.draftId,
-          revision.opId,
-        );
-        return proposal?.state === 'accepted'
-          && proposal.resolvedAt !== null
-          && proposal.revisionId !== null
-          && architectureAcceptanceMatchesOperation(
-            revision,
-            operation,
-            this.documentStore.listRevisions(revision.draftId),
-          );
+      try {
+        this.validateRevisionAcceptance(revision);
+        return true;
+      } catch {
+        return false;
       }
-      const proposal = this.documentStore.getNarrationProposal(
-        revision.draftId,
-        revision.opId,
-      );
-      return proposal?.state === 'accepted'
-        && proposal.resolvedAt !== null
-        && proposal.acceptedRevisionId === revision.id;
     }
     if (kind === 'variant-picked') {
       return this.variantPickHasNormativeProof(revision);
@@ -1487,6 +1700,7 @@ export class LearningService {
       || variant.originOperationId !== revision.opId
       || selectedIndex === null
       || variant.activeIndex !== selectedIndex
+      || !variantOptionsMatchOperation(variant, operation)
     ) {
       return false;
     }
@@ -1577,6 +1791,217 @@ function isCompletedOperationResult(value: unknown): boolean {
   return result?.['kind'] === 'schema' || result?.['kind'] === 'raw';
 }
 
+function narrationAcceptanceMatchesOperation(
+  revision: RevisionRecord,
+  operation: OperationDecisionEvidence,
+  revisions: RevisionRecord[],
+  firstNarrationBaseline: DraftDocument | null,
+): boolean {
+  if (revision.kind !== 'narration') return false;
+  const index = revisions.findIndex(({ id }) => id === revision.id);
+  if (index < 0) return false;
+  const previousNarration = revisions
+    .slice(0, index)
+    .reverse()
+    .find(({ kind }) => kind === 'narration');
+  const before = previousNarration?.doc ?? firstNarrationBaseline;
+  if (
+    !before
+    || JSON.stringify(before) === JSON.stringify(revision.doc)
+  ) {
+    return false;
+  }
+  try {
+    const afterNode = editorSchema.nodeFromJSON(revision.doc);
+    if (revision.disposition === 'episode-generation-accepted') {
+      if (sameNarrationContent(
+        editorSchema.nodeFromJSON(before),
+        afterNode,
+      )) {
+        return false;
+      }
+      const result = recordValue(operation.result);
+      if (
+        operation.operation !== 'generate-episode'
+        || result?.['kind'] !== 'raw'
+        || typeof result['markdown'] !== 'string'
+      ) {
+        return false;
+      }
+      const parsed = parseEditorMarkdown(result['markdown']);
+      const expected = preserveDraftDocument(
+        parsed.toJSON(),
+        before,
+      );
+      return sameNarrationContent(
+        editorSchema.nodeFromJSON(expected),
+        afterNode,
+      );
+    }
+    if (operation.operation !== 'rewrite-selection') return false;
+    const result = recordValue(operation.result);
+    const value = recordValue(result?.['value']);
+    const replacement = value?.['replacement_markdown'];
+    if (
+      result?.['kind'] !== 'schema'
+      || typeof replacement !== 'string'
+    ) {
+      return false;
+    }
+    const inputs = recordValue(operation.inputs);
+    const requestedScope = recordValue(inputs?.['requested_scope']);
+    if (revision.disposition === 'personal-input-proposal-accepted') {
+      return requestedScope?.['kind'] === 'personal-input'
+        && personalInputAcceptanceMatches(
+          before,
+          revision.doc,
+          inputs,
+          replacement,
+        );
+    }
+    return revision.disposition === 'selection-proposal-accepted'
+      && requestedScope?.['kind'] !== 'personal-input'
+      && rewriteAcceptanceMatches(
+        before,
+        revision.doc,
+        inputs,
+        replacement,
+      );
+  } catch {
+    return false;
+  }
+}
+
+function sameNarrationContent(
+  expected: ReturnType<typeof editorSchema.nodeFromJSON>,
+  actual: ReturnType<typeof editorSchema.nodeFromJSON>,
+): boolean {
+  return JSON.stringify(narrationContent(expected))
+    === JSON.stringify(narrationContent(actual));
+}
+
+function narrationContent(
+  document: ReturnType<typeof editorSchema.nodeFromJSON>,
+): Array<{
+  title: string;
+  blocks: unknown[];
+}> {
+  const beats: Array<{ title: string; blocks: unknown[] }> = [];
+  document.forEach((beat) => {
+    const blocks: unknown[] = [];
+    beat.forEach((block) => blocks.push(block.toJSON()));
+    beats.push({
+      title: String(beat.attrs['title']),
+      blocks,
+    });
+  });
+  return beats;
+}
+
+function rewriteAcceptanceMatches(
+  before: unknown,
+  after: unknown,
+  inputs: Record<string, unknown> | null,
+  replacementMarkdown: string,
+): boolean {
+  const selection = inputs?.['selection'];
+  if (typeof selection !== 'string' || selection === '') return false;
+  const beforeNode = editorSchema.nodeFromJSON(before);
+  const afterNode = editorSchema.nodeFromJSON(after);
+  if (beforeNode.content.findDiffStart(afterNode.content) === null) {
+    return false;
+  }
+  const beforeText = beforeNode.textBetween(
+    0,
+    beforeNode.content.size,
+    '\n\n',
+  );
+  const first = beforeText.indexOf(selection);
+  if (first < 0 || beforeText.indexOf(selection, first + 1) >= 0) {
+    return false;
+  }
+  const replacement = narrationReplacementParagraphs(
+    replacementMarkdown,
+  ).join('\n\n');
+  const expected = `${beforeText.slice(0, first)}${replacement}${
+    beforeText.slice(first + selection.length)
+  }`;
+  return afterNode.textBetween(
+    0,
+    afterNode.content.size,
+    '\n\n',
+  ) === expected;
+}
+
+function personalInputAcceptanceMatches(
+  before: unknown,
+  after: unknown,
+  inputs: Record<string, unknown> | null,
+  replacementMarkdown: string,
+): boolean {
+  const marker = inputs?.['selection'];
+  const personalInputBlock = inputs?.['personal_input_block'];
+  const requestedScope = recordValue(inputs?.['requested_scope']);
+  const personalInputId = requestedScope?.['personal_input_id'];
+  if (
+    typeof marker !== 'string'
+    || marker === ''
+    || typeof personalInputBlock !== 'string'
+    || typeof personalInputId !== 'string'
+    || marker !== `<!-- ${personalInputId}: Martin input -->`
+  ) {
+    return false;
+  }
+  const bodyMd = personalInputOpaqueBody(
+    personalInputBlock,
+    personalInputId,
+  );
+  if (bodyMd === null) return false;
+  const state = EditorState.create({
+    doc: editorSchema.nodeFromJSON(before),
+  });
+  const transaction = personalInputAcceptanceTransaction(state, {
+    marker,
+    bodyMd,
+    replacement: replacementMarkdown,
+  });
+  return transaction?.doc.eq(editorSchema.nodeFromJSON(after)) ?? false;
+}
+
+function personalInputOpaqueBody(
+  personalInputBlock: string,
+  personalInputId: string,
+): string | null {
+  const candidates = personalInputBlock
+    .replace(/\r\n?/gu, '\n')
+    .trimEnd()
+    .split(/\n\s*\n/gu)
+    .filter((block) => {
+      const lines = block.split('\n');
+      return lines.includes(`- **ID:** ${personalInputId}`)
+        && lines.includes('- **Decision:** INPUT-REQUESTED');
+    });
+  return candidates.length === 1 ? candidates[0]! : null;
+}
+
+function narrationReplacementParagraphs(markdown: string): string[] {
+  const blocks = markdown
+    .replace(/\r\n?/gu, '\n')
+    .trim()
+    .split(/\n\s*\n/gu)
+    .filter((block) => block.trim() !== '');
+  return blocks.flatMap((block) => {
+    const lines = block.split('\n');
+    const quoted = lines.every((line) =>
+      line === '>' || line.startsWith('> '));
+    const text = lines
+      .map((line) => quoted ? line.replace(/^> ?/u, '') : line)
+      .join(' ')
+      .trim();
+    return text === '' ? [] : [text];
+  });
+}
+
 function architectureAcceptanceMatchesOperation(
   revision: RevisionRecord,
   operation: OperationDecisionEvidence,
@@ -1601,8 +2026,7 @@ function architectureAcceptanceMatchesOperation(
 
   const changed = before
     ? changedArchitectureSections(before, after)
-    : after.sections.filter((section) =>
-        proposals.some((proposal) => sameSection(proposal, section)));
+    : after.sections;
   if (
     changed === null
     || changed.length === 0
@@ -1614,7 +2038,8 @@ function architectureAcceptanceMatchesOperation(
     return false;
   }
   if (!changed.every((section) =>
-    proposals.some((proposal) => sameSection(proposal, section)))) {
+    proposals.some((proposal) =>
+      sameOperationSection(proposal, section)))) {
     return false;
   }
   const previouslyAccepted = acceptedArchitectureProposalsBefore(
@@ -1626,7 +2051,7 @@ function architectureAcceptanceMatchesOperation(
   return previouslyAccepted !== null
     && !changed.some((section) =>
       previouslyAccepted.some((accepted) =>
-        sameSection(accepted, section)));
+        sameOperationSection(accepted, section)));
 }
 
 function architectureProposalsFromOperation(
@@ -1675,10 +2100,12 @@ function acceptedArchitectureProposalsBefore(
       const changed = before
         ? changedArchitectureSections(before, after)
         : after.sections.filter((section) =>
-            proposals.some((proposal) => sameSection(proposal, section)));
+            proposals.some((proposal) =>
+              sameOperationSection(proposal, section)));
       if (changed === null) return null;
       accepted.push(...changed.filter((section) =>
-        proposals.some((proposal) => sameSection(proposal, section))));
+        proposals.some((proposal) =>
+          sameOperationSection(proposal, section))));
     }
     before = after;
   }
@@ -1761,6 +2188,17 @@ function sameSection(
     && left.md === right.md;
 }
 
+function sameOperationSection(
+  left: ArchitectureSection,
+  right: ArchitectureSection,
+): boolean {
+  if (sameSection(left, right)) return true;
+  return left.key.startsWith('opaque-')
+    && right.key.startsWith('opaque-')
+    && left.title === right.title
+    && left.md === right.md;
+}
+
 function isQualifyingValidatorFixRevision(
   revisions: RevisionRecord[],
   revision: RevisionRecord,
@@ -1789,6 +2227,10 @@ interface VariantSetProof {
   originOperationId: string | null;
   activeIndex: number | null;
   optionCount: number;
+  options: Array<{
+    label: string;
+    text: string;
+  }>;
 }
 
 function findVariantSet(
@@ -1814,12 +2256,37 @@ function findVariantSet(
     const options = record['type'] === 'inlineVariantSet'
       ? attrs['options']
       : record['content'];
+    const normalizedOptions = Array.isArray(options)
+      ? options.flatMap((option) => {
+          const candidate = recordValue(option);
+          if (!candidate) return [];
+          if (record['type'] === 'inlineVariantSet') {
+            return typeof candidate['label'] === 'string'
+                && typeof candidate['text'] === 'string'
+              ? [{
+                  label: candidate['label'],
+                  text: candidate['text'],
+                }]
+              : [];
+          }
+          const optionAttrs = recordValue(candidate['attrs']);
+          const content = candidate['content'];
+          return typeof optionAttrs?.['label'] === 'string'
+              && Array.isArray(content)
+            ? [{
+                label: optionAttrs['label'],
+                text: plainTextFromEditorJson(content),
+              }]
+            : [];
+        })
+      : [];
     return {
       originOperationId: typeof origin === 'string' ? origin : null,
       activeIndex: Number.isInteger(activeIndex)
         ? Number(activeIndex)
         : null,
       optionCount: Array.isArray(options) ? options.length : 0,
+      options: normalizedOptions,
     };
   }
   for (const nested of Object.values(record)) {
@@ -1827,6 +2294,55 @@ function findVariantSet(
     if (found) return found;
   }
   return null;
+}
+
+function variantOptionsMatchOperation(
+  variant: VariantSetProof,
+  operation: OperationDecisionEvidence,
+): boolean {
+  const result = recordValue(operation.result);
+  const value = recordValue(result?.['value']);
+  const options = value?.['options'];
+  if (result?.['kind'] !== 'schema' || !Array.isArray(options)) {
+    return false;
+  }
+  const expected = options.flatMap((option) => {
+    const candidate = recordValue(option);
+    return candidate
+        && typeof candidate['label'] === 'string'
+        && typeof candidate['markdown'] === 'string'
+      ? [{
+          label: candidate['label'],
+          text: markdownToPlainText(candidate['markdown']),
+        }]
+      : [];
+  });
+  return expected.length === options.length
+    && JSON.stringify(expected) === JSON.stringify(variant.options);
+}
+
+function plainTextFromEditorJson(value: unknown): string {
+  if (Array.isArray(value)) {
+    return value.map(plainTextFromEditorJson)
+      .filter((text) => text !== '')
+      .join(' ');
+  }
+  const record = recordValue(value);
+  if (!record) return '';
+  if (record['type'] === 'text' && typeof record['text'] === 'string') {
+    return record['text'];
+  }
+  return plainTextFromEditorJson(record['content']);
+}
+
+function markdownToPlainText(markdown: string): string {
+  return markdown
+    .replace(/!\[([^\]]*)\]\([^)]*\)/gu, '$1')
+    .replace(/\[([^\]]+)\]\([^)]*\)/gu, '$1')
+    .replace(/^(?:#{1,6}\s+|>\s?|[-+*]\s+|\d+\.\s+)/gmu, '')
+    .replace(/[*_~`]/gu, '')
+    .replace(/\s*\r?\n\s*/gu, ' ')
+    .trim();
 }
 
 function variantAlternativeIndex(

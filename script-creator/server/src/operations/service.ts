@@ -82,12 +82,29 @@ export type OperationServiceResult =
 export class DraftScopedResumeRequiredError extends Error {
   readonly code = 'draft-scoped-resume-required';
   readonly recoverable = true;
+  readonly route = '/api/drafts/:id/ops/:operationId/resume';
 
-  constructor(readonly draftId: string) {
+  constructor(
+    readonly operation: OperationName,
+    readonly draftId: string | null,
+  ) {
     super(
-      `operation resume refused: use the draft-scoped resume route for draft ${draftId}`,
+      `operation resume refused: ${operation} must use /api/drafts/:id/ops/:operationId/resume`,
     );
     this.name = 'DraftScopedResumeRequiredError';
+  }
+}
+
+export class DraftScopedSubmissionRequiredError extends Error {
+  readonly code = 'draft-scoped-submission-required';
+  readonly recoverable = true;
+
+  constructor(
+    readonly operation: OperationName,
+    readonly route: '/api/drafts/:id/ops' | '/api/drafts/:id/distill',
+  ) {
+    super(`operation submit refused: ${operation} must use ${route}`);
+    this.name = 'DraftScopedSubmissionRequiredError';
   }
 }
 

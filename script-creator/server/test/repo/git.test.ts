@@ -316,6 +316,7 @@ describe('reconciliation commit verification', () => {
         'DECISIONS.md',
         'whp-youtube/STEERING.md',
       ],
+      reconciliationTokens: [],
       doctrinePointers: [
         expect.objectContaining({
           path: 'whp-youtube/STEERING.md',
@@ -404,13 +405,16 @@ describe('reconciliation commit verification', () => {
       kind: 'apply',
       preparedAt: '2026-07-24T09:00:00.000Z',
       preparedHead,
+      reconciliationToken: 'reconciliation-current',
       candidateMarkdown: 'This lesson belongs to the current handoff.',
       priorPointer: null,
     })).toThrow(/reconciliation commit.+predates.+handoff/iu);
 
     writeFileSync(
       join(repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Older unrelated lesson.\n- Another wrong lesson.\n',
+      '# Decisions\n\n- Older unrelated lesson.\n- Another wrong lesson.\n'
+        + 'Reconciliation: reconciliation-wrong\n'
+        + 'Reconciliation: reconciliation-current\n',
     );
     writeFileSync(
       join(repoRoot, 'whp-youtube', 'STEERING.md'),
@@ -424,6 +428,7 @@ describe('reconciliation commit verification', () => {
       kind: 'apply',
       preparedAt: '2026-07-24T09:00:00.000Z',
       preparedHead,
+      reconciliationToken: 'reconciliation-current',
       candidateMarkdown: 'This lesson belongs to the current handoff.',
       priorPointer: null,
     })).toThrow(/reconciliation commit.+current lesson.+added doctrine/iu);
@@ -449,7 +454,8 @@ describe('reconciliation commit verification', () => {
     const preparedHead = git(repoRoot, ['rev-parse', 'HEAD']);
     writeFileSync(
       join(repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Prefer the lesson-matched hunk.\n',
+      '# Decisions\n\n- Prefer the lesson-matched hunk.\n'
+        + 'Reconciliation: reconciliation-apply\n',
     );
     writeFileSync(
       join(repoRoot, '.agents', 'skills', 'a-unrelated', 'SKILL.md'),
@@ -467,6 +473,7 @@ describe('reconciliation commit verification', () => {
       kind: 'apply',
       preparedAt: '2026-07-24T09:00:00.000Z',
       preparedHead,
+      reconciliationToken: 'reconciliation-apply',
       candidateMarkdown: 'Prefer the lesson-matched hunk.',
       priorPointer: null,
     });
@@ -506,7 +513,9 @@ describe('reconciliation commit verification', () => {
     };
     writeFileSync(
       join(repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Unrelated change only.\n',
+      '# Decisions\n\n- Unrelated change only.\n'
+        + 'Reconciliation: reconciliation-retire\n'
+        + 'Reconciliation: reconciliation-supersede\n',
     );
     writeFileSync(
       join(repoRoot, '.agents', 'skills', 'unrelated', 'SKILL.md'),
@@ -521,6 +530,7 @@ describe('reconciliation commit verification', () => {
         kind,
         preparedAt: '2026-07-24T09:00:00.000Z',
         preparedHead,
+        reconciliationToken: `reconciliation-${kind}`,
         candidateMarkdown: kind === 'supersede'
           ? 'Replacement durable doctrine.'
           : null,
@@ -530,7 +540,9 @@ describe('reconciliation commit verification', () => {
 
     writeFileSync(
       join(repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n',
+      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n'
+        + 'Reconciliation: reconciliation-supersede\n'
+        + 'Reconciliation: reconciliation-supersede\n',
     );
     writeFileSync(
       join(repoRoot, 'whp-youtube', 'STEERING.md'),
@@ -543,6 +555,7 @@ describe('reconciliation commit verification', () => {
       kind: 'supersede',
       preparedAt: '2026-07-24T09:00:00.000Z',
       preparedHead,
+      reconciliationToken: 'reconciliation-supersede',
       candidateMarkdown: 'Replacement durable doctrine.',
       priorPointer,
     }).doctrinePointers).toEqual([
@@ -555,7 +568,8 @@ describe('reconciliation commit verification', () => {
     const retirePreparedHead = supersedeCommit;
     writeFileSync(
       join(repoRoot, 'DECISIONS.md'),
-      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n- Retire replacement.\n',
+      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n- Retire replacement.\n'
+        + 'Reconciliation: reconciliation-retire\n',
     );
     writeFileSync(
       join(repoRoot, 'whp-youtube', 'STEERING.md'),
@@ -576,11 +590,195 @@ describe('reconciliation commit verification', () => {
       kind: 'retire',
       preparedAt: '2026-07-24T09:00:00.000Z',
       preparedHead: retirePreparedHead,
+      reconciliationToken: 'reconciliation-retire',
       candidateMarkdown: null,
       priorPointer: replacementPointer,
     }).doctrinePointers).toEqual([{
       ...replacementPointer,
       content: 'Replacement durable doctrine.',
     }]);
+  });
+
+  it('binds same-HEAD identical candidates to only their own handoff token', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'lesson-a'), {
+      recursive: true,
+    });
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'lesson-b'), {
+      recursive: true,
+    });
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'lesson-a', 'SKILL.md'),
+      '# Lesson A\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'lesson-b', 'SKILL.md'),
+      '# Lesson B\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents']);
+    git(repoRoot, ['commit', '-m', 'seed identical lesson handoffs']);
+    const preparedHead = git(repoRoot, ['rev-parse', 'HEAD']);
+    const expectation = (reconciliationToken: string) => ({
+      kind: 'apply' as const,
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      reconciliationToken,
+      candidateMarkdown: 'Prefer this exact shared lesson text.',
+      priorPointer: null,
+    });
+
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\nReconciliation: reconciliation-a\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'lesson-a', 'SKILL.md'),
+      '# Lesson A\n\nPrefer this exact shared lesson text.\n',
+    );
+    git(repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      '.agents/skills/lesson-a/SKILL.md',
+    ]);
+    git(repoRoot, ['commit', '-m', 'reconcile lesson a']);
+    const commitA = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\nReconciliation: reconciliation-a\n'
+        + 'Reconciliation: reconciliation-b\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'lesson-b', 'SKILL.md'),
+      '# Lesson B\n\nPrefer this exact shared lesson text.\n',
+    );
+    git(repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      '.agents/skills/lesson-b/SKILL.md',
+    ]);
+    git(repoRoot, ['commit', '-m', 'reconcile lesson b']);
+    const commitB = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    expect(verifyReconciliationCommit(
+      repoRoot,
+      commitA,
+      expectation('reconciliation-a'),
+    ).commit).toBe(commitA);
+    expect(verifyReconciliationCommit(
+      repoRoot,
+      commitB,
+      expectation('reconciliation-b'),
+    ).commit).toBe(commitB);
+    expect(() => verifyReconciliationCommit(
+      repoRoot,
+      commitA,
+      expectation('reconciliation-b'),
+    )).toThrow(/did not add.+reconciliation-b/iu);
+    expect(() => verifyReconciliationCommit(
+      repoRoot,
+      commitB,
+      expectation('reconciliation-a'),
+    )).toThrow(/did not add.+reconciliation-a/iu);
+  });
+
+  it('allows a deliberate multi-lesson commit only through each exact token', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'multi-a'), {
+      recursive: true,
+    });
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'multi-b'), {
+      recursive: true,
+    });
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'multi-a', 'SKILL.md'),
+      '# Multi A\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'multi-b', 'SKILL.md'),
+      '# Multi B\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents']);
+    git(repoRoot, ['commit', '-m', 'seed multi lesson handoff']);
+    const preparedHead = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\nReconciliation: multi-a\nReconciliation: multi-b\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'multi-a', 'SKILL.md'),
+      '# Multi A\n\nFirst committed lesson.\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'multi-b', 'SKILL.md'),
+      '# Multi B\n\nSecond committed lesson.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents']);
+    git(repoRoot, ['commit', '-m', 'reconcile two lessons deliberately']);
+    const commit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    for (const [token, candidate] of [
+      ['multi-a', 'First committed lesson.'],
+      ['multi-b', 'Second committed lesson.'],
+    ] as const) {
+      expect(verifyReconciliationCommit(repoRoot, commit, {
+        kind: 'apply',
+        preparedAt: '2026-07-24T09:00:00.000Z',
+        preparedHead,
+        reconciliationToken: token,
+        candidateMarkdown: candidate,
+        priorPointer: null,
+      })).toMatchObject({
+        commit,
+        reconciliationTokens: ['multi-a', 'multi-b'],
+      });
+    }
+    expect(() => verifyReconciliationCommit(repoRoot, commit, {
+      kind: 'apply',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      reconciliationToken: 'multi-forged',
+      candidateMarkdown: 'First committed lesson.',
+      priorPointer: null,
+    })).toThrow(/did not add.+multi-forged/iu);
+  });
+
+  it('refuses temporal verification when the prepared HEAD was not recorded', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\nReconciliation: re-dated-token\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nRe-dated candidate doctrine.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, [
+      '-c',
+      'user.name=Reviewer',
+      '-c',
+      'user.email=reviewer@example.invalid',
+      'commit',
+      '-m',
+      're-dated ancestor',
+      '--date=2036-07-24T09:00:00.000Z',
+    ]);
+    const commit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    expect(() => verifyReconciliationCommit(repoRoot, commit, {
+      kind: 'apply',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead: null,
+      reconciliationToken: 're-dated-token',
+      candidateMarkdown: 'Re-dated candidate doctrine.',
+      priorPointer: null,
+    })).toThrow(/prepared HEAD.+re-prepare/iu);
   });
 });

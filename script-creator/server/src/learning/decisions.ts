@@ -29,6 +29,7 @@ export interface OperationDecisionEvidence {
   operation: string;
   state: string;
   envelope: unknown;
+  inputs?: unknown;
   result: unknown;
 }
 

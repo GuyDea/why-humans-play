@@ -22,12 +22,17 @@ import {
   type SaveDraftInput,
 } from '../documents/service.js';
 import { DraftWriteReservationError } from '../documents/store.js';
-import type { OperationName } from '../operations/registry.js';
+import {
+  DRAFT_WRITING_OPERATIONS,
+  type OperationName,
+} from '../operations/registry.js';
 import {
   DraftScopedResumeRequiredError,
+  DraftScopedSubmissionRequiredError,
   type OperationService,
 } from '../operations/service.js';
 import {
+  AcceptanceProofRefusal,
   ReconciliationVerificationRefusal,
   type LearningService,
 } from '../learning/service.js';
@@ -1516,16 +1521,21 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       if (!hasOwn(request.body, 'inputs')) {
         throw new Error('inputs are required');
       }
-      if (
-        request.body.operation === 'generate-episode'
-        || request.body.operation === 'promote'
-      ) {
-        throw new Error(
-          `operation ${request.body.operation} requires a draft-scoped submission`,
+      const operation = request.body.operation as OperationName;
+      if (DRAFT_WRITING_OPERATIONS.has(operation)) {
+        throw new DraftScopedSubmissionRequiredError(
+          operation,
+          '/api/drafts/:id/ops',
+        );
+      }
+      if (operation === 'distill') {
+        throw new DraftScopedSubmissionRequiredError(
+          operation,
+          '/api/drafts/:id/distill',
         );
       }
       const id = options.operationService.submit(
-        request.body.operation as OperationName,
+        operation,
         request.body.inputs,
       );
       return { id };
@@ -1544,6 +1554,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         if (!hasOwn(request.body, 'inputs')) {
           throw new Error('inputs are required');
         }
+        if (request.body.operation === 'distill') {
+          throw new DraftScopedSubmissionRequiredError(
+            'distill',
+            '/api/drafts/:id/distill',
+          );
+        }
         return {
           id: architectureService.submitOperation(
             request.params.id,
@@ -1552,6 +1568,9 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           ),
         };
       } catch (error) {
+        if (error instanceof DraftScopedSubmissionRequiredError) {
+          return sendOperationError(reply, error);
+        }
         return sendArchitectureError(
           reply,
           error,
@@ -1654,8 +1673,11 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           throw new Error('inputs are required');
         }
         const parent = options.operationService.get(request.params.id);
-        if (parent.draftId !== null) {
-          throw new DraftScopedResumeRequiredError(parent.draftId);
+        if (DRAFT_WRITING_OPERATIONS.has(parent.operation)) {
+          throw new DraftScopedResumeRequiredError(
+            parent.operation,
+            parent.draftId,
+          );
         }
         const id = options.operationService.submit(
           parent.operation,
@@ -2271,6 +2293,13 @@ function sendDocumentError(
       reasons: error.reasons,
     });
   }
+  if (error instanceof AcceptanceProofRefusal) {
+    return reply.code(409).send({
+      error: error.message,
+      code: error.code,
+      recoverable: error.recoverable,
+    });
+  }
 
   const message = error instanceof Error ? error.message : 'document failed';
   if (/^draft not found:/i.test(message)) {
@@ -2343,12 +2372,23 @@ function sendOperationError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof DraftScopedSubmissionRequiredError) {
+    return reply.code(409).send({
+      error: error.message,
+      code: error.code,
+      recoverable: error.recoverable,
+      operation: error.operation,
+      route: error.route,
+    });
+  }
   if (error instanceof DraftScopedResumeRequiredError) {
     return reply.code(409).send({
       error: error.message,
       code: error.code,
       recoverable: error.recoverable,
+      operation: error.operation,
       draftId: error.draftId,
+      route: error.route,
     });
   }
   const message = error instanceof Error ? error.message : 'operation failed';
@@ -2380,6 +2420,13 @@ function sendArchitectureError(
     : null;
   if (error instanceof DraftWriteReservationError) {
     return sendDraftWriteReservationError(reply, error, pausedState);
+  }
+  if (error instanceof AcceptanceProofRefusal) {
+    return reply.code(409).send({
+      error: error.message,
+      code: error.code,
+      recoverable: error.recoverable,
+    });
   }
   if (error instanceof ArchitectureRevisionConflictError) {
     return reply.code(409).send({

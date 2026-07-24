@@ -59,7 +59,7 @@ function makeFixture(mode: string): Fixture {
 
 async function submit(
   fixture: Fixture,
-  operation = 'rewrite-selection',
+  operation = 'quick-gate-check',
   inputs: unknown = { selection: 'Original passage.' },
 ): Promise<string> {
   const response = await fixture.app.inject({
@@ -165,7 +165,7 @@ afterEach(async () => {
 describe('operations HTTP API', () => {
   it('returns immutable inputs and applied lesson links with an operation record', async () => {
     const fixture = makeFixture('operation-schema');
-    const id = await submit(fixture, 'review', {
+    const id = await submit(fixture, 'quick-gate-check', {
       selection: 'Original passage.',
       approved_lessons: ['Keep the reveal concrete.'],
     });
@@ -355,7 +355,7 @@ describe('operations HTTP API', () => {
     expect(recordResponse.json()).toMatchObject({
       id,
       state: 'completed',
-      operation: 'rewrite-selection',
+      operation: 'quick-gate-check',
       stalled: false,
       usageAvailable: 1,
       inputTokens: 37_290,
@@ -372,11 +372,7 @@ describe('operations HTTP API', () => {
     expect(resultResponse.statusCode).toBe(200);
     expect(resultResponse.json()).toEqual({
       kind: 'schema',
-      value: {
-        status: 'complete',
-        replacement_markdown: 'Rewritten passage.',
-        guardrail_markdown: null,
-      },
+      value: expect.objectContaining({ status: 'complete' }),
       guardrail: null,
     });
   });
@@ -436,7 +432,8 @@ describe('operations HTTP API', () => {
     expect(frames.filter((frame) => frame.event === 'done')).toHaveLength(1);
     expect(codexFrames.some((frame) => frame.data.includes('unexpected')))
       .toBe(true);
-    expect(codexFrames.some((frame) => frame.data.includes('Rewritten passage.')))
+    expect(codexFrames.some((frame) =>
+      frame.data.includes('game_play_centrality')))
       .toBe(true);
 
     const record = await fixture.app.inject({
@@ -453,7 +450,7 @@ describe('operations HTTP API', () => {
     });
     expect(result.json()).toMatchObject({
       kind: 'schema',
-      value: { replacement_markdown: 'Rewritten passage.' },
+      value: { status: 'complete' },
     });
   });
 
@@ -499,7 +496,7 @@ describe('operations HTTP API', () => {
     expect(record.json()).toMatchObject({ id, state: 'cancelled' });
   });
 
-  it('resumes an operation with fresh inputs over HTTP', async () => {
+  it('refuses to resume a generic non-resumable operation', async () => {
     const fixture = makeFixture('operation-schema');
     const originalId = await submit(fixture);
     await waitForTerminal(fixture, originalId);
@@ -511,11 +508,10 @@ describe('operations HTTP API', () => {
       payload: { inputs: { selection: 'Fresh passage.' } },
     });
 
-    expect(response.statusCode).toBe(200);
-    const { id } = response.json<{ id: string }>();
-    fixture.ids.push(id);
-    expect(id).not.toBe(originalId);
-    expect((await waitForTerminal(fixture, id)).resumedFrom).toBe(originalId);
+    expect(response.statusCode).toBe(400);
+    expect(response.json()).toEqual({
+      error: 'operation quick-gate-check is not resumable',
+    });
   });
 
   it('refuses draft-scoped operations on the generic resume route with a structured redirect', async () => {
@@ -537,10 +533,42 @@ describe('operations HTTP API', () => {
 
     expect(response.statusCode).toBe(409);
     expect(response.json()).toEqual({
-      error: 'operation resume refused: use the draft-scoped resume route for draft draft-1',
+      error:
+        'operation resume refused: rewrite-selection must use /api/drafts/:id/ops/:operationId/resume',
       code: 'draft-scoped-resume-required',
       recoverable: true,
+      operation: 'rewrite-selection',
       draftId: 'draft-1',
+      route: '/api/drafts/:id/ops/:operationId/resume',
+    });
+    expect(fixture.store.recentOperations()).toHaveLength(1);
+  });
+
+  it('refuses a historical draft-writing resume even when draft_id is null', async () => {
+    const fixture = makeFixture('operation-schema');
+    persistOperation(fixture, {
+      id: 'historical-null-draft',
+      operation: 'rewrite-selection',
+      state: 'completed',
+      createdAt: '2026-07-23T09:00:00.000Z',
+    });
+
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ops/historical-null-draft/resume',
+      headers: AUTH,
+      payload: { inputs: { selection: 'Try again.' } },
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error:
+        'operation resume refused: rewrite-selection must use /api/drafts/:id/ops/:operationId/resume',
+      code: 'draft-scoped-resume-required',
+      recoverable: true,
+      operation: 'rewrite-selection',
+      draftId: null,
+      route: '/api/drafts/:id/ops/:operationId/resume',
     });
     expect(fixture.store.recentOperations()).toHaveLength(1);
   });
@@ -638,7 +666,7 @@ describe('operations HTTP API', () => {
       url: '/api/ops',
       headers: AUTH,
       payload: {
-        operation: 'rewrite-selection',
+        operation: 'quick-gate-check',
         inputs: { selection: 'Original passage.' },
       },
     });
@@ -901,7 +929,17 @@ describe('operations HTTP API', () => {
     await app.close();
   });
 
-  it.each(['generate-episode', 'promote'])(
+  it.each([
+    'generate-scoped',
+    'generate-episode',
+    'generate-architecture',
+    'review',
+    'review-architecture',
+    'rewrite-selection',
+    'rewrite-architecture-section',
+    'generate-alternatives',
+    'promote',
+  ])(
     'requires %s to use the draft-scoped submission route',
     async (operation) => {
       const fixture = makeFixture('happy');
@@ -919,33 +957,66 @@ describe('operations HTTP API', () => {
         },
       });
 
-      expect(response.statusCode).toBe(400);
+      expect(response.statusCode).toBe(409);
       expect(response.json()).toEqual({
-        error: `operation ${operation} requires a draft-scoped submission`,
+        error: `operation submit refused: ${operation} must use /api/drafts/:id/ops`,
+        code: 'draft-scoped-submission-required',
+        recoverable: true,
+        operation,
+        route: '/api/drafts/:id/ops',
       });
       expect(fixture.store.recentOperations()).toEqual([]);
     },
   );
 
+  it('routes Distill exclusively through the learning-service endpoint', async () => {
+    const fixture = makeFixture('operation-schema');
+    for (const url of ['/api/ops', '/api/drafts/draft-1/ops']) {
+      const response = await fixture.app.inject({
+        method: 'POST',
+        url,
+        headers: AUTH,
+        payload: {
+          operation: 'distill',
+          inputs: { session: {}, existing_lessons: [] },
+        },
+      });
+
+      expect(response.statusCode).toBe(409);
+      expect(response.json()).toEqual({
+        error:
+          'operation submit refused: distill must use /api/drafts/:id/distill',
+        code: 'draft-scoped-submission-required',
+        recoverable: true,
+        operation: 'distill',
+        route: '/api/drafts/:id/distill',
+      });
+    }
+    expect(fixture.store.recentOperations()).toEqual([]);
+  });
+
   it('runs the Plan 6 dispatcher for raw and strict architecture operations over HTTP', async () => {
     const fixture = makeFixture('plan6-flow');
-    const generatedId = await submit(
-      fixture,
+    const generatedId = fixture.service.submitDraftScoped(
       'generate-architecture',
       {
         topic_brief: 'A selected topic.',
         approved_lessons: [],
         user_constraints: '',
       },
+      [],
+      { draftId: 'draft-1', cwd: fixture.root },
     );
-    const reviewedId = await submit(
-      fixture,
+    const reviewedId = fixture.service.submitDraftScoped(
       'review-architecture',
       {
         architecture_md: '### Core answer\n\nA mechanism.',
         topic_brief: 'A selected topic.',
       },
+      [],
+      { draftId: 'draft-1', cwd: fixture.root },
     );
+    fixture.ids.push(generatedId, reviewedId);
     await waitForTerminal(fixture, generatedId);
     await waitForTerminal(fixture, reviewedId);
 

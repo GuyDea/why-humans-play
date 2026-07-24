@@ -53,12 +53,14 @@ export interface VerifiedReconciliationCommit {
   commit: string;
   changedPaths: string[];
   doctrinePointers: ReconciliationDoctrinePointer[];
+  reconciliationTokens: string[];
 }
 
 export interface ReconciliationVerificationExpectation {
   kind: 'apply' | 'retire' | 'supersede';
   preparedAt: string;
   preparedHead: string | null;
+  reconciliationToken: string;
   candidateMarkdown: string | null;
   priorPointer: {
     path: string;
@@ -297,6 +299,26 @@ export function verifyReconciliationCommit(
       expectation,
     );
   }
+  const reconciliationTokens = addedReconciliationTokens(
+    repoRoot,
+    commit,
+    changedPaths,
+  );
+  if (
+    expectation
+    && !reconciliationTokens.includes(expectation.reconciliationToken)
+  ) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        commit
+      } did not add the exact handoff ledger line Reconciliation: ${
+        expectation.reconciliationToken
+      } in DECISIONS.md or a canonical doctrine file.`,
+      repoRoot,
+      commit,
+      changedPaths,
+    );
+  }
   const doctrinePaths = changedPaths.filter(isDoctrinePath);
   const missing = [
     ...(!changedPaths.includes('DECISIONS.md')
@@ -334,6 +356,7 @@ export function verifyReconciliationCommit(
     commit,
     changedPaths,
     doctrinePointers,
+    reconciliationTokens,
   };
 }
 
@@ -700,48 +723,54 @@ function verifyCommitAfterHandoff(
   changedPaths: string[],
   expectation: ReconciliationVerificationExpectation,
 ): void {
-  if (expectation.preparedHead) {
-    const preparedHead = tryGit(repoRoot, [
-      'rev-parse',
-      '--verify',
-      `${expectation.preparedHead}^{commit}`,
-    ]);
-    const followsPreparedHead = preparedHead !== undefined
-      && preparedHead !== commit
-      && isAncestor(repoRoot, preparedHead, commit);
-    if (!followsPreparedHead) {
-      throw reconciliationMismatch(
-        `reconciliation commit verification refused: checked commit ${
-          commit
-        } predates this lesson handoff; expected a descendant after prepared HEAD ${
-          expectation.preparedHead
-        }.`,
-        repoRoot,
-        commit,
-        changedPaths,
-      );
-    }
-    return;
-  }
-
-  const commitTimestamp = Date.parse(
-    runGit(repoRoot, ['show', '-s', '--format=%cI', commit]),
-  );
-  const preparedTimestamp = Date.parse(expectation.preparedAt);
-  if (
-    !Number.isFinite(commitTimestamp)
-    || !Number.isFinite(preparedTimestamp)
-    || commitTimestamp <= preparedTimestamp
-  ) {
+  if (!expectation.preparedHead) {
     throw reconciliationMismatch(
-      `reconciliation commit verification refused: checked commit ${
-        commit
-      } predates this lesson handoff prepared at ${expectation.preparedAt}.`,
+      'reconciliation commit verification refused: the prepared HEAD was not '
+        + 'recorded for this lesson handoff; re-prepare the reconciliation '
+        + 'before verifying a repository commit.',
       repoRoot,
       commit,
       changedPaths,
     );
   }
+  const preparedHead = tryGit(repoRoot, [
+    'rev-parse',
+    '--verify',
+    `${expectation.preparedHead}^{commit}`,
+  ]);
+  const followsPreparedHead = preparedHead !== undefined
+    && preparedHead !== commit
+    && isAncestor(repoRoot, preparedHead, commit);
+  if (!followsPreparedHead) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        commit
+      } predates this lesson handoff; expected a descendant after prepared HEAD ${
+        expectation.preparedHead
+      }.`,
+      repoRoot,
+      commit,
+      changedPaths,
+    );
+  }
+}
+
+function addedReconciliationTokens(
+  repoRoot: string,
+  commit: string,
+  changedPaths: string[],
+): string[] {
+  const eligiblePaths = changedPaths.filter((path) =>
+    path === 'DECISIONS.md' || isDoctrinePath(path));
+  const tokens = new Set<string>();
+  for (const hunk of eligiblePaths.flatMap((path) =>
+    changedDoctrineHunks(repoRoot, commit, path))) {
+    for (const line of hunk.added) {
+      const match = /^Reconciliation:\s+(\S+)\s*$/u.exec(line.trim());
+      if (match) tokens.add(match[1]!);
+    }
+  }
+  return [...tokens].sort();
 }
 
 function isAncestor(

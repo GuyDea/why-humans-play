@@ -783,3 +783,54 @@ a validator rerun without a content-changing narration revision must remain refu
 `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain unchanged because this
 decision corrects internal proof calibration without changing WHP doctrine or Plan 7
 architecture.
+
+## 2026-07-24 — Replay the editor transform for episode acceptance proof
+
+**Decision:** Script Creator's whole-episode proposal-acceptance proof replays the
+editor's real Markdown parse and draft-preservation transform, compares narration
+content while ignoring metadata and attributes legitimately preserved from the stored
+draft, and returns a structured refusal rather than a server error whenever
+correspondence cannot be proved.
+
+**Rationale:** The live Plan 7 sweep's genuine two-beat episode proposal was parsed and
+merged by the editor before saving, so comparing the saved document directly with the
+raw operation result made the hardened proof throw a raw 500 on a valid acceptance.
+Forged narration content must remain refused.
+
+**Documents:** `docs/superpowers/evidence/2026-07-24-script-creator-plan7-learning.md`
+and this ledger. `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 7
+implementation plan remain unchanged because this corrects internal proof calibration
+without changing WHP doctrine or Plan 7 architecture.
+
+## 2026-07-24 — Baseline first narration acceptance on the handoff draft
+
+**Decision:** When whole-episode proposal acceptance creates a handoff draft's first
+narration revision, Script Creator uses the draft's stored creation document as the
+baseline for both the content-change proof and the draft-preservation replay; accepting
+unchanged narration remains refused.
+
+**Rationale:** A fresh handoff draft has only architecture-kind revisions before its
+first narration acceptance, so requiring an earlier narration revision incorrectly
+refused the live episode acceptance as unequal to the operation proposal.
+
+**Documents:** `docs/superpowers/evidence/2026-07-24-script-creator-plan7-learning.md`
+and this ledger. `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 7
+implementation plan remain unchanged because this corrects internal proof calibration
+without changing WHP doctrine or Plan 7 architecture.
+
+## 2026-07-24 — Replay the atomic personal-input acceptance transaction
+
+**Decision:** Script Creator's personal-input acceptance proof replays the real editor
+transaction: replace the matching narration marker with the operation's returned text and
+mechanically flip that PI block's `Decision:` to `COMPLETED` inside the opaque production
+appendix in the same saved revision, while preserving surrounding narration content and
+inline evidence-indicator links exactly; any additional content change remains refused.
+
+**Rationale:** The live Plan 7 sweep refused a genuine Plan 6 Task 9 acceptance because
+the proof did not accommodate the complete atomic editor transaction represented by the
+real imported annotated-script template.
+
+**Documents:** `docs/superpowers/evidence/2026-07-24-script-creator-plan7-learning.md`
+and this ledger. `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 6 and
+Plan 7 implementation plans remain unchanged because they already state the governing
+contract and this corrects only its internal proof calibration.

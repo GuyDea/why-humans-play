@@ -95,7 +95,7 @@ afterEach(() => {
 });
 
 describe('LearningStore', () => {
-  it('creates the complete v11 learning schema from every store constructor', () => {
+  it('creates the complete v12 learning schema from every store constructor', () => {
     const dbFile = databaseFile();
     seedDraft(dbFile);
     openLearningStore(dbFile);
@@ -109,7 +109,7 @@ describe('LearningStore', () => {
     const version = inspected.pragma('user_version', { simple: true });
     inspected.close();
 
-    expect(version).toBe(11);
+    expect(version).toBe(12);
     expect(tables).toEqual(expect.arrayContaining([
       'decision_events',
       'decision_notes',
@@ -400,6 +400,7 @@ describe('LearningStore', () => {
 
     const verified = store.verifyReconciliation('opaque-1', {
       repositoryCommit: 'verified-commit',
+      reconciliationTokens: ['opaque-1'],
       paths: ['DECISIONS.md', 'whp-youtube/STEERING.md'],
       anchors: ['lines:4-4'],
       contentHashes: ['sha256:verified'],
@@ -422,8 +423,8 @@ describe('LearningStore', () => {
     expect(store.getDistillationRun('run-with-shadow')?.lessons).toEqual([{
       lessonId: 'lesson-1',
       snapshot: expect.objectContaining({
-        lesson_markdown: null,
         repository_provenance: {
+          status: 'resolved',
           commit: 'verified-commit',
           path: 'whp-youtube/STEERING.md',
           anchor: 'lines:4-4',
@@ -431,5 +432,75 @@ describe('LearningStore', () => {
         },
       }),
     }]);
+    expect(
+      store.getDistillationRun('run-with-shadow')?.lessons[0]?.snapshot,
+    ).not.toHaveProperty('lesson_markdown');
+
+    expect(() => store.verifyReconciliation('opaque-1', {
+      repositoryCommit: 'different-commit',
+      reconciliationTokens: ['opaque-1'],
+      paths: ['DECISIONS.md', 'whp-youtube/STEERING.md'],
+      anchors: ['lines:4-4'],
+      contentHashes: ['sha256:verified'],
+      repositoryPath: 'whp-youtube/STEERING.md',
+      repositoryAnchor: 'lines:4-4',
+      repositoryContentHash: 'sha256:verified',
+      updatedAt: '2026-07-24T08:33:00.000Z',
+    })).toThrow(/verification conflict/iu);
+  });
+
+  it('refuses a claimed reconciliation commit unless it carries every lesson token', () => {
+    const dbFile = databaseFile();
+    seedDraft(dbFile);
+    const store = openLearningStore(dbFile);
+    store.captureDecision(decision());
+    for (const [id, resumeKey] of [
+      ['lesson-a', 'token-a'],
+      ['lesson-b', 'token-b'],
+    ] as const) {
+      store.createLesson(lesson({
+        id,
+        state: 'approved-pending-reconcile',
+      }), ['decision-1']);
+      store.createReconciliation({
+        id: `reconcile-${id}`,
+        lessonId: id,
+        kind: 'apply',
+        state: 'awaiting-reconciliation',
+        resumeKey,
+        preparedMarkdown: `Reconciliation: ${resumeKey}`,
+        preparedHead: 'prepared-head',
+        repositoryCommit: null,
+        paths: [],
+        anchors: [],
+        contentHashes: [],
+        createdAt: '2026-07-24T08:30:00.000Z',
+        updatedAt: '2026-07-24T08:30:00.000Z',
+        verifiedAt: null,
+      });
+    }
+    const verification = {
+      repositoryCommit: 'shared-commit',
+      paths: ['DECISIONS.md', 'whp-youtube/STEERING.md'],
+      anchors: ['lines:4-4'],
+      contentHashes: ['sha256:verified'],
+      repositoryPath: 'whp-youtube/STEERING.md',
+      repositoryAnchor: 'lines:4-4',
+      repositoryContentHash: 'sha256:verified',
+      updatedAt: '2026-07-24T08:32:00.000Z',
+    };
+
+    expect(store.verifyReconciliation('token-a', {
+      ...verification,
+      reconciliationTokens: ['token-a'],
+    }).reconciliation.state).toBe('verified');
+    expect(() => store.verifyReconciliation('token-b', {
+      ...verification,
+      reconciliationTokens: ['token-b'],
+    })).toThrow(/already claimed.+token-a/iu);
+    expect(store.verifyReconciliation('token-b', {
+      ...verification,
+      reconciliationTokens: ['token-a', 'token-b'],
+    }).reconciliation.state).toBe('verified');
   });
 });

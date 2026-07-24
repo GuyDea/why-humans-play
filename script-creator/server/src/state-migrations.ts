@@ -609,6 +609,20 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
       seedBackfilledLearningSessions(db, 'v11');
     },
   },
+  {
+    version: 12,
+    owner: 'learning',
+    name: 'causal-binding-and-backfill-repair',
+    apply: (db) => {
+      db.exec(
+        `CREATE INDEX IF NOT EXISTS
+           lesson_reconciliations_repository_commit_idx
+         ON lesson_reconciliations(repository_commit)`,
+      );
+      scrubVerifiedDurableLessonSnapshots(db);
+      seedBackfilledLearningSessions(db, 'v12');
+    },
+  },
 ];
 
 export const LATEST_STATE_SCHEMA_VERSION =
@@ -649,10 +663,11 @@ function backfillProvableV9Decisions(db: Database.Database): void {
   const revisions = db.prepare<[], {
     id: string;
     draft_id: string;
+    seq: number;
     disposition: string;
     created_at: string;
   }>(
-    `SELECT id, draft_id, disposition, created_at
+    `SELECT id, draft_id, seq, disposition, created_at
      FROM revisions
      WHERE disposition IN (
        'episode-generation-accepted',
@@ -715,6 +730,7 @@ function backfillProvableV9Decisions(db: Database.Database): void {
     return seq;
   };
   for (const revision of revisions) {
+    if (!isProvableV9Revision(db, revision)) continue;
     const kind = revision.disposition.startsWith('variant-picked/')
       ? 'variant-picked'
       : [
@@ -780,9 +796,58 @@ function backfillProvableV9Decisions(db: Database.Database): void {
   }
 }
 
+function isProvableV9Revision(
+  db: Database.Database,
+  revision: {
+    draft_id: string;
+    seq: number;
+    disposition: string;
+    created_at: string;
+  },
+): boolean {
+  if (
+    revision.disposition === 'architecture-approved'
+    || revision.disposition === 'architecture-reopened'
+  ) {
+    const action = revision.disposition === 'architecture-approved'
+      ? 'approve'
+      : 'reopen';
+    return db.prepare<[string, string, number], { count: number }>(
+      `SELECT COUNT(*) AS count
+       FROM architecture_sagas
+       WHERE draft_id = ?
+         AND action = ?
+         AND expected_revision_seq = ?
+         AND revision_appended = 1
+         AND artifact_written = 1
+         AND pipeline_upserted = 1
+         AND draft_updated = 1`,
+    ).get(revision.draft_id, action, revision.seq - 1)!.count === 1;
+  }
+  if (revision.disposition === 'narration-approved') {
+    return db.prepare<[string, number, string], { count: number }>(
+      `SELECT COUNT(*) AS count
+       FROM drafts
+       WHERE id = ?
+         AND approved_narration_revision_seq = ?
+         AND approved_narration_at = ?
+         AND approved_narration_md IS NOT NULL
+         AND narration_artifact_hash IS NOT NULL`,
+    ).get(
+      revision.draft_id,
+      revision.seq,
+      revision.created_at,
+    )!.count === 1;
+  }
+  // V9 does not persist completed operation results or accepted proposal
+  // revision bindings, so accepted content and variant revisions cannot
+  // prove that their bytes came from the named operation.
+  return false;
+}
+
 function seedBackfilledLearningSessions(
   db: Database.Database,
-  migrationPrefix: 'v10' | 'v11',
+  migrationPrefix: 'v10' | 'v11' | 'v12',
 ): void {
   const drafts = db.prepare<[], {
     draft_id: string;
@@ -818,7 +883,8 @@ function seedBackfilledLearningSessions(
     )
     SELECT ?, ?, ?, NULL, ?, NULL
     WHERE NOT EXISTS (
-      SELECT 1 FROM learning_sessions WHERE draft_id = ?
+      SELECT 1 FROM learning_sessions
+      WHERE draft_id = ? AND closed_at IS NULL
     )`,
   );
   for (const draft of drafts) {
@@ -869,9 +935,12 @@ function scrubVerifiedDurableLessonSnapshots(
       continue;
     }
     update.run(JSON.stringify({
-      ...(snapshot as Record<string, unknown>),
-      lesson_markdown: null,
+      ...Object.fromEntries(
+        Object.entries(snapshot as Record<string, unknown>)
+          .filter(([key]) => key !== 'lesson_markdown'),
+      ),
       repository_provenance: {
+        status: 'resolved',
         commit: row.repository_commit,
         path: row.repository_path,
         anchor: row.repository_anchor,

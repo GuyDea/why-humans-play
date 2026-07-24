@@ -4,6 +4,7 @@ import {
   schema,
 } from '@whp/script-creator-editor-core';
 import { randomUUID } from 'node:crypto';
+import { preserveWorkflowMetadata } from './store.js';
 import type {
   DocumentStore,
   DraftDocument,
@@ -63,6 +64,13 @@ interface DocumentMilestoneService {
 
 interface DocumentLearningService {
   captureRevision(revision: RevisionRecord): unknown;
+  validateRevisionAcceptance?(
+    revision: RevisionRecord,
+    options?: {
+      allowPendingProposal?: boolean;
+      revisions?: RevisionRecord[];
+    },
+  ): void;
   capturePromotionCompletion(promotion: PromotionRecord): unknown;
 }
 
@@ -166,14 +174,37 @@ export class DocumentService {
     const disposition = input.disposition ?? 'manual-save';
     requireNonEmpty(disposition, 'disposition');
     const timestamp = this.now();
+    const revisionId = this.idFactory();
+    const doc = preserveWorkflowMetadata(input.doc, current.doc);
+    const acceptedProposal = isAcceptedProposalDisposition(disposition);
+    let acceptanceValidated = false;
+    if (
+      acceptedProposal
+      && this.learningService?.validateRevisionAcceptance
+    ) {
+      this.learningService.validateRevisionAcceptance({
+        id: revisionId,
+        draftId: id,
+        seq: this.store.currentRevisionSeq(id) + 1,
+        opId: input.opId ?? null,
+        disposition,
+        kind: 'narration',
+        doc,
+        createdAt: timestamp,
+      }, {
+        allowPendingProposal: true,
+      });
+      acceptanceValidated = true;
+    }
 
     const saved = this.store.saveDraft(id, {
       title,
       format,
-      doc: input.doc,
+      doc,
       updatedAt: timestamp,
+      validatedNarrationAcceptance: acceptanceValidated,
       revision: {
-        id: this.idFactory(),
+        id: revisionId,
         opId: input.opId ?? null,
         disposition,
         kind: 'narration',
@@ -400,6 +431,12 @@ export class DocumentService {
     this.learningService?.capturePromotionCompletion(completed);
     return completed;
   }
+}
+
+function isAcceptedProposalDisposition(disposition: string): boolean {
+  return disposition === 'episode-generation-accepted'
+    || disposition === 'selection-proposal-accepted'
+    || disposition === 'personal-input-proposal-accepted';
 }
 
 export function exportDocumentMarkdown(

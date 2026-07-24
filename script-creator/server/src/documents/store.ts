@@ -58,6 +58,7 @@ export interface SaveDraftRecord {
   format: DraftFormat;
   doc: DraftDocument;
   updatedAt: string;
+  validatedNarrationAcceptance?: boolean;
   revision: {
     id: string;
     opId: string | null;
@@ -496,6 +497,44 @@ export class DocumentStore {
         update.revision.createdAt,
         update.revision.kind ?? 'narration',
       );
+      if (update.validatedNarrationAcceptance === true) {
+        if (!update.revision.opId) {
+          throw new Error(
+            'validated narration acceptance requires an operation id',
+          );
+        }
+        const binding = this.db.prepare(
+          `UPDATE narration_proposals
+           SET accepted_revision_id = ?
+           WHERE draft_id = ? AND operation_id = ? AND state = 'pending'
+             AND (
+               accepted_revision_id IS NULL
+               OR accepted_revision_id = ?
+             )`,
+        ).run(
+          update.revision.id,
+          id,
+          update.revision.opId,
+          update.revision.id,
+        );
+        const proposal = this.getNarrationProposal(
+          id,
+          update.revision.opId,
+        );
+        if (
+          binding.changes === 0
+          && (
+            proposal?.state !== 'pending'
+            || proposal.acceptedRevisionId !== update.revision.id
+          )
+        ) {
+          throw new Error(
+            `narration acceptance proof binding conflict: ${
+              update.revision.opId
+            }`,
+          );
+        }
+      }
       if (
         update.revision.opId
         && update.revision.disposition.startsWith('variant-picked/')
@@ -1229,7 +1268,7 @@ function objectValue(
     : null;
 }
 
-function preserveWorkflowMetadata(
+export function preserveWorkflowMetadata(
   incoming: DraftDocument,
   stored: DraftDocument,
 ): DraftDocument {

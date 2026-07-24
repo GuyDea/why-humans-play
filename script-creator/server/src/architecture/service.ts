@@ -109,6 +109,13 @@ interface ArchitectureLearningService {
     revision: RevisionRecord,
     proof?: { gateCompleted?: boolean },
   ): unknown;
+  validateRevisionAcceptance?(
+    revision: RevisionRecord,
+    options?: {
+      allowPendingProposal?: boolean;
+      revisions?: RevisionRecord[];
+    },
+  ): void;
   captureProposalDisposition(input: {
     draftId: string;
     operationId: string;
@@ -309,6 +316,30 @@ export class ArchitectureService {
       );
     }
     const timestamp = this.now();
+    if (this.store.currentRevisionSeq(draftId) !== input.expectedRevisionSeq) {
+      throw new ArchitectureRevisionConflictError(this.get(draftId));
+    }
+    const acceptedProposal = disposition === 'architecture-proposal-accepted'
+      || disposition === 'architecture-proposals-accepted';
+    const revisionId = acceptedProposal ? this.idFactory() : null;
+    if (acceptedProposal) {
+      this.learningService?.validateRevisionAcceptance?.({
+        id: revisionId!,
+        draftId,
+        seq: input.expectedRevisionSeq + 1,
+        opId,
+        disposition,
+        kind: 'architecture',
+        doc: {
+          sections,
+          approvedMd: architecture.approvedMd,
+          approvedAt: architecture.approvedAt,
+        },
+        createdAt: timestamp,
+      }, {
+        allowPendingProposal: true,
+      });
+    }
     const result = this.store.saveArchitecture(draftId, {
       expectedRevisionSeq: input.expectedRevisionSeq,
       architecture: {
@@ -318,7 +349,9 @@ export class ArchitectureService {
       },
       updatedAt: timestamp,
       revision: {
-        idFactory: this.idFactory,
+        idFactory: revisionId === null
+          ? this.idFactory
+          : () => revisionId,
         opId,
         disposition,
         createdAt: timestamp,
