@@ -170,14 +170,17 @@ export const DISTILL_SCHEMA = strictObject({
     type: 'array',
     items: strictObject({
       classification: {
-        enum: ['episode-local', 'durable-doctrine'],
+        enum: ['episode-local', 'durable'],
       },
       lesson_markdown: { type: 'string' },
+      rationale_markdown: { type: 'string' },
       evidence: {
         type: 'array',
+        minItems: 1,
         items: { type: 'string' },
       },
       proposed_target: { type: ['string', 'null'] },
+      supersedes_lesson_id: { type: ['string', 'null'] },
     }),
   },
   guardrail_markdown: GUARDRAIL_MARKDOWN,

@@ -323,6 +323,14 @@ export class LearningStore {
     ).all(draftId, afterSeq, limit).map(decisionFrom);
   }
 
+  latestDecisionSeq(draftId: string): number {
+    return this.db.prepare<[string], { seq: number }>(
+      `SELECT COALESCE(MAX(seq), 0) AS seq
+       FROM decision_events
+       WHERE draft_id = ?`,
+    ).get(draftId)!.seq;
+  }
+
   setDecisionNote(
     decisionId: string,
     note: string | null,
@@ -370,8 +378,47 @@ export class LearningStore {
     return row ? sessionFrom(row) : null;
   }
 
+  getOpenSession(draftId: string): LearningSessionRecord | null {
+    const row = this.db.prepare<[string], SessionRow>(
+      `SELECT * FROM learning_sessions
+       WHERE draft_id = ? AND closed_at IS NULL`,
+    ).get(draftId);
+    return row ? sessionFrom(row) : null;
+  }
+
+  listSessions(draftId: string): LearningSessionRecord[] {
+    return this.db.prepare<[string], SessionRow>(
+      `SELECT * FROM learning_sessions
+       WHERE draft_id = ?
+       ORDER BY rowid`,
+    ).all(draftId).map(sessionFrom);
+  }
+
+  closeSession(
+    id: string,
+    endCursor: number,
+    closedAt: string,
+  ): LearningSessionRecord {
+    const result = this.db.prepare(
+      `UPDATE learning_sessions
+       SET end_cursor = ?, closed_at = ?
+       WHERE id = ? AND closed_at IS NULL`,
+    ).run(endCursor, closedAt, id);
+    if (result.changes === 0) {
+      const current = this.getSession(id);
+      if (
+        current?.endCursor !== endCursor
+        || current.closedAt !== closedAt
+      ) {
+        throw new Error(`learning session close conflict: ${id}`);
+      }
+    }
+    return this.getSession(id)!;
+  }
+
   createDistillationRun(
     record: DistillationRunRecord,
+    options: { closeSessionAt?: number } = {},
   ): DistillationRunRecord {
     return this.db.transaction(() => {
       if (!this.getSession(record.sessionId)) {
@@ -428,6 +475,13 @@ export class LearningStore {
           JSON.stringify(item.snapshot),
         );
       });
+      if (options.closeSessionAt !== undefined) {
+        this.closeSession(
+          record.sessionId,
+          options.closeSessionAt,
+          record.updatedAt,
+        );
+      }
       return this.getDistillationRun(record.id)!;
     })();
   }
@@ -470,6 +524,67 @@ export class LearningStore {
       decisions,
       lessons,
     };
+  }
+
+  getActiveDistillationRun(
+    draftId: string,
+    trigger: DistillationTrigger,
+  ): DistillationRunRecord | null {
+    const row = this.db.prepare<
+      [string, DistillationTrigger],
+      DistillationRunRow
+    >(
+      `SELECT * FROM distillation_runs
+       WHERE draft_id = ?
+         AND trigger = ?
+         AND state IN ('frozen', 'queued', 'running', 'completed')
+       ORDER BY created_at DESC, rowid DESC
+       LIMIT 1`,
+    ).get(draftId, trigger);
+    return row ? this.getDistillationRun(row.id) : null;
+  }
+
+  listRecoverableDistillationRuns(): DistillationRunRecord[] {
+    return this.db.prepare<[], DistillationRunRow>(
+      `SELECT * FROM distillation_runs
+       WHERE state IN ('frozen', 'queued', 'running', 'completed')
+       ORDER BY created_at, rowid`,
+    ).all().map((row) => this.getDistillationRun(row.id)!);
+  }
+
+  updateDistillationRun(
+    id: string,
+    update: {
+      state: DistillationRunState;
+      operationId?: string | null;
+      guardrailMarkdown?: string | null;
+      error?: string | null;
+      updatedAt: string;
+    },
+  ): DistillationRunRecord {
+    const current = this.getDistillationRun(id);
+    if (!current) throw new Error(`distillation run not found: ${id}`);
+    this.db.prepare(
+      `UPDATE distillation_runs
+       SET state = ?,
+           operation_id = ?,
+           guardrail_markdown = ?,
+           error = ?,
+           updated_at = ?
+       WHERE id = ?`,
+    ).run(
+      update.state,
+      update.operationId === undefined
+        ? current.operationId
+        : update.operationId,
+      update.guardrailMarkdown === undefined
+        ? current.guardrailMarkdown
+        : update.guardrailMarkdown,
+      update.error === undefined ? current.error : update.error,
+      update.updatedAt,
+      id,
+    );
+    return this.getDistillationRun(id)!;
   }
 
   createLesson(
@@ -522,12 +637,379 @@ export class LearningStore {
     return row ? lessonFrom(row) : null;
   }
 
+  listLessons(draftId: string): LessonRecord[] {
+    return this.db.prepare<[string], LessonRow>(
+      `SELECT * FROM lessons
+       WHERE draft_id = ?
+       ORDER BY created_at, rowid`,
+    ).all(draftId).map(lessonFrom);
+  }
+
+  listActiveEpisodeLessons(draftId: string): LessonRecord[] {
+    return this.db.prepare<[string], LessonRow>(
+      `SELECT * FROM lessons
+       WHERE draft_id = ?
+         AND classification = 'episode-local'
+         AND state = 'approved'
+         AND reviewed_markdown IS NOT NULL
+       ORDER BY created_at, rowid`,
+    ).all(draftId).map(lessonFrom);
+  }
+
+  editLesson(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      reviewedMarkdown: string;
+      updatedAt: string;
+    },
+  ): LessonRecord {
+    const result = this.db.prepare(
+      `UPDATE lessons
+       SET reviewed_markdown = ?,
+           version = version + 1,
+           updated_at = ?
+       WHERE id = ? AND state = 'proposed' AND version = ?`,
+    ).run(
+      input.reviewedMarkdown,
+      input.updatedAt,
+      lessonId,
+      input.expectedVersion,
+    );
+    if (result.changes === 0) {
+      throw new Error(`lesson version conflict: ${lessonId}`);
+    }
+    return this.getLesson(lessonId)!;
+  }
+
+  rejectLesson(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      updatedAt: string;
+    },
+  ): LessonRecord {
+    return this.db.transaction(() => {
+      const lesson = this.getLesson(lessonId);
+      if (!lesson) throw new Error(`lesson not found: ${lessonId}`);
+      if (
+        lesson.version !== input.expectedVersion
+        && lesson.state !== 'rejected'
+      ) {
+        throw new Error(`lesson version conflict: ${lessonId}`);
+      }
+      if (lesson.state === 'rejected') return lesson;
+      if (
+        lesson.state !== 'proposed'
+        && lesson.state !== 'approved-pending-reconcile'
+      ) {
+        throw new Error(`lesson rejection conflict: ${lessonId}`);
+      }
+      this.db.prepare(
+        `UPDATE lessons
+         SET state = 'rejected',
+             version = version + 1,
+             updated_at = ?
+         WHERE id = ?`,
+      ).run(input.updatedAt, lessonId);
+      const active = this.getActiveReconciliationForLesson(lessonId);
+      if (active) {
+        this.db.prepare(
+          `UPDATE lesson_reconciliations
+           SET state = 'verified', updated_at = ?, verified_at = ?
+           WHERE id = ?`,
+        ).run(input.updatedAt, input.updatedAt, active.id);
+      }
+      if (lesson.supersedesLessonId) {
+        const predecessor = this.getLesson(lesson.supersedesLessonId);
+        if (predecessor?.state === 'supersession-pending') {
+          this.db.prepare(
+            `UPDATE lessons
+             SET state = 'applied',
+                 version = version + 1,
+                 updated_at = ?
+             WHERE id = ?`,
+          ).run(input.updatedAt, predecessor.id);
+        }
+      }
+      return this.getLesson(lessonId)!;
+    })();
+  }
+
+  setLessonSupersedes(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      predecessorLessonId: string;
+      updatedAt: string;
+    },
+  ): LessonRecord {
+    return this.db.transaction(() => {
+      const lesson = this.getLesson(lessonId);
+      const predecessor = this.getLesson(input.predecessorLessonId);
+      if (!lesson || lesson.state !== 'proposed') {
+        throw new Error(`lesson supersession conflict: ${lessonId}`);
+      }
+      if (
+        lesson.version !== input.expectedVersion
+        || !predecessor
+        || predecessor.id === lesson.id
+        || predecessor.draftId !== lesson.draftId
+        || predecessor.classification !== lesson.classification
+        || (
+          lesson.classification === 'episode-local'
+            ? predecessor.state !== 'approved'
+            : predecessor.state !== 'applied'
+        )
+      ) {
+        throw new Error(`lesson supersession conflict: ${lessonId}`);
+      }
+      this.db.prepare(
+        `UPDATE lessons
+         SET supersedes_lesson_id = ?,
+             version = version + 1,
+             updated_at = ?
+         WHERE id = ?`,
+      ).run(input.predecessorLessonId, input.updatedAt, lessonId);
+      return this.getLesson(lessonId)!;
+    })();
+  }
+
+  approveEpisodeLesson(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      updatedAt: string;
+    },
+  ): LessonRecord {
+    return this.db.transaction(() => {
+      const lesson = this.getLesson(lessonId);
+      if (!lesson) throw new Error(`lesson not found: ${lessonId}`);
+      if (
+        lesson.classification !== 'episode-local'
+        || lesson.state !== 'proposed'
+        || lesson.version !== input.expectedVersion
+        || lesson.reviewedMarkdown === null
+      ) {
+        throw new Error(`lesson approval conflict: ${lessonId}`);
+      }
+      const predecessorId = lesson.supersedesLessonId;
+      if (predecessorId !== null) {
+        if (predecessorId === lessonId) {
+          throw new Error(`lesson supersession cycle: ${lessonId}`);
+        }
+        const predecessor = this.getLesson(predecessorId);
+        if (
+          !predecessor
+          || predecessor.draftId !== lesson.draftId
+          || predecessor.classification !== 'episode-local'
+          || predecessor.state !== 'approved'
+        ) {
+          throw new Error(
+            `lesson supersession conflict: ${predecessorId}`,
+          );
+        }
+        let current: LessonRecord | null = predecessor;
+        const seen = new Set<string>();
+        while (current?.supersedesLessonId) {
+          if (
+            current.supersedesLessonId === lessonId
+            || seen.has(current.supersedesLessonId)
+          ) {
+            throw new Error(`lesson supersession cycle: ${lessonId}`);
+          }
+          seen.add(current.supersedesLessonId);
+          current = this.getLesson(current.supersedesLessonId);
+        }
+        this.db.prepare(
+          `UPDATE lessons
+           SET state = 'superseded',
+               version = version + 1,
+               updated_at = ?
+           WHERE id = ?`,
+        ).run(input.updatedAt, predecessorId);
+      }
+      this.db.prepare(
+        `UPDATE lessons
+         SET state = 'approved',
+             version = version + 1,
+             updated_at = ?
+         WHERE id = ?`,
+      ).run(input.updatedAt, lessonId);
+      return this.getLesson(lessonId)!;
+    })();
+  }
+
+  retireEpisodeLesson(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      updatedAt: string;
+    },
+  ): LessonRecord {
+    const result = this.db.prepare(
+      `UPDATE lessons
+       SET state = 'retired',
+           version = version + 1,
+           updated_at = ?
+       WHERE id = ?
+         AND classification = 'episode-local'
+         AND state = 'approved'
+         AND version = ?`,
+    ).run(input.updatedAt, lessonId, input.expectedVersion);
+    if (result.changes === 0) {
+      throw new Error(`lesson retirement conflict: ${lessonId}`);
+    }
+    return this.getLesson(lessonId)!;
+  }
+
+  approveDurableLesson(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      reconciliation: LessonReconciliationRecord;
+      updatedAt: string;
+    },
+  ): {
+    lesson: LessonRecord;
+    reconciliation: LessonReconciliationRecord;
+  } {
+    return this.db.transaction(() => {
+      const lesson = this.getLesson(lessonId);
+      if (!lesson) throw new Error(`lesson not found: ${lessonId}`);
+      if (
+        lesson.classification === 'durable'
+        && lesson.state === 'approved-pending-reconcile'
+      ) {
+        const existing = this.getActiveReconciliationForLesson(lessonId);
+        if (!existing) {
+          throw new Error(`lesson reconciliation conflict: ${lessonId}`);
+        }
+        return { lesson, reconciliation: existing };
+      }
+      if (
+        lesson.classification !== 'durable'
+        || lesson.state !== 'proposed'
+        || lesson.version !== input.expectedVersion
+        || lesson.reviewedMarkdown === null
+      ) {
+        throw new Error(`lesson approval conflict: ${lessonId}`);
+      }
+      this.db.prepare(
+        `UPDATE lessons
+         SET state = 'approved-pending-reconcile',
+             version = version + 1,
+             updated_at = ?
+         WHERE id = ?`,
+      ).run(input.updatedAt, lessonId);
+      if (lesson.supersedesLessonId) {
+        const predecessor = this.getLesson(lesson.supersedesLessonId);
+        if (
+          !predecessor
+          || predecessor.draftId !== lesson.draftId
+          || predecessor.classification !== 'durable'
+          || predecessor.state !== 'applied'
+        ) {
+          throw new Error(
+            `lesson supersession conflict: ${lesson.supersedesLessonId}`,
+          );
+        }
+        this.db.prepare(
+          `UPDATE lessons
+           SET state = 'supersession-pending',
+               version = version + 1,
+               updated_at = ?
+           WHERE id = ?`,
+        ).run(input.updatedAt, predecessor.id);
+      }
+      const reconciliation = this.createReconciliation(
+        input.reconciliation,
+      );
+      return {
+        lesson: this.getLesson(lessonId)!,
+        reconciliation,
+      };
+    })();
+  }
+
+  prepareDurableRetirement(
+    lessonId: string,
+    input: {
+      expectedVersion: number;
+      reconciliation: LessonReconciliationRecord;
+      updatedAt: string;
+    },
+  ): {
+    lesson: LessonRecord;
+    reconciliation: LessonReconciliationRecord;
+  } {
+    return this.db.transaction(() => {
+      const lesson = this.getLesson(lessonId);
+      if (!lesson) throw new Error(`lesson not found: ${lessonId}`);
+      if (
+        lesson.classification === 'durable'
+        && lesson.state === 'retirement-pending'
+      ) {
+        const existing = this.getActiveReconciliationForLesson(lessonId);
+        if (!existing) {
+          throw new Error(`lesson reconciliation conflict: ${lessonId}`);
+        }
+        return { lesson, reconciliation: existing };
+      }
+      if (
+        lesson.classification !== 'durable'
+        || lesson.state !== 'applied'
+        || lesson.version !== input.expectedVersion
+      ) {
+        throw new Error(`lesson retirement conflict: ${lessonId}`);
+      }
+      this.db.prepare(
+        `UPDATE lessons
+         SET state = 'retirement-pending',
+             version = version + 1,
+             updated_at = ?
+         WHERE id = ?`,
+      ).run(input.updatedAt, lessonId);
+      return {
+        lesson: this.getLesson(lessonId)!,
+        reconciliation: this.createReconciliation(
+          input.reconciliation,
+        ),
+      };
+    })();
+  }
+
   listLessonEvidence(lessonId: string): string[] {
     return this.db.prepare<[string], { decision_id: string }>(
       `SELECT decision_id FROM lesson_evidence
        WHERE lesson_id = ?
        ORDER BY rowid`,
     ).all(lessonId).map(({ decision_id }) => decision_id);
+  }
+
+  ingestDistillationRun(
+    runId: string,
+    lessons: Array<{
+      record: LessonRecord;
+      evidenceIds: string[];
+    }>,
+    guardrailMarkdown: string | null,
+    updatedAt: string,
+  ): DistillationRunRecord {
+    return this.db.transaction(() => {
+      const run = this.getDistillationRun(runId);
+      if (!run) throw new Error(`distillation run not found: ${runId}`);
+      if (run.state === 'ingested') return run;
+      for (const lesson of lessons) {
+        this.createLesson(lesson.record, lesson.evidenceIds);
+      }
+      return this.updateDistillationRun(runId, {
+        state: 'ingested',
+        guardrailMarkdown,
+        error: null,
+        updatedAt,
+      });
+    })();
   }
 
   verifyDurableLessonApplication(
@@ -607,6 +1089,184 @@ export class LearningStore {
     return row ? reconciliationFrom(row) : null;
   }
 
+  getReconciliationByResumeKey(
+    resumeKey: string,
+  ): LessonReconciliationRecord | null {
+    const row = this.db.prepare<[string], ReconciliationRow>(
+      'SELECT * FROM lesson_reconciliations WHERE resume_key = ?',
+    ).get(resumeKey);
+    return row ? reconciliationFrom(row) : null;
+  }
+
+  getActiveReconciliationForLesson(
+    lessonId: string,
+  ): LessonReconciliationRecord | null {
+    const row = this.db.prepare<[string], ReconciliationRow>(
+      `SELECT * FROM lesson_reconciliations
+       WHERE lesson_id = ? AND state != 'verified'
+       ORDER BY created_at DESC, rowid DESC
+       LIMIT 1`,
+    ).get(lessonId);
+    return row ? reconciliationFrom(row) : null;
+  }
+
+  listLessonReconciliations(
+    lessonId: string,
+  ): LessonReconciliationRecord[] {
+    return this.db.prepare<[string], ReconciliationRow>(
+      `SELECT * FROM lesson_reconciliations
+       WHERE lesson_id = ?
+       ORDER BY created_at, rowid`,
+    ).all(lessonId).map(reconciliationFrom);
+  }
+
+  markReconciliationAwaiting(
+    resumeKey: string,
+    updatedAt: string,
+  ): LessonReconciliationRecord {
+    const current = this.getReconciliationByResumeKey(resumeKey);
+    if (!current) {
+      throw new Error(`lesson reconciliation not found: ${resumeKey}`);
+    }
+    if (current.state === 'awaiting-reconciliation') return current;
+    if (current.state !== 'prepared') {
+      throw new Error(
+        `lesson reconciliation transition conflict: ${resumeKey}`,
+      );
+    }
+    this.db.prepare(
+      `UPDATE lesson_reconciliations
+       SET state = 'awaiting-reconciliation', updated_at = ?
+       WHERE id = ?`,
+    ).run(updatedAt, current.id);
+    return this.getReconciliation(current.id)!;
+  }
+
+  verifyReconciliation(
+    resumeKey: string,
+    input: {
+      repositoryCommit: string;
+      paths: string[];
+      anchors: string[];
+      contentHashes: string[];
+      repositoryPath: string | null;
+      repositoryAnchor: string | null;
+      repositoryContentHash: string | null;
+      updatedAt: string;
+    },
+  ): {
+    lesson: LessonRecord;
+    reconciliation: LessonReconciliationRecord;
+  } {
+    return this.db.transaction(() => {
+      const reconciliation = this.getReconciliationByResumeKey(resumeKey);
+      if (!reconciliation) {
+        throw new Error(`lesson reconciliation not found: ${resumeKey}`);
+      }
+      const lesson = this.getLesson(reconciliation.lessonId);
+      if (!lesson) {
+        throw new Error(`lesson not found: ${reconciliation.lessonId}`);
+      }
+      if (reconciliation.state === 'verified') {
+        return { lesson, reconciliation };
+      }
+      if (reconciliation.state !== 'awaiting-reconciliation') {
+        throw new Error(
+          `lesson reconciliation verification conflict: ${resumeKey}`,
+        );
+      }
+      if (reconciliation.kind === 'retire') {
+        if (lesson.state !== 'retirement-pending') {
+          throw new Error(`lesson retirement conflict: ${lesson.id}`);
+        }
+        this.db.prepare(
+          `UPDATE lessons
+           SET state = 'retired',
+               repository_commit = ?,
+               repository_path = NULL,
+               repository_anchor = NULL,
+               repository_content_hash = NULL,
+               version = version + 1,
+               updated_at = ?
+           WHERE id = ?`,
+        ).run(input.repositoryCommit, input.updatedAt, lesson.id);
+      } else {
+        if (lesson.state !== 'approved-pending-reconcile') {
+          throw new Error(`lesson application conflict: ${lesson.id}`);
+        }
+        if (
+          !input.repositoryPath
+          || !input.repositoryAnchor
+          || !input.repositoryContentHash
+        ) {
+          throw new Error(
+            `lesson application provenance is incomplete: ${lesson.id}`,
+          );
+        }
+        this.db.prepare(
+          `UPDATE lessons
+           SET state = 'applied',
+               proposed_markdown = NULL,
+               reviewed_markdown = NULL,
+               repository_commit = ?,
+               repository_path = ?,
+               repository_anchor = ?,
+               repository_content_hash = ?,
+               version = version + 1,
+               updated_at = ?
+           WHERE id = ?`,
+        ).run(
+          input.repositoryCommit,
+          input.repositoryPath,
+          input.repositoryAnchor,
+          input.repositoryContentHash,
+          input.updatedAt,
+          lesson.id,
+        );
+        if (
+          reconciliation.kind === 'supersede'
+          && lesson.supersedesLessonId
+        ) {
+          this.db.prepare(
+            `UPDATE lessons
+             SET state = 'superseded',
+                 repository_commit = ?,
+                 version = version + 1,
+                 updated_at = ?
+             WHERE id = ? AND state = 'supersession-pending'`,
+          ).run(
+            input.repositoryCommit,
+            input.updatedAt,
+            lesson.supersedesLessonId,
+          );
+        }
+      }
+      this.db.prepare(
+        `UPDATE lesson_reconciliations
+         SET state = 'verified',
+             repository_commit = ?,
+             paths_json = ?,
+             anchors_json = ?,
+             content_hashes_json = ?,
+             updated_at = ?,
+             verified_at = ?
+         WHERE id = ?`,
+      ).run(
+        input.repositoryCommit,
+        JSON.stringify(input.paths),
+        JSON.stringify(input.anchors),
+        JSON.stringify(input.contentHashes),
+        input.updatedAt,
+        input.updatedAt,
+        reconciliation.id,
+      );
+      return {
+        lesson: this.getLesson(lesson.id)!,
+        reconciliation: this.getReconciliation(reconciliation.id)!,
+      };
+    })();
+  }
+
   recordValidatorAttempt(
     record: ValidatorAttemptRecord,
   ): ValidatorAttemptRecord {
@@ -664,6 +1324,43 @@ export class LearningStore {
        WHERE operation_id = ? AND lesson_id = ?`,
     ).get(record.operationId, record.lessonId)!;
     return operationLessonFrom(row);
+  }
+
+  recordOperationLessons(
+    records: OperationLessonRecord[],
+  ): OperationLessonRecord[] {
+    return this.db.transaction(() => {
+      for (const record of records) {
+        const existing = this.db.prepare<
+          [string, string],
+          OperationLessonRow
+        >(
+          `SELECT * FROM operation_lessons
+           WHERE operation_id = ? AND lesson_id = ?`,
+        ).get(record.operationId, record.lessonId);
+        if (
+          existing
+          && (
+            existing.lesson_version !== record.lessonVersion
+            || existing.content_hash !== record.contentHash
+          )
+        ) {
+          throw new Error(
+            `operation lesson snapshot conflict: ${record.operationId}`,
+          );
+        }
+        this.recordOperationLesson(record);
+      }
+      return this.listOperationLessons(records[0]?.operationId ?? '');
+    })();
+  }
+
+  listOperationLessons(operationId: string): OperationLessonRecord[] {
+    return this.db.prepare<[string], OperationLessonRow>(
+      `SELECT * FROM operation_lessons
+       WHERE operation_id = ?
+       ORDER BY created_at, rowid`,
+    ).all(operationId).map(operationLessonFrom);
   }
 
   close(): void {

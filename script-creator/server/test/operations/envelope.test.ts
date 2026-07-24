@@ -49,4 +49,27 @@ describe('operation envelope', () => {
       );
     },
   );
+
+  it('keeps Distill inputs to the frozen session and prior lessons only', () => {
+    const inputs = {
+      session: {
+        id: 'session-1',
+        draft_id: 'draft-1',
+        trigger: 'on-demand',
+        decisions: [{ id: 'decision-1', kind: 'proposal-rejected' }],
+      },
+      existing_lessons: [{
+        id: 'lesson-1',
+        classification: 'episode-local',
+        state: 'approved',
+        lesson_markdown: 'Keep this episode understated.',
+      }],
+    };
+
+    expect(buildEnvelopePrompt(OPERATIONS.distill, inputs)).toBe(
+      `$writing-whp-youtube-scripts\nOperation: Distill session lessons\nInputs: ${
+        JSON.stringify(inputs)
+      }`,
+    );
+  });
 });

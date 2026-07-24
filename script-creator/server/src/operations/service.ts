@@ -108,8 +108,55 @@ export class OperationService {
     inputs: unknown,
     opts: { resumeOf?: string; cwd?: string } = {},
   ): string {
+    return this.submitPrepared(opName, inputs, null, opts);
+  }
+
+  submitDraftScoped(
+    opName: OperationName,
+    inputs: unknown,
+    approvedLessons: string[],
+    opts: { resumeOf?: string; cwd?: string } = {},
+  ): string {
+    if (!approvedLessons.every((lesson) => typeof lesson === 'string')) {
+      throw new Error('authoritative approved lessons must be strings');
+    }
+    return this.submitPrepared(
+      opName,
+      inputs,
+      [...approvedLessons],
+      opts,
+    );
+  }
+
+  inputs(id: string): unknown {
+    const operation = this.requireOperation(id);
+    const attempt = this.store.operationAttempts(operation.id)[0];
+    if (!attempt) {
+      throw new Error(`operation ${id} has no persisted attempt`);
+    }
+    const envelope = JSON.parse(attempt.envelopeJson) as { prompt?: unknown };
+    if (typeof envelope.prompt !== 'string') {
+      throw new Error(`operation ${id} has no persisted prompt`);
+    }
+    const marker = '\nInputs: ';
+    const index = envelope.prompt.indexOf(marker);
+    if (index < 0) throw new Error(`operation ${id} has invalid inputs`);
+    return JSON.parse(envelope.prompt.slice(index + marker.length)) as unknown;
+  }
+
+  private submitPrepared(
+    opName: OperationName,
+    inputs: unknown,
+    approvedLessons: string[] | null,
+    opts: { resumeOf?: string; cwd?: string },
+  ): string {
     const definition = this.definition(opName);
     if (inputs === undefined) throw new Error('full inputs are required');
+    const authoritativeInputs = authoritativeOperationInputs(
+      definition,
+      inputs,
+      approvedLessons,
+    );
 
     let resumedFrom: string | undefined;
     let resumeThreadId: string | undefined;
@@ -142,7 +189,7 @@ export class OperationService {
     ).toISOString();
     this.supervisor.enqueue({
       jobId: id,
-      prompt: buildEnvelopePrompt(definition, inputs),
+      prompt: buildEnvelopePrompt(definition, authoritativeInputs),
       cwd: resolve(opts.cwd ?? REPO_ROOT),
       sandbox: definition.sandbox,
       outputSchema: definition.result.kind === 'schema'
@@ -470,4 +517,26 @@ export class OperationService {
 
 function isTerminalState(state: OperationState): boolean {
   return !['queued', 'running', 'cancelling'].includes(state);
+}
+
+function authoritativeOperationInputs(
+  definition: OperationDefinition,
+  inputs: unknown,
+  approvedLessons: string[] | null,
+): unknown {
+  if (
+    definition.skill !== 'writing-whp-youtube-scripts'
+    || definition.name === 'distill'
+  ) {
+    return inputs;
+  }
+  if (typeof inputs !== 'object' || inputs === null || Array.isArray(inputs)) {
+    return inputs;
+  }
+  const result = { ...(inputs as Record<string, unknown>) };
+  delete result['approved_lessons'];
+  if (approvedLessons !== null) {
+    result['approved_lessons'] = approvedLessons;
+  }
+  return result;
 }

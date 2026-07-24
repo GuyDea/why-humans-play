@@ -107,4 +107,16 @@ describe('operation registry', () => {
       resumable: true,
     });
   });
+
+  it('activates Distill as a fresh-only scoped read-only script operation', () => {
+    expect(OPERATIONS.distill).toMatchObject({
+      name: 'distill',
+      skill: 'writing-whp-youtube-scripts',
+      operationLabel: 'Distill session lessons',
+      sandbox: 'read-only',
+      timeoutClass: 'scoped',
+      result: { kind: 'schema' },
+      resumable: false,
+    });
+  });
 });

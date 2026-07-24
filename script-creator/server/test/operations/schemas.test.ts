@@ -146,8 +146,10 @@ describe('operation schema payloads', () => {
     ['distill', 'lessons', [
       'classification',
       'lesson_markdown',
+      'rationale_markdown',
       'evidence',
       'proposed_target',
+      'supersedes_lesson_id',
     ]],
   ] as const)('%s exposes the normative %s item fields', (name, payload, fields) => {
     const operation = OPERATIONS[name];
@@ -161,5 +163,39 @@ describe('operation schema payloads', () => {
       properties: Record<string, unknown>;
     };
     expect(Object.keys(items.properties)).toEqual(fields);
+  });
+
+  it('uses the exact strict lesson-distillation vocabulary', () => {
+    const operation = OPERATIONS.distill;
+    expect(operation.result.kind).toBe('schema');
+    if (operation.result.kind !== 'schema') return;
+
+    const lesson = (operation.result.schema as {
+      properties: {
+        lessons: {
+          items: {
+            required: string[];
+            additionalProperties: boolean;
+            properties: Record<string, Record<string, unknown>>;
+          };
+        };
+      };
+    }).properties.lessons.items;
+
+    expect(lesson.required).toEqual([
+      'classification',
+      'lesson_markdown',
+      'rationale_markdown',
+      'evidence',
+      'proposed_target',
+      'supersedes_lesson_id',
+    ]);
+    expect(lesson.additionalProperties).toBe(false);
+    expect(lesson.properties.classification?.enum)
+      .toEqual(['episode-local', 'durable']);
+    expect(lesson.properties.proposed_target?.type)
+      .toEqual(['string', 'null']);
+    expect(lesson.properties.supersedes_lesson_id?.type)
+      .toEqual(['string', 'null']);
   });
 });

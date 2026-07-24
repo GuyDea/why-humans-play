@@ -270,4 +270,106 @@ describe('LearningStore', () => {
       contentHash: 'sha256:must-not-overwrite',
     })).toEqual(application);
   });
+
+  it('edits, approves, retires, and supersedes episode-local lessons with CAS', () => {
+    const dbFile = databaseFile();
+    seedDraft(dbFile);
+    const store = openLearningStore(dbFile);
+    store.captureDecision(decision());
+    store.createLesson(lesson({
+      id: 'local-1',
+      classification: 'episode-local',
+      state: 'proposed',
+      version: 1,
+      proposedMarkdown: 'Original proposal.',
+      reviewedMarkdown: 'Original proposal.',
+    }), ['decision-1']);
+    store.createLesson(lesson({
+      id: 'local-2',
+      classification: 'episode-local',
+      state: 'proposed',
+      version: 1,
+      proposedMarkdown: 'Replacement proposal.',
+      reviewedMarkdown: 'Replacement proposal.',
+      supersedesLessonId: 'local-1',
+    }), ['decision-1']);
+
+    const edited = store.editLesson('local-1', {
+      expectedVersion: 1,
+      reviewedMarkdown: '  Martin exact edit.  ',
+      updatedAt: '2026-07-24T08:30:00.000Z',
+    });
+    expect(edited).toMatchObject({
+      state: 'proposed',
+      proposedMarkdown: 'Original proposal.',
+      reviewedMarkdown: '  Martin exact edit.  ',
+      version: 2,
+    });
+    expect(() => store.editLesson('local-1', {
+      expectedVersion: 1,
+      reviewedMarkdown: 'stale',
+      updatedAt: '2026-07-24T08:31:00.000Z',
+    })).toThrow(/lesson version conflict/i);
+
+    expect(store.approveEpisodeLesson('local-1', {
+      expectedVersion: 2,
+      updatedAt: '2026-07-24T08:32:00.000Z',
+    })).toMatchObject({ state: 'approved', version: 3 });
+    expect(store.approveEpisodeLesson('local-2', {
+      expectedVersion: 1,
+      updatedAt: '2026-07-24T08:33:00.000Z',
+    })).toMatchObject({ state: 'approved', version: 2 });
+    expect(store.getLesson('local-1')).toMatchObject({
+      state: 'superseded',
+      version: 4,
+    });
+    expect(store.retireEpisodeLesson('local-2', {
+      expectedVersion: 2,
+      updatedAt: '2026-07-24T08:34:00.000Z',
+    })).toMatchObject({ state: 'retired', version: 3 });
+  });
+
+  it('persists durable reconciliation transitions without changing repository files', () => {
+    const dbFile = databaseFile();
+    seedDraft(dbFile);
+    const store = openLearningStore(dbFile);
+    store.captureDecision(decision());
+    store.createLesson(lesson({
+      state: 'proposed',
+      version: 1,
+    }), ['decision-1']);
+
+    const prepared = store.approveDurableLesson('lesson-1', {
+      expectedVersion: 1,
+      reconciliation: {
+        id: 'reconcile-1',
+        lessonId: 'lesson-1',
+        kind: 'apply',
+        state: 'prepared',
+        resumeKey: 'opaque-1',
+        preparedMarkdown: 'Candidate handoff.',
+        repositoryCommit: null,
+        paths: [],
+        anchors: [],
+        contentHashes: [],
+        createdAt: '2026-07-24T08:30:00.000Z',
+        updatedAt: '2026-07-24T08:30:00.000Z',
+        verifiedAt: null,
+      },
+      updatedAt: '2026-07-24T08:30:00.000Z',
+    });
+
+    expect(prepared.lesson).toMatchObject({
+      state: 'approved-pending-reconcile',
+      version: 2,
+    });
+    expect(prepared.reconciliation).toMatchObject({
+      state: 'prepared',
+      resumeKey: 'opaque-1',
+    });
+    expect(store.markReconciliationAwaiting(
+      'opaque-1',
+      '2026-07-24T08:31:00.000Z',
+    )).toMatchObject({ state: 'awaiting-reconciliation' });
+  });
 });
