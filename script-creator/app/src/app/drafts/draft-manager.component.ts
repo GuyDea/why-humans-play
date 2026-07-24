@@ -123,6 +123,7 @@ import { RevisionTimeline } from './revision-timeline';
               <app-architecture-panel
                 [model]="architecture"
                 [draft]="activeDraft"
+                [version]="architectureVersion()"
                 (changed)="architectureChanged()"
               />
               <app-narration-actions

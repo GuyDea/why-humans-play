@@ -463,6 +463,7 @@ interface ArchitectureCard {
 })
 export class ArchitecturePanel {
   readonly model = input.required<ArchitectureModel>();
+  readonly version = input(0);
   readonly draft = input.required<DraftRecord>();
   readonly changed = output<void>();
 
@@ -473,6 +474,7 @@ export class ArchitecturePanel {
 
   protected cards(): ArchitectureCard[] {
     this.viewVersion();
+    this.version();
     const state = this.model().state;
     const proposals = this.model().proposals;
     const keys = [
@@ -497,22 +499,26 @@ export class ArchitecturePanel {
 
   protected findingsFor(key: string) {
     this.viewVersion();
+    this.version();
     return this.model().findingsFor(key);
   }
 
   protected hasSections(): boolean {
     this.viewVersion();
+    this.version();
     return (this.model().state?.sections.length ?? 0) > 0;
   }
 
   protected isApproved(): boolean {
     this.viewVersion();
+    this.version();
     return this.model().state?.approvedAt !== null
       && this.model().state?.approvedAt !== undefined;
   }
 
   protected ribbonState(): 'needed' | 'approved' | 'reopened' {
     this.viewVersion();
+    this.version();
     const state = this.model().state;
     if (state?.narrationReconciliationRequired) return 'reopened';
     return state?.approvedAt ? 'approved' : 'needed';
@@ -531,6 +537,7 @@ export class ArchitecturePanel {
 
   protected operationStatus(): string {
     this.viewVersion();
+    this.version();
     return this.busy()
       ? this.model().operationStatus
       : this.model().failure
