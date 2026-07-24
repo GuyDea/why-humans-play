@@ -216,6 +216,16 @@ offers useful surprise, then use a short montage of recognizable cases to demons
 global scope.
 Prepare every unfamiliar proper name before first use, then identify it and explain its
 relevance; never drop a name as if the viewer missed an earlier introduction.
+Explain each named concept through the default explanation grammar:
+`term as promise → story as evidence → analogy as recognition → application`.
+Lead with the term as an open loop—a label whose meaning is promised, not defined. Pay the
+promise off with the documented story; evidence always precedes the analogy, because an
+analogy illustrates a proven mechanism and can never prove one. Place the analogy after
+the story as recognition—a scene the viewer has lived, whose roles map one-to-one onto
+the mechanism—then move to the application or counter. Mainstream terms open with
+acknowledgment instead of a promise. The grammar is the default, not a straitjacket: a
+beat with no established term, or where the name itself is the earned punchline, may
+demonstrate first and name after.
 Check audience familiarity before naming any concept. When a term is already mainstream
 for the target audience — research current awareness rather than assuming — acknowledge
 the familiarity (“you've probably heard this called sycophancy”) and add something beyond

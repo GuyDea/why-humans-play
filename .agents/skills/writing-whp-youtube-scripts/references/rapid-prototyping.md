@@ -361,9 +361,19 @@ pattern rather than opening three new stories. Evidence quality, causal fit, hum
 consequence, and factual support remain gates; novelty and recognition serve different
 narrative jobs.
 
-Demonstrate the pattern before naming the concept. Let a term such as Goodhart's law or
-specification gaming feel like a useful label for something the viewer already understands,
-not an entrance exam.
+Explain each named concept through the default explanation grammar:
+`term as promise → story as evidence → analogy as recognition → application`.
+Lead with the term as an open loop—a label whose meaning is promised, not defined
+(“Psychologists have a name for this: processing fluency. Sounds abstract—watch what it
+actually does.”). Pay the promise off with the documented story. Evidence always precedes
+the analogy: an analogy illustrates a proven mechanism and can never prove one. Place the
+analogy after the story as recognition—a scene the viewer has lived, whose roles map
+one-to-one onto the mechanism—then move to the application or counter. A term dropped as
+a bare definition sounds like a lecture; a term framed as a promise creates the itch the
+story scratches. The grammar composes with the familiarity check below: a mainstream term
+opens with acknowledgment instead of a promise. It is the default, not a straitjacket: a
+beat with no established term, or where the name itself is the earned punchline, may
+demonstrate first and name after.
 
 Check audience familiarity before naming any concept. When a term is already mainstream
 for the target audience — research current awareness rather than assuming — acknowledge
@@ -600,6 +610,9 @@ Before returning rapid work, check internally:
   pivots?
 - Is every already-mainstream term acknowledged as familiar rather than unveiled as news,
   and is no term revealed that the script's own earlier lines already used?
+- Does each named concept follow the explanation grammar—term as promise (or
+  acknowledgment when mainstream), story as evidence, analogy as recognition, then
+  application?
 - When narration claims people say, ask, or type something, does it voice at least one
   verbatim example in that exact form?
 - In a complete narration, does an open question, contradiction, or promised test give
@@ -659,7 +672,8 @@ Keep this audit internal unless Martin asks to see it.
   of the promise.
 - Treating “no verification” as permission to invent plausible detail.
 - Returning three drafts when one was requested.
-- Naming a concept before making its pattern visible.
+- Dropping a term as a bare definition instead of an open-loop promise, or letting an
+  analogy stand in for evidence.
 - Unveiling a mainstream term as news, or revealing a term the script's own earlier lines
   already used.
 - Narrating facts through colon-label fragments (“The deal:”) or fragments that drop the

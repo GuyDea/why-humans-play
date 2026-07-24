@@ -301,6 +301,17 @@ the name. Reserve the reveal structure (“that pattern has a name”) for terms
 plausibly does not know. Never unveil as news a term the script's own earlier narration —
 such as an anticipated-defense line — already put in the viewer's mouth.
 
+Explain each named concept through the default explanation grammar:
+`term as promise → story as evidence → analogy as recognition → application`.
+Lead with the term as an open loop—a label whose meaning is promised, not defined. Pay the
+promise off with the documented story; evidence always precedes the analogy, because an
+analogy illustrates a proven mechanism and can never prove one. Place the analogy after
+the story as recognition—a scene the viewer has lived, whose roles map one-to-one onto
+the mechanism—then move to the application or counter. Mainstream terms open with
+acknowledgment instead of a promise. The grammar is the default, not a straitjacket: a
+beat with no established term, or where the name itself is the earned punchline, may
+demonstrate first and name after.
+
 ## Open and close specific loops
 
 Write every open loop as a specific unresolved question, contradiction, comparison,

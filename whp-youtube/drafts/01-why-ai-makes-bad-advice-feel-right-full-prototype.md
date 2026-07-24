@@ -40,15 +40,15 @@
 
 > Move one. You pick the menu.
 >
-> Every parent knows this trick. You don't ask a child, "Do you want vegetables?" You ask, "Do you want broccoli, or carrots?" The child feels free. But the menu was decided before they said a word. Whether to eat vegetables at all was never on the table.
+> This first move has a name in psychology: the framing effect. [F-003](https://doi.org/10.1126/science.7455683) How you present a problem changes how people judge it. [F-003](https://doi.org/10.1126/science.7455683) That sounds abstract—so let me show you what it looks like when you type.
 >
-> Now say you type this into an AI chat: "My boss keeps ignoring my brilliant ideas. Should I quit?" It's a made-up example—but you know this person. Maybe you've been this person.
+> Say you ask an AI: "My boss keeps ignoring my brilliant ideas. Should I quit?" It's a made-up example—but you know this person. Maybe you've been this person.
 >
 > Look at the menu you just handed over. Your ideas are "brilliant." That's now a fact. Your boss "ignores" them. Also a fact. And the only two options in the question are quitting or staying. Maybe the ideas need work. Maybe there is no budget this year. Those doors are not in your question.
 >
-> Psychologists call this the framing effect. [F-003](https://doi.org/10.1126/science.7455683) How you present a problem changes how people judge it. [F-003](https://doi.org/10.1126/science.7455683)
+> And if that trick feels familiar, it's because you learned it as a child. A parent doesn't ask, "Do you want vegetables?" A parent asks, "Do you want broccoli, or carrots?" The child feels free. But the menu was decided before they said a word.
 >
-> And this time, you're the parent. The AI is the child, politely picking a vegetable.
+> This time, you're the parent. The AI is the child, politely picking a vegetable.
 >
 > So here is the counter for move one. Ask the AI: "What assumptions in my question are you accepting without evidence?"
 >
@@ -60,7 +60,9 @@
 
 > Move two. The AI is trained to agree.
 >
-> Remember the Anthropic study from the beginning? The researchers also looked at why the assistants drift toward the user. They analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
+> You already know this move's name—sycophancy, the one from your list. But the name is not the interesting part. The interesting part is why it happens.
+>
+> Remember the Anthropic study from the beginning? The researchers also looked at where the agreement comes from. They analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
 >
 > And approval is what the training runs on. People reward the answers they like, and that can teach the AI to treat agreement as good assistance. [F-001](https://arxiv.org/abs/2310.13548)
 >
@@ -82,15 +84,17 @@
 
 > Move three. The answer comes back in a costume.
 >
-> Here is one of my favorite experiments. In 1999, researchers showed people short statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements were easy to read, and some were hard to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> This move is two effects stacked on top of each other. The first one has a name: processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386) Sounds abstract—but the experiment behind it is one of my favorites.
 >
-> Psychologists call that processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386) When something is easy to process, it feels more true. And AI text is about as fluent as text gets.
+> In 1999, researchers showed people short statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements were easy to read, and some were hard to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
 >
-> Then there's the name on the advice. Across six experiments, ordinary people received the same advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave it more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) That's called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> That's processing fluency. When something is easy to process, it feels more true. [F-004](https://doi.org/10.1006/ccog.1999.0386) And AI text is about as fluent as text gets.
+>
+> The second effect is called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Across six experiments, ordinary people received the same advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave it more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
 > "But wait—the radiologists trusted the AI less!" I know. They were experts judging their own specialty. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Outside your own field, the machine label can tip the scale the other way. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
-> So watch what happens to your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
+> Now watch both effects work on your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
 >
 > Very impressive. Nothing became more true. The same thought got a costume and better lighting.
 >
@@ -106,7 +110,9 @@
 
 > Move four. The loop closes.
 >
-> Think about the radiologists one more time. The study authors offered an explanation for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Once you have read a suggested answer, it anchors your thinking. [F-009](https://www.nature.com/articles/s41746-021-00385-9) You start checking that answer instead of looking at the problem fresh. You cannot unread a suggestion.
+> The last move runs on a bias you may have heard of: anchoring. Once an answer is in your head, your thinking bends around it. You cannot unread a suggestion.
+>
+> That's the explanation the radiologist researchers offered for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Each radiologist read a suggested diagnosis first. [F-009](https://www.nature.com/articles/s41746-021-00385-9) After that, they were checking the suggestion—not reading the scan fresh. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
 > Now put all four moves together. You framed the question. The AI agreed. The answer came back polished, with a machine label. And now it sits in your head, anchored, dressed as an outside opinion. I call this the borrowed-authority loop. You lend the AI your premise, and it comes back looking like independent evidence.
 >
@@ -156,7 +162,9 @@
   hidden game—menu (framing), agreement (sycophancy), costume (fluency + algorithm
   appreciation), loop (anchoring + feedback)—each section opens with its name card and
   closes with its counter-question; beat 6 assembles the four counters as the
-  Second-Opinion Test; beat 7 voices the transfer and final lesson.
+  Second-Opinion Test; beat 7 voices the transfer and final lesson. Each named concept
+  follows the explanation grammar adopted 2026-07-25: term as promise (or acknowledgment
+  when mainstream), story as evidence, analogy as recognition, then application.
 - Register: full best-friend under the natural-spoken-register rules (2026-07-25):
   complete spoken clauses, plain international English, voiced bridges between all
   evidence pairs, sycophancy acknowledged as a familiar term, verbatim questions for the
@@ -168,9 +176,9 @@
 ### Shorts nugget candidates
 
 1. **Beat 1** — radiologist label experiment. Hook: "138 radiologists distrusted the AI. It didn't help them at all." Cut: "So here is what happened." → goalkeeper line; re-record hook.
-2. **Beat 2** — broccoli/carrot and the parent reversal. Hook: "You manipulate your AI the way parents manipulate kids." Cut: "Every parent knows this trick." → "politely picking a vegetable."; re-record hook.
+2. **Beat 2** — broccoli/carrot and the parent reversal. Hook: "You manipulate your AI the way parents manipulate kids." Cut: "And if that trick feels familiar" → "politely picking a vegetable."; re-record hook.
 3. **Beat 3** — the hidden game score. Hook: "Your AI isn't playing 'find the truth.' It's playing 'win your approval.'" Cut: "See the hidden game?" → "walks straight past security."
-4. **Beat 4** — the costume promotion. Hook: "Watch a hunch get promoted to a Strategic Exit Framework." Cut: "So watch what happens to your hunch." → "costume and better lighting."
+4. **Beat 4** — the costume promotion. Hook: "Watch a hunch get promoted to a Strategic Exit Framework." Cut: "Now watch both effects work on your hunch." → "costume and better lighting."
 5. **Beat 5** — ballot photocopy + loop. Hook: "You didn't get a second opinion. You photocopied your own." Cut: loop definition + software-update line → ballot lines; skip the experiment passage in the re-cut.
 
 ### Timing and cut ledger (review-reversible)
