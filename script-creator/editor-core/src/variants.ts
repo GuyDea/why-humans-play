@@ -15,6 +15,7 @@ interface BlockVariantOptionInput {
 
 interface InsertBlockVariantSetOptions {
   variantId: string;
+  originOperationId?: string | null;
   at: number;
   options: BlockVariantOptionInput[];
 }
@@ -26,6 +27,7 @@ interface InlineVariantOptionInput {
 
 interface InsertInlineVariantSetOptions {
   variantId: string;
+  originOperationId?: string | null;
   at: number;
   options: InlineVariantOptionInput[];
 }
@@ -253,7 +255,12 @@ export function insertBlockVariantSet(
     )),
   ));
   const variantSet = variantSetType.createChecked(
-    { variantId: input.variantId, activeIndex: 0, settled: false },
+    {
+      variantId: input.variantId,
+      originOperationId: input.originOperationId ?? null,
+      activeIndex: 0,
+      settled: false,
+    },
     options,
   );
 
@@ -275,6 +282,7 @@ export function insertInlineVariantSet(
 
   const inlineVariantSet = inlineVariantSetType.createChecked({
     variantId: input.variantId,
+    originOperationId: input.originOperationId ?? null,
     activeIndex: 0,
     settled: false,
     options: input.options.map((option) => ({ ...option })),

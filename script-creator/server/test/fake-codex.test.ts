@@ -378,6 +378,10 @@ async function runDistillFake(
     'Operation: Distill session lessons',
     `Inputs: ${JSON.stringify(inputs)}`,
   ].join('\n');
+  writeFileSync(
+    join(dir, 'envelope.json'),
+    JSON.stringify({ prompt }),
+  );
 
   const pending = run(process.execPath, [
     FAKE,

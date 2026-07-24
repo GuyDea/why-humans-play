@@ -1531,6 +1531,7 @@ describe('mounted Script Studio composition', () => {
       '[data-testid="proposal-recovery"]',
     );
     expect(recovery.textContent).toContain('orphaned-proposal-op');
+    expect(recovery.textContent).toContain('state: pending');
 
     findButton(panel, 'Reject durable proposal').click();
     await vi.waitFor(() => {
@@ -1545,6 +1546,36 @@ describe('mounted Script Studio composition', () => {
         '[data-testid="proposal-recovery"]',
       )).toBeNull();
     });
+  });
+
+  it('surfaces the exact unsettled ledger operation and state when narration approval is refused', async () => {
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.pendingNarrationProposals = [{
+        draftId: 'draft-1',
+        operationId: 'alternatives-op',
+        state: 'pending',
+        createdAt: '2026-07-24T13:00:00.000Z',
+        resolvedAt: null,
+        acceptedRevisionPresent: false,
+      }];
+      client.prepareNarrationApproval.mockRejectedValueOnce(
+        new DaemonClientError(409, {
+          error: 'narration approval refused: unresolved proposals',
+        }),
+      );
+    });
+    const panel = studio.root.querySelector('app-production-panel');
+    await waitForElement(studio, '[data-testid="proposal-recovery"]');
+
+    findButton(panel, 'Approve complete narration').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.querySelector('[role="alert"]')?.textContent).toContain(
+        'alternatives-op (state: pending)',
+      );
+    });
+    expect(studio.client.approveNarration).not.toHaveBeenCalled();
   });
 
   it('gates Promote completion on pinned exact-hash validator diagnostics', async () => {
@@ -3291,7 +3322,7 @@ describe('mounted Script Studio composition', () => {
     expect(studio.client.save).toHaveBeenCalledWith(
       'draft-1',
       expect.objectContaining({
-        opId: null,
+        opId: 'op-4',
         disposition: `variant-picked/${
           encodeURIComponent(variantId!)
         }/alternative%3A1`,

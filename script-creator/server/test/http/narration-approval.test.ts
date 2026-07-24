@@ -176,7 +176,8 @@ describe('complete narration approval HTTP API', () => {
 
     expect(response.statusCode).toBe(409);
     expect(response.json()).toEqual({
-      error: 'narration approval refused: unresolved proposals',
+      error:
+        'narration approval refused: unresolved proposals: operation-1 (state: pending)',
     });
     const pending = await fixture.app.inject({
       method: 'GET',
@@ -270,6 +271,162 @@ describe('complete narration approval HTTP API', () => {
     expect(resolved.json()).toMatchObject({ state: 'accepted' });
     expect((await prepareApproval(fixture, {
       expectedRevisionSeq: 1,
+      expectedNarrationMd: approvedNarration(),
+    })).statusCode).toBe(200);
+  });
+
+  it('dismisses a stray alternatives ledger entry after its durable variant pick and permits approval', async () => {
+    const fixture = makeFixture();
+    const rewriteInputs = {
+      topic_brief: {},
+      creative_status: {},
+      selection: 'Approved complete narration.',
+      before: '',
+      after: '',
+      beat_title: '1. Opening',
+      narrative_job: 'open',
+      requested_scope: 'rewrite',
+    };
+    const rejectedRewrite = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'rewrite-selection',
+        inputs: rewriteInputs,
+      },
+    });
+    expect(rejectedRewrite.statusCode).toBe(200);
+    expect((await fixture.app.inject({
+      method: 'POST',
+      url:
+        '/api/drafts/draft-1/narration/proposals/operation-1/resolve',
+      headers: AUTH,
+      payload: {
+        decision: 'rejected',
+        reason: 'The first rewrite was too generic.',
+      },
+    })).statusCode).toBe(200);
+    expect(fixture.store.getNarrationProposal(
+      'draft-1',
+      'operation-1',
+    )).toMatchObject({
+      state: 'rejected',
+      reasonNote: 'The first rewrite was too generic.',
+    });
+
+    const rerolledRewrite = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'rewrite-selection',
+        inputs: rewriteInputs,
+      },
+    });
+    expect(rerolledRewrite.statusCode).toBe(200);
+    const rerolled = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/ops/operation-2/resume',
+      headers: AUTH,
+      payload: {
+        inputs: rewriteInputs,
+        reason: 'Try a more concrete line.',
+      },
+    });
+    expect(rerolled.statusCode).toBe(200);
+    expect(rerolled.json()).toEqual({ id: 'operation-3' });
+    expect(fixture.store.getNarrationProposal(
+      'draft-1',
+      'operation-2',
+    )).toMatchObject({
+      state: 'rerolled',
+      reasonNote: 'Try a more concrete line.',
+      successorOperationId: 'operation-3',
+    });
+    expect((await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: approvedDocument(),
+        opId: 'operation-3',
+        disposition: 'selection-proposal-accepted',
+      },
+    })).statusCode).toBe(200);
+    expect((await fixture.app.inject({
+      method: 'POST',
+      url:
+        '/api/drafts/draft-1/narration/proposals/operation-3/resolve',
+      headers: AUTH,
+      payload: { decision: 'accepted' },
+    })).statusCode).toBe(200);
+    expect(fixture.store.getNarrationProposal(
+      'draft-1',
+      'operation-3',
+    )).toMatchObject({ state: 'accepted' });
+
+    const submitted = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'generate-alternatives',
+        inputs: {
+          topic_brief: {},
+          creative_status: {},
+          selection: 'Approved complete narration.',
+          before: '',
+          after: '',
+          beat_title: '1. Opening',
+          narrative_job: 'open',
+          count: 2,
+        },
+      },
+    });
+    expect(submitted.statusCode).toBe(200);
+    const { id: operationId } = submitted.json() as { id: string };
+    expect(operationId).toBe('operation-4');
+    expect(fixture.store.getNarrationProposal(
+      'draft-1',
+      operationId,
+    )).toBeNull();
+    fixture.store.createNarrationProposal({
+      draftId: 'draft-1',
+      operationId,
+      state: 'pending',
+      createdAt: '2026-07-24T13:00:00.000Z',
+      resolvedAt: null,
+    });
+
+    const picked = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: approvedDocument(),
+        opId: operationId,
+        disposition: 'variant-picked/variant-1/alternative%3A0',
+      },
+    });
+    expect(picked.statusCode).toBe(200);
+    expect(fixture.store.getNarrationProposal(
+      'draft-1',
+      operationId,
+    )).toMatchObject({
+      state: 'dismissed',
+      successorOperationId: null,
+    });
+
+    const ledger = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/drafts/draft-1/narration/proposals',
+      headers: AUTH,
+    });
+    expect(ledger.statusCode).toBe(200);
+    expect(ledger.json()).toEqual({ proposals: [] });
+    expect((await prepareApproval(fixture, {
+      expectedRevisionSeq: 2,
       expectedNarrationMd: approvedNarration(),
     })).statusCode).toBe(200);
   });
@@ -434,9 +591,10 @@ function makeFixture(options: {
   const root = mkdtempSync(join(tmpdir(), 'narration-approval-'));
   const store = new DocumentStore(join(root, 'state.sqlite3'));
   const now = () => '2026-07-24T13:00:00.000Z';
+  let documentRevisionSequence = 0;
   const documentService = new DocumentService({
     store,
-    idFactory: () => 'unused-id',
+    idFactory: () => `document-revision-${++documentRevisionSequence}`,
     now,
   });
   const doc = options.unsettledVariant
@@ -478,16 +636,41 @@ function makeFixture(options: {
     read: vi.fn(),
   };
   let operationSequence = 0;
+  const operations = new Map<string, 'rewrite-selection' | 'generate-alternatives'>();
   const architectureService = new ArchitectureService({
     store,
     operationService: {
-      submit: () => `operation-${++operationSequence}`,
-      get: () => ({ operation: 'rewrite-selection' as const }),
-      result: () => ({
-        kind: 'schema',
-        value: { replacement_markdown: '> Proposed narration.' },
-        guardrail: null,
+      submit: (operation) => {
+        const id = `operation-${++operationSequence}`;
+        if (
+          operation === 'rewrite-selection'
+          || operation === 'generate-alternatives'
+        ) {
+          operations.set(id, operation);
+        }
+        return id;
+      },
+      get: (id) => ({
+        operation: operations.get(id) ?? 'rewrite-selection',
       }),
+      result: (id) => operations.get(id) === 'generate-alternatives'
+        ? {
+            kind: 'schema',
+            value: {
+              status: 'complete',
+              options: [
+                { label: 'Direct', markdown: 'Direct option.' },
+                { label: 'Playful', markdown: 'Playful option.' },
+              ],
+              guardrail_markdown: null,
+            },
+            guardrail: null,
+          }
+        : {
+            kind: 'schema',
+            value: { replacement_markdown: '> Proposed narration.' },
+            guardrail: null,
+          },
     },
     artifactService: artifacts,
     idFactory: () => 'approval-revision-1',

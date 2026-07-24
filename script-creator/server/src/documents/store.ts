@@ -459,6 +459,19 @@ export class DocumentStore {
         update.revision.createdAt,
         update.revision.kind ?? 'narration',
       );
+      if (
+        update.revision.opId
+        && update.revision.disposition.startsWith('variant-picked/')
+        && this.getNarrationProposal(id, update.revision.opId)?.state
+          === 'pending'
+      ) {
+        this.resolveNarrationProposal(
+          id,
+          update.revision.opId,
+          'dismissed',
+          update.revision.createdAt,
+        );
+      }
 
       return {
         draft: this.getDraft(id)!,

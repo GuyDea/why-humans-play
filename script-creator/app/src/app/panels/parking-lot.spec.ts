@@ -95,6 +95,7 @@ describe('parkingLotEntries', () => {
 
     expect(model.unsettled()).toEqual([{
       variantId: 'variant-unsettled',
+      originOperationId: null,
       activeIndex: 0,
       activeLabel: 'A',
       options: [

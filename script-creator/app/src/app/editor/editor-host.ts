@@ -574,7 +574,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       );
       if (picked) {
         this.nextSaveProvenance = {
-          opId: null,
+          opId: picked.originOperationId,
           disposition: variantPickedDisposition(
             picked.variantId,
             `alternative:${picked.activeIndex}`,

@@ -607,7 +607,7 @@ async function main(): Promise<void> {
   );
   await waitForText(
     editor,
-    'A queue quietly turns waiting into a strategic game.',
+    'Choosing a line is a bet made with incomplete information.',
   );
 
   await architecturePanel.getByRole(
@@ -653,6 +653,13 @@ async function main(): Promise<void> {
   await waitForEditorSave(page);
 
   const productionPanel = page.locator('app-production-panel');
+  {
+    const ledger = await api<unknown>(
+      daemon!.handshake,
+      `/api/drafts/${encodeURIComponent(draft.id)}/narration/proposals`,
+    );
+    console.log('DIAG pre-approval ledger:', JSON.stringify(ledger));
+  }
   const approveNarration = productionPanel.getByRole(
     'button',
     { name: 'Approve complete narration' },

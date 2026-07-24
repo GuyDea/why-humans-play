@@ -283,6 +283,7 @@ describe('ProposalBridge', () => {
     });
     expect(variant?.attrs).toEqual({
       variantId: 'variant-1',
+      originOperationId: 'op-1',
       activeIndex: 0,
       settled: false,
       options: [

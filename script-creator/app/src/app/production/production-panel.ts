@@ -124,6 +124,7 @@ interface PersonalInputProposal {
             ) {
               <div>
                 <code>{{ proposal.operationId }}</code>
+                <span>state: {{ proposal.state }}</span>
                 <button
                   type="button"
                   [disabled]="workflowBusy()"
@@ -745,8 +746,19 @@ export class ProductionPanel implements OnInit {
       this.editor()?.refreshFromServer(approved);
     } catch (error) {
       this.captureArchitectureConflict(error);
-      this.workflowError.set(errorMessage(error));
+      const approvalError = errorMessage(error);
+      this.workflowError.set(approvalError);
       await this.loadNarrationProposals();
+      const unsettled = this.pendingNarrationProposals();
+      if (unsettled.length > 0) {
+        const ledgerDetail = unsettled.map((proposal) =>
+          `${proposal.operationId} (state: ${proposal.state})`).join(', ');
+        if (!approvalError.includes(ledgerDetail)) {
+          this.workflowError.set(
+            `${approvalError}; unsettled ledger: ${ledgerDetail}`,
+          );
+        }
+      }
     } finally {
       releaseEditor();
       this.workflowBusy.set(false);

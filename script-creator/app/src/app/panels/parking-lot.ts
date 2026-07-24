@@ -21,6 +21,7 @@ export interface UnsettledVariantOption {
 
 export interface UnsettledVariantSet {
   variantId: string;
+  originOperationId: string | null;
   activeIndex: number;
   activeLabel: string;
   options: UnsettledVariantOption[];
@@ -56,6 +57,10 @@ export function unsettledVariantSets(
       : 0;
     variants.push({
       variantId: String(node.attrs['variantId'] ?? ''),
+      originOperationId:
+        typeof node.attrs['originOperationId'] === 'string'
+          ? node.attrs['originOperationId']
+          : null,
       activeIndex,
       activeLabel: options[activeIndex]?.label ?? '',
       options,

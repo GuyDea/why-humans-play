@@ -39,6 +39,7 @@ export const schema = new Schema({
     variantSet: {
       attrs: {
         variantId: {},
+        originOperationId: { default: null },
         activeIndex: {},
         settled: {},
       },
@@ -56,6 +57,7 @@ export const schema = new Schema({
       group: 'inline',
       attrs: {
         variantId: {},
+        originOperationId: { default: null },
         activeIndex: {},
         settled: {},
         options: {},

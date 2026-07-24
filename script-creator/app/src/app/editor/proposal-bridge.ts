@@ -545,6 +545,7 @@ export class ProposalBridge {
     const inserted = this.insertVariantSet(
       target,
       this.nextId(),
+      launch.tracked.id(),
       options,
     );
     this.releaseStructuralAnchor(launch.anchorId);
@@ -559,6 +560,7 @@ export class ProposalBridge {
   private insertVariantSet(
     target: SelectionTarget,
     variantId: string,
+    originOperationId: string | null,
     options: AlternativeOption[],
   ): boolean {
     const { doc } = this.view.state;
@@ -578,6 +580,7 @@ export class ProposalBridge {
         (transaction) => this.view.dispatch(transaction),
         {
           variantId,
+          originOperationId,
           at: target.from,
           options: options.map((option) => ({
             label: option.label,
@@ -594,6 +597,7 @@ export class ProposalBridge {
         (transaction) => this.view.dispatch(transaction),
         {
           variantId,
+          originOperationId,
           at,
           options: options.map((option) => ({
             label: option.label,

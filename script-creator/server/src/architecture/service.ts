@@ -1708,7 +1708,7 @@ export class ArchitectureService {
     draftId: string,
     action = 'narration approval',
   ): void {
-    let unresolved = false;
+    const unresolved: NarrationProposalRecord[] = [];
     for (const proposal of this.store.listPendingNarrationProposals(draftId)) {
       if (this.operationHasNarrationProposal(proposal.operationId)) {
         if (
@@ -1742,13 +1742,13 @@ export class ArchitectureService {
           );
           continue;
         }
-        unresolved = true;
+        unresolved.push(proposal);
         continue;
       }
       const result = this.operationService.result?.(proposal.operationId)
         ?? { kind: 'pending' };
       if (result.kind === 'pending') {
-        unresolved = true;
+        unresolved.push(proposal);
         continue;
       }
       this.store.resolveNarrationProposal(
@@ -1758,9 +1758,12 @@ export class ArchitectureService {
         this.now(),
       );
     }
-    if (unresolved) {
+    if (unresolved.length > 0) {
       throw new ArchitectureGateError(
-        `${action} refused: unresolved proposals`,
+        `${action} refused: unresolved proposals: ${
+          unresolved.map((proposal) =>
+            `${proposal.operationId} (state: ${proposal.state})`).join(', ')
+        }`,
       );
     }
   }
