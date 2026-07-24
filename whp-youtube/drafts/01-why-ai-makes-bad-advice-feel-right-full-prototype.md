@@ -10,43 +10,37 @@
 >
 > So were the experienced radiologists in our next story. Their guard still failed miserably. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> By the end of this video, you'll know four questions you can ask AI to expose the assumptions behind its advice before you act on it.
+> By the end of this video, you'll understand why distrust is not enough—and you'll know four questions you can ask AI to expose its assumptions before you act.
 >
-> A 2021 study recruited 138 experienced radiologists practicing in the United States and Canada. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> In 2021, a study recruited 138 experienced radiologists in the United States and Canada. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Each radiologist was asked to review eight diagnoses and find the wrong ones. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> They had to review eight diagnoses and find the wrong ones. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Six were correct; two were deliberately wrong. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Six diagnoses were correct. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Two were deliberately wrong. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> Researchers split them into two groups. [F-009](https://www.nature.com/articles/s41746-021-00385-9) One was told the diagnoses came from independent doctors. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other was told they came from AI. [F-009](https://www.nature.com/articles/s41746-021-00385-9) In reality, doctors wrote all eight. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Researchers then split the radiologists into two groups. [F-009](https://www.nature.com/articles/s41746-021-00385-9) One group was told every diagnosis came from another independent doctor. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other was told every diagnosis came from AI. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> If distrust were enough to protect them, the radiologists who thought AI was involved should have caught more of the planted errors.
 >
-> In reality, doctors had written every diagnosis in both groups. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> They didn't: they trusted the diagnoses less, but were no better at finding the wrong ones. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Same diagnoses. Different label of origin. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> The goalkeeper saw the ball coming—and apparently thought that was the whole job.
 >
-> And this is the kicker: the AI-label group rated the diagnoses as less trustworthy. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> Suspicion changed how the radiologists felt, not how well they found mistakes. [F-009](https://www.nature.com/articles/s41746-021-00385-9) That is the human half of the trap.
 >
-> Yet they caught the wrong diagnoses no better than the group told the diagnoses came from another doctor. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> No AI wrote those diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question remains: can a real AI bend its answer toward what you already believe?
 >
-> The goalkeeper was on alert. The ball still rolled between his legs.
+> In 2023, Anthropic researchers tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548)
 >
-> That is the trap: distrusting a diagnosis is not the same as catching its error.
+> Those assistants often shifted their answers toward users' stated beliefs—even when those beliefs were wrong. [F-001](https://arxiv.org/abs/2310.13548)
 >
-> The AI existed only on the label. This experiment exposed the human half of the problem: distrust alone did not help experts catch the wrong diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> That behavior is called sycophancy. [F-001](https://arxiv.org/abs/2310.13548)
 >
-> Now for the machine half: when AI really writes the answer, can it bend that answer toward what you already believe?
+> Put those findings together: your guard can fail while the machine leans toward the belief you brought with you. [F-009](https://www.nature.com/articles/s41746-021-00385-9) [F-001](https://arxiv.org/abs/2310.13548)
 >
-> In 2023, Anthropic researchers tested five leading AI assistants. Across four tasks, those assistants often shifted their answers toward users' stated beliefs—even when those beliefs were wrong. [F-001](https://arxiv.org/abs/2310.13548)
+> Your hunch can come back with a doctorate.
 >
-> That second trap is called sycophancy. [F-001](https://arxiv.org/abs/2310.13548)
+> Ask AI whether to quit your job, end a relationship, dismiss a health worry, or bet your savings on a business idea, and you may think you received a second opinion.
 >
-> Distrusting advice may not stop it from influencing your decision. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Sycophancy can point AI's advice back toward what you already believe. [F-001](https://arxiv.org/abs/2310.13548)
->
-> Put them together, and your hunch can come back with a doctorate.
->
-> Ask AI whether to quit your job, end a relationship, dismiss a health worry, or bet your savings on a business idea, and you may think you received a second opinion. You may have received your first opinion with much better posture.
->
-> That is how a dumb idea becomes dangerous: not by sounding dumb, but by sounding independently confirmed.
+> That is how a dumb idea becomes dangerous: it stops sounding like your idea and starts sounding independently confirmed.
 >
 > To see how that happens, start with the question you give it.
 
@@ -58,13 +52,11 @@
 >
 > An assistant might answer: “If your contributions are consistently dismissed, it may be time to plan an exit. Document your achievements, update your résumé, and begin a discreet job search.”
 >
-> It sounds responsible. It has verbs, a plan, and the calm authority of someone who has never needed health insurance.
+> It sounds responsible: cautious language, practical steps, and no obvious hallucination.
 >
-> But look at the case the prompt already built. Your ideas are brilliant. Your boss is ignoring them. Quitting is the decision.
+> But look at the case the prompt already built. Your ideas are “brilliant.” Your boss is “ignoring” them. Quitting is the decision.
 >
-> Maybe the ideas need work. Maybe there is no budget, the proposal was tried last year, or your “revolutionary strategy” is a shared spreadsheet with a gradient.
->
-> The question has already assigned the roles. You are the neglected genius. Your boss is the villain. And quitting is waiting backstage for its big entrance.
+> Maybe the ideas need work. Maybe there is no budget. Maybe the proposal was tried last year.
 >
 > The broader phenomenon is called the framing effect: how a problem is presented can change how we judge it. [F-003](https://doi.org/10.1126/science.7455683)
 >
@@ -74,8 +66,6 @@
 
 ## 3. Trained to agree
 
-> But why would AI agree?
->
 > One reason is painfully human: in the Anthropic study, matching the user's beliefs was one of the most predictive features of human preference judgments. [F-001](https://arxiv.org/abs/2310.13548)
 >
 > Agreement can feel helpful. When human preferences shape training, that reaction can become a crooked signal: agreement starts impersonating assistance. [F-001](https://arxiv.org/abs/2310.13548)
@@ -92,27 +82,27 @@
 >
 > “Helpful assistant” had briefly been promoted to “professional accomplice.”
 >
-> Agreement gets the answer through the door. Presentation gives it a suit.
+> Agreement can shape the conclusion. Now look at why polished presentation can make that conclusion feel earned.
 
 ## 4. Confidence gets a costume
 
 > Then the answer arrives polished.
 >
-> In a 1999 experiment, researchers made statements easier or harder to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) The easier statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> In a 1999 experiment, researchers made statements easier or harder to read. [F-004](https://doi.org/10.1006/ccog.1999.0386)
 >
-> The evidence did not improve. The contrast did. Psychologists call this effect processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> Only the readability changed. [F-004](https://doi.org/10.1006/ccog.1999.0386) That should not make a statement more true.
 >
-> But AI adds another layer. Across six experiments, laypeople sometimes gave more weight to equivalent advice when they thought it came from an algorithm rather than a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> Yet the easier statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386) Psychologists call this effect processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386)
 >
-> That tendency is called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> AI adds another layer. You might expect equivalent advice to receive equivalent weight, whoever supposedly wrote it.
+>
+> But across six experiments, laypeople sometimes gave more weight to equivalent advice when they thought it came from an algorithm rather than a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) That tendency is called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
 > Now return to “Should I quit?” Your hunch enters the chat wearing sweatpants. It returns as:
 >
 > “Strategic Exit Framework. Phase one: document the pattern. Phase two: de-risk the transition. Phase three: execute from a position of leverage.”
 >
-> Very impressive. The assumptions did not get audited. They got a font upgrade.
->
-> The framework has executive confidence and a machine badge. Nothing necessarily became more correct. It just received headings and institutional lighting.
+> Very impressive. Nothing necessarily became more correct. It just received headings and institutional lighting.
 >
 > The advice may still be right. The problem is that its appearance no longer tells you whether the conclusion came from evidence—or from the confident packaging of your own premise.
 >
@@ -132,9 +122,11 @@
 >
 > They made a judgment, saw an AI answer, and could then revise their own. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
-> Across repeated interactions, systematically biased AI made people's judgments more biased over time. Accurate AI improved them. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> You might hope one biased answer would remain one bad suggestion on one screen.
 >
-> So the lesson isn't that AI always makes us worse. It is that the model's error can become part of the human's next judgment. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> It didn't. Across repeated interactions, systematically biased AI made people's judgments more biased over time. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Accurate AI improved their judgments. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+>
+> The lesson isn't that AI always makes us worse. It is that the model's error can become part of the human's next judgment. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
 > Back to quitting. You began with “My boss ignores my brilliant ideas.” AI produced a calm exit strategy. Now you leave thinking: even the machine sees it.
 >
@@ -142,9 +134,7 @@
 >
 > Sometimes you didn't get a second vote. You photocopied the first ballot and counted it twice.
 >
-> Quitting may still be right. But that confidence was not independently earned.
->
-> The most dangerous answer may not contain a single obvious lie. It may answer your carefully edited version of the problem perfectly.
+> Quitting may still be right. But an answer that perfectly solves your edited version of the problem has not independently earned its confidence.
 
 ## 6. The Second-Opinion Test
 
@@ -170,13 +160,13 @@
 >
 > Fourth: “What fact would change your recommendation, and where should I verify it outside this chat?”
 >
-> Now name the deciding facts: written feedback, reasons for rejection, financial runway, and credible openings. Those live with people, job listings, and your bank account—not inside the prompt. Your bank account remains stubbornly resistant to prompting.
+> Now name the deciding facts: written feedback, reasons for rejection, financial runway, and credible openings. Those live with people, job listings, and your bank account—not inside the prompt.
 >
 > A better answer becomes conditional. Documented dismissal, enough runway, and a credible alternative strengthen the case for leaving. Missing feedback may make a direct conversation or small test the next move.
 >
-> The questions are not a truth machine. They make the answer inspectable. If no deciding fact can change the recommendation, you received a motivational poster with autocomplete.
+> If no deciding fact can change the recommendation, you received a motivational poster with autocomplete.
 >
-> Expose the assumptions. Test the opposite. Imagine the failure. Verify the deciding fact.
+> These questions are not a truth machine. They make the answer inspectable: a better recommendation should change when a deciding fact changes.
 
 ## 7. Where the method stops
 
