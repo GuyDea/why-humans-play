@@ -7,8 +7,10 @@ import {
   type ArchitectureSection,
 } from './codec.js';
 import {
-  hasCompleteNarrationApproval,
+  ExportBlockedError,
+  exportDocumentMarkdown,
   hasNarration,
+  importProductionMarkdown,
   readCreativePhase,
   readCreativeStatus,
   withCreativePhase,
@@ -19,11 +21,15 @@ import {
   type DocumentStore,
   type DraftArchitecture,
   type DraftRecord,
+  type NarrationProposalRecord,
+  type PromotionRecord,
   type RevisionRecord,
 } from '../documents/store.js';
 import type { OperationName } from '../operations/registry.js';
+import type { OperationServiceResult } from '../operations/service.js';
 import type {
   ArtifactExpectedState,
+  ArtifactReadResult,
   ArtifactWriteResult,
   PipelineRow,
 } from '../repo/artifacts.js';
@@ -65,6 +71,7 @@ interface ArchitectureOperationService {
     options?: { resumeOf?: string },
   ): string;
   get(id: string): { operation: OperationName };
+  result?(id: string): OperationServiceResult;
 }
 
 interface ArchitectureArtifactService {
@@ -74,6 +81,12 @@ interface ArchitectureArtifactService {
     expectedState: ArtifactExpectedState,
   ): Promise<ArtifactWriteResult>;
   upsertPipelineRow(row: PipelineRow): Promise<ArtifactWriteResult>;
+  read?(path: string): Promise<ArtifactReadResult> | ArtifactReadResult;
+  writeProduction?(
+    path: string,
+    content: string,
+    expectedState: ArtifactExpectedState,
+  ): Promise<ArtifactWriteResult>;
 }
 
 export class ArchitectureRevisionConflictError extends Error {
@@ -90,6 +103,30 @@ export class ArchitectureGateError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'ArchitectureGateError';
+  }
+}
+
+export class NarrationRevisionConflictError extends Error {
+  readonly current: DraftRecord;
+
+  constructor(current: DraftRecord) {
+    super('narration revision conflict');
+    this.name = 'NarrationRevisionConflictError';
+    this.current = current;
+  }
+}
+
+export class ProductionSyncConflictError extends Error {
+  readonly currentHash: string | 'absent';
+  readonly parked?: string[];
+
+  constructor(
+    conflict: Extract<ArtifactWriteResult, { conflict: true }>,
+  ) {
+    super('production synchronization conflict');
+    this.name = 'ProductionSyncConflictError';
+    this.currentHash = conflict.currentHash;
+    this.parked = conflict.parked;
   }
 }
 
@@ -124,6 +161,11 @@ const NARRATION_OPERATIONS = new Set<OperationName>([
   ...SCOPED_NARRATION_OPERATIONS,
   'generate-episode',
   'promote',
+]);
+
+const NARRATION_PROPOSAL_OPERATIONS = new Set<OperationName>([
+  'rewrite-selection',
+  'generate-episode',
 ]);
 
 export class ArchitectureService {
@@ -199,6 +241,33 @@ export class ArchitectureService {
     inputs: unknown,
   ): string {
     const operation = this.operationService.get(operationId).operation;
+    const proposal = this.store.getNarrationProposal(
+      draftId,
+      operationId,
+    );
+    if (proposal?.state === 'pending') {
+      const result = this.operationService.result?.(operationId)
+        ?? { kind: 'pending' };
+      if (this.operationHasNarrationProposal(operationId)) {
+        this.store.resolveNarrationProposal(
+          draftId,
+          operationId,
+          'rejected',
+          this.now(),
+        );
+      } else if (result.kind !== 'pending') {
+        this.store.resolveNarrationProposal(
+          draftId,
+          operationId,
+          'dismissed',
+          this.now(),
+        );
+      } else {
+        throw new ArchitectureGateError(
+          'operation resume refused: predecessor proposal is not settled',
+        );
+      }
+    }
     return this.submit(draftId, operation, inputs, {
       resumeOf: operationId,
     });
@@ -221,6 +290,457 @@ export class ArchitectureService {
     requireRevisionSeq(input.expectedRevisionSeq);
     return this.withActionLock(draftId, () =>
       this.resumeReopen(draftId, input.expectedRevisionSeq));
+  }
+
+  async approveNarration(
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      settledExportToken: string;
+    },
+  ): Promise<DraftRecord> {
+    requireRevisionSeq(input.expectedRevisionSeq);
+    requireNonEmpty(input.settledExportToken, 'settledExportToken');
+    return this.withActionLock(draftId, async () => {
+      let draft = this.requireExpectedNarrationRevision(
+        draftId,
+        input.expectedRevisionSeq,
+      );
+      const settledExport = this.store.getNarrationSettledExport(
+        input.settledExportToken,
+      );
+      if (
+        !settledExport
+        || settledExport.draftId !== draftId
+        || settledExport.revisionSeq !== input.expectedRevisionSeq
+      ) {
+        throw new ArchitectureGateError(
+          'narration approval refused: settled export token is stale or invalid',
+        );
+      }
+      this.requireSettledNarrationProposals(draftId);
+      const architecture = requireArchitecture(draft);
+      if (
+        architecture.approvedMd === null
+        || architecture.approvedAt === null
+      ) {
+        throw new ArchitectureGateError(
+          'narration approval refused: architecture approval is required',
+        );
+      }
+      if (architecture.approvedMd !== joinArchitecture(architecture.sections)) {
+        throw new ArchitectureGateError(
+          'narration approval refused: architecture approval is stale',
+        );
+      }
+      if (draft.narrationReconciliationRequired === true) {
+        throw new ArchitectureGateError(
+          'narration approval refused: narration reconciliation is required',
+        );
+      }
+      if (readCreativePhase(draft.doc) !== 'rapid-prototype') {
+        throw new ArchitectureGateError(
+          'narration approval refused: rapid-prototype phase is required',
+        );
+      }
+
+      let approvedNarrationMd: string;
+      try {
+        approvedNarrationMd = exportDocumentMarkdown(draft.doc);
+      } catch (error) {
+        if (error instanceof ExportBlockedError) {
+          throw new ArchitectureGateError(
+            `narration approval refused: unsettled export: ${
+              error.reasons.join('; ')
+            }`,
+          );
+        }
+        throw error;
+      }
+      if (approvedNarrationMd !== settledExport.narrationMd) {
+        throw new ArchitectureGateError(
+          'narration approval refused: settled export token does not match the stored revision',
+        );
+      }
+      const resumingReservedApproval =
+        draft.approvedNarrationMd === approvedNarrationMd
+        && typeof draft.approvedNarrationAt === 'string'
+        && draft.approvedNarrationRevisionSeq === input.expectedRevisionSeq;
+      const approvedNarrationAt = resumingReservedApproval
+        ? draft.approvedNarrationAt!
+        : this.now();
+      let approvalRevisionSeq = input.expectedRevisionSeq;
+      if (!resumingReservedApproval) {
+        const reserved = this.store.approveNarration(draftId, {
+          expectedRevisionSeq: input.expectedRevisionSeq,
+          approvedNarrationMd,
+          approvedNarrationAt,
+          narrationArtifactHash: draft.narrationArtifactHash ?? null,
+          doc: draft.doc,
+          updatedAt: approvedNarrationAt,
+          revision: {
+            id: this.idFactory(),
+            createdAt: approvedNarrationAt,
+          },
+        });
+        if (!reserved) {
+          throw new NarrationRevisionConflictError(
+            this.requireDraft(draftId),
+          );
+        }
+        draft = reserved.draft;
+        approvalRevisionSeq = reserved.revision.seq;
+      }
+      this.requireNarrationApprovalRevision(
+        draftId,
+        approvalRevisionSeq,
+        approvedNarrationMd,
+      );
+      const artifactPath =
+        `whp-youtube/drafts/${draft.episodeSlug}.md`;
+      const artifactService = this.requireArtifactService();
+      const writeResult = await artifactService.write(
+        artifactPath,
+        approvedNarrationMd,
+        draft.narrationArtifactHash
+          ? { expectedHash: draft.narrationArtifactHash }
+          : { expectNew: true },
+      );
+      const intendedHash = sha256(approvedNarrationMd);
+      if (
+        writeResult.conflict
+        && (
+          writeResult.currentHash !== intendedHash
+          || (writeResult.parked?.length ?? 0) > 0
+        )
+      ) {
+        throw new ArchitectureArtifactConflictError(
+          'narration artifact conflict',
+          writeResult,
+          this.syntheticActionResult(draftId),
+        );
+      }
+      this.store.replaceNarrationArtifactHash(
+        draftId,
+        writeResult.conflict ? intendedHash : writeResult.hash,
+      );
+      this.requireNarrationApprovalRevision(
+        draftId,
+        approvalRevisionSeq,
+        approvedNarrationMd,
+      );
+      const pipeline = await artifactService.upsertPipelineRow({
+        episodeSlug: draft.episodeSlug,
+        milestone: 'creative-approved',
+        ref: artifactPath,
+      });
+      if (pipeline.conflict) {
+        throw new ArchitectureArtifactConflictError(
+          'narration pipeline conflict',
+          pipeline,
+          this.syntheticActionResult(draftId),
+        );
+      }
+      const current = this.requireNarrationApprovalRevision(
+        draftId,
+        approvalRevisionSeq,
+        approvedNarrationMd,
+      );
+      const approved = this.store.replaceDraftWorkflowState(draftId, {
+        doc: withCreativePhase(current.doc, 'creative-approved'),
+        architecture: requireArchitecture(current),
+        architectureArtifactHash:
+          current.architectureArtifactHash ?? null,
+        narrationReconciliationRequired:
+          current.narrationReconciliationRequired === true,
+        updatedAt: this.now(),
+      });
+      this.store.deleteNarrationSettledExports(draftId);
+      return approved;
+    });
+  }
+
+  prepareNarrationApproval(
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      expectedNarrationMd: string;
+    },
+  ): { settledExportToken: string } {
+    requireRevisionSeq(input.expectedRevisionSeq);
+    requireNonEmpty(input.expectedNarrationMd, 'expectedNarrationMd');
+    const draft = this.requireExpectedNarrationRevision(
+      draftId,
+      input.expectedRevisionSeq,
+    );
+    this.requireSettledNarrationProposals(draftId);
+    let narrationMd: string;
+    try {
+      narrationMd = exportDocumentMarkdown(draft.doc);
+    } catch (error) {
+      if (error instanceof ExportBlockedError) {
+        throw new ArchitectureGateError(
+          `narration approval refused: unsettled export: ${
+            error.reasons.join('; ')
+          }`,
+        );
+      }
+      throw error;
+    }
+    if (narrationMd !== input.expectedNarrationMd) {
+      throw new ArchitectureGateError(
+        'narration approval refused: editor export does not match the stored revision',
+      );
+    }
+    const settledExportToken = randomUUID();
+    this.store.createNarrationSettledExport({
+      token: settledExportToken,
+      draftId,
+      revisionSeq: input.expectedRevisionSeq,
+      narrationMd,
+      createdAt: this.now(),
+    });
+    return { settledExportToken };
+  }
+
+  narrationProposals(draftId: string): Array<
+    NarrationProposalRecord & { acceptedRevisionPresent: boolean }
+  > {
+    this.requireDraft(draftId);
+    return this.store.listPendingNarrationProposals(draftId).map(
+      (proposal) => ({
+        ...proposal,
+        acceptedRevisionPresent: this.store.hasRevisionForOperation(
+          draftId,
+          proposal.operationId,
+        ),
+      }),
+    );
+  }
+
+  resolveNarrationProposal(
+    draftId: string,
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+  ): NarrationProposalRecord {
+    this.requireDraft(draftId);
+    requireNonEmpty(operationId, 'operationId');
+    if (decision !== 'accepted' && decision !== 'rejected') {
+      throw new Error('decision must be accepted or rejected');
+    }
+    const proposal = this.store.getNarrationProposal(
+      draftId,
+      operationId,
+    );
+    if (!proposal) {
+      throw new ArchitectureGateError(
+        'narration proposal resolution refused: operation is not registered for this draft',
+      );
+    }
+    if (proposal.state !== 'pending') return proposal;
+    if (!this.operationHasNarrationProposal(operationId)) {
+      throw new ArchitectureGateError(
+        'narration proposal resolution refused: operation has no proposal result',
+      );
+    }
+    if (
+      decision === 'accepted'
+      && !this.store.hasRevisionForOperation(draftId, operationId)
+    ) {
+      throw new ArchitectureGateError(
+        'narration proposal resolution refused: accepted proposal revision is missing',
+      );
+    }
+    return this.store.resolveNarrationProposal(
+      draftId,
+      operationId,
+      decision,
+      this.now(),
+    );
+  }
+
+  promotion(draftId: string): PromotionRecord | null {
+    this.requireDraft(draftId);
+    return this.store.getLatestPromotion(draftId);
+  }
+
+  async syncProductionDraft(
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+    },
+  ): Promise<PromotionRecord> {
+    requireRevisionSeq(input.expectedRevisionSeq);
+    return this.withActionLock(draftId, async () => {
+      const draft = this.requireExpectedNarrationRevision(
+        draftId,
+        input.expectedRevisionSeq,
+      );
+      this.requireSettledNarrationProposals(
+        draftId,
+        'production synchronization',
+      );
+      const promotion = this.store.getLatestPromotion(draftId);
+      const resumingSynchronization =
+        promotion?.state === 'output-ready'
+        && promotion.error === 'production synchronization in progress'
+        && promotion.targetHash !== null;
+      if (
+        !promotion
+        || (
+          promotion.state !== 'validation-required'
+          && !resumingSynchronization
+        )
+        || !promotion.targetHash
+      ) {
+        throw new ArchitectureGateError(
+          'production synchronization refused: validation-required promotion is required',
+        );
+      }
+      let markdown: string;
+      try {
+        markdown = exportDocumentMarkdown(draft.doc);
+      } catch (error) {
+        if (error instanceof ExportBlockedError) {
+          throw new ArchitectureGateError(
+            `production synchronization refused: unsettled export: ${
+              error.reasons.join('; ')
+            }`,
+          );
+        }
+        throw error;
+      }
+      const writeProduction =
+        this.requireArtifactService().writeProduction;
+      if (!writeProduction) {
+        throw new Error(
+          'production artifact writer is not configured',
+        );
+      }
+      let reserved = resumingSynchronization
+        ? promotion
+        : this.updatePromotion(promotion, {
+            state: 'output-ready',
+            validationHash: null,
+            error: 'production synchronization in progress',
+          });
+      try {
+        const result = await writeProduction(
+          promotion.targetPath,
+          markdown,
+          { expectedHash: promotion.targetHash },
+        );
+        const intendedHash = sha256(markdown);
+        if (
+          result.conflict
+          && (
+            result.currentHash !== intendedHash
+            || (result.parked?.length ?? 0) > 0
+          )
+        ) {
+          throw new ProductionSyncConflictError(result);
+        }
+        this.requireExpectedNarrationRevision(
+          draftId,
+          input.expectedRevisionSeq,
+        );
+        reserved = this.updatePromotion(reserved, {
+          state: 'validation-required',
+          targetHash: result.conflict ? intendedHash : result.hash,
+          validationHash: null,
+          error: null,
+        });
+        return reserved;
+      } catch (error) {
+        if (reserved.state === 'output-ready') {
+          this.updatePromotion(reserved, {
+            state: 'validation-required',
+            validationHash: null,
+            error: null,
+          });
+        }
+        throw error;
+      }
+    });
+  }
+
+  async reconcilePromotionResult(
+    operationId: string,
+    result:
+      | { kind: 'raw'; markdown: string }
+      | { kind: 'failed'; error: string }
+      | { kind: 'pending' }
+      | { kind: 'schema'; value: unknown; guardrail: string | null },
+  ): Promise<PromotionRecord | null> {
+    let promotion = this.store.getPromotionByOperation(operationId);
+    if (!promotion) return null;
+    if (
+      promotion.state === 'validation-required'
+      || promotion.state === 'complete'
+      || promotion.state === 'failed'
+      || (
+        promotion.state === 'output-ready'
+        && (
+          promotion.error === 'production synchronization in progress'
+          || promotion.validationHash !== null
+        )
+      )
+    ) {
+      return promotion;
+    }
+    if (result.kind === 'pending') return promotion;
+    if (result.kind !== 'raw') {
+      return this.failPromotion(
+        promotion,
+        result.kind === 'failed'
+          ? result.error
+          : 'Promote returned an unexpected structured result',
+      );
+    }
+
+    if (promotion.state === 'running') {
+      try {
+        const read = this.requireArtifactReader();
+        const output = await read(promotion.targetPath);
+        if (output.path !== promotion.targetPath) {
+          throw new Error('Promote output path did not match its staged target');
+        }
+        promotion = this.updatePromotion(promotion, {
+          state: 'output-ready',
+          targetHash: output.hash,
+          error: null,
+        });
+      } catch (error) {
+        return this.failPromotion(promotion, errorMessage(error));
+      }
+    }
+
+    try {
+      const output = await this.requireArtifactReader()(
+        promotion.targetPath,
+      );
+      if (output.hash !== promotion.targetHash) {
+        throw new Error('Promote output changed during staged import');
+      }
+      const draft = this.requireDraft(promotion.draftId);
+      const imported = importProductionMarkdown(output.content, draft.doc);
+      this.store.importPromotion(promotion.draftId, {
+        doc: imported.doc,
+        format: imported.format,
+        updatedAt: this.now(),
+        revision: {
+          id: promotion.importRevisionId,
+          opId: promotion.operationId,
+          createdAt: this.now(),
+        },
+      });
+      return this.updatePromotion(promotion, {
+        state: 'validation-required',
+        error: null,
+      });
+    } catch (error) {
+      return this.failPromotion(promotion, errorMessage(error));
+    }
   }
 
   private async resumeApprove(
@@ -481,6 +1001,33 @@ export class ArchitectureService {
     return draft;
   }
 
+  private requireExpectedNarrationRevision(
+    draftId: string,
+    expectedRevisionSeq: number,
+  ): DraftRecord {
+    const draft = this.requireDraft(draftId);
+    if (this.store.currentRevisionSeq(draftId) !== expectedRevisionSeq) {
+      throw new NarrationRevisionConflictError(draft);
+    }
+    return draft;
+  }
+
+  private requireNarrationApprovalRevision(
+    draftId: string,
+    revisionSeq: number,
+    approvedNarrationMd: string,
+  ): DraftRecord {
+    const draft = this.requireDraft(draftId);
+    if (
+      this.store.currentRevisionSeq(draftId) !== revisionSeq
+      || draft.approvedNarrationRevisionSeq !== revisionSeq
+      || draft.approvedNarrationMd !== approvedNarrationMd
+    ) {
+      throw new NarrationRevisionConflictError(draft);
+    }
+    return draft;
+  }
+
   private requireSagaRevisionCurrent(
     saga: ArchitectureSagaRecord,
     revisionId: string,
@@ -529,6 +1076,29 @@ export class ArchitectureService {
     return this.artifactService;
   }
 
+  private requireArtifactReader(): (
+    path: string,
+  ) => Promise<ArtifactReadResult> {
+    const read = this.requireArtifactService().read;
+    if (!read) throw new Error('artifact reader is not configured');
+    return async (path) => await read(path);
+  }
+
+  private syntheticActionResult(
+    draftId: string,
+  ): ArchitectureActionResult {
+    return {
+      complete: false,
+      steps: {
+        revisionAppended: 'pending',
+        artifactWritten: 'pending',
+        pipelineUpserted: 'pending',
+        draftUpdated: 'pending',
+      },
+      state: this.get(draftId),
+    };
+  }
+
   private async withActionLock<T>(
     draftId: string,
     action: () => Promise<T>,
@@ -562,6 +1132,16 @@ export class ArchitectureService {
     const approvedCurrent = architecture.approvedMd !== null
       && architecture.approvedAt !== null
       && architecture.approvedMd === joinArchitecture(architecture.sections);
+    if (
+      NARRATION_PROPOSAL_OPERATIONS.has(operation)
+      && phase === 'rapid-prototype'
+      && draft.approvedNarrationMd !== null
+      && draft.approvedNarrationMd !== undefined
+    ) {
+      throw new ArchitectureGateError(
+        `${operation} refused: narration approval is in progress`,
+      );
+    }
 
     if (operation === 'generate-episode') {
       if (phase !== 'rapid-prototype') {
@@ -609,15 +1189,44 @@ export class ArchitectureService {
           'promote refused: narration reconciliation is required',
         );
       }
-      if (!hasCompleteNarrationApproval(draft.doc)) {
+      if (
+        draft.approvedNarrationMd === null
+        || draft.approvedNarrationMd === undefined
+        || draft.approvedNarrationAt === null
+        || draft.approvedNarrationAt === undefined
+        || draft.approvedNarrationRevisionSeq === null
+        || draft.approvedNarrationRevisionSeq === undefined
+      ) {
         throw new ArchitectureGateError(
           'promote refused: complete narration approval is required',
+        );
+      }
+      if (
+        phase !== 'creative-approved'
+        || draft.approvedNarrationRevisionSeq
+          !== this.store.currentRevisionSeq(draftId)
+      ) {
+        throw new ArchitectureGateError(
+          'promote refused: complete narration approval is stale',
+        );
+      }
+      let currentNarration: string;
+      try {
+        currentNarration = exportDocumentMarkdown(draft.doc);
+      } catch {
+        throw new ArchitectureGateError(
+          'promote refused: narration export is unsettled',
+        );
+      }
+      if (currentNarration !== draft.approvedNarrationMd) {
+        throw new ArchitectureGateError(
+          'promote refused: complete narration approval is stale',
         );
       }
     }
 
     const supplied = requireInputs(inputs);
-    const authoritativeInputs = { ...supplied };
+    let authoritativeInputs = { ...supplied };
     delete authoritativeInputs['draftId'];
     if (NARRATION_OPERATIONS.has(operation)) {
       delete authoritativeInputs['creative_status'];
@@ -631,17 +1240,140 @@ export class ArchitectureService {
           architecture.approvedMd;
       }
     }
-    return this.operationService.submit(
+    if (operation === 'promote') {
+      const targetPath = requireProductionTarget(
+        authoritativeInputs['target_path'],
+        draft.episodeSlug,
+      );
+      const metadata = recordValue(draft.doc['metadata']) ?? {};
+      authoritativeInputs = {
+        topic_brief: {
+          topic: stringValue(metadata['topic']),
+          factual_anchors: stringArray(metadata['anchors']),
+          unknowns: stringArray(metadata['unknowns']),
+        },
+        approved_lessons: stringArray(metadata['approvedLessons']),
+        approved_architecture_md: architecture.approvedMd!,
+        approved_narration_md: draft.approvedNarrationMd!,
+        creative_status: readCreativeStatus(draft.doc) ?? {},
+        target_path: targetPath,
+      };
+    }
+    const id = this.operationService.submit(
       operation,
       authoritativeInputs,
       options,
     );
+    if (NARRATION_PROPOSAL_OPERATIONS.has(operation)) {
+      this.store.createNarrationProposal({
+        draftId,
+        operationId: id,
+        state: 'pending',
+        createdAt: this.now(),
+        resolvedAt: null,
+      });
+    }
+    if (operation === 'promote') {
+      const timestamp = this.now();
+      this.store.createPromotion({
+        draftId,
+        operationId: id,
+        state: 'running',
+        targetPath: authoritativeInputs['target_path'] as string,
+        targetHash: null,
+        importRevisionId: this.idFactory(),
+        validationHash: null,
+        error: null,
+        createdAt: timestamp,
+        updatedAt: timestamp,
+      });
+    }
+    return id;
+  }
+
+  private requireSettledNarrationProposals(
+    draftId: string,
+    action = 'narration approval',
+  ): void {
+    let unresolved = false;
+    for (const proposal of this.store.listPendingNarrationProposals(draftId)) {
+      if (this.operationHasNarrationProposal(proposal.operationId)) {
+        if (
+          this.store.hasRevisionForOperation(
+            draftId,
+            proposal.operationId,
+          )
+        ) {
+          this.store.resolveNarrationProposal(
+            draftId,
+            proposal.operationId,
+            'accepted',
+            this.now(),
+          );
+          continue;
+        }
+        unresolved = true;
+        continue;
+      }
+      const result = this.operationService.result?.(proposal.operationId)
+        ?? { kind: 'pending' };
+      if (result.kind === 'pending') {
+        unresolved = true;
+        continue;
+      }
+      this.store.resolveNarrationProposal(
+        draftId,
+        proposal.operationId,
+        'dismissed',
+        this.now(),
+      );
+    }
+    if (unresolved) {
+      throw new ArchitectureGateError(
+        `${action} refused: unresolved proposals`,
+      );
+    }
+  }
+
+  private operationHasNarrationProposal(operationId: string): boolean {
+    const operation = this.operationService.get(operationId).operation;
+    const result = this.operationService.result?.(operationId)
+      ?? { kind: 'pending' };
+    if (operation === 'generate-episode') {
+      return result.kind === 'raw' && result.markdown.trim() !== '';
+    }
+    if (operation !== 'rewrite-selection') return false;
+    return result.kind === 'schema'
+      && result.guardrail === null
+      && recordValue(result.value) !== null
+      && typeof recordValue(result.value)?.['replacement_markdown'] === 'string';
   }
 
   private requireDraft(draftId: string): DraftRecord {
     const draft = this.store.getDraft(draftId);
     if (!draft) throw new Error(`draft not found: ${draftId}`);
     return draft;
+  }
+
+  private updatePromotion(
+    promotion: PromotionRecord,
+    update: Partial<PromotionRecord>,
+  ): PromotionRecord {
+    return this.store.updatePromotion({
+      ...promotion,
+      ...update,
+      updatedAt: this.now(),
+    });
+  }
+
+  private failPromotion(
+    promotion: PromotionRecord,
+    error: string,
+  ): PromotionRecord {
+    return this.updatePromotion(promotion, {
+      state: 'failed',
+      error,
+    });
   }
 }
 
@@ -797,4 +1529,46 @@ function requireInputs(value: unknown): Record<string, unknown> {
     throw new Error('inputs must be an object');
   }
   return value as Record<string, unknown>;
+}
+
+function requireProductionTarget(
+  value: unknown,
+  episodeSlug: string,
+): string {
+  if (typeof value !== 'string') {
+    throw new Error('target_path is required');
+  }
+  const escapedSlug = episodeSlug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  if (!new RegExp(
+    `^whp-youtube/episodes/\\d{2}-${escapedSlug}\\.md$`,
+  ).test(value)) {
+    throw new Error(`invalid production target: ${value}`);
+  }
+  return value;
+}
+
+function recordValue(
+  value: unknown,
+): Record<string, unknown> | null {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
+}
+
+function stringValue(value: unknown): string {
+  return typeof value === 'string' ? value : '';
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === 'string')
+    : [];
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error && error.message.trim() !== ''
+    ? error.message
+    : 'promotion failed';
 }

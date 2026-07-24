@@ -67,6 +67,10 @@ describe('DocumentService', () => {
       },
       architectureArtifactHash: null,
       narrationReconciliationRequired: false,
+      approvedNarrationMd: null,
+      approvedNarrationAt: null,
+      approvedNarrationRevisionSeq: null,
+      narrationArtifactHash: null,
       updatedAt: '2026-07-23T09:00:00.000Z',
     });
     expect(fixture.service.getDraft(created.id)).toEqual(created);

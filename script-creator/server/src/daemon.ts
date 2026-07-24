@@ -25,8 +25,10 @@ import {
   type OperationClock,
 } from './operations/service.js';
 import {
+  readArtifact,
   upsertPipelineRow,
   writeArtifact,
+  writeEpisodeArtifact,
 } from './repo/artifacts.js';
 import { runValidatorJson } from './repo/validator.js';
 import { JobSupervisor } from './supervisor.js';
@@ -167,6 +169,17 @@ export function createDaemonContext(
         upsertPipelineRow: (
           row: Parameters<typeof upsertPipelineRow>[1],
         ) => upsertPipelineRow(repoRoot, row),
+        read: (relPath: string) => readArtifact(repoRoot, relPath),
+        writeProduction: (
+          relPath: string,
+          content: string,
+          expectedState: Parameters<typeof writeEpisodeArtifact>[3],
+        ) => writeEpisodeArtifact(
+          repoRoot,
+          relPath,
+          content,
+          expectedState,
+        ),
       },
     });
     const topicService = new TopicService({
@@ -201,6 +214,7 @@ export function createDaemonContext(
         upsertPipelineRow: (
           row: Parameters<typeof upsertPipelineRow>[1],
         ) => upsertPipelineRow(repoRoot, row),
+        read: (relPath: string) => readArtifact(repoRoot, relPath),
       },
       validatorService: {
         validate: (scriptRelPath) =>

@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('shared state migration registry', () => {
-  it('owns one documented global sequence through the architecture stage', () => {
+  it('owns one documented global sequence through staged promotion', () => {
     expect(STATE_MIGRATIONS.map(({ version, owner, name }) => ({
       version,
       owner,
@@ -36,8 +36,9 @@ describe('shared state migration registry', () => {
       { version: 4, owner: 'topics', name: 'gate-check-persistence' },
       { version: 5, owner: 'topics', name: 'topic-handoff-saga' },
       { version: 6, owner: 'architecture', name: 'architecture-stage' },
+      { version: 7, owner: 'architecture', name: 'staged-promotion' },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(6);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(7);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -108,7 +109,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v6 schema for a fresh database', () => {
+  it('creates the complete v7 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -126,6 +127,10 @@ describe('shared state migration registry', () => {
       'architecture_json',
       'architecture_artifact_hash',
       'narration_reconciliation_required',
+      'approved_narration_md',
+      'approved_narration_at',
+      'approved_narration_revision_seq',
+      'narration_artifact_hash',
     ]);
     expect(columns(inspected, 'revisions')).toEqual([
       'id',
@@ -148,6 +153,32 @@ describe('shared state migration registry', () => {
       'draft_updated',
       'created_at',
       'updated_at',
+    ]);
+    expect(columns(inspected, 'promotions')).toEqual([
+      'draft_id',
+      'operation_id',
+      'state',
+      'target_path',
+      'target_hash',
+      'import_revision_id',
+      'validation_hash',
+      'error',
+      'created_at',
+      'updated_at',
+    ]);
+    expect(columns(inspected, 'narration_settled_exports')).toEqual([
+      'token',
+      'draft_id',
+      'revision_seq',
+      'narration_md',
+      'created_at',
+    ]);
+    expect(columns(inspected, 'narration_proposals')).toEqual([
+      'draft_id',
+      'operation_id',
+      'state',
+      'created_at',
+      'resolved_at',
     ]);
     inspected.close();
   });
@@ -198,6 +229,63 @@ describe('shared state migration registry', () => {
       architecture_json: '{"sections":[{"key":"x","title":"X","md":"### X"}],"approvedMd":null,"approvedAt":null}',
       architecture_artifact_hash: 'sha256:last-known',
       narration_reconciliation_required: 1,
+    });
+  });
+
+  it('applies migration v7 once without changing existing document JSON bytes', () => {
+    const dbFile = simulatedV5Database();
+    const first = new DocumentStore(dbFile);
+    first.close();
+    const db = new Database(dbFile);
+    const docJson = '{"type":"doc","attrs":{"format":"narration"},"content":[]}';
+    db.prepare(
+      `INSERT INTO drafts (
+        id, episode_slug, title, format, doc_json, updated_at,
+        architecture_json, architecture_artifact_hash,
+        narration_reconciliation_required, approved_narration_md,
+        approved_narration_at, approved_narration_revision_seq,
+        narration_artifact_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-v7',
+      'draft-v7',
+      'Draft V7',
+      'narration',
+      docJson,
+      '2026-07-24T08:00:00.000Z',
+      '{"sections":[],"approvedMd":null,"approvedAt":null}',
+      null,
+      0,
+      'approved bytes',
+      '2026-07-24T08:01:00.000Z',
+      3,
+      'draft-hash',
+    );
+    db.close();
+
+    const migration = STATE_MIGRATIONS.find(({ version }) => version === 7)!;
+    const apply = vi.spyOn(migration, 'apply');
+    documentStores.push(new DocumentStore(dbFile));
+
+    const inspected = new Database(dbFile, { readonly: true });
+    const row = inspected.prepare<[], {
+      doc_json: string;
+      approved_narration_md: string;
+      approved_narration_revision_seq: number;
+      narration_artifact_hash: string;
+    }>(
+      `SELECT doc_json, approved_narration_md,
+              approved_narration_revision_seq, narration_artifact_hash
+       FROM drafts WHERE id = 'draft-v7'`,
+    ).get()!;
+    inspected.close();
+
+    expect(apply).not.toHaveBeenCalled();
+    expect(row).toEqual({
+      doc_json: docJson,
+      approved_narration_md: 'approved bytes',
+      approved_narration_revision_seq: 3,
+      narration_artifact_hash: 'draft-hash',
     });
   });
 

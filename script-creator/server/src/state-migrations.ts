@@ -114,6 +114,52 @@ CREATE TABLE IF NOT EXISTS architecture_sagas (
 );
 `;
 
+const STAGED_PROMOTION_V7 = `
+CREATE TABLE IF NOT EXISTS promotions (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL
+    CHECK (state IN (
+      'running', 'output-ready', 'validation-required', 'complete', 'failed'
+    )),
+  target_path TEXT NOT NULL,
+  target_hash TEXT,
+  import_revision_id TEXT NOT NULL,
+  validation_hash TEXT,
+  error TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  PRIMARY KEY (draft_id, operation_id)
+);
+
+CREATE INDEX IF NOT EXISTS promotions_draft_created
+  ON promotions (draft_id, created_at DESC);
+
+CREATE TABLE IF NOT EXISTS narration_settled_exports (
+  token TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  revision_seq INTEGER NOT NULL,
+  narration_md TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS narration_settled_exports_draft
+  ON narration_settled_exports (draft_id, revision_seq);
+
+CREATE TABLE IF NOT EXISTS narration_proposals (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL UNIQUE,
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'accepted', 'rejected', 'dismissed')),
+  created_at TEXT NOT NULL,
+  resolved_at TEXT,
+  PRIMARY KEY (draft_id, operation_id)
+);
+
+CREATE INDEX IF NOT EXISTS narration_proposals_draft_state
+  ON narration_proposals (draft_id, state);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -184,6 +230,38 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
          CHECK (kind IN ('narration', 'architecture'))`,
       );
       db.exec(ARCHITECTURE_V6);
+    },
+  },
+  {
+    version: 7,
+    owner: 'architecture',
+    name: 'staged-promotion',
+    apply: (db) => {
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_md',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_md TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_at',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_at TEXT',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'approved_narration_revision_seq',
+        'ALTER TABLE drafts ADD COLUMN approved_narration_revision_seq INTEGER',
+      );
+      ensureColumn(
+        db,
+        'drafts',
+        'narration_artifact_hash',
+        'ALTER TABLE drafts ADD COLUMN narration_artifact_hash TEXT',
+      );
+      db.exec(STAGED_PROMOTION_V7);
     },
   },
 ];

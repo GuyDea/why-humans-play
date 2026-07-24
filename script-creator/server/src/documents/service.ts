@@ -11,7 +11,12 @@ import type {
   DraftRecord,
   DraftSummary,
   RevisionRecord,
+  PromotionRecord,
 } from './store.js';
+import type {
+  ArtifactReadResult,
+} from '../repo/artifacts.js';
+import type { ValidatorResult } from '../repo/validator.js';
 
 export interface CreateDraftInput {
   episodeSlug: string;
@@ -99,6 +104,10 @@ export class DocumentService {
       },
       architectureArtifactHash: null,
       narrationReconciliationRequired: false,
+      approvedNarrationMd: null,
+      approvedNarrationAt: null,
+      approvedNarrationRevisionSeq: null,
+      narrationArtifactHash: null,
       updatedAt: this.now(),
     });
   }
@@ -173,10 +182,229 @@ export class DocumentService {
 
   exportMarkdown(draftId: string): string {
     const draft = this.getDraft(draftId);
-    const result = encodeMarkdown(schema.nodeFromJSON(draft.doc));
-    if (!result.ok) throw new ExportBlockedError(result.blocked);
-    return result.markdown;
+    return exportDocumentMarkdown(draft.doc);
   }
+
+  syncPromotionOutput(
+    draftId: string,
+    output: ArtifactReadResult,
+  ): PromotionRecord {
+    const draft = this.getDraft(draftId);
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (!promotion || promotion.state !== 'validation-required') {
+      throw new Error(
+        'promote validation refused: validation-required promotion is required',
+      );
+    }
+    if (promotion.targetPath !== output.path) {
+      throw new Error('promote validation refused: target path changed');
+    }
+    const currentMarkdown = exportDocumentMarkdown(draft.doc);
+    if (
+      promotion.targetHash === output.hash
+      && currentMarkdown !== output.content
+    ) {
+      throw new Error(
+        'promote validation refused: imported document differs from target',
+      );
+    }
+    const timestamp = this.now();
+    if (currentMarkdown !== output.content) {
+      const imported = importProductionMarkdown(output.content, draft.doc);
+      this.store.importPromotion(draftId, {
+        doc: imported.doc,
+        format: imported.format,
+        updatedAt: timestamp,
+        revision: {
+          id: this.idFactory(),
+          opId: promotion.operationId,
+          createdAt: timestamp,
+        },
+      });
+    }
+    if (
+      exportDocumentMarkdown(this.getDraft(draftId).doc)
+        !== output.content
+    ) {
+      throw new Error(
+        'promote validation refused: imported document differs from target',
+      );
+    }
+    if (promotion.targetHash === output.hash) return promotion;
+    return this.store.updatePromotion({
+      ...promotion,
+      targetHash: output.hash,
+      validationHash: null,
+      updatedAt: timestamp,
+    });
+  }
+
+  recordPromotionValidation(
+    draftId: string,
+    validation: ValidatorResult,
+  ): PromotionRecord {
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (!promotion || promotion.state !== 'validation-required') {
+      throw new Error(
+        'promote validation refused: validation-required promotion is required',
+      );
+    }
+    if (
+      validation.path !== promotion.targetPath
+      || validation.hash !== promotion.targetHash
+    ) {
+      throw new Error(
+        'promote validation refused: validator result is stale',
+      );
+    }
+    return this.store.updatePromotion({
+      ...promotion,
+      validationHash: validation.hash,
+      updatedAt: this.now(),
+    });
+  }
+
+  reservePromotionCompletion(
+    draftId: string,
+    validation: ValidatorResult,
+  ): PromotionRecord {
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (!promotion || promotion.state !== 'validation-required') {
+      throw new Error(
+        'promote completion refused: validation-required promotion is required',
+      );
+    }
+    if (
+      !validation.ok
+      || validation.path !== promotion.targetPath
+      || validation.hash !== promotion.targetHash
+      || validation.hash !== promotion.validationHash
+    ) {
+      throw new Error(
+        'promote completion refused: validator result is stale',
+      );
+    }
+    return this.store.updatePromotion({
+      ...promotion,
+      state: 'output-ready',
+      error: 'promotion completion in progress',
+      updatedAt: this.now(),
+    });
+  }
+
+  releasePromotionCompletion(draftId: string): PromotionRecord | null {
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (!promotion || promotion.state !== 'output-ready') return promotion;
+    return this.store.updatePromotion({
+      ...promotion,
+      state: 'validation-required',
+      error: null,
+      updatedAt: this.now(),
+    });
+  }
+
+  markPromotionRollbackRequired(draftId: string): PromotionRecord {
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (!promotion || promotion.state !== 'output-ready') {
+      throw new Error(
+        'promote completion refused: reserved promotion is required',
+      );
+    }
+    return this.store.updatePromotion({
+      ...promotion,
+      error: 'production pipeline rollback required',
+      updatedAt: this.now(),
+    });
+  }
+
+  completePromotion(
+    draftId: string,
+    validation: ValidatorResult,
+  ): PromotionRecord {
+    const draft = this.getDraft(draftId);
+    const promotion = this.store.getLatestPromotion(draftId);
+    if (
+      !promotion
+      || promotion.state !== 'output-ready'
+      || promotion.error !== 'promotion completion in progress'
+    ) {
+      throw new Error(
+        'promote completion refused: reserved promotion is required',
+      );
+    }
+    if (!validation.ok) {
+      throw new Error('promote completion refused: validator failed');
+    }
+    if (
+      validation.path !== promotion.targetPath
+      || validation.hash !== promotion.targetHash
+    ) {
+      throw new Error(
+        'promote completion refused: validator result is stale',
+      );
+    }
+    this.store.replaceDraftWorkflowState(draftId, {
+      doc: withCreativePhase(draft.doc, 'production'),
+      architecture: draft.architecture ?? {
+        sections: [],
+        approvedMd: null,
+        approvedAt: null,
+      },
+      architectureArtifactHash: draft.architectureArtifactHash ?? null,
+      narrationReconciliationRequired:
+        draft.narrationReconciliationRequired === true,
+      updatedAt: this.now(),
+    });
+    return this.store.updatePromotion({
+      ...promotion,
+      state: 'complete',
+      validationHash: validation.hash,
+      error: null,
+      updatedAt: this.now(),
+    });
+  }
+}
+
+export function exportDocumentMarkdown(
+  doc: DraftDocument,
+  pendingProposals: string[] = [],
+): string {
+  const result = encodeMarkdown(
+    schema.nodeFromJSON(doc),
+    pendingProposals,
+  );
+  if (!result.ok) throw new ExportBlockedError(result.blocked);
+  return result.markdown;
+}
+
+export function importProductionMarkdown(
+  markdown: string,
+  source: DraftDocument,
+): { doc: DraftDocument; format: DraftFormat } {
+  if (typeof markdown !== 'string' || markdown.trim() === '') {
+    throw new Error('production Markdown is required');
+  }
+  const parsed = parseMarkdown(markdown).toJSON() as DraftDocument;
+  const parsedAttrs = recordValue(parsed['attrs']) ?? {};
+  const sourceAttrs = recordValue(source['attrs']) ?? {};
+  const preserved = Object.fromEntries(
+    Object.entries(source).filter(([key]) =>
+      key !== 'type' && key !== 'attrs' && key !== 'content'),
+  );
+  const doc: DraftDocument = {
+    ...preserved,
+    ...parsed,
+    attrs: {
+      ...sourceAttrs,
+      ...parsedAttrs,
+    },
+  };
+  return {
+    doc,
+    format: parsedAttrs['format'] === 'annotated'
+      ? 'annotated'
+      : 'narration',
+  };
 }
 
 export function readCreativeStatus(

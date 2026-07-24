@@ -10,6 +10,8 @@ import {
   ArchitectureArtifactConflictError,
   ArchitectureGateError,
   ArchitectureRevisionConflictError,
+  NarrationRevisionConflictError,
+  ProductionSyncConflictError,
   type ArchitectureService,
   type SaveArchitectureInput,
 } from '../architecture/service.js';
@@ -28,6 +30,7 @@ import {
 } from '../repo/validator.js';
 import type { TopicService } from '../topics/service.js';
 import type {
+  ArtifactReadResult,
   ArtifactExpectedState,
   ArtifactWriteResult,
   PipelineRow,
@@ -50,6 +53,14 @@ export interface ArchitectureHttpService extends Pick<
 > {
   approve?: ArchitectureService['approve'];
   reopen?: ArchitectureService['reopen'];
+  prepareNarrationApproval?: ArchitectureService['prepareNarrationApproval'];
+  approveNarration?: ArchitectureService['approveNarration'];
+  narrationProposals?: ArchitectureService['narrationProposals'];
+  resolveNarrationProposal?:
+    ArchitectureService['resolveNarrationProposal'];
+  syncProductionDraft?: ArchitectureService['syncProductionDraft'];
+  promotion?: ArchitectureService['promotion'];
+  reconcilePromotionResult?: ArchitectureService['reconcilePromotionResult'];
 }
 
 export type DocumentHttpService = Pick<
@@ -61,7 +72,15 @@ export type DocumentHttpService = Pick<
   | 'listRevisions'
   | 'importMarkdown'
   | 'exportMarkdown'
->;
+> & Partial<Pick<
+  DocumentService,
+  | 'syncPromotionOutput'
+  | 'recordPromotionValidation'
+  | 'reservePromotionCompletion'
+  | 'releasePromotionCompletion'
+  | 'markPromotionRollbackRequired'
+  | 'completePromotion'
+>>;
 
 export interface ValidatorHttpService {
   validate(path: string): Promise<ValidatorResult>;
@@ -91,6 +110,7 @@ export interface ArtifactHttpService {
     expectedState: ArtifactExpectedState,
   ): Promise<ArtifactWriteResult>;
   upsertPipelineRow?(row: PipelineRow): Promise<ArtifactWriteResult>;
+  read?(path: string): Promise<ArtifactReadResult> | ArtifactReadResult;
 }
 
 export interface BuildAppOptions {
@@ -208,6 +228,24 @@ interface ReopenArchitectureBody {
   confirmed?: unknown;
 }
 
+interface ApproveNarrationBody {
+  expectedRevisionSeq?: unknown;
+  settledExportToken?: unknown;
+}
+
+interface PrepareNarrationApprovalBody {
+  expectedRevisionSeq?: unknown;
+  expectedNarrationMd?: unknown;
+}
+
+interface SyncProductionBody {
+  expectedRevisionSeq?: unknown;
+}
+
+interface ResolveNarrationProposalBody {
+  decision?: unknown;
+}
+
 interface ImportDraftBody {
   markdown?: unknown;
 }
@@ -272,6 +310,266 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         return await options.validatorService.validate(path);
       } catch (error) {
         return sendValidatorError(reply, error);
+      }
+    },
+  );
+
+  const validatePromotion = async (draftId: string) => {
+    if (
+      !architectureService.promotion
+      || !options.artifactService.read
+      || !options.documentService.syncPromotionOutput
+      || !options.documentService.recordPromotionValidation
+    ) {
+      throw new Error('promotion validation is not configured');
+    }
+    const promotion = architectureService.promotion(draftId);
+    if (!promotion || promotion.state !== 'validation-required') {
+      throw new Error(
+        'promote validation refused: validation-required promotion is required',
+      );
+    }
+    const validation = await options.validatorService.validate(
+      promotion.targetPath,
+    );
+    const output = await options.artifactService.read(
+      promotion.targetPath,
+    );
+    if (
+      output.path !== validation.path
+      || output.hash !== validation.hash
+    ) {
+      throw new Error(
+        'promote validation refused: target changed during validation',
+      );
+    }
+    options.documentService.syncPromotionOutput(draftId, output);
+    options.documentService.recordPromotionValidation(draftId, validation);
+    return validation;
+  };
+
+  app.post<{ Params: DraftParams }>(
+    '/api/drafts/:id/validate',
+    async (request, reply) => {
+      try {
+        return await validatePromotion(request.params.id);
+      } catch (error) {
+        return sendPromotionError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams; Body: SyncProductionBody }>(
+    '/api/drafts/:id/production/sync',
+    async (request, reply) => {
+      try {
+        if (!architectureService.syncProductionDraft) {
+          throw new Error(
+            'production synchronization is not configured',
+          );
+        }
+        return await architectureService.syncProductionDraft(
+          request.params.id,
+          {
+            expectedRevisionSeq: requiredRevisionSeq(
+              request.body?.expectedRevisionSeq,
+            ),
+          },
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams }>(
+    '/api/drafts/:id/promote/complete',
+    async (request, reply) => {
+      try {
+        if (
+          !architectureService.promotion
+          || !options.documentService.completePromotion
+          || !options.documentService.reservePromotionCompletion
+          || !options.documentService.releasePromotionCompletion
+          || !options.documentService.markPromotionRollbackRequired
+          || !options.artifactService.upsertPipelineRow
+          || !options.artifactService.read
+        ) {
+          throw new Error('promotion completion is not configured');
+        }
+        let existingPromotion = architectureService.promotion(
+          request.params.id,
+        );
+        if (
+          existingPromotion?.state === 'output-ready'
+          && existingPromotion.error ===
+            'production pipeline rollback required'
+        ) {
+          const recoveryDraft = options.documentService.getDraft(
+            request.params.id,
+          );
+          let rollback;
+          try {
+            rollback = await options.artifactService.upsertPipelineRow({
+              episodeSlug: recoveryDraft.episodeSlug,
+              milestone: 'creative-approved',
+              ref:
+                `whp-youtube/drafts/${recoveryDraft.episodeSlug}.md`,
+            });
+          } catch {
+            return reply.code(409).send({
+              error:
+                'promote completion refused: production pipeline rollback required',
+            });
+          }
+          if (rollback.conflict) {
+            return reply.code(409).send({
+              error:
+                'promote completion refused: production pipeline rollback required',
+              ...rollback,
+            });
+          }
+          existingPromotion =
+            options.documentService.releasePromotionCompletion(
+              request.params.id,
+            );
+          return reply.code(409).send({
+            error:
+              'promote completion refused: production pipeline rollback completed; rerun validator',
+            promotion: existingPromotion,
+          });
+        }
+        const completionReservation = existingPromotion;
+        const resumingCompletion =
+          completionReservation?.state === 'output-ready'
+          && completionReservation.error ===
+            'promotion completion in progress'
+          && completionReservation.targetHash !== null
+          && completionReservation.validationHash ===
+            completionReservation.targetHash;
+        let validation: ValidatorResult;
+        if (resumingCompletion) {
+          try {
+            validation = await options.validatorService.validate(
+              completionReservation.targetPath,
+            );
+            const output = await options.artifactService.read(
+              completionReservation.targetPath,
+            );
+            if (
+              output.path !== validation.path
+              || output.hash !== validation.hash
+              || validation.path !== completionReservation.targetPath
+              || validation.hash !== completionReservation.targetHash
+            ) {
+              throw new Error(
+                'promote completion refused: target changed during resumed validation',
+              );
+            }
+          } catch (error) {
+            options.documentService.releasePromotionCompletion(
+              request.params.id,
+            );
+            throw error;
+          }
+        } else {
+          validation = await validatePromotion(request.params.id);
+        }
+        if (!validation.ok) {
+          if (resumingCompletion) {
+            options.documentService.releasePromotionCompletion(
+              request.params.id,
+            );
+          }
+          return reply.code(409).send({
+            error: 'promote completion refused: validator failed',
+            validation,
+          });
+        }
+        const draft = options.documentService.getDraft(request.params.id);
+        const promotion = architectureService.promotion(request.params.id);
+        if (!promotion) {
+          throw new Error(
+            'promote completion refused: promotion is required',
+          );
+        }
+        if (!resumingCompletion) {
+          options.documentService.reservePromotionCompletion(
+            request.params.id,
+            validation,
+          );
+        }
+        let pipelineAdvanced = false;
+        let releaseReservation = true;
+        try {
+          const pipeline = await options.artifactService.upsertPipelineRow({
+            episodeSlug: draft.episodeSlug,
+            milestone: 'production',
+            ref: promotion.targetPath,
+          });
+          if (pipeline.conflict) {
+            return reply.code(409).send({
+              error: 'production pipeline conflict',
+              ...pipeline,
+            });
+          }
+          pipelineAdvanced = true;
+          const finalTarget = await options.artifactService.read(
+            promotion.targetPath,
+          );
+          if (
+            finalTarget.path !== validation.path
+            || finalTarget.hash !== validation.hash
+          ) {
+            throw new Error(
+              'promote completion refused: target changed after validation',
+            );
+          }
+          return options.documentService.completePromotion(
+            request.params.id,
+            validation,
+          );
+        } catch (error) {
+          if (pipelineAdvanced) {
+            try {
+              const rollback =
+                await options.artifactService.upsertPipelineRow({
+                  episodeSlug: draft.episodeSlug,
+                  milestone: 'creative-approved',
+                  ref: `whp-youtube/drafts/${draft.episodeSlug}.md`,
+                });
+              if (rollback.conflict) {
+                options.documentService.markPromotionRollbackRequired(
+                  request.params.id,
+                );
+                releaseReservation = false;
+                return reply.code(409).send({
+                  error:
+                    'promote completion refused: production pipeline rollback required',
+                  ...rollback,
+                });
+              }
+            } catch {
+              options.documentService.markPromotionRollbackRequired(
+                request.params.id,
+              );
+              releaseReservation = false;
+              return reply.code(409).send({
+                error:
+                  'promote completion refused: production pipeline rollback required',
+              });
+            }
+          }
+          throw error;
+        } finally {
+          if (releaseReservation) {
+            options.documentService.releasePromotionCompletion(
+              request.params.id,
+            );
+          }
+        }
+      } catch (error) {
+        return sendPromotionError(reply, error);
       }
     },
   );
@@ -385,6 +683,120 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
             request.body?.expectedRevisionSeq,
           ),
         });
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: DraftParams;
+    Body: PrepareNarrationApprovalBody;
+  }>(
+    '/api/drafts/:id/narration/settled-export',
+    async (request, reply) => {
+      try {
+        if (!architectureService.prepareNarrationApproval) {
+          throw new Error(
+            'narration approval preparation is not configured',
+          );
+        }
+        return architectureService.prepareNarrationApproval(
+          request.params.id,
+          {
+            expectedRevisionSeq: requiredRevisionSeq(
+              request.body?.expectedRevisionSeq,
+            ),
+            expectedNarrationMd: requiredString(
+              request.body?.expectedNarrationMd,
+              'expectedNarrationMd',
+            ),
+          },
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/narration/proposals',
+    async (request, reply) => {
+      try {
+        if (!architectureService.narrationProposals) {
+          throw new Error('narration proposal listing is not configured');
+        }
+        return {
+          proposals: architectureService.narrationProposals(
+            request.params.id,
+          ),
+        };
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: { id: string; operationId: string };
+    Body: ResolveNarrationProposalBody;
+  }>(
+    '/api/drafts/:id/narration/proposals/:operationId/resolve',
+    async (request, reply) => {
+      try {
+        if (!architectureService.resolveNarrationProposal) {
+          throw new Error(
+            'narration proposal resolution is not configured',
+          );
+        }
+        const decision = request.body?.decision;
+        if (decision !== 'accepted' && decision !== 'rejected') {
+          throw new Error('decision must be accepted or rejected');
+        }
+        return architectureService.resolveNarrationProposal(
+          request.params.id,
+          request.params.operationId,
+          decision,
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams; Body: ApproveNarrationBody }>(
+    '/api/drafts/:id/narration/approve',
+    async (request, reply) => {
+      try {
+        if (!architectureService.approveNarration) {
+          throw new Error('narration approval is not configured');
+        }
+        return await architectureService.approveNarration(
+          request.params.id,
+          {
+            expectedRevisionSeq: requiredRevisionSeq(
+              request.body?.expectedRevisionSeq,
+            ),
+            settledExportToken: requiredString(
+              request.body?.settledExportToken,
+              'settledExportToken',
+            ),
+          },
+        );
+      } catch (error) {
+        return sendArchitectureError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/promote',
+    async (request, reply) => {
+      try {
+        if (!architectureService.promotion) {
+          throw new Error('promotion service is not configured');
+        }
+        return { promotion: architectureService.promotion(request.params.id) };
       } catch (error) {
         return sendArchitectureError(reply, error);
       }
@@ -532,9 +944,16 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     '/api/ops/:id/result',
     async (request, reply) => {
       try {
-        return options.operationService.result(request.params.id);
+        const result = options.operationService.result(request.params.id);
+        if (architectureService.reconcilePromotionResult) {
+          await architectureService.reconcilePromotionResult(
+            request.params.id,
+            result,
+          );
+        }
+        return result;
       } catch (error) {
-        return sendOperationError(reply, error);
+        return sendArchitectureError(reply, error);
       }
     },
   );
@@ -939,6 +1358,16 @@ function requiredArray(value: unknown, field: string): unknown[] {
   return value;
 }
 
+function requiredStringArray(value: unknown, field: string): string[] {
+  if (
+    !Array.isArray(value)
+    || value.some((item) => typeof item !== 'string' || item.trim() === '')
+  ) {
+    throw new Error(`${field} must be an array of non-empty strings`);
+  }
+  return value;
+}
+
 function requiredArchitectureSections(
   value: unknown,
 ): SaveArchitectureInput['sections'] {
@@ -1064,6 +1493,9 @@ function sendDocumentError(
   if (/^draft not found:/i.test(message)) {
     return reply.code(404).send({ error: message });
   }
+  if (/^draft write deferred:/u.test(message)) {
+    return reply.code(425).send({ error: message });
+  }
   if (isDocumentClientError(message)) {
     return reply.code(400).send({ error: message });
   }
@@ -1110,6 +1542,12 @@ function sendArchitectureError(
       current: error.current,
     });
   }
+  if (error instanceof NarrationRevisionConflictError) {
+    return reply.code(409).send({
+      error: error.message,
+      current: error.current,
+    });
+  }
   if (error instanceof ArchitectureArtifactConflictError) {
     return reply.code(409).send({
       error: error.message,
@@ -1119,13 +1557,20 @@ function sendArchitectureError(
       state: error.state,
     });
   }
+  if (error instanceof ProductionSyncConflictError) {
+    return reply.code(409).send({
+      error: error.message,
+      currentHash: error.currentHash,
+      ...(error.parked ? { parked: error.parked } : {}),
+    });
+  }
   if (error instanceof ArchitectureGateError) {
     return reply.code(409).send({ error: error.message });
   }
   const message = error instanceof Error
     ? error.message
     : 'architecture request failed';
-  if (/^draft not found:/i.test(message)) {
+  if (/^(?:draft|operation) not found:/i.test(message)) {
     return reply.code(404).send({ error: message });
   }
   if ([
@@ -1136,6 +1581,10 @@ function sendArchitectureError(
     /^opId must be a string or null$/,
     /^disposition is required$/,
     /^confirmed must be true$/,
+    /^expectedNarrationMd is required$/,
+    /^settledExportToken is required$/,
+    /^target_path is required$/,
+    /^invalid production target:/,
     /^unknown operation:/,
     /^cannot resume .+ as .+$/,
     /^operation .+ is not resumable$/,
@@ -1176,6 +1625,23 @@ function sendValidatorError(
   }
 
   reply.log.error({ err: error }, 'validator request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
+function sendPromotionError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error
+    ? error.message
+    : 'promotion failed';
+  if (/^draft not found:/iu.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (/^promote (?:validation|completion) refused:/u.test(message)) {
+    return reply.code(409).send({ error: message });
+  }
+  reply.log.error({ err: error }, 'promotion request failed');
   return reply.code(500).send({ error: 'internal server error' });
 }
 
@@ -1246,6 +1712,9 @@ const UNCONFIGURED_ARCHITECTURE_SERVICE: ArchitectureHttpService = {
   save: architectureNotConfigured,
   submitOperation: architectureNotConfigured,
   resumeOperation: architectureNotConfigured,
+  prepareNarrationApproval: architectureNotConfigured,
+  approveNarration: architectureNotConfigured,
+  promotion: architectureNotConfigured,
   approve: architectureNotConfigured,
   reopen: architectureNotConfigured,
 };

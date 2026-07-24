@@ -25,6 +25,10 @@ export interface DraftRecord extends DraftSummary {
   architecture?: DraftArchitecture;
   architectureArtifactHash?: string | null;
   narrationReconciliationRequired?: boolean;
+  approvedNarrationMd?: string | null;
+  approvedNarrationAt?: string | null;
+  approvedNarrationRevisionSeq?: number | null;
+  narrationArtifactHash?: string | null;
 }
 
 export interface CreateDraftRecord extends DraftSummary {
@@ -32,6 +36,10 @@ export interface CreateDraftRecord extends DraftSummary {
   architecture?: DraftArchitecture;
   architectureArtifactHash?: string | null;
   narrationReconciliationRequired?: boolean;
+  approvedNarrationMd?: string | null;
+  approvedNarrationAt?: string | null;
+  approvedNarrationRevisionSeq?: number | null;
+  narrationArtifactHash?: string | null;
 }
 
 export interface RevisionRecord {
@@ -94,6 +102,72 @@ export interface ReplaceDraftWorkflowState {
   updatedAt: string;
 }
 
+export type PromotionState =
+  | 'running'
+  | 'output-ready'
+  | 'validation-required'
+  | 'complete'
+  | 'failed';
+
+export interface PromotionRecord {
+  draftId: string;
+  operationId: string;
+  state: PromotionState;
+  targetPath: string;
+  targetHash: string | null;
+  importRevisionId: string;
+  validationHash: string | null;
+  error: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ApproveNarrationRecord {
+  expectedRevisionSeq: number;
+  approvedNarrationMd: string;
+  approvedNarrationAt: string;
+  narrationArtifactHash: string | null;
+  doc: DraftDocument;
+  updatedAt: string;
+  revision: {
+    id: string;
+    createdAt: string;
+  };
+}
+
+export interface NarrationSettledExportRecord {
+  token: string;
+  draftId: string;
+  revisionSeq: number;
+  narrationMd: string;
+  createdAt: string;
+}
+
+export type NarrationProposalState =
+  | 'pending'
+  | 'accepted'
+  | 'rejected'
+  | 'dismissed';
+
+export interface NarrationProposalRecord {
+  draftId: string;
+  operationId: string;
+  state: NarrationProposalState;
+  createdAt: string;
+  resolvedAt: string | null;
+}
+
+export interface ImportPromotionRecord {
+  doc: DraftDocument;
+  format: DraftFormat;
+  updatedAt: string;
+  revision: {
+    id: string;
+    opId: string;
+    createdAt: string;
+  };
+}
+
 interface DraftRow {
   id: string;
   episode_slug: string;
@@ -104,6 +178,10 @@ interface DraftRow {
   architecture_json: string;
   architecture_artifact_hash: string | null;
   narration_reconciliation_required: number;
+  approved_narration_md: string | null;
+  approved_narration_at: string | null;
+  approved_narration_revision_seq: number | null;
+  narration_artifact_hash: string | null;
 }
 
 type DraftSummaryRow = Omit<DraftRow, 'doc_json'>;
@@ -136,6 +214,35 @@ interface ArchitectureSagaRow {
   updated_at: string;
 }
 
+interface PromotionRow {
+  draft_id: string;
+  operation_id: string;
+  state: PromotionState;
+  target_path: string;
+  target_hash: string | null;
+  import_revision_id: string;
+  validation_hash: string | null;
+  error: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+interface NarrationSettledExportRow {
+  token: string;
+  draft_id: string;
+  revision_seq: number;
+  narration_md: string;
+  created_at: string;
+}
+
+interface NarrationProposalRow {
+  draft_id: string;
+  operation_id: string;
+  state: NarrationProposalState;
+  created_at: string;
+  resolved_at: string | null;
+}
+
 function draftFrom(row: DraftRow): DraftRecord {
   return {
     id: row.id,
@@ -147,6 +254,10 @@ function draftFrom(row: DraftRow): DraftRecord {
     architectureArtifactHash: row.architecture_artifact_hash,
     narrationReconciliationRequired:
       row.narration_reconciliation_required === 1,
+    approvedNarrationMd: row.approved_narration_md,
+    approvedNarrationAt: row.approved_narration_at,
+    approvedNarrationRevisionSeq: row.approved_narration_revision_seq,
+    narrationArtifactHash: row.narration_artifact_hash,
     updatedAt: row.updated_at,
   };
 }
@@ -191,6 +302,45 @@ function architectureSagaFrom(
   };
 }
 
+function promotionFrom(row: PromotionRow): PromotionRecord {
+  return {
+    draftId: row.draft_id,
+    operationId: row.operation_id,
+    state: row.state,
+    targetPath: row.target_path,
+    targetHash: row.target_hash,
+    importRevisionId: row.import_revision_id,
+    validationHash: row.validation_hash,
+    error: row.error,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+function narrationSettledExportFrom(
+  row: NarrationSettledExportRow,
+): NarrationSettledExportRecord {
+  return {
+    token: row.token,
+    draftId: row.draft_id,
+    revisionSeq: row.revision_seq,
+    narrationMd: row.narration_md,
+    createdAt: row.created_at,
+  };
+}
+
+function narrationProposalFrom(
+  row: NarrationProposalRow,
+): NarrationProposalRecord {
+  return {
+    draftId: row.draft_id,
+    operationId: row.operation_id,
+    state: row.state,
+    createdAt: row.created_at,
+    resolvedAt: row.resolved_at,
+  };
+}
+
 export class DocumentStore {
   private readonly db: Database.Database;
 
@@ -208,8 +358,10 @@ export class DocumentStore {
       `INSERT INTO drafts (
         id, episode_slug, title, format, doc_json, updated_at,
         architecture_json, architecture_artifact_hash,
-        narration_reconciliation_required
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        narration_reconciliation_required, approved_narration_md,
+        approved_narration_at, approved_narration_revision_seq,
+        narration_artifact_hash
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       draft.id,
       draft.episodeSlug,
@@ -220,6 +372,10 @@ export class DocumentStore {
       JSON.stringify(architecture),
       draft.architectureArtifactHash ?? null,
       draft.narrationReconciliationRequired === true ? 1 : 0,
+      draft.approvedNarrationMd ?? null,
+      draft.approvedNarrationAt ?? null,
+      draft.approvedNarrationRevisionSeq ?? null,
+      draft.narrationArtifactHash ?? null,
     );
     return this.getDraft(draft.id)!;
   }
@@ -244,6 +400,8 @@ export class DocumentStore {
     update: SaveDraftRecord,
   ): { draft: DraftRecord; revision: RevisionRecord } {
     return this.db.transaction(() => {
+      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      this.assertDraftWriteAvailable(id);
       const result = this.db.prepare(
         `UPDATE drafts
          SET title = ?, format = ?, doc_json = ?, updated_at = ?
@@ -288,6 +446,216 @@ export class DocumentStore {
     })();
   }
 
+  approveNarration(
+    id: string,
+    update: ApproveNarrationRecord,
+  ): { draft: DraftRecord; revision: RevisionRecord } | null {
+    return this.db.transaction(() => {
+      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      const currentSeq = this.currentRevisionSeq(id);
+      if (currentSeq !== update.expectedRevisionSeq) return null;
+      const nextSeq = currentSeq + 1;
+      this.db.prepare(
+        `UPDATE drafts
+         SET doc_json = ?, approved_narration_md = ?,
+             approved_narration_at = ?,
+             approved_narration_revision_seq = ?,
+             narration_artifact_hash = ?, updated_at = ?
+         WHERE id = ?`,
+      ).run(
+        JSON.stringify(update.doc),
+        update.approvedNarrationMd,
+        update.approvedNarrationAt,
+        nextSeq,
+        update.narrationArtifactHash,
+        update.updatedAt,
+        id,
+      );
+      this.db.prepare(
+        `INSERT INTO revisions (
+          id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+        ) VALUES (?, ?, ?, NULL, 'narration-approved', ?, ?, 'narration')`,
+      ).run(
+        update.revision.id,
+        id,
+        nextSeq,
+        JSON.stringify(update.doc),
+        update.revision.createdAt,
+      );
+      return {
+        draft: this.getDraft(id)!,
+        revision: revisionFrom(
+          this.db.prepare<[string], RevisionRow>(
+            'SELECT * FROM revisions WHERE id = ?',
+          ).get(update.revision.id)!,
+        ),
+      };
+    })();
+  }
+
+  createNarrationSettledExport(
+    record: NarrationSettledExportRecord,
+  ): NarrationSettledExportRecord {
+    this.db.prepare(
+      `INSERT INTO narration_settled_exports (
+        token, draft_id, revision_seq, narration_md, created_at
+      ) VALUES (?, ?, ?, ?, ?)`,
+    ).run(
+      record.token,
+      record.draftId,
+      record.revisionSeq,
+      record.narrationMd,
+      record.createdAt,
+    );
+    return this.getNarrationSettledExport(record.token)!;
+  }
+
+  getNarrationSettledExport(
+    token: string,
+  ): NarrationSettledExportRecord | null {
+    const row = this.db.prepare<[string], NarrationSettledExportRow>(
+      'SELECT * FROM narration_settled_exports WHERE token = ?',
+    ).get(token);
+    return row ? narrationSettledExportFrom(row) : null;
+  }
+
+  deleteNarrationSettledExports(draftId: string): void {
+    this.db.prepare(
+      'DELETE FROM narration_settled_exports WHERE draft_id = ?',
+    ).run(draftId);
+  }
+
+  createNarrationProposal(
+    record: NarrationProposalRecord,
+  ): NarrationProposalRecord {
+    this.db.prepare(
+      `INSERT INTO narration_proposals (
+        draft_id, operation_id, state, created_at, resolved_at
+      ) VALUES (?, ?, ?, ?, ?)
+      ON CONFLICT (draft_id, operation_id) DO NOTHING`,
+    ).run(
+      record.draftId,
+      record.operationId,
+      record.state,
+      record.createdAt,
+      record.resolvedAt,
+    );
+    return this.getNarrationProposal(
+      record.draftId,
+      record.operationId,
+    )!;
+  }
+
+  getNarrationProposal(
+    draftId: string,
+    operationId: string,
+  ): NarrationProposalRecord | null {
+    const row = this.db.prepare<
+      [string, string],
+      NarrationProposalRow
+    >(
+      `SELECT * FROM narration_proposals
+       WHERE draft_id = ? AND operation_id = ?`,
+    ).get(draftId, operationId);
+    return row ? narrationProposalFrom(row) : null;
+  }
+
+  listPendingNarrationProposals(
+    draftId: string,
+  ): NarrationProposalRecord[] {
+    return this.db.prepare<[string], NarrationProposalRow>(
+      `SELECT * FROM narration_proposals
+       WHERE draft_id = ? AND state = 'pending'
+       ORDER BY created_at, operation_id`,
+    ).all(draftId).map(narrationProposalFrom);
+  }
+
+  resolveNarrationProposal(
+    draftId: string,
+    operationId: string,
+    state: Exclude<NarrationProposalState, 'pending'>,
+    resolvedAt: string,
+  ): NarrationProposalRecord {
+    const result = this.db.prepare(
+      `UPDATE narration_proposals
+       SET state = ?, resolved_at = ?
+       WHERE draft_id = ? AND operation_id = ? AND state = 'pending'`,
+    ).run(state, resolvedAt, draftId, operationId);
+    const current = this.getNarrationProposal(draftId, operationId);
+    if (!current) {
+      throw new Error(`narration proposal not found: ${operationId}`);
+    }
+    if (result.changes === 0 && current.state === 'pending') {
+      throw new Error(`narration proposal could not be resolved: ${operationId}`);
+    }
+    return current;
+  }
+
+  hasRevisionForOperation(draftId: string, operationId: string): boolean {
+    return this.db.prepare<[string, string], { present: number }>(
+      `SELECT 1 AS present FROM revisions
+       WHERE draft_id = ? AND op_id = ?
+       LIMIT 1`,
+    ).get(draftId, operationId)?.present === 1;
+  }
+
+  replaceNarrationArtifactHash(
+    id: string,
+    hash: string,
+  ): DraftRecord {
+    const result = this.db.prepare(
+      `UPDATE drafts
+       SET narration_artifact_hash = ?
+       WHERE id = ?`,
+    ).run(hash, id);
+    if (result.changes === 0) throw new Error(`draft not found: ${id}`);
+    return this.getDraft(id)!;
+  }
+
+  importPromotion(
+    id: string,
+    update: ImportPromotionRecord,
+  ): { draft: DraftRecord; revision: RevisionRecord } {
+    return this.db.transaction(() => {
+      const existing = this.getRevision(update.revision.id);
+      if (existing) {
+        return { draft: this.getDraft(id)!, revision: existing };
+      }
+      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      const nextSeq = this.currentRevisionSeq(id) + 1;
+      this.db.prepare(
+        `UPDATE drafts
+         SET format = ?, doc_json = ?, updated_at = ?
+         WHERE id = ?`,
+      ).run(
+        update.format,
+        JSON.stringify(update.doc),
+        update.updatedAt,
+        id,
+      );
+      this.db.prepare(
+        `INSERT INTO revisions (
+          id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+        ) VALUES (?, ?, ?, ?, 'production-import', ?, ?, 'narration')`,
+      ).run(
+        update.revision.id,
+        id,
+        nextSeq,
+        update.revision.opId,
+        JSON.stringify(update.doc),
+        update.revision.createdAt,
+      );
+      return {
+        draft: this.getDraft(id)!,
+        revision: revisionFrom(
+          this.db.prepare<[string], RevisionRow>(
+            'SELECT * FROM revisions WHERE id = ?',
+          ).get(update.revision.id)!,
+        ),
+      };
+    })();
+  }
+
   currentRevisionSeq(draftId: string): number {
     return this.db.prepare<[string], NextSequenceRow>(
       `SELECT COALESCE(MAX(seq), 0) AS seq
@@ -302,6 +670,7 @@ export class DocumentStore {
   ): { draft: DraftRecord; revision: RevisionRecord } | null {
     return this.db.transaction(() => {
       if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      this.assertDraftWriteAvailable(id);
       const currentSeq = this.currentRevisionSeq(id);
       if (currentSeq !== update.expectedRevisionSeq) return null;
 
@@ -462,6 +831,65 @@ export class DocumentStore {
     )!;
   }
 
+  createPromotion(record: PromotionRecord): PromotionRecord {
+    this.db.prepare(
+      `INSERT INTO promotions (
+        draft_id, operation_id, state, target_path, target_hash,
+        import_revision_id, validation_hash, error, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      record.draftId,
+      record.operationId,
+      record.state,
+      record.targetPath,
+      record.targetHash,
+      record.importRevisionId,
+      record.validationHash,
+      record.error,
+      record.createdAt,
+      record.updatedAt,
+    );
+    return this.getPromotionByOperation(record.operationId)!;
+  }
+
+  getPromotionByOperation(operationId: string): PromotionRecord | null {
+    const row = this.db.prepare<[string], PromotionRow>(
+      'SELECT * FROM promotions WHERE operation_id = ?',
+    ).get(operationId);
+    return row ? promotionFrom(row) : null;
+  }
+
+  getLatestPromotion(draftId: string): PromotionRecord | null {
+    const row = this.db.prepare<[string], PromotionRow>(
+      `SELECT * FROM promotions
+       WHERE draft_id = ?
+       ORDER BY created_at DESC, rowid DESC
+       LIMIT 1`,
+    ).get(draftId);
+    return row ? promotionFrom(row) : null;
+  }
+
+  updatePromotion(record: PromotionRecord): PromotionRecord {
+    const result = this.db.prepare(
+      `UPDATE promotions
+       SET state = ?, target_hash = ?, validation_hash = ?, error = ?,
+           updated_at = ?
+       WHERE operation_id = ? AND draft_id = ?`,
+    ).run(
+      record.state,
+      record.targetHash,
+      record.validationHash,
+      record.error,
+      record.updatedAt,
+      record.operationId,
+      record.draftId,
+    );
+    if (result.changes === 0) {
+      throw new Error(`promotion not found: ${record.operationId}`);
+    }
+    return this.getPromotionByOperation(record.operationId)!;
+  }
+
   listRevisions(draftId: string): RevisionRecord[] {
     return this.db.prepare<[string], RevisionRow>(
       `SELECT * FROM revisions
@@ -477,6 +905,43 @@ export class DocumentStore {
   private migrate(): void {
     migrateStateDatabase(this.db);
   }
+
+  private assertDraftWriteAvailable(id: string): void {
+    const draft = this.getDraft(id)!;
+    const phase = draftCreativePhase(draft.doc);
+    if (
+      phase === 'rapid-prototype'
+      && draft.approvedNarrationMd
+      && draft.approvedNarrationAt
+      && draft.approvedNarrationRevisionSeq === this.currentRevisionSeq(id)
+    ) {
+      throw new Error(
+        'draft write deferred: narration approval is in progress',
+      );
+    }
+    if (this.getLatestPromotion(id)?.state === 'output-ready') {
+      throw new Error(
+        'draft write deferred: production synchronization is in progress',
+      );
+    }
+  }
+}
+
+function draftCreativePhase(doc: DraftDocument): string | null {
+  const metadata = objectValue(doc['metadata']);
+  const creativeStatus = objectValue(metadata?.['creativeStatus']);
+  const phase = creativeStatus?.['phase'];
+  return typeof phase === 'string' ? phase : null;
+}
+
+function objectValue(
+  value: unknown,
+): Record<string, unknown> | null {
+  return typeof value === 'object'
+    && value !== null
+    && !Array.isArray(value)
+    ? value as Record<string, unknown>
+    : null;
 }
 
 function emptyArchitecture(): DraftArchitecture {

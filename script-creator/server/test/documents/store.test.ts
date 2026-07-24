@@ -43,6 +43,10 @@ function draft(
     },
     architectureArtifactHash: null,
     narrationReconciliationRequired: false,
+    approvedNarrationMd: null,
+    approvedNarrationAt: null,
+    approvedNarrationRevisionSeq: null,
+    narrationArtifactHash: null,
     updatedAt: '2026-07-23T08:00:00.000Z',
     ...overrides,
   };
@@ -56,7 +60,7 @@ afterEach(() => {
 });
 
 describe('DocumentStore', () => {
-  it('migrates a v1 state database through the shared v6 registry', () => {
+  it('migrates a v1 state database through the shared v7 registry', () => {
     const dbFile = databaseFile();
     const before = new Database(dbFile);
     before.exec(`
@@ -79,7 +83,7 @@ describe('DocumentStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(6);
+    expect(version).toBe(7);
     expect(drafts).toEqual([
       'id',
       'episode_slug',
@@ -90,6 +94,10 @@ describe('DocumentStore', () => {
       'architecture_json',
       'architecture_artifact_hash',
       'narration_reconciliation_required',
+      'approved_narration_md',
+      'approved_narration_at',
+      'approved_narration_revision_seq',
+      'narration_artifact_hash',
     ]);
     expect(revisions).toEqual([
       'id',
