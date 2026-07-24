@@ -163,16 +163,16 @@ without weakening the audience-first test for problem-led growth episodes.
   Do not spend either sentence on a technical setup label. State the human-readable premise
   first; hold experimental qualifiers and mechanism detail until after the hook.
 - **Enforce spoken readability before delivery.** Readability is a delivery gate, not a
-  post-draft editorial audit. Remove source links and every other non-spoken annotation
-  before checking sentence length. A sentence above 25 spoken words fails and must be
-  rewritten before the narration is shown. Every sentence from 21 through 25 spoken words
-  requires a first-hearing review. Sentences of 20 words or fewer still fail when they
-  introduce more than one new relationship, leave the actor, action, reference, or
-  comparison unclear, stack conditions or caveats, or use an unexplained abstraction. A
-  sentence passes only when a listener can identify who did what, what changed, and why it
-  matters after hearing it once. Split at a causal boundary and preserve the evidence,
-  connective tissue, humor, and voice; never manufacture readability by deleting context
-  the listener needs.
+  post-draft editorial audit. A sentence above 25 spoken words fails and must be rewritten
+  before delivery. Every sentence from 21 through 25 spoken words requires a first-hearing
+  review. A shorter sentence also fails when difficult vocabulary and multiple
+  relationships make it hard to process. A sentence of any length fails when a
+  first-hearing listener cannot identify who did what, what changed, and why it matters.
+  Split difficult sentences without deleting evidence boundaries, connective tissue,
+  humor, or personality. Remove source links and every other non-spoken annotation before
+  checking. Treat the word ceiling as a backstop, not as the definition of clarity. Reject
+  stacked conditions, contrasts, comparisons, caveats, unclear references, and unexplained
+  abstractions even when the sentence is short.
 - **Make research events sound real because they are specific.** When supplied or verified,
   name the year and responsible institution or team in the opening. Do not flatten a known
   attribution into generic “scientists,” and never invent a university, city, lab,

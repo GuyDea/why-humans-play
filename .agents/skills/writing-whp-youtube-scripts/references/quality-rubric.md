@@ -126,8 +126,8 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 
 - **0:** The narration is unperformable, substantially mistimed, or dominated by
   written-language constructions, paper-abstract phrasing, long explanatory punchlines,
-  uncontrolled density, or emotionally sterilized language that turns a human consequence
-  into institutional copy.
+  uncontrolled density, unresolved readability failures, or emotionally sterilized
+  language that turns a human consequence into institutional copy.
 - **1:** An aloud read is understandable and near target, but stumbles, overloaded
   sentences, abrupt caveats, sterile transitions, overlong jokes, or runtime drift
   remain.
@@ -140,6 +140,20 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   support or turning a person's inherent worth or vulnerability into the punchline.
   Research-administration language gives way to ordinary spoken wording whenever the
   simpler wording preserves the same claim.
+
+Spoken readability is a non-compensable delivery gate:
+
+- No spoken sentence exceeds 25 words.
+- Every 21–25-word sentence has passed a first-hearing review.
+- Shorter sentences still fail when vocabulary, structure, or unclear relationships make
+  them difficult to process.
+- A sentence of any length fails when the listener cannot identify who did what, what
+  changed, and why it matters after one hearing.
+- The mechanical checker has no unresolved `FAIL` or `REVIEW` result.
+
+Do not raise a script's score or readiness label until this gate passes. Splitting a
+difficult sentence must preserve its evidence boundary, connective tissue, humor, and
+personality.
 
 ### 5. Useful visual treatment and concrete candidates
 

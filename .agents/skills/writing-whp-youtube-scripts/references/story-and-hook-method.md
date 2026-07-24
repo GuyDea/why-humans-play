@@ -326,6 +326,23 @@ Write conversational, pronounceable sentences with controlled information densit
 Prefer one new relationship per sentence. Define necessary terms at the moment they
 become useful; cut terminology that does not change the answer.
 
+Readability is a delivery gate, not a post-draft editorial audit.
+A sentence above 25 spoken words fails and must be rewritten before delivery.
+Every sentence from 21 through 25 spoken words requires a first-hearing review.
+A shorter sentence also fails when difficult vocabulary and multiple relationships make it
+hard to process.
+A sentence of any length fails when a first-hearing listener cannot identify who did what,
+what changed, and why it matters.
+Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
+or personality.
+
+Strip non-spoken annotations before checking. Rewrite any sentence that stacks a condition,
+contrast, comparison, caveat, and conclusion, even when its word count is low. Introduce a
+necessary name or technical term in a short plain sentence. For file-backed narration, run
+the skill's `scripts/check_spoken_readability.py` before delivery; use the required
+first-hearing review for every 21–25-word sentence. Apply the same semantic gate to every
+shorter sentence and to chat-only narration.
+
 Read the full narration aloud. Mark stumbles, ambiguous pronouns, overloaded clauses,
 breathless lists, abrupt caveats, and citation language that sounds written rather
 than spoken. Time the read at an honest delivery pace, update word count and runtime,

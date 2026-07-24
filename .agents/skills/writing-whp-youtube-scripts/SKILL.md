@@ -232,6 +232,38 @@ when it judges the choice and the episode earns the underlying stakes. Do not di
 into clinical language merely because the topic is serious. Emotional force never lowers
 the evidence bar, and vulnerable people never become the punchline.
 
+### Enforce spoken readability before delivery
+
+Readability is a delivery gate, not a post-draft editorial audit.
+A sentence above 25 spoken words fails and must be rewritten before delivery.
+Every sentence from 21 through 25 spoken words requires a first-hearing review.
+A shorter sentence also fails when difficult vocabulary and multiple relationships make it
+hard to process.
+A sentence of any length fails when a first-hearing listener cannot identify who did what,
+what changed, and why it matters.
+Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
+or personality.
+
+Strip inline evidence indicators, URLs, personal-input markers, and every other non-spoken
+annotation before checking. Treat the 25-word ceiling as a backstop, not as the definition
+of clarity. For every sentence, require one main relationship, explicit actors and
+referents, a concrete action or comparison, and no stacked condition, contrast, caveat, or
+unexplained abstraction. Necessary technical terms may remain, but introduce them through a
+short plain sentence rather than surrounding them with more difficult language.
+
+For narration stored in a file, resolve the target to an absolute path, change to the skill
+directory, and run:
+
+```bash
+python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"
+```
+
+Rewrite every `FAIL`. Review every `REVIEW` aloud and rewrite it unless its actor, action,
+relationship, and consequence are immediately clear. After that review, rerun with
+`--reviewed` only when a clear 21–25-word sentence remains. Do not use `--reviewed` to waive
+a difficult sentence. Apply the same sentence-by-sentence gate to chat-only narration
+before returning it.
+
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or
 timing audit. Treat timing as a post-draft
@@ -298,8 +330,9 @@ For evidence-backed finalization:
    its evidence. Voice all five elements in narration—the insight; the low-risk action,
    observation, or reflection; the observable signal; the boundary; and the larger
    benefit—not only in the structured block.
-7. Complete the narration for spoken delivery and show it to Martin before auditing it.
-   Read it aloud and revise for speech without imposing a runtime cut first.
+7. Complete the narration for spoken delivery, pass the spoken-readability delivery gate,
+   and show it to Martin before auditing it. Read it aloud and revise for speech without
+   imposing a runtime cut first.
 8. The readable script comes first as numbered beats containing only the beat heading and
    spoken blockquote narration. Visible inline evidence indicators may appear within those
    blockquotes as the sole non-spoken review annotations. Put all other metadata and
@@ -332,6 +365,8 @@ For evidence-backed finalization:
 - Preserve the approved learning-and-action contract from architecture through the
   opening promise, explanation, viewer application, and final lesson; do not replace it
   with generic caution or an unrelated checklist.
+- Pass the spoken-readability delivery gate before showing any narration. A later
+  editorial, retention, timing, or validator pass does not substitute for it.
 - Audit evidence sufficiency and asset rights separately.
 - Give every important fact a visual decision; do not assume every fact needs a unique
   image.

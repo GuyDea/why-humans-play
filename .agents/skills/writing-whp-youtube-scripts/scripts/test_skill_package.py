@@ -1573,6 +1573,63 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(source="rubric", contract=contract):
                 self.assertIn(contract, rubric)
 
+    def test_spoken_readability_is_a_pre_delivery_hard_gate(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Readability is a delivery gate, not a post-draft editorial audit.",
+            "A sentence above 25 spoken words fails and must be rewritten before "
+            "delivery.",
+            "Every sentence from 21 through 25 spoken words requires a "
+            "first-hearing review.",
+            "A shorter sentence also fails when difficult vocabulary and multiple "
+            "relationships make it hard to process.",
+            "A sentence of any length fails when a first-hearing listener cannot "
+            "identify who did what, what changed, and why it matters.",
+            "Split difficult sentences without deleting evidence boundaries, "
+            "connective tissue, humor, or personality.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        for contract in (
+            "No spoken sentence exceeds 25 words.",
+            "Every 21–25-word sentence has passed a first-hearing review.",
+            "Shorter sentences still fail when vocabulary, structure, or unclear "
+            "relationships make them difficult to process.",
+        ):
+            with self.subTest(source="rubric", contract=contract):
+                self.assertIn(contract, rubric)
+
+        command = (
+            'python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"'
+        )
+        self.assertIn(command, SKILL_MD.read_text(encoding="utf-8"))
+
     def test_complete_episode_promise_names_understanding_and_response(
         self,
     ) -> None:
@@ -2054,8 +2111,9 @@ class SkillPackageTests(unittest.TestCase):
                 "narration; never silently cut context to satisfy an audit.",
             ),
             "rapid": (
-                "When the request is for a complete script, finish and show the whole "
-                "narration before any editorial, retention, or timing audit.",
+                "When the request is for a complete script, finish the whole narration "
+                "internally and pass the spoken-readability delivery gate. Then show it "
+                "before any editorial, retention, or timing audit.",
                 "Do not remove setup, referents, causality, examples, humor, viewer "
                 "relevance, or the learning promise merely to satisfy an unseen clock.",
                 "After Martin reviews the complete narration, report audit concerns "

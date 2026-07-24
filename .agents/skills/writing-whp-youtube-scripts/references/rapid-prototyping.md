@@ -417,14 +417,38 @@ sentence. Use contrast, repetition, callbacks, and occasional fragments when the
 natural aloud. Read the draft aloud when the scope warrants it, but do not burden the response
 with a visible audit.
 
+## Pass the spoken-readability delivery gate
+
+Readability is a delivery gate, not a post-draft editorial audit.
+A sentence above 25 spoken words fails and must be rewritten before delivery.
+Every sentence from 21 through 25 spoken words requires a first-hearing review.
+A shorter sentence also fails when difficult vocabulary and multiple relationships make it
+hard to process.
+A sentence of any length fails when a first-hearing listener cannot identify who did what,
+what changed, and why it matters.
+Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
+or personality.
+
+Strip sources and every other non-spoken annotation before checking. Do not confuse a short
+sentence with a clear sentence. Reject stacked clauses, long abstract phrases, unclear
+pronouns, hidden comparisons, and sentences that make the listener translate the wording
+before understanding the point. A necessary technical term is not an excuse for a difficult
+sentence; give the term a short plain introduction.
+
+For file-backed narration, run `scripts/check_spoken_readability.py` from the skill
+directory before returning the text. Rewrite every failure. Read every 21–25-word review
+item aloud and keep it only when its actor, action, relationship, and consequence land
+after one hearing. Apply the same sentence-level gate manually to chat-only narration.
+
 Preserve accepted language after feedback. Change only the requested opening, punchline,
 transition, example, or passage unless Martin asks for a broader rewrite.
 
 ## Finish before auditing
 
-When the request is for a complete script, finish and show the whole narration before any
-editorial, retention, or timing audit. Judge the hook, explanation, humor, human connection,
-examples, and ending as one story before optimizing a clock.
+When the request is for a complete script, finish the whole narration internally and pass
+the spoken-readability delivery gate. Then show it before any editorial, retention, or
+timing audit. Judge the hook, explanation, humor, human connection, examples, and ending as
+one story before optimizing a clock.
 
 Do not remove setup, referents, causality, examples, humor, viewer relevance, or the
 learning promise merely to satisfy an unseen clock. Timing is a post-draft diagnostic, not
