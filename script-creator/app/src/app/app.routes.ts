@@ -5,6 +5,7 @@ import {
 } from './studio-pages';
 import { PipelinePage } from './pipeline/pipeline-page';
 import { TopicsPage } from './topics/topics-page';
+import { LessonsPage } from './lessons/lessons-page';
 
 export const routes: Routes = [
   {
@@ -23,6 +24,10 @@ export const routes: Routes = [
   {
     path: 'pipeline',
     component: PipelinePage,
+  },
+  {
+    path: 'lessons',
+    component: LessonsPage,
   },
   {
     path: '**',

@@ -28,7 +28,12 @@ import type {
   DaemonClient,
   DraftDocument,
   DraftRecord,
+  DistillationRunRecord,
   EpisodeWorkspace,
+  LearningDecision,
+  LearningSessionRecord,
+  LessonDetail,
+  LessonReconciliation,
   MilestoneKind,
   MilestoneStatus,
   OperationName,
@@ -63,6 +68,7 @@ import { ParkingLot } from '../panels/parking-lot';
 import { RevisionTimeline } from '../drafts/revision-timeline';
 import { DraftTransfer } from '../drafts/draft-transfer';
 import { AgentConsole } from '../panels/agent-console';
+import { LessonsPanel } from '../lessons/lessons-panel';
 import {
   STUDIO_SESSION,
   StudioSession,
@@ -170,8 +176,21 @@ class ControllableDaemonClient {
     narrationReconciliationRequired: false,
     pendingSaga: null,
   };
+  learningSessions: LearningSessionRecord[] = [{
+    id: 'session-1',
+    draftId: 'draft-1',
+    startCursor: 0,
+    endCursor: null,
+    createdAt: '2026-07-24T09:00:00.000Z',
+    closedAt: null,
+  }];
+  learningDecisions: LearningDecision[] = [];
+  learningLessons: LessonDetail[] = [];
+  lastDistillation: DistillationRunRecord | null = null;
 
   constructor(readonly storedDraft: DraftRecord) {
+    this.learningSessions[0]!.draftId = storedDraft.id;
+    this.learningDecisions = [learningDecisionFixture(storedDraft.id)];
     this.milestoneWorkspace = {
       draftId: storedDraft.id,
       episodeSlug: storedDraft.episodeSlug,
@@ -198,6 +217,231 @@ class ControllableDaemonClient {
     hash: 'artifact-hash',
   }));
   readonly validate = vi.fn(async () => ({ ok: true, errors: [] }));
+  readonly listLearningSessions = vi.fn(async () => ({
+    sessions: this.learningSessions.map((session) => ({ ...session })),
+  }));
+  readonly listDecisions = vi.fn(async () => ({
+    decisions: this.learningDecisions.map((decision) => ({
+      ...decision,
+      context: {
+        ...decision.context,
+        source: { ...decision.context.source },
+      },
+    })),
+    nextCursor: null,
+  }));
+  readonly listLessons = vi.fn(async () => ({
+    lessons: this.learningLessons.map(cloneLesson),
+  }));
+  readonly distill = vi.fn(async (
+    draftId: string,
+    trigger: 'on-demand' | 'session-end',
+  ): Promise<DistillationRunRecord> => {
+    if (trigger === 'session-end') {
+      this.learningSessions[0] = {
+        ...this.learningSessions[0]!,
+        endCursor: 1,
+        closedAt: '2026-07-24T10:05:00.000Z',
+      };
+    }
+    this.learningLessons = learningLessonFixtures(draftId);
+    this.lastDistillation = {
+      id: 'distillation-1',
+      draftId,
+      sessionId: 'session-1',
+      trigger,
+      state: 'ingested',
+      operationId: 'distill-op-1',
+      resumeKey: 'opaque-distillation-key',
+      guardrailMarkdown: 'One candidate remains deliberately narrow.',
+      error: null,
+      createdAt: '2026-07-24T10:05:00.000Z',
+      updatedAt: '2026-07-24T10:05:01.000Z',
+      decisions: [{
+        decisionId: 'decision-1',
+        snapshot: learningDecisionFixture(draftId),
+      }],
+      lessons: [],
+    };
+    return { ...this.lastDistillation };
+  });
+  readonly reconcileDistillation = vi.fn(async () => {
+    if (!this.lastDistillation) throw new Error('distillation missing');
+    return { ...this.lastDistillation };
+  });
+  readonly editLesson = vi.fn(async (
+    _draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+    reviewedMarkdown: string,
+  ) => this.updateLearningLesson(lessonId, expectedVersion, (lesson) => ({
+    ...lesson,
+    reviewedMarkdown,
+    version: lesson.version + 1,
+  })));
+  readonly approveLesson = vi.fn(async (
+    _draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ) => this.updateLearningLesson(lessonId, expectedVersion, (lesson) => {
+    if (lesson.classification === 'episode-local') {
+      const approved = {
+        ...lesson,
+        state: 'approved' as const,
+        version: lesson.version + 1,
+      };
+      const operation = completedOperation('lesson-context-op', {
+        operation: 'review',
+        inputs: {
+          selection: 'A later review.',
+          approved_lessons: [approved.reviewedMarkdown],
+        },
+        operationLessons: [{
+          operationId: 'lesson-context-op',
+          lessonId: approved.id,
+          lessonVersion: approved.version,
+          contentHash: 'local-reviewed-hash',
+          createdAt: '2026-07-24T10:10:00.000Z',
+        }],
+      });
+      if (!this.submissions.some(({ id }) => id === operation.id)) {
+        this.submissions.push({
+          id: operation.id,
+          operation: operation.operation,
+          inputs: operation.inputs,
+        });
+      }
+      this.outcomes.set(operation.id, {
+        operation,
+        result: { kind: 'schema', value: {}, guardrail: null },
+      });
+      return approved;
+    }
+    return {
+      ...lesson,
+      state: 'approved-pending-reconcile' as const,
+      version: lesson.version + 1,
+      reconciliation: reconciliationFixture(lesson.id, 'apply'),
+      reconciliationHistory: [reconciliationFixture(lesson.id, 'apply')],
+    };
+  }));
+  readonly rejectLesson = vi.fn(async (
+    _draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ) => this.updateLearningLesson(lessonId, expectedVersion, (lesson) => ({
+    ...lesson,
+    state: 'rejected' as const,
+    version: lesson.version + 1,
+  })));
+  readonly retireLesson = vi.fn(async (
+    _draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+  ) => this.updateLearningLesson(lessonId, expectedVersion, (lesson) => {
+    if (lesson.classification === 'episode-local') {
+      return {
+        ...lesson,
+        state: 'retired' as const,
+        version: lesson.version + 1,
+      };
+    }
+    const reconciliation = reconciliationFixture(lesson.id, 'retire');
+    return {
+      ...lesson,
+      state: 'retirement-pending' as const,
+      version: lesson.version + 1,
+      reconciliation,
+      reconciliationHistory: [
+        ...lesson.reconciliationHistory,
+        reconciliation,
+      ],
+    };
+  }));
+  readonly supersedeLesson = vi.fn(async (
+    _draftId: string,
+    lessonId: string,
+    expectedVersion: number,
+    predecessorLessonId: string,
+  ) => this.updateLearningLesson(lessonId, expectedVersion, (lesson) => ({
+    ...lesson,
+    supersedesLessonId: predecessorLessonId,
+    version: lesson.version + 1,
+    state: lesson.classification === 'episode-local'
+      ? 'approved' as const
+      : 'approved-pending-reconcile' as const,
+  })));
+  readonly markLessonReconciliationAwaiting = vi.fn(async (
+    resumeKey: string,
+  ): Promise<LessonReconciliation> => {
+    const lesson = this.learningLessons.find(
+      (candidate) => candidate.reconciliation?.resumeKey === resumeKey,
+    );
+    if (!lesson?.reconciliation) throw new Error('reconciliation missing');
+    lesson.reconciliation = {
+      ...lesson.reconciliation,
+      state: 'awaiting-reconciliation',
+    };
+    lesson.reconciliationHistory = lesson.reconciliationHistory.map(
+      (record) => record.resumeKey === resumeKey
+        ? { ...record, state: 'awaiting-reconciliation' }
+        : record,
+    );
+    return { ...lesson.reconciliation };
+  });
+  readonly verifyLessonReconciliation = vi.fn(async (
+    resumeKey: string,
+    commit: string,
+  ): Promise<LessonDetail> => {
+    const lesson = this.learningLessons.find(
+      (candidate) => candidate.reconciliation?.resumeKey === resumeKey,
+    );
+    if (!lesson?.reconciliation) throw new Error('reconciliation missing');
+    const verified = {
+      ...lesson.reconciliation,
+      state: 'verified' as const,
+      repositoryCommit: commit,
+      paths: ['DECISIONS.md', '.agents/skills/writing-whp-youtube-scripts/SKILL.md'],
+      anchors: ['## Review concrete reveals'],
+      contentHashes: ['repository-content-hash'],
+      verifiedAt: '2026-07-24T10:20:00.000Z',
+    };
+    const next: LessonDetail = lesson.state === 'retirement-pending'
+      ? {
+          ...lesson,
+          state: 'retired',
+          version: lesson.version + 1,
+          reconciliation: verified,
+          reconciliationHistory: [
+            ...lesson.reconciliationHistory.slice(0, -1),
+            verified,
+          ],
+        }
+      : {
+          ...lesson,
+          state: 'applied',
+          reviewedMarkdown: null,
+          currentMarkdown: 'Repository rule: keep the reveal concrete.',
+          repositoryCommit: commit,
+          repositoryPath:
+            '.agents/skills/writing-whp-youtube-scripts/SKILL.md',
+          repositoryAnchor: '## Review concrete reveals',
+          repositoryContentHash: 'repository-content-hash',
+          repositoryProvenance: {
+            status: 'resolved',
+            lesson_markdown: 'Repository rule: keep the reveal concrete.',
+            path: '.agents/skills/writing-whp-youtube-scripts/SKILL.md',
+            anchor: '## Review concrete reveals',
+            content_hash: 'repository-content-hash',
+          },
+          version: lesson.version + 1,
+          reconciliation: verified,
+          reconciliationHistory: [verified],
+        };
+    this.learningLessons = this.learningLessons.map((candidate) =>
+      candidate.id === lesson.id ? next : candidate);
+    return cloneLesson(next);
+  });
   readonly prepareNarrationApproval = vi.fn(async (
     draftId: string,
     input: {
@@ -781,6 +1025,24 @@ class ControllableDaemonClient {
       );
     }
     finish();
+  }
+
+  private updateLearningLesson(
+    lessonId: string,
+    expectedVersion: number,
+    update: (lesson: LessonDetail) => LessonDetail,
+  ): LessonDetail {
+    const lesson = this.learningLessons.find(({ id }) => id === lessonId);
+    if (!lesson) throw new Error(`lesson missing: ${lessonId}`);
+    if (lesson.version !== expectedVersion) {
+      throw new DaemonClientError(409, {
+        error: `lesson version conflict: ${lessonId}`,
+      });
+    }
+    const updated = update(cloneLesson(lesson));
+    this.learningLessons = this.learningLessons.map((candidate) =>
+      candidate.id === lessonId ? updated : candidate);
+    return cloneLesson(updated);
   }
 
   private currentMarkdown(): string {
@@ -2711,6 +2973,189 @@ describe('mounted Script Studio composition', () => {
       input.disposition === 'autosave' && input.opId === null)).toBe(false);
   });
 
+  it('drives the routed Lessons lifecycle and inspects exact supplied envelope context', async () => {
+    const studio = await mountStudio();
+    const lessonsLink = Array.from(
+      studio.root.querySelectorAll<HTMLAnchorElement>('.masthead a'),
+    ).find((link) => link.textContent?.trim() === 'Lessons') ?? null;
+    expect(lessonsLink).not.toBeNull();
+    lessonsLink!.click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector('app-lessons-page')).not.toBeNull();
+      expect(studio.root.textContent).toContain('Decision 1 · proposal-accepted');
+    });
+    expect(studio.client.distill).not.toHaveBeenCalled();
+    const draftSelect = studio.root.querySelector('#lesson-draft');
+    const distillButton = findButton(studio.root, 'Distill now');
+    expect(
+      (draftSelect?.compareDocumentPosition(distillButton) ?? 0)
+      & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).not.toBe(0);
+
+    findButton(studio.root, 'Distill now').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.distill).toHaveBeenCalledWith(
+        'draft-1',
+        'on-demand',
+      );
+      expect(studio.root.querySelectorAll('.lesson-card')).toHaveLength(3);
+      expect(studio.root.querySelector(
+        '[data-testid="distillation-state"]',
+      )?.textContent).toContain('Review the proposed lessons');
+      expect(studio.root.textContent).toContain(
+        'One candidate remains deliberately narrow.',
+      );
+    });
+
+    const local = studio.root.querySelector('#lesson-lesson-local');
+    const localEditor = local?.querySelector<HTMLTextAreaElement>('textarea');
+    expect(localEditor?.labels?.[0]?.textContent).toContain(
+      'Reviewed lesson text',
+    );
+    expect(local?.querySelector('a[href="#decision-decision-1"]'))
+      .not.toBeNull();
+    if (!localEditor) throw new Error('local lesson editor missing');
+    localEditor.value = 'Keep every reveal attached to one visible action.';
+    localEditor.dispatchEvent(new Event('input', { bubbles: true }));
+    findButton(local, 'Save review').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.editLesson).toHaveBeenCalledWith(
+        'draft-1',
+        'lesson-local',
+        1,
+        'Keep every reveal attached to one visible action.',
+      );
+      expect(local?.textContent).toContain('Proposed');
+      expect(local?.textContent).toContain('does not approve');
+    });
+    let localApprove!: HTMLButtonElement;
+    await vi.waitFor(() => {
+      studio.tick();
+      localApprove = findButton(
+        studio.root.querySelector('#lesson-lesson-local'),
+        'Approve',
+      );
+      expect(localApprove.disabled).toBe(false);
+    });
+    localApprove.click();
+    studio.tick();
+    const localConfirmation = studio.root.querySelector(
+      '#lesson-lesson-local',
+    );
+    expect(localConfirmation?.textContent).toContain('Confirm approve');
+    findButton(localConfirmation, 'Confirm approve').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector('#lesson-lesson-local')?.textContent)
+        .toContain('Active');
+    });
+
+    let rejected = studio.root.querySelector('#lesson-lesson-reject');
+    findButton(rejected, 'Reject').click();
+    studio.tick();
+    rejected = studio.root.querySelector('#lesson-lesson-reject');
+    expect(rejected?.textContent).toContain('Confirm reject');
+    findButton(rejected, 'Confirm reject').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      rejected = studio.root.querySelector('#lesson-lesson-reject');
+      expect(rejected?.getAttribute('data-state')).toBe('rejected');
+    });
+
+    let durable = studio.root.querySelector('#lesson-lesson-durable');
+    findButton(durable, 'Approve').click();
+    studio.tick();
+    durable = studio.root.querySelector('#lesson-lesson-durable');
+    findButton(durable, 'Confirm approve').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      durable = studio.root.querySelector('#lesson-lesson-durable');
+      expect(durable?.textContent).toContain('External reconcile-whp handoff');
+      expect(durable?.textContent).toContain(
+        'Script Creator does not edit or commit doctrine',
+      );
+    });
+    findButton(durable, 'Copy handoff').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(durable?.textContent).toContain(
+        'Copy failed. Select the handoff text and copy it manually.',
+      );
+    });
+    findButton(durable, 'I started external reconciliation').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      durable = studio.root.querySelector('#lesson-lesson-durable');
+      expect(durable?.textContent).toContain('awaiting-reconciliation');
+    });
+    const commit = durable?.querySelector<HTMLInputElement>(
+      '#commit-lesson-durable',
+    );
+    if (!commit) throw new Error('durable verification input missing');
+    commit.value = 'external-reconcile-commit';
+    commit.dispatchEvent(new Event('input', { bubbles: true }));
+    findButton(durable, 'Verify external commit').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      durable = studio.root.querySelector('#lesson-lesson-durable');
+      expect(durable?.getAttribute('data-state')).toBe('applied');
+      expect(durable?.textContent).toContain(
+        'Repository-native current doctrine',
+      );
+      expect(durable?.textContent).toContain(
+        'Repository rule: keep the reveal concrete.',
+      );
+    });
+
+    const activeLocal = studio.root.querySelector('#lesson-lesson-local');
+    findButton(activeLocal, 'Retire').click();
+    studio.tick();
+    findButton(
+      studio.root.querySelector('#lesson-lesson-local'),
+      'Confirm retire',
+    ).click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector('#lesson-lesson-local')
+        ?.getAttribute('data-state')).toBe('retired');
+    });
+
+    durable = studio.root.querySelector('#lesson-lesson-durable');
+    findButton(durable, 'Retire').click();
+    studio.tick();
+    durable = studio.root.querySelector('#lesson-lesson-durable');
+    findButton(durable, 'Confirm retire').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      durable = studio.root.querySelector('#lesson-lesson-durable');
+      expect(durable?.getAttribute('data-state')).toBe('retirement-pending');
+      expect(durable?.textContent).toContain(
+        'Repository change pending. Current doctrine remains in force.',
+      );
+    });
+
+    const consoleLink = Array.from(
+      studio.root.querySelectorAll<HTMLAnchorElement>('.masthead a'),
+    ).find((link) => link.textContent?.trim() === 'Console') ?? null;
+    consoleLink!.click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector('app-agent-console')).not.toBeNull();
+      expect(studio.root.textContent).toContain('Supplied lessons');
+      expect(studio.root.textContent).toContain(
+        'Keep every reveal attached to one visible action.',
+      );
+      expect(studio.root.textContent).toContain(
+        'lesson-local · version 3',
+      );
+      expect(studio.root.textContent).toContain('repository-native');
+    });
+  });
+
   it('drives the full production Studio and routed Console surface', async () => {
     const cancelAutosave = vi.spyOn(
       DebouncedAutosave.prototype,
@@ -3138,6 +3583,7 @@ async function mountStudio(
     ]);
     hydrateSignalOutputs(EditorHost, ['architectureConflict']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(LessonsPanel, ['model']);
     hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
     hydrateSignalInputs(ArchitecturePanel, ['model', 'draft', 'version']);
     hydrateSignalInputs(NarrationActions, [
@@ -3474,6 +3920,148 @@ function studioDraft(): DraftRecord {
         }],
       }],
     },
+  };
+}
+
+function learningDecisionFixture(draftId: string): LearningDecision {
+  return {
+    id: 'decision-1',
+    draftId,
+    seq: 1,
+    kind: 'proposal-accepted',
+    disposition: 'selection-proposal-accepted',
+    sourceTimestamp: '2026-07-24T09:30:00.000Z',
+    createdAt: '2026-07-24T09:30:00.000Z',
+    note: 'The concrete reveal survived.',
+    context: {
+      source: {
+        type: 'revision',
+        id: 'revision-accepted-1',
+        disposition: 'selection-proposal-accepted',
+      },
+    },
+  };
+}
+
+function learningLessonFixtures(draftId: string): LessonDetail[] {
+  const decision = learningDecisionFixture(draftId);
+  const base = {
+    draftId,
+    distillationRunId: 'distillation-1',
+    state: 'proposed' as const,
+    proposedTarget: null,
+    supersedesLessonId: null,
+    version: 1,
+    repositoryCommit: null,
+    repositoryPath: null,
+    repositoryAnchor: null,
+    repositoryContentHash: null,
+    createdAt: '2026-07-24T10:05:01.000Z',
+    updatedAt: '2026-07-24T10:05:01.000Z',
+    evidenceIds: [decision.id],
+    evidence: [{
+      id: decision.id,
+      status: 'resolved' as const,
+      decision,
+    }],
+    reconciliation: null,
+    reconciliationHistory: [],
+    repositoryProvenance: null,
+  };
+  return [
+    {
+      ...base,
+      id: 'lesson-local',
+      classification: 'episode-local',
+      proposedMarkdown: 'Keep the reveal attached to a visible action.',
+      reviewedMarkdown: 'Keep the reveal attached to a visible action.',
+      rationaleMarkdown: 'The accepted revision became clearer through action.',
+      currentMarkdown: 'Keep the reveal attached to a visible action.',
+    },
+    {
+      ...base,
+      id: 'lesson-reject',
+      classification: 'episode-local',
+      proposedMarkdown: 'Always begin with a question.',
+      reviewedMarkdown: 'Always begin with a question.',
+      rationaleMarkdown: 'One opening happened to use a question.',
+      currentMarkdown: 'Always begin with a question.',
+    },
+    {
+      ...base,
+      id: 'lesson-durable',
+      classification: 'durable',
+      proposedMarkdown: 'Test abstract reveals against one concrete action.',
+      reviewedMarkdown: 'Test abstract reveals against one concrete action.',
+      rationaleMarkdown: 'This pattern may apply across future episodes.',
+      proposedTarget:
+        '.agents/skills/writing-whp-youtube-scripts/SKILL.md',
+      currentMarkdown: 'Test abstract reveals against one concrete action.',
+    },
+  ];
+}
+
+function reconciliationFixture(
+  lessonId: string,
+  kind: 'apply' | 'retire' | 'supersede',
+): LessonReconciliation {
+  return {
+    id: `reconciliation-${lessonId}-${kind}`,
+    lessonId,
+    kind,
+    state: 'prepared',
+    resumeKey: `opaque-${lessonId}-${kind}`,
+    preparedMarkdown: [
+      '# Proposed WHP lesson reconciliation',
+      '',
+      'This is a proposal supported by decision-1.',
+      'Run `$reconcile-whp`; Script Creator has not edited or committed doctrine.',
+    ].join('\n'),
+    repositoryCommit: null,
+    paths: [],
+    anchors: [],
+    contentHashes: [],
+    createdAt: '2026-07-24T10:10:00.000Z',
+    updatedAt: '2026-07-24T10:10:00.000Z',
+    verifiedAt: null,
+  };
+}
+
+function cloneLesson(lesson: LessonDetail): LessonDetail {
+  return {
+    ...lesson,
+    evidenceIds: [...lesson.evidenceIds],
+    evidence: lesson.evidence.map((evidence) => ({
+      ...evidence,
+      decision: evidence.decision
+        ? {
+            ...evidence.decision,
+            context: {
+              ...evidence.decision.context,
+              source: { ...evidence.decision.context.source },
+            },
+          }
+        : null,
+    })),
+    reconciliation: lesson.reconciliation
+      ? {
+          ...lesson.reconciliation,
+          paths: [...lesson.reconciliation.paths],
+          anchors: [...lesson.reconciliation.anchors],
+          contentHashes: [...lesson.reconciliation.contentHashes],
+        }
+      : null,
+    reconciliationHistory: lesson.reconciliationHistory.map(
+      (record) => ({
+        ...record,
+        paths: [...record.paths],
+        anchors: [...record.anchors],
+        contentHashes: [...record.contentHashes],
+      }),
+    ),
+    repositoryProvenance: lesson.repositoryProvenance
+      ? { ...lesson.repositoryProvenance }
+      : null,
   };
 }
 
