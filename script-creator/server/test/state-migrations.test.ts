@@ -24,7 +24,7 @@ afterEach(() => {
 });
 
 describe('shared state migration registry', () => {
-  it('owns one documented global sequence through staged promotion', () => {
+  it('owns one documented global sequence through milestone workspaces', () => {
     expect(STATE_MIGRATIONS.map(({ version, owner, name }) => ({
       version,
       owner,
@@ -37,8 +37,9 @@ describe('shared state migration registry', () => {
       { version: 5, owner: 'topics', name: 'topic-handoff-saga' },
       { version: 6, owner: 'architecture', name: 'architecture-stage' },
       { version: 7, owner: 'architecture', name: 'staged-promotion' },
+      { version: 8, owner: 'milestones', name: 'episode-milestones' },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(7);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(8);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -109,7 +110,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v7 schema for a fresh database', () => {
+  it('creates the complete v8 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -179,6 +180,31 @@ describe('shared state migration registry', () => {
       'state',
       'created_at',
       'resolved_at',
+    ]);
+    expect(columns(inspected, 'episode_workspaces')).toEqual([
+      'draft_id',
+      'episode_slug',
+      'choice',
+      'branch_name',
+      'worktree_path',
+      'base_branch',
+      'created_at',
+      'updated_at',
+    ]);
+    expect(columns(inspected, 'pending_milestones')).toEqual([
+      'id',
+      'draft_id',
+      'episode_slug',
+      'kind',
+      'files_json',
+      'commit_message',
+      'source_hashes_json',
+      'base_commit_hash',
+      'reconciliation_required',
+      'state',
+      'resulting_commit_hash',
+      'created_at',
+      'updated_at',
     ]);
     inspected.close();
   });
@@ -287,6 +313,28 @@ describe('shared state migration registry', () => {
       approved_narration_revision_seq: 3,
       narration_artifact_hash: 'draft-hash',
     });
+  });
+
+  it('applies migration v8 exactly once without storing editorial content', () => {
+    const dbFile = simulatedV7Database();
+    const migration = STATE_MIGRATIONS.find(({ version }) => version === 8)!;
+    const apply = vi.spyOn(migration, 'apply');
+    documentStores.push(new DocumentStore(dbFile));
+    documentStores.push(new DocumentStore(dbFile));
+
+    const inspected = new Database(dbFile, { readonly: true });
+    const workspaceSql = inspected.prepare<[string], { sql: string }>(
+      `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?`,
+    ).get('episode_workspaces')!.sql;
+    const milestoneSql = inspected.prepare<[string], { sql: string }>(
+      `SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?`,
+    ).get('pending_milestones')!.sql;
+    inspected.close();
+
+    expect(apply).toHaveBeenCalledOnce();
+    expect(`${workspaceSql}\n${milestoneSql}`).not.toMatch(
+      /(?:markdown|content|doc_json|approved_md)/i,
+    );
   });
 
   it.each([2, 3, 4] as const)(
@@ -427,6 +475,20 @@ function simulatedV5Database(): string {
   const db = new Database(dbFile);
   for (const migration of STATE_MIGRATIONS) {
     if (migration.version > 5) break;
+    migration.apply(db);
+    db.pragma(`user_version = ${migration.version}`);
+  }
+  db.close();
+  return dbFile;
+}
+
+function simulatedV7Database(): string {
+  const root = mkdtempSync(join(tmpdir(), 'state-v7-'));
+  roots.push(root);
+  const dbFile = join(root, 'state.sqlite3');
+  const db = new Database(dbFile);
+  for (const migration of STATE_MIGRATIONS) {
+    if (migration.version > 7) break;
     migration.apply(db);
     db.pragma(`user_version = ${migration.version}`);
   }

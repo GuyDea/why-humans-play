@@ -8,6 +8,8 @@ import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
 import { DocumentService } from '../../src/documents/service.js';
 import { DocumentStore } from '../../src/documents/store.js';
+import { withCreativePhase } from '../../src/documents/service.js';
+import { vi } from 'vitest';
 
 interface Fixture {
   root: string;
@@ -189,5 +191,57 @@ describe('DocumentService', () => {
       .toThrow(/draft not found: missing/i);
     expect(() => fixture.service.exportMarkdown('missing'))
       .toThrow(/draft not found: missing/i);
+  });
+
+  it('records the production milestone only after completing the reserved promotion', async () => {
+    const fixture = makeFixture();
+    const recordPending = vi.fn(async () => undefined);
+    const service = new DocumentService({
+      store: fixture.store,
+      milestoneService: { recordPending },
+      now: () => '2026-07-24T10:00:00.000Z',
+    });
+    service.createDraftWithId('production-draft', {
+      episodeSlug: 'production-episode',
+      title: 'Production Episode',
+      format: 'narration',
+      doc: withCreativePhase(
+        parseMarkdown('## 1. Opening\n\n> A first line.').toJSON(),
+        'creative-approved',
+      ),
+    });
+    fixture.store.createPromotion({
+      draftId: 'production-draft',
+      operationId: 'promote-operation',
+      state: 'output-ready',
+      targetPath: 'whp-youtube/episodes/01-production-episode.md',
+      targetHash: 'production-hash',
+      importRevisionId: 'promotion-import',
+      validationHash: 'production-hash',
+      error: 'promotion completion in progress',
+      createdAt: '2026-07-24T09:00:00.000Z',
+      updatedAt: '2026-07-24T09:00:00.000Z',
+    });
+
+    const completed = await service.completePromotion(
+      'production-draft',
+      {
+        ok: true,
+        errors: [],
+        path: 'whp-youtube/episodes/01-production-episode.md',
+        hash: 'production-hash',
+      },
+    );
+
+    expect(completed.state).toBe('complete');
+    expect(recordPending).toHaveBeenCalledWith({
+      draftId: 'production-draft',
+      kind: 'production-promotion',
+      files: [
+        'whp-youtube/episodes/01-production-episode.md',
+        'whp-youtube/PIPELINE.md',
+      ],
+      reconciliationRequired: true,
+    });
   });
 });

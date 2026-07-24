@@ -137,6 +137,10 @@ interface Fixture {
   app: ReturnType<typeof buildApp>;
   write: ReturnType<typeof vi.fn>;
   upsert: ReturnType<typeof vi.fn>;
+  workspaceService: {
+    hasWorkspace: ReturnType<typeof vi.fn>;
+    recordPending: ReturnType<typeof vi.fn>;
+  };
 }
 
 const fixtures: Fixture[] = [];
@@ -159,6 +163,10 @@ function createFixture(
     conflict: false as const,
     hash: 'pipeline-hash',
   }));
+  const workspaceService = {
+    hasWorkspace: vi.fn(() => true),
+    recordPending: vi.fn(async () => undefined),
+  };
   const operationService = {
     get: (id: string) => ({
       id,
@@ -189,6 +197,7 @@ function createFixture(
       write,
       upsertPipelineRow: upsert,
     },
+    workspaceService,
   } as ConstructorParameters<typeof TopicService>[0]);
   topicService.createIdea({
     text: 'Voluntary Obstacles\n\nWhy chosen constraints can make effort meaningful.',
@@ -221,6 +230,7 @@ function createFixture(
     app,
     write,
     upsert,
+    workspaceService,
   };
   fixtures.push(fixture);
   return fixture;
@@ -304,6 +314,42 @@ describe('topic handoff saga HTTP API', () => {
     expect(fixture.documentStore.listDrafts()).toHaveLength(1);
     expect(fixture.write).toHaveBeenCalledTimes(2);
     expect(fixture.upsert).toHaveBeenCalledOnce();
+  });
+
+  it('creates no repository artifact before workspace choice and records the topic milestone after resume', async () => {
+    const fixture = createFixture();
+    fixture.workspaceService.hasWorkspace.mockReturnValue(false);
+
+    const blocked = await handoff(fixture.app);
+
+    expect(blocked.statusCode).toBe(200);
+    expect(blocked.json()).toMatchObject({
+      draftId: 'draft-handoff-1',
+      complete: false,
+      steps: {
+        draftCreated: 'completed',
+        artifactWritten: 'pending',
+        pipelineUpserted: 'pending',
+        ideaPromoted: 'pending',
+      },
+      error: 'workspace choice required for draft draft-handoff-1',
+    });
+    expect(fixture.write).not.toHaveBeenCalled();
+    expect(fixture.upsert).not.toHaveBeenCalled();
+
+    fixture.workspaceService.hasWorkspace.mockReturnValue(true);
+    const resumed = await handoff(fixture.app);
+
+    expect(resumed.json()).toMatchObject({ complete: true, error: null });
+    expect(fixture.workspaceService.recordPending).toHaveBeenCalledWith({
+      draftId: 'draft-handoff-1',
+      kind: 'topic-selection',
+      files: [
+        'whp-youtube/topics/voluntary-obstacles.md',
+        'whp-youtube/PIPELINE.md',
+      ],
+      reconciliationRequired: true,
+    });
   });
 
   it('reloads the server command before retry without creating a second draft', async () => {
@@ -511,6 +557,7 @@ async function restartFixture(fixture: Fixture): Promise<void> {
       write: fixture.write,
       upsertPipelineRow: fixture.upsert,
     },
+    workspaceService: fixture.workspaceService,
   });
   fixture.app = buildApp({
     nonce: NONCE,

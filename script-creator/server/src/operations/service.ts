@@ -106,7 +106,7 @@ export class OperationService {
   submit(
     opName: OperationName,
     inputs: unknown,
-    opts: { resumeOf?: string } = {},
+    opts: { resumeOf?: string; cwd?: string } = {},
   ): string {
     const definition = this.definition(opName);
     if (inputs === undefined) throw new Error('full inputs are required');
@@ -143,7 +143,7 @@ export class OperationService {
     this.supervisor.enqueue({
       jobId: id,
       prompt: buildEnvelopePrompt(definition, inputs),
-      cwd: REPO_ROOT,
+      cwd: resolve(opts.cwd ?? REPO_ROOT),
       sandbox: definition.sandbox,
       outputSchema: definition.result.kind === 'schema'
         ? definition.result.schema

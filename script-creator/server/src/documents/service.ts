@@ -17,6 +17,10 @@ import type {
   ArtifactReadResult,
 } from '../repo/artifacts.js';
 import type { ValidatorResult } from '../repo/validator.js';
+import type {
+  MilestoneKind,
+  PendingMilestone,
+} from '../repo/milestones.js';
 
 export interface CreateDraftInput {
   episodeSlug: string;
@@ -48,17 +52,29 @@ export class ExportBlockedError extends Error {
   }
 }
 
+interface DocumentMilestoneService {
+  recordPending(input: {
+    draftId: string;
+    kind: MilestoneKind;
+    files: string[];
+    reconciliationRequired: boolean;
+  }): Promise<PendingMilestone | void>;
+}
+
 export class DocumentService {
   private readonly store: DocumentStore;
+  private readonly milestoneService: DocumentMilestoneService | null;
   private readonly idFactory: () => string;
   private readonly now: () => string;
 
   constructor(opts: {
     store: DocumentStore;
+    milestoneService?: DocumentMilestoneService;
     idFactory?: () => string;
     now?: () => string;
   }) {
     this.store = opts.store;
+    this.milestoneService = opts.milestoneService ?? null;
     this.idFactory = opts.idFactory ?? randomUUID;
     this.now = opts.now ?? (() => new Date().toISOString());
   }
@@ -317,10 +333,10 @@ export class DocumentService {
     });
   }
 
-  completePromotion(
+  async completePromotion(
     draftId: string,
     validation: ValidatorResult,
-  ): PromotionRecord {
+  ): Promise<PromotionRecord> {
     const draft = this.getDraft(draftId);
     const promotion = this.store.getLatestPromotion(draftId);
     if (
@@ -342,6 +358,14 @@ export class DocumentService {
       throw new Error(
         'promote completion refused: validator result is stale',
       );
+    }
+    if (this.milestoneService) {
+      await this.milestoneService.recordPending({
+        draftId,
+        kind: 'production-promotion',
+        files: [promotion.targetPath, 'whp-youtube/PIPELINE.md'],
+        reconciliationRequired: true,
+      });
     }
     this.store.replaceDraftWorkflowState(draftId, {
       doc: withCreativePhase(draft.doc, 'production'),

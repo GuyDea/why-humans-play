@@ -220,6 +220,22 @@ describe('OperationService', () => {
     expect(envelope.outputSchema).toBeUndefined();
   });
 
+  it('routes a draft-scoped operation through its recorded workspace cwd', async () => {
+    const fixture = makeFixture('happy');
+    const workspace = mkdtempSync(join(tmpdir(), 'operation-workspace-'));
+    const id = submit(
+      fixture,
+      'generate-episode',
+      { brief: 'A workspace-routed test.' },
+      { cwd: workspace },
+    );
+
+    await terminal(fixture, id);
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.cwd).toBe(workspace);
+  });
+
   it('dispatches Generate Architecture to the complete raw Markdown fixture', async () => {
     const fixture = makeFixture('plan6-flow');
     const id = submit(fixture, 'generate-architecture', {

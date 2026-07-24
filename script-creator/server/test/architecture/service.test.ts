@@ -18,7 +18,7 @@ import type { OperationName } from '../../src/operations/registry.js';
 interface SubmittedOperation {
   operation: OperationName;
   inputs: unknown;
-  options: { resumeOf?: string };
+  options: { resumeOf?: string; cwd?: string };
 }
 
 const roots: string[] = [];
@@ -70,6 +70,7 @@ function makeFixture(input: {
   approved?: boolean;
   reconciliationRequired?: boolean;
   sections?: ArchitectureSection[];
+  workspacePath?: string;
 } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'architecture-service-'));
   roots.push(root);
@@ -102,7 +103,7 @@ function makeFixture(input: {
     submit: vi.fn((
       operation: OperationName,
       inputs: unknown,
-      options: { resumeOf?: string } = {},
+      options: { resumeOf?: string; cwd?: string } = {},
     ) => {
       submitted.push({ operation, inputs, options });
       return `operation-${submitted.length}`;
@@ -115,6 +116,12 @@ function makeFixture(input: {
   const service = new ArchitectureService({
     store,
     operationService,
+    workspaceService: input.workspacePath
+      ? {
+          workspacePath: vi.fn(() => input.workspacePath!),
+          recordPending: vi.fn(),
+        }
+      : undefined,
     idFactory: () => `architecture-revision-${++revision}`,
     now: () => '2026-07-24T10:00:00.000Z',
   });
@@ -245,6 +252,32 @@ describe('ArchitectureService draft-scoped operation policy', () => {
       },
       options: {},
     }]);
+  });
+
+  it('routes draft-scoped codex submissions and resumptions through the recorded workspace', () => {
+    const workspacePath = join(tmpdir(), 'episode-workspace');
+    const fixture = makeFixture({
+      phase: 'architecture',
+      approved: false,
+      narration: 'An imported line.',
+      workspacePath,
+    });
+
+    fixture.service.submitOperation(
+      'draft-1',
+      'review',
+      { selection: 'An imported line.' },
+    );
+    fixture.service.resumeOperation(
+      'draft-1',
+      'parent-operation',
+      { selection: 'An imported line.' },
+    );
+
+    expect(fixture.submitted.map(({ options }) => options)).toEqual([
+      { cwd: workspacePath },
+      { resumeOf: 'parent-operation', cwd: workspacePath },
+    ]);
   });
 
   it('allows scoped narration work in architecture phase only with real narration', () => {

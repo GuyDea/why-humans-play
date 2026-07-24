@@ -33,6 +33,10 @@ import type {
   ArtifactWriteResult,
   PipelineRow,
 } from '../repo/artifacts.js';
+import type {
+  MilestoneKind,
+  PendingMilestone,
+} from '../repo/milestones.js';
 
 export interface ArchitectureState extends DraftArchitecture {
   revisionSeq: number;
@@ -68,10 +72,20 @@ interface ArchitectureOperationService {
   submit(
     operation: OperationName,
     inputs: unknown,
-    options?: { resumeOf?: string },
+    options?: { resumeOf?: string; cwd?: string },
   ): string;
   get(id: string): { operation: OperationName };
   result?(id: string): OperationServiceResult;
+}
+
+interface ArchitectureWorkspaceService {
+  workspacePath(draftId: string): string;
+  recordPending(input: {
+    draftId: string;
+    kind: MilestoneKind;
+    files: string[];
+    reconciliationRequired: boolean;
+  }): Promise<PendingMilestone>;
 }
 
 interface ArchitectureArtifactService {
@@ -172,6 +186,7 @@ export class ArchitectureService {
   private readonly store: DocumentStore;
   private readonly operationService: ArchitectureOperationService;
   private readonly artifactService: ArchitectureArtifactService | null;
+  private readonly workspaceService: ArchitectureWorkspaceService | null;
   private readonly idFactory: () => string;
   private readonly now: () => string;
   private readonly actionLocks = new Map<string, Promise<void>>();
@@ -180,12 +195,14 @@ export class ArchitectureService {
     store: DocumentStore;
     operationService: ArchitectureOperationService;
     artifactService?: ArchitectureArtifactService;
+    workspaceService?: ArchitectureWorkspaceService;
     idFactory?: () => string;
     now?: () => string;
   }) {
     this.store = options.store;
     this.operationService = options.operationService;
     this.artifactService = options.artifactService ?? null;
+    this.workspaceService = options.workspaceService ?? null;
     this.idFactory = options.idFactory ?? randomUUID;
     this.now = options.now ?? (() => new Date().toISOString());
   }
@@ -441,6 +458,11 @@ export class ArchitectureService {
           this.syntheticActionResult(draftId),
         );
       }
+      await this.recordPendingMilestone(
+        draftId,
+        'creative-narration-approval',
+        [artifactPath, 'whp-youtube/PIPELINE.md'],
+      );
       const current = this.requireNarrationApprovalRevision(
         draftId,
         approvalRevisionSeq,
@@ -870,6 +892,11 @@ export class ArchitectureService {
     }
 
     if (!saga.draftUpdated) {
+      await this.recordPendingMilestone(
+        draftId,
+        'architecture-approval',
+        [sagaInput.artifactPath, 'whp-youtube/PIPELINE.md'],
+      );
       const draft = this.requireDraft(draftId);
       this.store.replaceDraftWorkflowState(draftId, {
         doc: withCreativePhase(draft.doc, 'rapid-prototype'),
@@ -974,6 +1001,11 @@ export class ArchitectureService {
     }
 
     if (!saga.draftUpdated) {
+      await this.recordPendingMilestone(
+        draftId,
+        'architecture-reopen',
+        ['whp-youtube/PIPELINE.md'],
+      );
       const draft = this.requireDraft(draftId);
       this.store.replaceDraftWorkflowState(draftId, {
         doc: withCreativePhase(draft.doc, 'architecture'),
@@ -1124,7 +1156,7 @@ export class ArchitectureService {
     draftId: string,
     operation: OperationName,
     inputs: unknown,
-    options: { resumeOf?: string } = {},
+    options: { resumeOf?: string; cwd?: string } = {},
   ): string {
     const draft = this.requireDraft(draftId);
     const phase = readCreativePhase(draft.doc);
@@ -1262,7 +1294,12 @@ export class ArchitectureService {
     const id = this.operationService.submit(
       operation,
       authoritativeInputs,
-      options,
+      this.workspaceService
+        ? {
+            ...options,
+            cwd: this.workspaceService.workspacePath(draftId),
+          }
+        : options,
     );
     if (NARRATION_PROPOSAL_OPERATIONS.has(operation)) {
       this.store.createNarrationProposal({
@@ -1289,6 +1326,20 @@ export class ArchitectureService {
       });
     }
     return id;
+  }
+
+  private async recordPendingMilestone(
+    draftId: string,
+    kind: MilestoneKind,
+    files: string[],
+  ): Promise<void> {
+    if (!this.workspaceService) return;
+    await this.workspaceService.recordPending({
+      draftId,
+      kind,
+      files,
+      reconciliationRequired: true,
+    });
   }
 
   private requireSettledNarrationProposals(

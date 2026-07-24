@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3';
 
 export interface StateMigration {
   version: number;
-  owner: 'documents' | 'topics' | 'architecture';
+  owner: 'documents' | 'topics' | 'architecture' | 'milestones';
   name: string;
   apply(db: Database.Database): void;
 }
@@ -160,6 +160,48 @@ CREATE INDEX IF NOT EXISTS narration_proposals_draft_state
   ON narration_proposals (draft_id, state);
 `;
 
+const EPISODE_MILESTONES_V8 = `
+CREATE TABLE IF NOT EXISTS episode_workspaces (
+  draft_id TEXT PRIMARY KEY REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL UNIQUE,
+  choice TEXT NOT NULL
+    CHECK (choice IN ('new-branch', 'current-branch')),
+  branch_name TEXT NOT NULL,
+  worktree_path TEXT NOT NULL,
+  base_branch TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS pending_milestones (
+  id TEXT PRIMARY KEY,
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  episode_slug TEXT NOT NULL,
+  kind TEXT NOT NULL
+    CHECK (kind IN (
+      'topic-selection',
+      'architecture-approval',
+      'architecture-reopen',
+      'creative-narration-approval',
+      'production-promotion'
+    )),
+  files_json TEXT NOT NULL,
+  commit_message TEXT NOT NULL,
+  source_hashes_json TEXT NOT NULL,
+  base_commit_hash TEXT NOT NULL,
+  reconciliation_required INTEGER NOT NULL DEFAULT 0
+    CHECK (reconciliation_required IN (0, 1)),
+  state TEXT NOT NULL
+    CHECK (state IN ('pending', 'committed')),
+  resulting_commit_hash TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS pending_milestones_draft_state
+  ON pending_milestones (draft_id, state, created_at DESC);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -263,6 +305,12 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
       );
       db.exec(STAGED_PROMOTION_V7);
     },
+  },
+  {
+    version: 8,
+    owner: 'milestones',
+    name: 'episode-milestones',
+    apply: (db) => db.exec(EPISODE_MILESTONES_V8),
   },
 ];
 
