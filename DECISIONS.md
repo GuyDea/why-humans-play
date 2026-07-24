@@ -889,3 +889,20 @@ artifact state must remain consistent across either transition failure.
 remain unchanged because the approved architecture already requires repository-native
 durable doctrine and mechanically proved proposal correspondence; this closes
 implementation and failure-atomicity gaps.
+
+## 2026-07-24 — Make Plan 7 redaction durable across every freezing run
+
+**Decision:** When a durable lesson is verified, Script Creator atomically records a
+pending redaction step covering every distillation run that froze the lesson and each
+linked operation, scrubs candidate bytes from all of those runs and artifacts, and marks
+redaction done only after completion; restart recovery and verification retries resume
+any verified reconciliation whose redaction remains pending.
+
+**Rationale:** A later Distill run can freeze and echo a still-pending durable candidate,
+and a process stop after learning verification but before operation-artifact redaction
+must not leave verified shadow doctrine permanently stored.
+
+**Documents:** `.superpowers/sdd/p7-final-review-report.md` and this ledger. `BRAND.md`,
+`CLAUDE.md`, `whp-youtube/STEERING.md`, the accepted Plan 7 implementation plan, and
+`.agents/` remain unchanged because this closes storage coverage and restart-recovery
+gaps within the existing repository-native durable-doctrine contract.

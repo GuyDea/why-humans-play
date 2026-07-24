@@ -110,6 +110,28 @@ export type ReconciliationState =
   | 'awaiting-reconciliation'
   | 'verified';
 
+export interface ReconciliationRedactionTarget {
+  runId: string;
+  operationId: string | null;
+}
+
+export type ReconciliationRedaction =
+  | {
+      state: 'pending';
+      targets: ReconciliationRedactionTarget[];
+      candidates: string[];
+      repositoryProvenance: {
+        commit: string;
+        path: string;
+        anchor: string;
+        contentHash: string;
+      };
+    }
+  | {
+      state: 'done';
+      targets: ReconciliationRedactionTarget[];
+    };
+
 export interface LessonReconciliationRecord {
   id: string;
   lessonId: string;
@@ -125,6 +147,7 @@ export interface LessonReconciliationRecord {
   createdAt: string;
   updatedAt: string;
   verifiedAt: string | null;
+  redaction: ReconciliationRedaction | null;
 }
 
 export interface ReconciliationVerificationRollback {
@@ -136,10 +159,10 @@ export interface ReconciliationVerificationRollback {
     runId: string;
     snapshotJson: string;
   }>;
-  runGuardrail: {
+  runGuardrails: Array<{
     runId: string;
     guardrailMarkdown: string | null;
-  } | null;
+  }>;
   decisionSnapshots: Array<{
     runId: string;
     decisionId: string;
@@ -241,6 +264,8 @@ interface ReconciliationRow {
   created_at: string;
   updated_at: string;
   verified_at: string | null;
+  redaction_state: ReconciliationRedaction['state'] | null;
+  redaction_json: string | null;
 }
 
 interface ValidatorAttemptRow {
@@ -1084,8 +1109,9 @@ export class LearningStore {
       `INSERT INTO lesson_reconciliations (
         id, lesson_id, kind, state, resume_key, prepared_markdown,
         prepared_head, repository_commit, paths_json, anchors_json,
-        content_hashes_json, created_at, updated_at, verified_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        content_hashes_json, created_at, updated_at, verified_at,
+        redaction_state, redaction_json
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       record.id,
       record.lessonId,
@@ -1101,6 +1127,8 @@ export class LearningStore {
       record.createdAt,
       record.updatedAt,
       record.verifiedAt,
+      record.redaction?.state ?? null,
+      record.redaction === null ? null : JSON.stringify(record.redaction),
     );
     return this.getReconciliation(record.id)!;
   }
@@ -1141,6 +1169,45 @@ export class LearningStore {
        WHERE lesson_id = ?
        ORDER BY created_at, rowid`,
     ).all(lessonId).map(reconciliationFrom);
+  }
+
+  listPendingReconciliationRedactions(): LessonReconciliationRecord[] {
+    return this.db.prepare<[], ReconciliationRow>(
+      `SELECT * FROM lesson_reconciliations
+       WHERE state = 'verified' AND redaction_state = 'pending'
+       ORDER BY verified_at, rowid`,
+    ).all().map(reconciliationFrom);
+  }
+
+  completeReconciliationRedaction(
+    resumeKey: string,
+    updatedAt: string,
+  ): LessonReconciliationRecord {
+    return this.db.transaction(() => {
+      const current = this.getReconciliationByResumeKey(resumeKey);
+      if (!current) {
+        throw new Error(`lesson reconciliation not found: ${resumeKey}`);
+      }
+      if (current.state !== 'verified' || current.redaction === null) {
+        throw new Error(
+          `lesson reconciliation redaction conflict: ${resumeKey}`,
+        );
+      }
+      if (current.redaction.state === 'done') return current;
+      const completed: ReconciliationRedaction = {
+        state: 'done',
+        targets: current.redaction.targets,
+      };
+      this.db.prepare(
+        `UPDATE lesson_reconciliations
+         SET redaction_state = 'done',
+             redaction_json = ?,
+             updated_at = ?
+         WHERE id = ? AND state = 'verified'
+           AND redaction_state = 'pending'`,
+      ).run(JSON.stringify(completed), updatedAt, current.id);
+      return this.getReconciliation(current.id)!;
+    })();
   }
 
   markReconciliationAwaiting(
@@ -1238,6 +1305,7 @@ export class LearningStore {
           }; a multi-lesson commit must add every reconciliation token`,
         );
       }
+      let redaction: ReconciliationRedaction | null = null;
       if (reconciliation.kind === 'retire') {
         if (lesson.state !== 'retirement-pending') {
           throw new Error(`lesson retirement conflict: ${lesson.id}`);
@@ -1266,6 +1334,12 @@ export class LearningStore {
             `lesson application provenance is incomplete: ${lesson.id}`,
           );
         }
+        redaction = this.pendingReconciliationRedaction(lesson, {
+          commit: input.repositoryCommit,
+          path: input.repositoryPath,
+          anchor: input.repositoryAnchor,
+          contentHash: input.repositoryContentHash,
+        });
         const repositoryReference = {
           kind: 'repository-reference',
           lesson_id: lesson.id,
@@ -1334,7 +1408,9 @@ export class LearningStore {
              anchors_json = ?,
              content_hashes_json = ?,
              updated_at = ?,
-             verified_at = ?
+             verified_at = ?,
+             redaction_state = ?,
+             redaction_json = ?
          WHERE id = ?`,
       ).run(
         input.repositoryCommit,
@@ -1343,17 +1419,17 @@ export class LearningStore {
         JSON.stringify(input.contentHashes),
         input.updatedAt,
         input.updatedAt,
+        redaction?.state ?? null,
+        redaction === null ? null : JSON.stringify(redaction),
         reconciliation.id,
       );
-      this.scrubVerifiedDurableLessonStorage(
-        lesson,
-        {
-          commit: input.repositoryCommit,
-          path: input.repositoryPath,
-          anchor: input.repositoryAnchor,
-          contentHash: input.repositoryContentHash,
-        },
-      );
+      if (redaction?.state === 'pending') {
+        this.scrubVerifiedDurableLessonStorage(
+          lesson,
+          redaction.repositoryProvenance,
+          redaction.targets,
+        );
+      }
       return {
         lesson: this.getLesson(lesson.id)!,
         reconciliation: this.getReconciliation(reconciliation.id)!,
@@ -1424,7 +1500,9 @@ export class LearningStore {
              anchors_json = ?,
              content_hashes_json = ?,
              updated_at = ?,
-             verified_at = ?
+             verified_at = ?,
+             redaction_state = ?,
+             redaction_json = ?
          WHERE id = ?`,
       ).run(
         rollback.reconciliation.state,
@@ -1436,6 +1514,10 @@ export class LearningStore {
         JSON.stringify(rollback.reconciliation.contentHashes),
         rollback.reconciliation.updatedAt,
         rollback.reconciliation.verifiedAt,
+        rollback.reconciliation.redaction?.state ?? null,
+        rollback.reconciliation.redaction === null
+          ? null
+          : JSON.stringify(rollback.reconciliation.redaction),
         rollback.reconciliation.id,
       );
       const restoreLessonSnapshot = this.db.prepare(
@@ -1450,14 +1532,15 @@ export class LearningStore {
           rollback.lesson.id,
         );
       }
-      if (rollback.runGuardrail) {
-        this.db.prepare(
-          `UPDATE distillation_runs
-           SET guardrail_markdown = ?
-           WHERE id = ?`,
-        ).run(
-          rollback.runGuardrail.guardrailMarkdown,
-          rollback.runGuardrail.runId,
+      const restoreGuardrail = this.db.prepare(
+        `UPDATE distillation_runs
+         SET guardrail_markdown = ?
+         WHERE id = ?`,
+      );
+      for (const guardrail of rollback.runGuardrails) {
+        restoreGuardrail.run(
+          guardrail.guardrailMarkdown,
+          guardrail.runId,
         );
       }
       const restoreDecisionSnapshot = this.db.prepare(
@@ -1498,10 +1581,11 @@ export class LearningStore {
     lesson: LessonRecord,
     provenance: {
       commit: string;
-      path: string | null;
-      anchor: string | null;
-      contentHash: string | null;
+      path: string;
+      anchor: string;
+      contentHash: string;
     },
+    targets: ReconciliationRedactionTarget[],
   ): void {
     const candidates = [
       lesson.proposedMarkdown,
@@ -1555,54 +1639,106 @@ export class LearningStore {
       }), row.run_id, lesson.id);
     }
 
-    if (!lesson.distillationRunId) return;
-    const run = this.db.prepare<[string], {
+    const getRun = this.db.prepare<[string], {
       guardrail_markdown: string | null;
     }>(
       `SELECT guardrail_markdown
        FROM distillation_runs
        WHERE id = ?`,
-    ).get(lesson.distillationRunId);
-    if (run?.guardrail_markdown !== null && run !== undefined) {
-      this.db.prepare(
-        `UPDATE distillation_runs
-         SET guardrail_markdown = ?
-         WHERE id = ?`,
-      ).run(
-        redactCandidateText(
-          run.guardrail_markdown,
-          candidates,
-          JSON.stringify(repositoryReference),
-        ),
-        lesson.distillationRunId,
-      );
-    }
-
-    const decisionSnapshots = this.db.prepare<[string], {
+    );
+    const updateGuardrail = this.db.prepare(
+      `UPDATE distillation_runs
+       SET guardrail_markdown = ?
+       WHERE id = ?`,
+    );
+    const getDecisions = this.db.prepare<[string], {
       decision_id: string;
       snapshot_json: string;
     }>(
       `SELECT decision_id, snapshot_json
        FROM distillation_run_decisions
-       WHERE run_id = ?`,
-    ).all(lesson.distillationRunId);
+       WHERE run_id = ?
+       ORDER BY ordinal`,
+    );
     const updateDecision = this.db.prepare(
       `UPDATE distillation_run_decisions
        SET snapshot_json = ?
        WHERE run_id = ? AND decision_id = ?`,
     );
-    for (const row of decisionSnapshots) {
-      const snapshot = JSON.parse(row.snapshot_json) as unknown;
-      updateDecision.run(
-        JSON.stringify(redactCandidateValue(
-          snapshot,
-          candidates,
-          repositoryReference,
-        )),
-        lesson.distillationRunId,
-        row.decision_id,
-      );
+    for (const target of targets) {
+      const run = getRun.get(target.runId);
+      if (run?.guardrail_markdown !== null && run !== undefined) {
+        updateGuardrail.run(
+          redactCandidateText(
+            run.guardrail_markdown,
+            candidates,
+            JSON.stringify(repositoryReference),
+          ),
+          target.runId,
+        );
+      }
+      for (const row of getDecisions.all(target.runId)) {
+        const snapshot = JSON.parse(row.snapshot_json) as unknown;
+        updateDecision.run(
+          JSON.stringify(redactCandidateValue(
+            snapshot,
+            candidates,
+            repositoryReference,
+          )),
+          target.runId,
+          row.decision_id,
+        );
+      }
     }
+  }
+
+  private pendingReconciliationRedaction(
+    lesson: LessonRecord,
+    repositoryProvenance: {
+      commit: string;
+      path: string;
+      anchor: string;
+      contentHash: string;
+    },
+  ): ReconciliationRedaction {
+    return {
+      state: 'pending',
+      targets: this.redactionTargetsForLesson(lesson),
+      candidates: [...new Set([
+        lesson.proposedMarkdown,
+        lesson.reviewedMarkdown,
+      ].filter((candidate): candidate is string =>
+        candidate !== null && candidate !== ''))],
+      repositoryProvenance,
+    };
+  }
+
+  private redactionTargetsForLesson(
+    lesson: LessonRecord,
+  ): ReconciliationRedactionTarget[] {
+    return this.db.prepare<
+      [string | null, string, string | null],
+      { id: string; operation_id: string | null }
+    >(
+      `SELECT runs.id, runs.operation_id
+       FROM distillation_runs AS runs
+       WHERE runs.id = ?
+          OR EXISTS (
+            SELECT 1
+            FROM distillation_run_lessons AS snapshots
+            WHERE snapshots.run_id = runs.id
+              AND snapshots.lesson_id = ?
+          )
+       ORDER BY CASE WHEN runs.id = ? THEN 0 ELSE 1 END,
+                runs.created_at, runs.rowid`,
+    ).all(
+      lesson.distillationRunId,
+      lesson.id,
+      lesson.distillationRunId,
+    ).map((run) => ({
+      runId: run.id,
+      operationId: run.operation_id,
+    }));
   }
 
   private captureReconciliationVerificationRollback(
@@ -1610,6 +1746,7 @@ export class LearningStore {
     reconciliation: LessonReconciliationRecord,
     repositoryCommit: string,
   ): ReconciliationVerificationRollback {
+    const targets = this.redactionTargetsForLesson(lesson);
     const lessonSnapshots = this.db.prepare<[string], {
       run_id: string;
       snapshot_json: string;
@@ -1622,32 +1759,39 @@ export class LearningStore {
       runId: snapshot.run_id,
       snapshotJson: snapshot.snapshot_json,
     }));
-    const runGuardrail = lesson.distillationRunId
-      ? this.db.prepare<[string], {
-          id: string;
-          guardrail_markdown: string | null;
-        }>(
-          `SELECT id, guardrail_markdown
-           FROM distillation_runs
-           WHERE id = ?`,
-        ).get(lesson.distillationRunId)
-      : undefined;
-    const decisionSnapshots = lesson.distillationRunId
-      ? this.db.prepare<[string], {
-          run_id: string;
-          decision_id: string;
-          snapshot_json: string;
-        }>(
-          `SELECT run_id, decision_id, snapshot_json
-           FROM distillation_run_decisions
-           WHERE run_id = ?
-           ORDER BY ordinal`,
-        ).all(lesson.distillationRunId).map((snapshot) => ({
+    const getRunGuardrail = this.db.prepare<[string], {
+      id: string;
+      guardrail_markdown: string | null;
+    }>(
+      `SELECT id, guardrail_markdown
+       FROM distillation_runs
+       WHERE id = ?`,
+    );
+    const runGuardrails = targets.flatMap(({ runId }) => {
+      const run = getRunGuardrail.get(runId);
+      return run
+        ? [{
+            runId: run.id,
+            guardrailMarkdown: run.guardrail_markdown,
+          }]
+        : [];
+    });
+    const getDecisionSnapshots = this.db.prepare<[string], {
+      run_id: string;
+      decision_id: string;
+      snapshot_json: string;
+    }>(
+      `SELECT run_id, decision_id, snapshot_json
+       FROM distillation_run_decisions
+       WHERE run_id = ?
+       ORDER BY ordinal`,
+    );
+    const decisionSnapshots = targets.flatMap(({ runId }) =>
+      getDecisionSnapshots.all(runId).map((snapshot) => ({
           runId: snapshot.run_id,
           decisionId: snapshot.decision_id,
           snapshotJson: snapshot.snapshot_json,
-        }))
-      : [];
+        })));
     return {
       repositoryCommit,
       lesson,
@@ -1657,12 +1801,7 @@ export class LearningStore {
         : null,
       reconciliation,
       lessonSnapshots,
-      runGuardrail: runGuardrail
-        ? {
-            runId: runGuardrail.id,
-            guardrailMarkdown: runGuardrail.guardrail_markdown,
-          }
-        : null,
+      runGuardrails,
       decisionSnapshots,
     };
   }
@@ -1815,7 +1954,21 @@ function reconciliationFrom(
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     verifiedAt: row.verified_at,
+    redaction: reconciliationRedactionFrom(row),
   };
+}
+
+function reconciliationRedactionFrom(
+  row: ReconciliationRow,
+): ReconciliationRedaction | null {
+  if (row.redaction_state === null || row.redaction_json === null) return null;
+  const redaction = JSON.parse(row.redaction_json) as ReconciliationRedaction;
+  if (redaction.state !== row.redaction_state) {
+    throw new Error(
+      `lesson reconciliation redaction state mismatch: ${row.id}`,
+    );
+  }
+  return redaction;
 }
 
 function validatorAttemptFrom(

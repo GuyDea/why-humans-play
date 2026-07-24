@@ -95,7 +95,7 @@ afterEach(() => {
 });
 
 describe('LearningStore', () => {
-  it('creates the complete v12 learning schema from every store constructor', () => {
+  it('creates the complete v13 learning schema from every store constructor', () => {
     const dbFile = databaseFile();
     seedDraft(dbFile);
     openLearningStore(dbFile);
@@ -109,7 +109,7 @@ describe('LearningStore', () => {
     const version = inspected.pragma('user_version', { simple: true });
     inspected.close();
 
-    expect(version).toBe(12);
+    expect(version).toBe(13);
     expect(tables).toEqual(expect.arrayContaining([
       'decision_events',
       'decision_notes',
@@ -242,6 +242,7 @@ describe('LearningStore', () => {
       createdAt: '2026-07-24T08:30:00.000Z',
       updatedAt: '2026-07-24T08:30:00.000Z',
       verifiedAt: null,
+      redaction: null,
     });
     expect(() => store.createReconciliation({
       id: 'reconcile-2',
@@ -258,6 +259,7 @@ describe('LearningStore', () => {
       createdAt: '2026-07-24T08:31:00.000Z',
       updatedAt: '2026-07-24T08:31:00.000Z',
       verifiedAt: null,
+      redaction: null,
     })).toThrow(/unique/i);
     const application = {
       operationId: 'jobs:operation-1',
@@ -358,6 +360,7 @@ describe('LearningStore', () => {
         createdAt: '2026-07-24T08:30:00.000Z',
         updatedAt: '2026-07-24T08:30:00.000Z',
         verifiedAt: null,
+        redaction: null,
       },
       updatedAt: '2026-07-24T08:30:00.000Z',
     });
@@ -419,6 +422,13 @@ describe('LearningStore', () => {
       state: 'verified',
       preparedMarkdown: '',
       preparedHead: 'prepared-head',
+      redaction: {
+        state: 'pending',
+        targets: [{
+          runId: 'run-with-shadow',
+          operationId: 'distill-operation',
+        }],
+      },
     });
     expect(store.getDistillationRun('run-with-shadow')?.lessons).toEqual([{
       lessonId: 'lesson-1',
@@ -477,6 +487,7 @@ describe('LearningStore', () => {
         createdAt: '2026-07-24T08:30:00.000Z',
         updatedAt: '2026-07-24T08:30:00.000Z',
         verifiedAt: null,
+        redaction: null,
       });
     }
     const verification = {

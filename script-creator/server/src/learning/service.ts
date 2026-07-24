@@ -837,7 +837,8 @@ export class LearningService {
           `lesson reconciliation verification conflict: ${resumeKey}`,
         );
       }
-      return this.lessonDetail(lesson);
+      this.resumeVerifiedRedaction(lesson, reconciliation, null);
+      return this.lessonDetail(this.store.getLesson(lesson.id)!);
     }
     if (!this.repositoryRootForDraft) {
       throw new Error('selected repository workspace is unavailable');
@@ -874,19 +875,12 @@ export class LearningService {
       repositoryContentHash: pointer?.contentHash ?? null,
       updatedAt: this.now(),
     });
-    if (reconciliation.kind !== 'retire' && pointer !== null) {
-      this.redactVerifiedDurableLesson(
-        lesson,
-        {
-          commit: verified.commit,
-          path: pointer.path,
-          anchor: pointer.anchor,
-          contentHash: pointer.contentHash,
-        },
-        result.rollback,
-      );
-    }
-    return this.lessonDetail(result.lesson);
+    this.resumeVerifiedRedaction(
+      lesson,
+      result.reconciliation,
+      result.rollback,
+    );
+    return this.lessonDetail(this.store.getLesson(result.lesson.id)!);
   }
 
   verifyExistingDoctrine(
@@ -911,6 +905,20 @@ export class LearningService {
     }
     const lesson = this.store.getLesson(reconciliation.lessonId);
     if (!lesson) throw new Error(`lesson not found: ${reconciliation.lessonId}`);
+    if (reconciliation.state === 'verified') {
+      if (
+        reconciliation.repositoryCommit !== input.commit
+        || lesson.repositoryPath !== input.path
+        || lesson.repositoryAnchor !== input.anchor
+        || lesson.repositoryContentHash !== input.contentHash
+      ) {
+        throw new Error(
+          `lesson reconciliation verification conflict: ${resumeKey}`,
+        );
+      }
+      this.resumeVerifiedRedaction(lesson, reconciliation, null);
+      return this.lessonDetail(this.store.getLesson(lesson.id)!);
+    }
     if (!this.repositoryRootForDraft) {
       throw new Error('selected repository workspace is unavailable');
     }
@@ -952,17 +960,12 @@ export class LearningService {
       repositoryContentHash: pointer.contentHash,
       updatedAt: this.now(),
     });
-    this.redactVerifiedDurableLesson(
+    this.resumeVerifiedRedaction(
       lesson,
-      {
-        commit: verified.commit,
-        path: pointer.path,
-        anchor: pointer.anchor,
-        contentHash: pointer.contentHash,
-      },
+      result.reconciliation,
       result.rollback,
     );
-    return this.lessonDetail(result.lesson);
+    return this.lessonDetail(this.store.getLesson(result.lesson.id)!);
   }
 
   activeEpisodeLessons(draftId: string): ActiveEpisodeLesson[] {
@@ -1264,6 +1267,19 @@ export class LearningService {
       this.reconcileDistillation(run.id));
   }
 
+  recoverPendingRedactions(): LessonDetail[] {
+    return this.store.listPendingReconciliationRedactions().map(
+      (reconciliation) => {
+        const lesson = this.store.getLesson(reconciliation.lessonId);
+        if (!lesson) {
+          throw new Error(`lesson not found: ${reconciliation.lessonId}`);
+        }
+        this.resumeVerifiedRedaction(lesson, reconciliation, null);
+        return this.lessonDetail(this.store.getLesson(lesson.id)!);
+      },
+    );
+  }
+
   private lessonDetail(lesson: LessonRecord): LessonDetail {
     const evidenceIds = this.store.listLessonEvidence(lesson.id);
     const evidence = evidenceIds.map((id): LessonEvidenceView => {
@@ -1336,6 +1352,7 @@ export class LearningService {
       createdAt: timestamp,
       updatedAt: timestamp,
       verifiedAt: null,
+      redaction: null,
     };
   }
 
@@ -1616,6 +1633,11 @@ export class LearningService {
 
   private redactAppliedDurableLesson(
     lesson: LessonRecord,
+    target: {
+      runId: string;
+      operationId: string;
+    },
+    candidates: string[],
     repositoryProvenance: {
       commit: string;
       path: string;
@@ -1623,46 +1645,50 @@ export class LearningService {
       contentHash: string;
     },
   ): void {
-    if (lesson.distillationRunId === null) return;
-    const run = this.store.getDistillationRun(lesson.distillationRunId);
-    if (!run?.operationId) {
-      throw new Error(
-        `durable lesson ${lesson.id} has no proposing operation provenance`,
-      );
-    }
     const redact = this.operationService?.redactAppliedDurableLesson;
     if (!redact) {
       throw new Error(
         'durable lesson operation redaction is not configured',
       );
     }
-    redact.call(this.operationService, run.operationId, {
+    redact.call(this.operationService, target.operationId, {
       lessonId: lesson.id,
-      candidates: [...new Set([
-        lesson.proposedMarkdown,
-        lesson.reviewedMarkdown,
-      ].filter((candidate): candidate is string => candidate !== null))],
+      candidates,
       repositoryProvenance,
       sourceProvenance: {
-        distillationRunId: run.id,
+        distillationRunId: target.runId,
       },
     });
   }
 
-  private redactVerifiedDurableLesson(
+  private resumeVerifiedRedaction(
     lesson: LessonRecord,
-    repositoryProvenance: {
-      commit: string;
-      path: string;
-      anchor: string;
-      contentHash: string;
-    },
+    reconciliation: LessonReconciliationRecord,
     rollback: ReconciliationVerificationRollback | null,
   ): void {
+    const redaction = reconciliation.redaction;
+    if (redaction === null || redaction.state === 'done') return;
+    let completedOperations = 0;
     try {
-      this.redactAppliedDurableLesson(lesson, repositoryProvenance);
+      for (const target of redaction.targets) {
+        if (target.operationId === null) continue;
+        this.redactAppliedDurableLesson(
+          lesson,
+          {
+            runId: target.runId,
+            operationId: target.operationId,
+          },
+          redaction.candidates,
+          redaction.repositoryProvenance,
+        );
+        completedOperations += 1;
+      }
+      this.store.completeReconciliationRedaction(
+        reconciliation.resumeKey,
+        this.now(),
+      );
     } catch (error) {
-      if (rollback === null) throw error;
+      if (rollback === null || completedOperations > 0) throw error;
       try {
         this.store.rollbackReconciliationVerification(rollback);
       } catch (rollbackError) {

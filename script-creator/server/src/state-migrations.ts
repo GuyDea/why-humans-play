@@ -625,6 +625,33 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
       seedBackfilledLearningSessions(db, 'v12');
     },
   },
+  {
+    version: 13,
+    owner: 'learning',
+    name: 'durable-reconciliation-redaction',
+    apply: (db) => {
+      ensureColumn(
+        db,
+        'lesson_reconciliations',
+        'redaction_state',
+        `ALTER TABLE lesson_reconciliations
+         ADD COLUMN redaction_state TEXT
+         CHECK (redaction_state IN ('pending', 'done'))`,
+      );
+      ensureColumn(
+        db,
+        'lesson_reconciliations',
+        'redaction_json',
+        'ALTER TABLE lesson_reconciliations ADD COLUMN redaction_json TEXT',
+      );
+      db.exec(
+        `CREATE INDEX IF NOT EXISTS
+           lesson_reconciliations_pending_redaction_idx
+         ON lesson_reconciliations(redaction_state)
+         WHERE state = 'verified' AND redaction_state = 'pending'`,
+      );
+    },
+  },
 ];
 
 export const LATEST_STATE_SCHEMA_VERSION =

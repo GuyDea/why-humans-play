@@ -17,6 +17,7 @@ import { JobStore } from '../../src/job-store.js';
 import { LearningService } from '../../src/learning/service.js';
 import { LearningStore } from '../../src/learning/store.js';
 import { OperationService } from '../../src/operations/service.js';
+import { verifyReconciliationCommit } from '../../src/repo/git.js';
 import type { JobSupervisor } from '../../src/supervisor.js';
 import { TopicStore } from '../../src/topics/store.js';
 import {
@@ -488,24 +489,31 @@ describe('lesson review HTTP API', () => {
       const reconciliations =
         fixture.learningStore.listLessonReconciliations('lesson-durable');
       const databaseTables = readDatabaseTables(fixture.dbFile);
-      const artifactFiles = readdirSync(fixture.jobDir)
-        .map((name) => readFileSync(join(fixture.jobDir, name), 'utf8'));
-      const apiResponses = await Promise.all([
+      const artifactFiles = fixture.jobDirs.flatMap((jobDir) =>
+        readdirSync(jobDir)
+          .map((name) => readFileSync(join(jobDir, name), 'utf8'))
+      );
+      const apiUrls = [
         '/api/distillations/run-1',
+        '/api/distillations/run-later',
         '/api/drafts/draft-1/learning-sessions',
         '/api/drafts/draft-1/decisions',
         '/api/ops',
         '/api/ops/distill-operation',
         '/api/ops/distill-operation/result',
-      ].map((url) => fixture.app.inject({
-        method: 'GET',
-        url,
-        headers: AUTH,
-      })));
+        '/api/ops/later-distill-operation',
+        '/api/ops/later-distill-operation/result',
+      ];
+      const apiResponses = await Promise.all(apiUrls.map((url) =>
+        fixture.app.inject({
+          method: 'GET',
+          url,
+          headers: AUTH,
+        })));
       for (const response of apiResponses) {
         expect(response.statusCode, response.body).toBe(200);
       }
-      const result = apiResponses.at(-1)!;
+      const result = apiResponses[6]!;
       const appStorage = JSON.stringify({
         run,
         lesson,
@@ -541,6 +549,119 @@ describe('lesson review HTTP API', () => {
       await fixture.app.close();
     },
   );
+
+  it('resumes a persisted verified redaction after service restart', async () => {
+    const candidate = 'Keep every restarted reveal concrete.';
+    const fixture = storedCandidateReconciliationFixture({
+      proposed: candidate,
+      reviewed: candidate,
+    });
+    persistVerifiedCandidateWithoutRedaction(
+      fixture,
+      candidate,
+      'persist pending redaction',
+    );
+
+    expect(fixture.learningStore.getLesson('lesson-durable')).toMatchObject({
+      state: 'applied',
+      proposedMarkdown: null,
+      reviewedMarkdown: null,
+    });
+    expect(fixture.learningStore.getReconciliationByResumeKey(
+      fixture.resumeKey,
+    )).toMatchObject({
+      state: 'verified',
+      redaction: {
+        state: 'pending',
+        targets: [
+          {
+            runId: 'run-1',
+            operationId: 'distill-operation',
+          },
+          {
+            runId: 'run-later',
+            operationId: 'later-distill-operation',
+          },
+        ],
+      },
+    });
+    expect(JSON.stringify(operationArtifactSnapshot(fixture))).toContain(
+      candidate,
+    );
+
+    const restarted = fixture.recreateLearningService();
+    restarted.service.recoverPendingRedactions();
+
+    expect(restarted.learningStore.getReconciliationByResumeKey(
+      fixture.resumeKey,
+    )).toMatchObject({
+      state: 'verified',
+      redaction: {
+        state: 'done',
+        targets: [
+          {
+            runId: 'run-1',
+            operationId: 'distill-operation',
+          },
+          {
+            runId: 'run-later',
+            operationId: 'later-distill-operation',
+          },
+        ],
+      },
+    });
+    const storage = JSON.stringify({
+      databaseTables: readDatabaseTables(fixture.dbFile),
+      artifacts: operationArtifactSnapshot({
+        jobDirs: fixture.jobDirs,
+        jobStore: restarted.jobStore,
+      }),
+    });
+    expect(storage).not.toContain(candidate);
+    await fixture.app.close();
+  });
+
+  it('resumes a persisted pending redaction on verification retry', async () => {
+    const candidate = 'Keep every retried reveal concrete.';
+    const fixture = storedCandidateReconciliationFixture({
+      proposed: candidate,
+      reviewed: candidate,
+    });
+    const commit = persistVerifiedCandidateWithoutRedaction(
+      fixture,
+      candidate,
+      'retry pending redaction',
+    );
+
+    const retried = await verifyCommit(fixture, commit);
+
+    expect(retried.statusCode, retried.body).toBe(200);
+    expect(retried.json()).toMatchObject({
+      state: 'applied',
+      reconciliation: {
+        state: 'verified',
+        redaction: {
+          state: 'done',
+          targets: [
+            {
+              runId: 'run-1',
+              operationId: 'distill-operation',
+            },
+            {
+              runId: 'run-later',
+              operationId: 'later-distill-operation',
+            },
+          ],
+        },
+      },
+    });
+    const storage = JSON.stringify({
+      databaseTables: readDatabaseTables(fixture.dbFile),
+      artifacts: operationArtifactSnapshot(fixture),
+    });
+    expect(storage).not.toContain(candidate);
+    await fixture.app.close();
+  });
 
   it('refuses a valid commit while prepared without touching operation artifacts', async () => {
     const candidate = 'Keep every prepared reveal concrete.';
@@ -948,13 +1069,108 @@ function storedCandidateReconciliationFixture(input: {
   );
   snapshots.close();
 
+  const laterJobDir = join(root, 'jobs', 'later-distill-job');
+  mkdirSync(laterJobDir, { recursive: true });
+  const laterPrompt =
+    `$writing-whp-youtube-scripts\nOperation: Distill session lessons\nInputs: ${
+      JSON.stringify({
+        session: {
+          id: 'session-1',
+          draft_id: 'draft-1',
+          decisions: [{
+            id: 'decision-1',
+            candidate_echo: input.reviewed,
+          }],
+        },
+        existing_lessons: [{
+          id: 'lesson-durable',
+          classification: 'durable',
+          state: 'proposed',
+          lesson_markdown: input.reviewed,
+          rationale_markdown: `Later frozen rationale repeats ${input.reviewed}`,
+        }],
+      })
+    }`;
+  const laterEnvelope = {
+    jobId: 'later-distill-job',
+    prompt: laterPrompt,
+    cwd: repoRoot,
+    sandbox: 'read-only' as const,
+  };
+  const laterResult = {
+    status: 'complete',
+    lessons: [],
+    guardrail_markdown: `Later guardrail repeats ${input.reviewed}`,
+  };
+  writeFileSync(
+    join(laterJobDir, 'envelope.json'),
+    JSON.stringify(laterEnvelope),
+  );
+  writeFileSync(
+    join(laterJobDir, 'final-message.txt'),
+    JSON.stringify(laterResult),
+  );
+  writeFileSync(
+    join(laterJobDir, 'events.jsonl'),
+    JSON.stringify({
+      type: 'item.completed',
+      item: { type: 'agent_message', text: JSON.stringify(laterResult) },
+    }),
+  );
+  writeFileSync(
+    join(laterJobDir, 'result-storage.json'),
+    JSON.stringify({ laterCandidate: input.reviewed }),
+  );
+  jobStore.createOperationWithJob({
+    id: 'later-distill-operation',
+    name: 'distill',
+    draftId: 'draft-1',
+    deadlineAt: '2026-07-24T10:30:00.000Z',
+    createdAt: '2026-07-24T08:03:00.000Z',
+  }, laterEnvelope, laterJobDir);
+  jobStore.setState('later-distill-job', 'completed');
+  learningStore.createDistillationRun({
+    id: 'run-later',
+    draftId: 'draft-1',
+    sessionId: 'session-1',
+    trigger: 'on-demand',
+    state: 'completed',
+    operationId: 'later-distill-operation',
+    resumeKey: 'later-distill-resume',
+    guardrailMarkdown: laterResult.guardrail_markdown,
+    error: null,
+    createdAt: '2026-07-24T08:03:00.000Z',
+    updatedAt: '2026-07-24T08:04:00.000Z',
+    decisions: [{
+      decisionId: 'decision-1',
+      snapshot: {
+        id: 'decision-1',
+        candidateEcho: input.reviewed,
+      },
+    }],
+    lessons: [{
+      lessonId: 'lesson-durable',
+      snapshot: {
+        id: 'lesson-durable',
+        classification: 'durable',
+        state: 'proposed',
+        lesson_markdown: input.reviewed,
+        rationale_markdown:
+          `Later frozen lesson repeats ${input.reviewed}`,
+      },
+    }],
+  });
+
   const service = new LearningService({
     store: learningStore,
     documentStore,
     topicStore,
     operationService,
     operationEvidence: (operationId) => {
-      if (operationId !== 'distill-operation') return null;
+      if (
+        operationId !== 'distill-operation'
+        && operationId !== 'later-distill-operation'
+      ) return null;
       const operation = operationService.get(operationId);
       return {
         operationId,
@@ -1014,10 +1230,52 @@ function storedCandidateReconciliationFixture(input: {
   return {
     app,
     dbFile,
-    jobDir,
+    jobDirs: [jobDir, laterJobDir],
     jobStore,
     learningStore,
     repoRoot,
+    recreateLearningService: () => {
+      const restartedJobStore = new JobStore(dbFile);
+      const restartedDocumentStore = new DocumentStore(dbFile);
+      const restartedLearningStore = new LearningStore(dbFile);
+      const restartedTopicStore = new TopicStore(dbFile);
+      jobStores.push(restartedJobStore);
+      documentStores.push(restartedDocumentStore);
+      learningStores.push(restartedLearningStore);
+      topicStores.push(restartedTopicStore);
+      const restartedOperationService = new OperationService({
+        supervisor: {
+          events: () => [],
+          cancel: () => undefined,
+        } as unknown as JobSupervisor,
+        store: restartedJobStore,
+      });
+      operationServices.push(restartedOperationService);
+      return {
+        jobStore: restartedJobStore,
+        learningStore: restartedLearningStore,
+        service: new LearningService({
+          store: restartedLearningStore,
+          documentStore: restartedDocumentStore,
+          topicStore: restartedTopicStore,
+          operationService: restartedOperationService,
+          operationEvidence: (operationId) => {
+            const operation = restartedOperationService.get(operationId);
+            return {
+              operationId,
+              draftId: operation.draftId,
+              operation: operation.operation,
+              state: operation.state,
+              envelope: restartedJobStore.operationEnvelope(operationId),
+              inputs: restartedOperationService.inputs(operationId),
+              result: restartedOperationService.result(operationId),
+            };
+          },
+          repositoryRootForDraft: () => repoRoot,
+          now: () => '2026-07-24T09:02:00.000Z',
+        }),
+      };
+    },
     redactionStateObserved: () => redactionStateObserved,
     resumeKey,
   };
@@ -1026,18 +1284,21 @@ function storedCandidateReconciliationFixture(input: {
 function operationArtifactSnapshot(
   fixture: Pick<
     ReturnType<typeof storedCandidateReconciliationFixture>,
-    'jobDir' | 'jobStore'
+    'jobDirs' | 'jobStore'
   >,
 ) {
   return {
     envelopes: fixture.jobStore.operationAttempts('distill-operation')
+      .concat(fixture.jobStore.operationAttempts('later-distill-operation'))
       .map(({ envelopeJson }) => envelopeJson),
-    files: readdirSync(fixture.jobDir)
-      .sort()
-      .map((name) => ({
-        name,
-        content: readFileSync(join(fixture.jobDir, name), 'utf8'),
-      })),
+    files: fixture.jobDirs.flatMap((jobDir) =>
+      readdirSync(jobDir)
+        .sort()
+        .map((name) => ({
+          name,
+          content: readFileSync(join(jobDir, name), 'utf8'),
+        }))
+    ),
   };
 }
 
@@ -1079,4 +1340,43 @@ function verifyCommit(
     headers: AUTH,
     payload: { commit },
   });
+}
+
+function persistVerifiedCandidateWithoutRedaction(
+  fixture: ReturnType<typeof storedCandidateReconciliationFixture>,
+  candidate: string,
+  message: string,
+): string {
+  writeFileSync(
+    join(fixture.repoRoot, 'DECISIONS.md'),
+    '# Decisions\n\n'
+      + `- ${candidate}\n`
+      + `Reconciliation: ${fixture.resumeKey}\n`,
+  );
+  writeFileSync(
+    join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),
+    `# Steering\n\n## Reveals\n\n${candidate}\n`,
+  );
+  git(fixture.repoRoot, [
+    'add',
+    '--',
+    'DECISIONS.md',
+    'whp-youtube/STEERING.md',
+  ]);
+  git(fixture.repoRoot, ['commit', '-m', message]);
+  const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+  const verified = verifyReconciliationCommit(fixture.repoRoot, commit);
+  const pointer = verified.doctrinePointers[0]!;
+  fixture.learningStore.verifyReconciliation(fixture.resumeKey, {
+    repositoryCommit: verified.commit,
+    reconciliationTokens: verified.reconciliationTokens,
+    paths: verified.changedPaths,
+    anchors: [pointer.anchor],
+    contentHashes: [pointer.contentHash],
+    repositoryPath: pointer.path,
+    repositoryAnchor: pointer.anchor,
+    repositoryContentHash: pointer.contentHash,
+    updatedAt: '2026-07-24T09:01:00.000Z',
+  });
+  return commit;
 }

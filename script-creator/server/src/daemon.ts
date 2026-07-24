@@ -198,6 +198,7 @@ export function createDaemonContext(
       },
     });
     learningService.recoverDistillations();
+    learningService.recoverPendingRedactions();
     for (const operation of activeOperationService.list()) {
       try {
         learningService.recoverOperationLessons(

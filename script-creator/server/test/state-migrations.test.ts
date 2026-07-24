@@ -60,8 +60,13 @@ describe('shared state migration registry', () => {
         owner: 'learning',
         name: 'causal-binding-and-backfill-repair',
       },
+      {
+        version: 13,
+        owner: 'learning',
+        name: 'durable-reconciliation-redaction',
+      },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(12);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(13);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -132,7 +137,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v12 schema for a fresh database', () => {
+  it('creates the complete v13 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -215,9 +220,24 @@ describe('shared state migration registry', () => {
       'created_at',
       'resolved_at',
     ]);
-    expect(columns(inspected, 'lesson_reconciliations')).toContain(
+    expect(columns(inspected, 'lesson_reconciliations')).toEqual([
+      'id',
+      'lesson_id',
+      'kind',
+      'state',
+      'resume_key',
+      'prepared_markdown',
+      'repository_commit',
+      'paths_json',
+      'anchors_json',
+      'content_hashes_json',
+      'created_at',
+      'updated_at',
+      'verified_at',
       'prepared_head',
-    );
+      'redaction_state',
+      'redaction_json',
+    ]);
     expect(columns(inspected, 'package_tests')).toEqual([
       'id',
       'idea_id',
@@ -445,7 +465,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('does not reapply v10, v11, or v12 to an already-v12 database', () => {
+  it('does not reapply v10-v13 to an already-v13 database', () => {
     const dbFile = simulatedV9Database();
     documentStores.push(new DocumentStore(dbFile));
     documentStores.pop()!.close();
@@ -455,6 +475,8 @@ describe('shared state migration registry', () => {
     const applyV11 = vi.spyOn(v11, 'apply');
     const v12 = STATE_MIGRATIONS.find(({ version }) => version === 12)!;
     const applyV12 = vi.spyOn(v12, 'apply');
+    const v13 = STATE_MIGRATIONS.find(({ version }) => version === 13)!;
+    const applyV13 = vi.spyOn(v13, 'apply');
 
     documentStores.push(new DocumentStore(dbFile));
     topicStores.push(new TopicStore(dbFile));
@@ -462,6 +484,7 @@ describe('shared state migration registry', () => {
     expect(apply).not.toHaveBeenCalled();
     expect(applyV11).not.toHaveBeenCalled();
     expect(applyV12).not.toHaveBeenCalled();
+    expect(applyV13).not.toHaveBeenCalled();
   });
 
   it('repairs a closed stranded v10 session and distills its unfrozen backfill', () => {
@@ -529,7 +552,7 @@ describe('shared state migration registry', () => {
     documentStores.push(new DocumentStore(dbFile));
 
     const inspected = new Database(dbFile, { readonly: true });
-    expect(inspected.pragma('user_version', { simple: true })).toBe(12);
+    expect(inspected.pragma('user_version', { simple: true })).toBe(13);
     expect(inspected.prepare<[], { start_cursor: number }>(
       `SELECT start_cursor
        FROM learning_sessions

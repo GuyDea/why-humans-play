@@ -101,7 +101,7 @@ afterEach(() => {
 });
 
 describe('TopicStore', () => {
-  it('migrates a v2 state database through the shared v12 registry', () => {
+  it('migrates a v2 state database through the shared v13 registry', () => {
     const dbFile = databaseFile();
     const documents = new DocumentStore(dbFile);
     documentStores.push(documents);
@@ -124,7 +124,7 @@ describe('TopicStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(12);
+    expect(version).toBe(13);
     expect(ideas).toEqual([
       'id',
       'text',
