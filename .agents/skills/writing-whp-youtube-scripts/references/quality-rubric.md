@@ -97,7 +97,9 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   personal input is in scope, the work makes one explicit personal decision, uses only
   authentic supplied material, and the sequence performs necessary narrative work or
   gives a specific reason for `OMIT`. Adjacent cases state the first case's exact
-  takeaway, why it matters, the remaining question, and why the next evidence is needed.
+  takeaway, why it matters, the remaining question, and why the next evidence is needed —
+  voiced in plain words, never implied through a bare pivot such as “So:” plus a new
+  question.
   Advice experiments make the case, advice, participant decision, label manipulation, and
   measured outcome understandable on first hearing. Each story uses the fewest distinct
   inputs, objects, roles, and counts that preserve its causal truth; source detail with no
@@ -139,7 +141,12 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   judgment, emotionally loaded everyday words, and brutal humor without weakening factual
   support or turning a person's inherent worth or vulnerability into the punchline.
   Research-administration language gives way to ordinary spoken wording whenever the
-  simpler wording preserves the same claim.
+  simpler wording preserves the same claim. Every factual sentence is a complete spoken
+  clause the presenter could plausibly say unscripted while walking: no colon-label
+  fragments, no line that depends on punctuation to be understood, and no idiom or
+  compressed metaphor a non-native listener must decode. Jokes are earned, not quota-fed;
+  a joke that sounds constructed rather than spontaneous costs this criterion its top
+  score.
 
 Spoken readability is a non-compensable delivery gate:
 

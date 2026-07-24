@@ -97,6 +97,10 @@ Do not let the boundary become a dead-end disclaimer: the first case must positi
 one part of the argument, and its limit must open the question the next evidence answers.
 Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
 equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
+Voice the logical link in plain words: say what the last case established, what it could
+not establish, and why the next evidence answers that open part. Do not pivot between two
+pieces of evidence with a bare connective — “So:” plus a new question is not a transition.
+If the narration never states how the two ideas connect, the transition fails.
 
 ## Build every story across the complete script
 
@@ -132,6 +136,10 @@ fit the story. Do not march through repeated “Here was…” labels or expose 
 meta-commentary. A transition should explain what changes next, not merely announce the
 section. When a result creates a clean comic opening, add one short punchline that sharpens
 the mechanism, consequence, or AHA; skip it when it competes with the lesson.
+There is no per-beat joke quota. A joke ships only when it maps to the mechanism,
+incentive, or consequence; is transparent to a non-native listener on first hearing; and
+sounds like something a person would spontaneously say aloud. Delete a forced joke rather
+than defending it.
 
 Use the fewest story elements that preserve the causal truth. Remove or collapse technical
 inputs, intermediate objects, roles, and counts when the mechanism remains accurate without
@@ -286,6 +294,13 @@ why it matters here`. A sentence such as ‘Donald Campbell warned’ is incompl
 viewer has not met him; first signal the harsher phenomenon, name Campbell's law, and
 identify Campbell in plain language.
 
+Check audience familiarity before naming any concept. When a term is already mainstream
+for the target audience — research current awareness rather than assuming — acknowledge
+the familiarity (“you've probably heard this called sycophancy”) and add something beyond
+the name. Reserve the reveal structure (“that pattern has a name”) for terms the audience
+plausibly does not know. Never unveil as news a term the script's own earlier narration —
+such as an anticipated-defense line — already put in the viewer's mouth.
+
 ## Open and close specific loops
 
 Write every open loop as a specific unresolved question, contradiction, comparison,
@@ -306,6 +321,28 @@ as a clock that erases setup, referents, causality, humor, or the learning promi
 from an unfinished script.
 
 ## Write and test for speech
+
+Write for the real delivery context: Martin — a non-native English speaker — reads the
+narration aloud, often while walking and talking to the camera, for an audience that
+includes non-native listeners. Every factual sentence is a complete spoken clause with an
+explicit subject. Never narrate facts through colon-label fragments such as “The deal:” or
+“The sneaky part:” — labels with colons are written-prose devices that do not exist in
+speech. No line may depend on punctuation to be understood; if a sentence needs its em
+dash or colon to land, rewrite it as speech. Before keeping any line, test it: would
+Martin plausibly say this, unscripted, to a friend while walking? A line that only works
+as written prose or performed voice-over fails.
+
+When clarity and style pull in opposite directions, clarity wins. Referent completeness,
+locked nouns, counts attached to their nouns, and causal accuracy outrank rhythm,
+compression, punchiness, and humor. A fragment may omit only words recoverable from the
+immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
+result, or manipulation depends on.
+
+Prefer plain international English a non-native listener understands on first hearing.
+Widely understood conversational structures (`Right?`, `Yeah… no.`) are welcome; idioms,
+cultural shorthand, and compressed metaphors that need decoding (`your hunch comes back
+with a doctorate`) are not. A metaphor survives only when its image explains itself
+literally on first hearing.
 
 Write like a smart friend walking the viewer through something surprising, not like a
 paper abstract, conference talk, or legal disclaimer. Use the conversational progression
