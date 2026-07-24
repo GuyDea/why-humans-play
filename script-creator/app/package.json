@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "vitest run"
+    "test": "vitest run",
+    "e2e:plan6": "node --import tsx e2e/plan6-browser-sweep.ts"
   },
   "prettier": {
     "printWidth": 100,
@@ -44,6 +45,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "playwright": "1.61.0",
     "typescript": "~5.9.2",
     "vitest": "^3.0.0",
     "jsdom": "^25.0.0",

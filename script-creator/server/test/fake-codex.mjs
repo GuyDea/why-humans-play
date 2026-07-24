@@ -66,6 +66,9 @@ if (attemptMode === 'bad-schema-output') {
 if (attemptMode === 'generate-architecture') {
   lines = withAgentResult(lines, architectureMarkdown());
 }
+if (attemptMode === 'generate-episode') {
+  lines = withAgentResult(lines, episodeNarrationMarkdown());
+}
 if (
   attemptMode === 'promote'
   || attemptMode === 'promote-invalid-production'
@@ -514,6 +517,8 @@ function plan6Mode(prompt, schemaOutput) {
       return 'review-architecture';
     case 'Rewrite architecture section':
       return 'rewrite-architecture-section';
+    case 'Generate (episode-scale)':
+      return 'generate-episode';
     case 'Promote':
       return process.env.FAKE_PROMOTE_MODE === 'invalid-production'
         ? 'promote-invalid-production'
@@ -571,6 +576,19 @@ function withAgentResult(events, result) {
     event.type === 'item.completed' && event.item?.type === 'agent_message'
       ? { ...event, item: { ...event.item, text: result } }
       : event);
+}
+
+function episodeNarrationMarkdown() {
+  return [
+    '## Beat 1 — The queue opening',
+    '',
+    '> A queue quietly turns waiting into a strategic game.',
+    '',
+    '## Beat 2 — The hidden choice',
+    '',
+    '> Choosing a line is a bet made with incomplete information.',
+    '',
+  ].join('\n');
 }
 
 function architectureHeadings() {
