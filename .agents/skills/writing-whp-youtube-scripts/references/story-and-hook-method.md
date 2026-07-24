@@ -4,6 +4,8 @@
 
 - [Start with the promise and payoff](#start-with-the-promise-and-payoff)
 - [Compare and score three opening candidates](#compare-and-score-three-opening-candidates)
+- [Build every story across the complete script](#build-every-story-across-the-complete-script)
+- [Score the opening candidates](#score-the-opening-candidates)
 - [Build scenes without invention](#build-scenes-without-invention)
 - [Choose story only when it serves the promise](#choose-story-only-when-it-serves-the-promise)
 - [Build a narrative spine from changed understanding](#build-a-narrative-spine-from-changed-understanding)
@@ -30,6 +32,8 @@ Before drafting, establish:
 Require all five to describe the same video. State the useful change in how the
 viewer will see or act. Do not begin with an interesting scene that cannot lead
 directly to that change.
+A complete-episode promise must name both the understanding the viewer will gain and the
+concrete response they will be able to use.
 
 For a problem-led opening with a predictable “not me; I know the tricks” response, use the
 five-move anti-skip intro:
@@ -94,6 +98,29 @@ one part of the argument, and its limit must open the question the next evidence
 Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
 equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
 
+## Build every story across the complete script
+
+Apply these story-construction rules to every beat and developed example in the complete
+script, not only to the opening.
+
+Before a surprising result, state the outcome the viewer should reasonably expect when that
+expectation is necessary to understand why the result matters. Reveal the result in direct
+contrast to that expectation.
+
+After the result, use at most one mechanism-mapped punchline and one precise takeaway before
+moving forward. Do not restate the same result through a stack of analogies, paraphrases,
+and thesis lines.
+
+When consecutive cases prove different parts of the argument, name each case's distinct
+proof job before combining them. The synthesis may combine established findings; it must
+not make either case appear to prove the other case's claim.
+
+Prefer everyday spoken language over research-administration phrases when both preserve the
+same claim.
+
+End each beat once: choose the strongest closing image or joke, state one exact lesson, and
+transition.
+
 Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
 element must earn its place by increasing trust, first-hearing clarity, or magnetism;
 otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified
@@ -154,6 +181,8 @@ and what human behavior the manipulation tested before interpreting the result. 
 every correct-or-incorrect count to its stable noun; never leave the listener guessing
 which item or final outcome was wrong. Separate what the case proves about human response
 from what later evidence proves about AI behavior.
+
+## Score the opening candidates
 
 Score every candidate from 0 to 2 on each criterion:
 

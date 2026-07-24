@@ -989,3 +989,32 @@ completeness are not the same thing.
 `docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
 `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
 ledger. Historical and published scripts remain unchanged.
+
+## 2026-07-24 — Resolve every story result once
+
+**Decision:** Apply the story-construction rules to every beat and developed example in a
+complete script, not only to the intro. When a surprising result depends on a violated
+expectation, state the expected outcome first and reveal the result against it. Resolve the
+result with at most one mechanism-mapped punchline and one precise takeaway, then move
+forward instead of stacking equivalent analogies or thesis lines. Give consecutive cases
+distinct proof jobs before synthesizing them, prefer ordinary spoken language when it
+preserves the claim, and end each beat once. A complete-episode promise must state both the
+understanding the viewer will gain and the concrete response they can use.
+
+**Rationale:** The revised radiologist story was causally understandable, but the audience
+was not told what skepticism should have changed before hearing that it changed nothing.
+The result was then explained repeatedly through an analogy, paraphrases, and thesis lines.
+The opening promise offered the four questions while leaving the new understanding
+implicit, and phrases such as “label of origin” sounded like research administration rather
+than a well-educated friend telling the story.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. `BRAND.md` remains unchanged because its smallest-magnetic-story rule already
+applies to the complete piece; this decision clarifies the channel-level scripting method.

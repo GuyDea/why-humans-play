@@ -202,6 +202,18 @@ without weakening the audience-first test for problem-led growth episodes.
   Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
   equivalent disclaimer. Use the limitation only after the viewer knows why the case
   belongs.
+- **Apply story construction script-wide.** Apply these story-construction rules to every
+  beat and developed example in the complete script, not only to the opening. Before a
+  surprising result, state the outcome the viewer should reasonably expect when that
+  expectation is necessary to understand why the result matters. Reveal the result in
+  direct contrast to that expectation. After the result, use at most one mechanism-mapped
+  punchline and one precise takeaway before moving forward. Do not restate the same result
+  through a stack of analogies, paraphrases, and thesis lines. When consecutive cases prove
+  different parts of the argument, name each case's distinct proof job before combining
+  them. The synthesis may combine established findings; it must not make either case appear
+  to prove the other case's claim. Prefer everyday spoken language over
+  research-administration phrases when both preserve the same claim. End each beat once:
+  choose the strongest closing image or joke, state one exact lesson, and transition.
 - **Tell the smallest magnetic truthful story.** Tell the smallest story that preserves
   trust, causal clarity, and surprise. Every story element must earn its place by increasing
   trust, first-hearing clarity, or magnetism; otherwise cut or collapse it. Open a
@@ -290,6 +302,8 @@ without weakening the audience-first test for problem-led growth episodes.
   to do by the end. A generic "keep watching" tease is not a viewer promise. Write the
   promise itself as a literal learning contract: keep jokes, comic images, metaphors, and
   colorful callbacks out of that sentence even when humor surrounds it.
+  A complete-episode promise must name both the understanding the viewer will gain and the
+  concrete response they will be able to use.
 - **The Vsauce template `[verified]` (steal this exact shape):** question → concrete
   absurdity reframe ("games are weird — why would I invite a goalie to make scoring
   *harder*?") → intellectual anchor (a named idea / researcher). It lands the hook in

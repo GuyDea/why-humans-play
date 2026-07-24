@@ -1511,6 +1511,83 @@ class SkillPackageTests(unittest.TestCase):
                 with self.subTest(source=source_name, contract=contract):
                     self.assertIn(contract, source_text)
 
+    def test_story_rules_apply_script_wide_and_resolve_each_result_once(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Apply these story-construction rules to every beat and developed "
+            "example in the complete script, not only to the opening.",
+            "Before a surprising result, state the outcome the viewer should "
+            "reasonably expect when that expectation is necessary to understand "
+            "why the result matters.",
+            "Reveal the result in direct contrast to that expectation.",
+            "After the result, use at most one mechanism-mapped punchline and one "
+            "precise takeaway before moving forward.",
+            "Do not restate the same result through a stack of analogies, "
+            "paraphrases, and thesis lines.",
+            "When consecutive cases prove different parts of the argument, name "
+            "each case's distinct proof job before combining them.",
+            "The synthesis may combine established findings; it must not make "
+            "either case appear to prove the other case's claim.",
+            "Prefer everyday spoken language over research-administration phrases "
+            "when both preserve the same claim.",
+            "End each beat once: choose the strongest closing image or joke, state "
+            "one exact lesson, and transition.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_complete_episode_promise_names_understanding_and_response(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contract = (
+            "A complete-episode promise must name both the understanding the "
+            "viewer will gain and the concrete response they will be able to use."
+        )
+
+        for source_name, source_text in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn(contract, source_text)
+
     def test_case_selection_prefers_western_audience_proximity_after_proof_fit(
         self,
     ) -> None:

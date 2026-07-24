@@ -88,6 +88,8 @@ complete transformation explicitly: `Before, I thought X. Now, I understand Y. N
 I will do Z. I will know it helped when I observe W.` Preserve that approved
 learning-and-action contract when drafting the opening promise, explanation, viewer
 application, and final lesson.
+A complete-episode promise must name both the understanding the viewer will gain and the
+concrete response they will be able to use.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
@@ -116,6 +118,25 @@ attributing the viewer's words to the participants. Do not invent thoughts, moti
 quotations for the people in the case. Keep the early remedy promise literal, specific,
 action-focused, and joke-free. This five-move contract overrides a generic hook spine when
 it applies.
+
+### Apply story construction across the script
+
+Apply these story-construction rules to every beat and developed example in the complete
+script, not only to the opening.
+Before a surprising result, state the outcome the viewer should reasonably expect when that
+expectation is necessary to understand why the result matters. Reveal the result in direct
+contrast to that expectation.
+After the result, use at most one mechanism-mapped punchline and one precise takeaway before
+moving forward. Do not restate the same result through a stack of analogies, paraphrases,
+and thesis lines.
+When consecutive cases prove different parts of the argument, name each case's distinct
+proof job before combining them. The synthesis may combine established findings; it must
+not make either case appear to prove the other case's claim.
+Prefer everyday spoken language over research-administration phrases when both preserve the
+same claim.
+End each beat once: choose the strongest closing image or joke, state one exact lesson, and
+transition.
+
 When an adjacent case and the episode mechanism need separate evidence, connect them as
 `case → exact takeaway → why it matters here → remaining question → next evidence`.
 Do not stop at a disclaimer about what the first case did not prove. State its positive

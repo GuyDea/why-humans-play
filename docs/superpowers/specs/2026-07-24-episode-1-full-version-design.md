@@ -75,14 +75,21 @@ complete narration.
     comparator in the developed case. Lock the case vocabulary to `radiologists`,
     `diagnoses`, `another doctor`, `AI label`, `wrong diagnoses`, and `trustworthiness`.
     Describe the task by its practical objective, not its accept-adjust-reject controls.
-    State the changed variable as “same diagnoses, different label of origin.” Every new
+    State the changed variable as “same diagnoses, different source name.” Every new
     noun must earn a causal job. Say “By the end of this video” in the learning promise.
+15. Apply the story rules to every beat, not only the opening. Before a result whose
+    importance depends on a violated expectation, state that expected outcome and reveal
+    the result against it. Resolve the result with no more than one mechanism-mapped joke
+    and one exact takeaway. Give adjacent cases distinct proof jobs before synthesizing
+    them, use ordinary spoken language when it preserves the same claim, and end each beat
+    once rather than stacking equivalent closing metaphors. The opening promise must name
+    both what the viewer will understand and the four-question response they can use.
 
 ## Narrative expansion
 
 | Beat | Narrative job | Word target |
 |---|---|---:|
-| 1. The answer you wanted | Ask whether AI can talk a skeptical viewer into the dumbest decision of their life, voice the viewer's immunity defense, and disarm it quickly with experienced radiologists whose guard still failed. Say “By the end of this video” in the literal four-question promise, then develop the US-and-Canada story as experienced radiologists → eight diagnoses → catch the wrong ones → doctor-versus-AI origin label → trustworthiness rating → no better at catching wrong diagnoses. Keep those nouns stable, collapse the X-rays and response controls, and distinguish the fake AI label from actual AI behavior. Identify susceptibility to wrong diagnoses as the human half of the problem, make the unanswered directional question lead into the Anthropic sycophancy study, and connect both mechanisms to ordinary AI decisions. | 300 |
+| 1. The answer you wanted | Ask whether AI can talk a skeptical viewer into the dumbest decision of their life, voice the viewer's immunity defense, and disarm it quickly with experienced radiologists whose guard still failed. Say “By the end of this video” in a literal promise covering both why distrust can fail and the four-question response. Develop the US-and-Canada story as experienced radiologists → eight diagnoses → catch the wrong ones → doctor-versus-AI source name → expected protection from skepticism → lower trustworthiness rating → no better at catching wrong diagnoses. Keep those nouns stable, collapse the X-rays and response controls, and distinguish the fake AI label from actual AI behavior. Resolve that result with one goalkeeper joke and one exact human-half takeaway, then give the Anthropic study the distinct job of proving actual sycophantic behavior. Connect the two findings to ordinary AI decisions and end on one thesis before moving into the viewer's prompt. | 300 |
 | 2. Your question has a cast | Ask whether to quit, show a plausible polished AI answer, and expose the assumptions already assigned by the prompt. | 180 |
 | 3. Trained to agree | Explain the human-preference signal, the Anthropic finding, and OpenAI's 2025 rollback without anthropomorphizing the model. | 190 |
 | 4. Confidence gets a costume | Show how fluency and an algorithm label make the returned premise feel like new expertise. | 180 |
@@ -189,6 +196,9 @@ appendix apparently current when it is not.
 - The opening question, physician proof case, exact over-reliance takeaway, reason that
   takeaway matters, remaining directional question, Anthropic mechanism, viewer relevance,
   and by-end promise all remain clear within the opening beat.
+- The opening states what skepticism should have changed before revealing that it did not,
+  resolves that result once, and keeps the physician and Anthropic studies in distinct
+  proof roles.
 - The opening follows the five-move anti-skip order, with only the short skepticism result
   before the remedy promise and the detailed physician case after it.
 - The opening sounds like a friendly explanation rather than a study abstract, and no

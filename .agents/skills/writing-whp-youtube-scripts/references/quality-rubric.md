@@ -57,7 +57,9 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 - **2:** The title, thumbnail promise, opening question, central answer, and final
   payoff create one clear and explicitly resolved contract. The payoff teaches the
   approved non-obvious understanding and carries it into a concrete, observable, bounded
-  viewer response. Any load-bearing claim that informed or expert viewers remain
+  viewer response. The opening promise names both that understanding and the concrete
+  response rather than offering only a tool or only an explanation. Any load-bearing
+  claim that informed or expert viewers remain
   vulnerable is earned with a documented observed case involving the claimed population.
   When an immunity defense is predictable, full credit requires the five-move anti-skip
   sequence and places the remedy promise before detailed case exposition.
@@ -113,7 +115,12 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   name, every role label helps the listener distinguish actors, and no new noun appears
   merely because the source used it. Measurements name both the established object and the
   measured property. A short joke strengthens that turn only when the result itself earns
-  it and its concrete roles map directly to the mechanism.
+  it and its concrete roles map directly to the mechanism. When an expectation is needed
+  to make a reversal surprising, the story states it before the result and contrasts the
+  result directly against it. The result resolves through no more than one
+  mechanism-mapped punchline and one exact takeaway. Adjacent cases keep their proof jobs
+  distinct before the narration synthesizes them, and each beat closes once instead of
+  stacking equivalent analogies or thesis lines.
 
 ### 4. Spoken quality and credible runtime
 
@@ -131,6 +138,8 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   controls what it claims; personality controls how it says it. The voice can use blunt
   judgment, emotionally loaded everyday words, and brutal humor without weakening factual
   support or turning a person's inherent worth or vulnerability into the punchline.
+  Research-administration language gives way to ordinary spoken wording whenever the
+  simpler wording preserves the same claim.
 
 ### 5. Useful visual treatment and concrete candidates
 

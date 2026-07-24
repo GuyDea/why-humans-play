@@ -182,6 +182,30 @@ Use either flexible spine:
   Match the case's population, behavior, mechanism, and outcome to the claim. When the case
   establishes susceptibility to an adjacent behavior rather than the episode's exact
   mechanism, say so and introduce separate evidence for that mechanism.
+
+## Build every story across the complete script
+
+Apply these story-construction rules to every beat and developed example in the complete
+script, not only to the opening.
+
+Before a surprising result, state the outcome the viewer should reasonably expect when that
+expectation is necessary to understand why the result matters. Reveal the result in direct
+contrast to that expectation.
+
+After the result, use at most one mechanism-mapped punchline and one precise takeaway before
+moving forward. Do not restate the same result through a stack of analogies, paraphrases,
+and thesis lines.
+
+When consecutive cases prove different parts of the argument, name each case's distinct
+proof job before combining them. The synthesis may combine established findings; it must
+not make either case appear to prove the other case's claim.
+
+Prefer everyday spoken language over research-administration phrases when both preserve the
+same claim.
+
+End each beat once: choose the strongest closing image or joke, state one exact lesson, and
+transition.
+
 - Build the handoff from any adjacent case as
   `case → exact takeaway → why it matters here → remaining question → next evidence`.
   A scope boundary is not a transition. Never end the case with only what it did not prove.
@@ -239,8 +263,6 @@ Use either flexible spine:
   each sentence, ask what a first-hearing listener still has to resolve. Questions such as
   “judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
   setup that must be restored before polishing.
-- Name the container in a learning promise: write “By the end of this video” rather than
-  leaving “by the end” without a referent.
 - For a source-label experiment, narrate the visible chain with the story's locked nouns:
   `item or question → claimed source → participant objective or outcome`. If researchers
   labeled human-written material as AI-generated, state what was real, what was only a
@@ -248,6 +270,11 @@ Use either flexible spine:
   Attach every correct-or-incorrect count to its stable noun; never leave the listener
   guessing which item or final outcome was wrong. Separate what the case proves about human
   response from what later evidence proves about AI behavior.
+
+## Finish the complete hook
+
+- Name the container in a learning promise: write “By the end of this video” rather than
+  leaving “by the end” without a referent.
 - Earn a quick joke from the event itself. The joke should expose, not interrupt, the logic.
 - State the paradox in plain language only as far as the supplied facts support. When the
   causal link is unavailable, ask whether the visible result exposed a scoring mismatch
@@ -267,6 +294,8 @@ promise, but it must not complicate what the viewer will learn.
 For a complete episode, make that promise reflect both halves of the approved contract:
 the new understanding and the concrete response the viewer will be able to use. Keep the
 wording concise; do not recite the full method before the episode has earned it.
+A complete-episode promise must name both the understanding the viewer will gain and the
+concrete response they will be able to use.
 
 When the promise asks an AI to help audit its own answer, describe the questions as a way to
 surface gaps or help check the result, not as proof that the answer is correct. Preserve that
