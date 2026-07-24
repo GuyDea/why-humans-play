@@ -659,6 +659,13 @@ async function main(): Promise<void> {
       `/api/drafts/${encodeURIComponent(draft.id)}/narration/proposals`,
     );
     console.log('DIAG pre-approval ledger:', JSON.stringify(ledger));
+    for (const row of (ledger as { proposals: { operationId: string }[] }).proposals) {
+      const op = await api<{ operation: string; state: string }>(
+        daemon!.handshake,
+        `/api/ops/${encodeURIComponent(row.operationId)}`,
+      );
+      console.log('DIAG pending op:', row.operationId, op.operation, op.state);
+    }
   }
   const approveNarration = productionPanel.getByRole(
     'button',

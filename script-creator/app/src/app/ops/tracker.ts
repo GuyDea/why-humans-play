@@ -106,7 +106,10 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     return tracked;
   }
 
-  resume(id: string): TrackedOperation<Meta, ConsoleEntry> {
+  resume(
+    id: string,
+    meta?: Meta,
+  ): TrackedOperation<Meta, ConsoleEntry> {
     const parent = this.requireRecord(id);
     if (!parent.canResume()) {
       throw new Error(`resume limit exhausted for operation ${id}`);
@@ -115,7 +118,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     const tracked = this.createTrackedOperation(
       parent.operation,
       parent.inputs,
-      parent.meta,
+      meta ?? parent.meta,
       parent.remainingHops() - 1,
     );
     this.appendToHistory(tracked);

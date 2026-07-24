@@ -1266,8 +1266,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
               reject(proposalId);
             }
           },
-          () => undefined,
-        );
+        ).catch((error: unknown) => {
+          this.surfaceProposalSettlementFailure(error);
+        });
         return true;
       }
       const rejected = reject(proposalId);
@@ -1363,9 +1364,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.proposalSettlements.add(settlement);
     this.proposalSettlementsByOperation.set(operationId, settlement);
     void settlement.catch((error: unknown) => {
-      this.proposalSettlementError =
-        `Proposal settlement failed: ${operationErrorMessage(error)}`;
-      this.operationError.set(this.proposalSettlementError);
+      this.surfaceProposalSettlementFailure(error);
     }).finally(() => {
       this.proposalSettlements.delete(settlement);
       if (this.proposalSettlementsByOperation.get(operationId) === settlement) {
@@ -1373,6 +1372,12 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       }
     });
     return settlement;
+  }
+
+  private surfaceProposalSettlementFailure(error: unknown): void {
+    this.proposalSettlementError =
+      `Proposal settlement failed: ${operationErrorMessage(error)}`;
+    this.operationError.set(this.proposalSettlementError);
   }
 
   private isCurrentDraft(draftId: string, epoch: number): boolean {

@@ -69,11 +69,9 @@ function launcherFixture(
   phases: OperationPhase[] = [],
 ): LauncherFixture {
   let sequence = 0;
-  let latestMeta: ProposalLaunchMeta | undefined;
   const take = (
     meta: ProposalLaunchMeta,
   ): TrackedOperation<ProposalLaunchMeta> => {
-    latestMeta = meta;
     const index = sequence++;
     return trackedOperation(
       `op-${index + 1}`,
@@ -87,7 +85,10 @@ function launcherFixture(
     _inputs: unknown,
     meta: ProposalLaunchMeta,
   ) => take(meta));
-  const resume = vi.fn((_id: string) => take(latestMeta!));
+  const resume = vi.fn((
+    _id: string,
+    meta: ProposalLaunchMeta,
+  ) => take(meta));
 
   return {
     launcher: { launch, resume },
@@ -238,7 +239,16 @@ describe('ProposalBridge', () => {
         status: 'pending',
       }),
     ]);
-    expect(fixture.resume).toHaveBeenCalledWith('op-1');
+    expect(fixture.resume).toHaveBeenCalledWith('op-1', {
+      operation: 'reroll',
+      proposalId: 'proposal-2',
+      target,
+    });
+    expect(rerolled.tracked.meta).toMatchObject({
+      operation: 'reroll',
+      proposalId: 'proposal-2',
+      target,
+    });
 
     await rerolled.settled;
 

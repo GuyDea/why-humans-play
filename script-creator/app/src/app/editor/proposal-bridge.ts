@@ -103,7 +103,10 @@ export interface OperationLauncher {
     inputs: unknown,
     meta: ProposalLaunchMeta,
   ): TrackedOperation<ProposalLaunchMeta>;
-  resume(id: string): TrackedOperation<ProposalLaunchMeta>;
+  resume(
+    id: string,
+    meta: ProposalLaunchMeta,
+  ): TrackedOperation<ProposalLaunchMeta>;
 }
 
 export interface ProposalLayer {
@@ -283,7 +286,11 @@ export class ProposalBridge {
 
     let tracked: TrackedOperation<ProposalLaunchMeta>;
     try {
-      tracked = this.launcher.resume(operationId);
+      tracked = this.launcher.resume(operationId, {
+        operation: 'reroll',
+        target,
+        proposalId,
+      });
     } catch (error) {
       rejectProposal(
         this.view.state,

@@ -1578,6 +1578,185 @@ describe('mounted Script Studio composition', () => {
     expect(studio.client.approveNarration).not.toHaveBeenCalled();
   });
 
+  it('settles reject then reroll then accepted successor before narration approval', async () => {
+    const prompt = vi.fn()
+      .mockReturnValueOnce('The first rewrite was too generic.')
+      .mockReturnValueOnce('Try a more concrete line.');
+    vi.stubGlobal('prompt', prompt);
+    const studio = await mountStudio(productionDraft());
+    const productionPanel = studio.root.querySelector(
+      'app-production-panel',
+    );
+
+    await selectText(studio, 'Opening narration.');
+    clickToolbar(studio, 'rewrite');
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    studio.client.pendingNarrationProposals = [
+      pendingNarrationProposal('op-1'),
+    ];
+    studio.client.resolve('op-1', rewriteResult('First rewrite candidate.'));
+    let proposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('First rewrite candidate.');
+      expect(findButton(proposal, 'Reject', true)).not.toBeNull();
+    });
+    findButton(proposal, 'Reject').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-1',
+        decision: 'rejected',
+        reason: 'The first rewrite was too generic.',
+      });
+      expect(studio.client.pendingNarrationProposals).toEqual([]);
+      expect(studio.root.querySelector('.proposal-diff')).toBeNull();
+    });
+
+    await selectText(studio, 'Opening narration.');
+    clickToolbar(studio, 'rewrite');
+    await expectDraftSubmission(studio, 'rewrite-selection', 2);
+    studio.client.pendingNarrationProposals = [
+      pendingNarrationProposal('op-2'),
+    ];
+    studio.client.resolve('op-2', rewriteResult('First reroll candidate.'));
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('First reroll candidate.');
+      expect(findButton(proposal, 'Re-roll', true)).not.toBeNull();
+    });
+    findButton(proposal, 'Re-roll').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.resumeDraftOp).toHaveBeenCalledWith(
+        'draft-1',
+        'op-2',
+        expect.anything(),
+        'Try a more concrete line.',
+      );
+    });
+    studio.client.pendingNarrationProposals = [
+      pendingNarrationProposal('op-3'),
+    ];
+    await expectEmbeddedConsole(studio, 'Working on op-3.');
+    studio.client.resolve('op-3', rewriteResult('Accepted reroll candidate.'));
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('Accepted reroll candidate.');
+    });
+    findButton(proposal, 'Accept').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledWith(
+        'draft-1',
+        expect.objectContaining({
+          opId: 'op-3',
+          disposition: 'selection-proposal-accepted',
+        }),
+      );
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-3',
+        decision: 'accepted',
+      });
+      expect(studio.client.pendingNarrationProposals).toEqual([]);
+    });
+
+    await selectText(studio, 'Closing narration.');
+    clickToolbar(studio, 'alternatives');
+    await expectDraftSubmission(studio, 'generate-alternatives', 1);
+    await expectEmbeddedConsole(studio, 'Working on op-4.');
+    studio.client.resolve('op-4', {
+      kind: 'schema',
+      value: {
+        status: 'complete',
+        options: [
+          { label: 'Direct', markdown: 'Close on the concrete rule.' },
+          { label: 'Playful', markdown: 'Close by turning the rule into play.' },
+        ],
+        guardrail_markdown: null,
+      },
+      guardrail: null,
+    });
+    const alternatives = await waitForElement(
+      studio,
+      '[data-testid="unsettled-variant"]',
+    );
+    findButton(alternatives, 'Pick active').click();
+    const editor = getDebugNode(
+      studio.root.querySelector('app-editor-host')!,
+    )?.componentInstance as EditorHost;
+    await editor.flushPendingChanges();
+    expect(studio.client.save).toHaveBeenCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-4',
+        disposition: expect.stringContaining('variant-picked/'),
+      }),
+    );
+    expect(studio.client.pendingNarrationProposals).toEqual([]);
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector(
+        '[data-testid="unsettled-variant"]',
+      )).toBeNull();
+      expect(findButton(
+        productionPanel,
+        'Approve complete narration',
+      ).disabled).toBe(false);
+    });
+    findButton(productionPanel, 'Approve complete narration').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.prepareNarrationApproval).toHaveBeenCalledOnce();
+      expect(studio.client.approveNarration).toHaveBeenCalledOnce();
+    });
+    expect(prompt).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps a rejected proposal visible and announces durable settlement failure', async () => {
+    vi.stubGlobal('prompt', vi.fn(() => 'The rewrite lost the concrete beat.'));
+    const studio = await mountStudio(productionDraft(), (client) => {
+      client.resolveNarrationProposal.mockRejectedValueOnce(
+        new Error('ledger write failed'),
+      );
+    });
+
+    await selectText(studio, 'Opening narration.');
+    clickToolbar(studio, 'rewrite');
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    studio.client.pendingNarrationProposals = [
+      pendingNarrationProposal('op-1'),
+    ];
+    studio.client.resolve('op-1', rewriteResult('Rejected rewrite candidate.'));
+    let proposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('Rejected rewrite candidate.');
+    });
+    findButton(proposal, 'Reject').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.root.querySelector(
+        'app-editor-host [role="alert"]',
+      )?.textContent).toContain(
+        'Proposal settlement failed: ledger write failed',
+      );
+      expect(studio.root.querySelector('.proposal-diff')?.textContent)
+        .toContain('Rejected rewrite candidate.');
+      expect(studio.client.pendingNarrationProposals)
+        .toEqual([pendingNarrationProposal('op-1')]);
+    });
+  });
+
   it('gates Promote completion on pinned exact-hash validator diagnostics', async () => {
     const studio = await mountStudio(productionDraft(), (client) => {
       client.milestoneDirtyFiles = ['unrelated-notes.md'];
@@ -4216,6 +4395,24 @@ function productionDraft(): DraftRecord {
     },
   };
   return draft;
+}
+
+function pendingNarrationProposal(operationId: string): {
+  draftId: string;
+  operationId: string;
+  state: 'pending';
+  createdAt: string;
+  resolvedAt: null;
+  acceptedRevisionPresent: boolean;
+} {
+  return {
+    draftId: 'draft-1',
+    operationId,
+    state: 'pending',
+    createdAt: '2026-07-24T13:00:00.000Z',
+    resolvedAt: null,
+    acceptedRevisionPresent: false,
+  };
 }
 
 function approvedArchitectureState(
