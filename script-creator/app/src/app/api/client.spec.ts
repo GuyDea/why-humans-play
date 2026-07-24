@@ -342,6 +342,7 @@ describe('DaemonClient', () => {
       opId: 'op-package-1',
       directions: [direction],
     });
+    await client.pickPackageDirection('idea/one', 'package/test-1', 0);
     await client.handoffTopicRun('run/one', {
       ideaId: 'idea/one',
       episodeSlug: 'voluntary-obstacles',
@@ -373,6 +374,13 @@ describe('DaemonClient', () => {
           opId: 'op-package-1',
           directions: [direction],
         }),
+      },
+      {
+        url:
+          `${BASE_URL}/api/ideas/idea%2Fone/package-tests/package%2Ftest-1/pick`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ directionIndex: 0 }),
       },
       {
         url: `${BASE_URL}/api/topic-runs/run%2Fone/handoff`,
@@ -489,6 +497,11 @@ describe('DaemonClient', () => {
       expectedRevisionSeq: 6,
       confirmed: true,
     });
+    await client.rejectArchitectureProposal(
+      'draft/one',
+      'op/reject',
+      'The proof arrives too late.',
+    );
     await client.markNarrationReconciled('draft/one', {
       expectedRevisionSeq: 6,
       confirmed: true,
@@ -502,6 +515,13 @@ describe('DaemonClient', () => {
       'draft/one',
       'op/one',
       { architecture_md: 'Supplied architecture.' },
+      null,
+    );
+    await client.resolveNarrationProposal(
+      'draft/one',
+      'op/rewrite',
+      'rejected',
+      'Too broad — keep the smaller claim.',
     );
 
     expect(fetchMock.mock.calls.map(([input, init]) => ({
@@ -549,6 +569,13 @@ describe('DaemonClient', () => {
         }),
       },
       {
+        url:
+          `${BASE_URL}/api/drafts/draft%2Fone/architecture/proposals/op%2Freject/reject`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({ reason: 'The proof arrives too late.' }),
+      },
+      {
         url: `${BASE_URL}/api/drafts/draft%2Fone/narration/reconcile`,
         method: 'POST',
         nonce: NONCE,
@@ -572,6 +599,17 @@ describe('DaemonClient', () => {
         nonce: NONCE,
         body: JSON.stringify({
           inputs: { architecture_md: 'Supplied architecture.' },
+          reason: null,
+        }),
+      },
+      {
+        url:
+          `${BASE_URL}/api/drafts/draft%2Fone/narration/proposals/op%2Frewrite/resolve`,
+        method: 'POST',
+        nonce: NONCE,
+        body: JSON.stringify({
+          decision: 'rejected',
+          reason: 'Too broad — keep the smaller claim.',
         }),
       },
     ]);

@@ -86,6 +86,11 @@ class ArchitectureClientStub {
     narrationReconciliationRequired: true,
     pendingSaga: null,
   }));
+  readonly rejectArchitectureProposal = vi.fn(async (
+    _draftId: string,
+    _operationId: string,
+    _reason: string | null,
+  ) => ({ rejected: true as const }));
   readonly submitDraftOp = vi.fn(async (
     _draftId: string,
     _operation: ArchitectureOperationName,
@@ -188,7 +193,7 @@ describe('ArchitectureModel', () => {
     );
   });
 
-  it('accepts one, rejects one without mutation, then accepts all remaining in one revision', async () => {
+  it('accepts one, durably rejects one, then accepts all remaining in one revision', async () => {
     const client = new ArchitectureClientStub();
     client.state = initialState([]);
     client.nextResult = {
@@ -210,8 +215,13 @@ describe('ArchitectureModel', () => {
     const afterOne = cloneState(model.state!);
     const opaque = model.proposals.find(({ key }) => key.startsWith('opaque-'));
     expect(opaque).toBeDefined();
-    model.reject(opaque!.id);
+    await model.reject(opaque!.id, 'The appendix repeats the core answer.');
     expect(model.state).toEqual(afterOne);
+    expect(client.rejectArchitectureProposal).toHaveBeenCalledWith(
+      'draft-1',
+      opaque!.sourceOpId,
+      'The appendix repeats the core answer.',
+    );
     expect(client.saveArchitecture).toHaveBeenCalledTimes(1);
 
     await model.acceptAll();
@@ -223,6 +233,31 @@ describe('ArchitectureModel', () => {
       expectedRevisionSeq: 4,
       disposition: 'architecture-proposals-accepted',
     });
+  });
+
+  it('keeps an architecture proposal visible when durable rejection fails', async () => {
+    const client = new ArchitectureClientStub();
+    client.state = initialState([]);
+    client.nextResult = {
+      kind: 'raw',
+      markdown: fixedSections('generated').map(({ md }) => md).join(''),
+    };
+    client.rejectArchitectureProposal.mockRejectedValueOnce(
+      new Error('learning store unavailable'),
+    );
+    const model = new ArchitectureModel('draft-1', client);
+    await model.load();
+    await model.generate({
+      topicBrief: {},
+      approvedLessons: [],
+      userConstraints: {},
+    });
+    const proposal = model.proposals[0]!;
+
+    await model.reject(proposal.id, null);
+
+    expect(model.proposals).toContainEqual(proposal);
+    expect(model.failure).toBe('learning store unavailable');
   });
 
   it('preserves Base, Current, and Proposed when a refine acceptance is stale', async () => {

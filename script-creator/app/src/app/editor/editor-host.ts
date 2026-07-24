@@ -287,7 +287,7 @@ interface AutosaveSnapshot {
 }
 
 interface SaveProvenance {
-  opId: string;
+  opId: string | null;
   disposition: string;
 }
 
@@ -553,7 +553,36 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly approvalGate = signal<ApprovalGate | null>(null);
   readonly parkingLot = new ParkingLotModel(
     this.editorState,
-    (transaction) => this.editorView?.dispatch(transaction),
+    (transaction) => {
+      if (!this.editorView || this.narrationBlocked()) {
+        this.editorView?.dispatch(transaction);
+        return;
+      }
+      const before = this.parkingLot.unsettled();
+      const remaining = new Set<string>();
+      transaction.doc.descendants((node) => {
+        if (
+          node.type.name === 'variantSet'
+          || node.type.name === 'inlineVariantSet'
+        ) {
+          remaining.add(String(node.attrs['variantId'] ?? ''));
+        }
+        return true;
+      });
+      const picked = before.find(
+        ({ variantId }) => !remaining.has(variantId),
+      );
+      if (picked) {
+        this.nextSaveProvenance = {
+          opId: null,
+          disposition: variantPickedDisposition(
+            picked.variantId,
+            `alternative:${picked.activeIndex}`,
+          ),
+        };
+      }
+      this.editorView?.dispatch(transaction);
+    },
   );
   readonly operationError = signal<string | null>(null);
   private readonly currentDirty = signal(false);
@@ -602,6 +631,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     new Map<string, Promise<void>>();
   private readonly pendingAcceptedSettlements = new Set<string>();
   private proposalSettlementError: string | null = null;
+  private pendingRerollReason: string | null | undefined;
   private readonly autosave = new DebouncedAutosave<AutosaveSnapshot>(
     (snapshot) => this.saveSnapshot(snapshot),
     1_000,
@@ -1036,7 +1066,15 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.editorState.set(mountedView.state);
     const composition = composeStudio(
       mountedView,
-      draftScopedClient(this.client(), draft.id),
+      draftScopedClient(
+        this.client(),
+        draft.id,
+        () => {
+          const reason = this.pendingRerollReason;
+          this.pendingRerollReason = undefined;
+          return reason;
+        },
+      ),
       {
         editor: mount,
         failures,
@@ -1077,7 +1115,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     if (
       this.nextSaveProvenance
       && !this.pendingDirtyProvenances.some(
-        ({ opId }) => opId === this.nextSaveProvenance?.opId,
+        ({ opId, disposition }) =>
+          opId === this.nextSaveProvenance?.opId
+          && disposition === this.nextSaveProvenance?.disposition,
       )
     ) {
       this.pendingDirtyProvenances.push(this.nextSaveProvenance);
@@ -1119,8 +1159,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         this.latestRevision.set(saved.revision);
         if (version === this.editVersion) this.currentDirty.set(false);
         if (
-          opId
-          && this.pendingDirtyProvenances[0]?.opId === opId
+          this.pendingDirtyProvenances[0]?.opId === opId
           && this.pendingDirtyProvenances[0].disposition === disposition
         ) {
           this.pendingDirtyProvenances.shift();
@@ -1213,11 +1252,13 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         proposalId,
       );
       if (operationId) {
+        const reason = optionalWhy();
         const settlement = this.settleNarrationProposal(
           operationId,
           'rejected',
           false,
           draftId,
+          reason,
         );
         void settlement.then(
           () => {
@@ -1235,32 +1276,22 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
 
     const rerollProposal = runtime.rerollProposal.bind(runtime);
     runtime.rerollProposal = (proposalId: string) => {
-      const operationId = this.operationIdForProposal(
-        composition,
-        proposalId,
-      );
-      const launch = rerollProposal(proposalId);
-      if (operationId) {
-        this.settleNarrationProposal(
-          operationId,
-          'rejected',
-          false,
-          draftId,
-        );
+      this.pendingRerollReason = optionalWhy();
+      try {
+        return rerollProposal(proposalId);
+      } finally {
+        this.pendingRerollReason = undefined;
       }
-      return launch;
     };
 
     const reroll = runtime.reroll.bind(runtime);
     runtime.reroll = (operationId: string) => {
-      const launch = reroll(operationId);
-      this.settleNarrationProposal(
-        operationId,
-        'rejected',
-        false,
-        draftId,
-      );
-      return launch;
+      this.pendingRerollReason = optionalWhy();
+      try {
+        return reroll(operationId);
+      } finally {
+        this.pendingRerollReason = undefined;
+      }
     };
   }
 
@@ -1302,6 +1333,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     decision: 'accepted' | 'rejected',
     waitForSave: boolean,
     draftId = this.activeDraftId,
+    reason?: string | null,
   ): Promise<void> {
     if (!draftId) return Promise.resolve();
     if (decision === 'accepted') {
@@ -1318,6 +1350,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         draftId,
         operationId,
         decision,
+        ...(reason === undefined ? [] : [reason]),
       );
       if (decision === 'accepted') {
         this.pendingAcceptedSettlements.delete(operationId);
@@ -1443,6 +1476,7 @@ function operationErrorMessage(error: unknown): string {
 function draftScopedClient(
   client: DaemonClient,
   draftId: string,
+  takeRerollReason: () => string | null | undefined,
 ): DaemonClient {
   return new Proxy(client, {
     get(target, property) {
@@ -1453,8 +1487,12 @@ function draftScopedClient(
         ) => target.submitDraftOp(draftId, operation, inputs);
       }
       if (property === 'resume') {
-        return (operationId: string, inputs: unknown) =>
-          target.resumeDraftOp(draftId, operationId, inputs);
+        return (operationId: string, inputs: unknown) => {
+          const reason = takeRerollReason();
+          return reason === undefined
+            ? target.resumeDraftOp(draftId, operationId, inputs)
+            : target.resumeDraftOp(draftId, operationId, inputs, reason);
+        };
       }
       const value = Reflect.get(target, property, target) as unknown;
       return typeof value === 'function'
@@ -1462,4 +1500,22 @@ function draftScopedClient(
         : value;
     },
   });
+}
+
+export function variantPickedDisposition(
+  variantSetId: string,
+  alternativeId: string,
+): string {
+  return `variant-picked/${encodeURIComponent(variantSetId)}/${
+    encodeURIComponent(alternativeId)
+  }`;
+}
+
+function optionalWhy(): string | null {
+  try {
+    const reason = globalThis.prompt('Why? (optional)', '');
+    return reason === null || reason === '' ? null : reason;
+  } catch {
+    return null;
+  }
 }

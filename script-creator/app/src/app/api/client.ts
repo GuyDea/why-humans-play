@@ -117,6 +117,8 @@ export interface PackageTestRecord {
   opId: string;
   directions: PackageDirection[];
   createdAt: string;
+  selectedDirectionIndex?: number | null;
+  selectedAt?: string | null;
 }
 
 export interface CreatePackageTestInput {
@@ -617,6 +619,22 @@ export class DaemonClient {
     );
   }
 
+  async pickPackageDirection(
+    ideaId: string,
+    packageTestId: string,
+    directionIndex: number,
+  ): Promise<PackageTestRecord> {
+    return this.request(
+      `/api/ideas/${encodeURIComponent(
+        ideaId,
+      )}/package-tests/${encodeURIComponent(packageTestId)}/pick`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ directionIndex }),
+      },
+    );
+  }
+
   async registerTopicRun(opId: string): Promise<TopicRunSummary> {
     return this.request('/api/topic-runs', {
       method: 'POST',
@@ -842,6 +860,7 @@ export class DaemonClient {
     draftId: string,
     operationId: string,
     decision: 'accepted' | 'rejected',
+    reason?: string | null,
   ): Promise<{
     draftId: string;
     operationId: string;
@@ -855,7 +874,27 @@ export class DaemonClient {
       )}/resolve`,
       {
         method: 'POST',
-        body: JSON.stringify({ decision }),
+        body: JSON.stringify(
+          reason === undefined ? { decision } : { decision, reason },
+        ),
+      },
+    );
+  }
+
+  async rejectArchitectureProposal(
+    draftId: string,
+    operationId: string,
+    reason: string | null,
+  ): Promise<{ rejected: true }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(
+        draftId,
+      )}/architecture/proposals/${encodeURIComponent(
+        operationId,
+      )}/reject`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ reason }),
       },
     );
   }
@@ -941,6 +980,7 @@ export class DaemonClient {
     draftId: string,
     operationId: string,
     inputs: unknown,
+    reason?: string | null,
   ): Promise<{ id: string }> {
     return this.request(
       `/api/drafts/${encodeURIComponent(draftId)}/ops/${
@@ -948,7 +988,9 @@ export class DaemonClient {
       }/resume`,
       {
         method: 'POST',
-        body: JSON.stringify({ inputs }),
+        body: JSON.stringify(
+          reason === undefined ? { inputs } : { inputs, reason },
+        ),
       },
     );
   }

@@ -172,6 +172,12 @@ interface PersonalInputProposal {
               Complete Promote
             </button>
           </div>
+          @if (validatorBadge() === 'fail') {
+            <p class="validator-fix-cycle" role="status">
+              Fix cycle started — edit the draft, then re-run the validator.
+              This failed attempt is evidence, not an editorial approval.
+            </p>
+          }
           @if (mappedValidatorDiagnostics().length > 0) {
             <ul class="validator-diagnostics">
               @for (
@@ -256,6 +262,15 @@ interface PersonalInputProposal {
                   <section class="pi-proposal" data-testid="pi-proposal">
                     <strong>Skill proposal</strong>
                     <pre>{{ proposal.replacement }}</pre>
+                    <label>
+                      Why? <span>(optional)</span>
+                      <input
+                        type="text"
+                        [attr.aria-label]="'Why reject ' + request.id"
+                        [value]="rejectionReasons()[request.id] ?? ''"
+                        (input)="setRejectionReason(request.id, $event)"
+                      />
+                    </label>
                     <div class="button-row">
                       <button type="button" (click)="acceptProposal(proposal)">
                         Accept proposal
@@ -488,6 +503,8 @@ export class ProductionPanel implements OnInit {
   readonly cleanNarration = signal(false);
   readonly responses = signal<Partial<Record<string, string>>>({});
   readonly proposals = signal<Record<string, PersonalInputProposal>>({});
+  readonly rejectionReasons =
+    signal<Partial<Record<string, string>>>({});
   readonly errors = signal<Record<string, string>>({});
   readonly busyIds = signal<ReadonlySet<string>>(new Set());
   readonly productionTarget = signal('');
@@ -640,15 +657,27 @@ export class ProductionPanel implements OnInit {
   protected rejectProposal(id: string): void {
     const proposal = this.proposals()[id];
     if (!proposal) return;
+    const enteredReason = this.rejectionReasons()[id] ?? '';
     void this.client().resolveNarrationProposal(
       this.draft().id,
       proposal.opId,
       'rejected',
+      enteredReason === '' ? null : enteredReason,
     ).then(() => {
       this.proposals.update((proposals) => withoutKey(proposals, id));
+      this.rejectionReasons.update((reasons) => withoutKey(reasons, id));
     }).catch((error: unknown) => {
       this.setError(id, errorMessage(error));
     });
+  }
+
+  protected setRejectionReason(id: string, event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    this.rejectionReasons.update((reasons) => ({
+      ...reasons,
+      [id]: target.value,
+    }));
   }
 
   protected acceptProposal(proposal: PersonalInputProposal): void {

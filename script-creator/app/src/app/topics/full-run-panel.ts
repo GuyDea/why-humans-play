@@ -61,6 +61,11 @@ interface HandoffPreview {
   idea: IdeaRecord;
   slug: string;
   title: string;
+  selectedPackage: {
+    testId: string;
+    directionIndex: number;
+    direction: PackageDirection;
+  } | null;
 }
 
 interface OperationOutcome {
@@ -481,12 +486,13 @@ interface OperationOutcome {
                           <th scope="col">Visual promise</th>
                           <th scope="col">Delivered payoff</th>
                           <th scope="col">Survives honestly?</th>
+                          <th scope="col">Selection</th>
                         </tr>
                       </thead>
                       @for (test of packageHistory(); track test.id) {
                         <tbody>
                           <tr class="history-divider">
-                            <th colspan="9" scope="rowgroup">
+                            <th colspan="10" scope="rowgroup">
                               {{ packageTestLabel(test, $index) }}
                             </th>
                           </tr>
@@ -494,6 +500,7 @@ interface OperationOutcome {
                             <tr
                               data-testid="package-test-direction"
                               [attr.data-survives]="direction.survives_honestly"
+                              [attr.data-selected]="test.selectedDirectionIndex === $index"
                             >
                               <td>{{ finalist.subject }}</td>
                               <th scope="row">Direction {{ $index + 1 }}</th>
@@ -508,6 +515,21 @@ interface OperationOutcome {
                                   {{ direction.survives_honestly ? 'Yes' : 'No' }}
                                 </strong>
                                 <p>{{ direction.reason_markdown }}</p>
+                              </td>
+                              <td>
+                                <button
+                                  type="button"
+                                  [disabled]="packageSelectionBusy() !== null
+                                    || (test.selectedDirectionIndex !== null
+                                      && test.selectedDirectionIndex !== undefined)"
+                                  (click)="usePackage(test, $index)"
+                                >
+                                  {{
+                                    test.selectedDirectionIndex === $index
+                                      ? 'Selected package'
+                                      : 'Use this package'
+                                  }}
+                                </button>
                               </td>
                             </tr>
                           }
@@ -657,6 +679,15 @@ interface OperationOutcome {
                   <div>
                     <dt>Open unknowns</dt>
                     <dd>{{ preview.brief.unknowns.length }}</dd>
+                  </div>
+                  <div>
+                    <dt>Selected package</dt>
+                    <dd>
+                      {{
+                        preview.selectedPackage?.direction?.working_title
+                          ?? 'No package selected'
+                      }}
+                    </dd>
                   </div>
                   <div>
                     <dt>Starting phase</dt>
@@ -1260,6 +1291,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
   protected readonly packageFinalist = signal<ShortlistEntry | null>(null);
   protected readonly packageHistory =
     signal<readonly PackageTestRecord[]>([]);
+  protected readonly packageSelectionBusy = signal<string | null>(null);
   protected readonly handoffBusy = signal(false);
   protected readonly handoffError = signal<string | null>(null);
   protected readonly handoffPreview = signal<HandoffPreview | null>(null);
@@ -1397,6 +1429,14 @@ export class FullRunPanel implements OnInit, OnDestroy {
     return `Test ${this.packageHistory().length - index} · ${timestamp}`;
   }
 
+  protected usePackage(
+    test: PackageTestRecord,
+    directionIndex: number,
+  ): void {
+    if (this.packageSelectionBusy() !== null) return;
+    void this.pickPackage(test, directionIndex);
+  }
+
   protected previewHandoff(summary: TopicSummary): void {
     if (this.handoffBusy()) return;
     void this.runHandoffPreview(summary);
@@ -1486,6 +1526,28 @@ export class FullRunPanel implements OnInit, OnDestroy {
     }
   }
 
+  private async pickPackage(
+    test: PackageTestRecord,
+    directionIndex: number,
+  ): Promise<void> {
+    this.packageSelectionBusy.set(test.id);
+    this.packageError.set(null);
+    try {
+      const selected = await this.client.pickPackageDirection(
+        test.ideaId,
+        test.id,
+        directionIndex,
+      );
+      this.packageHistory.update((history) => history.map(
+        (record) => record.id === selected.id ? selected : record,
+      ));
+    } catch (error) {
+      this.packageError.set(errorMessage(error));
+    } finally {
+      this.packageSelectionBusy.set(null);
+    }
+  }
+
   private async runHandoffPreview(summary: TopicSummary): Promise<void> {
     const winner = summary.winner;
     if (!winner.subject || !winner.angle_markdown) return;
@@ -1499,6 +1561,17 @@ export class FullRunPanel implements OnInit, OnDestroy {
         winner.subject,
         winner.angle_markdown,
       );
+      const packageTests = await this.client.listPackageTests(idea.id);
+      const selectedTest = packageTests.find(
+        (test) =>
+          test.selectedDirectionIndex !== null
+          && test.selectedDirectionIndex !== undefined,
+      );
+      const selectedIndex = selectedTest?.selectedDirectionIndex;
+      const selectedDirection = selectedIndex === null
+        || selectedIndex === undefined
+        ? undefined
+        : selectedTest?.directions[selectedIndex];
       const outcome = await this.executeOperation(
         'handoff-preview',
         buildTopicOperationInputs({
@@ -1522,6 +1595,13 @@ export class FullRunPanel implements OnInit, OnDestroy {
         idea,
         slug: slugify(winner.subject),
         title: winner.subject,
+        selectedPackage: selectedTest && selectedDirection
+          ? {
+              testId: selectedTest.id,
+              directionIndex: selectedIndex!,
+              direction: selectedDirection,
+            }
+          : null,
       });
     } catch (error) {
       this.handoffError.set(errorMessage(error));
@@ -1654,6 +1734,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
     this.packageError.set(null);
     this.packageFinalist.set(null);
     this.packageHistory.set([]);
+    this.packageSelectionBusy.set(null);
   }
 
   private resetHandoff(): void {

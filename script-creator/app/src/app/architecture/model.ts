@@ -92,6 +92,11 @@ export interface ArchitectureModelClient {
     draftId: string,
     input: { expectedRevisionSeq: number; confirmed: true },
   ): Promise<ArchitectureActionResult>;
+  rejectArchitectureProposal(
+    draftId: string,
+    operationId: string,
+    reason: string | null,
+  ): Promise<{ rejected: true }>;
   submitDraftOp(
     draftId: string,
     operation: ArchitectureOperationName,
@@ -298,10 +303,22 @@ export class ArchitectureModel {
     }
   }
 
-  reject(idOrKey: string): void {
+  async reject(idOrKey: string, reason: string | null): Promise<void> {
     const proposal = this.findProposal(idOrKey);
     if (!proposal) return;
-    this.proposals = this.proposals.filter(({ id }) => id !== proposal.id);
+    this.failure = null;
+    try {
+      await this.client.rejectArchitectureProposal(
+        this.draftId,
+        proposal.sourceOpId,
+        reason,
+      );
+      this.proposals = this.proposals.filter(
+        ({ id }) => id !== proposal.id,
+      );
+    } catch (error) {
+      this.failure = errorMessage(error);
+    }
   }
 
   findingsFor(sectionKey: string): ArchitectureFinding[] {

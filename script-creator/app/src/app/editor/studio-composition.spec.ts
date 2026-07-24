@@ -140,6 +140,7 @@ class ControllableDaemonClient {
     draftId: string;
     operationId: string;
     decision: 'accepted' | 'rejected';
+    reason?: string | null;
   }> = [];
   readonly narrationReconciliations: Array<{
     draftId: string;
@@ -250,6 +251,7 @@ class ControllableDaemonClient {
     draftId: string,
     operationId: string,
     decision: 'accepted' | 'rejected',
+    reason?: string | null,
   ) => {
     if (
       decision === 'accepted'
@@ -266,6 +268,7 @@ class ControllableDaemonClient {
       draftId,
       operationId,
       decision,
+      ...(reason === undefined ? {} : { reason }),
     });
     this.pendingNarrationProposals =
       this.pendingNarrationProposals.filter(
@@ -479,6 +482,11 @@ class ControllableDaemonClient {
       },
     };
   });
+  readonly rejectArchitectureProposal = vi.fn(async (
+    _draftId: string,
+    _operationId: string,
+    _reason: string | null,
+  ) => ({ rejected: true as const }));
   readonly approveArchitecture = vi.fn(async (
     _id: string,
     input: { expectedRevisionSeq: number },
@@ -679,6 +687,7 @@ class ControllableDaemonClient {
     draftId: string,
     operationId: string,
     inputs: unknown,
+    _reason?: string | null,
   ) => this.submitDraftOp(
     draftId,
     this.submissions.find(({ id }) => id === operationId)?.operation
@@ -1335,6 +1344,12 @@ describe('mounted Script Studio composition', () => {
       expect(panel.textContent).toContain(
         'Personal input must be completed.',
       );
+      expect(panel.textContent).toContain(
+        'Fix cycle started — edit the draft, then re-run the validator.',
+      );
+      expect(panel.textContent).toContain(
+        'evidence, not an editorial approval',
+      );
     });
     expect(readDraftReadiness(studio.client.storedDraft))
       .toBe('EDITORIAL-DRAFT');
@@ -1530,6 +1545,10 @@ describe('mounted Script Studio composition', () => {
         'Martin supplied first paragraph.',
       );
     });
+    setInputValue(
+      panel.querySelector('input[aria-label="Why reject PI-001"]'),
+      'The personal detail lands before the setup.',
+    );
     findButton(panel, 'Reject proposal').click();
     await vi.waitFor(() => {
       studio.tick();
@@ -1537,6 +1556,7 @@ describe('mounted Script Studio composition', () => {
         draftId: 'draft-1',
         operationId: 'op-1',
         decision: 'rejected',
+        reason: 'The personal detail lands before the setup.',
       });
     });
     expect(editor.currentMarkdown()).toContain(
@@ -1649,8 +1669,20 @@ describe('mounted Script Studio composition', () => {
     expect(unsafeProposal).not.toBeNull();
     expect(unsafeProposal?.querySelector('img')).toBeNull();
     expect(unsafeProposal?.innerHTML).not.toContain('onerror=');
+    setInputValue(
+      unsafeProposal?.querySelector('input[aria-label^="Why reject"]'),
+      'It repeats the core answer.',
+    );
     findButton(unsafeProposal ?? null, 'Reject proposal').click();
-    studio.tick();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.rejectArchitectureProposal).toHaveBeenCalledWith(
+        'draft-1',
+        'op-1',
+        'It repeats the core answer.',
+      );
+      expect(unsafeProposal?.isConnected).toBe(false);
+    });
     findButton(architecturePanel, 'Accept all proposals').click();
     await vi.waitFor(() => {
       studio.tick();
@@ -2787,6 +2819,8 @@ describe('mounted Script Studio composition', () => {
       studio,
       '[data-testid="unsettled-variant"]',
     );
+    const variantId = unsettled.querySelector('strong')?.textContent?.trim();
+    expect(variantId).toBeTruthy();
     expect(unsettled.textContent).toContain('Direct');
     expect(unsettled.textContent).toContain('Playful');
     findButton(unsettled, 'Playful').click();
@@ -2805,6 +2839,19 @@ describe('mounted Script Studio composition', () => {
         'ol[aria-label="Parked variants"]',
       )?.textContent).toContain('State the rule plainly.');
     });
+    const editor = getDebugNode(
+      studio.root.querySelector('app-editor-host')!,
+    )?.componentInstance as EditorHost;
+    await editor.flushPendingChanges();
+    expect(studio.client.save).toHaveBeenCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: null,
+        disposition: `variant-picked/${
+          encodeURIComponent(variantId!)
+        }/alternative%3A1`,
+      }),
+    );
 
     await selectText(studio, 'review target');
     clickToolbar(studio, 'review');
@@ -2846,17 +2893,54 @@ describe('mounted Script Studio composition', () => {
     await expectPending(studio, true);
     await expectEmbeddedConsole(studio, 'Working on op-6.');
     studio.client.resolve('op-6', rewriteResult('rerolled target'));
-    await waitForElement(studio, '.proposal-diff');
+    let dispositionProposal: Element | null = null;
     await vi.waitFor(() => {
       studio.tick();
-      const studioReroll = findButton(
-        Array.from(studio.root.querySelectorAll(
-          '[data-testid="console-operation"]',
-        )).at(-1) ?? null,
-        'Re-roll',
-      );
-      expect(studioReroll.disabled).toBe(false);
+      dispositionProposal = studio.root.querySelector('.proposal-diff');
+      expect(dispositionProposal?.textContent).toContain('rerolled target');
+      expect(findButton(dispositionProposal, 'Reject', true)).not.toBeNull();
     });
+    const prompt = vi.spyOn(globalThis, 'prompt')
+      .mockReturnValueOnce('The cadence is too abrupt.')
+      .mockReturnValueOnce(null);
+    findButton(dispositionProposal, 'Reject').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-6',
+        decision: 'rejected',
+        reason: 'The cadence is too abrupt.',
+      });
+    });
+
+    await selectText(studio, 'reroll target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-7.');
+    studio.client.resolve('op-7', rewriteResult('first reroll candidate'));
+    await vi.waitFor(() => {
+      studio.tick();
+      dispositionProposal = studio.root.querySelector('.proposal-diff');
+      expect(dispositionProposal?.textContent).toContain(
+        'first reroll candidate',
+      );
+      expect(findButton(dispositionProposal, 'Re-roll').disabled).toBe(false);
+    });
+    findButton(dispositionProposal, 'Re-roll').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.resumeDraftOp).toHaveBeenCalledWith(
+        'draft-1',
+        'op-7',
+        expect.anything(),
+        null,
+      );
+    });
+    expect(prompt).toHaveBeenCalledTimes(2);
+    await expectEmbeddedConsole(studio, 'Working on op-8.');
+    studio.client.resolve('op-8', rewriteResult('second reroll candidate'));
+    await waitForElement(studio, '.proposal-diff');
 
     const cancelsBeforeDetach = cancelAutosave.mock.calls.length;
     await studio.router.navigateByUrl('/console');
@@ -2864,8 +2948,8 @@ describe('mounted Script Studio composition', () => {
     await vi.waitFor(() => {
       studio.tick();
       expect(studio.root.querySelector('app-agent-console-page')).not.toBeNull();
-      expect(studio.root.textContent).toContain('op-6');
-      expect(studio.root.textContent).toContain('Working on op-6.');
+      expect(studio.root.textContent).toContain('op-8');
+      expect(studio.root.textContent).toContain('Working on op-8.');
     });
     const routedReroll = findButton(
       studio.root.querySelector('app-agent-console .actions'),

@@ -125,6 +125,8 @@ class TopicClientStub {
     opId: string;
     directions: PackageDirection[];
     createdAt: string;
+    selectedDirectionIndex?: number | null;
+    selectedAt?: string | null;
   }> = [];
   private drafts: DraftRecord[] = [];
   private handoffResults: TopicHandoffResult[] = [{
@@ -199,6 +201,19 @@ class TopicClientStub {
     };
     this.packageTests.push(record);
     return record;
+  });
+  readonly pickPackageDirection = vi.fn(async (
+    ideaId: string,
+    packageTestId: string,
+    directionIndex: number,
+  ) => {
+    const current = this.packageTests.find(
+      (test) => test.ideaId === ideaId && test.id === packageTestId,
+    );
+    if (!current) throw new Error('package test not found');
+    current.selectedDirectionIndex = directionIndex;
+    current.selectedAt = '2026-07-23T12:11:00.000Z';
+    return { ...current };
   });
   readonly registerTopicRun = vi.fn(async (
     opId: string,
@@ -1195,6 +1210,7 @@ describe('routed Topics composition', () => {
         'Visual promise',
         'Delivered payoff',
         'Survives honestly?',
+        'Selection',
       ]);
     const testedDirections = packageTable?.querySelectorAll<HTMLElement>(
       '[data-testid="package-test-direction"]',
@@ -1203,6 +1219,18 @@ describe('routed Topics composition', () => {
     expect(testedDirections?.[1]?.dataset['survives']).toBe('false');
     expect(topics.root.querySelector('[data-testid="package-history"]')?.textContent)
       .toContain('1 saved test');
+    findButton(testedDirections?.[1] ?? null, 'Use this package').click();
+    await vi.waitFor(() => {
+      topics.tick();
+      expect(topics.client.pickPackageDirection).toHaveBeenCalledWith(
+        'idea-2',
+        'package-test-1',
+        1,
+      );
+      expect(testedDirections?.[1]?.dataset['selected']).toBe('true');
+    });
+    expect(testedDirections?.[0]?.dataset['survives']).toBe('true');
+    expect(testedDirections?.[0]?.dataset['selected']).toBe('false');
 
     expect(topics.client.submissions.at(-1)).toEqual({
       id: expect.any(String),
@@ -1240,6 +1268,8 @@ describe('routed Topics composition', () => {
       topics.tick();
       expect(topics.root.querySelector('[data-testid="handoff-preview"]')?.textContent)
         .toContain('Which opening proof case is strongest?');
+      expect(topics.root.querySelector('[data-testid="handoff-preview"]')?.textContent)
+        .toContain('The Rules Nobody Forced You to Follow');
     });
     expect(topics.client.submissions.at(-1)).toEqual({
       id: expect.any(String),

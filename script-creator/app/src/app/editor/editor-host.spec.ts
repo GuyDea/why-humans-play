@@ -1,6 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { DaemonClientError } from '../api/client';
-import { DebouncedAutosave } from './editor-host';
+import {
+  DebouncedAutosave,
+  variantPickedDisposition,
+} from './editor-host';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -228,5 +231,13 @@ describe('DebouncedAutosave', () => {
 
     expect(save).toHaveBeenCalledOnce();
     expect(queueSizes.at(-1)).toBe(0);
+  });
+});
+
+describe('variant pick learning provenance', () => {
+  it('uses the fixed reversible variant-set/alternative disposition', () => {
+    expect(variantPickedDisposition('opening set/α', 'Playful: 2')).toBe(
+      'variant-picked/opening%20set%2F%CE%B1/Playful%3A%202',
+    );
   });
 });

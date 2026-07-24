@@ -171,6 +171,16 @@ interface ArchitectureCard {
                     </div>
                   </dl>
                 }
+                <label>
+                  Why? <span>(optional)</span>
+                  <input
+                    type="text"
+                    [attr.aria-label]="'Why reject ' + (proposal.title || proposal.key)"
+                    [disabled]="busy()"
+                    [value]="rejectionReason(proposal.id)"
+                    (input)="setRejectionReason(proposal.id, $event)"
+                  />
+                </label>
                 <div class="button-row">
                   <button
                     type="button"
@@ -482,6 +492,7 @@ export class ArchitecturePanel {
   protected readonly generationConstraints = signal('');
   protected readonly busy = signal(false);
   private readonly instructions = signal<Record<string, string>>({});
+  private readonly rejectionReasons = signal<Record<string, string>>({});
   private readonly viewVersion = signal(0);
 
   protected cards(): ArchitectureCard[] {
@@ -598,6 +609,18 @@ export class ArchitecturePanel {
     return this.instructions()[key] ?? '';
   }
 
+  protected setRejectionReason(id: string, event: Event): void {
+    const value = controlValue(event);
+    this.rejectionReasons.update((current) => ({
+      ...current,
+      [id]: value,
+    }));
+  }
+
+  protected rejectionReason(id: string): string {
+    return this.rejectionReasons()[id] ?? '';
+  }
+
   protected generate(): void {
     if (this.busy() || this.approvalLocked()) return;
     void this.run(async () => {
@@ -644,8 +667,17 @@ export class ArchitecturePanel {
   }
 
   protected reject(id: string): void {
-    this.model().reject(id);
-    this.touch();
+    if (this.busy()) return;
+    const reason = this.rejectionReason(id);
+    void this.run(async () => {
+      await this.model().reject(id, reason === '' ? null : reason);
+      if (!this.model().proposals.some((proposal) => proposal.id === id)) {
+        this.rejectionReasons.update((current) => {
+          const { [id]: _removed, ...remaining } = current;
+          return remaining;
+        });
+      }
+    });
   }
 
   protected acceptAll(): void {
