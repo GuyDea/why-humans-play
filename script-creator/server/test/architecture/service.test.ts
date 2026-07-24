@@ -72,6 +72,9 @@ function makeFixture(input: {
   reconciliationRequired?: boolean;
   sections?: ArchitectureSection[];
   workspacePath?: string;
+  learningService?: ConstructorParameters<
+    typeof ArchitectureService
+  >[0]['learningService'];
 } = {}) {
   const root = mkdtempSync(join(tmpdir(), 'architecture-service-'));
   roots.push(root);
@@ -127,6 +130,7 @@ function makeFixture(input: {
           recordPending: vi.fn(),
         }
       : undefined,
+    learningService: input.learningService,
     idFactory: () => `architecture-revision-${++revision}`,
     now: () => '2026-07-24T10:00:00.000Z',
   });
@@ -160,6 +164,95 @@ afterEach(() => {
 });
 
 describe('ArchitectureService revisions', () => {
+  it('captures architecture rejection as pointer-only evidence', () => {
+    const captureArchitectureRejection = vi.fn();
+    const fixture = makeFixture({
+      learningService: {
+        captureRevision: vi.fn(),
+        captureProposalDisposition: vi.fn(),
+        captureArchitectureRejection,
+      },
+    });
+
+    fixture.service.rejectArchitectureProposal(
+      'draft-1',
+      'architecture-operation',
+      '  Too generic.  ',
+    );
+
+    expect(captureArchitectureRejection).toHaveBeenCalledWith({
+      draftId: 'draft-1',
+      operationId: 'architecture-operation',
+      reason: '  Too generic.  ',
+      resolvedAt: '2026-07-24T10:00:00.000Z',
+    });
+    expect(fixture.store.listRevisions('draft-1')).toEqual([]);
+  });
+
+  it('captures narration reconciliation only after its atomic revision', () => {
+    const captureRevision = vi.fn();
+    const fixture = makeFixture({
+      reconciliationRequired: true,
+      learningService: {
+        captureRevision,
+        captureProposalDisposition: vi.fn(),
+        captureArchitectureRejection: vi.fn(),
+      },
+    });
+
+    const state = fixture.service.markNarrationReconciled('draft-1', {
+      confirmed: true,
+      expectedRevisionSeq: 0,
+    });
+
+    expect(state.narrationReconciliationRequired).toBe(false);
+    expect(captureRevision).toHaveBeenCalledWith(expect.objectContaining({
+      id: 'architecture-revision-1',
+      seq: 1,
+      opId: null,
+      disposition: 'narration-reconciled',
+    }));
+  });
+
+  it('captures a re-roll only after the successor operation is durable', () => {
+    const captureProposalDisposition = vi.fn();
+    const fixture = makeFixture({
+      learningService: {
+        captureRevision: vi.fn(),
+        captureProposalDisposition,
+        captureArchitectureRejection: vi.fn(),
+      },
+    });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'generate-episode',
+    });
+    const parent = fixture.service.submitOperation(
+      'draft-1',
+      'generate-episode',
+      { topic_brief: 'Brief.' },
+    );
+
+    const child = fixture.service.resumeOperation(
+      'draft-1',
+      parent,
+      { topic_brief: 'Brief, second pass.' },
+      null,
+    );
+
+    expect(child).toBe('operation-2');
+    expect(captureProposalDisposition).toHaveBeenCalledWith({
+      draftId: 'draft-1',
+      operationId: 'operation-1',
+      decision: 'rerolled',
+      reason: null,
+      successorOperationId: 'operation-2',
+      resolvedAt: '2026-07-24T10:00:00.000Z',
+    });
+    expect(fixture.submitted[1]?.options).toEqual({
+      resumeOf: 'operation-1',
+    });
+  });
+
   it('reads architecture state and appends one revision-checked architecture save', () => {
     const fixture = makeFixture({ approved: false });
     const sections = completeSections().map((section, index) =>

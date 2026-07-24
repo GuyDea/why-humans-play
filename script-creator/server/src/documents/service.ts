@@ -61,20 +61,28 @@ interface DocumentMilestoneService {
   }): Promise<PendingMilestone | void>;
 }
 
+interface DocumentLearningService {
+  captureRevision(revision: RevisionRecord): unknown;
+  capturePromotionCompletion(promotion: PromotionRecord): unknown;
+}
+
 export class DocumentService {
   private readonly store: DocumentStore;
   private readonly milestoneService: DocumentMilestoneService | null;
+  private readonly learningService: DocumentLearningService | null;
   private readonly idFactory: () => string;
   private readonly now: () => string;
 
   constructor(opts: {
     store: DocumentStore;
     milestoneService?: DocumentMilestoneService;
+    learningService?: DocumentLearningService;
     idFactory?: () => string;
     now?: () => string;
   }) {
     this.store = opts.store;
     this.milestoneService = opts.milestoneService ?? null;
+    this.learningService = opts.learningService ?? null;
     this.idFactory = opts.idFactory ?? randomUUID;
     this.now = opts.now ?? (() => new Date().toISOString());
   }
@@ -159,7 +167,7 @@ export class DocumentService {
     requireNonEmpty(disposition, 'disposition');
     const timestamp = this.now();
 
-    return this.store.saveDraft(id, {
+    const saved = this.store.saveDraft(id, {
       title,
       format,
       doc: input.doc,
@@ -172,6 +180,8 @@ export class DocumentService {
         createdAt: timestamp,
       },
     });
+    this.learningService?.captureRevision(saved.revision);
+    return saved;
   }
 
   listRevisions(draftId: string): RevisionRecord[] {
@@ -247,12 +257,13 @@ export class DocumentService {
       );
     }
     if (promotion.targetHash === output.hash) return promotion;
-    return this.store.updatePromotion({
+    const completed = this.store.updatePromotion({
       ...promotion,
       targetHash: output.hash,
       validationHash: null,
       updatedAt: timestamp,
     });
+    return completed;
   }
 
   recordPromotionValidation(
@@ -379,13 +390,15 @@ export class DocumentService {
         draft.narrationReconciliationRequired === true,
       updatedAt: this.now(),
     });
-    return this.store.updatePromotion({
+    const completed = this.store.updatePromotion({
       ...promotion,
       state: 'complete',
       validationHash: validation.hash,
       error: null,
       updatedAt: this.now(),
     });
+    this.learningService?.capturePromotionCompletion(completed);
+    return completed;
   }
 }
 

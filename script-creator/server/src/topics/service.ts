@@ -376,6 +376,20 @@ interface TopicWorkspaceService {
   }): Promise<PendingMilestone | void>;
 }
 
+interface TopicLearningService {
+  capturePackagePick(input: {
+    draftId: string;
+    packageTestId: string;
+    selectedAt: string;
+  }): unknown;
+  captureWinnerHandoff(input: {
+    draftId: string;
+    runId: string;
+    winnerSubject: string;
+    completedAt: string;
+  }): unknown;
+}
+
 export interface TopicHandoffInput {
   ideaId: string;
   episodeSlug: string;
@@ -427,6 +441,7 @@ export class TopicService {
   private readonly documentService: TopicDocumentService;
   private readonly artifactService: TopicArtifactService | null;
   private readonly workspaceService: TopicWorkspaceService | null;
+  private readonly learningService: TopicLearningService | null;
   private readonly repoRoot: string;
   private readonly idFactory: () => string;
   private readonly now: () => string;
@@ -438,6 +453,7 @@ export class TopicService {
     documentService: TopicDocumentService;
     artifactService?: TopicArtifactService;
     workspaceService?: TopicWorkspaceService;
+    learningService?: TopicLearningService;
     repoRoot: string;
     idFactory?: () => string;
     now?: () => string;
@@ -447,6 +463,7 @@ export class TopicService {
     this.documentService = options.documentService;
     this.artifactService = options.artifactService ?? null;
     this.workspaceService = options.workspaceService ?? null;
+    this.learningService = options.learningService ?? null;
     this.repoRoot = options.repoRoot;
     this.idFactory = options.idFactory ?? randomUUID;
     this.now = options.now ?? (() => new Date().toISOString());
@@ -554,6 +571,23 @@ export class TopicService {
   listPackageTests(ideaId: string): PackageTestRecord[] {
     this.getIdea(ideaId);
     return this.store.listPackageTests(ideaId);
+  }
+
+  pickPackageDirection(
+    ideaId: string,
+    packageTestId: string,
+    directionIndex: number,
+  ): PackageTestRecord {
+    this.getIdea(ideaId);
+    const record = this.store.getPackageTest(packageTestId);
+    if (!record || record.ideaId !== ideaId) {
+      throw new Error(`package test not found: ${packageTestId}`);
+    }
+    return this.store.selectPackageDirection(
+      packageTestId,
+      directionIndex,
+      this.now(),
+    );
   }
 
   registerRun(opId: string): TopicRunSummary {
@@ -839,6 +873,26 @@ export class TopicService {
       }
       this.updateIdea(input.ideaId, { status: 'promoted' });
       saga = this.advanceHandoff(saga, { ideaPromoted: true });
+    }
+    if (saga.ideaPromoted && this.learningService) {
+      this.learningService.captureWinnerHandoff({
+        draftId: saga.draftId,
+        runId,
+        winnerSubject,
+        completedAt: saga.updatedAt,
+      });
+      for (const packageTest of this.store.listPackageTests(input.ideaId)) {
+        if (
+          packageTest.selectedDirectionIndex !== undefined
+          && packageTest.selectedAt !== undefined
+        ) {
+          this.learningService.capturePackagePick({
+            draftId: saga.draftId,
+            packageTestId: packageTest.id,
+            selectedAt: packageTest.selectedAt,
+          });
+        }
+      }
     }
     return handoffResult(saga, null);
   }

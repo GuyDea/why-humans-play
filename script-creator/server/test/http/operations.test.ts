@@ -672,6 +672,181 @@ describe('operations HTTP API', () => {
     await app.close();
   });
 
+  it('passes re-roll and rejection reasons verbatim through typed durable actions', async () => {
+    const resumeOperation = vi.fn(() => 'operation-child');
+    const resolveNarrationProposal = vi.fn(() => ({
+      draftId: 'draft-1',
+      operationId: 'operation-reject',
+      state: 'rejected' as const,
+      createdAt: '2026-07-24T08:00:00.000Z',
+      resolvedAt: '2026-07-24T08:01:00.000Z',
+      reasonNote: '  Keep the original rhythm.  ',
+      successorOperationId: null,
+    }));
+    const rejectArchitectureProposal = vi.fn();
+    const app = buildApp({
+      nonce: NONCE,
+      operationService: {
+        submit: () => 'unused',
+        list: () => [],
+        events: () => [],
+        get: () => {
+          throw new Error('operation not found: unused');
+        },
+        cancel: () => {},
+        result: () => ({ kind: 'pending' }),
+      },
+      documentService: UNUSED_DOCUMENT_SERVICE,
+      architectureService: {
+        get: () => {
+          throw new Error('unused');
+        },
+        save: () => {
+          throw new Error('unused');
+        },
+        submitOperation: () => 'unused',
+        resumeOperation,
+        resolveNarrationProposal,
+        rejectArchitectureProposal,
+      },
+      artifactService: {},
+      validatorService: UNUSED_VALIDATOR_SERVICE,
+    });
+
+    const rerolled = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/ops/operation-parent/resume',
+      headers: AUTH,
+      payload: {
+        inputs: { selection: 'Try again.' },
+        reason: '  The first version over-explained.  ',
+      },
+    });
+    const rejected = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/narration/proposals/operation-reject/resolve',
+      headers: AUTH,
+      payload: {
+        decision: 'rejected',
+        reason: '  Keep the original rhythm.  ',
+      },
+    });
+    const architectureRejected = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/architecture/proposals/architecture-op/reject',
+      headers: AUTH,
+      payload: { reason: null },
+    });
+
+    expect(rerolled.statusCode).toBe(200);
+    expect(resumeOperation).toHaveBeenCalledWith(
+      'draft-1',
+      'operation-parent',
+      { selection: 'Try again.' },
+      '  The first version over-explained.  ',
+    );
+    expect(rejected.statusCode).toBe(200);
+    expect(resolveNarrationProposal).toHaveBeenCalledWith(
+      'draft-1',
+      'operation-reject',
+      'rejected',
+      '  Keep the original rhythm.  ',
+    );
+    expect(architectureRejected.statusCode).toBe(200);
+    expect(rejectArchitectureProposal).toHaveBeenCalledWith(
+      'draft-1',
+      'architecture-op',
+      null,
+    );
+    await app.close();
+  });
+
+  it('lists cursor-paginated decisions and stores optional notes verbatim', async () => {
+    const list = vi.fn(() => ({
+      decisions: [{
+        id: 'decision-1',
+        draftId: 'draft-1',
+        seq: 1,
+        kind: 'proposal-rejected' as const,
+        disposition: 'rejected',
+        sourceTimestamp: '2026-07-24T08:00:00.000Z',
+        createdAt: '2026-07-24T08:00:00.000Z',
+        note: null,
+        context: {
+          source: {
+            type: 'architecture-proposal',
+            id: 'operation-1',
+            disposition: 'rejected',
+          },
+        },
+      }],
+      nextCursor: null,
+    }));
+    const setNote = vi.fn(() => ({
+      id: 'decision-1',
+      draftId: 'draft-1',
+      seq: 1,
+      kind: 'proposal-rejected' as const,
+      disposition: 'rejected',
+      sourceTimestamp: '2026-07-24T08:00:00.000Z',
+      createdAt: '2026-07-24T08:00:00.000Z',
+      note: '  exact note  ',
+      context: {
+        source: {
+          type: 'architecture-proposal',
+          id: 'operation-1',
+          disposition: 'rejected',
+        },
+      },
+    }));
+    const app = buildApp({
+      nonce: NONCE,
+      operationService: {
+        submit: () => 'unused',
+        list: () => [],
+        events: () => [],
+        get: () => {
+          throw new Error('operation not found: unused');
+        },
+        cancel: () => {},
+        result: () => ({ kind: 'pending' }),
+      },
+      documentService: UNUSED_DOCUMENT_SERVICE,
+      learningService: {
+        list,
+        setNote,
+        recordValidatorAttempt: vi.fn(),
+      },
+      artifactService: {},
+      validatorService: UNUSED_VALIDATOR_SERVICE,
+    });
+
+    const listed = await app.inject({
+      method: 'GET',
+      url: '/api/drafts/draft-1/decisions?after=4&limit=20',
+      headers: AUTH,
+    });
+    const noted = await app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1/decisions/decision-1/note',
+      headers: AUTH,
+      payload: { note: '  exact note  ' },
+    });
+
+    expect(listed.statusCode).toBe(200);
+    expect(list).toHaveBeenCalledWith('draft-1', {
+      after: 4,
+      limit: 20,
+    });
+    expect(noted.statusCode).toBe(200);
+    expect(setNote).toHaveBeenCalledWith(
+      'draft-1',
+      'decision-1',
+      '  exact note  ',
+    );
+    await app.close();
+  });
+
   it.each(['generate-episode', 'promote'])(
     'requires %s to use the draft-scoped submission route',
     async (operation) => {

@@ -139,7 +139,7 @@ describe('complete narration approval HTTP API', () => {
     });
     expect(reconciled.statusCode).toBe(200);
     expect(reconciled.json()).toMatchObject({
-      revisionSeq: 0,
+      revisionSeq: 1,
       narrationReconciliationRequired: false,
     });
     expect(fixture.store.getDraft('draft-1'))
@@ -274,7 +274,7 @@ describe('complete narration approval HTTP API', () => {
     })).statusCode).toBe(200);
   });
 
-  it('durably rejects the predecessor before a proposal reroll is submitted', async () => {
+  it('durably marks the predecessor rerolled before its successor is submitted', async () => {
     const fixture = makeFixture();
     await fixture.app.inject({
       method: 'POST',
@@ -300,7 +300,10 @@ describe('complete narration approval HTTP API', () => {
     expect(fixture.store.getNarrationProposal(
       'draft-1',
       'operation-1',
-    )?.state).toBe('rejected');
+    )).toMatchObject({
+      state: 'rerolled',
+      successorOperationId: 'operation-2',
+    });
     expect(fixture.store.getNarrationProposal(
       'draft-1',
       'operation-2',

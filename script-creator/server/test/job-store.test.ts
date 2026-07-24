@@ -14,6 +14,46 @@ function freshStore(): JobStore {
 afterEach(() => vi.useRealTimers());
 
 describe('JobStore', () => {
+  it('returns the immutable first envelope for decision evidence', () => {
+    const root = mkdtempSync(join(tmpdir(), 'job-envelope-'));
+    const store = new JobStore(join(root, 'state.sqlite3'));
+    store.createOperationWithJob(
+      {
+        id: 'operation-1',
+        name: 'rewrite-selection',
+        deadlineAt: '2026-07-24T09:00:00.000Z',
+        createdAt: '2026-07-24T08:00:00.000Z',
+      },
+      {
+        jobId: 'job-1',
+        prompt: 'original prompt',
+        cwd: root,
+        sandbox: 'read-only',
+      },
+      join(root, 'job-1'),
+    );
+    store.create(
+      {
+        jobId: 'job-retry',
+        prompt: 'retry prompt',
+        cwd: root,
+        sandbox: 'read-only',
+      },
+      join(root, 'job-retry'),
+      {
+        operationId: 'operation-1',
+        retryOf: 'job-1',
+      },
+    );
+
+    expect(store.operationEnvelope('operation-1')).toMatchObject({
+      jobId: 'job-1',
+      prompt: 'original prompt',
+    });
+    expect(store.operationEnvelope('missing')).toBeNull();
+    store.close();
+  });
+
   it('creates, transitions, and records verbatim usage', () => {
     const s = freshStore();
     const rec = s.create(env, '/jobs/j1');

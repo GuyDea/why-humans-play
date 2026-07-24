@@ -24,6 +24,7 @@ import {
 import { DraftWriteReservationError } from '../documents/store.js';
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
+import type { LearningService } from '../learning/service.js';
 import {
   MilestoneCommitError,
   MilestoneConflictError,
@@ -68,6 +69,8 @@ export interface ArchitectureHttpService extends Pick<
   narrationProposals?: ArchitectureService['narrationProposals'];
   resolveNarrationProposal?:
     ArchitectureService['resolveNarrationProposal'];
+  rejectArchitectureProposal?:
+    ArchitectureService['rejectArchitectureProposal'];
   syncProductionDraft?: ArchitectureService['syncProductionDraft'];
   promotion?: ArchitectureService['promotion'];
   reconcilePromotionResult?: ArchitectureService['reconcilePromotionResult'];
@@ -105,6 +108,7 @@ export type TopicHttpService = Pick<
   | 'deleteIdea'
   | 'createPackageTest'
   | 'listPackageTests'
+  | 'pickPackageDirection'
   | 'registerRun'
   | 'listRuns'
   | 'getRun'
@@ -133,7 +137,15 @@ export interface BuildAppOptions {
   artifactService: ArtifactHttpService;
   validatorService: ValidatorHttpService;
   milestoneService?: MilestoneHttpService;
+  learningService?: LearningHttpService;
 }
+
+export type LearningHttpService = Pick<
+  LearningService,
+  | 'list'
+  | 'setNote'
+  | 'recordValidatorAttempt'
+>;
 
 export type MilestoneHttpService = Pick<
   MilestoneService,
@@ -150,6 +162,7 @@ interface SubmitBody {
 
 interface ResumeBody {
   inputs?: unknown;
+  reason?: unknown;
 }
 
 interface OperationParams {
@@ -287,6 +300,28 @@ interface SyncProductionBody {
 
 interface ResolveNarrationProposalBody {
   decision?: unknown;
+  reason?: unknown;
+}
+
+interface RejectArchitectureProposalBody {
+  reason?: unknown;
+}
+
+interface DecisionParams extends DraftParams {
+  decisionId: string;
+}
+
+interface DecisionQuery {
+  after?: string;
+  limit?: string;
+}
+
+interface DecisionNoteBody {
+  note?: unknown;
+}
+
+interface PickPackageBody {
+  directionIndex?: unknown;
 }
 
 interface ImportDraftBody {
@@ -457,6 +492,13 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     const validation = await options.validatorService.validate(
       promotion.targetPath,
     );
+    options.learningService?.recordValidatorAttempt({
+      draftId,
+      path: validation.path,
+      hash: validation.hash,
+      ok: validation.ok,
+      diagnostics: validation.errors,
+    });
     const output = await options.artifactService.read(
       promotion.targetPath,
     );
@@ -588,6 +630,13 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
             validation = await options.validatorService.validate(
               completionReservation.targetPath,
             );
+            options.learningService?.recordValidatorAttempt({
+              draftId: request.params.id,
+              path: validation.path,
+              hash: validation.hash,
+              ok: validation.ok,
+              diagnostics: validation.errors,
+            });
             const output = await options.artifactService.read(
               completionReservation.targetPath,
             );
@@ -756,6 +805,40 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         return options.documentService.getDraft(request.params.id);
       } catch (error) {
         return sendDocumentError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams; Querystring: DecisionQuery }>(
+    '/api/drafts/:id/decisions',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.list(request.params.id, {
+          after: optionalNonNegativeInteger(
+            request.query.after,
+            'after',
+          ),
+          limit: optionalPositiveInteger(request.query.limit, 'limit'),
+        });
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.put<{ Params: DecisionParams; Body: DecisionNoteBody }>(
+    '/api/drafts/:id/decisions/:decisionId/note',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.setNote(
+          request.params.id,
+          request.params.decisionId,
+          optionalOneLineNote(request.body?.note),
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
       }
     },
   );
@@ -980,11 +1063,19 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         if (decision !== 'accepted' && decision !== 'rejected') {
           throw new Error('decision must be accepted or rejected');
         }
-        return architectureService.resolveNarrationProposal(
-          request.params.id,
-          request.params.operationId,
-          decision,
-        );
+        const reason = optionalOneLineNote(request.body?.reason);
+        return hasOwn(request.body, 'reason')
+          ? architectureService.resolveNarrationProposal(
+              request.params.id,
+              request.params.operationId,
+              decision,
+              reason,
+            )
+          : architectureService.resolveNarrationProposal(
+              request.params.id,
+              request.params.operationId,
+              decision,
+            );
       } catch (error) {
         return sendArchitectureError(
           reply,
@@ -992,6 +1083,28 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           architectureService,
           request.params.id,
         );
+      }
+    },
+  );
+
+  app.post<{
+    Params: { id: string; operationId: string };
+    Body: RejectArchitectureProposalBody;
+  }>(
+    '/api/drafts/:id/architecture/proposals/:operationId/reject',
+    async (request, reply) => {
+      try {
+        if (!architectureService.rejectArchitectureProposal) {
+          throw new Error('learning capture is not configured');
+        }
+        architectureService.rejectArchitectureProposal(
+          request.params.id,
+          request.params.operationId,
+          optionalOneLineNote(request.body?.reason),
+        );
+        return { rejected: true };
+      } catch (error) {
+        return sendLearningError(reply, error);
       }
     },
   );
@@ -1167,12 +1280,21 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         if (!hasOwn(request.body, 'inputs')) {
           throw new Error('inputs are required');
         }
+        const inputs = request.body.inputs;
+        const reason = optionalOneLineNote(request.body?.reason);
         return {
-          id: architectureService.resumeOperation(
-            request.params.id,
-            request.params.operationId,
-            request.body.inputs,
-          ),
+          id: hasOwn(request.body, 'reason')
+            ? architectureService.resumeOperation(
+                request.params.id,
+                request.params.operationId,
+                inputs,
+                reason,
+              )
+            : architectureService.resumeOperation(
+                request.params.id,
+                request.params.operationId,
+                inputs,
+              ),
         };
       } catch (error) {
         return sendArchitectureError(
@@ -1316,6 +1438,27 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     async (request, reply) => {
       try {
         return topicService.getIdea(request.params.id);
+      } catch (error) {
+        return sendTopicError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: { id: string; packageTestId: string };
+    Body: PickPackageBody;
+  }>(
+    '/api/ideas/:id/package-tests/:packageTestId/pick',
+    async (request, reply) => {
+      try {
+        return topicService.pickPackageDirection(
+          request.params.id,
+          request.params.packageTestId,
+          requiredNonNegativeInteger(
+            request.body?.directionIndex,
+            'directionIndex',
+          ),
+        );
       } catch (error) {
         return sendTopicError(reply, error);
       }
@@ -1708,6 +1851,44 @@ function optionalString(value: unknown, field: string): string | null {
   return value;
 }
 
+function optionalOneLineNote(value: unknown): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== 'string' || /[\r\n]/u.test(value)) {
+    throw new Error('reason must be a single-line string or null');
+  }
+  return value;
+}
+
+function optionalNonNegativeInteger(
+  value: string | undefined,
+  field: string,
+): number | undefined {
+  if (value === undefined) return undefined;
+  return requiredNonNegativeInteger(Number(value), field);
+}
+
+function optionalPositiveInteger(
+  value: string | undefined,
+  field: string,
+): number | undefined {
+  if (value === undefined) return undefined;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(`${field} must be a positive integer`);
+  }
+  return parsed;
+}
+
+function requiredNonNegativeInteger(
+  value: unknown,
+  field: string,
+): number {
+  if (!Number.isInteger(value) || Number(value) < 0) {
+    throw new Error(`${field} must be a non-negative integer`);
+  }
+  return value as number;
+}
+
 function requiredFormat(value: unknown): 'annotated' | 'narration' {
   if (value !== 'annotated' && value !== 'narration') {
     throw new Error('format must be annotated or narration');
@@ -2062,11 +2243,46 @@ function sendTopicError(
   return reply.code(500).send({ error: 'internal server error' });
 }
 
+function requireLearningService(
+  service: LearningHttpService | undefined,
+): LearningHttpService {
+  if (!service) throw new Error('learning service is not configured');
+  return service;
+}
+
+function sendLearningError(
+  reply: FastifyReply,
+  error: unknown,
+) {
+  const message = error instanceof Error
+    ? error.message
+    : 'learning request failed';
+  if (/^(?:draft|decision) not found:/iu.test(message)) {
+    return reply.code(404).send({ error: message });
+  }
+  if (
+    /^(?:after|limit|directionIndex) must /u.test(message)
+    || message === 'reason must be a single-line string or null'
+  ) {
+    return reply.code(400).send({ error: message });
+  }
+  if (
+    / conflict:/u.test(message)
+    || / resolution refused:/u.test(message)
+  ) {
+    return reply.code(409).send({ error: message });
+  }
+  reply.log.error({ err: error }, 'learning request failed');
+  return reply.code(500).send({ error: 'internal server error' });
+}
+
 function isTopicClientError(message: string): boolean {
   return [
     /^(?:text|opId|latestCheckOpId) is required$/,
     /^directions must be an array$/,
     /^directions\[\d+\]/,
+    /^directionIndex (?:must be|is out of range)/,
+    /^package test selection conflict:/,
     /^source must be inbox or ideate$/,
     /^status must be open, promoted, or discarded$/,
     /^latestCheck\./,
@@ -2130,6 +2346,7 @@ const UNCONFIGURED_TOPIC_SERVICE: TopicHttpService = {
   deleteIdea: topicNotConfigured,
   createPackageTest: topicNotConfigured,
   listPackageTests: topicNotConfigured,
+  pickPackageDirection: topicNotConfigured,
   registerRun: topicNotConfigured,
   listRuns: topicNotConfigured,
   getRun: topicNotConfigured,

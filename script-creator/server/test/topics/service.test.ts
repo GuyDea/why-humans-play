@@ -542,6 +542,15 @@ describe('TopicService', () => {
       createdAt: '2026-07-23T10:00:00.000Z',
     });
     expect(service.listPackageTests(idea.id)).toEqual([saved]);
+    expect(service.pickPackageDirection(idea.id, saved.id, 0))
+      .toMatchObject({
+        selectedDirectionIndex: 0,
+        selectedAt: '2026-07-23T10:00:00.000Z',
+      });
+    expect(service.pickPackageDirection(idea.id, saved.id, 0))
+      .toMatchObject({ selectedDirectionIndex: 0 });
+    expect(() => service.pickPackageDirection(idea.id, saved.id, 1))
+      .toThrow(/directionIndex is out of range|selection conflict/i);
     expect(() => service.listPackageTests('missing'))
       .toThrow(/idea not found/i);
   });

@@ -311,6 +311,27 @@ describe('topics HTTP API', () => {
     });
     expect(listed.statusCode).toBe(200);
     expect(listed.json()).toEqual([created.json()]);
+
+    const picked = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ideas/idea-1/package-tests/package-test-1/pick',
+      headers: AUTH,
+      payload: { directionIndex: 0 },
+    });
+    expect(picked.statusCode).toBe(200);
+    expect(picked.json()).toMatchObject({
+      id: 'package-test-1',
+      selectedDirectionIndex: 0,
+      selectedAt: '2026-07-23T10:00:00.000Z',
+    });
+    const replay = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ideas/idea-1/package-tests/package-test-1/pick',
+      headers: AUTH,
+      payload: { directionIndex: 0 },
+    });
+    expect(replay.statusCode).toBe(200);
+    expect(replay.json()).toEqual(picked.json());
   });
 
   it('returns pipeline rows merged with local draft creative state', async () => {
@@ -436,6 +457,7 @@ describe('topics HTTP API', () => {
         deleteIdea: fail,
         createPackageTest: fail,
         listPackageTests: fail,
+        pickPackageDirection: fail,
         registerRun: fail,
         listRuns: fail,
         getRun: fail,
@@ -473,6 +495,7 @@ describe('topics HTTP API', () => {
     ['DELETE', '/api/ideas/idea-1'],
     ['GET', '/api/ideas/idea-1/package-tests'],
     ['POST', '/api/ideas/idea-1/package-tests'],
+    ['POST', '/api/ideas/idea-1/package-tests/package-test-1/pick'],
     ['GET', '/api/topic-runs'],
     ['POST', '/api/topic-runs'],
     ['GET', '/api/topic-runs/run-1'],

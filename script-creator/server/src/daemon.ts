@@ -20,6 +20,8 @@ import { DocumentService } from './documents/service.js';
 import { DocumentStore } from './documents/store.js';
 import { buildApp } from './http/app.js';
 import { JobStore } from './job-store.js';
+import { LearningService } from './learning/service.js';
+import { LearningStore } from './learning/store.js';
 import {
   OperationService,
   type OperationClock,
@@ -141,6 +143,7 @@ export function createDaemonContext(
   const jobStore = new JobStore(stateDbFile);
   let documentStore: DocumentStore | undefined;
   let topicStore: TopicStore | undefined;
+  let learningStore: LearningStore | undefined;
   let supervisor: JobSupervisor | undefined;
   let operationService: OperationService | undefined;
   let milestoneService: MilestoneService | undefined;
@@ -148,6 +151,7 @@ export function createDaemonContext(
   try {
     documentStore = new DocumentStore(stateDbFile);
     topicStore = new TopicStore(stateDbFile);
+    learningStore = new LearningStore(stateDbFile);
     const gitValidatorLane = new SerializedLane();
     milestoneService = new MilestoneService({
       stateDbFile,
@@ -168,6 +172,21 @@ export function createDaemonContext(
     operationService.enforceDeadlinesAtBoot();
     supervisor.reattach();
     operationService.reconcileTimedOutAttempts();
+    const activeOperationService = operationService;
+    const learningService = new LearningService({
+      store: learningStore,
+      documentStore,
+      topicStore,
+      operationEvidence: (operationId) => {
+        const envelope = jobStore.operationEnvelope(operationId);
+        if (!envelope) return null;
+        return {
+          operationId,
+          envelope,
+          result: activeOperationService.result(operationId),
+        };
+      },
+    });
     const activeMilestoneService = milestoneService;
     const workspaceArtifacts = {
       write: (
@@ -207,12 +226,14 @@ export function createDaemonContext(
     const documentService = new DocumentService({
       store: documentStore,
       milestoneService: activeMilestoneService,
+      learningService,
     });
     const architectureService = new ArchitectureService({
       store: documentStore,
       operationService,
       artifactService: workspaceArtifacts,
       workspaceService: activeMilestoneService,
+      learningService,
     });
     const topicService = new TopicService({
       store: topicStore,
@@ -221,6 +242,7 @@ export function createDaemonContext(
       repoRoot,
       artifactService: workspaceArtifacts,
       workspaceService: activeMilestoneService,
+      learningService,
     });
     const app = buildApp({
       nonce,
@@ -239,11 +261,12 @@ export function createDaemonContext(
           ),
       },
       milestoneService: activeMilestoneService,
+      learningService,
     });
     const activeSupervisor = supervisor;
     const activeDocumentStore = documentStore;
     const activeTopicStore = topicStore;
-    const activeOperationService = operationService;
+    const activeLearningStore = learningStore;
     const daemonMilestoneService = milestoneService;
 
     let closed = false;
@@ -267,9 +290,13 @@ export function createDaemonContext(
               activeTopicStore.close();
             } finally {
               try {
-                activeDocumentStore.close();
+                activeLearningStore.close();
               } finally {
-                daemonMilestoneService.close();
+                try {
+                  activeDocumentStore.close();
+                } finally {
+                  daemonMilestoneService.close();
+                }
               }
             }
           }
@@ -281,6 +308,7 @@ export function createDaemonContext(
     if (supervisor) supervisor.stop();
     else jobStore.close();
     topicStore?.close();
+    learningStore?.close();
     documentStore?.close();
     milestoneService?.close();
     throw error;

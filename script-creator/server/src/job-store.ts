@@ -263,6 +263,13 @@ export class JobStore {
     return row ? toRecord(row) : null;
   }
 
+  operationEnvelope(operationId: string): JobEnvelope | null {
+    const attempt = this.operationAttempts(operationId)[0];
+    return attempt
+      ? JSON.parse(attempt.envelopeJson) as JobEnvelope
+      : null;
+  }
+
   setState(id: string, state: JobState, error?: string): void {
     const operationId = this.db.transaction(() => {
       const finished = [

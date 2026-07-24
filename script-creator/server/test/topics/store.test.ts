@@ -101,7 +101,7 @@ afterEach(() => {
 });
 
 describe('TopicStore', () => {
-  it('migrates a v2 state database through the shared v9 registry', () => {
+  it('migrates a v2 state database through the shared v10 registry', () => {
     const dbFile = databaseFile();
     const documents = new DocumentStore(dbFile);
     documentStores.push(documents);
@@ -124,7 +124,7 @@ describe('TopicStore', () => {
       .map((column) => column.name);
     inspected.close();
 
-    expect(version).toBe(9);
+    expect(version).toBe(10);
     expect(ideas).toEqual([
       'id',
       'text',
@@ -149,6 +149,8 @@ describe('TopicStore', () => {
       'op_id',
       'directions_json',
       'created_at',
+      'selected_direction_index',
+      'selected_at',
     ]);
   });
 

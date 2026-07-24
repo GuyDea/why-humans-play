@@ -98,6 +98,24 @@ interface ArchitectureWorkspaceService {
   }): Promise<PendingMilestone>;
 }
 
+interface ArchitectureLearningService {
+  captureRevision(revision: RevisionRecord): unknown;
+  captureProposalDisposition(input: {
+    draftId: string;
+    operationId: string;
+    decision: 'accepted' | 'rejected' | 'rerolled';
+    reason: string | null;
+    successorOperationId: string | null;
+    resolvedAt: string;
+  }): unknown;
+  captureArchitectureRejection(input: {
+    draftId: string;
+    operationId: string;
+    reason: string | null;
+    resolvedAt: string;
+  }): unknown;
+}
+
 interface ArchitectureArtifactService {
   write(
     path: string,
@@ -197,6 +215,7 @@ export class ArchitectureService {
   private readonly operationService: ArchitectureOperationService;
   private readonly artifactService: ArchitectureArtifactService | null;
   private readonly workspaceService: ArchitectureWorkspaceService | null;
+  private readonly learningService: ArchitectureLearningService | null;
   private readonly idFactory: () => string;
   private readonly now: () => string;
   private readonly actionLocks = new Map<string, Promise<void>>();
@@ -206,6 +225,7 @@ export class ArchitectureService {
     operationService: ArchitectureOperationService;
     artifactService?: ArchitectureArtifactService;
     workspaceService?: ArchitectureWorkspaceService;
+    learningService?: ArchitectureLearningService;
     idFactory?: () => string;
     now?: () => string;
   }) {
@@ -213,6 +233,7 @@ export class ArchitectureService {
     this.operationService = options.operationService;
     this.artifactService = options.artifactService ?? null;
     this.workspaceService = options.workspaceService ?? null;
+    this.learningService = options.learningService ?? null;
     this.idFactory = options.idFactory ?? randomUUID;
     this.now = options.now ?? (() => new Date().toISOString());
   }
@@ -269,6 +290,7 @@ export class ArchitectureService {
     if (!result) {
       throw new ArchitectureRevisionConflictError(this.get(draftId));
     }
+    this.learningService?.captureRevision(result.revision);
     return {
       state: architectureState(result.draft, result.revision.seq, null),
       revision: result.revision,
@@ -287,22 +309,69 @@ export class ArchitectureService {
     draftId: string,
     operationId: string,
     inputs: unknown,
+    reason: string | null = null,
   ): string {
     const operation = this.operationService.get(operationId).operation;
     const proposal = this.store.getNarrationProposal(
       draftId,
       operationId,
     );
+    if (proposal && proposal.state !== 'pending') {
+      const successorOperationId = proposal.successorOperationId;
+      if (
+        proposal.state !== 'rerolled'
+        || successorOperationId == null
+      ) {
+        throw new ArchitectureGateError(
+          'operation resume refused: predecessor proposal is already resolved',
+        );
+      }
+      if (this.learningService) {
+        this.learningService.captureProposalDisposition({
+          draftId,
+          operationId,
+          decision: 'rerolled',
+          reason,
+          successorOperationId,
+          resolvedAt: proposal.resolvedAt ?? this.now(),
+        });
+      } else if (proposal.reasonNote !== reason) {
+        throw new ArchitectureGateError(
+          'operation resume refused: predecessor disposition conflicts',
+        );
+      }
+      return successorOperationId;
+    }
     if (proposal?.state === 'pending') {
       const result = this.operationService.result?.(operationId)
         ?? { kind: 'pending' };
       if (this.operationHasNarrationProposal(operationId)) {
-        this.store.resolveNarrationProposal(
-          draftId,
-          operationId,
-          'rejected',
-          this.now(),
-        );
+        const childId = this.submit(draftId, operation, inputs, {
+          resumeOf: operationId,
+        });
+        const resolvedAt = this.now();
+        if (this.learningService) {
+          this.learningService.captureProposalDisposition({
+            draftId,
+            operationId,
+            decision: 'rerolled',
+            reason,
+            successorOperationId: childId,
+            resolvedAt,
+          });
+        } else {
+          this.store.resolveNarrationProposal(
+            draftId,
+            operationId,
+            'rerolled',
+            resolvedAt,
+            {
+              reasonNote: reason,
+              successorOperationId: childId,
+            },
+          );
+        }
+        return childId;
       } else if (result.kind !== 'pending') {
         this.store.resolveNarrationProposal(
           draftId,
@@ -326,8 +395,12 @@ export class ArchitectureService {
     expectedRevisionSeq: number,
   ): Promise<ArchitectureActionResult> {
     requireRevisionSeq(expectedRevisionSeq);
-    return this.withActionLock(draftId, () =>
+    const result = await this.withActionLock(draftId, () =>
       this.resumeApprove(draftId, expectedRevisionSeq));
+    if (result.complete) {
+      this.captureLatestDecisionRevision(draftId);
+    }
+    return result;
   }
 
   async resumeArchitectureSaga(
@@ -335,7 +408,7 @@ export class ArchitectureService {
     resumeKey: string,
   ): Promise<ArchitectureActionResult> {
     requireNonEmpty(resumeKey, 'resumeKey');
-    return this.withActionLock(draftId, () => {
+    const result = await this.withActionLock(draftId, () => {
       const saga = this.store.getPendingArchitectureSaga(draftId);
       if (
         !saga
@@ -354,6 +427,10 @@ export class ArchitectureService {
           return assertNeverArchitectureSaga(saga.action);
       }
     });
+    if (result.complete) {
+      this.captureLatestDecisionRevision(draftId);
+    }
+    return result;
   }
 
   async reopen(
@@ -362,8 +439,12 @@ export class ArchitectureService {
   ): Promise<ArchitectureActionResult> {
     if (input.confirmed !== true) throw new Error('confirmed must be true');
     requireRevisionSeq(input.expectedRevisionSeq);
-    return this.withActionLock(draftId, () =>
+    const result = await this.withActionLock(draftId, () =>
       this.resumeReopen(draftId, input.expectedRevisionSeq));
+    if (result.complete) {
+      this.captureLatestDecisionRevision(draftId);
+    }
+    return result;
   }
 
   markNarrationReconciled(
@@ -388,11 +469,17 @@ export class ArchitectureService {
       );
     }
     if (draft.narrationReconciliationRequired === true) {
-      this.store.setNarrationReconciliationRequired(
-        draftId,
-        false,
-        this.now(),
-      );
+      const reconciled = this.store.markNarrationReconciled(draftId, {
+        expectedRevisionSeq: input.expectedRevisionSeq,
+        revisionId: this.idFactory(),
+        updatedAt: this.now(),
+      });
+      if (!reconciled) {
+        throw new NarrationRevisionConflictError(
+          this.requireDraft(draftId),
+        );
+      }
+      this.learningService?.captureRevision(reconciled.revision);
     }
     return this.get(draftId);
   }
@@ -566,6 +653,7 @@ export class ArchitectureService {
         updatedAt: this.now(),
       });
       this.store.deleteNarrationSettledExports(draftId);
+      this.captureLatestDecisionRevision(draftId);
       return approved;
     });
   }
@@ -632,6 +720,7 @@ export class ArchitectureService {
     draftId: string,
     operationId: string,
     decision: 'accepted' | 'rejected',
+    reason: string | null = null,
   ): NarrationProposalRecord {
     const draft = this.requireDraft(draftId);
     requireNonEmpty(operationId, 'operationId');
@@ -648,6 +737,16 @@ export class ArchitectureService {
       );
     }
     if (proposal.state !== 'pending') {
+      if (this.learningService) {
+        this.learningService.captureProposalDisposition({
+          draftId,
+          operationId,
+          decision,
+          reason,
+          successorOperationId: null,
+          resolvedAt: proposal.resolvedAt ?? this.now(),
+        });
+      }
       if (decision === 'accepted' && proposal.state === 'accepted') {
         this.clearNarrationReconciliationIfEligible(
           draft,
@@ -671,12 +770,26 @@ export class ArchitectureService {
       );
     }
     const resolvedAt = this.now();
-    const resolved = this.store.resolveNarrationProposal(
-      draftId,
-      operationId,
-      decision,
-      resolvedAt,
-    );
+    let resolved: NarrationProposalRecord;
+    if (this.learningService) {
+      this.learningService.captureProposalDisposition({
+          draftId,
+          operationId,
+          decision,
+          reason,
+          successorOperationId: null,
+          resolvedAt,
+        });
+      resolved = this.store.getNarrationProposal(draftId, operationId)!;
+    } else {
+      resolved = this.store.resolveNarrationProposal(
+        draftId,
+        operationId,
+        decision,
+        resolvedAt,
+        { reasonNote: reason },
+      );
+    }
     if (decision === 'accepted') {
       this.clearNarrationReconciliationIfEligible(
         draft,
@@ -685,6 +798,24 @@ export class ArchitectureService {
       );
     }
     return resolved;
+  }
+
+  rejectArchitectureProposal(
+    draftId: string,
+    operationId: string,
+    reason: string | null = null,
+  ): void {
+    this.requireDraft(draftId);
+    requireNonEmpty(operationId, 'operationId');
+    if (!this.learningService) {
+      throw new Error('learning capture is not configured');
+    }
+    this.learningService.captureArchitectureRejection({
+      draftId,
+      operationId,
+      reason,
+      resolvedAt: this.now(),
+    });
   }
 
   private clearNarrationReconciliationIfEligible(
@@ -1488,6 +1619,8 @@ export class ArchitectureService {
         state: 'pending',
         createdAt: this.now(),
         resolvedAt: null,
+        reasonNote: null,
+        successorOperationId: null,
       });
     }
     if (operation === 'promote') {
@@ -1536,12 +1669,23 @@ export class ArchitectureService {
           )
         ) {
           const resolvedAt = this.now();
-          this.store.resolveNarrationProposal(
-            draftId,
-            proposal.operationId,
-            'accepted',
-            resolvedAt,
-          );
+          if (this.learningService) {
+            this.learningService.captureProposalDisposition({
+              draftId,
+              operationId: proposal.operationId,
+              decision: 'accepted',
+              reason: null,
+              successorOperationId: null,
+              resolvedAt,
+            });
+          } else {
+            this.store.resolveNarrationProposal(
+              draftId,
+              proposal.operationId,
+              'accepted',
+              resolvedAt,
+            );
+          }
           this.clearNarrationReconciliationIfEligible(
             this.requireDraft(draftId),
             proposal,
@@ -1584,6 +1728,11 @@ export class ArchitectureService {
       && result.guardrail === null
       && recordValue(result.value) !== null
       && typeof recordValue(result.value)?.['replacement_markdown'] === 'string';
+  }
+
+  private captureLatestDecisionRevision(draftId: string): void {
+    const revision = this.store.listRevisions(draftId).at(-1);
+    if (revision) this.learningService?.captureRevision(revision);
   }
 
   private requireDraft(draftId: string): DraftRecord {

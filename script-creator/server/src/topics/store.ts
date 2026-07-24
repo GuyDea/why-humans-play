@@ -48,6 +48,8 @@ export interface PackageTestRecord {
   opId: string;
   directions: PackageDirection[];
   createdAt: string;
+  selectedDirectionIndex?: number;
+  selectedAt?: string;
 }
 
 export interface TopicRunRecord {
@@ -105,6 +107,8 @@ interface PackageTestRow {
   op_id: string;
   directions_json: string;
   created_at: string;
+  selected_direction_index: number | null;
+  selected_at: string | null;
 }
 
 interface TopicHandoffSagaRow {
@@ -162,13 +166,21 @@ function runFrom(row: TopicRunRow): TopicRunRecord {
 }
 
 function packageTestFrom(row: PackageTestRow): PackageTestRecord {
-  return {
+  const record: PackageTestRecord = {
     id: row.id,
     ideaId: row.idea_id,
     opId: row.op_id,
     directions: JSON.parse(row.directions_json) as PackageDirection[],
     createdAt: row.created_at,
   };
+  if (
+    row.selected_direction_index !== null
+    && row.selected_at !== null
+  ) {
+    record.selectedDirectionIndex = row.selected_direction_index;
+    record.selectedAt = row.selected_at;
+  }
+  return record;
 }
 
 function handoffSagaFrom(
@@ -309,6 +321,39 @@ export class TopicStore {
     ).all(ideaId).map(packageTestFrom);
   }
 
+  getPackageTest(id: string): PackageTestRecord | null {
+    const row = this.db.prepare<[string], PackageTestRow>(
+      'SELECT * FROM package_tests WHERE id = ?',
+    ).get(id);
+    return row ? packageTestFrom(row) : null;
+  }
+
+  selectPackageDirection(
+    id: string,
+    directionIndex: number,
+    selectedAt: string,
+  ): PackageTestRecord {
+    const current = this.getPackageTest(id);
+    if (!current) throw new Error(`package test not found: ${id}`);
+    if (
+      !Number.isInteger(directionIndex)
+      || directionIndex < 0
+      || directionIndex >= current.directions.length
+    ) {
+      throw new Error('directionIndex is out of range');
+    }
+    if (current.selectedDirectionIndex !== undefined) {
+      if (current.selectedDirectionIndex === directionIndex) return current;
+      throw new Error(`package test selection conflict: ${id}`);
+    }
+    this.db.prepare(
+      `UPDATE package_tests
+       SET selected_direction_index = ?, selected_at = ?
+       WHERE id = ? AND selected_direction_index IS NULL`,
+    ).run(directionIndex, selectedAt, id);
+    return this.getPackageTest(id)!;
+  }
+
   createRun(record: TopicRunRecord): TopicRunRecord {
     this.db.prepare(
       `INSERT INTO topic_runs (
@@ -404,6 +449,16 @@ export class TopicStore {
       `SELECT * FROM topic_handoff_sagas
        WHERE run_id = ? AND winner_subject = ?`,
     ).get(runId, winnerSubject);
+    return row ? handoffSagaFrom(row) : null;
+  }
+
+  getHandoffSagaBySourceId(
+    sourceId: string,
+  ): TopicHandoffSagaRecord | null {
+    const row = this.db.prepare<[string], TopicHandoffSagaRow>(
+      `SELECT * FROM topic_handoff_sagas
+       WHERE run_id || ':' || winner_subject = ?`,
+    ).get(sourceId);
     return row ? handoffSagaFrom(row) : null;
   }
 

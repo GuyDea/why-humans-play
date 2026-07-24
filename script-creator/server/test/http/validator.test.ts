@@ -161,4 +161,84 @@ describe('validator HTTP API', () => {
     expect(forbiddenOrigin.statusCode).toBe(403);
     expect(validate).not.toHaveBeenCalled();
   });
+
+  it('appends a draft-scoped validator attempt before returning diagnostics', async () => {
+    const result: ValidatorResult = {
+      ok: false,
+      errors: [{ message: 'Missing Status field.', line: 3 }],
+      path: 'whp-youtube/episodes/bad.md',
+      hash: 'bad-hash',
+    };
+    const recordValidatorAttempt = vi.fn();
+    const app = buildApp({
+      nonce: NONCE,
+      operationService: {
+        submit: () => 'operation-1',
+        list: () => [],
+        get: () => {
+          throw new Error('operation not found: operation-1');
+        },
+        events: () => [],
+        cancel: () => {},
+        result: () => ({ kind: 'pending' }),
+      },
+      documentService: {
+        ...UNUSED_DOCUMENT_SERVICE,
+        syncPromotionOutput: vi.fn(),
+        recordPromotionValidation: vi.fn(),
+      },
+      architectureService: {
+        get: () => {
+          throw new Error('unused');
+        },
+        save: () => {
+          throw new Error('unused');
+        },
+        submitOperation: () => 'unused',
+        resumeOperation: () => 'unused',
+        promotion: () => ({
+          draftId: 'draft-1',
+          operationId: 'promote-1',
+          state: 'validation-required',
+          targetPath: result.path,
+          targetHash: result.hash,
+          importRevisionId: 'revision-1',
+          validationHash: null,
+          error: null,
+          createdAt: '2026-07-24T08:00:00.000Z',
+          updatedAt: '2026-07-24T08:00:00.000Z',
+        }),
+      },
+      learningService: {
+        list: vi.fn(),
+        setNote: vi.fn(),
+        recordValidatorAttempt,
+      },
+      artifactService: {
+        read: async () => ({
+          path: result.path,
+          content: '# Script',
+          hash: result.hash,
+        }),
+      },
+      validatorService: { validate: async () => result },
+    });
+    apps.push(app);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/validate',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual(result);
+    expect(recordValidatorAttempt).toHaveBeenCalledWith({
+      draftId: 'draft-1',
+      path: result.path,
+      hash: result.hash,
+      ok: false,
+      diagnostics: result.errors,
+    });
+  });
 });
