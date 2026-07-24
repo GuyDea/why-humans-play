@@ -482,7 +482,7 @@ describe('DaemonClient', () => {
     await client.approveArchitecture('draft/one', {
       expectedRevisionSeq: 5,
     });
-    await client.resumeArchitectureApproval('draft/one', {
+    await client.resumeArchitectureSaga('draft/one', {
       resumeKey: 'approval/key',
     });
     await client.reopenArchitecture('draft/one', {
@@ -534,7 +534,7 @@ describe('DaemonClient', () => {
         body: JSON.stringify({ expectedRevisionSeq: 5 }),
       },
       {
-        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/approve/resume`,
+        url: `${BASE_URL}/api/drafts/draft%2Fone/architecture/resume`,
         method: 'POST',
         nonce: NONCE,
         body: JSON.stringify({ resumeKey: 'approval/key' }),

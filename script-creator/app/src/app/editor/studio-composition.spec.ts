@@ -119,7 +119,9 @@ class ControllableDaemonClient {
   pendingMilestones: PendingMilestone[] = [];
   failNextMilestoneCommit = false;
   pauseNextArchitectureApproval = false;
-  readonly architectureApprovalResumes: string[] = [];
+  pauseNextArchitectureMilestone = false;
+  pauseNextArchitectureReopen = false;
+  readonly architectureSagaResumes: string[] = [];
   readonly narrationApprovals: Array<{
     draftId: string;
     expectedRevisionSeq: number;
@@ -165,7 +167,7 @@ class ControllableDaemonClient {
     approvedAt: null,
     revisionSeq: 0,
     narrationReconciliationRequired: false,
-    approvalSaga: null,
+    pendingSaga: null,
   };
 
   constructor(readonly storedDraft: DraftRecord) {
@@ -249,6 +251,17 @@ class ControllableDaemonClient {
     operationId: string,
     decision: 'accepted' | 'rejected',
   ) => {
+    if (
+      decision === 'accepted'
+      && !this.revisionHistory.some(
+        (revision) => revision.opId === operationId,
+      )
+    ) {
+      throw new DaemonClientError(409, {
+        error:
+          'accepted narration proposal requires a persisted operation revision',
+      });
+    }
     this.narrationProposalResolutions.push({
       draftId,
       operationId,
@@ -413,12 +426,17 @@ class ControllableDaemonClient {
 
   readonly save = vi.fn(async (
     _id: string,
-    input: { doc: DraftDocument; disposition?: string },
+    input: {
+      doc: DraftDocument;
+      opId?: string | null;
+      disposition?: string;
+    },
   ): Promise<SavedDraft> => {
     this.storedDraft.doc = input.doc;
     const revision = this.appendRevision(
       input.disposition ?? 'edit',
       input.doc,
+      input.opId ?? null,
     );
     return {
       draft: this.storedDraft,
@@ -476,8 +494,12 @@ class ControllableDaemonClient {
       approvedMd: joinArchitecture(this.architectureState.sections),
       approvedAt: '2026-07-24T12:00:00.000Z',
       revisionSeq: this.architectureState.revisionSeq + 1,
-      approvalSaga: this.pauseNextArchitectureApproval
+      pendingSaga: (
+        this.pauseNextArchitectureApproval
+        || this.pauseNextArchitectureMilestone
+      )
         ? {
+            kind: 'approve',
             resumeKey: 'approval-resume-key',
             steps: {
               revisionAppended: 'completed',
@@ -495,7 +517,22 @@ class ControllableDaemonClient {
       throw new DaemonClientError(409, {
         error: 'architecture artifact conflict',
         currentHash: 'pre-planted-conflict-hash',
-        steps: this.architectureState.approvalSaga!.steps,
+        steps: this.architectureState.pendingSaga!.steps,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
+    if (this.pauseNextArchitectureMilestone) {
+      this.pauseNextArchitectureMilestone = false;
+      this.architectureState.pendingSaga!.steps = {
+        revisionAppended: 'completed',
+        artifactWritten: 'completed',
+        pipelineUpserted: 'completed',
+        draftUpdated: 'pending',
+      };
+      throw new DaemonClientError(409, {
+        error:
+          'pending milestone source conflict for architecture-approval',
+        recoverable: true,
         state: cloneArchitectureState(this.architectureState),
       });
     }
@@ -513,30 +550,40 @@ class ControllableDaemonClient {
     );
     return completedArchitectureAction(this.architectureState);
   });
-  readonly resumeArchitectureApproval = vi.fn(async (
+  readonly resumeArchitectureSaga = vi.fn(async (
     _id: string,
     input: { resumeKey: string },
   ): Promise<ArchitectureActionResult> => {
-    if (input.resumeKey !== this.architectureState.approvalSaga?.resumeKey) {
-      throw new Error('approval resume key mismatch');
+    const saga = this.architectureState.pendingSaga;
+    if (input.resumeKey !== saga?.resumeKey) {
+      throw new Error('architecture saga resume key mismatch');
     }
-    this.architectureApprovalResumes.push(input.resumeKey);
+    this.architectureSagaResumes.push(input.resumeKey);
     this.architectureState = {
       ...this.architectureState,
-      approvalSaga: null,
+      pendingSaga: null,
     };
-    setDraftPhase(this.storedDraft, 'rapid-prototype');
-    this.canonicalArchitectureWrites.push(
-      `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
-    );
-    this.pipelineMilestones.push('prototyping');
-    this.recordPendingMilestone(
-      'architecture-approval',
-      [
+    if (saga.kind === 'approve') {
+      setDraftPhase(this.storedDraft, 'rapid-prototype');
+      this.canonicalArchitectureWrites.push(
         `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
-        'whp-youtube/PIPELINE.md',
-      ],
-    );
+      );
+      this.pipelineMilestones.push('prototyping');
+      this.recordPendingMilestone(
+        'architecture-approval',
+        [
+          `whp-youtube/architectures/${this.storedDraft.episodeSlug}.md`,
+          'whp-youtube/PIPELINE.md',
+        ],
+      );
+    } else {
+      setDraftPhase(this.storedDraft, 'architecture');
+      this.pipelineMilestones.push('architecture');
+      this.recordPendingMilestone(
+        'architecture-reopen',
+        ['whp-youtube/PIPELINE.md'],
+      );
+    }
     return completedArchitectureAction(this.architectureState);
   });
   readonly reopenArchitecture = vi.fn(async (
@@ -558,7 +605,30 @@ class ControllableDaemonClient {
       approvedAt: null,
       revisionSeq: this.architectureState.revisionSeq + 1,
       narrationReconciliationRequired: true,
+      pendingSaga: this.pauseNextArchitectureReopen
+        ? {
+            kind: 'reopen',
+            resumeKey: 'reopen-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'completed',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          }
+        : null,
     };
+    if (this.pauseNextArchitectureReopen) {
+      this.pauseNextArchitectureReopen = false;
+      throw new DaemonClientError(409, {
+        error: 'architecture pipeline conflict',
+        currentHash: 'pre-planted-pipeline-conflict-hash',
+        steps: this.architectureState.pendingSaga!.steps,
+        state: cloneArchitectureState(this.architectureState),
+      });
+    }
     setDraftPhase(this.storedDraft, 'architecture');
     this.pipelineMilestones.push('architecture');
     this.recordPendingMilestone(
@@ -1700,7 +1770,7 @@ describe('mounted Script Studio composition', () => {
       expect(findButton(panel, 'Generate architecture').disabled).toBe(true);
       expect(findButton(panel, 'Review architecture').disabled).toBe(true);
       expect(editorHostElement.textContent).toContain(
-        'Architecture approval paused — resume or resolve first.',
+        'Architecture action paused — resume or resolve first.',
       );
       expect(editorHostElement.querySelector('.ProseMirror')
         ?.getAttribute('contenteditable')).toBe('false');
@@ -1710,7 +1780,7 @@ describe('mounted Script Studio composition', () => {
       generatedNarrationMarkdown('Blocked narration replacement.'),
       'blocked-proposal',
     )).rejects.toThrow(
-      'Architecture approval paused — resume or resolve first.',
+      'Architecture action paused — resume or resolve first.',
     );
     expect(studio.client.save).toHaveBeenCalledTimes(
       savesBeforeBlockedAttempt,
@@ -1719,10 +1789,10 @@ describe('mounted Script Studio composition', () => {
     findButton(panel, 'Resume approval').click();
     await vi.waitFor(() => {
       studio.tick();
-      expect(studio.client.architectureApprovalResumes)
+      expect(studio.client.architectureSagaResumes)
         .toEqual(['approval-resume-key']);
       expect(panel?.textContent).toContain('Approved Jul 24, 2026');
-      expect(studio.client.architectureState.approvalSaga).toBeNull();
+      expect(studio.client.architectureState.pendingSaga).toBeNull();
       expect(readDraftPhase(studio.client.storedDraft))
         .toBe('rapid-prototype');
       expect(studio.client.pipelineMilestones).toEqual(['prototyping']);
@@ -1730,7 +1800,7 @@ describe('mounted Script Studio composition', () => {
         expect.objectContaining({ kind: 'architecture-approval' }),
       ]);
       expect(editorHostElement.textContent).not.toContain(
-        'Architecture approval paused — resume or resolve first.',
+        'Architecture action paused — resume or resolve first.',
       );
       expect(editorHostElement.querySelector('.ProseMirror')
         ?.getAttribute('contenteditable')).toBe('true');
@@ -1746,6 +1816,95 @@ describe('mounted Script Studio composition', () => {
       savesBeforeBlockedAttempt + 1,
     );
     expect(editorText(studio)).toContain('resumed editor target');
+  });
+
+  it('adopts milestone-conflict state immediately so the routed editor blocks and exposes Resume', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureMilestone = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    findButton(panel, 'Approve architecture').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain(
+        'pending milestone source conflict for architecture-approval',
+      );
+      expect(panel?.textContent).toContain(
+        'Approval paused — resume required',
+      );
+      expect(findButton(panel, 'Resume approval').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+  });
+
+  it('shows a paused Reopen saga and resumes it through the shared routed surface', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      const approvedSections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+        key,
+        title,
+        md: `### ${title}\n\nApproved ${key}.\n`,
+      }));
+      client.architectureState = {
+        ...client.architectureState,
+        sections: approvedSections,
+        approvedMd: joinArchitecture(approvedSections),
+        approvedAt: '2026-07-24T12:00:00.000Z',
+      };
+      client.pauseNextArchitectureReopen = true;
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    findButton(panel, 'Reopen architecture').click();
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain('Reopen paused — resume required');
+      expect(findButton(panel, 'Resume Reopen').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
+
+    findButton(panel, 'Resume Reopen').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.architectureSagaResumes)
+        .toEqual(['reopen-resume-key']);
+      expect(studio.client.architectureState.pendingSaga).toBeNull();
+      expect(readDraftPhase(studio.client.storedDraft)).toBe('architecture');
+      expect(editorHost.narrationBlocked()).toBe(false);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('true');
+    });
   });
 
   it('surfaces a recoverable autosave refusal that races with paused approval', async () => {
@@ -1795,15 +1954,16 @@ describe('mounted Script Studio composition', () => {
     });
     rejectRacingSave!(new DaemonClientError(409, {
       error:
-        'draft write refused: architecture approval is paused; resume or resolve approval first',
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
       recoverable: true,
     }));
     await expect(flush).rejects.toThrow('Narration remains unsaved.');
     studio.tick();
     expect(editorHostElement.textContent).toContain(
-      'Unsaved — Architecture approval paused — resume or resolve first. Narration remains unsaved.',
+      'Unsaved — Architecture action paused — resume or resolve first. Narration remains unsaved.',
     );
 
     findButton(panel, 'Resume approval').click();
@@ -1817,6 +1977,64 @@ describe('mounted Script Studio composition', () => {
     expect(editorHostElement.querySelector(
       '[data-testid="unsaved-badge"]',
     )).toBeNull();
+  });
+
+  it('adopts a reservation response state and blocks the routed editor without a reload', async () => {
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.save.mockImplementationOnce(async () => {
+        client.architectureState = {
+          ...client.architectureState,
+          pendingSaga: {
+            kind: 'reopen',
+            resumeKey: 'remote-reopen-resume-key',
+            steps: {
+              revisionAppended: 'completed',
+              artifactWritten: 'completed',
+              pipelineUpserted: 'pending',
+              draftUpdated: 'pending',
+            },
+            createdAt: '2026-07-24T12:00:00.000Z',
+            updatedAt: '2026-07-24T12:00:00.000Z',
+          },
+        };
+        throw new DaemonClientError(409, {
+          error:
+            'draft write refused: an architecture saga is paused; resume or resolve it first',
+          code: 'draft-write-reserved',
+          reservation: 'architecture-saga',
+          sagaKind: 'reopen',
+          recoverable: true,
+          state: cloneArchitectureState(client.architectureState),
+        });
+      });
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await replaceRenderedText(
+      studio,
+      'rewrite target',
+      'remote saga race target',
+    );
+    await expect(editorHost.flushPendingChanges()).rejects.toThrow(
+      'Narration remains unsaved.',
+    );
+
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel?.textContent).toContain('Reopen paused — resume required');
+      expect(findButton(panel, 'Resume Reopen').disabled).toBe(false);
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(editorHostElement.querySelector('.ProseMirror')
+        ?.getAttribute('contenteditable')).toBe('false');
+    });
   });
 
   it('rolls back a proposal replacement refused by a racing approval pause', async () => {
@@ -1874,14 +2092,15 @@ describe('mounted Script Studio composition', () => {
     });
     rejectRacingSave!(new DaemonClientError(409, {
       error:
-        'draft write refused: architecture approval is paused; resume or resolve approval first',
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
       recoverable: true,
     }));
 
     await expect(replacement).rejects.toThrow(
-      'draft write refused: architecture approval is paused; resume or resolve approval first',
+      'draft write refused: an architecture saga is paused; resume or resolve it first',
     );
     studio.tick();
     expect(editorText(studio)).toBe(narrationBeforeReplacement);
@@ -1905,6 +2124,311 @@ describe('mounted Script Studio composition', () => {
     studio.tick();
     expect(editorText(studio)).toContain('Racing proposal replacement.');
     expect(studio.client.save).toHaveBeenCalledTimes(3);
+  });
+
+  it('preserves inline-acceptance provenance across a saga pause and settles after Resume', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await selectText(studio, 'rewrite target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
+    studio.client.resolve('op-1', rewriteResult('accepted inline target'));
+    let proposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      proposal = studio.root.querySelector('.proposal-diff');
+      expect(proposal?.textContent).toContain('accepted inline target');
+    });
+    findButton(proposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    expect(studio.client.save).toHaveBeenLastCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'selection-proposal-accepted',
+      }),
+    );
+    expect(studio.client.narrationProposalResolutions).toContainEqual({
+      draftId: 'draft-1',
+      operationId: 'op-1',
+      decision: 'accepted',
+    });
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave' && input.opId === null)).toBe(false);
+  });
+
+  it('queues every overlapping accepted provenance across one saga pause', async () => {
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(architectureDraft(), (client) => {
+      client.architectureState = {
+        ...client.architectureState,
+        sections: ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+          key,
+          title,
+          md: `### ${title}\n\nApproved ${key}.\n`,
+        })),
+      };
+      client.pauseNextArchitectureApproval = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const panel = studio.root.querySelector('app-architecture-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    await selectText(studio, 'rewrite target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
+    studio.client.resolve('op-1', rewriteResult('first accepted target'));
+    let firstProposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      firstProposal = studio.root.querySelector('.proposal-diff');
+      expect(firstProposal?.textContent).toContain('first accepted target');
+    });
+    findButton(firstProposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    await selectText(studio, 'failure target');
+    clickToolbar(studio, 'rewrite');
+    await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-2.');
+    studio.client.resolve('op-2', rewriteResult('second accepted target'));
+    let secondProposal: Element | null = null;
+    await vi.waitFor(() => {
+      studio.tick();
+      secondProposal = studio.root.querySelector('.proposal-diff');
+      expect(secondProposal?.textContent).toContain('second accepted target');
+    });
+    findButton(secondProposal, 'Accept').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorText(studio)).toContain('second accepted target');
+    });
+
+    findButton(panel, 'Approve architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(panel, 'Resume approval').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    const acceptedRevisions = studio.client.revisionHistory.filter(
+      (revision) => revision.disposition === 'selection-proposal-accepted',
+    );
+    expect(acceptedRevisions.map(({ opId }) => opId)).toEqual([
+      'op-1',
+      'op-2',
+    ]);
+    expect(studio.client.narrationProposalResolutions).toEqual(
+      expect.arrayContaining([
+        {
+          draftId: 'draft-1',
+          operationId: 'op-1',
+          decision: 'accepted',
+        },
+        {
+          draftId: 'draft-1',
+          operationId: 'op-2',
+          decision: 'accepted',
+        },
+      ]),
+    );
+  });
+
+  it('preserves PI-acceptance provenance across a Reopen pause and settles after Resume', async () => {
+    vi.stubGlobal('confirm', vi.fn(() => true));
+    let rejectRacingSave:
+      ((error: DaemonClientError) => void) | undefined;
+    const studio = await mountStudio(productionDraft(), (client) => {
+      const approvedSections = ARCHITECTURE_SECTIONS.map(({ key, title }) => ({
+        key,
+        title,
+        md: `### ${title}\n\nApproved ${key}.\n`,
+      }));
+      client.architectureState = {
+        ...client.architectureState,
+        sections: approvedSections,
+        approvedMd: joinArchitecture(approvedSections),
+        approvedAt: '2026-07-24T12:00:00.000Z',
+      };
+      client.pauseNextArchitectureReopen = true;
+      client.save.mockImplementationOnce(() =>
+        new Promise((_resolve, reject) => {
+          rejectRacingSave = reject;
+        }));
+    });
+    const architecturePanel = studio.root.querySelector(
+      'app-architecture-panel',
+    );
+    const productionPanel = studio.root.querySelector('app-production-panel');
+    const editorHostElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    );
+    if (!editorHostElement) throw new Error('EditorHost was not mounted');
+    const editorHost = getDebugNode(editorHostElement)?.componentInstance as
+      | EditorHost
+      | undefined;
+    if (!editorHost) throw new Error('EditorHost instance was not discoverable');
+
+    const response = productionPanel!.querySelector<HTMLTextAreaElement>(
+      'textarea[aria-label="Response for PI-001"]',
+    )!;
+    response.value = 'I noticed it while teaching a friend.';
+    response.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(productionPanel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    studio.client.resolve('op-1', rewriteResult('Accepted supplied detail.'));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(productionPanel?.textContent).toContain(
+        'Accepted supplied detail.',
+      );
+    });
+    findButton(productionPanel, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.save).toHaveBeenCalledOnce();
+      expect(rejectRacingSave).toBeTypeOf('function');
+    });
+
+    findButton(architecturePanel, 'Reopen architecture').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(true);
+      expect(architecturePanel?.textContent).toContain(
+        'Reopen paused — resume required',
+      );
+    });
+    rejectRacingSave!(new DaemonClientError(409, {
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'reopen',
+      recoverable: true,
+    }));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHostElement.textContent).toContain(
+        'Proposal settlement failed: accepted narration proposal requires a persisted operation revision',
+      );
+    });
+
+    findButton(architecturePanel, 'Resume Reopen').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editorHost.narrationBlocked()).toBe(false);
+    });
+    await editorHost.flushPendingChanges();
+
+    expect(studio.client.save).toHaveBeenLastCalledWith(
+      'draft-1',
+      expect.objectContaining({
+        opId: 'op-1',
+        disposition: 'personal-input-proposal-accepted',
+      }),
+    );
+    expect(studio.client.narrationProposalResolutions).toContainEqual({
+      draftId: 'draft-1',
+      operationId: 'op-1',
+      decision: 'accepted',
+    });
+    expect(studio.client.save.mock.calls.some(([, input]) =>
+      input.disposition === 'autosave' && input.opId === null)).toBe(false);
   });
 
   it('drives the full production Studio and routed Console surface', async () => {
@@ -2279,6 +2803,7 @@ async function mountStudio(
       'wpm',
       'narrationBlocked',
     ]);
+    hydrateSignalOutputs(EditorHost, ['architectureConflict']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
     hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
     hydrateSignalInputs(ArchitecturePanel, ['model', 'draft', 'version']);
@@ -2818,10 +3343,10 @@ function cloneArchitectureState(
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
-    approvalSaga: state.approvalSaga
+    pendingSaga: state.pendingSaga
       ? {
-          ...state.approvalSaga,
-          steps: { ...state.approvalSaga.steps },
+          ...state.pendingSaga,
+          steps: { ...state.pendingSaga.steps },
         }
       : null,
   };

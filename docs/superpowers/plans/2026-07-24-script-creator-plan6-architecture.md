@@ -10,6 +10,12 @@
 
 ## Contract decisions
 
+- Architecture approval and Reopen are kinds of one persisted architecture-saga
+  contract. Any pending kind reserves generic narration revision writes, is exposed
+  with its kind and opaque resume key, resumes through the same route, and returns the
+  current architecture state on recoverable pauses so the routed editor blocks without
+  a reload. Cancelling a racing accepted-proposal save preserves its operation
+  provenance with the pending dirty state for the post-resume save and settlement.
 - The accepted [architecture-stage amendment](../specs/2026-07-23-script-creator-architecture-ui-design.md) is normative for Block A. The app copies its nine fixed sections and their key/title/order contract, then performs only mechanical split, join, storage, rendering, and gating. It does not encode architecture quality, required insight counts, evidence judgments, or any other editorial rule from the script skill.
 - Architecture section `md` retains the complete `###` section slice, including its heading and separators. This lets fixed and unrecognized sections round-trip byte-for-byte; `key` and `title` are routing metadata, not a second serialization. A rewrite result must mechanically parse to one section with the requested key before it can become a proposal.
 - Architecture approval stores `approvedMd` as the exact joined architecture without the repository header. The canonical `whp-youtube/architectures/<slug>.md` file is a mechanical header containing title, approval date, and approved status followed by that exact `approvedMd`. Narration envelopes receive `approved_architecture_md: approvedMd`, not the header and not text reconstructed by the app.

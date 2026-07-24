@@ -170,12 +170,15 @@ export interface ImportPromotionRecord {
 
 export class DraftWriteReservationError extends Error {
   readonly code = 'draft-write-reserved';
-  readonly reservation = 'architecture-approval';
+  readonly reservation = 'architecture-saga';
   readonly recoverable = true;
 
-  constructor() {
+  constructor(
+    readonly draftId: string,
+    readonly sagaKind: ArchitectureSagaAction,
+  ) {
     super(
-      'draft write refused: architecture approval is paused; resume or resolve approval first',
+      'draft write refused: an architecture saga is paused; resume or resolve it first',
     );
     this.name = 'DraftWriteReservationError';
   }
@@ -467,6 +470,7 @@ export class DocumentStore {
   ): { draft: DraftRecord; revision: RevisionRecord } | null {
     return this.db.transaction(() => {
       if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      this.assertDraftWriteAvailable(id);
       const currentSeq = this.currentRevisionSeq(id);
       if (currentSeq !== update.expectedRevisionSeq) return null;
       const nextSeq = currentSeq + 1;
@@ -691,7 +695,7 @@ export class DocumentStore {
     return this.db.transaction(() => {
       if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
       this.assertDraftWriteAvailable(id, {
-        allowArchitectureApprovalSaga: true,
+        allowArchitectureSaga: true,
       });
       const currentSeq = this.currentRevisionSeq(id);
       if (currentSeq !== update.expectedRevisionSeq) return null;
@@ -810,17 +814,16 @@ export class DocumentStore {
 
   getPendingArchitectureSaga(
     draftId: string,
-    action: ArchitectureSagaAction,
   ): ArchitectureSagaRecord | null {
     const row = this.db.prepare<
-      [string, ArchitectureSagaAction],
+      [string],
       ArchitectureSagaRow
     >(
       `SELECT * FROM architecture_sagas
-       WHERE draft_id = ? AND action = ? AND draft_updated = 0
-       ORDER BY expected_revision_seq DESC
+       WHERE draft_id = ? AND draft_updated = 0
+       ORDER BY updated_at DESC, expected_revision_seq DESC, rowid DESC
        LIMIT 1`,
-    ).get(draftId, action);
+    ).get(draftId);
     return row ? architectureSagaFrom(row) : null;
   }
 
@@ -961,15 +964,19 @@ export class DocumentStore {
   private assertDraftWriteAvailable(
     id: string,
     options: {
-      allowArchitectureApprovalSaga?: boolean;
+      allowArchitectureSaga?: boolean;
       allowProductionSynchronization?: boolean;
     } = {},
   ): void {
+    const pendingArchitectureSaga = this.getPendingArchitectureSaga(id);
     if (
-      options.allowArchitectureApprovalSaga !== true
-      && this.getPendingArchitectureSaga(id, 'approve')
+      options.allowArchitectureSaga !== true
+      && pendingArchitectureSaga
     ) {
-      throw new DraftWriteReservationError();
+      throw new DraftWriteReservationError(
+        id,
+        pendingArchitectureSaga.action,
+      );
     }
     const draft = this.getDraft(id)!;
     const phase = draftCreativePhase(draft.doc);

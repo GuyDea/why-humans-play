@@ -238,7 +238,7 @@ export class NarrationActions {
     return state?.approvedAt !== null
       && state?.approvedAt !== undefined
       && state.approvedMd !== null
-      && state.approvalSaga === null
+      && state.pendingSaga === null
       && state.approvedMd === joinArchitecture(state.sections);
   }
 

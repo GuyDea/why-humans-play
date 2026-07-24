@@ -158,7 +158,9 @@ describe('staged Promote HTTP workflow', () => {
     )).toHaveLength(1);
   });
 
-  it('refuses a production import while architecture approval is paused', async () => {
+  it.each(['approve', 'reopen'] as const)(
+    'refuses a production import while architecture %s is paused',
+    async (sagaKind) => {
     const production = productionMarkdown();
     const fixture = makeFixture({
       read: async () => ({
@@ -184,7 +186,7 @@ describe('staged Promote HTTP workflow', () => {
     });
     fixture.store.createArchitectureSaga({
       draftId: 'draft-1',
-      action: 'approve',
+      action: sagaKind,
       expectedRevisionSeq: 0,
       input: {},
       revisionAppended: true,
@@ -204,17 +206,27 @@ describe('staged Promote HTTP workflow', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toEqual({
       error:
-        'draft write refused: architecture approval is paused; resume or resolve approval first',
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind,
       recoverable: true,
+      state: expect.objectContaining({
+        pendingSaga: expect.objectContaining({
+          kind: sagaKind,
+          resumeKey: expect.any(String),
+        }),
+      }),
     });
     expect(fixture.store.listRevisions('draft-1').filter(
       ({ disposition }) => disposition === 'production-import',
     )).toHaveLength(0);
-  });
+    },
+  );
 
-  it('keeps a Promote-result import recoverable while architecture approval is paused', async () => {
+  it.each(['approve', 'reopen'] as const)(
+    'keeps a Promote-result import recoverable while architecture %s is paused',
+    async (sagaKind) => {
     const fixture = makeFixture({
       read: async () => ({
         path: 'whp-youtube/episodes/01-composition-net.md',
@@ -227,7 +239,7 @@ describe('staged Promote HTTP workflow', () => {
     });
     fixture.store.createArchitectureSaga({
       draftId: 'draft-1',
-      action: 'approve',
+      action: sagaKind,
       expectedRevisionSeq: 0,
       input: {},
       revisionAppended: true,
@@ -247,10 +259,17 @@ describe('staged Promote HTTP workflow', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toEqual({
       error:
-        'draft write refused: architecture approval is paused; resume or resolve approval first',
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind,
       recoverable: true,
+      state: expect.objectContaining({
+        pendingSaga: expect.objectContaining({
+          kind: sagaKind,
+          resumeKey: expect.any(String),
+        }),
+      }),
     });
     expect(fixture.store.getPromotionByOperation('promote-1')).toMatchObject({
       state: 'output-ready',
@@ -260,7 +279,8 @@ describe('staged Promote HTTP workflow', () => {
     expect(fixture.store.listRevisions('draft-1').filter(
       ({ disposition }) => disposition === 'production-import',
     )).toHaveLength(0);
-  });
+    },
+  );
 
   it.each([
     {

@@ -9,6 +9,7 @@ import {
   ViewChild,
   computed,
   input,
+  output,
   signal,
 } from '@angular/core';
 import {
@@ -281,6 +282,11 @@ interface AutosaveSnapshot {
   disposition: string;
 }
 
+interface SaveProvenance {
+  opId: string;
+  disposition: string;
+}
+
 @Component({
   selector: 'app-editor-host',
   standalone: true,
@@ -314,7 +320,7 @@ interface AutosaveSnapshot {
           data-testid="editor-blocked-callout"
           role="status"
         >
-          <strong>Architecture approval paused — resume or resolve first.</strong>
+          <strong>Architecture action paused — resume or resolve first.</strong>
           <span>Narration editing and autosave are blocked.</span>
         </aside>
       }
@@ -533,6 +539,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly session = input.required<StudioSession>();
   readonly wpm = input(150);
   readonly narrationBlocked = input(false);
+  readonly architectureConflict = output<unknown>();
 
   readonly doc = signal<DocumentJson | null>(null);
   readonly editorState = signal<EditorState | null>(null);
@@ -583,11 +590,12 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private editVersion = 0;
   private applyingPersonalInputChange = false;
   private personalInputUndo: (() => boolean) | null = null;
-  private nextSaveProvenance: {
-    opId: string;
-    disposition: string;
-  } | null = null;
+  private nextSaveProvenance: SaveProvenance | null = null;
+  private pendingDirtyProvenances: SaveProvenance[] = [];
   private readonly proposalSettlements = new Set<Promise<void>>();
+  private readonly proposalSettlementsByOperation =
+    new Map<string, Promise<void>>();
+  private readonly pendingAcceptedSettlements = new Set<string>();
   private proposalSettlementError: string | null = null;
   private readonly autosave = new DebouncedAutosave<AutosaveSnapshot>(
     (snapshot) => this.saveSnapshot(snapshot),
@@ -963,6 +971,8 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.editorView = null;
     this.personalInputUndo = null;
     this.nextSaveProvenance = null;
+    this.pendingDirtyProvenances = [];
+    this.pendingAcceptedSettlements.clear();
     this.proposalSettlementError = null;
     this.editorState.set(null);
     mount.replaceChildren();
@@ -1056,7 +1066,15 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     const epoch = this.draftEpoch;
     const brief = this.brief();
     if (!brief) return;
-    const provenance = this.nextSaveProvenance;
+    if (
+      this.nextSaveProvenance
+      && !this.pendingDirtyProvenances.some(
+        ({ opId }) => opId === this.nextSaveProvenance?.opId,
+      )
+    ) {
+      this.pendingDirtyProvenances.push(this.nextSaveProvenance);
+    }
+    const provenance = this.pendingDirtyProvenances[0] ?? null;
     this.nextSaveProvenance = null;
     this.currentDirty.set(true);
     this.autosave.schedule({
@@ -1087,14 +1105,49 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         disposition,
       });
       if (this.isCurrentDraft(draftId, epoch)) {
+        let provenanceAdvanced = false;
         this.saveError.set(null);
         this.revisions.update((revisions) => [...revisions, saved.revision]);
         this.latestRevision.set(saved.revision);
         if (version === this.editVersion) this.currentDirty.set(false);
+        if (
+          opId
+          && this.pendingDirtyProvenances[0]?.opId === opId
+          && this.pendingDirtyProvenances[0].disposition === disposition
+        ) {
+          this.pendingDirtyProvenances.shift();
+          provenanceAdvanced = true;
+        }
+        if (
+          provenanceAdvanced
+          && (
+            this.pendingDirtyProvenances.length > 0
+            || version !== this.editVersion
+          )
+        ) {
+          const currentDocument = this.doc();
+          if (currentDocument) this.scheduleAutosave(currentDocument);
+        }
+      }
+      if (
+        opId
+        && isAcceptedProposalDisposition(disposition)
+        && this.pendingAcceptedSettlements.has(opId)
+        && !this.proposalSettlementsByOperation.has(opId)
+      ) {
+        void this.settleNarrationProposal(
+          opId,
+          'accepted',
+          false,
+          draftId,
+        );
       }
     } catch (error) {
       if (this.isCurrentDraft(draftId, epoch)) {
         this.saveError.set(saveErrorMessage(error));
+        if (isArchitectureSagaReservation(error)) {
+          this.architectureConflict.emit(error);
+        }
       }
       throw error;
     }
@@ -1109,7 +1162,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     runtime.acceptProposal = (proposalId: string) => {
       if (this.narrationBlocked()) {
         this.operationError.set(
-          'Architecture approval paused — resume or resolve first.',
+          'Architecture action paused — resume or resolve first.',
         );
         return false;
       }
@@ -1212,7 +1265,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   private requireNarrationWriteAvailable(): void {
     if (this.narrationBlocked()) {
       throw new Error(
-        'Architecture approval paused — resume or resolve first.',
+        'Architecture action paused — resume or resolve first.',
       );
     }
   }
@@ -1237,7 +1290,11 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     draftId = this.activeDraftId,
   ): Promise<void> {
     if (!draftId) return Promise.resolve();
-    this.proposalSettlementError = null;
+    if (decision === 'accepted') {
+      this.pendingAcceptedSettlements.add(operationId);
+    }
+    const existing = this.proposalSettlementsByOperation.get(operationId);
+    if (existing) return existing;
     const settlement = (async () => {
       if (waitForSave) {
         await this.autosave.flush();
@@ -1248,14 +1305,25 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         operationId,
         decision,
       );
+      if (decision === 'accepted') {
+        this.pendingAcceptedSettlements.delete(operationId);
+      }
+      this.proposalSettlementError = null;
+      if (this.operationError()?.startsWith('Proposal settlement failed:')) {
+        this.operationError.set(null);
+      }
     })();
     this.proposalSettlements.add(settlement);
+    this.proposalSettlementsByOperation.set(operationId, settlement);
     void settlement.catch((error: unknown) => {
       this.proposalSettlementError =
         `Proposal settlement failed: ${operationErrorMessage(error)}`;
       this.operationError.set(this.proposalSettlementError);
     }).finally(() => {
       this.proposalSettlements.delete(settlement);
+      if (this.proposalSettlementsByOperation.get(operationId) === settlement) {
+        this.proposalSettlementsByOperation.delete(operationId);
+      }
     });
     return settlement;
   }
@@ -1326,15 +1394,15 @@ function promotionLauncher(
 }
 
 function saveErrorMessage(error: unknown): string {
-  if (isArchitectureApprovalReservation(error)) {
-    return 'Architecture approval paused — resume or resolve first. Narration remains unsaved.';
+  if (isArchitectureSagaReservation(error)) {
+    return 'Architecture action paused — resume or resolve first. Narration remains unsaved.';
   }
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'save failed';
 }
 
-function isArchitectureApprovalReservation(error: unknown): boolean {
+function isArchitectureSagaReservation(error: unknown): boolean {
   if (!(error instanceof DaemonClientError) || error.status !== 409) {
     return false;
   }
@@ -1343,8 +1411,13 @@ function isArchitectureApprovalReservation(error: unknown): boolean {
     && typeof body === 'object'
     && (body as Record<string, unknown>)['code'] === 'draft-write-reserved'
     && (body as Record<string, unknown>)['reservation']
-      === 'architecture-approval'
+      === 'architecture-saga'
     && (body as Record<string, unknown>)['recoverable'] === true;
+}
+
+function isAcceptedProposalDisposition(disposition: string): boolean {
+  return disposition === 'selection-proposal-accepted'
+    || disposition === 'personal-input-proposal-accepted';
 }
 
 function operationErrorMessage(error: unknown): string {

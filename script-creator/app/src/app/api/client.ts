@@ -270,10 +270,11 @@ export interface ArchitectureState {
   approvedAt: string | null;
   revisionSeq: number;
   narrationReconciliationRequired: boolean;
-  approvalSaga: ArchitectureApprovalSagaState | null;
+  pendingSaga: ArchitectureSagaState | null;
 }
 
-export interface ArchitectureApprovalSagaState {
+export interface ArchitectureSagaState {
+  kind: 'approve' | 'reopen';
   resumeKey: string;
   steps: ArchitectureActionSteps;
   createdAt: string;
@@ -739,12 +740,12 @@ export class DaemonClient {
     );
   }
 
-  async resumeArchitectureApproval(
+  async resumeArchitectureSaga(
     id: string,
     input: { resumeKey: string },
   ): Promise<ArchitectureActionResult> {
     return this.request(
-      `/api/drafts/${encodeURIComponent(id)}/architecture/approve/resume`,
+      `/api/drafts/${encodeURIComponent(id)}/architecture/resume`,
       {
         method: 'POST',
         body: JSON.stringify(input),

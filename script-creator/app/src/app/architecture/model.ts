@@ -79,7 +79,7 @@ export interface ArchitectureModelClient {
     draftId: string,
     input: { expectedRevisionSeq: number },
   ): Promise<ArchitectureActionResult>;
-  resumeArchitectureApproval(
+  resumeArchitectureSaga(
     draftId: string,
     input: { resumeKey: string },
   ): Promise<ArchitectureActionResult>;
@@ -337,13 +337,13 @@ export class ArchitectureModel {
     }
   }
 
-  async resumeApproval(): Promise<void> {
-    const saga = this.requireState().approvalSaga;
+  async resumeSaga(): Promise<void> {
+    const saga = this.requireState().pendingSaga;
     if (!saga) return;
     this.actionConflict = null;
     this.failure = null;
     try {
-      const result = await this.client.resumeArchitectureApproval(
+      const result = await this.client.resumeArchitectureSaga(
         this.draftId,
         { resumeKey: saga.resumeKey },
       );
@@ -463,15 +463,16 @@ export class ArchitectureModel {
         : proposal);
   }
 
-  private captureActionConflict(error: unknown): void {
+  captureActionConflict(error: unknown): boolean {
     const body = conflictBody(error);
     if (!body) {
       this.failure = errorMessage(error);
-      return;
+      return false;
     }
     this.actionConflict = body;
     const current = body.current ?? body.state;
     if (current) this.state = cloneState(current);
+    return current !== undefined;
   }
 
   private applySavedState(state: ArchitectureState): void {
@@ -569,9 +570,15 @@ function schemaFrame(result: OperationResult): Record<string, unknown> | null {
 }
 
 function conflictBody(error: unknown): ArchitectureConflictBody | null {
-  if (!record(error) || error['status'] !== 409) return null;
+  if (!record(error) || typeof error['status'] !== 'number') return null;
   const body = error['body'];
-  return record(body) && typeof body['error'] === 'string'
+  return record(body)
+      && typeof body['error'] === 'string'
+      && (
+        error['status'] === 409
+        || record(body['state'])
+        || record(body['current'])
+      )
     ? body as unknown as ArchitectureConflictBody
     : null;
 }
@@ -584,10 +591,10 @@ function cloneState(state: ArchitectureState): ArchitectureState {
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
-    approvalSaga: state.approvalSaga
+    pendingSaga: state.pendingSaga
       ? {
-          ...state.approvalSaga,
-          steps: { ...state.approvalSaga.steps },
+          ...state.pendingSaga,
+          steps: { ...state.pendingSaga.steps },
         }
       : null,
   };

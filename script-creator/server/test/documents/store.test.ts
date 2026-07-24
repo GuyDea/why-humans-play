@@ -345,4 +345,46 @@ describe('DocumentStore', () => {
     })).toThrow(/draft not found: missing/i);
     expect(store.listRevisions('missing')).toEqual([]);
   });
+
+  it.each(['approve', 'reopen'] as const)(
+    'reserves narration approval while a pre-revision %s saga is pending',
+    (sagaKind) => {
+      const store = openStore();
+      const record = draft();
+      store.createDraft(record);
+      store.createArchitectureSaga({
+        draftId: record.id,
+        action: sagaKind,
+        expectedRevisionSeq: 0,
+        input: {},
+        revisionAppended: false,
+        artifactWritten: false,
+        pipelineUpserted: false,
+        draftUpdated: false,
+        createdAt: '2026-07-24T10:00:00.000Z',
+        updatedAt: '2026-07-24T10:00:00.000Z',
+      });
+
+      expect(() => store.approveNarration(record.id, {
+        expectedRevisionSeq: 0,
+        doc: record.doc,
+        approvedNarrationMd: 'Approved narration.\n',
+        approvedNarrationAt: '2026-07-24T10:01:00.000Z',
+        narrationArtifactHash: 'approved-hash',
+        updatedAt: '2026-07-24T10:01:00.000Z',
+        revision: {
+          id: `narration-approval-during-${sagaKind}`,
+          createdAt: '2026-07-24T10:01:00.000Z',
+        },
+      })).toThrow(
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      );
+      expect(store.currentRevisionSeq(record.id)).toBe(0);
+      expect(store.getDraft(record.id)).toMatchObject({
+        approvedNarrationMd: null,
+        approvedNarrationAt: null,
+        approvedNarrationRevisionSeq: null,
+      });
+    },
+  );
 });

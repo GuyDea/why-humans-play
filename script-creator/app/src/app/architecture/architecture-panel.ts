@@ -222,14 +222,14 @@ interface ArchitectureCard {
       </div>
 
       <footer class="approval-actions">
-        @if (approvalPaused()) {
+        @if (sagaPaused()) {
           <button
             type="button"
             class="approve"
             [disabled]="busy()"
-            (click)="resumeApproval()"
+            (click)="resumeSaga()"
           >
-            Resume approval
+            {{ resumeLabel() }}
           </button>
         } @else if (isApproved()) {
           <button
@@ -524,27 +524,27 @@ export class ArchitecturePanel {
   protected isApproved(): boolean {
     this.viewVersion();
     this.version();
-    return !this.approvalPaused()
+    return !this.sagaPaused()
       && this.model().state?.approvedAt !== null
       && this.model().state?.approvedAt !== undefined;
   }
 
-  protected approvalPaused(): boolean {
+  protected sagaPaused(): boolean {
     this.viewVersion();
     this.version();
-    return this.model().state?.approvalSaga !== null
-      && this.model().state?.approvalSaga !== undefined;
+    return this.model().state?.pendingSaga !== null
+      && this.model().state?.pendingSaga !== undefined;
   }
 
   protected approvalLocked(): boolean {
-    return this.isApproved() || this.approvalPaused();
+    return this.isApproved() || this.sagaPaused();
   }
 
   protected ribbonState(): 'needed' | 'approved' | 'reopened' | 'paused' {
     this.viewVersion();
     this.version();
     const state = this.model().state;
-    if (state?.approvalSaga) return 'paused';
+    if (state?.pendingSaga) return 'paused';
     if (state?.narrationReconciliationRequired) return 'reopened';
     return state?.approvedAt ? 'approved' : 'needed';
   }
@@ -552,7 +552,9 @@ export class ArchitecturePanel {
   protected ribbonLabel(): string {
     const state = this.ribbonState();
     if (state === 'paused') {
-      return 'Approval paused — resume required';
+      return this.model().state?.pendingSaga?.kind === 'reopen'
+        ? 'Reopen paused — resume required'
+        : 'Approval paused — resume required';
     }
     if (state === 'reopened') {
       return 'Reopened — narration reconciliation required';
@@ -561,6 +563,12 @@ export class ArchitecturePanel {
     return state === 'approved' && approvedAt
       ? `Approved ${formatDate(approvedAt)}`
       : 'Needs architecture';
+  }
+
+  protected resumeLabel(): string {
+    return this.model().state?.pendingSaga?.kind === 'reopen'
+      ? 'Resume Reopen'
+      : 'Resume approval';
   }
 
   protected operationStatus(): string {
@@ -660,10 +668,10 @@ export class ArchitecturePanel {
       this.runWorkflowAction(() => this.model().reopen(true)));
   }
 
-  protected resumeApproval(): void {
-    if (this.busy() || !this.approvalPaused()) return;
+  protected resumeSaga(): void {
+    if (this.busy() || !this.sagaPaused()) return;
     void this.run(() =>
-      this.runWorkflowAction(() => this.model().resumeApproval()));
+      this.runWorkflowAction(() => this.model().resumeSaga()));
   }
 
   private async runWorkflowAction(action: () => Promise<void>): Promise<void> {

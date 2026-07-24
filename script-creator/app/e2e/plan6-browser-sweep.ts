@@ -347,7 +347,7 @@ async function main(): Promise<void> {
   await editor.waitFor();
   await waitForText(
     editorHost,
-    'Architecture approval paused — resume or resolve first.',
+    'Architecture action paused — resume or resolve first.',
   );
   await waitForAttribute(editor, 'contenteditable', 'false');
   const pausedNarration = await editor.textContent();

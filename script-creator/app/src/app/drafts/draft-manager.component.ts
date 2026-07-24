@@ -141,8 +141,9 @@ import { RevisionTimeline } from './revision-timeline';
               [client]="client()"
               [session]="session()"
               [narrationBlocked]="
-                architectureModel()?.state?.approvalSaga != null
+                architectureModel()?.state?.pendingSaga != null
               "
+              (architectureConflict)="captureArchitectureConflict($event)"
             />
             <app-production-panel
               [draft]="activeDraft"
@@ -532,6 +533,12 @@ export class DraftManagerComponent implements OnInit {
 
   protected architectureChanged(): void {
     this.architectureVersion.update((version) => version + 1);
+  }
+
+  protected captureArchitectureConflict(error: unknown): void {
+    if (this.architectureModel()?.captureActionConflict(error)) {
+      this.architectureChanged();
+    }
   }
 
   protected refreshWorkflowDraft(): void {

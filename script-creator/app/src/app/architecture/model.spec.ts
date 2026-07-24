@@ -22,7 +22,7 @@ const initialState = (
   approvedAt: null,
   revisionSeq: 3,
   narrationReconciliationRequired: false,
-  approvalSaga: null,
+  pendingSaga: null,
 });
 
 class ArchitectureClientStub {
@@ -63,18 +63,18 @@ class ArchitectureClientStub {
     approvedMd: joinArchitecture(this.state.sections),
     approvedAt: '2026-07-24T10:00:00.000Z',
     revisionSeq: this.state.revisionSeq + 1,
-    approvalSaga: null,
+    pendingSaga: null,
   }));
-  readonly resumeArchitectureApproval = vi.fn(async (
+  readonly resumeArchitectureSaga = vi.fn(async (
     _draftId: string,
     input: { resumeKey: string },
   ) => {
-    if (input.resumeKey !== this.state.approvalSaga?.resumeKey) {
-      throw new Error('approval resume key mismatch');
+    if (input.resumeKey !== this.state.pendingSaga?.resumeKey) {
+      throw new Error('architecture saga resume key mismatch');
     }
     this.state = {
       ...this.state,
-      approvalSaga: null,
+      pendingSaga: null,
     };
     return actionResult(this.state);
   });
@@ -84,7 +84,7 @@ class ArchitectureClientStub {
     approvedAt: null,
     revisionSeq: this.state.revisionSeq + 1,
     narrationReconciliationRequired: true,
-    approvalSaga: null,
+    pendingSaga: null,
   }));
   readonly submitDraftOp = vi.fn(async (
     _draftId: string,
@@ -363,7 +363,9 @@ describe('ArchitectureModel', () => {
     });
   });
 
-  it('adopts a paused approval saga distinctly and resumes with its durable key', async () => {
+  it.each(['approve', 'reopen'] as const)(
+    'adopts a paused %s saga distinctly and resumes it with the shared surface',
+    async (kind) => {
     const client = new ArchitectureClientStub();
     const model = new ArchitectureModel('draft-1', client);
     await model.load();
@@ -372,8 +374,9 @@ describe('ArchitectureModel', () => {
       approvedMd: joinArchitecture(client.state.sections),
       approvedAt: '2026-07-24T10:00:00.000Z',
       revisionSeq: 4,
-      approvalSaga: {
-        resumeKey: 'approval-resume-key',
+      pendingSaga: {
+        kind,
+        resumeKey: `${kind}-resume-key`,
         steps: {
           revisionAppended: 'completed' as const,
           artifactWritten: 'pending' as const,
@@ -384,7 +387,13 @@ describe('ArchitectureModel', () => {
         updatedAt: '2026-07-24T10:00:00.000Z',
       },
     };
-    client.approveArchitecture.mockRejectedValueOnce(new DaemonClientError(
+    const action = kind === 'approve'
+      ? () => model.approve()
+      : () => model.reopen(true);
+    const actionClient = kind === 'approve'
+      ? client.approveArchitecture
+      : client.reopenArchitecture;
+    actionClient.mockRejectedValueOnce(new DaemonClientError(
       409,
       {
         error: 'architecture artifact conflict',
@@ -392,21 +401,61 @@ describe('ArchitectureModel', () => {
       },
     ));
 
-    await model.approve();
+    await action();
 
     expect(model.state).toEqual(paused);
-    expect(model.state?.approvalSaga?.resumeKey)
-      .toBe('approval-resume-key');
+    expect(model.state?.pendingSaga).toMatchObject({
+      kind,
+      resumeKey: `${kind}-resume-key`,
+    });
 
     client.state = cloneState(paused);
-    await model.resumeApproval();
+    await model.resumeSaga();
 
-    expect(client.resumeArchitectureApproval).toHaveBeenCalledWith(
+    expect(client.resumeArchitectureSaga).toHaveBeenCalledWith(
       'draft-1',
-      { resumeKey: 'approval-resume-key' },
+      { resumeKey: `${kind}-resume-key` },
     );
-    expect(model.state?.approvalSaga).toBeNull();
+    expect(model.state?.pendingSaga).toBeNull();
     expect(model.actionConflict).toBeNull();
+    },
+  );
+
+  it('adopts pending saga state from an unexpected post-saga failure', async () => {
+    const client = new ArchitectureClientStub();
+    const model = new ArchitectureModel('draft-1', client);
+    await model.load();
+    const paused = {
+      ...client.state,
+      approvedMd: null,
+      approvedAt: null,
+      revisionSeq: 4,
+      pendingSaga: {
+        kind: 'reopen' as const,
+        resumeKey: 'reopen-resume-key',
+        steps: {
+          revisionAppended: 'completed' as const,
+          artifactWritten: 'completed' as const,
+          pipelineUpserted: 'pending' as const,
+          draftUpdated: 'pending' as const,
+        },
+        createdAt: '2026-07-24T10:00:00.000Z',
+        updatedAt: '2026-07-24T10:00:00.000Z',
+      },
+    };
+    client.reopenArchitecture.mockRejectedValueOnce(new DaemonClientError(
+      500,
+      { error: 'internal server error', state: paused },
+    ));
+
+    await model.reopen(true);
+
+    expect(model.state).toEqual(paused);
+    expect(model.failure).toBeNull();
+    expect(model.actionConflict).toMatchObject({
+      error: 'internal server error',
+      state: { pendingSaga: { kind: 'reopen' } },
+    });
   });
 
   it('requires explicit reopen confirmation and applies only the returned state', async () => {
@@ -448,10 +497,10 @@ function cloneState(state: ArchitectureState): ArchitectureState {
   return {
     ...state,
     sections: state.sections.map((section) => ({ ...section })),
-    approvalSaga: state.approvalSaga
+    pendingSaga: state.pendingSaga
       ? {
-          ...state.approvalSaga,
-          steps: { ...state.approvalSaga.steps },
+          ...state.pendingSaga,
+          steps: { ...state.pendingSaga.steps },
         }
       : null,
   };

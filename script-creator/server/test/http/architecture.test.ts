@@ -186,10 +186,10 @@ function approve(fixture: Fixture, expectedRevisionSeq: number) {
   });
 }
 
-function resumeApproval(fixture: Fixture, resumeKey: string) {
+function resumeArchitectureSaga(fixture: Fixture, resumeKey: string) {
   return fixture.app.inject({
     method: 'POST',
-    url: '/api/drafts/draft-1/architecture/approve/resume',
+    url: '/api/drafts/draft-1/architecture/resume',
     headers: AUTH,
     payload: { resumeKey },
   });
@@ -477,7 +477,8 @@ describe('architecture approval and Reopen HTTP API', () => {
       state: {
         approvedAt: '2026-07-24T10:30:00.000Z',
         revisionSeq: 1,
-        approvalSaga: {
+        pendingSaga: {
+          kind: 'approve',
           resumeKey: expect.any(String),
           steps: {
             revisionAppended: 'completed',
@@ -491,7 +492,7 @@ describe('architecture approval and Reopen HTTP API', () => {
     expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
       metadata: { creativeStatus: { phase: 'architecture' } },
     });
-    const resumeKey = paused.json().state.approvalSaga.resumeKey as string;
+    const resumeKey = paused.json().state.pendingSaga.resumeKey as string;
 
     await fixture.app.close();
     rebuild(fixture);
@@ -502,17 +503,17 @@ describe('architecture approval and Reopen HTTP API', () => {
     });
     expect(reloaded.statusCode).toBe(200);
     expect(reloaded.json()).toMatchObject({
-      approvalSaga: { resumeKey },
+      pendingSaga: { kind: 'approve', resumeKey },
     });
 
     unlinkSync(target);
-    const resumed = await resumeApproval(fixture, resumeKey);
+    const resumed = await resumeArchitectureSaga(fixture, resumeKey);
 
     expect(resumed.statusCode).toBe(200);
     expect(resumed.json()).toMatchObject({
       complete: true,
       state: {
-        approvalSaga: null,
+        pendingSaga: null,
         revisionSeq: 1,
       },
     });
@@ -536,7 +537,7 @@ describe('architecture approval and Reopen HTTP API', () => {
     });
     const paused = await approve(fixture, 0);
     expect(paused.statusCode).toBe(409);
-    const resumeKey = paused.json().state.approvalSaga.resumeKey as string;
+    const resumeKey = paused.json().state.pendingSaga.resumeKey as string;
     const currentDoc = fixture.store.getDraft('draft-1')!.doc;
     const save = await fixture.app.inject({
       method: 'PUT',
@@ -551,24 +552,47 @@ describe('architecture approval and Reopen HTTP API', () => {
     expect(save.statusCode).toBe(409);
     expect(save.json()).toEqual({
       error:
-        'draft write refused: architecture approval is paused; resume or resolve approval first',
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
       recoverable: true,
+      state: expect.objectContaining({
+        pendingSaga: expect.objectContaining({
+          kind: 'approve',
+          resumeKey,
+        }),
+      }),
     });
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
 
-    const resumed = await resumeApproval(fixture, resumeKey);
+    const resumed = await resumeArchitectureSaga(fixture, resumeKey);
 
     expect(resumed.statusCode).toBe(200);
     expect(resumed.json()).toMatchObject({
       complete: true,
       state: {
-        approvalSaga: null,
+        pendingSaga: null,
         revisionSeq: 1,
       },
     });
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+    const released = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'post-resume-autosave',
+      },
+    });
+    expect(released.statusCode).toBe(200);
+    expect(released.json()).toMatchObject({
+      revision: {
+        seq: 2,
+        disposition: 'post-resume-autosave',
+      },
+    });
   });
 
   it('refuses a proposal-acceptance replacement save while approval is paused', async () => {
@@ -593,7 +617,8 @@ describe('architecture approval and Reopen HTTP API', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
       code: 'draft-write-reserved',
-      reservation: 'architecture-approval',
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
       recoverable: true,
     });
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
@@ -610,14 +635,53 @@ describe('architecture approval and Reopen HTTP API', () => {
       throw new Error('injected architecture write boundary fault');
     });
 
-    expect((await approve(fixture, 0)).statusCode).toBe(500);
+    const failed = await approve(fixture, 0);
+    expect(failed.statusCode).toBe(500);
+    expect(failed.json()).toMatchObject({
+      error: 'internal server error',
+      state: {
+        pendingSaga: {
+          kind: 'approve',
+          resumeKey: expect.any(String),
+        },
+      },
+    });
+    const blocked = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'autosave-during-failure',
+      },
+    });
+    expect(blocked.statusCode).toBe(409);
+    expect(blocked.json()).toMatchObject({
+      reservation: 'architecture-saga',
+      sagaKind: 'approve',
+    });
+    const resumeKey =
+      failed.json().state.pendingSaga.resumeKey as string;
     await fixture.app.close();
     rebuild(fixture);
-    const retried = await approve(fixture, 0);
+    const retried = await resumeArchitectureSaga(fixture, resumeKey);
 
     expect(retried.statusCode).toBe(200);
     expect(retried.json()).toMatchObject({ complete: true });
     expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+    const released = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'post-approval-failure-resume',
+      },
+    });
+    expect(released.statusCode).toBe(200);
+    expect(fixture.store.listRevisions('draft-1').filter(
+      ({ kind }) => kind === 'architecture',
+    )).toHaveLength(1);
   });
 
   it('resumes after the pipeline write boundary without duplicating work', async () => {
@@ -627,10 +691,22 @@ describe('architecture approval and Reopen HTTP API', () => {
       throw new Error('injected pipeline boundary fault');
     });
 
-    expect((await approve(fixture, 0)).statusCode).toBe(500);
+    const failed = await approve(fixture, 0);
+    expect(failed.statusCode).toBe(500);
+    expect(failed.json()).toMatchObject({
+      error: 'internal server error',
+      state: {
+        pendingSaga: {
+          kind: 'approve',
+          resumeKey: expect.any(String),
+        },
+      },
+    });
+    const resumeKey =
+      failed.json().state.pendingSaga.resumeKey as string;
     await fixture.app.close();
     rebuild(fixture);
-    const retried = await approve(fixture, 0);
+    const retried = await resumeArchitectureSaga(fixture, resumeKey);
 
     expect(retried.statusCode).toBe(200);
     expect(retried.json()).toMatchObject({ complete: true });
@@ -689,6 +765,170 @@ describe('architecture approval and Reopen HTTP API', () => {
       milestone: 'architecture',
       ref: 'whp-youtube/topics/voluntary-obstacles.md',
     });
+    const released = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'post-reopen-completion-autosave',
+      },
+    });
+    expect(released.statusCode).toBe(200);
+  });
+
+  it('refuses narration while a Reopen pipeline conflict is paused and resumes the same saga', async () => {
+    const fixture = makeFixture({ narration: 'Preserved narration.' });
+    expect((await approve(fixture, 0)).statusCode).toBe(200);
+    fixture.upsert.mockResolvedValueOnce({
+      conflict: true,
+      currentHash: 'pipeline-conflict-hash',
+    });
+
+    const paused = await reopen(fixture, 1);
+
+    expect(paused.statusCode).toBe(409);
+    expect(paused.json()).toMatchObject({
+      error: 'architecture pipeline conflict',
+      state: {
+        revisionSeq: 2,
+        approvedMd: null,
+        approvedAt: null,
+        pendingSaga: {
+          kind: 'reopen',
+          resumeKey: expect.any(String),
+          steps: {
+            revisionAppended: 'completed',
+            artifactWritten: 'completed',
+            pipelineUpserted: 'pending',
+            draftUpdated: 'pending',
+          },
+        },
+      },
+    });
+    const resumeKey =
+      paused.json().state.pendingSaga.resumeKey as string;
+    const revisionCount = fixture.store.listRevisions('draft-1').length;
+
+    const refused = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'autosave-during-paused-reopen',
+      },
+    });
+
+    expect(refused.statusCode).toBe(409);
+    expect(refused.json()).toEqual({
+      error:
+        'draft write refused: an architecture saga is paused; resume or resolve it first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-saga',
+      sagaKind: 'reopen',
+      recoverable: true,
+      state: expect.objectContaining({
+        pendingSaga: expect.objectContaining({
+          kind: 'reopen',
+          resumeKey,
+        }),
+      }),
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(revisionCount);
+
+    const resumed = await resumeArchitectureSaga(fixture, resumeKey);
+
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toMatchObject({
+      complete: true,
+      state: {
+        revisionSeq: 2,
+        approvedMd: null,
+        approvedAt: null,
+        narrationReconciliationRequired: true,
+        pendingSaga: null,
+      },
+    });
+    expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
+      metadata: { creativeStatus: { phase: 'architecture' } },
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(revisionCount);
+
+    const released = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'post-reopen-resume-autosave',
+      },
+    });
+    expect(released.statusCode).toBe(200);
+    expect(released.json()).toMatchObject({
+      revision: {
+        seq: 3,
+        disposition: 'post-reopen-resume-autosave',
+      },
+    });
+  });
+
+  it('keeps and then releases the Reopen reservation across an unexpected pipeline failure', async () => {
+    const fixture = makeFixture({ narration: 'Preserved narration.' });
+    expect((await approve(fixture, 0)).statusCode).toBe(200);
+    fixture.upsert.mockImplementationOnce(async (row: PipelineRow) => {
+      await upsertPipelineRow(fixture.root, row);
+      throw new Error('injected Reopen pipeline boundary fault');
+    });
+
+    const failed = await reopen(fixture, 1);
+
+    expect(failed.statusCode).toBe(500);
+    expect(failed.json()).toMatchObject({
+      error: 'internal server error',
+      state: {
+        pendingSaga: {
+          kind: 'reopen',
+          resumeKey: expect.any(String),
+        },
+      },
+    });
+    const blocked = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'autosave-during-reopen-failure',
+      },
+    });
+    expect(blocked.statusCode).toBe(409);
+    expect(blocked.json()).toMatchObject({
+      reservation: 'architecture-saga',
+      sagaKind: 'reopen',
+    });
+    const resumeKey =
+      failed.json().state.pendingSaga.resumeKey as string;
+
+    await fixture.app.close();
+    rebuild(fixture);
+    const resumed = await resumeArchitectureSaga(fixture, resumeKey);
+
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toMatchObject({
+      complete: true,
+      state: { pendingSaga: null, revisionSeq: 2 },
+    });
+    const released = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        disposition: 'post-reopen-failure-resume',
+      },
+    });
+    expect(released.statusCode).toBe(200);
   });
 
   it('requires explicit Reopen confirmation', async () => {
@@ -741,6 +981,12 @@ describe('architecture approval and Reopen HTTP API', () => {
     expect(response.json()).toEqual({
       error: 'pending milestone source conflict for architecture-approval',
       recoverable: true,
+      state: expect.objectContaining({
+        pendingSaga: expect.objectContaining({
+          kind: 'approve',
+          resumeKey: expect.any(String),
+        }),
+      }),
     });
   });
 });

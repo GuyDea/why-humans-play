@@ -653,3 +653,23 @@ stranding the draft.
 `.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
 `whp-youtube/STEERING.md` remain unchanged because this is an internal workbench
 concurrency and recovery contract, not a change to WHP doctrine.
+
+## 2026-07-24 — Generalize persisted architecture-saga recovery across kinds
+
+**Decision:** Treat approval, Reopen, and any future persisted architecture-saga kind
+through one recovery contract: every pending kind reserves generic narration revision
+writes, is exposed with its kind and opaque resume key, resumes through one route, and
+returns current architecture state on recoverable pauses; if a pause cancels a racing
+accepted-proposal save, preserve its operation provenance with the pending dirty state
+for the post-resume save and settlement.
+
+**Rationale:** Approval-specific reservation, exposure, and resume machinery left the
+same permanent revision strand available to Reopen, while state-less pause responses and
+cancelled-save-only provenance prevented immediate routed recovery and accepted-proposal
+settlement.
+
+**Documents:** `docs/superpowers/plans/2026-07-24-script-creator-plan6-architecture.md`,
+`.superpowers/sdd/p6-final-review-report.md`, `.superpowers/sdd/progress.md`, and
+this ledger. `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain
+unchanged because this is an internal Script Creator concurrency and recovery
+contract.

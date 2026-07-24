@@ -60,7 +60,7 @@ export interface ArchitectureHttpService extends Pick<
   'get' | 'save' | 'submitOperation' | 'resumeOperation'
 > {
   approve?: ArchitectureService['approve'];
-  resumeApproval?: ArchitectureService['resumeApproval'];
+  resumeArchitectureSaga?: ArchitectureService['resumeArchitectureSaga'];
   reopen?: ArchitectureService['reopen'];
   prepareNarrationApproval?: ArchitectureService['prepareNarrationApproval'];
   approveNarration?: ArchitectureService['approveNarration'];
@@ -257,7 +257,7 @@ interface ApproveArchitectureBody {
   expectedRevisionSeq?: unknown;
 }
 
-interface ResumeArchitectureApprovalBody {
+interface ResumeArchitectureSagaBody {
   resumeKey?: unknown;
 }
 
@@ -479,7 +479,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       try {
         return await validatePromotion(request.params.id);
       } catch (error) {
-        return sendPromotionError(reply, error);
+        return sendPromotionError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -502,7 +507,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           },
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -694,7 +704,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           }
         }
       } catch (error) {
-        return sendPromotionError(reply, error);
+        return sendPromotionError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -751,7 +766,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       try {
         return architectureService.get(request.params.id);
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -773,7 +793,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         };
         return architectureService.save(request.params.id, input);
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -790,27 +815,37 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           requiredRevisionSeq(request.body?.expectedRevisionSeq),
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
 
   app.post<{
     Params: DraftParams;
-    Body: ResumeArchitectureApprovalBody;
+    Body: ResumeArchitectureSagaBody;
   }>(
-    '/api/drafts/:id/architecture/approve/resume',
+    '/api/drafts/:id/architecture/resume',
     async (request, reply) => {
       try {
-        if (!architectureService.resumeApproval) {
-          throw new Error('architecture approval resume is not configured');
+        if (!architectureService.resumeArchitectureSaga) {
+          throw new Error('architecture saga resume is not configured');
         }
-        return await architectureService.resumeApproval(
+        return await architectureService.resumeArchitectureSaga(
           request.params.id,
           requiredString(request.body?.resumeKey, 'resumeKey'),
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -829,7 +864,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           ),
         });
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -859,7 +899,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           },
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -886,7 +931,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           },
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -904,7 +954,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           ),
         };
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -931,7 +986,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           decision,
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -956,7 +1016,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           },
         );
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -970,7 +1035,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         }
         return { promotion: architectureService.promotion(request.params.id) };
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -999,7 +1069,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         }
         return options.documentService.saveDraft(request.params.id, input);
       } catch (error) {
-        return sendDocumentError(reply, error);
+        return sendDocumentError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -1072,7 +1147,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           ),
         };
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -1095,7 +1175,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           ),
         };
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(
+          reply,
+          error,
+          architectureService,
+          request.params.id,
+        );
       }
     },
   );
@@ -1125,7 +1210,7 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         }
         return result;
       } catch (error) {
-        return sendArchitectureError(reply, error);
+        return sendArchitectureError(reply, error, architectureService);
       }
     },
   );
@@ -1674,9 +1759,20 @@ function waitForStreamDrain(stream: PassThrough): Promise<void> {
 function sendDocumentError(
   reply: FastifyReply,
   error: unknown,
+  architectureService?: ArchitectureHttpService,
+  draftId?: string,
 ) {
+  const effectiveDraftId = draftId
+    ?? (
+      error instanceof DraftWriteReservationError
+        ? error.draftId
+        : undefined
+    );
+  const pausedState = architectureService && effectiveDraftId
+    ? currentPausedArchitectureState(architectureService, effectiveDraftId)
+    : null;
   if (error instanceof DraftWriteReservationError) {
-    return sendDraftWriteReservationError(reply, error);
+    return sendDraftWriteReservationError(reply, error, pausedState);
   }
   if (error instanceof ExportBlockedError) {
     return reply.code(409).send({
@@ -1771,9 +1867,20 @@ function sendOperationError(
 function sendArchitectureError(
   reply: FastifyReply,
   error: unknown,
+  architectureService?: ArchitectureHttpService,
+  draftId?: string,
 ) {
+  const effectiveDraftId = draftId
+    ?? (
+      error instanceof DraftWriteReservationError
+        ? error.draftId
+        : undefined
+    );
+  const pausedState = architectureService && effectiveDraftId
+    ? currentPausedArchitectureState(architectureService, effectiveDraftId)
+    : null;
   if (error instanceof DraftWriteReservationError) {
-    return sendDraftWriteReservationError(reply, error);
+    return sendDraftWriteReservationError(reply, error, pausedState);
   }
   if (error instanceof ArchitectureRevisionConflictError) {
     return reply.code(409).send({
@@ -1804,12 +1911,16 @@ function sendArchitectureError(
     });
   }
   if (error instanceof ArchitectureGateError) {
-    return reply.code(409).send({ error: error.message });
+    return reply.code(409).send({
+      error: error.message,
+      ...(pausedState ? { state: pausedState } : {}),
+    });
   }
   if (error instanceof MilestoneConflictError) {
     return reply.code(409).send({
       error: error.message,
       recoverable: true,
+      ...(pausedState ? { state: pausedState } : {}),
     });
   }
   const message = error instanceof Error
@@ -1840,7 +1951,22 @@ function sendArchitectureError(
     return reply.code(400).send({ error: message });
   }
   reply.log.error({ err: error }, 'architecture request failed');
-  return reply.code(500).send({ error: 'internal server error' });
+  return reply.code(500).send({
+    error: 'internal server error',
+    ...(pausedState ? { state: pausedState } : {}),
+  });
+}
+
+function currentPausedArchitectureState(
+  architectureService: ArchitectureHttpService,
+  draftId: string,
+) {
+  try {
+    const state = architectureService.get(draftId);
+    return state.pendingSaga ? state : null;
+  } catch {
+    return null;
+  }
 }
 
 function isOperationClientError(message: string): boolean {
@@ -1877,9 +2003,20 @@ function sendValidatorError(
 function sendPromotionError(
   reply: FastifyReply,
   error: unknown,
+  architectureService?: ArchitectureHttpService,
+  draftId?: string,
 ) {
+  const effectiveDraftId = draftId
+    ?? (
+      error instanceof DraftWriteReservationError
+        ? error.draftId
+        : undefined
+    );
+  const pausedState = architectureService && effectiveDraftId
+    ? currentPausedArchitectureState(architectureService, effectiveDraftId)
+    : null;
   if (error instanceof DraftWriteReservationError) {
-    return sendDraftWriteReservationError(reply, error);
+    return sendDraftWriteReservationError(reply, error, pausedState);
   }
   const message = error instanceof Error
     ? error.message
@@ -1897,12 +2034,15 @@ function sendPromotionError(
 function sendDraftWriteReservationError(
   reply: FastifyReply,
   error: DraftWriteReservationError,
+  state: ReturnType<ArchitectureHttpService['get']> | null = null,
 ) {
   return reply.code(409).send({
     error: error.message,
     code: error.code,
     reservation: error.reservation,
+    sagaKind: error.sagaKind,
     recoverable: error.recoverable,
+    ...(state ? { state } : {}),
   });
 }
 
@@ -1978,7 +2118,7 @@ const UNCONFIGURED_ARCHITECTURE_SERVICE: ArchitectureHttpService = {
   markNarrationReconciled: architectureNotConfigured,
   promotion: architectureNotConfigured,
   approve: architectureNotConfigured,
-  resumeApproval: architectureNotConfigured,
+  resumeArchitectureSaga: architectureNotConfigured,
   reopen: architectureNotConfigured,
 };
 
