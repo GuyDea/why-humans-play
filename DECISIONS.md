@@ -834,3 +834,19 @@ real imported annotated-script template.
 and this ledger. `BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 6 and
 Plan 7 implementation plans remain unchanged because they already state the governing
 contract and this corrects only its internal proof calibration.
+
+## 2026-07-24 — Exercise Plan 7 distillation from genuine draft evidence
+
+**Decision:** The Plan 7 real-operation spot creates its distillation evidence through a
+real draft-scoped `rewrite-selection` operation whose narration proposal is durably
+rejected with a why-note, then submits Distill only through the draft-scoped route so the
+server freezes that genuine decision and zero lessons.
+
+**Rationale:** Generic operation submission now correctly refuses Distill, and
+draft-scoped Distill deliberately prevents callers from supplying synthetic frozen
+decisions or lessons.
+
+**Documents:** `.superpowers/sdd/p7-final-review-report.md` and this ledger.
+`BRAND.md`, `CLAUDE.md`, `whp-youtube/STEERING.md`, and the Plan 7 implementation plan
+remain unchanged because this corrects the real-operation verification flow without
+changing WHP doctrine or the approved Plan 7 architecture.
