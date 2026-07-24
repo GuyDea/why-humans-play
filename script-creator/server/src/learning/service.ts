@@ -11,8 +11,13 @@ import type {
   OperationServiceResult,
 } from '../operations/service.js';
 import {
+  ReconciliationCommitMismatchError,
   verifyExistingDoctrinePointer,
   verifyReconciliationCommit,
+} from '../repo/git.js';
+import type {
+  ReconciliationCommitCheck,
+  VerifiedReconciliationCommit,
 } from '../repo/git.js';
 import type { OperationState } from '../types.js';
 import type { TopicStore } from '../topics/store.js';
@@ -101,6 +106,19 @@ export interface ActiveEpisodeLesson {
   version: number;
   markdown: string;
   contentHash: string;
+}
+
+export class ReconciliationVerificationRefusal extends Error {
+  readonly code = 'reconciliation-verification-refused';
+  readonly recoverable = true;
+
+  constructor(
+    message: string,
+    readonly checked: ReconciliationCommitCheck,
+  ) {
+    super(message);
+    this.name = 'ReconciliationVerificationRefusal';
+  }
 }
 
 export class LearningService {
@@ -607,11 +625,18 @@ export class LearningService {
       throw new Error('selected repository workspace is unavailable');
     }
     const repoRoot = this.repositoryRootForDraft(lesson.draftId);
-    const verified = verifyReconciliationCommit(repoRoot, commit);
+    const verified = this.verifyReconciliationCommit(repoRoot, commit);
     const pointer = verified.doctrinePointers[0] ?? null;
     if (reconciliation.kind !== 'retire' && pointer === null) {
-      throw new Error(
-        'reconciliation commit has no current doctrine content pointer',
+      throw new ReconciliationVerificationRefusal(
+        `reconciliation commit verification refused: checked commit ${
+          verified.commit
+        } and changed paths ${formatCheckedPaths(verified.changedPaths)}, but no non-empty doctrine anchor was found at that commit.`,
+        {
+          commit: verified.commit,
+          repositoryRoot: repoRoot,
+          changedPaths: verified.changedPaths,
+        },
       );
     }
     const result = this.store.verifyReconciliation(resumeKey, {
@@ -655,8 +680,10 @@ export class LearningService {
       throw new Error('selected repository workspace is unavailable');
     }
     const repoRoot = this.repositoryRootForDraft(lesson.draftId);
-    const verified = verifyReconciliationCommit(repoRoot, input.commit);
-    const pointer = verifyExistingDoctrinePointer(repoRoot, input);
+    const verified = this.verifyReconciliationCommit(repoRoot, input.commit);
+    const pointer = this.runReconciliationCheck(
+      () => verifyExistingDoctrinePointer(repoRoot, input),
+    );
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       paths: verified.changedPaths,
@@ -718,6 +745,29 @@ export class LearningService {
 
   operationLessons(operationId: string) {
     return this.store.listOperationLessons(operationId);
+  }
+
+  private verifyReconciliationCommit(
+    repoRoot: string,
+    commit: string,
+  ): VerifiedReconciliationCommit {
+    return this.runReconciliationCheck(
+      () => verifyReconciliationCommit(repoRoot, commit),
+    );
+  }
+
+  private runReconciliationCheck<T>(check: () => T): T {
+    try {
+      return check();
+    } catch (error) {
+      if (error instanceof ReconciliationCommitMismatchError) {
+        throw new ReconciliationVerificationRefusal(
+          error.message,
+          error.checked,
+        );
+      }
+      throw error;
+    }
   }
 
   recoverOperationLessons(
@@ -1370,6 +1420,10 @@ function requireExactKeys(
 
 function hashMarkdown(markdown: string): string {
   return `sha256:${createHash('sha256').update(markdown).digest('hex')}`;
+}
+
+function formatCheckedPaths(paths: string[]): string {
+  return `[${paths.join(', ')}]`;
 }
 
 function requireLessonVersion(value: number): void {

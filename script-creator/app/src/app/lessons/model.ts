@@ -307,7 +307,11 @@ export class LessonsModel {
       this.replaceLesson(await mutation());
       this.announcement.set(success);
     } catch (error) {
-      if (error instanceof DaemonClientError && error.status === 409) {
+      if (
+        error instanceof DaemonClientError
+        && error.status === 409
+        && !isReconciliationVerificationRefusal(error.body)
+      ) {
         await this.refreshLessons().catch(() => undefined);
         this.error.set(
           'This lesson changed elsewhere. The latest version is shown; review it before trying again.',
@@ -340,4 +344,14 @@ export class LessonsModel {
     this.error.set(error instanceof Error ? error.message : fallback);
     this.announcement.set(this.error() ?? fallback);
   }
+}
+
+function isReconciliationVerificationRefusal(body: unknown): boolean {
+  return Boolean(
+    body
+    && typeof body === 'object'
+    && (body as { code?: unknown }).code
+      === 'reconciliation-verification-refused'
+    && (body as { recoverable?: unknown }).recoverable === true,
+  );
 }

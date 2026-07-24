@@ -335,9 +335,9 @@ describe('reconciliation commit verification', () => {
     expect(() => verifyReconciliationCommit(
       repoRoot,
       git(repoRoot, ['rev-parse', 'HEAD']),
-    )).toThrow(/skill or steering/i);
+    )).toThrow(/reconciliation commit.+canonical doctrine path/i);
     expect(() => verifyReconciliationCommit(repoRoot, 'not-a-commit'))
-      .toThrow(/commit does not exist/i);
+      .toThrow(/reconciliation commit.+does not exist/i);
   });
 
   it('validates explicitly supplied existing-doctrine provenance read-only', () => {

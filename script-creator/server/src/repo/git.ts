@@ -55,6 +55,22 @@ export interface VerifiedReconciliationCommit {
   doctrinePointers: ReconciliationDoctrinePointer[];
 }
 
+export interface ReconciliationCommitCheck {
+  commit: string;
+  repositoryRoot: string;
+  changedPaths: string[] | null;
+}
+
+export class ReconciliationCommitMismatchError extends Error {
+  constructor(
+    message: string,
+    readonly checked: ReconciliationCommitCheck,
+  ) {
+    super(message);
+    this.name = 'ReconciliationCommitMismatchError';
+  }
+}
+
 function runGit(repoRoot: string, args: string[]): string {
   try {
     return execFileSync('git', args, {
@@ -220,6 +236,7 @@ export function verifyReconciliationCommit(
   repoRoot: string,
   requestedCommit: string,
 ): VerifiedReconciliationCommit {
+  runGit(repoRoot, ['rev-parse', '--git-dir']);
   let commit: string;
   try {
     commit = runGit(repoRoot, [
@@ -228,17 +245,26 @@ export function verifyReconciliationCommit(
       `${requestedCommit}^{commit}`,
     ]);
   } catch {
-    throw new Error(
-      `reconciliation commit does not exist: ${requestedCommit}`,
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        requestedCommit
+      } in the selected repository; it does not exist there.`,
+      repoRoot,
+      requestedCommit,
+      null,
     );
   }
   try {
     runGit(repoRoot, ['merge-base', '--is-ancestor', commit, 'HEAD']);
-  } catch {
-    throw new Error(
-      `reconciliation commit is not in the selected workspace history: ${
+  } catch (error) {
+    if (gitExitStatus(error) !== 1) throw error;
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
         commit
-      }`,
+      } in the selected repository; it is not reachable from HEAD.`,
+      repoRoot,
+      commit,
+      null,
     );
   }
   const changedPaths = runGit(repoRoot, [
@@ -250,15 +276,25 @@ export function verifyReconciliationCommit(
     '-z',
     commit,
   ]).split('\0').filter(Boolean).sort();
-  if (!changedPaths.includes('DECISIONS.md')) {
-    throw new Error(
-      'reconciliation commit must change DECISIONS.md',
-    );
-  }
   const doctrinePaths = changedPaths.filter(isDoctrinePath);
-  if (doctrinePaths.length === 0) {
-    throw new Error(
-      'reconciliation commit must change a skill or steering file',
+  const missing = [
+    ...(!changedPaths.includes('DECISIONS.md')
+      ? ['DECISIONS.md']
+      : []),
+    ...(doctrinePaths.length === 0
+      ? ['at least one canonical doctrine path']
+      : []),
+  ];
+  if (missing.length > 0) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        commit
+      }; changed paths were ${formatPaths(changedPaths)}, but expected ${
+        joinExpectedChecks(missing)
+      }.`,
+      repoRoot,
+      commit,
+      changedPaths,
     );
   }
   const doctrinePointers = doctrinePaths.flatMap((path) => {
@@ -283,12 +319,26 @@ export function verifyExistingDoctrinePointer(
 ): ReconciliationDoctrinePointer {
   const verified = verifyReconciliationCommit(repoRoot, input.commit);
   if (!isDoctrinePath(input.path) || !verified.changedPaths.includes(input.path)) {
-    throw new Error(
-      'existing doctrine path is not a changed skill or steering file',
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked doctrine path ${
+        input.path
+      } at commit ${verified.commit}; it is not a changed canonical doctrine path.`,
+      repoRoot,
+      verified.commit,
+      verified.changedPaths,
     );
   }
   const match = /^lines:(\d+)-(\d+)$/u.exec(input.anchor);
-  if (!match) throw new Error('existing doctrine anchor is invalid');
+  if (!match) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked doctrine anchor ${
+        input.anchor
+      } in ${input.path} at commit ${verified.commit}; the anchor format is invalid.`,
+      repoRoot,
+      verified.commit,
+      verified.changedPaths,
+    );
+  }
   const start = Number(match[1]);
   const end = Number(match[2]);
   let lines: string[];
@@ -298,17 +348,38 @@ export function verifyExistingDoctrinePointer(
       `${verified.commit}:${input.path}`,
     ]).toString('utf8').split('\n');
   } catch {
-    throw new Error('existing doctrine path cannot be read at the commit');
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked doctrine path ${
+        input.path
+      } at commit ${verified.commit}; the path does not exist at that commit.`,
+      repoRoot,
+      verified.commit,
+      verified.changedPaths,
+    );
   }
   if (start < 1 || end < start || end > lines.length) {
-    throw new Error('existing doctrine anchor does not resolve');
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked doctrine anchor ${
+        input.anchor
+      } in ${input.path}; it does not resolve at commit ${verified.commit}.`,
+      repoRoot,
+      verified.commit,
+      verified.changedPaths,
+    );
   }
   const content = lines.slice(start - 1, end).join('\n');
   const contentHash = `sha256:${
     createHash('sha256').update(content).digest('hex')
   }`;
   if (contentHash !== input.contentHash) {
-    throw new Error('existing doctrine content hash does not match');
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked doctrine anchor ${
+        input.anchor
+      } in ${input.path} at commit ${verified.commit}; its content hash does not match.`,
+      repoRoot,
+      verified.commit,
+      verified.changedPaths,
+    );
   }
   return {
     path: input.path,
@@ -554,6 +625,14 @@ function changedContentPointer(
     '--',
     path,
   ]);
+  const pathAtCommit = runGit(repoRoot, [
+    'ls-tree',
+    '--name-only',
+    commit,
+    '--',
+    path,
+  ]);
+  if (pathAtCommit !== path) return null;
   const fileLines = runGitBytes(repoRoot, [
     'show',
     `${commit}:${path}`,
@@ -576,4 +655,34 @@ function changedContentPointer(
     };
   }
   return null;
+}
+
+function reconciliationMismatch(
+  message: string,
+  repositoryRoot: string,
+  commit: string,
+  changedPaths: string[] | null,
+): ReconciliationCommitMismatchError {
+  return new ReconciliationCommitMismatchError(message, {
+    commit,
+    repositoryRoot,
+    changedPaths,
+  });
+}
+
+function formatPaths(paths: string[]): string {
+  return `[${paths.join(', ')}]`;
+}
+
+function joinExpectedChecks(checks: string[]): string {
+  return checks.length === 1
+    ? checks[0]!
+    : `${checks.slice(0, -1).join(', ')} and ${checks.at(-1)}`;
+}
+
+function gitExitStatus(error: unknown): number | null {
+  if (!error || typeof error !== 'object') return null;
+  const status = (error as { status?: unknown }).status;
+  if (typeof status === 'number') return status;
+  return gitExitStatus((error as { cause?: unknown }).cause);
 }

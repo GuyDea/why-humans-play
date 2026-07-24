@@ -1,5 +1,18 @@
-import { describe, expect, it, vi } from 'vitest';
+import { execFileSync } from 'node:child_process';
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { afterEach, describe, expect, it, vi } from 'vitest';
+import { DocumentStore } from '../../src/documents/store.js';
 import { buildApp } from '../../src/http/app.js';
+import { LearningService } from '../../src/learning/service.js';
+import { LearningStore } from '../../src/learning/store.js';
+import { TopicStore } from '../../src/topics/store.js';
 import {
   UNUSED_DOCUMENT_SERVICE,
   UNUSED_VALIDATOR_SERVICE,
@@ -7,6 +20,19 @@ import {
 
 const NONCE = 'lessons-test-nonce';
 const AUTH = { 'x-sc-nonce': NONCE };
+const roots: string[] = [];
+const documentStores: DocumentStore[] = [];
+const learningStores: LearningStore[] = [];
+const topicStores: TopicStore[] = [];
+
+afterEach(() => {
+  for (const store of topicStores.splice(0)) store.close();
+  for (const store of learningStores.splice(0)) store.close();
+  for (const store of documentStores.splice(0)) store.close();
+  for (const root of roots.splice(0)) {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
 
 function appWithLearning(learningService: Record<string, unknown>) {
   return buildApp({
@@ -252,4 +278,256 @@ describe('lesson review HTTP API', () => {
     );
     await app.close();
   });
+
+  it('refuses a reachable HEAD that did not reconcile doctrine and allows retry', async () => {
+    const fixture = realReconciliationFixture();
+    const head = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+    const response = await verifyCommit(fixture, head);
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      error: expect.stringMatching(
+        /reconciliation commit.+checked.+DECISIONS\.md.+canonical doctrine/iu,
+      ),
+      code: 'reconciliation-verification-refused',
+      recoverable: true,
+      checked: {
+        commit: head,
+        repositoryRoot: fixture.repoRoot,
+        changedPaths: ['episode.md'],
+      },
+    });
+    expect(
+      fixture.learningStore.getLesson('lesson-durable'),
+    ).toMatchObject({ state: 'approved-pending-reconcile' });
+    await fixture.app.close();
+  });
+
+  it('refuses a fabricated reconciliation commit as recoverable', async () => {
+    const fixture = realReconciliationFixture();
+    const fabricated = 'f'.repeat(40);
+
+    const response = await verifyCommit(fixture, fabricated);
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      error: expect.stringMatching(
+        /reconciliation commit.+checked.+does not exist/iu,
+      ),
+      code: 'reconciliation-verification-refused',
+      recoverable: true,
+      checked: {
+        commit: fabricated,
+        repositoryRoot: fixture.repoRoot,
+        changedPaths: null,
+      },
+    });
+    await fixture.app.close();
+  });
+
+  it('keeps an invalid repository HEAD on the unexpected-fault path', async () => {
+    const fixture = realReconciliationFixture();
+    const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+    git(fixture.repoRoot, [
+      'symbolic-ref',
+      'HEAD',
+      'refs/heads/missing-head',
+    ]);
+
+    const response = await verifyCommit(fixture, commit);
+
+    expect(response.statusCode).toBe(500);
+    expect(response.json()).toEqual({ error: 'internal server error' });
+    await fixture.app.close();
+  });
+
+  it('refuses a reconciliation commit with no resolvable doctrine anchor', async () => {
+    const fixture = realReconciliationFixture();
+    writeFileSync(
+      join(fixture.repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Retain the concrete reveal rule.\n',
+    );
+    rmSync(join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'));
+    git(fixture.repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(fixture.repoRoot, ['commit', '-m', 'delete doctrine without replacement']);
+    const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+    const response = await verifyCommit(fixture, commit);
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toMatchObject({
+      error: expect.stringMatching(
+        /reconciliation commit.+checked.+doctrine anchor.+at that commit/iu,
+      ),
+      code: 'reconciliation-verification-refused',
+      recoverable: true,
+      checked: {
+        commit,
+        repositoryRoot: fixture.repoRoot,
+        changedPaths: [
+          'DECISIONS.md',
+          'whp-youtube/STEERING.md',
+        ],
+      },
+    });
+    await fixture.app.close();
+  });
+
+  it('verifies a real reconciliation commit that changes anchored doctrine', async () => {
+    const fixture = realReconciliationFixture();
+    writeFileSync(
+      join(fixture.repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Keep every reveal concrete.\n',
+    );
+    writeFileSync(
+      join(fixture.repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\n## Reveals\n\nKeep every reveal concrete.\n',
+    );
+    git(fixture.repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(fixture.repoRoot, ['commit', '-m', 'reconcile durable lesson']);
+    const commit = git(fixture.repoRoot, ['rev-parse', 'HEAD']);
+
+    const response = await verifyCommit(fixture, commit);
+
+    expect(response.statusCode, response.body).toBe(200);
+    expect(response.json()).toMatchObject({
+      id: 'lesson-durable',
+      state: 'applied',
+      reviewedMarkdown: null,
+      repositoryCommit: commit,
+      repositoryPath: 'whp-youtube/STEERING.md',
+      repositoryAnchor: expect.stringMatching(/^lines:\d+-\d+$/u),
+      reconciliation: {
+        state: 'verified',
+        repositoryCommit: commit,
+      },
+    });
+    await fixture.app.close();
+  });
 });
+
+function realReconciliationFixture() {
+  const root = mkdtempSync(join(tmpdir(), 'lessons-http-reconcile-'));
+  roots.push(root);
+  const repoRoot = join(root, 'repo');
+  mkdirSync(join(repoRoot, 'whp-youtube'), { recursive: true });
+  git(repoRoot, ['init', '--initial-branch=main']);
+  git(repoRoot, ['config', 'user.name', 'Script Creator Tests']);
+  git(repoRoot, [
+    'config',
+    'user.email',
+    'script-creator-tests@example.invalid',
+  ]);
+  writeFileSync(join(repoRoot, 'episode.md'), 'Episode draft.\n');
+  writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+  writeFileSync(
+    join(repoRoot, 'whp-youtube', 'STEERING.md'),
+    '# Steering\n',
+  );
+  git(repoRoot, ['add', '--', '.']);
+  git(repoRoot, ['commit', '-m', 'seed repository']);
+  writeFileSync(join(repoRoot, 'episode.md'), 'Current episode worktree HEAD.\n');
+  git(repoRoot, ['add', '--', 'episode.md']);
+  git(repoRoot, ['commit', '-m', 'episode work']);
+
+  const dbFile = join(root, 'state.sqlite3');
+  const documentStore = new DocumentStore(dbFile);
+  const learningStore = new LearningStore(dbFile);
+  const topicStore = new TopicStore(dbFile);
+  documentStores.push(documentStore);
+  learningStores.push(learningStore);
+  topicStores.push(topicStore);
+  documentStore.createDraft({
+    id: 'draft-1',
+    episodeSlug: 'episode-one',
+    title: 'Episode One',
+    format: 'narration',
+    doc: {
+      type: 'doc',
+      attrs: { format: 'narration', preamble: 'Base' },
+      content: [],
+    },
+    updatedAt: '2026-07-24T08:00:00.000Z',
+  });
+  let id = 0;
+  const service = new LearningService({
+    store: learningStore,
+    documentStore,
+    topicStore,
+    operationEvidence: () => null,
+    repositoryRootForDraft: () => repoRoot,
+    idFactory: () => `learning-${++id}`,
+    resumeKeyFactory: () => 'reconcile-resume-key',
+    now: () => '2026-07-24T09:00:00.000Z',
+  });
+  const decision = service.captureArchitectureRejection({
+    draftId: 'draft-1',
+    operationId: 'architecture-operation',
+    reason: 'Too abstract.',
+    resolvedAt: '2026-07-24T08:03:00.000Z',
+  });
+  learningStore.createLesson({
+    id: 'lesson-durable',
+    draftId: 'draft-1',
+    distillationRunId: null,
+    classification: 'durable',
+    state: 'proposed',
+    proposedMarkdown: 'Keep every reveal concrete.',
+    reviewedMarkdown: 'Keep every reveal concrete.',
+    rationaleMarkdown: 'The explicit rejection identified abstraction.',
+    proposedTarget: 'whp-youtube/STEERING.md',
+    supersedesLessonId: null,
+    version: 1,
+    repositoryCommit: null,
+    repositoryPath: null,
+    repositoryAnchor: null,
+    repositoryContentHash: null,
+    createdAt: '2026-07-24T08:05:00.000Z',
+    updatedAt: '2026-07-24T08:05:00.000Z',
+  }, [decision.id]);
+  const lesson = service.approveLesson(
+    'draft-1',
+    'lesson-durable',
+    { expectedVersion: 1 },
+  );
+  const resumeKey = lesson.reconciliation?.resumeKey;
+  if (!resumeKey) throw new Error('reconciliation fixture was not prepared');
+  service.markReconciliationAwaiting(resumeKey);
+  const app = appWithLearning(
+    service as unknown as Record<string, unknown>,
+  );
+  return { app, learningStore, repoRoot, resumeKey };
+}
+
+function git(repoRoot: string, args: string[]): string {
+  return execFileSync('git', args, {
+    cwd: repoRoot,
+    encoding: 'utf8',
+    stdio: ['ignore', 'pipe', 'pipe'],
+  }).trim();
+}
+
+function verifyCommit(
+  fixture: ReturnType<typeof realReconciliationFixture>,
+  commit: string,
+) {
+  return fixture.app.inject({
+    method: 'POST',
+    url: `/api/lesson-reconciliations/${
+      encodeURIComponent(fixture.resumeKey)
+    }/verify`,
+    headers: AUTH,
+    payload: { commit },
+  });
+}

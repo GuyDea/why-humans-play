@@ -397,6 +397,19 @@ class ControllableDaemonClient {
       (candidate) => candidate.reconciliation?.resumeKey === resumeKey,
     );
     if (!lesson?.reconciliation) throw new Error('reconciliation missing');
+    if (commit === 'non-reconciliation-head') {
+      throw new DaemonClientError(409, {
+        error:
+          'reconciliation commit verification refused: checked commit non-reconciliation-head; changed paths were [episode.md], but expected DECISIONS.md and at least one canonical doctrine path.',
+        code: 'reconciliation-verification-refused',
+        recoverable: true,
+        checked: {
+          commit,
+          repositoryRoot: '/tmp/episode-worktree',
+          changedPaths: ['episode.md'],
+        },
+      });
+    }
     const verified = {
       ...lesson.reconciliation,
       state: 'verified' as const,
@@ -3306,6 +3319,31 @@ describe('mounted Script Studio composition', () => {
       '#commit-lesson-durable',
     );
     if (!commit) throw new Error('durable verification input missing');
+    commit.value = 'non-reconciliation-head';
+    commit.dispatchEvent(new Event('input', { bubbles: true }));
+    findButton(durable, 'Verify external commit').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      const refusal = studio.root.querySelector(
+        '[data-testid="lessons-page"] .page-error[role="alert"]',
+      );
+      expect(refusal?.textContent).toContain(
+        'reconciliation commit verification refused: checked commit non-reconciliation-head; changed paths were [episode.md], but expected DECISIONS.md and at least one canonical doctrine path.',
+      );
+      durable = studio.root.querySelector('#lesson-lesson-durable');
+      expect(durable?.getAttribute('data-state')).toBe(
+        'approved-pending-reconcile',
+      );
+      expect(findButton(durable, 'Verify external commit')).toBeDefined();
+    });
+    findButton(
+      studio.root.querySelector('[data-testid="lessons-page"] .page-error'),
+      'Dismiss',
+    ).click();
+    studio.tick();
+    expect(
+      studio.root.querySelector('[data-testid="lessons-page"] .page-error'),
+    ).toBeNull();
     commit.value = 'external-reconcile-commit';
     commit.dispatchEvent(new Event('input', { bubbles: true }));
     findButton(durable, 'Verify external commit').click();

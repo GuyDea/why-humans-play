@@ -24,7 +24,10 @@ import {
 import { DraftWriteReservationError } from '../documents/store.js';
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
-import type { LearningService } from '../learning/service.js';
+import {
+  ReconciliationVerificationRefusal,
+  type LearningService,
+} from '../learning/service.js';
 import {
   MilestoneCommitError,
   MilestoneConflictError,
@@ -2555,6 +2558,14 @@ function sendLearningError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof ReconciliationVerificationRefusal) {
+    return reply.code(409).send({
+      error: error.message,
+      code: error.code,
+      recoverable: error.recoverable,
+      checked: error.checked,
+    });
+  }
   const message = error instanceof Error
     ? error.message
     : 'learning request failed';
