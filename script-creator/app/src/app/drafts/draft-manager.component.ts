@@ -17,6 +17,7 @@ import {
 import { EditorHost } from '../editor/editor-host';
 import { MilestonePanel } from '../milestones/milestone-panel';
 import { NarrationActions } from '../narration/narration-actions';
+import { ModelPreferenceService } from '../ops/model-preference';
 import { BriefPanel } from '../panels/brief-panel';
 import { ProductionPanel } from '../production/production-panel';
 import { FindingsPanel } from '../panels/findings-panel';
@@ -490,6 +491,7 @@ import { RevisionTimeline } from './revision-timeline';
 })
 export class DraftManagerComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly modelPreference = inject(ModelPreferenceService);
   readonly client = input.required<DaemonClient>();
   readonly session = input.required<StudioSession>();
   readonly manager = signal<DraftManager | null>(null);
@@ -580,7 +582,11 @@ export class DraftManagerComponent implements OnInit {
       this.architectureModel.set(null);
       return;
     }
-    const model = new ArchitectureModel(draft.id, this.client());
+    const model = new ArchitectureModel(
+      draft.id,
+      this.client(),
+      this.modelPreference,
+    );
     await model.load();
     if (this.manager()?.activeDraft()?.id === draft.id) {
       this.architectureModel.set(model);

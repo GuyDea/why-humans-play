@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  inject,
   input,
   output,
   signal,
@@ -17,6 +18,7 @@ import {
   joinArchitecture,
 } from '../architecture/model';
 import type { EditorHost } from '../editor/editor-host';
+import { ModelPreferenceService } from '../ops/model-preference';
 import { readDraftMetadata } from '../panels/brief-panel';
 
 interface EpisodeProposal {
@@ -221,6 +223,7 @@ interface EpisodeProposal {
   `,
 })
 export class NarrationActions {
+  private readonly modelPreference = inject(ModelPreferenceService);
   readonly model = input.required<ArchitectureModel>();
   readonly draft = input.required<DraftRecord>();
   readonly client = input.required<DaemonClient>();
@@ -389,11 +392,19 @@ export class NarrationActions {
     operation: OperationName,
     inputs: unknown,
   ): Promise<{ id: string; result: OperationResult }> {
-    const { id } = await this.client().submitDraftOp(
-      this.draft().id,
-      operation,
-      inputs,
-    );
+    const choice = this.modelPreference.get(operation) ?? null;
+    const { id } = choice
+      ? await this.client().submitDraftOp(
+          this.draft().id,
+          operation,
+          inputs,
+          choice,
+        )
+      : await this.client().submitDraftOp(
+          this.draft().id,
+          operation,
+          inputs,
+        );
     await this.client().streamEvents(id, {
       onEvent: () => undefined,
       onDone: () => undefined,

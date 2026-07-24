@@ -22,6 +22,7 @@ import {
   operationFailurePresentation,
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
+import { ModelPreferenceService } from '../ops/model-preference';
 import {
   OpTracker,
   type TrackedOperation,
@@ -917,6 +918,7 @@ interface GuardrailPresentation {
 export class TopicsPage implements OnInit, OnDestroy {
   private readonly session = inject(STUDIO_SESSION);
   private readonly client = this.session.client;
+  private readonly modelPreference = inject(ModelPreferenceService);
   private readonly route = inject(ActivatedRoute);
   private readonly gateTracker = new OpTracker<
     GateCheckMeta,
@@ -924,6 +926,7 @@ export class TopicsPage implements OnInit, OnDestroy {
   >(
     this.client,
     mapStudioConsoleEvents,
+    { modelPreference: this.modelPreference },
   );
   private detachGateRuntime: (() => void) | null = null;
   private calloutSequence = 0;
@@ -1276,7 +1279,10 @@ export class TopicsPage implements OnInit, OnDestroy {
     operation: OperationName,
     inputs: unknown,
   ): Promise<OperationOutcome> {
-    const { id } = await this.client.submitOp(operation, inputs);
+    const choice = this.modelPreference.get(operation) ?? null;
+    const { id } = choice
+      ? await this.client.submitOp(operation, inputs, choice)
+      : await this.client.submitOp(operation, inputs);
     await this.client.streamEvents(id, {
       onEvent: () => undefined,
       onDone: () => undefined,

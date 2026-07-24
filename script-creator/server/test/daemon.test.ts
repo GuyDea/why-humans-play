@@ -20,6 +20,7 @@ import {
   writeRuntimeFile,
 } from '../src/daemon.js';
 import { JobStore } from '../src/job-store.js';
+import { EFFORT_ERROR, MODEL_ERROR } from '../src/operations/model-config.js';
 import { OperationService } from '../src/operations/service.js';
 import { JobSupervisor } from '../src/supervisor.js';
 
@@ -150,6 +151,108 @@ describe('createDaemonContext', () => {
       reader = new JobStore(context.stateDbFile);
       const envelope = JSON.parse(reader.get(id)!.envelopeJson);
       expect(envelope.codexBin).toBe(codexBin);
+    } finally {
+      reader?.close();
+      await context.close();
+    }
+  });
+
+  it('fails fast when SC_CODEX_MODEL is invalid', () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-bad-model-'));
+    const repoRoot = join(root, 'repo');
+    mkdirSync(repoRoot);
+    expect(() => createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+        SC_CODEX_MODEL: 'bad model!',
+      },
+    })).toThrow(`SC_CODEX_MODEL is invalid: ${MODEL_ERROR}`);
+  });
+
+  it('fails fast when SC_CODEX_EFFORT is invalid', () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-bad-effort-'));
+    const repoRoot = join(root, 'repo');
+    mkdirSync(repoRoot);
+    expect(() => createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+        SC_CODEX_EFFORT: 'turbo',
+      },
+    })).toThrow(`SC_CODEX_EFFORT is invalid: ${EFFORT_ERROR}`);
+  });
+
+  it('threads valid SC_CODEX_MODEL and SC_CODEX_EFFORT fallbacks into envelopes', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-model-fallback-'));
+    const repoRoot = join(root, 'repo');
+    mkdirSync(repoRoot);
+    const context = createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+        SC_CODEX_MODEL: 'gpt-5.6-sol',
+        SC_CODEX_EFFORT: 'xhigh',
+      },
+    });
+    let reader: JobStore | undefined;
+
+    try {
+      const response = await context.app.inject({
+        method: 'POST',
+        url: '/api/ops',
+        headers: { 'x-sc-nonce': context.nonce },
+        payload: {
+          operation: 'quick-gate-check',
+          inputs: { selection: 'Apply the daemon-level fallback.' },
+        },
+      });
+      expect(response.statusCode).toBe(200);
+      const { id } = response.json<{ id: string }>();
+      reader = new JobStore(context.stateDbFile);
+      const envelope = JSON.parse(reader.get(id)!.envelopeJson);
+      expect(envelope.model).toBe('gpt-5.6-sol');
+      expect(envelope.effort).toBe('xhigh');
+    } finally {
+      reader?.close();
+      await context.close();
+    }
+  });
+
+  it('treats empty SC_CODEX_MODEL and SC_CODEX_EFFORT as unset', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'daemon-model-empty-'));
+    const repoRoot = join(root, 'repo');
+    mkdirSync(repoRoot);
+    const context = createDaemonContext({
+      repoRoot,
+      env: {
+        XDG_DATA_HOME: join(root, 'data'),
+        XDG_STATE_HOME: join(root, 'state'),
+        SC_CODEX_MODEL: '',
+        SC_CODEX_EFFORT: '',
+      },
+    });
+    let reader: JobStore | undefined;
+
+    try {
+      const response = await context.app.inject({
+        method: 'POST',
+        url: '/api/ops',
+        headers: { 'x-sc-nonce': context.nonce },
+        payload: {
+          operation: 'quick-gate-check',
+          inputs: { selection: 'No fallback configured.' },
+        },
+      });
+      expect(response.statusCode).toBe(200);
+      const { id } = response.json<{ id: string }>();
+      reader = new JobStore(context.stateDbFile);
+      const envelope = JSON.parse(reader.get(id)!.envelopeJson);
+      expect(envelope).not.toHaveProperty('model');
+      expect(envelope).not.toHaveProperty('effort');
     } finally {
       reader?.close();
       await context.close();

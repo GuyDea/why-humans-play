@@ -7,6 +7,12 @@ import {
   buildOperationInputs,
   type OperationContext,
 } from '../ops/context';
+import {
+  MODEL_OPTIONS,
+  choiceForModelOption,
+  modelOptionIndex,
+} from '../ops/model-options';
+import { type ModelPreferenceStore } from '../ops/model-preference';
 import type {
   BridgeLaunch,
   SelectionTarget,
@@ -51,7 +57,10 @@ export interface SelectionToolbarOptions {
   nextId?: () => string;
   onLaunch?: (launch: unknown) => void;
   onError?: (error: unknown) => void;
+  modelPreference?: ModelPreferenceStore;
 }
+
+const DEFAULT_PREFERENCE_KEY = 'default';
 
 const PROMPTS: Record<ToolbarPromptKind, string> = {
   customInstruction: 'What should the rewrite do?',
@@ -72,6 +81,7 @@ export class SelectionToolbar {
   private readonly nextId: () => string;
   private readonly onLaunch: (launch: unknown) => void;
   private readonly onError: (error: unknown) => void;
+  private readonly modelPreference: ModelPreferenceStore | undefined;
   private alternativeCount: 2 | 3 = 2;
 
   private readonly handleMouseDown = (event: MouseEvent): void => {
@@ -94,9 +104,14 @@ export class SelectionToolbar {
     this.runAction(action);
   };
 
-  private readonly handleCountChange = (event: Event): void => {
-    if (!(event.target instanceof HTMLSelectElement)) return;
-    this.alternativeCount = event.target.value === '3' ? 3 : 2;
+  private readonly handleChange = (event: Event): void => {
+    const select = event.target;
+    if (!(select instanceof HTMLSelectElement)) return;
+    if (select.dataset['modelSelect'] !== undefined) {
+      this.applyModelChoice(select.selectedIndex);
+      return;
+    }
+    this.alternativeCount = select.value === '3' ? 3 : 2;
   };
 
   private readonly queueUpdate = (): void => {
@@ -121,6 +136,7 @@ export class SelectionToolbar {
       ?? (() => `selection-${++this.idSequence}`);
     this.onLaunch = options.onLaunch ?? (() => undefined);
     this.onError = options.onError ?? (() => undefined);
+    this.modelPreference = options.modelPreference;
 
     this.element = this.createElement();
     this.container.append(this.element);
@@ -165,7 +181,7 @@ export class SelectionToolbar {
     globalThis.window.removeEventListener('scroll', this.queueUpdate, true);
     this.element.removeEventListener('mousedown', this.handleMouseDown);
     this.element.removeEventListener('click', this.handleClick);
-    this.element.removeEventListener('change', this.handleCountChange);
+    this.element.removeEventListener('change', this.handleChange);
     this.element.remove();
   }
 
@@ -182,6 +198,7 @@ export class SelectionToolbar {
       actionButton('rewrite', 'Rewrite'),
       actionButton('alternatives', 'Alternatives'),
       alternativeCountSelect(),
+      modelSelect(this.currentModelIndex()),
       actionButton('custom', 'Custom instruction'),
       actionButton('lock', 'Lock'),
       actionButton('annotate', 'Annotate'),
@@ -197,7 +214,7 @@ export class SelectionToolbar {
     globalThis.window.addEventListener('scroll', this.queueUpdate, true);
     this.element.addEventListener('mousedown', this.handleMouseDown);
     this.element.addEventListener('click', this.handleClick);
-    this.element.addEventListener('change', this.handleCountChange);
+    this.element.addEventListener('change', this.handleChange);
   }
 
   private runAction(action: ToolbarAction): void {
@@ -327,6 +344,21 @@ export class SelectionToolbar {
     const { from, to, empty } = this.view.state.selection;
     return empty || from >= to ? null : { from, to };
   }
+
+  private currentModelIndex(): number {
+    return modelOptionIndex(
+      MODEL_OPTIONS,
+      this.modelPreference?.get(DEFAULT_PREFERENCE_KEY) ?? null,
+    );
+  }
+
+  private applyModelChoice(index: number): void {
+    if (!this.modelPreference) return;
+    this.modelPreference.set(
+      DEFAULT_PREFERENCE_KEY,
+      choiceForModelOption(MODEL_OPTIONS[index]),
+    );
+  }
 }
 
 function actionButton(
@@ -354,6 +386,25 @@ function alternativeCountSelect(): HTMLLabelElement {
     option.textContent = String(count);
     select.append(option);
   }
+  label.append(text, select);
+  return label;
+}
+
+function modelSelect(selectedIndex: number): HTMLLabelElement {
+  const label = document.createElement('label');
+  label.className = 'model-select';
+  const text = document.createElement('span');
+  text.textContent = 'Model';
+  const select = document.createElement('select');
+  select.dataset['modelSelect'] = '';
+  select.setAttribute('aria-label', 'Model and effort');
+  MODEL_OPTIONS.forEach((option, index) => {
+    const element = document.createElement('option');
+    element.value = String(index);
+    element.textContent = option.label;
+    select.append(element);
+  });
+  select.selectedIndex = selectedIndex;
   label.append(text, select);
   return label;
 }

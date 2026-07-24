@@ -163,6 +163,63 @@ afterEach(async () => {
 });
 
 describe('operations HTTP API', () => {
+  it('accepts optional model and effort and surfaces them on the record', async () => {
+    const fixture = makeFixture('operation-schema');
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'quick-gate-check',
+        inputs: { selection: 'Original passage.' },
+        model: 'gpt-5.6-sol',
+        effort: 'xhigh',
+      },
+    });
+    expect(response.statusCode).toBe(200);
+    const { id } = response.json<{ id: string }>();
+    fixture.ids.push(id);
+
+    const record = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}`,
+      headers: AUTH,
+    });
+    expect(record.json()).toMatchObject({ model: 'gpt-5.6-sol', effort: 'xhigh' });
+  });
+
+  it('rejects an invalid effort with 400', async () => {
+    const fixture = makeFixture('operation-schema');
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'quick-gate-check',
+        inputs: { selection: 'Original passage.' },
+        effort: 'turbo',
+      },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json<{ error: string }>().error).toMatch(/^effort must be one of/);
+  });
+
+  it('rejects an invalid model with 400', async () => {
+    const fixture = makeFixture('operation-schema');
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/ops',
+      headers: AUTH,
+      payload: {
+        operation: 'quick-gate-check',
+        inputs: { selection: 'Original passage.' },
+        model: 'bad model!',
+      },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json<{ error: string }>().error).toMatch(/^model must be/);
+  });
+
   it('returns immutable inputs and applied lesson links with an operation record', async () => {
     const fixture = makeFixture('operation-schema');
     const id = await submit(fixture, 'quick-gate-check', {
@@ -254,6 +311,8 @@ describe('operations HTTP API', () => {
           cachedInputTokens: 20,
           outputTokens: 10,
           reasoningOutputTokens: 4,
+          model: null,
+          effort: null,
         },
         {
           id: 'op-failed',
@@ -268,6 +327,8 @@ describe('operations HTTP API', () => {
           cachedInputTokens: null,
           outputTokens: null,
           reasoningOutputTokens: null,
+          model: null,
+          effort: null,
         },
         {
           id: 'op-completed',
@@ -282,6 +343,8 @@ describe('operations HTTP API', () => {
           cachedInputTokens: 40,
           outputTokens: 30,
           reasoningOutputTokens: 12,
+          model: null,
+          effort: null,
         },
       ],
     });
@@ -611,10 +674,12 @@ describe('operations HTTP API', () => {
         submit: () => 'job-heartbeat',
         list: () => [],
         events: () => [],
-        get: () => ({ state }) as JobRecord & {
+        get: () => ({ state, model: null, effort: null }) as JobRecord & {
           operation: 'rewrite-selection';
           draftId: null;
           stalled: boolean;
+          model: null;
+          effort: null;
         },
         cancel: () => {},
         result: () => ({ kind: 'pending' }),

@@ -3,12 +3,14 @@ import {
   type ArchitectureOperationName,
   type ArchitectureSection,
   type ArchitectureState,
+  type ModelSubmitOptions,
   type OperationRecord,
   type OperationResult,
   type SaveArchitectureInput,
   type SavedArchitecture,
   type StreamEventsOptions,
 } from '../api/client';
+import { type ModelPreferenceReader } from '../ops/model-preference';
 import {
   buildGenerateArchitectureInputs,
   buildReviewArchitectureInputs,
@@ -101,6 +103,7 @@ export interface ArchitectureModelClient {
     draftId: string,
     operation: ArchitectureOperationName,
     inputs: unknown,
+    options?: ModelSubmitOptions,
   ): Promise<{ id: string }>;
   streamEvents(
     id: string,
@@ -128,6 +131,7 @@ export class ArchitectureModel {
   constructor(
     readonly draftId: string,
     private readonly client: ArchitectureModelClient,
+    private readonly modelPreference?: ModelPreferenceReader,
   ) {}
 
   async load(): Promise<void> {
@@ -383,11 +387,19 @@ export class ArchitectureModel {
     this.guardrails = [];
     this.operationStatus = `Running ${operation}`;
     try {
-      const { id } = await this.client.submitDraftOp(
-        this.draftId,
-        operation,
-        inputs,
-      );
+      const choice = this.modelPreference?.get(operation) ?? null;
+      const { id } = choice
+        ? await this.client.submitDraftOp(
+            this.draftId,
+            operation,
+            inputs,
+            choice,
+          )
+        : await this.client.submitDraftOp(
+            this.draftId,
+            operation,
+            inputs,
+          );
       await this.client.streamEvents(id, {
         onEvent: () => undefined,
         onDone: () => undefined,

@@ -151,6 +151,58 @@ describe('OpTracker', () => {
     );
   });
 
+  it('resolves the model preference for the launched operation', async () => {
+    const client = mockClient();
+    const tracker = new OpTracker(client, mapConsoleEvents, {
+      modelPreference: {
+        get: (operation) =>
+          operation === 'rewrite-selection'
+            ? { model: 'gpt-5.6-sol', effort: 'xhigh' }
+            : null,
+      },
+    });
+
+    const tracked = tracker.launch('rewrite-selection', inputs, meta);
+    await tracked.completion;
+
+    expect(client.submitOp).toHaveBeenCalledWith('rewrite-selection', inputs, {
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+  });
+
+  it('lets an explicit caller override win over the resolved preference', async () => {
+    const client = mockClient();
+    const tracker = new OpTracker(client, mapConsoleEvents, {
+      modelPreference: {
+        get: () => ({ model: 'gpt-5.6-sol', effort: 'medium' }),
+      },
+    });
+
+    const tracked = tracker.launch('rewrite-selection', inputs, meta, {
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+    await tracked.completion;
+
+    expect(client.submitOp).toHaveBeenCalledWith('rewrite-selection', inputs, {
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+  });
+
+  it('omits submit options when no preference resolves', async () => {
+    const client = mockClient();
+    const tracker = new OpTracker(client, mapConsoleEvents, {
+      modelPreference: { get: () => null },
+    });
+
+    const tracked = tracker.launch('rewrite-selection', inputs, meta);
+    await tracked.completion;
+
+    expect(client.submitOp).toHaveBeenCalledWith('rewrite-selection', inputs);
+  });
+
   it('exposes completion only after terminal result signals are settled', async () => {
     const result = schemaResult();
     const tracker = new OpTracker(mockClient({

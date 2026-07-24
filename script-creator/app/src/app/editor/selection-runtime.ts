@@ -12,6 +12,7 @@ import {
   operationFailurePresentation,
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
+import { type ModelPreferenceStore } from '../ops/model-preference';
 import {
   OpTracker,
   type TrackedOperation,
@@ -105,6 +106,7 @@ export interface SelectionRuntimeOptions {
   ) => void;
   onLaunch?: () => void;
   onError?: (error: unknown) => void;
+  modelPreference?: ModelPreferenceStore;
 }
 
 export class SelectionRuntime {
@@ -133,7 +135,10 @@ export class SelectionRuntime {
     >(
       options.client,
       mapStudioConsoleEvents,
-      { onChange: () => this.emitRecords() },
+      {
+        onChange: () => this.emitRecords(),
+        modelPreference: options.modelPreference,
+      },
     );
     this.bridge = new ProposalBridge(options.view, this.tracker, {
       isActive: () => !this.destroyed,
@@ -159,6 +164,7 @@ export class SelectionRuntime {
       },
       onLaunch: (launch) => this.monitor(launch),
       onError: this.onError,
+      modelPreference: options.modelPreference,
     });
     this.emitOutcomes();
     this.emitRecords();

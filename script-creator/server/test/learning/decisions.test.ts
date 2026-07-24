@@ -202,6 +202,8 @@ describe('mechanical decision projection', () => {
           sandbox: 'workspace-write',
           codexBin: '/tmp/fake-codex',
           nonce: 'secret',
+          model: 'gpt-5.6-sol',
+          effort: 'xhigh',
         },
         result: {
           kind: 'schema',
@@ -229,6 +231,8 @@ describe('mechanical decision projection', () => {
             jobId: 'operation-1',
             prompt: '$writing-whp-youtube-scripts\nOperation: Rewrite selection\nInputs: {"selection":"Before"}',
             sandbox: 'workspace-write',
+            model: 'gpt-5.6-sol',
+            effort: 'xhigh',
           },
           result: {
             kind: 'schema',
