@@ -170,6 +170,9 @@ describe('mechanical decision projection', () => {
       topicStore,
       operationEvidence: (operationId) => ({
         operationId,
+        draftId: 'draft-1',
+        operation: 'rewrite-selection',
+        state: 'completed',
         envelope: {
           jobId: operationId,
           prompt: '$writing-whp-youtube-scripts\nOperation: Rewrite selection\nInputs: {"selection":"Before"}',
@@ -197,6 +200,9 @@ describe('mechanical decision projection', () => {
         },
         operation: {
           operationId: 'operation-1',
+          draftId: 'draft-1',
+          operation: 'rewrite-selection',
+          state: 'completed',
           envelope: {
             jobId: 'operation-1',
             prompt: '$writing-whp-youtube-scripts\nOperation: Rewrite selection\nInputs: {"selection":"Before"}',

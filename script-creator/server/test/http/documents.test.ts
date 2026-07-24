@@ -40,7 +40,7 @@ function makeFixture(ids: string[]): Fixture {
     store,
     operationService: {
       submit: () => 'operation-1',
-      get: () => ({ operation: 'rewrite-selection' }),
+      get: () => ({ operation: 'rewrite-selection', draftId: 'draft-1' }),
     },
     idFactory: () => {
       const id = remainingIds.shift();

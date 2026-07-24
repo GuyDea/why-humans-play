@@ -95,7 +95,7 @@ afterEach(() => {
 });
 
 describe('LearningStore', () => {
-  it('creates the complete v10 learning schema from every store constructor', () => {
+  it('creates the complete v11 learning schema from every store constructor', () => {
     const dbFile = databaseFile();
     seedDraft(dbFile);
     openLearningStore(dbFile);
@@ -109,7 +109,7 @@ describe('LearningStore', () => {
     const version = inspected.pragma('user_version', { simple: true });
     inspected.close();
 
-    expect(version).toBe(10);
+    expect(version).toBe(11);
     expect(tables).toEqual(expect.arrayContaining([
       'decision_events',
       'decision_notes',
@@ -234,6 +234,7 @@ describe('LearningStore', () => {
       state: 'prepared',
       resumeKey: 'opaque-1',
       preparedMarkdown: 'Run $reconcile-whp.',
+      preparedHead: 'prepared-head',
       repositoryCommit: null,
       paths: [],
       anchors: [],
@@ -249,6 +250,7 @@ describe('LearningStore', () => {
       state: 'prepared',
       resumeKey: 'opaque-2',
       preparedMarkdown: 'Run $reconcile-whp.',
+      preparedHead: 'prepared-head',
       repositoryCommit: null,
       paths: [],
       anchors: [],
@@ -348,6 +350,7 @@ describe('LearningStore', () => {
         state: 'prepared',
         resumeKey: 'opaque-1',
         preparedMarkdown: 'Candidate handoff.',
+        preparedHead: 'prepared-head',
         repositoryCommit: null,
         paths: [],
         anchors: [],
@@ -371,5 +374,62 @@ describe('LearningStore', () => {
       'opaque-1',
       '2026-07-24T08:31:00.000Z',
     )).toMatchObject({ state: 'awaiting-reconciliation' });
+    store.createDistillationRun({
+      id: 'run-with-shadow',
+      draftId: 'draft-1',
+      sessionId: 'session-with-shadow',
+      trigger: 'on-demand',
+      state: 'ingested',
+      operationId: 'distill-operation',
+      resumeKey: 'distill-resume',
+      guardrailMarkdown: null,
+      error: null,
+      createdAt: '2026-07-24T08:31:30.000Z',
+      updatedAt: '2026-07-24T08:31:30.000Z',
+      decisions: [],
+      lessons: [{
+        lessonId: 'lesson-1',
+        snapshot: {
+          id: 'lesson-1',
+          classification: 'durable',
+          state: 'approved-pending-reconcile',
+          lesson_markdown: 'Candidate handoff.',
+        },
+      }],
+    });
+
+    const verified = store.verifyReconciliation('opaque-1', {
+      repositoryCommit: 'verified-commit',
+      paths: ['DECISIONS.md', 'whp-youtube/STEERING.md'],
+      anchors: ['lines:4-4'],
+      contentHashes: ['sha256:verified'],
+      repositoryPath: 'whp-youtube/STEERING.md',
+      repositoryAnchor: 'lines:4-4',
+      repositoryContentHash: 'sha256:verified',
+      updatedAt: '2026-07-24T08:32:00.000Z',
+    });
+
+    expect(verified.lesson).toMatchObject({
+      state: 'applied',
+      proposedMarkdown: null,
+      reviewedMarkdown: null,
+    });
+    expect(verified.reconciliation).toMatchObject({
+      state: 'verified',
+      preparedMarkdown: '',
+      preparedHead: 'prepared-head',
+    });
+    expect(store.getDistillationRun('run-with-shadow')?.lessons).toEqual([{
+      lessonId: 'lesson-1',
+      snapshot: expect.objectContaining({
+        lesson_markdown: null,
+        repository_provenance: {
+          commit: 'verified-commit',
+          path: 'whp-youtube/STEERING.md',
+          anchor: 'lines:4-4',
+          content_hash: 'sha256:verified',
+        },
+      }),
+    }]);
   });
 });

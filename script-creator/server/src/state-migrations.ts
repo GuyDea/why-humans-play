@@ -439,6 +439,40 @@ CREATE TABLE operation_lessons (
 );
 `;
 
+const LEARNING_HANDOFF_BINDING_V11 = `
+ALTER TABLE lesson_reconciliations
+  ADD COLUMN prepared_head TEXT;
+
+ALTER TABLE narration_proposals
+  ADD COLUMN accepted_revision_id TEXT;
+
+UPDATE narration_proposals
+SET accepted_revision_id = (
+  SELECT revisions.id
+  FROM revisions
+  WHERE revisions.draft_id = narration_proposals.draft_id
+    AND revisions.op_id = narration_proposals.operation_id
+  ORDER BY revisions.seq DESC
+  LIMIT 1
+)
+WHERE state = 'accepted';
+
+UPDATE lesson_reconciliations
+SET prepared_markdown = ''
+WHERE state = 'verified';
+
+CREATE TABLE architecture_proposals (
+  draft_id TEXT NOT NULL REFERENCES drafts(id) ON DELETE CASCADE,
+  operation_id TEXT NOT NULL,
+  state TEXT NOT NULL CHECK (state IN ('pending', 'accepted', 'rejected')),
+  revision_id TEXT,
+  reason_note TEXT,
+  created_at TEXT NOT NULL,
+  resolved_at TEXT,
+  PRIMARY KEY (draft_id, operation_id)
+);
+`;
+
 export const STATE_MIGRATIONS: readonly StateMigration[] = [
   {
     version: 1,
@@ -562,6 +596,17 @@ export const STATE_MIGRATIONS: readonly StateMigration[] = [
     apply: (db) => {
       db.exec(LEARNING_LIFECYCLE_V10);
       backfillProvableV9Decisions(db);
+      seedBackfilledLearningSessions(db, 'v10');
+    },
+  },
+  {
+    version: 11,
+    owner: 'learning',
+    name: 'handoff-binding-and-shadow-cleanup',
+    apply: (db) => {
+      db.exec(LEARNING_HANDOFF_BINDING_V11);
+      scrubVerifiedDurableLessonSnapshots(db);
+      seedBackfilledLearningSessions(db, 'v11');
     },
   },
 ];
@@ -732,5 +777,106 @@ function backfillProvableV9Decisions(db: Database.Database): void {
       promotion.updated_at,
       promotion.updated_at,
     );
+  }
+}
+
+function seedBackfilledLearningSessions(
+  db: Database.Database,
+  migrationPrefix: 'v10' | 'v11',
+): void {
+  const drafts = db.prepare<[], {
+    draft_id: string;
+    first_seq: number;
+    first_created_at: string;
+  }>(
+    `SELECT draft_id, MIN(seq) AS first_seq, MIN(created_at) AS first_created_at
+     FROM decision_events
+     WHERE id LIKE 'v10:%'
+       AND NOT EXISTS (
+         SELECT 1
+         FROM distillation_run_decisions AS snapshots
+         WHERE snapshots.decision_id = decision_events.id
+       )
+     GROUP BY draft_id`,
+  ).all();
+  const openSession = db.prepare<[string], {
+    id: string;
+    start_cursor: number;
+  }>(
+    `SELECT id, start_cursor
+     FROM learning_sessions
+     WHERE draft_id = ? AND closed_at IS NULL`,
+  );
+  const repair = db.prepare(
+    `UPDATE learning_sessions
+     SET start_cursor = ?
+     WHERE id = ? AND start_cursor > ?`,
+  );
+  const insert = db.prepare(
+    `INSERT INTO learning_sessions (
+      id, draft_id, start_cursor, end_cursor, created_at, closed_at
+    )
+    SELECT ?, ?, ?, NULL, ?, NULL
+    WHERE NOT EXISTS (
+      SELECT 1 FROM learning_sessions WHERE draft_id = ?
+    )`,
+  );
+  for (const draft of drafts) {
+    const startCursor = Math.max(0, draft.first_seq - 1);
+    const current = openSession.get(draft.draft_id);
+    if (current) {
+      repair.run(startCursor, current.id, startCursor);
+      continue;
+    }
+    insert.run(
+      `${migrationPrefix}:session:${draft.draft_id}`,
+      draft.draft_id,
+      startCursor,
+      draft.first_created_at,
+      draft.draft_id,
+    );
+  }
+}
+
+function scrubVerifiedDurableLessonSnapshots(
+  db: Database.Database,
+): void {
+  const snapshots = db.prepare<[], {
+    run_id: string;
+    lesson_id: string;
+    snapshot_json: string;
+    repository_commit: string;
+    repository_path: string | null;
+    repository_anchor: string | null;
+    repository_content_hash: string | null;
+  }>(
+    `SELECT snapshots.run_id, snapshots.lesson_id, snapshots.snapshot_json,
+            lessons.repository_commit, lessons.repository_path,
+            lessons.repository_anchor, lessons.repository_content_hash
+     FROM distillation_run_lessons AS snapshots
+     JOIN lessons ON lessons.id = snapshots.lesson_id
+     WHERE lessons.classification = 'durable'
+       AND lessons.state IN ('applied', 'retired', 'superseded')`,
+  ).all();
+  const update = db.prepare(
+    `UPDATE distillation_run_lessons
+     SET snapshot_json = ?
+     WHERE run_id = ? AND lesson_id = ?`,
+  );
+  for (const row of snapshots) {
+    const snapshot = JSON.parse(row.snapshot_json) as unknown;
+    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+      continue;
+    }
+    update.run(JSON.stringify({
+      ...(snapshot as Record<string, unknown>),
+      lesson_markdown: null,
+      repository_provenance: {
+        commit: row.repository_commit,
+        path: row.repository_path,
+        anchor: row.repository_anchor,
+        content_hash: row.repository_content_hash,
+      },
+    }), row.run_id, row.lesson_id);
   }
 }

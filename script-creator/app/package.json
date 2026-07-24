@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "vitest run",
     "e2e:plan6": "node --import tsx e2e/plan6-browser-sweep.ts",
-    "e2e:plan7": "PLAN7_SWEEP=1 node --import tsx e2e/plan6-browser-sweep.ts"
+    "e2e:plan7": "node --import tsx e2e/plan7-browser-sweep.ts"
   },
   "prettier": {
     "printWidth": 100,

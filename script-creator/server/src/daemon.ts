@@ -185,8 +185,12 @@ export function createDaemonContext(
       operationEvidence: (operationId) => {
         const envelope = jobStore.operationEnvelope(operationId);
         if (!envelope) return null;
+        const operation = activeOperationService.get(operationId);
         return {
           operationId,
+          draftId: operation.draftId,
+          operation: operation.operation,
+          state: operation.state,
           envelope,
           result: activeOperationService.result(operationId),
         };
@@ -198,6 +202,7 @@ export function createDaemonContext(
         learningService.recoverOperationLessons(
           operation.id,
           activeOperationService.inputs(operation.id),
+          operation.draftId,
         );
       } catch {
         // A malformed historical envelope remains inspectable but cannot be

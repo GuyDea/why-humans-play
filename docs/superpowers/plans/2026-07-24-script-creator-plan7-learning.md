@@ -122,7 +122,7 @@ Plan 7 implements these accepted subrequirements exactly:
 | Package picked | The existing package-test record plus its explicit selected-direction index/time and source operation. | Generating directions or `survives_honestly` being true. |
 | Winner handed off | A completed topic-handoff saga linked to its run summary, winner block, accepted brief, and created draft. | An agent naming a provisional winner before Martin confirms handoff. |
 | PI material integrated | The `personal-input-proposal-accepted` revision, proposal disposition, operation envelope/result, PI ID, supplied input, and atomic marker/block diff. | Submitting personal material or previewing the returned rewrite. |
-| Validator-fix cycle accepted | An append-only failed validator attempt, the next accepted/manual production revision(s), and the later attempt at a new exact hash; the normalized cycle links diagnostics and diff without treating a pass as editorial approval. | A validator pass by itself or a fix proposal Martin rejected. |
+| Validator-fix cycle accepted | An append-only failed validator attempt, an interposed narration revision that actually changes document content (accepted proposal, `production-import`, or content-changing autosave/manual edit), and the later attempt at a new exact hash; the normalized cycle links diagnostics and diff without treating a pass as editorial approval. | A validator pass by itself, a fix proposal Martin rejected, a restore, an architecture revision, a content-unchanged save, or an out-of-band export change with no qualifying draft revision. |
 
 The projector also recognizes existing `episode-generation-accepted`,
 `architecture-proposal-accepted`, `architecture-proposals-accepted`,
@@ -352,9 +352,13 @@ must not edit these files.
   never treats Martin's supplied text as accepted material.
 - [ ] Append every validator result before returning it to the UI. Build a
   `validator-fix-cycle` decision only when a failed exact-hash attempt is followed by a
-  persisted production-document change and a later attempt at a new hash. Keep raw
-  diagnostics and revision links; never translate structural validation into approval,
-  evidence quality, rights clearance, or `RECORD-READY`.
+  persisted narration revision that actually changes document content and a later attempt
+  at a new hash. Qualifying revisions include accepted proposals, production re-imports,
+  and content-changing autosaves/manual edits; restores, architecture revisions, and
+  content-unchanged saves do not qualify. Re-validation synchronizes the export from the
+  draft before validating, so an out-of-band target change cannot pass without a qualifying
+  draft revision. Keep raw diagnostics and revision links; never translate structural
+  validation into approval, evidence quality, rights clearance, or `RECORD-READY`.
 - [ ] Add `GET /api/drafts/:id/decisions` with stable ordering/cursor pagination and a
   typed endpoint for optional reject/re-roll notes. Test every counted and excluded
   event, restart/idempotent replay, missing result files, stale proposal resolution,
@@ -724,8 +728,9 @@ edits, and commits are deliberately excluded from real-agent automation.
   rejects, old optional reasons, unselected package directions, and overwritten failed
   validator diagnostics remain unknowable.
 - Agent outputs, quick gate-check verdicts, `survives_honestly`, validator passes,
-  autosaves, restores, and milestone commits do not become lessons without an explicit
-  Martin disposition.
+  autosaves by themselves, restores, and milestone commits do not become lessons without
+  an explicit Martin disposition. A content-changing narration autosave may still serve as
+  qualifying evidence inside a validator fail/edit/re-run cycle.
 - Durable-applied lessons are not copied into `approved_lessons`; they apply through the
   repository-loaded skill/steering doctrine. Episode-local lessons do not leak to other
   drafts or plain-chat sessions.

@@ -72,6 +72,7 @@ export class JobSupervisor {
       operation?: {
         id: string;
         name: string;
+        draftId?: string;
         deadlineAt: string;
         createdAt: string;
       };

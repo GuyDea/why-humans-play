@@ -158,6 +158,17 @@ export interface NarrationProposalRecord {
   resolvedAt: string | null;
   reasonNote?: string | null;
   successorOperationId?: string | null;
+  acceptedRevisionId?: string | null;
+}
+
+export interface ArchitectureProposalRecord {
+  draftId: string;
+  operationId: string;
+  state: 'pending' | 'accepted' | 'rejected';
+  revisionId: string | null;
+  reasonNote: string | null;
+  createdAt: string;
+  resolvedAt: string | null;
 }
 
 export interface ImportPromotionRecord {
@@ -254,6 +265,16 @@ interface NarrationSettledExportRow {
   created_at: string;
 }
 
+interface ArchitectureProposalRow {
+  draft_id: string;
+  operation_id: string;
+  state: ArchitectureProposalRecord['state'];
+  revision_id: string | null;
+  reason_note: string | null;
+  created_at: string;
+  resolved_at: string | null;
+}
+
 interface NarrationProposalRow {
   draft_id: string;
   operation_id: string;
@@ -262,6 +283,7 @@ interface NarrationProposalRow {
   resolved_at: string | null;
   reason_note: string | null;
   successor_operation_id: string | null;
+  accepted_revision_id: string | null;
 }
 
 function draftFrom(row: DraftRow): DraftRecord {
@@ -361,6 +383,21 @@ function narrationProposalFrom(
     resolvedAt: row.resolved_at,
     reasonNote: row.reason_note,
     successorOperationId: row.successor_operation_id,
+    acceptedRevisionId: row.accepted_revision_id,
+  };
+}
+
+function architectureProposalFrom(
+  row: ArchitectureProposalRow,
+): ArchitectureProposalRecord {
+  return {
+    draftId: row.draft_id,
+    operationId: row.operation_id,
+    state: row.state,
+    revisionId: row.revision_id,
+    reasonNote: row.reason_note,
+    createdAt: row.created_at,
+    resolvedAt: row.resolved_at,
   };
 }
 
@@ -570,8 +607,8 @@ export class DocumentStore {
     this.db.prepare(
       `INSERT INTO narration_proposals (
         draft_id, operation_id, state, created_at, resolved_at,
-        reason_note, successor_operation_id
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        reason_note, successor_operation_id, accepted_revision_id
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       ON CONFLICT (draft_id, operation_id) DO NOTHING`,
     ).run(
       record.draftId,
@@ -581,11 +618,91 @@ export class DocumentStore {
       record.resolvedAt,
       record.reasonNote ?? null,
       record.successorOperationId ?? null,
+      record.acceptedRevisionId ?? null,
     );
     return this.getNarrationProposal(
       record.draftId,
       record.operationId,
     )!;
+  }
+
+  createArchitectureProposal(
+    record: ArchitectureProposalRecord,
+  ): ArchitectureProposalRecord {
+    this.db.prepare(
+      `INSERT INTO architecture_proposals (
+        draft_id, operation_id, state, revision_id, reason_note,
+        created_at, resolved_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT (draft_id, operation_id) DO NOTHING`,
+    ).run(
+      record.draftId,
+      record.operationId,
+      record.state,
+      record.revisionId,
+      record.reasonNote,
+      record.createdAt,
+      record.resolvedAt,
+    );
+    return this.getArchitectureProposal(
+      record.draftId,
+      record.operationId,
+    )!;
+  }
+
+  getArchitectureProposal(
+    draftId: string,
+    operationId: string,
+  ): ArchitectureProposalRecord | null {
+    const row = this.db.prepare<
+      [string, string],
+      ArchitectureProposalRow
+    >(
+      `SELECT * FROM architecture_proposals
+       WHERE draft_id = ? AND operation_id = ?`,
+    ).get(draftId, operationId);
+    return row ? architectureProposalFrom(row) : null;
+  }
+
+  resolveArchitectureProposal(
+    draftId: string,
+    operationId: string,
+    input: {
+      state: 'accepted' | 'rejected';
+      revisionId: string | null;
+      reasonNote: string | null;
+      resolvedAt: string;
+    },
+  ): ArchitectureProposalRecord {
+    const result = this.db.prepare(
+      `UPDATE architecture_proposals
+       SET state = ?, revision_id = ?, reason_note = ?, resolved_at = ?
+       WHERE draft_id = ? AND operation_id = ? AND state = 'pending'`,
+    ).run(
+      input.state,
+      input.revisionId,
+      input.reasonNote,
+      input.resolvedAt,
+      draftId,
+      operationId,
+    );
+    const current = this.getArchitectureProposal(draftId, operationId);
+    if (!current) {
+      throw new Error(`architecture proposal not found: ${operationId}`);
+    }
+    if (
+      result.changes === 0
+      && (
+        current.state !== input.state
+        || current.revisionId !== input.revisionId
+        || current.reasonNote !== input.reasonNote
+      )
+    ) {
+      throw new Error(
+        `architecture proposal disposition conflict: ${operationId}`,
+      );
+    }
+    return current;
   }
 
   getNarrationProposal(
@@ -620,18 +737,20 @@ export class DocumentStore {
     options: {
       reasonNote?: string | null;
       successorOperationId?: string | null;
+      acceptedRevisionId?: string | null;
     } = {},
   ): NarrationProposalRecord {
     const result = this.db.prepare(
       `UPDATE narration_proposals
        SET state = ?, resolved_at = ?, reason_note = ?,
-           successor_operation_id = ?
+           successor_operation_id = ?, accepted_revision_id = ?
        WHERE draft_id = ? AND operation_id = ? AND state = 'pending'`,
     ).run(
       state,
       resolvedAt,
       options.reasonNote ?? null,
       options.successorOperationId ?? null,
+      options.acceptedRevisionId ?? null,
       draftId,
       operationId,
     );

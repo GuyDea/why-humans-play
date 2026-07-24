@@ -244,6 +244,7 @@ describe('operations HTTP API', () => {
         {
           id: 'op-cancelled',
           operation: 'generate-alternatives',
+          draftId: null,
           state: 'cancelled',
           createdAt: '2026-07-23T11:00:00.000Z',
           finishedAt: expect.any(String),
@@ -257,6 +258,7 @@ describe('operations HTTP API', () => {
         {
           id: 'op-failed',
           operation: 'rewrite-selection',
+          draftId: null,
           state: 'failed',
           createdAt: '2026-07-23T10:00:00.000Z',
           finishedAt: expect.any(String),
@@ -270,6 +272,7 @@ describe('operations HTTP API', () => {
         {
           id: 'op-completed',
           operation: 'review',
+          draftId: null,
           state: 'completed',
           createdAt: '2026-07-23T09:00:00.000Z',
           finishedAt: expect.any(String),
@@ -515,6 +518,33 @@ describe('operations HTTP API', () => {
     expect((await waitForTerminal(fixture, id)).resumedFrom).toBe(originalId);
   });
 
+  it('refuses draft-scoped operations on the generic resume route with a structured redirect', async () => {
+    const fixture = makeFixture('raw-success');
+    const id = fixture.service.submitDraftScoped(
+      'rewrite-selection',
+      { selection: 'Original passage.' },
+      ['Keep the exact lesson.'],
+      { draftId: 'draft-1', cwd: fixture.root },
+    );
+    fixture.ids.push(id);
+
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: `/api/ops/${id}/resume`,
+      headers: AUTH,
+      payload: { inputs: { selection: 'Try again.' } },
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error: 'operation resume refused: use the draft-scoped resume route for draft draft-1',
+      code: 'draft-scoped-resume-required',
+      recoverable: true,
+      draftId: 'draft-1',
+    });
+    expect(fixture.store.recentOperations()).toHaveLength(1);
+  });
+
   it('cancels a running operation over HTTP and closes its event stream', async () => {
     const fixture = makeFixture('hang');
     const id = await submit(fixture);
@@ -555,6 +585,7 @@ describe('operations HTTP API', () => {
         events: () => [],
         get: () => ({ state }) as JobRecord & {
           operation: 'rewrite-selection';
+          draftId: null;
           stalled: boolean;
         },
         cancel: () => {},

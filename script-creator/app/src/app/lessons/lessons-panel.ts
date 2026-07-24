@@ -261,25 +261,31 @@ type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
                       <code>{{ reconciliation.repositoryCommit }}</code>
                     }
                   </header>
-                  <p class="doctrine-law">
-                    Script Creator does not edit or commit doctrine. Copy this proposal,
-                    run it in the selected repository controller, invoke
-                    <code>$reconcile-whp</code>, review the diff, and commit separately.
-                  </p>
-                  <pre>{{ reconciliation.preparedMarkdown }}</pre>
-                  <div class="handoff-actions">
-                    <button
-                      type="button"
-                      (click)="copyHandoff(reconciliation.preparedMarkdown)"
-                    >
-                      Copy handoff
-                    </button>
-                    @if (reconciliation.state === 'prepared') {
-                      <button type="button" (click)="model().markAwaiting(lesson)">
-                        I started external reconciliation
+                  @if (reconciliation.state !== 'verified') {
+                    <p class="doctrine-law">
+                      Script Creator does not edit or commit doctrine. Copy this proposal,
+                      run it in the selected repository controller, invoke
+                      <code>$reconcile-whp</code>, review the diff, and commit separately.
+                    </p>
+                    <pre>{{ reconciliation.preparedMarkdown }}</pre>
+                    <div class="handoff-actions">
+                      <button
+                        type="button"
+                        (click)="copyHandoff(reconciliation.preparedMarkdown)"
+                      >
+                        Copy handoff
                       </button>
-                    }
-                  </div>
+                      @if (reconciliation.state === 'prepared') {
+                        <button type="button" (click)="model().markAwaiting(lesson)">
+                          I started external reconciliation
+                        </button>
+                      }
+                    </div>
+                  } @else {
+                    <p class="doctrine-law">
+                      Verified history is retained from repository provenance only.
+                    </p>
+                  }
                   @if (copyMessage()) {
                     <p
                       [class.error]="copyFailed()"

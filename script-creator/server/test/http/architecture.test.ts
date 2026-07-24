@@ -132,7 +132,7 @@ function rebuild(fixture: Fixture): void {
     store: fixture.store,
     operationService: {
       submit: () => 'unused-operation',
-      get: () => ({ operation: 'rewrite-selection' }),
+      get: () => ({ operation: 'rewrite-selection', draftId: 'draft-1' }),
     },
     artifactService: {
       write: fixture.write,

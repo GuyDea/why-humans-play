@@ -25,6 +25,9 @@ const VARIANT_PICK_PREFIX = 'variant-picked/';
 
 export interface OperationDecisionEvidence {
   operationId: string;
+  draftId: string | null;
+  operation: string;
+  state: string;
   envelope: unknown;
   result: unknown;
 }
@@ -143,10 +146,18 @@ export class DecisionProjector {
         };
         if (revision.opId) {
           context.operation = this.resolveOperation(revision.opId);
-          context.proposal = this.documentStore.getNarrationProposal(
-            decision.draftId,
-            revision.opId,
-          );
+          context.proposal = (
+            revision.disposition === 'architecture-proposal-accepted'
+            || revision.disposition === 'architecture-proposals-accepted'
+          )
+            ? this.documentStore.getArchitectureProposal(
+                decision.draftId,
+                revision.opId,
+              )
+            : this.documentStore.getNarrationProposal(
+                decision.draftId,
+                revision.opId,
+              );
         }
       }
     } else if (
@@ -187,18 +198,36 @@ export class DecisionProjector {
         context.operation = this.resolveOperation(packageTest.opId);
       }
     } else if (decision.sourceType === 'validator-fix-cycle') {
-      const attempts = decision.sourceId
-        .split(':')
-        .map((attemptId) =>
-          this.learningStore.getValidatorAttempt(attemptId))
-        .filter((attempt) => attempt !== null);
+      const separator = decision.sourceId.indexOf(':');
+      const first = separator < 0
+        ? decision.sourceId
+        : decision.sourceId.slice(0, separator);
+      const second = separator < 0
+        ? ''
+        : decision.sourceId.slice(separator + 1);
+      const failure = this.learningStore.getValidatorAttempt(first);
+      const legacySuccess = this.learningStore.getValidatorAttempt(second);
+      const success = legacySuccess ?? (
+        failure
+          ? this.learningStore.listValidatorAttempts(decision.draftId).find(
+              (attempt) =>
+                attempt.ok
+                && attempt.path === failure.path
+                && attempt.contentHash === second
+                && attempt.createdAt === decision.sourceTimestamp,
+            ) ?? null
+          : null
+      );
+      const attempts = [failure, success].filter(
+        (attempt) => attempt !== null,
+      );
       context.validatorAttempts = attempts;
       if (attempts.length === 2) {
         context.revisions = this.documentStore.listRevisions(
           decision.draftId,
         ).filter((revision) =>
           revision.createdAt > attempts[0]!.createdAt
-          && revision.createdAt < attempts[1]!.createdAt);
+          && revision.createdAt <= attempts[1]!.createdAt);
       }
     } else if (decision.sourceType === 'topic-handoff') {
       const saga = this.topicStore.getHandoffSagaBySourceId(

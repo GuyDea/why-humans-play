@@ -652,6 +652,7 @@ function makeFixture(options: {
       },
       get: (id) => ({
         operation: operations.get(id) ?? 'rewrite-selection',
+        draftId: 'draft-1',
       }),
       result: (id) => operations.get(id) === 'generate-alternatives'
         ? {

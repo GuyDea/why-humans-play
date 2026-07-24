@@ -53,6 +53,7 @@ export interface OperationRecord
   extends Omit<JobRecord, 'id' | 'operationId' | 'state'> {
   id: string;
   operation: OperationName;
+  draftId: string | null;
   state: OperationState;
   stalled: boolean;
 }
@@ -60,6 +61,7 @@ export interface OperationRecord
 export interface OperationListRecord {
   id: string;
   operation: OperationName;
+  draftId: string | null;
   state: OperationState;
   createdAt: string;
   finishedAt: string | null;
@@ -76,6 +78,18 @@ export type OperationServiceResult =
   | { kind: 'raw'; markdown: string }
   | { kind: 'failed'; error: string }
   | { kind: 'pending' };
+
+export class DraftScopedResumeRequiredError extends Error {
+  readonly code = 'draft-scoped-resume-required';
+  readonly recoverable = true;
+
+  constructor(readonly draftId: string) {
+    super(
+      `operation resume refused: use the draft-scoped resume route for draft ${draftId}`,
+    );
+    this.name = 'DraftScopedResumeRequiredError';
+  }
+}
 
 export class OperationService {
   private readonly supervisor: JobSupervisor;
@@ -115,7 +129,7 @@ export class OperationService {
     opName: OperationName,
     inputs: unknown,
     approvedLessons: string[],
-    opts: { resumeOf?: string; cwd?: string } = {},
+    opts: { draftId: string; resumeOf?: string; cwd?: string },
   ): string {
     if (!approvedLessons.every((lesson) => typeof lesson === 'string')) {
       throw new Error('authoritative approved lessons must be strings');
@@ -148,7 +162,7 @@ export class OperationService {
     opName: OperationName,
     inputs: unknown,
     approvedLessons: string[] | null,
-    opts: { resumeOf?: string; cwd?: string },
+    opts: { draftId?: string; resumeOf?: string; cwd?: string },
   ): string {
     const definition = this.definition(opName);
     if (inputs === undefined) throw new Error('full inputs are required');
@@ -162,6 +176,11 @@ export class OperationService {
     let resumeThreadId: string | undefined;
     if (opts.resumeOf !== undefined) {
       const parentOperation = this.requireOperation(opts.resumeOf);
+      if (parentOperation.draftId !== (opts.draftId ?? null)) {
+        throw new Error(
+          'operation resume refused: parent draft ownership does not match',
+        );
+      }
       const parent = this.activeAttempt(parentOperation.id);
       if (parentOperation.name !== definition.name) {
         throw new Error(
@@ -202,6 +221,7 @@ export class OperationService {
       operation: {
         id,
         name: definition.name,
+        ...(opts.draftId ? { draftId: opts.draftId } : {}),
         deadlineAt,
         createdAt,
       },
@@ -224,6 +244,7 @@ export class OperationService {
       ...job,
       id: operation.id,
       operation: operation.name as OperationName,
+      draftId: operation.draftId,
       state: operation.state === 'timed-out'
         ? 'timed-out'
         : job.state,
@@ -238,6 +259,7 @@ export class OperationService {
       return {
         id: record.id,
         operation: record.operation,
+        draftId: record.draftId,
         state: record.state,
         createdAt: operation.createdAt,
         finishedAt: record.finishedAt,

@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import {
   mkdirSync,
   mkdtempSync,
@@ -374,5 +375,212 @@ describe('reconciliation commit verification', () => {
       anchor: pointer.anchor,
       contentHash: 'sha256:wrong',
     })).toThrow(/content hash/i);
+  });
+
+  it('refuses an older reconciliation commit and a newer wrong-lesson commit', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, ['commit', '-m', 'seed doctrine']);
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Older unrelated lesson.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nOlder unrelated lesson.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, ['commit', '-m', 'older unrelated reconciliation']);
+    const olderCommit = git(repoRoot, ['rev-parse', 'HEAD']);
+    const preparedHead = olderCommit;
+
+    expect(() => verifyReconciliationCommit(repoRoot, olderCommit, {
+      kind: 'apply',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      candidateMarkdown: 'This lesson belongs to the current handoff.',
+      priorPointer: null,
+    })).toThrow(/reconciliation commit.+predates.+handoff/iu);
+
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Older unrelated lesson.\n- Another wrong lesson.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nOlder unrelated lesson.\nAnother wrong lesson.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, ['commit', '-m', 'newer wrong reconciliation']);
+    const wrongCommit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    expect(() => verifyReconciliationCommit(repoRoot, wrongCommit, {
+      kind: 'apply',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      candidateMarkdown: 'This lesson belongs to the current handoff.',
+      priorPointer: null,
+    })).toThrow(/reconciliation commit.+current lesson.+added doctrine/iu);
+  });
+
+  it('selects the apply pointer from the lesson-matched hunk, not path order', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'a-unrelated'), {
+      recursive: true,
+    });
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'a-unrelated', 'SKILL.md'),
+      '# Unrelated\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents', 'whp-youtube']);
+    git(repoRoot, ['commit', '-m', 'seed doctrine']);
+    const preparedHead = git(repoRoot, ['rev-parse', 'HEAD']);
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Prefer the lesson-matched hunk.\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'a-unrelated', 'SKILL.md'),
+      '# Unrelated\n\nAlphabetically first but unrelated.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nPrefer the lesson-matched hunk.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents', 'whp-youtube']);
+    git(repoRoot, ['commit', '-m', 'apply current lesson']);
+    const commit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    const verified = verifyReconciliationCommit(repoRoot, commit, {
+      kind: 'apply',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      candidateMarkdown: 'Prefer the lesson-matched hunk.',
+      priorPointer: null,
+    });
+
+    expect(verified.doctrinePointers).toEqual([
+      expect.objectContaining({
+        path: 'whp-youtube/STEERING.md',
+        content: 'Prefer the lesson-matched hunk.',
+      }),
+    ]);
+  });
+
+  it('requires the recorded predecessor removal for retire and supersede', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, '.agents', 'skills', 'unrelated'), {
+      recursive: true,
+    });
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'unrelated', 'SKILL.md'),
+      '# Unrelated\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nPrior durable doctrine.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents', 'whp-youtube']);
+    git(repoRoot, ['commit', '-m', 'seed prior doctrine']);
+    const preparedHead = git(repoRoot, ['rev-parse', 'HEAD']);
+    const priorPointer = {
+      path: 'whp-youtube/STEERING.md',
+      anchor: 'lines:3-3',
+      contentHash: `sha256:${
+        createHash('sha256').update('Prior durable doctrine.').digest('hex')
+      }`,
+    };
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Unrelated change only.\n',
+    );
+    writeFileSync(
+      join(repoRoot, '.agents', 'skills', 'unrelated', 'SKILL.md'),
+      '# Unrelated\n\nChanged, but not the predecessor.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', '.agents']);
+    git(repoRoot, ['commit', '-m', 'unrelated doctrine change']);
+    const unrelatedCommit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    for (const kind of ['retire', 'supersede'] as const) {
+      expect(() => verifyReconciliationCommit(repoRoot, unrelatedCommit, {
+        kind,
+        preparedAt: '2026-07-24T09:00:00.000Z',
+        preparedHead,
+        candidateMarkdown: kind === 'supersede'
+          ? 'Replacement durable doctrine.'
+          : null,
+        priorPointer,
+      })).toThrow(/reconciliation commit.+recorded predecessor.+removed/iu);
+    }
+
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nReplacement durable doctrine.\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, ['commit', '-m', 'supersede current lesson']);
+    const supersedeCommit = git(repoRoot, ['rev-parse', 'HEAD']);
+    expect(verifyReconciliationCommit(repoRoot, supersedeCommit, {
+      kind: 'supersede',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead,
+      candidateMarkdown: 'Replacement durable doctrine.',
+      priorPointer,
+    }).doctrinePointers).toEqual([
+      expect.objectContaining({
+        path: 'whp-youtube/STEERING.md',
+        content: 'Replacement durable doctrine.',
+      }),
+    ]);
+
+    const retirePreparedHead = supersedeCommit;
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Unrelated change only.\n- Supersede prior doctrine.\n- Retire replacement.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n',
+    );
+    git(repoRoot, ['add', '--', 'DECISIONS.md', 'whp-youtube/STEERING.md']);
+    git(repoRoot, ['commit', '-m', 'retire current doctrine']);
+    const retireCommit = git(repoRoot, ['rev-parse', 'HEAD']);
+    const replacementPointer = {
+      path: 'whp-youtube/STEERING.md',
+      anchor: 'lines:3-3',
+      contentHash: `sha256:${
+        createHash('sha256').update('Replacement durable doctrine.')
+          .digest('hex')
+      }`,
+    };
+    expect(verifyReconciliationCommit(repoRoot, retireCommit, {
+      kind: 'retire',
+      preparedAt: '2026-07-24T09:00:00.000Z',
+      preparedHead: retirePreparedHead,
+      candidateMarkdown: null,
+      priorPointer: replacementPointer,
+    }).doctrinePointers).toEqual([{
+      ...replacementPointer,
+      content: 'Replacement durable doctrine.',
+    }]);
   });
 });

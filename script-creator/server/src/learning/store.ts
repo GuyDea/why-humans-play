@@ -117,6 +117,7 @@ export interface LessonReconciliationRecord {
   state: ReconciliationState;
   resumeKey: string;
   preparedMarkdown: string;
+  preparedHead: string | null;
   repositoryCommit: string | null;
   paths: string[];
   anchors: string[];
@@ -212,6 +213,7 @@ interface ReconciliationRow {
   state: ReconciliationState;
   resume_key: string;
   prepared_markdown: string;
+  prepared_head: string | null;
   repository_commit: string | null;
   paths_json: string;
   anchors_json: string;
@@ -1061,9 +1063,9 @@ export class LearningStore {
     this.db.prepare(
       `INSERT INTO lesson_reconciliations (
         id, lesson_id, kind, state, resume_key, prepared_markdown,
-        repository_commit, paths_json, anchors_json, content_hashes_json,
-        created_at, updated_at, verified_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        prepared_head, repository_commit, paths_json, anchors_json,
+        content_hashes_json, created_at, updated_at, verified_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     ).run(
       record.id,
       record.lessonId,
@@ -1071,6 +1073,7 @@ export class LearningStore {
       record.state,
       record.resumeKey,
       record.preparedMarkdown,
+      record.preparedHead,
       record.repositoryCommit,
       JSON.stringify(record.paths),
       JSON.stringify(record.anchors),
@@ -1244,6 +1247,7 @@ export class LearningStore {
       this.db.prepare(
         `UPDATE lesson_reconciliations
          SET state = 'verified',
+             prepared_markdown = '',
              repository_commit = ?,
              paths_json = ?,
              anchors_json = ?,
@@ -1260,6 +1264,12 @@ export class LearningStore {
         input.updatedAt,
         reconciliation.id,
       );
+      this.scrubVerifiedDurableLessonSnapshots(lesson.id, {
+        commit: input.repositoryCommit,
+        path: input.repositoryPath,
+        anchor: input.repositoryAnchor,
+        contentHash: input.repositoryContentHash,
+      });
       return {
         lesson: this.getLesson(lesson.id)!,
         reconciliation: this.getReconciliation(reconciliation.id)!,
@@ -1284,6 +1294,46 @@ export class LearningStore {
       record.createdAt,
     );
     return this.getValidatorAttempt(record.id)!;
+  }
+
+  private scrubVerifiedDurableLessonSnapshots(
+    lessonId: string,
+    provenance: {
+      commit: string;
+      path: string | null;
+      anchor: string | null;
+      contentHash: string | null;
+    },
+  ): void {
+    const rows = this.db.prepare<[string], {
+      run_id: string;
+      snapshot_json: string;
+    }>(
+      `SELECT run_id, snapshot_json
+       FROM distillation_run_lessons
+       WHERE lesson_id = ?`,
+    ).all(lessonId);
+    const update = this.db.prepare(
+      `UPDATE distillation_run_lessons
+       SET snapshot_json = ?
+       WHERE run_id = ? AND lesson_id = ?`,
+    );
+    for (const row of rows) {
+      const snapshot = JSON.parse(row.snapshot_json) as unknown;
+      if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+        continue;
+      }
+      update.run(JSON.stringify({
+        ...(snapshot as Record<string, unknown>),
+        lesson_markdown: null,
+        repository_provenance: {
+          commit: provenance.commit,
+          path: provenance.path,
+          anchor: provenance.anchor,
+          content_hash: provenance.contentHash,
+        },
+      }), row.run_id, lessonId);
+    }
   }
 
   getValidatorAttempt(id: string): ValidatorAttemptRecord | null {
@@ -1426,6 +1476,7 @@ function reconciliationFrom(
     state: row.state,
     resumeKey: row.resume_key,
     preparedMarkdown: row.prepared_markdown,
+    preparedHead: row.prepared_head,
     repositoryCommit: row.repository_commit,
     paths: JSON.parse(row.paths_json) as string[],
     anchors: JSON.parse(row.anchors_json) as string[],

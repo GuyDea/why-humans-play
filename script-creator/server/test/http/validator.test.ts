@@ -162,7 +162,7 @@ describe('validator HTTP API', () => {
     expect(validate).not.toHaveBeenCalled();
   });
 
-  it('appends a draft-scoped validator attempt before returning diagnostics', async () => {
+  it('re-imports the exact production target before appending its validator attempt', async () => {
     const result: ValidatorResult = {
       ok: false,
       errors: [{ message: 'Missing Status field.', line: 3 }],
@@ -170,6 +170,7 @@ describe('validator HTTP API', () => {
       hash: 'bad-hash',
     };
     const recordValidatorAttempt = vi.fn();
+    const syncPromotionOutput = vi.fn();
     const app = buildApp({
       nonce: NONCE,
       operationService: {
@@ -184,7 +185,7 @@ describe('validator HTTP API', () => {
       },
       documentService: {
         ...UNUSED_DOCUMENT_SERVICE,
-        syncPromotionOutput: vi.fn(),
+        syncPromotionOutput,
         recordPromotionValidation: vi.fn(),
       },
       architectureService: {
@@ -233,6 +234,11 @@ describe('validator HTTP API', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual(result);
+    expect(syncPromotionOutput).toHaveBeenCalledWith('draft-1', {
+      path: result.path,
+      content: '# Script',
+      hash: result.hash,
+    });
     expect(recordValidatorAttempt).toHaveBeenCalledWith({
       draftId: 'draft-1',
       path: result.path,
@@ -240,5 +246,7 @@ describe('validator HTTP API', () => {
       ok: false,
       diagnostics: result.errors,
     });
+    expect(syncPromotionOutput.mock.invocationCallOrder[0])
+      .toBeLessThan(recordValidatorAttempt.mock.invocationCallOrder[0]!);
   });
 });

@@ -11,6 +11,7 @@ import { ArchitectureService } from '../../src/architecture/service.js';
 import { DocumentService } from '../../src/documents/service.js';
 import { DocumentStore } from '../../src/documents/store.js';
 import { buildApp } from '../../src/http/app.js';
+import type { ArtifactWriteResult } from '../../src/repo/artifacts.js';
 import { UNUSED_VALIDATOR_SERVICE } from './stubs.js';
 
 const NONCE = 'promote-nonce';
@@ -620,6 +621,67 @@ describe('staged Promote HTTP workflow', () => {
       .toBe('creative-approved');
   });
 
+  it('refuses an out-of-band target pass before re-validation when the draft has no edit', async () => {
+    const path = 'whp-youtube/episodes/01-composition-net.md';
+    const output = {
+      path,
+      content: productionMarkdown(),
+      hash: 'invalid-hash',
+    };
+    const fixture = makeFixture({
+      read: async () => output,
+      writeProduction: async () => ({
+        conflict: true,
+        currentHash: 'out-of-band-pass-hash',
+        parked: [`${path}.sc-conflict`],
+      }),
+      validationResults: [{
+        ok: false,
+        errors: [{ message: 'Fixture needs correction.', line: 9 }],
+        path,
+        hash: 'invalid-hash',
+      }],
+    });
+    await submit(fixture, { target_path: path });
+    await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops/promote-1/result',
+      headers: AUTH,
+    });
+    const failed = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/validate',
+      headers: AUTH,
+    });
+    expect(failed.json()).toMatchObject({
+      ok: false,
+      hash: 'invalid-hash',
+    });
+
+    const expectedRevisionSeq = fixture.store
+      .listRevisions('draft-1')
+      .at(-1)!.seq;
+    const sync = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/production/sync',
+      headers: AUTH,
+      payload: { expectedRevisionSeq },
+    });
+
+    expect(sync.statusCode).toBe(409);
+    expect(sync.json()).toEqual({
+      error: 'production synchronization conflict',
+      currentHash: 'out-of-band-pass-hash',
+      parked: [`${path}.sc-conflict`],
+    });
+    expect(fixture.validate).toHaveBeenCalledTimes(1);
+    expect(fixture.store.getLatestPromotion('draft-1')).toMatchObject({
+      state: 'validation-required',
+      targetHash: 'invalid-hash',
+      validationHash: null,
+    });
+  });
+
   it('resumes a durable production synchronization reservation after restart', async () => {
     let output = {
       path: 'whp-youtube/episodes/01-composition-net.md',
@@ -956,10 +1018,7 @@ function makeFixture(options: {
   writeProduction?: (
     path: string,
     content: string,
-  ) => Promise<{
-    conflict: false;
-    hash: string;
-  }>;
+  ) => Promise<ArtifactWriteResult>;
 } = {}): PromoteFixture {
   const root = mkdtempSync(join(tmpdir(), 'promote-http-'));
   const store = new DocumentStore(join(root, 'state.sqlite3'));
@@ -1035,7 +1094,7 @@ function makeFixture(options: {
     store,
     operationService: {
       submit: submitOperation,
-      get: () => ({ operation: 'promote' as const }),
+      get: () => ({ operation: 'promote' as const, draftId: 'draft-1' }),
     },
     artifactService: artifacts,
     idFactory: () => 'production-revision-1',

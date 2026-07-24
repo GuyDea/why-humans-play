@@ -9,13 +9,17 @@ import {
   STATE_MIGRATIONS,
 } from '../src/state-migrations.js';
 import { TopicStore } from '../src/topics/store.js';
+import { LearningStore } from '../src/learning/store.js';
+import { LearningService } from '../src/learning/service.js';
 
 const roots: string[] = [];
 const documentStores: DocumentStore[] = [];
 const topicStores: TopicStore[] = [];
+const learningStores: LearningStore[] = [];
 
 afterEach(() => {
   for (const store of topicStores.splice(0)) store.close();
+  for (const store of learningStores.splice(0)) store.close();
   for (const store of documentStores.splice(0)) store.close();
   for (const root of roots.splice(0)) {
     rmSync(root, { recursive: true, force: true });
@@ -40,8 +44,13 @@ describe('shared state migration registry', () => {
       { version: 8, owner: 'milestones', name: 'episode-milestones' },
       { version: 9, owner: 'milestones', name: 'milestone-supersession' },
       { version: 10, owner: 'learning', name: 'learning-lifecycle' },
+      {
+        version: 11,
+        owner: 'learning',
+        name: 'handoff-binding-and-shadow-cleanup',
+      },
     ]);
-    expect(LATEST_STATE_SCHEMA_VERSION).toBe(10);
+    expect(LATEST_STATE_SCHEMA_VERSION).toBe(11);
   });
 
   it('migrates a populated v5 database without changing document JSON bytes', () => {
@@ -112,7 +121,7 @@ describe('shared state migration registry', () => {
     });
   });
 
-  it('creates the complete v10 schema for a fresh database', () => {
+  it('creates the complete v11 schema for a fresh database', () => {
     const dbFile = join(
       roots[roots.push(mkdtempSync(join(tmpdir(), 'state-fresh-'))) - 1]!,
       'state.sqlite3',
@@ -184,7 +193,20 @@ describe('shared state migration registry', () => {
       'resolved_at',
       'reason_note',
       'successor_operation_id',
+      'accepted_revision_id',
     ]);
+    expect(columns(inspected, 'architecture_proposals')).toEqual([
+      'draft_id',
+      'operation_id',
+      'state',
+      'revision_id',
+      'reason_note',
+      'created_at',
+      'resolved_at',
+    ]);
+    expect(columns(inspected, 'lesson_reconciliations')).toContain(
+      'prepared_head',
+    );
     expect(columns(inspected, 'package_tests')).toEqual([
       'id',
       'idea_id',
@@ -319,19 +341,124 @@ describe('shared state migration registry', () => {
     ).get()!.count).toBe(0);
     inspected.close();
     expect(apply).toHaveBeenCalledOnce();
+
+    const documentStore = documentStores[0]!;
+    const topicStore = topicStores[0]!;
+    const learningStore = new LearningStore(dbFile);
+    learningStores.push(learningStore);
+    let frozenInput: unknown = null;
+    const learningService = new LearningService({
+      store: learningStore,
+      documentStore,
+      topicStore,
+      operationEvidence: () => null,
+      operationService: {
+        submit: (_operation, inputs) => {
+          frozenInput = inputs;
+          return 'distill-v9-backfill';
+        },
+        get: () => ({
+          operation: 'distill',
+          state: 'running',
+        }),
+        result: () => ({ kind: 'pending' }),
+      },
+      idFactory: () => 'first-post-upgrade-distillation',
+      resumeKeyFactory: () => 'first-post-upgrade-resume',
+      now: () => '2026-07-24T09:00:00.000Z',
+    });
+    const run = learningService.startDistillation('draft-v9', 'on-demand');
+    expect(run.state).toBe('queued');
+    expect(run.decisions.map(({ decisionId }) => decisionId)).toEqual([
+      'v10:revision:revision-v9',
+      'v10:narration-proposal:operation-rejected:rejected',
+    ]);
+    expect(frozenInput).toMatchObject({
+      session: {
+        draft_id: 'draft-v9',
+        decisions: expect.arrayContaining([
+          expect.objectContaining({ id: 'v10:revision:revision-v9' }),
+          expect.objectContaining({
+            id: 'v10:narration-proposal:operation-rejected:rejected',
+          }),
+        ]),
+      },
+    });
   });
 
-  it('does not reapply v10 to an already-v10 database', () => {
+  it('does not reapply v10 or v11 to an already-v11 database', () => {
     const dbFile = simulatedV9Database();
     documentStores.push(new DocumentStore(dbFile));
     documentStores.pop()!.close();
     const migration = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
     const apply = vi.spyOn(migration, 'apply');
+    const v11 = STATE_MIGRATIONS.find(({ version }) => version === 11)!;
+    const applyV11 = vi.spyOn(v11, 'apply');
 
     documentStores.push(new DocumentStore(dbFile));
     topicStores.push(new TopicStore(dbFile));
 
     expect(apply).not.toHaveBeenCalled();
+    expect(applyV11).not.toHaveBeenCalled();
+  });
+
+  it('repairs a stranded already-v10 session cursor exactly once in v11', () => {
+    const dbFile = simulatedV9Database();
+    const db = new Database(dbFile);
+    const docJson =
+      '{"type":"doc","attrs":{"format":"narration"},"content":[]}';
+    db.prepare(
+      `INSERT INTO drafts (
+        id, episode_slug, title, format, doc_json, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'draft-stranded',
+      'draft-stranded',
+      'Draft Stranded',
+      'narration',
+      docJson,
+      '2026-07-24T08:00:00.000Z',
+    );
+    db.prepare(
+      `INSERT INTO revisions (
+        id, draft_id, seq, op_id, disposition, doc_json, created_at, kind
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      'revision-stranded',
+      'draft-stranded',
+      1,
+      'operation-stranded',
+      'selection-proposal-accepted',
+      docJson,
+      '2026-07-24T08:01:00.000Z',
+      'narration',
+    );
+    const v10 = STATE_MIGRATIONS.find(({ version }) => version === 10)!;
+    v10.apply(db);
+    db.pragma('user_version = 10');
+    db.prepare(
+      `UPDATE learning_sessions
+       SET start_cursor = 1
+       WHERE draft_id = 'draft-stranded'`,
+    ).run();
+    db.close();
+
+    const v11 = STATE_MIGRATIONS.find(({ version }) => version === 11)!;
+    const applyV11 = vi.spyOn(v11, 'apply');
+    documentStores.push(new DocumentStore(dbFile));
+
+    const inspected = new Database(dbFile, { readonly: true });
+    expect(inspected.pragma('user_version', { simple: true })).toBe(11);
+    expect(inspected.prepare<[], { start_cursor: number }>(
+      `SELECT start_cursor
+       FROM learning_sessions
+       WHERE draft_id = 'draft-stranded' AND closed_at IS NULL`,
+    ).get()!.start_cursor).toBe(0);
+    inspected.close();
+    expect(applyV11).toHaveBeenCalledOnce();
+
+    documentStores.push(new DocumentStore(dbFile));
+    expect(applyV11).toHaveBeenCalledOnce();
   });
 
   it('does not reapply migration v6 to an already-v6 database', () => {

@@ -762,3 +762,24 @@ discard the same server state and leave a stale client writable with no Resume a
 `.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
 `whp-youtube/STEERING.md` remain unchanged because this is an internal Script Creator
 client recovery contract.
+
+## 2026-07-24 — Recognize genuine validator fix revisions
+
+**Decision:** Script Creator's validator-fix-cycle proof accepts any interposed narration
+revision that actually changes document content—including accepted proposals,
+`production-import` revisions, and content-changing autosaves/manual editor edits—between
+a failed exact-hash attempt and a passing attempt at a new hash; excludes restores,
+architecture revisions, and content-unchanged saves; and records at most one decision for
+each unique failure-attempt-ID plus fixed-hash cycle.
+
+**Rationale:** The live Plan 7 sweep's manual editor fix was persisted as an ordinary
+autosave, so categorically excluding autosaves made the genuine cycle impossible to
+capture. Re-validation synchronizes the production export from the draft before validating,
+so an out-of-band target change cannot produce a pass without a qualifying draft revision;
+a validator rerun without a content-changing narration revision must remain refused.
+
+**Documents:** `docs/superpowers/evidence/2026-07-24-script-creator-plan7-learning.md`,
+`docs/superpowers/plans/2026-07-24-script-creator-plan7-learning.md`, and this ledger.
+`BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain unchanged because this
+decision corrects internal proof calibration without changing WHP doctrine or Plan 7
+architecture.

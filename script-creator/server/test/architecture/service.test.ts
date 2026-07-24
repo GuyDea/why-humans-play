@@ -19,7 +19,7 @@ import type { OperationName } from '../../src/operations/registry.js';
 interface SubmittedOperation {
   operation: OperationName;
   inputs: unknown;
-  options: { resumeOf?: string; cwd?: string };
+  options: { draftId?: string; resumeOf?: string; cwd?: string };
 }
 
 const roots: string[] = [];
@@ -72,6 +72,7 @@ function makeFixture(input: {
   reconciliationRequired?: boolean;
   sections?: ArchitectureSection[];
   workspacePath?: string;
+  useDraftScopedOperationService?: boolean;
   learningService?: ConstructorParameters<
     typeof ArchitectureService
   >[0]['learningService'];
@@ -103,6 +104,7 @@ function makeFixture(input: {
     updatedAt: '2026-07-24T09:00:00.000Z',
   });
   const submitted: SubmittedOperation[] = [];
+  const submittedApprovedLessons: string[][] = [];
   const operationService = {
     submit: vi.fn((
       operation: OperationName,
@@ -112,13 +114,32 @@ function makeFixture(input: {
       submitted.push({ operation, inputs, options });
       return `operation-${submitted.length}`;
     }),
-    get: vi.fn((): { operation: OperationName } => ({
+    get: vi.fn((): { operation: OperationName; draftId: string } => ({
       operation: 'rewrite-selection',
+      draftId: 'draft-1',
     })),
     result: vi.fn(() => ({
       kind: 'raw' as const,
       markdown: '# Generated narration\n',
     })),
+    ...(input.useDraftScopedOperationService
+      ? {
+          submitDraftScoped: vi.fn((
+            operation: OperationName,
+            inputs: unknown,
+            approvedLessons: string[],
+            options: {
+              draftId: string;
+              resumeOf?: string;
+              cwd?: string;
+            },
+          ) => {
+            submitted.push({ operation, inputs, options });
+            submittedApprovedLessons.push(approvedLessons);
+            return `operation-${submitted.length}`;
+          }),
+        }
+      : {}),
   };
   let revision = 0;
   const service = new ArchitectureService({
@@ -134,7 +155,13 @@ function makeFixture(input: {
     idFactory: () => `architecture-revision-${++revision}`,
     now: () => '2026-07-24T10:00:00.000Z',
   });
-  return { store, service, submitted, operationService };
+  return {
+    store,
+    service,
+    submitted,
+    submittedApprovedLessons,
+    operationService,
+  };
 }
 
 function appendAcceptedNarrationRevision(
@@ -206,12 +233,15 @@ describe('ArchitectureService revisions', () => {
     });
 
     expect(state.narrationReconciliationRequired).toBe(false);
-    expect(captureRevision).toHaveBeenCalledWith(expect.objectContaining({
-      id: 'architecture-revision-1',
-      seq: 1,
-      opId: null,
-      disposition: 'narration-reconciled',
-    }));
+    expect(captureRevision).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'architecture-revision-1',
+        seq: 1,
+        opId: null,
+        disposition: 'narration-reconciled',
+      }),
+      { gateCompleted: true },
+    );
   });
 
   it('captures a re-roll only after the successor operation is durable', () => {
@@ -225,6 +255,7 @@ describe('ArchitectureService revisions', () => {
     });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     const parent = fixture.service.submitOperation(
       'draft-1',
@@ -473,6 +504,58 @@ describe('ArchitectureService draft-scoped operation policy', () => {
     ]);
   });
 
+  it('records authoritative lesson provenance on every legitimate draft resume', () => {
+    const workspacePath = join(tmpdir(), 'episode-workspace');
+    const approvedLessons = [{
+      id: 'lesson-1',
+      version: 3,
+      markdown: 'Keep the reveal concrete.',
+      contentHash: 'sha256:lesson-1',
+    }];
+    const recordOperationLessons = vi.fn();
+    const fixture = makeFixture({
+      phase: 'architecture',
+      approved: false,
+      narration: 'An imported line.',
+      workspacePath,
+      useDraftScopedOperationService: true,
+      learningService: {
+        captureRevision: vi.fn(),
+        captureProposalDisposition: vi.fn(),
+        captureArchitectureRejection: vi.fn(),
+        activeEpisodeLessons: vi.fn(() => approvedLessons),
+        recordOperationLessons,
+      },
+    });
+
+    const child = fixture.service.resumeOperation(
+      'draft-1',
+      'parent-operation',
+      { selection: 'An imported line.' },
+    );
+
+    expect(fixture.submitted).toEqual([{
+      operation: 'rewrite-selection',
+      inputs: {
+        selection: 'An imported line.',
+        creative_status: { phase: 'architecture' },
+        approved_lessons: ['Keep the reveal concrete.'],
+      },
+      options: {
+        draftId: 'draft-1',
+        resumeOf: 'parent-operation',
+        cwd: workspacePath,
+      },
+    }]);
+    expect(fixture.submittedApprovedLessons).toEqual([
+      ['Keep the reveal concrete.'],
+    ]);
+    expect(recordOperationLessons).toHaveBeenCalledWith(
+      child,
+      approvedLessons,
+    );
+  });
+
   it('allows scoped narration work in architecture phase only with real narration', () => {
     const imported = makeFixture({
       phase: 'architecture',
@@ -591,6 +674,41 @@ describe('ArchitectureService draft-scoped operation policy', () => {
       options: { resumeOf: 'parent-operation' },
     });
   });
+
+  it('refuses to resume a parent operation through a different draft', () => {
+    const fixture = makeFixture({
+      phase: 'architecture',
+      approved: false,
+      narration: 'An imported line.',
+    });
+    fixture.store.createDraft({
+      id: 'draft-2',
+      episodeSlug: 'other-episode',
+      title: 'Other Episode',
+      format: 'narration',
+      doc: narrationDoc({
+        phase: 'architecture',
+        narration: 'Other imported line.',
+      }),
+      architecture: {
+        sections: completeSections(),
+        approvedMd: null,
+        approvedAt: null,
+      },
+      updatedAt: '2026-07-24T09:00:00.000Z',
+    });
+    fixture.operationService.get.mockReturnValue({
+      operation: 'rewrite-selection',
+      draftId: 'draft-1',
+    });
+
+    expect(() => fixture.service.resumeOperation(
+      'draft-2',
+      'draft-1-operation',
+      { selection: 'Cross-draft contamination.' },
+    )).toThrow(/parent operation does not belong to the requested draft/iu);
+    expect(fixture.submitted).toEqual([]);
+  });
 });
 
 describe('ArchitectureService narration proposal reconciliation', () => {
@@ -598,6 +716,7 @@ describe('ArchitectureService narration proposal reconciliation', () => {
     const fixture = makeFixture({ reconciliationRequired: true });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     const operationId = fixture.service.submitOperation(
       'draft-1',
@@ -624,6 +743,7 @@ describe('ArchitectureService narration proposal reconciliation', () => {
     const fixture = makeFixture({ reconciliationRequired: true });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     fixture.store.createNarrationProposal({
       draftId: 'draft-1',
@@ -648,6 +768,7 @@ describe('ArchitectureService narration proposal reconciliation', () => {
     const fixture = makeFixture({ reconciliationRequired: true });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     const operationId = fixture.service.submitOperation(
       'draft-1',
@@ -669,6 +790,7 @@ describe('ArchitectureService narration proposal reconciliation', () => {
     const fixture = makeFixture({ reconciliationRequired: true });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     fixture.store.createNarrationProposal({
       draftId: 'draft-1',
@@ -699,6 +821,7 @@ describe('ArchitectureService narration proposal reconciliation', () => {
     });
     fixture.operationService.get.mockReturnValue({
       operation: 'generate-episode',
+      draftId: 'draft-1',
     });
     const operationId = fixture.service.submitOperation(
       'draft-1',

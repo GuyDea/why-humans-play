@@ -1,8 +1,18 @@
 import { createHash, randomUUID } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve, sep } from 'node:path';
+import {
+  EditorState,
+  pickActive as pickEditorVariant,
+  schema as editorSchema,
+} from '@whp/script-creator-editor-core';
+import {
+  splitArchitecture,
+  type ArchitectureSection,
+} from '../architecture/codec.js';
 import type {
   DocumentStore,
+  DraftArchitecture,
   PromotionRecord,
   RevisionRecord,
 } from '../documents/store.js';
@@ -11,18 +21,21 @@ import type {
   OperationServiceResult,
 } from '../operations/service.js';
 import {
+  gitHead,
   ReconciliationCommitMismatchError,
   verifyExistingDoctrinePointer,
   verifyReconciliationCommit,
 } from '../repo/git.js';
 import type {
   ReconciliationCommitCheck,
+  ReconciliationVerificationExpectation,
   VerifiedReconciliationCommit,
 } from '../repo/git.js';
 import type { OperationState } from '../types.js';
 import type { TopicStore } from '../topics/store.js';
 import {
   DecisionProjector,
+  decodeVariantPickedDisposition,
   decisionKindForRevisionDisposition,
   type OperationDecisionEvidence,
   type ResolvedDecision,
@@ -125,6 +138,9 @@ export class LearningService {
   private readonly store: LearningStore;
   private readonly documentStore: DocumentStore;
   private readonly topicStore: TopicStore;
+  private readonly operationEvidence: (
+    operationId: string,
+  ) => OperationDecisionEvidence | null;
   private readonly projector: DecisionProjector;
   private readonly operationService: LearningOperationService | null;
   private readonly repositoryRootForDraft:
@@ -149,6 +165,7 @@ export class LearningService {
     this.store = options.store;
     this.documentStore = options.documentStore;
     this.topicStore = options.topicStore;
+    this.operationEvidence = options.operationEvidence;
     this.operationService = options.operationService ?? null;
     this.repositoryRootForDraft = options.repositoryRootForDraft ?? null;
     this.idFactory = options.idFactory ?? randomUUID;
@@ -164,11 +181,15 @@ export class LearningService {
 
   captureRevision(
     revision: RevisionRecord,
+    proof: { gateCompleted?: boolean } = {},
   ): DecisionEventRecord | null {
     const kind = decisionKindForRevisionDisposition(
       revision.disposition,
     );
     if (!kind) return null;
+    if (!this.revisionHasNormativeProof(revision, kind, proof)) {
+      return null;
+    }
     return this.capture({
       draftId: revision.draftId,
       kind,
@@ -200,6 +221,21 @@ export class LearningService {
     if (input.decision === 'rerolled' && !input.successorOperationId) {
       throw new Error('successorOperationId is required for rerolled');
     }
+    this.requireCompletedDraftOperation(
+      input.operationId,
+      input.draftId,
+    );
+    const acceptedRevision = input.decision === 'accepted'
+      ? this.documentStore.getRevisionForOperation(
+          input.draftId,
+          input.operationId,
+        )
+      : null;
+    if (input.decision === 'accepted' && !acceptedRevision) {
+      throw new Error(
+        `accepted proposal revision missing: ${input.operationId}`,
+      );
+    }
     if (proposal.state === 'pending') {
       this.documentStore.resolveNarrationProposal(
         input.draftId,
@@ -209,12 +245,14 @@ export class LearningService {
         {
           reasonNote: input.reason,
           successorOperationId: input.successorOperationId,
+          acceptedRevisionId: acceptedRevision?.id ?? null,
         },
       );
     } else if (
       proposal.state !== input.decision
       || proposal.reasonNote !== input.reason
       || proposal.successorOperationId !== input.successorOperationId
+      || proposal.acceptedRevisionId !== (acceptedRevision?.id ?? null)
     ) {
       throw new Error(
         `narration proposal disposition conflict: ${input.operationId}`,
@@ -222,20 +260,11 @@ export class LearningService {
     }
 
     if (input.decision === 'accepted') {
-      const revision = this.documentStore.getRevisionForOperation(
-        input.draftId,
-        input.operationId,
-      );
-      if (!revision) {
-        throw new Error(
-          `accepted proposal revision missing: ${input.operationId}`,
-        );
-      }
-      const decision = this.captureRevision(revision);
+      const decision = this.captureRevision(acceptedRevision!);
       if (!decision) {
         throw new Error(
           `accepted proposal disposition is not recognized: ${
-            revision.disposition
+            acceptedRevision!.disposition
           }`,
         );
       }
@@ -270,6 +299,38 @@ export class LearningService {
     if (!this.documentStore.getDraft(input.draftId)) {
       throw new Error(`draft not found: ${input.draftId}`);
     }
+    const proposal = this.documentStore.getArchitectureProposal(
+      input.draftId,
+      input.operationId,
+    );
+    if (!proposal || proposal.state !== 'pending') {
+      throw new Error(
+        `architecture rejection refused: pending architecture proposal not found for draft ${input.draftId}`,
+      );
+    }
+    const operation = this.requireCompletedDraftOperation(
+      input.operationId,
+      input.draftId,
+    );
+    if (![
+      'generate-architecture',
+      'review-architecture',
+      'rewrite-architecture-section',
+    ].includes(operation.operation)) {
+      throw new Error(
+        'architecture rejection refused: operation is not an architecture proposal',
+      );
+    }
+    this.documentStore.resolveArchitectureProposal(
+      input.draftId,
+      input.operationId,
+      {
+        state: 'rejected',
+        revisionId: null,
+        reasonNote: input.reason,
+        resolvedAt: input.resolvedAt,
+      },
+    );
     return this.capture({
       draftId: input.draftId,
       kind: 'proposal-rejected',
@@ -372,16 +433,28 @@ export class LearningService {
         && candidate.createdAt < attempt.createdAt)
       .at(-1);
     if (!previousFailure) return { attempt, decision: null };
-    const revisions = this.documentStore.listRevisions(input.draftId)
+    const documentRevisions = this.documentStore.listRevisions(input.draftId);
+    const revisions = documentRevisions
       .filter((revision) =>
         revision.createdAt > previousFailure.createdAt
-        && revision.createdAt < attempt.createdAt);
+        && revision.createdAt <= attempt.createdAt)
+      .filter((revision) =>
+        isQualifyingValidatorFixRevision(documentRevisions, revision));
     if (revisions.length === 0) return { attempt, decision: null };
+    const cycleSourceId =
+      `${previousFailure.id}:${attempt.contentHash}`;
+    if (this.store.getDecisionBySource(
+      'validator-fix-cycle',
+      cycleSourceId,
+      'validator-fix-cycle',
+    )) {
+      return { attempt, decision: null };
+    }
     const decision = this.capture({
       draftId: input.draftId,
       kind: 'validator-fix-cycle-accepted',
       sourceType: 'validator-fix-cycle',
-      sourceId: `${previousFailure.id}:${attempt.id}`,
+      sourceId: cycleSourceId,
       disposition: 'validator-fix-cycle',
       sourceTimestamp: attempt.createdAt,
       note: null,
@@ -625,7 +698,11 @@ export class LearningService {
       throw new Error('selected repository workspace is unavailable');
     }
     const repoRoot = this.repositoryRootForDraft(lesson.draftId);
-    const verified = this.verifyReconciliationCommit(repoRoot, commit);
+    const verified = this.verifyReconciliationCommit(
+      repoRoot,
+      commit,
+      this.reconciliationExpectation(lesson, reconciliation),
+    );
     const pointer = verified.doctrinePointers[0] ?? null;
     if (reconciliation.kind !== 'retire' && pointer === null) {
       throw new ReconciliationVerificationRefusal(
@@ -680,10 +757,32 @@ export class LearningService {
       throw new Error('selected repository workspace is unavailable');
     }
     const repoRoot = this.repositoryRootForDraft(lesson.draftId);
-    const verified = this.verifyReconciliationCommit(repoRoot, input.commit);
+    const verified = this.verifyReconciliationCommit(
+      repoRoot,
+      input.commit,
+      this.reconciliationExpectation(lesson, reconciliation),
+    );
     const pointer = this.runReconciliationCheck(
       () => verifyExistingDoctrinePointer(repoRoot, input),
     );
+    const matched = verified.doctrinePointers[0];
+    if (
+      !matched
+      || matched.path !== pointer.path
+      || matched.anchor !== pointer.anchor
+      || matched.contentHash !== pointer.contentHash
+    ) {
+      throw new ReconciliationVerificationRefusal(
+        `reconciliation commit verification refused: checked doctrine pointer ${
+          pointer.path
+        } ${pointer.anchor}, but it is not the hunk matched to the current lesson handoff.`,
+        {
+          commit: verified.commit,
+          repositoryRoot: repoRoot,
+          changedPaths: verified.changedPaths,
+        },
+      );
+    }
     const result = this.store.verifyReconciliation(resumeKey, {
       repositoryCommit: verified.commit,
       paths: verified.changedPaths,
@@ -750,10 +849,48 @@ export class LearningService {
   private verifyReconciliationCommit(
     repoRoot: string,
     commit: string,
+    expectation: ReconciliationVerificationExpectation,
   ): VerifiedReconciliationCommit {
     return this.runReconciliationCheck(
-      () => verifyReconciliationCommit(repoRoot, commit),
+      () => verifyReconciliationCommit(repoRoot, commit, expectation),
     );
+  }
+
+  private reconciliationExpectation(
+    lesson: LessonRecord,
+    reconciliation: LessonReconciliationRecord,
+  ): ReconciliationVerificationExpectation {
+    let prior = lesson;
+    if (
+      reconciliation.kind === 'supersede'
+      && lesson.supersedesLessonId
+    ) {
+      const predecessor = this.store.getLesson(lesson.supersedesLessonId);
+      if (!predecessor) {
+        throw new Error(
+          `lesson not found: ${lesson.supersedesLessonId}`,
+        );
+      }
+      prior = predecessor;
+    }
+    return {
+      kind: reconciliation.kind,
+      preparedAt: reconciliation.createdAt,
+      preparedHead: reconciliation.preparedHead,
+      candidateMarkdown: reconciliation.kind === 'retire'
+        ? null
+        : lesson.reviewedMarkdown,
+      priorPointer: reconciliation.kind === 'apply'
+        || !prior.repositoryPath
+        || !prior.repositoryAnchor
+        || !prior.repositoryContentHash
+        ? null
+        : {
+            path: prior.repositoryPath,
+            anchor: prior.repositoryAnchor,
+            contentHash: prior.repositoryContentHash,
+          },
+    };
   }
 
   private runReconciliationCheck<T>(check: () => T): T {
@@ -773,6 +910,7 @@ export class LearningService {
   recoverOperationLessons(
     operationId: string,
     inputs: unknown,
+    draftId: string | null = null,
   ) {
     const existing = this.store.listOperationLessons(operationId);
     if (existing.length > 0) return existing;
@@ -785,12 +923,15 @@ export class LearningService {
     ) {
       return [];
     }
-    const candidates = this.documentStore.listDrafts().map(({ id }) =>
-      this.activeEpisodeLessons(id)).filter((lessons) =>
+    if (!draftId) return [];
+    const lessons = this.activeEpisodeLessons(draftId);
+    if (
       JSON.stringify(lessons.map(({ markdown }) => markdown))
-        === JSON.stringify(supplied));
-    if (candidates.length !== 1) return [];
-    return this.recordOperationLessons(operationId, candidates[0]!);
+      !== JSON.stringify(supplied)
+    ) {
+      return [];
+    }
+    return this.recordOperationLessons(operationId, lessons);
   }
 
   listSessions(draftId: string): LearningSessionRecord[] {
@@ -998,6 +1139,13 @@ export class LearningService {
     preparedMarkdown: string,
     timestamp: string,
   ): LessonReconciliationRecord {
+    let preparedHead: string | null = null;
+    try {
+      const root = this.repositoryRootForDraft?.(lesson.draftId);
+      if (root) preparedHead = gitHead(root);
+    } catch {
+      preparedHead = null;
+    }
     return {
       id: this.idFactory(),
       lessonId: lesson.id,
@@ -1005,6 +1153,7 @@ export class LearningService {
       state: 'prepared',
       resumeKey: this.resumeKeyFactory(),
       preparedMarkdown,
+      preparedHead,
       repositoryCommit: null,
       paths: [],
       anchors: [],
@@ -1234,6 +1383,149 @@ export class LearningService {
     }
   }
 
+  private revisionHasNormativeProof(
+    revision: RevisionRecord,
+    kind: DecisionKind,
+    proof: { gateCompleted?: boolean },
+  ): boolean {
+    if (
+      kind === 'proposal-accepted'
+      || kind === 'personal-input-integrated'
+    ) {
+      if (!revision.opId) return false;
+      const operation = this.completedDraftOperation(
+        revision.opId,
+        revision.draftId,
+      );
+      if (!operation) return false;
+      if (
+        revision.disposition === 'architecture-proposal-accepted'
+        || revision.disposition === 'architecture-proposals-accepted'
+      ) {
+        const proposal = this.documentStore.getArchitectureProposal(
+          revision.draftId,
+          revision.opId,
+        );
+        return proposal?.state === 'accepted'
+          && proposal.resolvedAt !== null
+          && proposal.revisionId !== null
+          && architectureAcceptanceMatchesOperation(
+            revision,
+            operation,
+            this.documentStore.listRevisions(revision.draftId),
+          );
+      }
+      const proposal = this.documentStore.getNarrationProposal(
+        revision.draftId,
+        revision.opId,
+      );
+      return proposal?.state === 'accepted'
+        && proposal.resolvedAt !== null
+        && proposal.acceptedRevisionId === revision.id;
+    }
+    if (kind === 'variant-picked') {
+      return this.variantPickHasNormativeProof(revision);
+    }
+    if (kind !== 'gate-action') return true;
+    if (
+      revision.disposition === 'architecture-approved'
+      || revision.disposition === 'architecture-reopened'
+    ) {
+      const action = revision.disposition === 'architecture-approved'
+        ? 'approve'
+        : 'reopen';
+      const saga = this.documentStore.getArchitectureSaga(
+        revision.draftId,
+        action,
+        revision.seq - 1,
+      );
+      return Boolean(
+        saga
+        && saga.revisionAppended
+        && saga.artifactWritten
+        && saga.pipelineUpserted
+        && saga.draftUpdated,
+      );
+    }
+    if (!proof.gateCompleted) return false;
+    const draft = this.documentStore.getDraft(revision.draftId);
+    if (!draft) return false;
+    if (revision.disposition === 'narration-approved') {
+      return draft.approvedNarrationRevisionSeq === revision.seq
+        && draft.approvedNarrationAt === revision.createdAt
+        && draft.approvedNarrationMd !== null
+        && draft.narrationArtifactHash !== null;
+    }
+    return revision.disposition === 'narration-reconciled'
+      && draft.narrationReconciliationRequired === false;
+  }
+
+  private variantPickHasNormativeProof(
+    revision: RevisionRecord,
+  ): boolean {
+    const picked = decodeVariantPickedDisposition(revision.disposition);
+    if (!picked || !revision.opId) return false;
+    const operation = this.completedDraftOperation(
+      revision.opId,
+      revision.draftId,
+    );
+    if (!operation || operation.operation !== 'generate-alternatives') {
+      return false;
+    }
+    const revisions = this.documentStore.listRevisions(revision.draftId);
+    const index = revisions.findIndex(({ id }) => id === revision.id);
+    const before = index > 0 ? revisions[index - 1] : null;
+    if (!before || JSON.stringify(before.doc) === JSON.stringify(revision.doc)) {
+      return false;
+    }
+    const variant = findVariantSet(before.doc, picked.variantSetId);
+    const selectedIndex = variant
+      ? variantAlternativeIndex(variant, picked.alternativeId)
+      : null;
+    if (
+      !variant
+      || variant.originOperationId !== revision.opId
+      || selectedIndex === null
+      || variant.activeIndex !== selectedIndex
+    ) {
+      return false;
+    }
+    return editorPickMatchesTransition(
+      before.doc,
+      revision.doc,
+      picked.variantSetId,
+    );
+  }
+
+  private completedDraftOperation(
+    operationId: string,
+    draftId: string,
+  ): OperationDecisionEvidence | null {
+    const evidence = this.operationEvidence(operationId);
+    if (
+      !evidence
+      || evidence.draftId !== draftId
+      || evidence.state !== 'completed'
+      || !isCompletedOperationResult(evidence.result)
+    ) {
+      return null;
+    }
+    return evidence;
+  }
+
+  private requireCompletedDraftOperation(
+    operationId: string,
+    draftId: string,
+  ): OperationDecisionEvidence {
+    const evidence = this.completedDraftOperation(operationId, draftId);
+    if (!evidence) {
+      throw new Error(
+        `proposal resolution refused: operation ${operationId} has no completed result for draft ${draftId}`,
+      );
+    }
+    return evidence;
+  }
+
   private capture(input: {
     draftId: string;
     kind: DecisionKind;
@@ -1277,6 +1569,299 @@ export class LearningService {
           input.note,
           input.sourceTimestamp,
         );
+  }
+}
+
+function isCompletedOperationResult(value: unknown): boolean {
+  const result = recordValue(value);
+  return result?.['kind'] === 'schema' || result?.['kind'] === 'raw';
+}
+
+function architectureAcceptanceMatchesOperation(
+  revision: RevisionRecord,
+  operation: OperationDecisionEvidence,
+  revisions: RevisionRecord[],
+): boolean {
+  if (revision.kind !== 'architecture') return false;
+  const proposals = architectureProposalsFromOperation(operation);
+  if (proposals.length === 0) return false;
+  const after = architectureFromRevision(revision);
+  if (!after || hasDuplicateSectionKeys(after.sections)) return false;
+
+  const index = revisions.findIndex(({ id }) => id === revision.id);
+  if (index < 0) return false;
+  const beforeRevision = revisions
+    .slice(0, index)
+    .reverse()
+    .find(({ kind }) => kind === 'architecture');
+  const before = beforeRevision
+    ? architectureFromRevision(beforeRevision)
+    : null;
+  if (beforeRevision && !before) return false;
+
+  const changed = before
+    ? changedArchitectureSections(before, after)
+    : after.sections.filter((section) =>
+        proposals.some((proposal) => sameSection(proposal, section)));
+  if (
+    changed === null
+    || changed.length === 0
+    || (
+      revision.disposition === 'architecture-proposal-accepted'
+      && changed.length !== 1
+    )
+  ) {
+    return false;
+  }
+  if (!changed.every((section) =>
+    proposals.some((proposal) => sameSection(proposal, section)))) {
+    return false;
+  }
+  const previouslyAccepted = acceptedArchitectureProposalsBefore(
+    revisions,
+    index,
+    revision.opId!,
+    proposals,
+  );
+  return previouslyAccepted !== null
+    && !changed.some((section) =>
+      previouslyAccepted.some((accepted) =>
+        sameSection(accepted, section)));
+}
+
+function architectureProposalsFromOperation(
+  operation: OperationDecisionEvidence,
+): ArchitectureSection[] {
+  const result = recordValue(operation.result);
+  if (
+    operation.operation === 'generate-architecture'
+    && result?.['kind'] === 'raw'
+    && typeof result['markdown'] === 'string'
+  ) {
+    return splitArchitecture(result['markdown']);
+  }
+  if (
+    operation.operation === 'rewrite-architecture-section'
+    && result?.['kind'] === 'schema'
+  ) {
+    const value = recordValue(result['value']);
+    const replacement = value?.['replacement_markdown'];
+    return typeof replacement === 'string'
+      ? splitArchitecture(replacement)
+      : [];
+  }
+  return [];
+}
+
+function acceptedArchitectureProposalsBefore(
+  revisions: RevisionRecord[],
+  endIndex: number,
+  operationId: string,
+  proposals: readonly ArchitectureSection[],
+): ArchitectureSection[] | null {
+  const accepted: ArchitectureSection[] = [];
+  let before: DraftArchitecture | null = null;
+  for (const revision of revisions.slice(0, endIndex)) {
+    if (revision.kind !== 'architecture') continue;
+    const after = architectureFromRevision(revision);
+    if (!after) return null;
+    if (
+      revision.opId === operationId
+      && (
+        revision.disposition === 'architecture-proposal-accepted'
+        || revision.disposition === 'architecture-proposals-accepted'
+      )
+    ) {
+      const changed = before
+        ? changedArchitectureSections(before, after)
+        : after.sections.filter((section) =>
+            proposals.some((proposal) => sameSection(proposal, section)));
+      if (changed === null) return null;
+      accepted.push(...changed.filter((section) =>
+        proposals.some((proposal) => sameSection(proposal, section))));
+    }
+    before = after;
+  }
+  return accepted;
+}
+
+function architectureFromRevision(
+  revision: RevisionRecord,
+): DraftArchitecture | null {
+  const value = recordValue(revision.doc);
+  if (!value || !Array.isArray(value['sections'])) return null;
+  const sections: ArchitectureSection[] = [];
+  for (const section of value['sections']) {
+    const candidate = recordValue(section);
+    if (
+      !candidate
+      || typeof candidate['key'] !== 'string'
+      || typeof candidate['title'] !== 'string'
+      || typeof candidate['md'] !== 'string'
+    ) {
+      return null;
+    }
+    sections.push({
+      key: candidate['key'],
+      title: candidate['title'],
+      md: candidate['md'],
+    });
+  }
+  const approvedMd = value['approvedMd'];
+  const approvedAt = value['approvedAt'];
+  if (
+    (approvedMd !== null && typeof approvedMd !== 'string')
+    || (approvedAt !== null && typeof approvedAt !== 'string')
+  ) {
+    return null;
+  }
+  return {
+    sections,
+    approvedMd,
+    approvedAt,
+  };
+}
+
+function changedArchitectureSections(
+  before: DraftArchitecture,
+  after: DraftArchitecture,
+): ArchitectureSection[] | null {
+  if (
+    before.approvedMd !== after.approvedMd
+    || before.approvedAt !== after.approvedAt
+    || hasDuplicateSectionKeys(before.sections)
+  ) {
+    return null;
+  }
+  const afterByKey = new Map(
+    after.sections.map((section) => [section.key, section]),
+  );
+  if (before.sections.some(({ key }) => !afterByKey.has(key))) return null;
+  const beforeByKey = new Map(
+    before.sections.map((section) => [section.key, section]),
+  );
+  return after.sections.filter((section) => {
+    const previous = beforeByKey.get(section.key);
+    return !previous || !sameSection(previous, section);
+  });
+}
+
+function hasDuplicateSectionKeys(
+  sections: readonly ArchitectureSection[],
+): boolean {
+  return new Set(sections.map(({ key }) => key)).size !== sections.length;
+}
+
+function sameSection(
+  left: ArchitectureSection,
+  right: ArchitectureSection,
+): boolean {
+  return left.key === right.key
+    && left.title === right.title
+    && left.md === right.md;
+}
+
+function isQualifyingValidatorFixRevision(
+  revisions: RevisionRecord[],
+  revision: RevisionRecord,
+): boolean {
+  return revision.kind === 'narration'
+    && revision.disposition !== 'restore'
+    && !revision.disposition.startsWith('restore-')
+    && revisionChangesDocument(revisions, revision);
+}
+
+function revisionChangesDocument(
+  revisions: RevisionRecord[],
+  revision: RevisionRecord,
+): boolean {
+  const index = revisions.findIndex(({ id }) => id === revision.id);
+  if (index <= 0) return false;
+  const previousNarration = revisions
+    .slice(0, index)
+    .reverse()
+    .find(({ kind }) => kind === 'narration');
+  return previousNarration !== undefined
+    && JSON.stringify(previousNarration.doc) !== JSON.stringify(revision.doc);
+}
+
+interface VariantSetProof {
+  originOperationId: string | null;
+  activeIndex: number | null;
+  optionCount: number;
+}
+
+function findVariantSet(
+  value: unknown,
+  variantSetId: string,
+): VariantSetProof | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findVariantSet(item, variantSetId);
+      if (found) return found;
+    }
+    return null;
+  }
+  const record = recordValue(value);
+  if (!record) return null;
+  const attrs = recordValue(record['attrs']);
+  if (
+    (record['type'] === 'variantSet' || record['type'] === 'inlineVariantSet')
+    && attrs?.['variantId'] === variantSetId
+  ) {
+    const origin = attrs['originOperationId'];
+    const activeIndex = attrs['activeIndex'];
+    const options = record['type'] === 'inlineVariantSet'
+      ? attrs['options']
+      : record['content'];
+    return {
+      originOperationId: typeof origin === 'string' ? origin : null,
+      activeIndex: Number.isInteger(activeIndex)
+        ? Number(activeIndex)
+        : null,
+      optionCount: Array.isArray(options) ? options.length : 0,
+    };
+  }
+  for (const nested of Object.values(record)) {
+    const found = findVariantSet(nested, variantSetId);
+    if (found) return found;
+  }
+  return null;
+}
+
+function variantAlternativeIndex(
+  variant: VariantSetProof,
+  alternativeId: string,
+): number | null {
+  const match = /^alternative:(\d+)$/u.exec(alternativeId);
+  if (!match) return null;
+  const index = Number(match[1]);
+  return Number.isInteger(index)
+    && index >= 0
+    && index < variant.optionCount
+    ? index
+    : null;
+}
+
+function editorPickMatchesTransition(
+  before: unknown,
+  after: unknown,
+  variantSetId: string,
+): boolean {
+  try {
+    let state = EditorState.create({
+      doc: editorSchema.nodeFromJSON(before),
+    });
+    const picked = pickEditorVariant(
+      state,
+      (transaction) => {
+        state = state.apply(transaction);
+      },
+      variantSetId,
+    );
+    return picked && state.doc.eq(editorSchema.nodeFromJSON(after));
+  } catch {
+    return false;
   }
 }
 

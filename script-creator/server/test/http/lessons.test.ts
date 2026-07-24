@@ -288,7 +288,7 @@ describe('lesson review HTTP API', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
       error: expect.stringMatching(
-        /reconciliation commit.+checked.+DECISIONS\.md.+canonical doctrine/iu,
+        /reconciliation commit.+checked.+predates this lesson handoff/iu,
       ),
       code: 'reconciliation-verification-refused',
       recoverable: true,
@@ -363,7 +363,7 @@ describe('lesson review HTTP API', () => {
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
       error: expect.stringMatching(
-        /reconciliation commit.+checked.+doctrine anchor.+at that commit/iu,
+        /reconciliation commit.+reviewed candidate anchor.+not found/iu,
       ),
       code: 'reconciliation-verification-refused',
       recoverable: true,
@@ -411,7 +411,15 @@ describe('lesson review HTTP API', () => {
       reconciliation: {
         state: 'verified',
         repositoryCommit: commit,
+        preparedMarkdown: '',
       },
+      reconciliationHistory: [
+        expect.objectContaining({
+          state: 'verified',
+          repositoryCommit: commit,
+          preparedMarkdown: '',
+        }),
+      ],
     });
     await fixture.app.close();
   });
@@ -465,11 +473,29 @@ function realReconciliationFixture() {
     store: learningStore,
     documentStore,
     topicStore,
-    operationEvidence: () => null,
+    operationEvidence: (operationId) => operationId === 'architecture-operation'
+      ? {
+          operationId,
+          draftId: 'draft-1',
+          operation: 'generate-architecture',
+          state: 'completed',
+          envelope: { inputs: { topic_brief: 'Brief.' } },
+          result: { kind: 'raw', markdown: '# Architecture proposal\n' },
+        }
+      : null,
     repositoryRootForDraft: () => repoRoot,
     idFactory: () => `learning-${++id}`,
     resumeKeyFactory: () => 'reconcile-resume-key',
     now: () => '2026-07-24T09:00:00.000Z',
+  });
+  documentStore.createArchitectureProposal({
+    draftId: 'draft-1',
+    operationId: 'architecture-operation',
+    state: 'pending',
+    revisionId: null,
+    reasonNote: null,
+    createdAt: '2026-07-24T08:02:00.000Z',
+    resolvedAt: null,
   });
   const decision = service.captureArchitectureRejection({
     draftId: 'draft-1',

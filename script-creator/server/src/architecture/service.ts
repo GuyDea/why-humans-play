@@ -88,9 +88,9 @@ interface ArchitectureOperationService {
     operation: OperationName,
     inputs: unknown,
     approvedLessons: string[],
-    options?: { resumeOf?: string; cwd?: string },
+    options: { draftId: string; resumeOf?: string; cwd?: string },
   ): string;
-  get(id: string): { operation: OperationName };
+  get(id: string): { operation: OperationName; draftId: string | null };
   result?(id: string): OperationServiceResult;
 }
 
@@ -105,7 +105,10 @@ interface ArchitectureWorkspaceService {
 }
 
 interface ArchitectureLearningService {
-  captureRevision(revision: RevisionRecord): unknown;
+  captureRevision(
+    revision: RevisionRecord,
+    proof?: { gateCompleted?: boolean },
+  ): unknown;
   captureProposalDisposition(input: {
     draftId: string;
     operationId: string;
@@ -231,6 +234,12 @@ const NARRATION_PROPOSAL_OPERATIONS = new Set<OperationName>([
   'generate-episode',
 ]);
 
+const ARCHITECTURE_PROPOSAL_OPERATIONS = new Set<OperationName>([
+  'generate-architecture',
+  'review-architecture',
+  'rewrite-architecture-section',
+]);
+
 const DRAFT_WRITING_OPERATIONS = new Set<OperationName>([
   ...NARRATION_OPERATIONS,
   'generate-architecture',
@@ -318,6 +327,23 @@ export class ArchitectureService {
     if (!result) {
       throw new ArchitectureRevisionConflictError(this.get(draftId));
     }
+    if (
+      (
+        disposition === 'architecture-proposal-accepted'
+        || disposition === 'architecture-proposals-accepted'
+      )
+      && opId !== null
+    ) {
+      const proposal = this.store.getArchitectureProposal(draftId, opId);
+      if (proposal?.state !== 'accepted') {
+        this.store.resolveArchitectureProposal(draftId, opId, {
+          state: 'accepted',
+          revisionId: result.revision.id,
+          reasonNote: null,
+          resolvedAt: timestamp,
+        });
+      }
+    }
     this.learningService?.captureRevision(result.revision);
     return {
       state: architectureState(result.draft, result.revision.seq, null),
@@ -339,7 +365,13 @@ export class ArchitectureService {
     inputs: unknown,
     reason: string | null = null,
   ): string {
-    const operation = this.operationService.get(operationId).operation;
+    const parent = this.operationService.get(operationId);
+    if (parent.draftId !== draftId) {
+      throw new ArchitectureGateError(
+        'operation resume refused: parent operation does not belong to the requested draft',
+      );
+    }
+    const operation = parent.operation;
     const proposal = this.store.getNarrationProposal(
       draftId,
       operationId,
@@ -426,7 +458,7 @@ export class ArchitectureService {
     const result = await this.withActionLock(draftId, () =>
       this.resumeApprove(draftId, expectedRevisionSeq));
     if (result.complete) {
-      this.captureLatestDecisionRevision(draftId);
+      this.captureLatestDecisionRevision(draftId, true);
     }
     return result;
   }
@@ -456,7 +488,7 @@ export class ArchitectureService {
       }
     });
     if (result.complete) {
-      this.captureLatestDecisionRevision(draftId);
+      this.captureLatestDecisionRevision(draftId, true);
     }
     return result;
   }
@@ -470,7 +502,7 @@ export class ArchitectureService {
     const result = await this.withActionLock(draftId, () =>
       this.resumeReopen(draftId, input.expectedRevisionSeq));
     if (result.complete) {
-      this.captureLatestDecisionRevision(draftId);
+      this.captureLatestDecisionRevision(draftId, true);
     }
     return result;
   }
@@ -507,7 +539,10 @@ export class ArchitectureService {
           this.requireDraft(draftId),
         );
       }
-      this.learningService?.captureRevision(reconciled.revision);
+      this.learningService?.captureRevision(
+        reconciled.revision,
+        { gateCompleted: true },
+      );
     }
     return this.get(draftId);
   }
@@ -681,7 +716,7 @@ export class ArchitectureService {
         updatedAt: this.now(),
       });
       this.store.deleteNarrationSettledExports(draftId);
-      this.captureLatestDecisionRevision(draftId);
+      this.captureLatestDecisionRevision(draftId, true);
       return approved;
     });
   }
@@ -815,7 +850,13 @@ export class ArchitectureService {
         operationId,
         decision,
         resolvedAt,
-        { reasonNote: reason },
+        {
+          reasonNote: reason,
+          acceptedRevisionId: decision === 'accepted'
+            ? this.store.getRevisionForOperation(draftId, operationId)?.id
+              ?? null
+            : null,
+        },
       );
     }
     if (decision === 'accepted') {
@@ -1651,7 +1692,7 @@ export class ArchitectureService {
           operation,
           authoritativeInputs,
           appliedLessons.map(({ markdown }) => markdown),
-          submitOptions,
+          { ...submitOptions, draftId },
         )
       : this.operationService.submit(
           operation,
@@ -1660,6 +1701,17 @@ export class ArchitectureService {
         );
     if (DRAFT_WRITING_OPERATIONS.has(operation)) {
       this.learningService?.recordOperationLessons?.(id, appliedLessons);
+    }
+    if (ARCHITECTURE_PROPOSAL_OPERATIONS.has(operation)) {
+      this.store.createArchitectureProposal({
+        draftId,
+        operationId: id,
+        state: 'pending',
+        revisionId: null,
+        reasonNote: null,
+        createdAt: this.now(),
+        resolvedAt: null,
+      });
     }
     if (NARRATION_PROPOSAL_OPERATIONS.has(operation)) {
       this.store.createNarrationProposal({
@@ -1782,9 +1834,17 @@ export class ArchitectureService {
       && typeof recordValue(result.value)?.['replacement_markdown'] === 'string';
   }
 
-  private captureLatestDecisionRevision(draftId: string): void {
+  private captureLatestDecisionRevision(
+    draftId: string,
+    gateCompleted = false,
+  ): void {
     const revision = this.store.listRevisions(draftId).at(-1);
-    if (revision) this.learningService?.captureRevision(revision);
+    if (revision) {
+      this.learningService?.captureRevision(
+        revision,
+        gateCompleted ? { gateCompleted: true } : undefined,
+      );
+    }
   }
 
   private requireDraft(draftId: string): DraftRecord {

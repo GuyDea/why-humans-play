@@ -73,6 +73,7 @@ export interface JobRecord {
 export interface StoredOperation {
   id: string;
   name: string;
+  draftId: string | null;
   deadlineAt: string;
   createdAt: string;
   state: OperationState;

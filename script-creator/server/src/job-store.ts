@@ -31,6 +31,7 @@ interface JobRow {
 interface OperationRow {
   id: string;
   name: string;
+  draft_id: string | null;
   deadline_at: string;
   created_at: string;
   state: OperationState;
@@ -50,6 +51,7 @@ const SCHEMA = `
 CREATE TABLE IF NOT EXISTS operations (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL,
+  draft_id TEXT,
   deadline_at TEXT NOT NULL,
   created_at TEXT NOT NULL,
   state TEXT NOT NULL
@@ -91,6 +93,17 @@ function ensureJobColumns(db: Database.Database): void {
   }
 }
 
+function ensureOperationColumns(db: Database.Database): void {
+  const columns = new Set(
+    db.prepare<[], { name: string }>('PRAGMA table_info(operations)')
+      .all()
+      .map((column) => column.name),
+  );
+  if (!columns.has('draft_id')) {
+    db.exec('ALTER TABLE operations ADD COLUMN draft_id TEXT');
+  }
+}
+
 function toRecord(row: JobRow): JobRecord {
   return {
     id: row.id,
@@ -117,6 +130,7 @@ function toOperation(row: OperationRow): StoredOperation {
   return {
     id: row.id,
     name: row.name,
+    draftId: row.draft_id,
     deadlineAt: row.deadline_at,
     createdAt: row.created_at,
     state: row.state,
@@ -133,6 +147,7 @@ interface CreateJobOptions {
 interface CreateOperationInput {
   id: string;
   name: string;
+  draftId?: string;
   deadlineAt: string;
   createdAt: string;
 }
@@ -147,6 +162,7 @@ export class JobStore {
     this.db.pragma('synchronous = FULL');
     this.db.exec(SCHEMA);
     ensureJobColumns(this.db);
+    ensureOperationColumns(this.db);
     this.db.exec(
       'CREATE INDEX IF NOT EXISTS jobs_operation_id_idx ON jobs(operation_id)',
     );
@@ -172,11 +188,13 @@ export class JobStore {
   ): JobRecord {
     this.db.transaction(() => {
       this.db.prepare(
-        `INSERT INTO operations (id, name, deadline_at, created_at, state)
-         VALUES (?, ?, ?, ?, 'queued')`,
+        `INSERT INTO operations (
+           id, name, draft_id, deadline_at, created_at, state
+         ) VALUES (?, ?, ?, ?, ?, 'queued')`,
       ).run(
         operation.id,
         operation.name,
+        operation.draftId ?? null,
         operation.deadlineAt,
         operation.createdAt,
       );

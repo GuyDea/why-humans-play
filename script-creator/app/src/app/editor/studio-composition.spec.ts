@@ -1680,6 +1680,7 @@ describe('mounted Script Studio composition', () => {
       expect(studio.client.pendingNarrationProposals).toEqual([]);
     });
 
+    const savesBeforeAlternatives = studio.client.save.mock.calls.length;
     await selectText(studio, 'Closing narration.');
     clickToolbar(studio, 'alternatives');
     await expectDraftSubmission(studio, 'generate-alternatives', 1);
@@ -1705,13 +1706,37 @@ describe('mounted Script Studio composition', () => {
       studio.root.querySelector('app-editor-host')!,
     )?.componentInstance as EditorHost;
     await editor.flushPendingChanges();
-    expect(studio.client.save).toHaveBeenCalledWith(
+    const variantSaves = studio.client.save.mock.calls
+      .slice(savesBeforeAlternatives);
+    expect(variantSaves).toHaveLength(2);
+    const insertedVariant = findSerializedNode(
+      variantSaves[0]![1].doc,
+      'inlineVariantSet',
+    );
+    expect(insertedVariant?.['attrs']).toMatchObject({
+      originOperationId: 'op-4',
+      activeIndex: 0,
+      settled: false,
+      options: [
+        { label: 'Direct', text: 'Close on the concrete rule.' },
+        { label: 'Playful', text: 'Close by turning the rule into play.' },
+      ],
+    });
+    expect(variantSaves[0]![1]).toMatchObject({
+      opId: null,
+      disposition: 'autosave',
+    });
+    expect(variantSaves[1]).toEqual([
       'draft-1',
       expect.objectContaining({
         opId: 'op-4',
         disposition: expect.stringContaining('variant-picked/'),
       }),
-    );
+    ]);
+    expect(findSerializedNode(
+      variantSaves[1]![1].doc,
+      'inlineVariantSet',
+    )).toBeNull();
     expect(studio.client.pendingNarrationProposals).toEqual([]);
 
     await vi.waitFor(() => {
@@ -3357,6 +3382,10 @@ describe('mounted Script Studio composition', () => {
       expect(durable?.textContent).toContain(
         'Repository rule: keep the reveal concrete.',
       );
+      expect(durable?.textContent).not.toContain(
+        '# Proposed WHP lesson reconciliation',
+      );
+      expect(() => findButton(durable, 'Copy handoff')).toThrow();
     });
 
     const activeLocal = studio.root.querySelector('#lesson-lesson-local');
@@ -3949,6 +3978,27 @@ function hydrateSignalOutputs(
   const outputs = { ...definition.outputs };
   for (const name of names) outputs[name] = name;
   definition.outputs = outputs;
+}
+
+function findSerializedNode(
+  value: unknown,
+  type: string,
+): Record<string, unknown> | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const found = findSerializedNode(item, type);
+      if (found) return found;
+    }
+    return null;
+  }
+  if (value === null || typeof value !== 'object') return null;
+  const record = value as Record<string, unknown>;
+  if (record['type'] === type) return record;
+  for (const nested of Object.values(record)) {
+    const found = findSerializedNode(nested, type);
+    if (found) return found;
+  }
+  return null;
 }
 
 async function selectText(

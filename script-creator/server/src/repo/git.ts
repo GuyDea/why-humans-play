@@ -55,6 +55,18 @@ export interface VerifiedReconciliationCommit {
   doctrinePointers: ReconciliationDoctrinePointer[];
 }
 
+export interface ReconciliationVerificationExpectation {
+  kind: 'apply' | 'retire' | 'supersede';
+  preparedAt: string;
+  preparedHead: string | null;
+  candidateMarkdown: string | null;
+  priorPointer: {
+    path: string;
+    anchor: string;
+    contentHash: string;
+  } | null;
+}
+
 export interface ReconciliationCommitCheck {
   commit: string;
   repositoryRoot: string;
@@ -235,6 +247,7 @@ export function isExactRecordedMilestoneCommit(
 export function verifyReconciliationCommit(
   repoRoot: string,
   requestedCommit: string,
+  expectation?: ReconciliationVerificationExpectation,
 ): VerifiedReconciliationCommit {
   runGit(repoRoot, ['rev-parse', '--git-dir']);
   let commit: string;
@@ -276,6 +289,14 @@ export function verifyReconciliationCommit(
     '-z',
     commit,
   ]).split('\0').filter(Boolean).sort();
+  if (expectation) {
+    verifyCommitAfterHandoff(
+      repoRoot,
+      commit,
+      changedPaths,
+      expectation,
+    );
+  }
   const doctrinePaths = changedPaths.filter(isDoctrinePath);
   const missing = [
     ...(!changedPaths.includes('DECISIONS.md')
@@ -297,10 +318,18 @@ export function verifyReconciliationCommit(
       changedPaths,
     );
   }
-  const doctrinePointers = doctrinePaths.flatMap((path) => {
-    const pointer = changedContentPointer(repoRoot, commit, path);
-    return pointer ? [pointer] : [];
-  });
+  const doctrinePointers = expectation
+    ? matchExpectedReconciliationHunks(
+        repoRoot,
+        commit,
+        doctrinePaths,
+        changedPaths,
+        expectation,
+      )
+    : doctrinePaths.flatMap((path) => {
+        const pointer = changedContentPointer(repoRoot, commit, path);
+        return pointer ? [pointer] : [];
+      });
   return {
     commit,
     changedPaths,
@@ -655,6 +684,297 @@ function changedContentPointer(
     };
   }
   return null;
+}
+
+interface ChangedDoctrineHunk {
+  path: string;
+  oldStart: number;
+  newStart: number;
+  removed: string[];
+  added: string[];
+}
+
+function verifyCommitAfterHandoff(
+  repoRoot: string,
+  commit: string,
+  changedPaths: string[],
+  expectation: ReconciliationVerificationExpectation,
+): void {
+  if (expectation.preparedHead) {
+    const preparedHead = tryGit(repoRoot, [
+      'rev-parse',
+      '--verify',
+      `${expectation.preparedHead}^{commit}`,
+    ]);
+    const followsPreparedHead = preparedHead !== undefined
+      && preparedHead !== commit
+      && isAncestor(repoRoot, preparedHead, commit);
+    if (!followsPreparedHead) {
+      throw reconciliationMismatch(
+        `reconciliation commit verification refused: checked commit ${
+          commit
+        } predates this lesson handoff; expected a descendant after prepared HEAD ${
+          expectation.preparedHead
+        }.`,
+        repoRoot,
+        commit,
+        changedPaths,
+      );
+    }
+    return;
+  }
+
+  const commitTimestamp = Date.parse(
+    runGit(repoRoot, ['show', '-s', '--format=%cI', commit]),
+  );
+  const preparedTimestamp = Date.parse(expectation.preparedAt);
+  if (
+    !Number.isFinite(commitTimestamp)
+    || !Number.isFinite(preparedTimestamp)
+    || commitTimestamp <= preparedTimestamp
+  ) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        commit
+      } predates this lesson handoff prepared at ${expectation.preparedAt}.`,
+      repoRoot,
+      commit,
+      changedPaths,
+    );
+  }
+}
+
+function isAncestor(
+  repoRoot: string,
+  ancestor: string,
+  descendant: string,
+): boolean {
+  try {
+    runGit(repoRoot, [
+      'merge-base',
+      '--is-ancestor',
+      ancestor,
+      descendant,
+    ]);
+    return true;
+  } catch (error) {
+    if (gitExitStatus(error) === 1) return false;
+    throw error;
+  }
+}
+
+function matchExpectedReconciliationHunks(
+  repoRoot: string,
+  commit: string,
+  doctrinePaths: string[],
+  changedPaths: string[],
+  expectation: ReconciliationVerificationExpectation,
+): ReconciliationDoctrinePointer[] {
+  const hunks = doctrinePaths.flatMap((path) =>
+    changedDoctrineHunks(repoRoot, commit, path));
+  let matchedPrior: {
+    pointer: NonNullable<
+      ReconciliationVerificationExpectation['priorPointer']
+    >;
+    lines: string[];
+  } | null = null;
+  if (expectation.kind !== 'apply') {
+    const prior = expectation.priorPointer;
+    if (!prior) {
+      throw reconciliationMismatch(
+        `reconciliation commit verification refused: checked commit ${
+          commit
+        } for the current lesson, but no recorded predecessor anchor was available.`,
+        repoRoot,
+        commit,
+        changedPaths,
+      );
+    }
+    const priorLines = pointerLinesAtCommit(
+      repoRoot,
+      expectation.preparedHead ?? `${commit}^`,
+      prior,
+      commit,
+      changedPaths,
+    );
+    const removed = hunks.some((hunk) =>
+      hunk.path === prior.path
+      && findLineSequence(hunk.removed, priorLines) >= 0);
+    if (!removed) {
+      throw reconciliationMismatch(
+        `reconciliation commit verification refused: checked commit ${
+          commit
+        } for the current lesson; the recorded predecessor anchor ${
+          prior.anchor
+        } in ${prior.path} was not removed.`,
+        repoRoot,
+        commit,
+        changedPaths,
+      );
+    }
+    matchedPrior = { pointer: prior, lines: priorLines };
+  }
+
+  if (expectation.kind === 'retire') {
+    const prior = matchedPrior!.pointer;
+    const content = matchedPrior!.lines.join('\n');
+    return [{
+      path: prior.path,
+      anchor: prior.anchor,
+      content,
+      contentHash: prior.contentHash,
+    }];
+  }
+  const candidateLines = markdownAnchorLines(expectation.candidateMarkdown);
+  if (candidateLines.length === 0) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: checked commit ${
+        commit
+      } for the current lesson, but its reviewed candidate anchor is empty.`,
+      repoRoot,
+      commit,
+      changedPaths,
+    );
+  }
+  for (const hunk of hunks) {
+    const offset = findLineSequence(hunk.added, candidateLines);
+    if (offset < 0) continue;
+    const start = hunk.newStart + offset;
+    const content = candidateLines.join('\n');
+    return [{
+      path: hunk.path,
+      anchor: `lines:${start}-${start + candidateLines.length - 1}`,
+      content,
+      contentHash: `sha256:${
+        createHash('sha256').update(content).digest('hex')
+      }`,
+    }];
+  }
+  throw reconciliationMismatch(
+    `reconciliation commit verification refused: checked commit ${
+      commit
+    } for the current lesson; its reviewed candidate anchor was not found in added doctrine content.`,
+    repoRoot,
+    commit,
+    changedPaths,
+  );
+}
+
+function changedDoctrineHunks(
+  repoRoot: string,
+  commit: string,
+  path: string,
+): ChangedDoctrineHunk[] {
+  const parent = tryGit(repoRoot, ['rev-parse', `${commit}^`]);
+  if (!parent) return [];
+  const diff = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'diff',
+    '--unified=0',
+    parent,
+    commit,
+    '--',
+    path,
+  ]);
+  const hunks: ChangedDoctrineHunk[] = [];
+  let current: ChangedDoctrineHunk | null = null;
+  for (const line of diff.split('\n')) {
+    const header =
+      /^@@ -(\d+)(?:,\d+)? \+(\d+)(?:,\d+)? @@/u.exec(line);
+    if (header) {
+      current = {
+        path,
+        oldStart: Number(header[1]),
+        newStart: Number(header[2]),
+        removed: [],
+        added: [],
+      };
+      hunks.push(current);
+      continue;
+    }
+    if (!current || line.startsWith('+++') || line.startsWith('---')) {
+      continue;
+    }
+    if (line.startsWith('+')) current.added.push(line.slice(1));
+    if (line.startsWith('-')) current.removed.push(line.slice(1));
+  }
+  return hunks;
+}
+
+function pointerLinesAtCommit(
+  repoRoot: string,
+  pointerCommit: string,
+  pointer: {
+    path: string;
+    anchor: string;
+    contentHash: string;
+  },
+  checkedCommit: string,
+  changedPaths: string[],
+): string[] {
+  const match = /^lines:(\d+)-(\d+)$/u.exec(pointer.anchor);
+  if (!match) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: recorded predecessor anchor ${
+        pointer.anchor
+      } in ${pointer.path} is invalid.`,
+      repoRoot,
+      checkedCommit,
+      changedPaths,
+    );
+  }
+  const lines = runGitBytes(repoRoot, [
+    'show',
+    `${pointerCommit}:${pointer.path}`,
+  ]).toString('utf8').split('\n');
+  const start = Number(match[1]);
+  const end = Number(match[2]);
+  if (start < 1 || end < start || end > lines.length) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: recorded predecessor anchor ${
+        pointer.anchor
+      } in ${pointer.path} does not resolve at the prepared repository boundary.`,
+      repoRoot,
+      checkedCommit,
+      changedPaths,
+    );
+  }
+  const content = lines.slice(start - 1, end).join('\n');
+  const contentHash = `sha256:${
+    createHash('sha256').update(content).digest('hex')
+  }`;
+  if (contentHash !== pointer.contentHash) {
+    throw reconciliationMismatch(
+      `reconciliation commit verification refused: recorded predecessor anchor ${
+        pointer.anchor
+      } in ${pointer.path} does not match its prepared content hash.`,
+      repoRoot,
+      checkedCommit,
+      changedPaths,
+    );
+  }
+  return content.split('\n');
+}
+
+function markdownAnchorLines(markdown: string | null): string[] {
+  if (markdown === null) return [];
+  const lines = markdown.replace(/\r\n?/gu, '\n').split('\n');
+  while (lines[0]?.trim() === '') lines.shift();
+  while (lines.at(-1)?.trim() === '') lines.pop();
+  return lines;
+}
+
+function findLineSequence(
+  haystack: string[],
+  needle: string[],
+): number {
+  if (needle.length === 0 || needle.length > haystack.length) return -1;
+  for (let index = 0; index <= haystack.length - needle.length; index += 1) {
+    if (needle.every((line, offset) => haystack[index + offset] === line)) {
+      return index;
+    }
+  }
+  return -1;
 }
 
 function reconciliationMismatch(

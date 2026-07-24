@@ -573,6 +573,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         ({ variantId }) => !remaining.has(variantId),
       );
       if (picked) {
+        void this.autosave.flush();
         this.nextSaveProvenance = {
           opId: picked.originOperationId,
           disposition: variantPickedDisposition(

@@ -23,7 +23,10 @@ import {
 } from '../documents/service.js';
 import { DraftWriteReservationError } from '../documents/store.js';
 import type { OperationName } from '../operations/registry.js';
-import type { OperationService } from '../operations/service.js';
+import {
+  DraftScopedResumeRequiredError,
+  type OperationService,
+} from '../operations/service.js';
 import {
   ReconciliationVerificationRefusal,
   type LearningService,
@@ -572,13 +575,6 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
     const validation = await options.validatorService.validate(
       promotion.targetPath,
     );
-    options.learningService?.recordValidatorAttempt({
-      draftId,
-      path: validation.path,
-      hash: validation.hash,
-      ok: validation.ok,
-      diagnostics: validation.errors,
-    });
     const output = await options.artifactService.read(
       promotion.targetPath,
     );
@@ -591,6 +587,13 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
       );
     }
     options.documentService.syncPromotionOutput(draftId, output);
+    options.learningService?.recordValidatorAttempt({
+      draftId,
+      path: validation.path,
+      hash: validation.hash,
+      ok: validation.ok,
+      diagnostics: validation.errors,
+    });
     options.documentService.recordPromotionValidation(draftId, validation);
     return validation;
   };
@@ -1651,6 +1654,9 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           throw new Error('inputs are required');
         }
         const parent = options.operationService.get(request.params.id);
+        if (parent.draftId !== null) {
+          throw new DraftScopedResumeRequiredError(parent.draftId);
+        }
         const id = options.operationService.submit(
           parent.operation,
           request.body.inputs,
@@ -2337,6 +2343,14 @@ function sendOperationError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof DraftScopedResumeRequiredError) {
+    return reply.code(409).send({
+      error: error.message,
+      code: error.code,
+      recoverable: error.recoverable,
+      draftId: error.draftId,
+    });
+  }
   const message = error instanceof Error ? error.message : 'operation failed';
   if (/^operation not found:/i.test(message)) {
     return reply.code(404).send({ error: message });
