@@ -58,6 +58,8 @@ describe('validator HTTP API', () => {
     const result: ValidatorResult = {
       ok: false,
       errors: [{ message: 'Missing Status field.', line: 3 }],
+      path: 'whp-youtube/episodes/bad.md',
+      hash: 'bad-hash',
     };
     const validate = vi.fn(async () => result);
     const app = makeApp(validate);
@@ -78,6 +80,8 @@ describe('validator HTTP API', () => {
     const validate = vi.fn(async () => ({
       ok: true,
       errors: [],
+      path: 'whp-youtube/episodes/bad.md',
+      hash: 'valid-hash',
     }));
     const app = makeApp(validate);
 

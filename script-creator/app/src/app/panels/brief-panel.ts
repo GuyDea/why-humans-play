@@ -360,12 +360,13 @@ export class ApprovalGate {
           <input
             type="checkbox"
             [checked]="model().metadata().directionApproved"
-            (change)="setApproved($event)"
+            disabled
           />
-          <span>Approve premise/voice/hook/story direction</span>
+          <span>Legacy direction approval (read-only)</span>
         </label>
         <p>
-          Passage approval does not approve the episode direction.
+          Complete narration approval is a separate server action in the
+          Production document panel.
         </p>
       </div>
 
@@ -616,11 +617,6 @@ export class BriefPanel {
     });
   }
 
-  protected setApproved(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLInputElement)) return;
-    void this.model().setDirectionApproved(target.checked);
-  }
 }
 
 function asRecord(value: unknown): Record<string, unknown> | null {

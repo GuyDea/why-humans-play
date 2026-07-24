@@ -1,5 +1,11 @@
-import { execFile } from 'node:child_process';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { execFile, spawn } from 'node:child_process';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { promisify } from 'node:util';
@@ -203,4 +209,62 @@ describe('fake codex', () => {
       guardrail_markdown: null,
     });
   });
+
+  it.each([
+    ['valid', true, 'Promotion output written.'],
+    ['invalid-production', true, 'Invalid production fixture written.'],
+    ['guardrail', false, 'Guardrail: promotion declined.'],
+  ] as const)(
+    'runs the %s deterministic Promote fixture mode',
+    async (promoteMode, writesTarget, report) => {
+      const repo = mkdtempSync(join(tmpdir(), `fake-promote-${promoteMode}-`));
+      const out = join(repo, 'result.md');
+      const target = 'whp-youtube/episodes/01-fixture.md';
+      mkdirSync(join(repo, 'whp-youtube', 'episodes'), { recursive: true });
+      writeFileSync(join(repo, 'envelope.json'), JSON.stringify({
+        prompt: [
+          '$writing-whp-youtube-scripts',
+          'Operation: Promote',
+          `Inputs: ${JSON.stringify({ target_path: target })}`,
+        ].join('\n'),
+      }));
+      const child = spawn(
+        process.execPath,
+        [FAKE, 'exec', '--json', '-C', repo, '-o', out, '-'],
+        {
+          env: {
+            ...process.env,
+            FAKE_CODEX_MODE: 'plan6-flow',
+            FAKE_PROMOTE_MODE: promoteMode,
+          },
+          stdio: ['pipe', 'ignore', 'pipe'],
+        },
+      );
+      child.stdin.end();
+      await new Promise<void>((resolve, reject) => {
+        let stderr = '';
+        child.stderr.on('data', (chunk) => {
+          stderr += chunk.toString();
+        });
+        child.once('error', reject);
+        child.once('exit', (code) => {
+          if (code === 0) resolve();
+          else reject(new Error(`fake Promote exited ${code}: ${stderr}`));
+        });
+      });
+
+      expect(readFileSync(out, 'utf8')).toBe(report);
+      expect(existsSync(join(repo, target))).toBe(writesTarget);
+      if (promoteMode === 'valid') {
+        expect(readFileSync(join(repo, target), 'utf8')).toContain(
+          '### Script metadata',
+        );
+      }
+      if (promoteMode === 'invalid-production') {
+        expect(readFileSync(join(repo, target), 'utf8')).toBe(
+          '# Invalid production fixture\n',
+        );
+      }
+    },
+  );
 });

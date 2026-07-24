@@ -1,8 +1,15 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-import { existsSync, readFileSync, unlinkSync, writeFileSync, writeSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+  writeSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 
 const mode = process.env.FAKE_CODEX_MODE ?? 'happy';
 const argv = process.argv.slice(2);
@@ -58,6 +65,18 @@ if (attemptMode === 'bad-schema-output') {
 }
 if (attemptMode === 'generate-architecture') {
   lines = withAgentResult(lines, architectureMarkdown());
+}
+if (
+  attemptMode === 'promote'
+  || attemptMode === 'promote-invalid-production'
+  || attemptMode === 'promote-guardrail'
+) {
+  const report = writePromotionFixture(
+    attemptMode,
+    submittedPrompt,
+    argv,
+  );
+  lines = withAgentResult(lines, report);
 }
 if (hasSchema && attemptMode !== 'bad-schema-output') {
   if (!schemaFile) throw new Error('--output-schema requires a schema file');
@@ -495,9 +514,43 @@ function plan6Mode(prompt, schemaOutput) {
       return 'review-architecture';
     case 'Rewrite architecture section':
       return 'rewrite-architecture-section';
+    case 'Promote':
+      return process.env.FAKE_PROMOTE_MODE === 'invalid-production'
+        ? 'promote-invalid-production'
+        : process.env.FAKE_PROMOTE_MODE === 'guardrail'
+          ? 'promote-guardrail'
+          : 'promote';
     default:
       return schemaOutput ? 'operation-schema' : 'happy';
   }
+}
+
+function writePromotionFixture(attempt, prompt, args) {
+  if (attempt === 'promote-guardrail') {
+    return 'Guardrail: promotion declined.';
+  }
+  const inputs = submittedInputs(prompt);
+  const target = typeof inputs.target_path === 'string'
+    ? inputs.target_path
+    : '';
+  const cwdIndex = args.indexOf('-C');
+  const repo = cwdIndex >= 0 ? args[cwdIndex + 1] : null;
+  if (!repo || target === '') {
+    throw new Error('fake Promote requires -C and target_path');
+  }
+  const output = resolve(repo, target);
+  mkdirSync(dirname(output), { recursive: true });
+  if (attempt === 'promote-invalid-production') {
+    writeFileSync(output, '# Invalid production fixture\n');
+    return 'Invalid production fixture written.';
+  }
+  const fixture = resolve(
+    import.meta.dirname,
+    '../../..',
+    '.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md',
+  );
+  writeFileSync(output, readFileSync(fixture));
+  return 'Promotion output written.';
 }
 
 function submittedInputs(prompt) {

@@ -1,4 +1,7 @@
 import {
+  createHash,
+} from 'node:crypto';
+import {
   mkdirSync,
   mkdtempSync,
   rmSync,
@@ -58,6 +61,12 @@ describe('runValidatorJson', () => {
     });
 
     expect(result.ok).toBe(false);
+    expect(result.path).toBe(scriptRelPath);
+    expect(result.hash).toBe(
+      createHash('sha256')
+        .update('# Invalid annotated script\n')
+        .digest('hex'),
+    );
     expect(result.errors.length).toBeGreaterThan(0);
     expect(result.errors).toEqual(
       expect.arrayContaining([

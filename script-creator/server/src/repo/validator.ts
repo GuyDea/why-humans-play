@@ -1,5 +1,10 @@
 import { spawn } from 'node:child_process';
-import { lstatSync, realpathSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import {
+  lstatSync,
+  readFileSync,
+  realpathSync,
+} from 'node:fs';
 import {
   isAbsolute,
   join,
@@ -17,6 +22,8 @@ export interface ValidatorDiagnostic {
 export interface ValidatorResult {
   ok: boolean;
   errors: ValidatorDiagnostic[];
+  path: string;
+  hash: string;
 }
 
 export interface RunValidatorJsonOptions {
@@ -131,11 +138,17 @@ export async function runValidatorJson(
   ) {
     throw new Error('absoluteTargetForTests must be absolute');
   }
+  const validatorScript = resolve(
+    scriptsDir,
+    'validate_annotated_script.py',
+  );
+  const validatedBytes = readFileSync(target);
+  const hash = createHash('sha256').update(validatedBytes).digest('hex');
 
   return new Promise((resolveResult, reject) => {
     const child = spawn(
       'python3',
-      ['validate_annotated_script.py', '--json', '--', target],
+      [validatorScript, '--json', '--', target],
       { cwd: scriptsDir },
     );
     let stdout = '';
@@ -168,7 +181,15 @@ export async function runValidatorJson(
         if (!isValidatorResult(parsed)) {
           throw new Error('stdout did not match the validator JSON contract');
         }
-        resolveResult(parsed);
+        const currentBytes = readFileSync(target);
+        if (!currentBytes.equals(validatedBytes)) {
+          throw new Error('target changed while validator was running');
+        }
+        resolveResult({
+          ...parsed,
+          path: scriptRelPath,
+          hash,
+        });
       } catch (error) {
         const message = error instanceof Error
           ? error.message

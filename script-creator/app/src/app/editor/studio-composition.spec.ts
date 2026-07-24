@@ -15,6 +15,11 @@ import {
   Router,
 } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import {
+  exportMarkdown,
+  parseMarkdown,
+  schema,
+} from '@whp/script-creator-editor-core';
 import { DaemonClientError } from '../api/client';
 import type {
   ArchitectureActionResult,
@@ -27,6 +32,7 @@ import type {
   OperationRecord,
   OperationResult,
   OperationSummary,
+  RevisionRecord,
   SavedDraft,
   StreamEventsOptions,
 } from '../api/client';
@@ -36,6 +42,7 @@ import {
 } from '../architecture/model';
 import { ArchitecturePanel } from '../architecture/architecture-panel';
 import { NarrationActions } from '../narration/narration-actions';
+import { ProductionPanel } from '../production/production-panel';
 import { App } from '../app';
 import { routes } from '../app.routes';
 import appTemplate from '../app.html?raw';
@@ -61,9 +68,25 @@ interface ControlledOutcome {
   result: OperationResult;
 }
 
+interface ControlledPromotion {
+  draftId: string;
+  operationId: string;
+  state:
+    | 'running'
+    | 'output-ready'
+    | 'validation-required'
+    | 'complete'
+    | 'failed';
+  targetPath: string;
+  targetHash: string | null;
+  validationHash: string | null;
+  error: string | null;
+}
+
 class ControllableDaemonClient {
   private sequence = 0;
   private revisionSequence = 0;
+  private readonly revisionHistory: RevisionRecord[] = [];
   private readonly finishes = new Map<string, () => void>();
   private readonly outcomes = new Map<string, ControlledOutcome>();
   readonly submissions: Array<{
@@ -80,6 +103,40 @@ class ControllableDaemonClient {
   }> = [];
   readonly canonicalArchitectureWrites: string[] = [];
   readonly pipelineMilestones: string[] = [];
+  readonly narrationApprovals: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    settledExportToken: string;
+  }> = [];
+  readonly narrationSettledExports: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+    expectedNarrationMd: string;
+  }> = [];
+  readonly productionSyncs: Array<{
+    draftId: string;
+    expectedRevisionSeq: number;
+  }> = [];
+  readonly narrationProposalResolutions: Array<{
+    draftId: string;
+    operationId: string;
+    decision: 'accepted' | 'rejected';
+  }> = [];
+  pendingNarrationProposals: Array<{
+    draftId: string;
+    operationId: string;
+    state: 'pending';
+    createdAt: string;
+    resolvedAt: null;
+    acceptedRevisionPresent: boolean;
+  }> = [];
+  promotion: ControlledPromotion | null = null;
+  validatorResults: Array<{
+    ok: boolean;
+    errors: Array<{ message: string; line: number | null }>;
+    path: string;
+    hash: string;
+  }> = [];
   architectureState: ArchitectureState = {
     sections: [],
     approvedMd: null,
@@ -92,7 +149,8 @@ class ControllableDaemonClient {
 
   readonly list = vi.fn(async () => [draftSummary(this.storedDraft)]);
   readonly get = vi.fn(async (_id: string) => this.storedDraft);
-  readonly listRevisions = vi.fn(async () => []);
+  readonly listRevisions = vi.fn(async () =>
+    this.revisionHistory.map((revision) => ({ ...revision })));
   readonly create = vi.fn(async () => this.storedDraft);
   readonly import = vi.fn(async () => this.storedDraft);
   readonly export = vi.fn(async () => ({ markdown: '# Exported' }));
@@ -101,6 +159,110 @@ class ControllableDaemonClient {
     hash: 'artifact-hash',
   }));
   readonly validate = vi.fn(async () => ({ ok: true, errors: [] }));
+  readonly prepareNarrationApproval = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      expectedNarrationMd: string;
+    },
+  ) => {
+    this.narrationSettledExports.push({ draftId, ...input });
+    if (input.expectedNarrationMd !== this.currentMarkdown()) {
+      throw new Error('editor export mismatch');
+    }
+    return { settledExportToken: 'settled-export-token' };
+  });
+  readonly approveNarration = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+      settledExportToken: string;
+    },
+  ) => {
+    this.narrationApprovals.push({ draftId, ...input });
+    const markdown = this.currentMarkdown();
+    if (input.settledExportToken !== 'settled-export-token') {
+      throw new Error('settled export token mismatch');
+    }
+    const record = this.storedDraft as DraftRecord & {
+      approvedNarrationMd?: string | null;
+      approvedNarrationAt?: string | null;
+      approvedNarrationRevisionSeq?: number | null;
+      narrationArtifactHash?: string | null;
+    };
+    record.approvedNarrationMd = markdown;
+    record.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    const revision = this.appendRevision(
+      'narration-approved',
+      this.storedDraft.doc,
+    );
+    record.approvedNarrationRevisionSeq = revision.seq;
+    record.narrationArtifactHash = 'narration-hash';
+    setDraftPhase(this.storedDraft, 'creative-approved');
+    return this.storedDraft;
+  });
+  readonly resolveNarrationProposal = vi.fn(async (
+    draftId: string,
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+  ) => {
+    this.narrationProposalResolutions.push({
+      draftId,
+      operationId,
+      decision,
+    });
+    this.pendingNarrationProposals =
+      this.pendingNarrationProposals.filter(
+        (proposal) => proposal.operationId !== operationId,
+      );
+    return {
+      draftId,
+      operationId,
+      state: decision,
+    };
+  });
+  readonly listNarrationProposals = vi.fn(async () => ({
+    proposals: this.pendingNarrationProposals.map(
+      (proposal) => ({ ...proposal }),
+    ),
+  }));
+  readonly getPromotion = vi.fn(async () => ({
+    promotion: this.promotion,
+  }));
+  readonly syncProduction = vi.fn(async (
+    draftId: string,
+    input: {
+      expectedRevisionSeq: number;
+    },
+  ) => {
+    this.productionSyncs.push({ draftId, ...input });
+    if (!this.promotion) throw new Error('promotion missing');
+    this.promotion = {
+      ...this.promotion,
+      state: 'validation-required',
+      targetHash: 'production-hash',
+      validationHash: null,
+    };
+    return this.promotion;
+  });
+  readonly validateDraft = vi.fn(async () =>
+    this.validatorResults.shift() ?? {
+      ok: true,
+      errors: [],
+      path: 'whp-youtube/episodes/01-composition-net.md',
+      hash: 'production-hash',
+    });
+  readonly completePromote = vi.fn(async () => {
+    if (!this.promotion) throw new Error('promotion missing');
+    this.promotion = {
+      ...this.promotion,
+      state: 'complete',
+      validationHash: 'production-hash',
+    };
+    setDraftPhase(this.storedDraft, 'production');
+    this.pipelineMilestones.push('production');
+    return this.promotion;
+  });
 
   readonly save = vi.fn(async (
     _id: string,
@@ -113,18 +275,13 @@ class ControllableDaemonClient {
         narrationReconciliationRequired: false,
       };
     }
-    const seq = ++this.revisionSequence;
+    const revision = this.appendRevision(
+      input.disposition ?? 'edit',
+      input.doc,
+    );
     return {
       draft: this.storedDraft,
-      revision: {
-        id: `revision-${seq}`,
-        draftId: this.storedDraft.id,
-        seq,
-        opId: null,
-        disposition: input.disposition ?? 'edit',
-        doc: input.doc,
-        createdAt: `2026-07-23T12:00:${String(seq).padStart(2, '0')}.000Z`,
-      },
+      revision,
     };
   });
 
@@ -232,6 +389,20 @@ class ControllableDaemonClient {
       inputs,
       approvedArchitectureMd: this.architectureState.approvedMd,
     });
+    if (operation === 'promote') {
+      const targetPath = (
+        inputs as Record<string, unknown>
+      )['target_path'] as string;
+      this.promotion = {
+        draftId,
+        operationId: result.id,
+        state: 'running',
+        targetPath,
+        targetHash: null,
+        validationHash: null,
+        error: null,
+      };
+    }
     return result;
   });
   readonly resumeDraftOp = vi.fn(async (
@@ -311,7 +482,52 @@ class ControllableDaemonClient {
       }),
       result,
     });
+    if (submission.operation === 'promote' && result.kind === 'raw') {
+      const currentMetadata = this.storedDraft.doc['metadata'];
+      this.storedDraft.doc = {
+        ...parseProductionFixture(),
+        metadata: currentMetadata,
+      };
+      this.promotion = this.promotion
+        ? {
+            ...this.promotion,
+            state: 'validation-required',
+            targetHash: 'production-hash',
+          }
+        : null;
+      this.appendRevision(
+        'production-import',
+        this.storedDraft.doc,
+        submission.id,
+      );
+    }
     finish();
+  }
+
+  private currentMarkdown(): string {
+    const result = exportMarkdown(schema.nodeFromJSON(this.storedDraft.doc));
+    if (!result.ok) throw new Error('fixture export is unsettled');
+    return result.markdown;
+  }
+
+  private appendRevision(
+    disposition: string,
+    doc: DraftDocument,
+    opId: string | null = null,
+  ): RevisionRecord {
+    const seq = ++this.revisionSequence;
+    const revision = {
+      id: `revision-${seq}`,
+      draftId: this.storedDraft.id,
+      seq,
+      opId,
+      disposition,
+      doc: structuredClone(doc),
+      createdAt:
+        `2026-07-23T12:00:${String(seq).padStart(2, '0')}.000Z`,
+    };
+    this.revisionHistory.push(revision);
+    return revision;
   }
 }
 
@@ -347,6 +563,380 @@ afterEach(() => {
 });
 
 describe('mounted Script Studio composition', () => {
+  it('keeps complete-narration approval disabled while an editor save is pending', async () => {
+    const studio = await mountStudio(productionDraft());
+    const panel = studio.root.querySelector('app-production-panel')!;
+
+    await replaceRenderedText(
+      studio,
+      'Opening narration.',
+      'Unsaved opening narration.',
+    );
+    studio.tick();
+
+    expect(findButton(panel, 'Approve complete narration').disabled).toBe(true);
+    expect(studio.client.approveNarration).not.toHaveBeenCalled();
+  });
+
+  it('resumes an interrupted narration approval reservation from the routed controls', async () => {
+    const draft = productionDraft();
+    setDraftPhase(draft, 'rapid-prototype');
+    const markdown = exportMarkdown(schema.nodeFromJSON(draft.doc));
+    if (!markdown.ok) throw new Error('fixture export is unsettled');
+    draft.approvedNarrationMd = markdown.markdown;
+    draft.approvedNarrationAt = '2026-07-24T13:00:00.000Z';
+    draft.approvedNarrationRevisionSeq = 0;
+    const studio = await mountStudio(draft);
+    const panel = studio.root.querySelector('app-production-panel')!;
+
+    expect(findButton(panel, 'Approve complete narration').disabled)
+      .toBe(false);
+    findButton(panel, 'Approve complete narration').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.approveNarration).toHaveBeenCalledOnce();
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('creative-approved');
+    });
+  });
+
+  it('automatically resumes persisted production synchronization and completion reservations', async () => {
+    const targetPath =
+      'whp-youtube/episodes/01-composition-net.md';
+    const synchronization = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.promotion = {
+          draftId: client.storedDraft.id,
+          operationId: 'promote-sync',
+          state: 'output-ready',
+          targetPath,
+          targetHash: 'production-hash',
+          validationHash: null,
+          error: 'production synchronization in progress',
+        };
+      },
+    );
+    await vi.waitFor(() => {
+      synchronization.tick();
+      expect(synchronization.client.syncProduction).toHaveBeenCalledOnce();
+      expect(synchronization.client.validateDraft).toHaveBeenCalledOnce();
+    });
+    synchronization.destroy();
+    mounted.splice(mounted.indexOf(synchronization), 1);
+
+    const completion = await mountStudio(
+      productionDraft(),
+      (client) => {
+        client.promotion = {
+          draftId: client.storedDraft.id,
+          operationId: 'promote-complete',
+          state: 'output-ready',
+          targetPath,
+          targetHash: 'production-hash',
+          validationHash: 'production-hash',
+          error: 'promotion completion in progress',
+        };
+      },
+    );
+    await vi.waitFor(() => {
+      completion.tick();
+      expect(completion.client.completePromote).toHaveBeenCalledOnce();
+      expect(readDraftPhase(completion.client.storedDraft))
+        .toBe('production');
+    });
+  });
+
+  it('surfaces a durable pending proposal after reload and lets Martin retry settlement', async () => {
+    const studio = await mountStudio(studioDraft(), (client) => {
+      client.pendingNarrationProposals = [{
+        draftId: 'draft-1',
+        operationId: 'orphaned-proposal-op',
+        state: 'pending',
+        createdAt: '2026-07-24T13:00:00.000Z',
+        resolvedAt: null,
+        acceptedRevisionPresent: false,
+      }];
+    });
+    const panel = studio.root.querySelector('app-production-panel');
+    const editorElement = studio.root.querySelector('app-editor-host');
+    const editor = editorElement
+      ? getDebugNode(editorElement)?.componentInstance as EditorHost
+      : null;
+    expect(editor).not.toBeNull();
+    const clearSettlementError = vi.spyOn(
+      editor!,
+      'clearProposalSettlementError',
+    );
+    const recovery = await waitForElement(
+      studio,
+      '[data-testid="proposal-recovery"]',
+    );
+    expect(recovery.textContent).toContain('orphaned-proposal-op');
+
+    findButton(panel, 'Reject durable proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'orphaned-proposal-op',
+        decision: 'rejected',
+      });
+      expect(clearSettlementError).toHaveBeenCalledOnce();
+      expect(studio.root.querySelector(
+        '[data-testid="proposal-recovery"]',
+      )).toBeNull();
+    });
+  });
+
+  it('gates Promote completion on pinned exact-hash validator diagnostics', async () => {
+    const studio = await mountStudio(productionDraft());
+    const panel = studio.root.querySelector('app-production-panel')!;
+    studio.client.validatorResults.push(
+      {
+        ok: false,
+        errors: [{
+          message: 'Personal input must be completed.',
+          line: 24,
+        }],
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        hash: 'production-hash',
+      },
+      {
+        ok: true,
+        errors: [],
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        hash: 'production-hash',
+      },
+    );
+
+    findButton(panel, 'Approve complete narration').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.approveNarration).toHaveBeenCalledOnce();
+      expect(readDraftPhase(studio.client.storedDraft)).toBe(
+        'creative-approved',
+      );
+    });
+    const target = panel.querySelector<HTMLInputElement>(
+      'input[aria-label="Production target"]',
+    )!;
+    target.value = 'whp-youtube/episodes/01-composition-net.md';
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(panel, 'Promote to Phase 2').click();
+    await expectDraftSubmission(studio, 'promote', 1);
+    studio.client.resolve('op-1', {
+      kind: 'raw',
+      markdown: 'Promotion output written.',
+    });
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('validation-required');
+      expect(readDraftPhase(studio.client.storedDraft))
+        .toBe('creative-approved');
+    });
+
+    findButton(panel, 'Run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('FAIL');
+      expect(panel.textContent).toContain('1 diagnostic');
+      expect(panel.textContent).toContain('Line 24');
+      expect(panel.textContent).toContain(
+        'Personal input must be completed.',
+      );
+    });
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+    expect(findButton(panel, 'Complete Promote').disabled).toBe(true);
+
+    const metadata = studio.client.storedDraft.doc['metadata'];
+    studio.client.storedDraft.doc = {
+      ...parseProductionFixture(true),
+      metadata,
+    };
+    findButton(panel, 'Re-run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('PASS');
+      expect(panel.textContent).toContain('COMPLETED');
+      expect(findButton(panel, 'Complete Promote').disabled).toBe(false);
+    });
+    expect(readDraftPhase(studio.client.storedDraft))
+      .toBe('creative-approved');
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+
+    await replaceRenderedText(
+      studio,
+      'Opening narration.',
+      'Edited after validator pass.',
+    );
+    studio.tick();
+    expect(panel.textContent).toContain('STALE');
+    expect(findButton(panel, 'Complete Promote').disabled).toBe(true);
+    findButton(panel, 'Re-run validator').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('PASS');
+      expect(findButton(panel, 'Complete Promote').disabled).toBe(false);
+    });
+
+    findButton(panel, 'Complete Promote').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain('complete');
+      expect(readDraftPhase(studio.client.storedDraft)).toBe('production');
+      expect(studio.client.pipelineMilestones).toContain('production');
+    });
+    expect(readDraftReadiness(studio.client.storedDraft))
+      .toBe('EDITORIAL-DRAFT');
+    expect(studio.client.productionSyncs).toHaveLength(3);
+    expect(studio.client.productionSyncs.map(
+      ({ expectedRevisionSeq }) => expectedRevisionSeq,
+    )).toEqual([2, 2, 3]);
+  });
+
+  it('integrates Phase-2 cards, clean narration, and PI proposals on the routed draft page', async () => {
+    const studio = await mountStudio(productionDraft());
+    const panel = studio.root.querySelector('app-production-panel');
+    expect(panel).not.toBeNull();
+    expect(panel?.textContent).toContain('Script metadata');
+    expect(panel?.textContent).toContain('Beat 01 — Opening');
+    expect(panel?.textContent).toContain('Unrecognized production note');
+
+    const cards = panel!.querySelectorAll<HTMLDetailsElement>(
+      '[data-testid="production-card"]',
+    );
+    expect(cards.length).toBeGreaterThan(2);
+    cards[1]!.open = false;
+    cards[1]!.dispatchEvent(new Event('toggle'));
+    studio.tick();
+    expect(cards[1]!.open).toBe(false);
+    cards[1]!.open = true;
+    cards[1]!.dispatchEvent(new Event('toggle'));
+    studio.tick();
+    expect(cards[1]!.open).toBe(true);
+
+    const editorElement = studio.root.querySelector<HTMLElement>(
+      'app-editor-host',
+    )!;
+    const editor = getDebugNode(editorElement)?.componentInstance as EditorHost;
+    const beforeToggle = editor.currentMarkdown();
+    const cleanToggle = panel!.querySelector<HTMLInputElement>(
+      'input[aria-label="Clean narration"]',
+    )!;
+    cleanToggle.click();
+    studio.tick();
+    expect(editorElement.querySelector('.editor')?.classList)
+      .toContain('clean-narration');
+    cleanToggle.click();
+    studio.tick();
+    expect(editor.currentMarkdown()).toBe(beforeToggle);
+
+    const response = panel!.querySelector<HTMLTextAreaElement>(
+      'textarea[aria-label="Response for PI-001"]',
+    )!;
+    response.value = 'I noticed it while teaching a friend.';
+    response.dispatchEvent(new Event('input', { bubbles: true }));
+    studio.tick();
+    findButton(panel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 1);
+    expect(studio.client.draftSubmissions.at(-1)?.inputs).toEqual({
+      topic_brief: {
+        topic: 'Why constraints create play',
+        factual_anchors: ['Players accept the rule.'],
+        unknowns: ['Which example survives?'],
+      },
+      approved_lessons: ['Keep it concrete.'],
+      selection: '<!-- PI-001: Martin input -->',
+      surrounding_context: {
+        before: 'Opening narration.',
+        after: 'Closing narration.',
+      },
+      beat_title: '1. Opening',
+      narrative_job: '',
+      creative_status: {
+        phase: 'creative-approved',
+        readiness: 'EDITORIAL-DRAFT',
+      },
+      requested_scope: {
+        kind: 'personal-input',
+        personal_input_id: 'PI-001',
+      },
+      supplied_personal_input: 'I noticed it while teaching a friend.',
+      personal_input_block: expect.stringContaining(
+        '- **Decision:** INPUT-REQUESTED',
+      ),
+    });
+    studio.client.resolve('op-1', rewriteResult(
+      'Martin supplied first paragraph.\n\n'
+        + 'Martin supplied **exact** second paragraph.',
+    ));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain(
+        'Martin supplied first paragraph.',
+      );
+    });
+    findButton(panel, 'Reject proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-1',
+        decision: 'rejected',
+      });
+    });
+    expect(editor.currentMarkdown()).toContain(
+      '<!-- PI-001: Martin input -->',
+    );
+    expect(editor.currentMarkdown()).toContain(
+      '- **Decision:** INPUT-REQUESTED',
+    );
+
+    findButton(panel, 'Integrate supplied response').click();
+    await expectDraftSubmission(studio, 'rewrite-selection', 2);
+    studio.client.resolve('op-2', rewriteResult(
+      'Martin supplied first paragraph.\n\n'
+        + 'Martin supplied **exact** second paragraph.',
+    ));
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(panel.textContent).toContain(
+        'Martin supplied first paragraph.',
+      );
+    });
+    findButton(panel, 'Accept proposal').click();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(editor.currentMarkdown()).toContain(
+        '> Opening narration. Martin supplied first paragraph.\n\n'
+          + '> Martin supplied **exact** second paragraph. Closing narration.',
+      );
+      expect(editor.currentMarkdown()).not.toContain(
+        '<!-- PI-001: Martin input -->',
+      );
+      expect(editor.currentMarkdown()).toContain(
+        '- **Decision:** COMPLETED',
+      );
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-2',
+        decision: 'accepted',
+      });
+    });
+    expect(editor.undoPersonalInputAcceptance()).toBe(true);
+    studio.tick();
+    expect(editor.currentMarkdown()).toContain(
+      '<!-- PI-001: Martin input -->',
+    );
+    expect(editor.currentMarkdown()).toContain(
+      '- **Decision:** INPUT-REQUESTED',
+    );
+  });
+
   it('drives architecture approval, reopen, and episode reconciliation through production controls', async () => {
     const confirm = vi.fn(() => true);
     vi.stubGlobal('confirm', confirm);
@@ -524,7 +1114,16 @@ describe('mounted Script Studio composition', () => {
       );
     });
     findButton(narrationActions, 'Reject episode proposal').click();
-    studio.tick();
+    await vi.waitFor(() => {
+      studio.tick();
+      expect(findButton(narrationActions, 'Generate episode').disabled)
+        .toBe(false);
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-4',
+        decision: 'rejected',
+      });
+    });
     expect(editorText(studio)).toBe(narrationBeforeReopen);
 
     findButton(narrationActions, 'Generate episode').click();
@@ -551,6 +1150,11 @@ describe('mounted Script Studio composition', () => {
           disposition: 'episode-generation-accepted',
         }),
       );
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-5',
+        decision: 'accepted',
+      });
       expect(studio.client.architectureState
         .narrationReconciliationRequired).toBe(false);
       expect(narrationActions.textContent).not.toContain(
@@ -601,11 +1205,17 @@ describe('mounted Script Studio composition', () => {
     await vi.waitFor(() => {
       expect(editorText(studio)).toContain('rewritten target');
       expect(editorText(studio)).not.toContain('rewrite target');
+      expect(studio.client.narrationProposalResolutions).toContainEqual({
+        draftId: 'draft-1',
+        operationId: 'op-1',
+        decision: 'accepted',
+      });
     });
 
     await selectText(studio, 'failure target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-2.');
     studio.client.resolve('op-2', {
       kind: 'failed',
       error: 'invalid operation result',
@@ -623,6 +1233,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'guardrail target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-3.');
     studio.client.resolve('op-3', {
       kind: 'schema',
       value: {
@@ -642,6 +1253,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'alternatives target');
     clickToolbar(studio, 'alternatives');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-4.');
     expect(studio.root.querySelector('.proposal-diff')).toBeNull();
     studio.client.resolve('op-4', {
       kind: 'schema',
@@ -681,6 +1293,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'review target');
     clickToolbar(studio, 'review');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-5.');
     studio.client.resolve('op-5', {
       kind: 'schema',
       value: {
@@ -704,24 +1317,18 @@ describe('mounted Script Studio composition', () => {
       expect(findings?.textContent).toContain('Anchored');
     });
 
-    const promote = findButton(
-      studio.root.querySelector('app-brief-panel'),
-      'Promote',
-    );
-    expect(promote.disabled).toBe(true);
-    const approval = studio.root.querySelector<HTMLInputElement>(
-      'app-brief-panel input[type="checkbox"]',
-    )!;
-    approval.checked = true;
-    approval.dispatchEvent(new Event('change', { bubbles: true }));
-    await vi.waitFor(() => {
-      studio.tick();
-      expect(promote.disabled).toBe(false);
-    });
+    expect(
+      Array.from(
+        studio.root.querySelectorAll<HTMLButtonElement>(
+          'app-brief-panel button',
+        ),
+      ).some((button) => button.textContent?.trim() === 'Promote'),
+    ).toBe(false);
 
     await selectText(studio, 'reroll target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-6.');
     studio.client.resolve('op-6', rewriteResult('rerolled target'));
     await waitForElement(studio, '.proposal-diff');
     await vi.waitFor(() => {
@@ -795,6 +1402,7 @@ describe('mounted Script Studio composition', () => {
     await selectText(studio, 'lock target');
     clickToolbar(studio, 'rewrite');
     await expectPending(studio, true);
+    await expectEmbeddedConsole(studio, 'Working on op-1.');
     studio.client.resolve('op-1', rewriteResult('locked proposal'));
 
     const conflict = await waitForElement(
@@ -903,6 +1511,8 @@ describe('mounted Script Studio composition', () => {
 
 async function mountStudio(
   draft = studioDraft(),
+  configureClient: (client: ControllableDaemonClient) => void =
+    () => {},
 ): Promise<MountedStudio> {
   if (!appResourcesResolved) {
     await ɵresolveComponentResources(async (url) =>
@@ -928,6 +1538,11 @@ async function mountStudio(
       'editor',
       'version',
     ]);
+    hydrateSignalInputs(ProductionPanel, [
+      'draft',
+      'client',
+      'editor',
+    ]);
     hydrateSignalOutputs(ArchitecturePanel, ['changed']);
     hydrateSignalOutputs(NarrationActions, ['changed']);
     hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
@@ -947,6 +1562,7 @@ async function mountStudio(
   }
   globalThis.history.replaceState(null, '', '/');
   const client = new ControllableDaemonClient(draft);
+  configureClient(client);
   const session = new StudioSession(client as unknown as DaemonClient);
   const application = await createApplication({
     providers: [
@@ -1117,9 +1733,9 @@ async function expectEmbeddedConsole(
 ): Promise<void> {
   await vi.waitFor(() => {
     studio.tick();
-    expect(studio.root.querySelector(
+    expect(Array.from(studio.root.querySelectorAll(
       '[data-testid="console-operation"]',
-    )?.textContent).toContain(text);
+    )).some((entry) => entry.textContent?.includes(text))).toBe(true);
   });
 }
 
@@ -1317,12 +1933,108 @@ function architectureDraft(): DraftRecord {
   return draft;
 }
 
+function productionDraft(): DraftRecord {
+  const draft = studioDraft();
+  draft.format = 'narration';
+  draft.doc = {
+    ...parseProductionFixture(),
+    metadata: {
+      topic: 'Why constraints create play',
+      anchors: ['Players accept the rule.'],
+      unknowns: ['Which example survives?'],
+      approvedLessons: ['Keep it concrete.'],
+      creativeStatus: {
+        phase: 'creative-approved',
+        readiness: 'EDITORIAL-DRAFT',
+      },
+      directionApproved: false,
+    },
+  };
+  return draft;
+}
+
+function parseProductionFixture(
+  personalInputCompleted = false,
+): DraftDocument {
+  const markdown = [
+    '# Production fixture',
+    '',
+    '## 1. Opening',
+    '',
+    '> Opening narration.',
+    ...(personalInputCompleted
+      ? ['> Martin supplied exact narration.']
+      : ['> <!-- PI-001: Martin input -->']),
+    '> Closing narration.',
+    '',
+    '## Appendix',
+    '',
+    '### Script metadata',
+    '',
+    '- **Status:** RESEARCH-DRAFT',
+    '- **Title:** Production fixture',
+    '',
+    '### Beat 01 — Opening',
+    '',
+    '- **Time:** 00:00–00:30',
+    '',
+    '#### Story function',
+    '',
+    'Open the question.',
+    '',
+    '#### Personal input',
+    '',
+    '- **ID:** PI-001',
+    `- **Decision:** ${
+      personalInputCompleted ? 'COMPLETED' : 'INPUT-REQUESTED'
+    }`,
+    '- **Story purpose:** Ground the question in a truthful moment.',
+    '- **Primary prompt:** What exact moment changed your view?',
+    '- **Follow-up prompts:** What did you see; what did you assume?',
+    '- **Bridge in:** Exact stored bridge in.',
+    '- **Bridge out:** Exact stored bridge out.',
+    '- **Personal visuals:** Exact stored visual note.',
+    '- **Omit when:** Exact stored omit condition.',
+    '',
+    '#### Viewer application',
+    '',
+    '- **Insight:** A bounded insight.',
+    '',
+    '### Editorial audit',
+    '',
+    '- Exact audit text.',
+    '',
+    '### References and source materials',
+    '',
+    '#### Evidence references',
+    '',
+    '##### F-001 — Source',
+    '',
+    '- **Status:** VERIFIED',
+    '',
+    '### Unrecognized production note',
+    '',
+    'Preserve this unknown section exactly.',
+  ].join('\n');
+  return parseMarkdown(markdown).toJSON() as DraftDocument;
+}
+
 function setDraftPhase(draft: DraftRecord, phase: string): void {
   const metadata = draft.doc['metadata'] as Record<string, unknown>;
   metadata['creativeStatus'] = {
     ...metadata['creativeStatus'] as Record<string, unknown>,
     phase,
   };
+}
+
+function readDraftPhase(draft: DraftRecord): unknown {
+  return ((draft.doc['metadata'] as Record<string, unknown>)
+    ['creativeStatus'] as Record<string, unknown>)['phase'];
+}
+
+function readDraftReadiness(draft: DraftRecord): unknown {
+  return ((draft.doc['metadata'] as Record<string, unknown>)
+    ['creativeStatus'] as Record<string, unknown>)['readiness'];
 }
 
 function cloneArchitectureState(

@@ -307,6 +307,10 @@ export interface DraftSummary {
 
 export interface DraftRecord extends DraftSummary {
   doc: DraftDocument;
+  approvedNarrationMd?: string | null;
+  approvedNarrationAt?: string | null;
+  approvedNarrationRevisionSeq?: number | null;
+  narrationArtifactHash?: string | null;
 }
 
 export interface RevisionRecord {
@@ -317,6 +321,15 @@ export interface RevisionRecord {
   disposition: string;
   doc: DraftDocument;
   createdAt: string;
+}
+
+export interface NarrationProposalRecord {
+  draftId: string;
+  operationId: string;
+  state: 'pending';
+  createdAt: string;
+  resolvedAt: null;
+  acceptedRevisionPresent: boolean;
 }
 
 export interface CreateDraftInput {
@@ -395,6 +408,28 @@ export interface ValidatorDiagnostic {
 export interface ValidatorResult {
   ok: boolean;
   errors: ValidatorDiagnostic[];
+  path: string;
+  hash: string;
+}
+
+export type PromotionState =
+  | 'running'
+  | 'output-ready'
+  | 'validation-required'
+  | 'complete'
+  | 'failed';
+
+export interface PromotionRecord {
+  draftId: string;
+  operationId: string;
+  state: PromotionState;
+  targetPath: string;
+  targetHash: string | null;
+  importRevisionId?: string;
+  validationHash: string | null;
+  error: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SseFrame {
@@ -649,6 +684,107 @@ export class DaemonClient {
         method: 'POST',
         body: JSON.stringify(input),
       },
+    );
+  }
+
+  async prepareNarrationApproval(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+      expectedNarrationMd: string;
+    },
+  ): Promise<{ settledExportToken: string }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/settled-export`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async resolveNarrationProposal(
+    draftId: string,
+    operationId: string,
+    decision: 'accepted' | 'rejected',
+  ): Promise<{
+    draftId: string;
+    operationId: string;
+    state: 'accepted' | 'rejected' | 'dismissed';
+  }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(
+        draftId,
+      )}/narration/proposals/${encodeURIComponent(
+        operationId,
+      )}/resolve`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ decision }),
+      },
+    );
+  }
+
+  async listNarrationProposals(
+    draftId: string,
+  ): Promise<{ proposals: NarrationProposalRecord[] }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(
+        draftId,
+      )}/narration/proposals`,
+    );
+  }
+
+  async approveNarration(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+      settledExportToken: string;
+    },
+  ): Promise<DraftRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/narration/approve`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async getPromotion(
+    id: string,
+  ): Promise<{ promotion: PromotionRecord | null }> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/promote`,
+    );
+  }
+
+  async syncProduction(
+    id: string,
+    input: {
+      expectedRevisionSeq: number;
+    },
+  ): Promise<PromotionRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/production/sync`,
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+    );
+  }
+
+  async validateDraft(id: string): Promise<ValidatorResult> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/validate`,
+      { method: 'POST' },
+    );
+  }
+
+  async completePromote(id: string): Promise<PromotionRecord> {
+    return this.request(
+      `/api/drafts/${encodeURIComponent(id)}/promote/complete`,
+      { method: 'POST' },
     );
   }
 
