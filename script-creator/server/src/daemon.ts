@@ -177,6 +177,11 @@ export function createDaemonContext(
       store: learningStore,
       documentStore,
       topicStore,
+      operationService: activeOperationService,
+      repositoryRootForDraft: (draftId) =>
+        milestoneService!.hasWorkspace(draftId)
+          ? milestoneService!.workspacePath(draftId)
+          : repoRoot,
       operationEvidence: (operationId) => {
         const envelope = jobStore.operationEnvelope(operationId);
         if (!envelope) return null;
@@ -187,6 +192,18 @@ export function createDaemonContext(
         };
       },
     });
+    learningService.recoverDistillations();
+    for (const operation of activeOperationService.list()) {
+      try {
+        learningService.recoverOperationLessons(
+          operation.id,
+          activeOperationService.inputs(operation.id),
+        );
+      } catch {
+        // A malformed historical envelope remains inspectable but cannot be
+        // guessed into an operation-lesson provenance record.
+      }
+    }
     const activeMilestoneService = milestoneService;
     const workspaceArtifacts = {
       write: (

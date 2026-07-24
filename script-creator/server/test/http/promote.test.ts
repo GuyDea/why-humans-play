@@ -51,6 +51,7 @@ describe('staged Promote HTTP workflow', () => {
       creative_status: { phase: 'forged' },
       approved_architecture_md: 'forged architecture',
       approved_narration_md: 'forged narration',
+      approved_lessons: ['forged legacy lesson'],
       topic_brief: { topic: 'forged' },
     });
 
@@ -62,7 +63,7 @@ describe('staged Promote HTTP workflow', () => {
         factual_anchors: ['Players accept the rule.'],
         unknowns: ['Which example survives?'],
       },
-      approved_lessons: ['Keep it concrete.'],
+      approved_lessons: [],
       approved_architecture_md: fixture.approvedArchitecture,
       approved_narration_md: fixture.approvedNarration,
       creative_status: {

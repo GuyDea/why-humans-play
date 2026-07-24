@@ -84,6 +84,12 @@ interface ArchitectureOperationService {
     inputs: unknown,
     options?: { resumeOf?: string; cwd?: string },
   ): string;
+  submitDraftScoped?(
+    operation: OperationName,
+    inputs: unknown,
+    approvedLessons: string[],
+    options?: { resumeOf?: string; cwd?: string },
+  ): string;
   get(id: string): { operation: OperationName };
   result?(id: string): OperationServiceResult;
 }
@@ -114,6 +120,21 @@ interface ArchitectureLearningService {
     reason: string | null;
     resolvedAt: string;
   }): unknown;
+  activeEpisodeLessons?(draftId: string): Array<{
+    id: string;
+    version: number;
+    markdown: string;
+    contentHash: string;
+  }>;
+  recordOperationLessons?(
+    operationId: string,
+    lessons: Array<{
+      id: string;
+      version: number;
+      markdown: string;
+      contentHash: string;
+    }>,
+  ): unknown;
 }
 
 interface ArchitectureArtifactService {
@@ -208,6 +229,13 @@ const NARRATION_OPERATIONS = new Set<OperationName>([
 const NARRATION_PROPOSAL_OPERATIONS = new Set<OperationName>([
   'rewrite-selection',
   'generate-episode',
+]);
+
+const DRAFT_WRITING_OPERATIONS = new Set<OperationName>([
+  ...NARRATION_OPERATIONS,
+  'generate-architecture',
+  'review-architecture',
+  'rewrite-architecture-section',
 ]);
 
 export class ArchitectureService {
@@ -1602,16 +1630,37 @@ export class ArchitectureService {
         target_path: targetPath,
       };
     }
-    const id = this.operationService.submit(
-      operation,
-      authoritativeInputs,
-      this.workspaceService
-        ? {
-            ...options,
-            cwd: this.workspaceService.workspacePath(draftId),
-          }
-        : options,
-    );
+    const appliedLessons = DRAFT_WRITING_OPERATIONS.has(operation)
+      ? this.learningService?.activeEpisodeLessons?.(draftId) ?? []
+      : [];
+    if (DRAFT_WRITING_OPERATIONS.has(operation)) {
+      delete authoritativeInputs['approved_lessons'];
+      authoritativeInputs['approved_lessons'] = appliedLessons.map(
+        ({ markdown }) => markdown,
+      );
+    }
+    const submitOptions = this.workspaceService
+      ? {
+          ...options,
+          cwd: this.workspaceService.workspacePath(draftId),
+        }
+      : options;
+    const id = this.operationService.submitDraftScoped
+      && DRAFT_WRITING_OPERATIONS.has(operation)
+      ? this.operationService.submitDraftScoped(
+          operation,
+          authoritativeInputs,
+          appliedLessons.map(({ markdown }) => markdown),
+          submitOptions,
+        )
+      : this.operationService.submit(
+          operation,
+          authoritativeInputs,
+          submitOptions,
+        );
+    if (DRAFT_WRITING_OPERATIONS.has(operation)) {
+      this.learningService?.recordOperationLessons?.(id, appliedLessons);
+    }
     if (NARRATION_PROPOSAL_OPERATIONS.has(operation)) {
       this.store.createNarrationProposal({
         draftId,

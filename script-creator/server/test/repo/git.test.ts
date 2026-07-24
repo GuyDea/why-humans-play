@@ -14,6 +14,8 @@ import {
   gitStatus,
   milestoneCommit,
   prepareManagedWorktree,
+  verifyExistingDoctrinePointer,
+  verifyReconciliationCommit,
 } from '../../src/repo/git.js';
 
 function git(repoRoot: string, args: string[]): string {
@@ -271,5 +273,106 @@ describe('milestoneCommit', () => {
 
     expect(hash).toBe(git(repoRoot, ['rev-parse', 'HEAD']));
     expect(git(repoRoot, ['rev-list', '--count', 'HEAD'])).toBe('2');
+  });
+});
+
+describe('reconciliation commit verification', () => {
+  it('accepts an ancestor commit with ledger and doctrine changes and captures pointers', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n',
+    );
+    git(repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(repoRoot, ['commit', '-m', 'seed doctrine']);
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Prefer concrete stakes.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\n## Openings\n\nPrefer concrete stakes.\n',
+    );
+    git(repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(repoRoot, ['commit', '-m', 'reconcile lesson']);
+    const commit = git(repoRoot, ['rev-parse', 'HEAD']);
+
+    expect(verifyReconciliationCommit(repoRoot, commit)).toEqual({
+      commit,
+      changedPaths: [
+        'DECISIONS.md',
+        'whp-youtube/STEERING.md',
+      ],
+      doctrinePointers: [
+        expect.objectContaining({
+          path: 'whp-youtube/STEERING.md',
+          anchor: expect.stringMatching(/^lines:\d+-\d+$/u),
+          content: expect.stringContaining('Prefer concrete stakes.'),
+          contentHash: expect.stringMatching(/^sha256:/u),
+        }),
+      ],
+    });
+  });
+
+  it('rejects commits without both the ledger and a canonical doctrine surface', () => {
+    const repoRoot = makeRepo();
+    writeFileSync(join(repoRoot, 'DECISIONS.md'), '# Decisions\n');
+    git(repoRoot, ['add', '--', 'DECISIONS.md']);
+    git(repoRoot, ['commit', '-m', 'ledger only']);
+
+    expect(() => verifyReconciliationCommit(
+      repoRoot,
+      git(repoRoot, ['rev-parse', 'HEAD']),
+    )).toThrow(/skill or steering/i);
+    expect(() => verifyReconciliationCommit(repoRoot, 'not-a-commit'))
+      .toThrow(/commit does not exist/i);
+  });
+
+  it('validates explicitly supplied existing-doctrine provenance read-only', () => {
+    const repoRoot = makeRepo();
+    mkdirSync(join(repoRoot, 'whp-youtube'));
+    writeFileSync(
+      join(repoRoot, 'DECISIONS.md'),
+      '# Decisions\n\n- Existing doctrine.\n',
+    );
+    writeFileSync(
+      join(repoRoot, 'whp-youtube', 'STEERING.md'),
+      '# Steering\n\nExisting doctrine.\n',
+    );
+    git(repoRoot, [
+      'add',
+      '--',
+      'DECISIONS.md',
+      'whp-youtube/STEERING.md',
+    ]);
+    git(repoRoot, ['commit', '-m', 'existing doctrine provenance']);
+    const commit = git(repoRoot, ['rev-parse', 'HEAD']);
+    const verified = verifyReconciliationCommit(repoRoot, commit);
+    const pointer = verified.doctrinePointers[0]!;
+
+    expect(verifyExistingDoctrinePointer(repoRoot, {
+      commit,
+      path: pointer.path,
+      anchor: pointer.anchor,
+      contentHash: pointer.contentHash,
+    })).toEqual(pointer);
+    expect(() => verifyExistingDoctrinePointer(repoRoot, {
+      commit,
+      path: pointer.path,
+      anchor: pointer.anchor,
+      contentHash: 'sha256:wrong',
+    })).toThrow(/content hash/i);
   });
 });

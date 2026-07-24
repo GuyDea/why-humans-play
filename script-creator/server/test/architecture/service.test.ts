@@ -345,6 +345,59 @@ describe('ArchitectureService revisions', () => {
 });
 
 describe('ArchitectureService draft-scoped operation policy', () => {
+  it('replaces forged lessons with the ordered server snapshot and records application after submit', () => {
+    const activeEpisodeLessons = vi.fn().mockReturnValue([
+      {
+        id: 'lesson-a',
+        version: 2,
+        markdown: '  First stored lesson.  ',
+        contentHash: 'sha256:first',
+      },
+      {
+        id: 'lesson-b',
+        version: 4,
+        markdown: 'Second stored lesson.',
+        contentHash: 'sha256:second',
+      },
+    ]);
+    const recordOperationLessons = vi.fn();
+    const fixture = makeFixture({
+      learningService: {
+        captureRevision: vi.fn(),
+        captureProposalDisposition: vi.fn(),
+        captureArchitectureRejection: vi.fn(),
+        activeEpisodeLessons,
+        recordOperationLessons,
+      },
+    });
+
+    fixture.service.submitOperation('draft-1', 'review', {
+      selection: 'A passage.',
+      approved_lessons: ['Forged client lesson.'],
+    });
+
+    expect(fixture.submitted[0]?.inputs).toEqual({
+      selection: 'A passage.',
+      creative_status: { phase: 'rapid-prototype' },
+      approved_architecture_md: joinArchitecture(completeSections()),
+      approved_lessons: [
+        '  First stored lesson.  ',
+        'Second stored lesson.',
+      ],
+    });
+    expect(activeEpisodeLessons).toHaveBeenCalledWith('draft-1');
+    expect(recordOperationLessons).toHaveBeenCalledWith(
+      'operation-1',
+      [
+        expect.objectContaining({ id: 'lesson-a', version: 2 }),
+        expect.objectContaining({ id: 'lesson-b', version: 4 }),
+      ],
+    );
+    expect(
+      recordOperationLessons.mock.invocationCallOrder[0],
+    ).toBeGreaterThan(fixture.operationService.submit.mock.invocationCallOrder[0]!);
+  });
+
   it('ignores forged client phase and approval inputs', () => {
     const fixture = makeFixture({
       phase: 'architecture',
@@ -388,6 +441,7 @@ describe('ArchitectureService draft-scoped operation policy', () => {
         topic_brief: 'Stored by the caller.',
         creative_status: { phase: 'rapid-prototype' },
         approved_architecture_md: state.approvedMd,
+        approved_lessons: [],
       },
       options: {},
     }]);
@@ -532,6 +586,7 @@ describe('ArchitectureService draft-scoped operation policy', () => {
       inputs: {
         selection: 'Complete current input.',
         creative_status: { phase: 'architecture' },
+        approved_lessons: [],
       },
       options: { resumeOf: 'parent-operation' },
     });

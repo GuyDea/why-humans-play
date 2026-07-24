@@ -54,7 +54,7 @@ import {
 type OperationHttpService = Pick<
   OperationService,
   'submit' | 'list' | 'get' | 'events' | 'cancel' | 'result'
->;
+> & Partial<Pick<OperationService, 'inputs'>>;
 
 export interface ArchitectureHttpService extends Pick<
   ArchitectureService,
@@ -145,7 +145,24 @@ export type LearningHttpService = Pick<
   | 'list'
   | 'setNote'
   | 'recordValidatorAttempt'
->;
+> & Partial<Pick<
+  LearningService,
+  | 'startDistillation'
+  | 'listSessions'
+  | 'getDistillationRun'
+  | 'reconcileDistillation'
+  | 'listLessons'
+  | 'getLesson'
+  | 'editLesson'
+  | 'approveLesson'
+  | 'rejectLesson'
+  | 'retireLesson'
+  | 'supersedeLesson'
+  | 'markReconciliationAwaiting'
+  | 'verifyReconciliation'
+  | 'verifyExistingDoctrine'
+  | 'operationLessons'
+>>;
 
 export type MilestoneHttpService = Pick<
   MilestoneService,
@@ -171,6 +188,40 @@ interface OperationParams {
 
 interface DraftParams {
   id: string;
+}
+
+interface DistillationParams {
+  runId: string;
+}
+
+interface LessonParams extends DraftParams {
+  lessonId: string;
+}
+
+interface ReconciliationParams {
+  resumeKey: string;
+}
+
+interface LessonVersionBody {
+  expectedVersion?: unknown;
+}
+
+interface EditLessonBody extends LessonVersionBody {
+  reviewedMarkdown?: unknown;
+}
+
+interface SupersedeLessonBody extends LessonVersionBody {
+  predecessorLessonId?: unknown;
+}
+
+interface VerifyReconciliationBody {
+  commit?: unknown;
+}
+
+interface VerifyExistingDoctrineBody extends VerifyReconciliationBody {
+  path?: unknown;
+  anchor?: unknown;
+  contentHash?: unknown;
 }
 
 interface MilestoneParams extends DraftParams {
@@ -457,6 +508,32 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
         });
       } catch (error) {
         return sendMilestoneError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: ReconciliationParams;
+    Body: VerifyExistingDoctrineBody;
+  }>(
+    '/api/lesson-reconciliations/:resumeKey/verify-existing',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.verifyExistingDoctrine!(
+          request.params.resumeKey,
+          {
+            commit: requiredString(request.body?.commit, 'commit'),
+            path: requiredString(request.body?.path, 'path'),
+            anchor: requiredString(request.body?.anchor, 'anchor'),
+            contentHash: requiredString(
+              request.body?.contentHash,
+              'contentHash',
+            ),
+          },
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
       }
     },
   );
@@ -836,6 +913,215 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           request.params.id,
           request.params.decisionId,
           optionalOneLineNote(request.body?.note),
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/learning-sessions',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return {
+          sessions: service.listSessions!(request.params.id),
+        };
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams }>(
+    '/api/drafts/:id/distill',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.startDistillation!(request.params.id, 'on-demand');
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DraftParams }>(
+    '/api/drafts/:id/distill/end-session',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.startDistillation!(request.params.id, 'session-end');
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DistillationParams }>(
+    '/api/distillations/:runId',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.getDistillationRun!(request.params.runId);
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: DistillationParams }>(
+    '/api/distillations/:runId/reconcile',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.reconcileDistillation!(request.params.runId);
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: DraftParams }>(
+    '/api/drafts/:id/lessons',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return { lessons: service.listLessons!(request.params.id) };
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.get<{ Params: LessonParams }>(
+    '/api/drafts/:id/lessons/:lessonId',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.getLesson!(
+          request.params.id,
+          request.params.lessonId,
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.put<{ Params: LessonParams; Body: EditLessonBody }>(
+    '/api/drafts/:id/lessons/:lessonId',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.editLesson!(
+          request.params.id,
+          request.params.lessonId,
+          {
+            expectedVersion: requiredPositiveInteger(
+              request.body?.expectedVersion,
+              'expectedVersion',
+            ),
+            reviewedMarkdown: requiredStringValue(
+              request.body?.reviewedMarkdown,
+              'reviewedMarkdown',
+            ),
+          },
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  for (const action of ['approve', 'reject', 'retire'] as const) {
+    app.post<{ Params: LessonParams; Body: LessonVersionBody }>(
+      `/api/drafts/:id/lessons/:lessonId/${action}`,
+      async (request, reply) => {
+        try {
+          const service = requireLearningService(
+            options.learningService,
+          );
+          const input = {
+            expectedVersion: requiredPositiveInteger(
+              request.body?.expectedVersion,
+              'expectedVersion',
+            ),
+          };
+          return action === 'approve'
+            ? service.approveLesson!(
+                request.params.id,
+                request.params.lessonId,
+                input,
+              )
+            : action === 'reject'
+            ? service.rejectLesson!(
+                request.params.id,
+                request.params.lessonId,
+                input,
+              )
+            : service.retireLesson!(
+                request.params.id,
+                request.params.lessonId,
+                input,
+              );
+        } catch (error) {
+          return sendLearningError(reply, error);
+        }
+      },
+    );
+  }
+
+  app.post<{ Params: LessonParams; Body: SupersedeLessonBody }>(
+    '/api/drafts/:id/lessons/:lessonId/supersede',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.supersedeLesson!(
+          request.params.id,
+          request.params.lessonId,
+          {
+            expectedVersion: requiredPositiveInteger(
+              request.body?.expectedVersion,
+              'expectedVersion',
+            ),
+            predecessorLessonId: requiredString(
+              request.body?.predecessorLessonId,
+              'predecessorLessonId',
+            ),
+          },
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.post<{ Params: ReconciliationParams }>(
+    '/api/lesson-reconciliations/:resumeKey/awaiting',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.markReconciliationAwaiting!(
+          request.params.resumeKey,
+        );
+      } catch (error) {
+        return sendLearningError(reply, error);
+      }
+    },
+  );
+
+  app.post<{
+    Params: ReconciliationParams;
+    Body: VerifyReconciliationBody;
+  }>(
+    '/api/lesson-reconciliations/:resumeKey/verify',
+    async (request, reply) => {
+      try {
+        const service = requireLearningService(options.learningService);
+        return service.verifyReconciliation!(
+          request.params.resumeKey,
+          requiredString(request.body?.commit, 'commit'),
         );
       } catch (error) {
         return sendLearningError(reply, error);
@@ -1313,7 +1599,12 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
 
   app.get<{ Params: OperationParams }>('/api/ops/:id', async (request, reply) => {
     try {
-      return options.operationService.get(request.params.id);
+      return {
+        ...options.operationService.get(request.params.id),
+        inputs: options.operationService.inputs?.(request.params.id) ?? null,
+        operationLessons:
+          options.learningService?.operationLessons?.(request.params.id) ?? [],
+      };
     } catch (error) {
       return sendOperationError(reply, error);
     }
@@ -1879,6 +2170,16 @@ function optionalPositiveInteger(
   return parsed;
 }
 
+function requiredPositiveInteger(
+  value: unknown,
+  field: string,
+): number {
+  if (!Number.isInteger(value) || Number(value) < 1) {
+    throw new Error(`${field} must be a positive integer`);
+  }
+  return value as number;
+}
+
 function requiredNonNegativeInteger(
   value: unknown,
   field: string,
@@ -2257,12 +2558,18 @@ function sendLearningError(
   const message = error instanceof Error
     ? error.message
     : 'learning request failed';
-  if (/^(?:draft|decision) not found:/iu.test(message)) {
+  if (
+    /^(?:draft|decision|distillation run|lesson|lesson reconciliation) not found:/iu
+      .test(message)
+  ) {
     return reply.code(404).send({ error: message });
   }
   if (
     /^(?:after|limit|directionIndex) must /u.test(message)
     || message === 'reason must be a single-line string or null'
+    || /^(?:expectedVersion|reviewedMarkdown) must /u.test(message)
+    || /^(?:commit|path|anchor|contentHash|predecessorLessonId) is required$/u
+      .test(message)
   ) {
     return reply.code(400).send({ error: message });
   }

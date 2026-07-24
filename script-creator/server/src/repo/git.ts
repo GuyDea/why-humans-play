@@ -42,6 +42,19 @@ export interface RecordedMilestoneCommit {
   sourceHashes: Record<string, string>;
 }
 
+export interface ReconciliationDoctrinePointer {
+  path: string;
+  anchor: string;
+  content: string;
+  contentHash: string;
+}
+
+export interface VerifiedReconciliationCommit {
+  commit: string;
+  changedPaths: string[];
+  doctrinePointers: ReconciliationDoctrinePointer[];
+}
+
 function runGit(repoRoot: string, args: string[]): string {
   try {
     return execFileSync('git', args, {
@@ -201,6 +214,108 @@ export function isExactRecordedMilestoneCommit(
         `${recorded.commitHash}:${file}`,
       ]))
       .digest('hex') === recorded.sourceHashes[file]);
+}
+
+export function verifyReconciliationCommit(
+  repoRoot: string,
+  requestedCommit: string,
+): VerifiedReconciliationCommit {
+  let commit: string;
+  try {
+    commit = runGit(repoRoot, [
+      'rev-parse',
+      '--verify',
+      `${requestedCommit}^{commit}`,
+    ]);
+  } catch {
+    throw new Error(
+      `reconciliation commit does not exist: ${requestedCommit}`,
+    );
+  }
+  try {
+    runGit(repoRoot, ['merge-base', '--is-ancestor', commit, 'HEAD']);
+  } catch {
+    throw new Error(
+      `reconciliation commit is not in the selected workspace history: ${
+        commit
+      }`,
+    );
+  }
+  const changedPaths = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'diff-tree',
+    '--no-commit-id',
+    '--name-only',
+    '-r',
+    '-z',
+    commit,
+  ]).split('\0').filter(Boolean).sort();
+  if (!changedPaths.includes('DECISIONS.md')) {
+    throw new Error(
+      'reconciliation commit must change DECISIONS.md',
+    );
+  }
+  const doctrinePaths = changedPaths.filter(isDoctrinePath);
+  if (doctrinePaths.length === 0) {
+    throw new Error(
+      'reconciliation commit must change a skill or steering file',
+    );
+  }
+  const doctrinePointers = doctrinePaths.flatMap((path) => {
+    const pointer = changedContentPointer(repoRoot, commit, path);
+    return pointer ? [pointer] : [];
+  });
+  return {
+    commit,
+    changedPaths,
+    doctrinePointers,
+  };
+}
+
+export function verifyExistingDoctrinePointer(
+  repoRoot: string,
+  input: {
+    commit: string;
+    path: string;
+    anchor: string;
+    contentHash: string;
+  },
+): ReconciliationDoctrinePointer {
+  const verified = verifyReconciliationCommit(repoRoot, input.commit);
+  if (!isDoctrinePath(input.path) || !verified.changedPaths.includes(input.path)) {
+    throw new Error(
+      'existing doctrine path is not a changed skill or steering file',
+    );
+  }
+  const match = /^lines:(\d+)-(\d+)$/u.exec(input.anchor);
+  if (!match) throw new Error('existing doctrine anchor is invalid');
+  const start = Number(match[1]);
+  const end = Number(match[2]);
+  let lines: string[];
+  try {
+    lines = runGitBytes(repoRoot, [
+      'show',
+      `${verified.commit}:${input.path}`,
+    ]).toString('utf8').split('\n');
+  } catch {
+    throw new Error('existing doctrine path cannot be read at the commit');
+  }
+  if (start < 1 || end < start || end > lines.length) {
+    throw new Error('existing doctrine anchor does not resolve');
+  }
+  const content = lines.slice(start - 1, end).join('\n');
+  const contentHash = `sha256:${
+    createHash('sha256').update(content).digest('hex')
+  }`;
+  if (contentHash !== input.contentHash) {
+    throw new Error('existing doctrine content hash does not match');
+  }
+  return {
+    path: input.path,
+    anchor: input.anchor,
+    content,
+    contentHash,
+  };
 }
 
 export function prepareManagedWorktree(
@@ -414,4 +529,51 @@ function localBranchExists(repoRoot: string, branch: string): boolean {
     '--hash',
     `refs/heads/${branch}`,
   ]));
+}
+
+function isDoctrinePath(path: string): boolean {
+  return path.startsWith('.agents/skills/')
+    || path === 'BRAND.md'
+    || path.endsWith('/STEERING.md')
+    || path === 'STEERING.md';
+}
+
+function changedContentPointer(
+  repoRoot: string,
+  commit: string,
+  path: string,
+): ReconciliationDoctrinePointer | null {
+  const parent = tryGit(repoRoot, ['rev-parse', `${commit}^`]);
+  if (!parent) return null;
+  const diff = runGit(repoRoot, [
+    '--literal-pathspecs',
+    'diff',
+    '--unified=0',
+    parent,
+    commit,
+    '--',
+    path,
+  ]);
+  const fileLines = runGitBytes(repoRoot, [
+    'show',
+    `${commit}:${path}`,
+  ]).toString('utf8').split('\n');
+  for (const line of diff.split('\n')) {
+    const match = /^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@/u.exec(line);
+    if (!match) continue;
+    const start = Number(match[1]);
+    const count = Number(match[2] ?? '1');
+    if (count < 1) continue;
+    const content = fileLines.slice(start - 1, start - 1 + count).join('\n');
+    if (content.trim() === '') continue;
+    return {
+      path,
+      anchor: `lines:${start}-${start + count - 1}`,
+      content,
+      contentHash: `sha256:${
+        createHash('sha256').update(content).digest('hex')
+      }`,
+    };
+  }
+  return null;
 }

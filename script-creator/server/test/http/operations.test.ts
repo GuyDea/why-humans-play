@@ -163,6 +163,29 @@ afterEach(async () => {
 });
 
 describe('operations HTTP API', () => {
+  it('returns immutable inputs and applied lesson links with an operation record', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = await submit(fixture, 'review', {
+      selection: 'Original passage.',
+      approved_lessons: ['Keep the reveal concrete.'],
+    });
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: `/api/ops/${id}`,
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toMatchObject({
+      id,
+      inputs: {
+        selection: 'Original passage.',
+      },
+      operationLessons: [],
+    });
+  });
+
   it('lists no operations when durable history is empty', async () => {
     const fixture = makeFixture('operation-schema');
 
