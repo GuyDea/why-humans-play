@@ -1192,3 +1192,75 @@ language or flattening clear rhythmic speech.
 ledger. `BRAND.md` remains unchanged because its existing first-hearing clarity doctrine
 already supports this channel-level delivery gate. Historical and published scripts
 remain unchanged.
+
+## 2026-07-24 — Define the WHP lens at the mechanism level, not the vocabulary level
+
+**Decision:** An episode satisfies the WHP brand lens when it makes a rule-system
+legible — players, real goal, scored proxy, rewarded strategies, and consequences for
+the players. Game or play vocabulary is never required, and a game or play metaphor
+that does no explanatory work is a defect to cut, not brand fidelity.
+
+**Rationale:** Martin questioned whether the rubric's "hidden game or the nature of
+play" requirement would force game framing onto strong topics such as human–technology
+intersections. Review of a generated Episode 1 script showed exactly that failure: a
+decorative goalkeeper metaphor bolted on to satisfy the lens. `BRAND.md` already
+defines hidden games through players, goals, rules, incentives, and strategies, so the
+mechanism-level reading is a clarification of existing doctrine, and it preserves the
+channel's differentiation against generic human-and-technology commentary.
+
+**Documents:** `whp-youtube/STEERING.md` (Law 5),
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`
+(dimension 10), and
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
+(rapid quality check). `BRAND.md` remains unchanged because its existing lens
+definition already operates at the mechanism level.
+
+## 2026-07-24 — Close skill gaps: retention audit, Shorts-by-design, humor floor
+
+**Decision:** The scripting skill defines the previously unspecified retention audit
+(open-loop cadence roughly every 60–90 seconds of spoken time, explicit
+thumbnail-promise payoff, 6–10 minute early-episode band, post-review diagnostic
+only); every `FULL-SCRIPT` appendix includes a `Shorts plan` section with three to
+five golden-nugget candidates carrying beat references, standalone three-second hooks,
+and cut boundaries planned during scripting; and complete narrations sustain a humor
+floor — each major beat lands at least one earned comic or surprising turn, with any
+two-beat dry stretch reworked or reported as a deliberate sobriety exception.
+
+**Rationale:** A skill review found the Phase 2 audit list naming a retention audit no
+reference defined, Law 3 and Law 4 retention and Shorts mechanics living only in
+STEERING where scoped operations never reread them, and humor governed entirely by
+ceilings with the only comic requirement in the opening — biasing generated bodies
+toward dry rigor exactly where retention sags. Martin accepted the proposed closures.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`,
+`.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`, and
+this ledger. Validator enforcement of the `Shorts plan` section is deliberately
+deferred; the structural validator continues to permit additional appendix sections.
+
+## 2026-07-24 — Adopt the full best-friend register via concrete conversational moves
+
+**Decision:** WHP narration uses the full best-friend register: a present first-person
+narrator who reacts to the material, direct-address check-ins with immediate payoffs,
+present-tense storytelling for documented cases, spoken transitions instead of outline
+labels, everyday diction wherever the claim's scope survives, and natural rhythm with
+fragments — composed as required per-beat moves, with invented autobiography still
+forbidden and all evidence boundaries unchanged.
+
+**Rationale:** Martin reviewed the regenerated Episode 1 prototype and found it did not
+feel best-friend casual most of the time. Diagnosis: the draft was composed almost
+entirely of polished aphorisms with no narrator presence, lecture-style transitions,
+and research-register phrasing — the voice doctrine named the register but supplied no
+concrete moves, while the readability gate pushed drafts toward compressed epigrams.
+Martin chose the full best-friend option over a warm-conversational middle ground from
+previewed alternatives.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (conversational
+moves recipe), `whp-youtube/STEERING.md` (Law 2 voice bullets),
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md` (rapid
+quality check), and
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+(narration rewritten in the adopted register).

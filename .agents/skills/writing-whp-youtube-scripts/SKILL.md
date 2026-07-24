@@ -222,6 +222,31 @@ direct address, and brief controlled hyperbole when they sound natural. Friendly
 mean filler, invented dialogue, weakened caveats, or jokes inside the learning promise.
 Keep each standalone punchline short and separate from its factual setup.
 
+Build the conversation from these concrete moves so the register stays spoken, not
+essayistic. Each major beat contains at least one narrator reaction and at least one
+direct-address check-in:
+
+- **Narrator presence.** React to the material in first person — anticipation, surprise,
+  exasperation, delight (`And I know what you're thinking`, `here's the part that gets
+  me`). Opinions and reactions are voice; never invent autobiography, memories, or
+  first-person facts.
+- **Check-ins.** Ask the viewer a question and pay it off immediately, including
+  self-answered questions (`Right? Yeah. No.`) and anticipated objections voiced for the
+  viewer, then answered.
+- **Present-tense storytelling.** Tell documented cases as unfolding scenes (`2021.
+  Researchers round up 138 radiologists`) while every factual atom stays inside the
+  evidence boundary.
+- **Spoken transitions.** Move between ideas the way speech does (`Okay, back to your
+  boss.`, `So put the pieces together.`), never with outline labels such as `In our
+  hypothetical` or `Now return to`.
+- **Everyday diction.** When the claim's scope survives, prefer everyday phrasing over
+  research register (`slid its answer toward what you already believed`, not `moved
+  answers toward stated beliefs`); status-matched wording bounds the claim, not the
+  diction.
+- **Natural rhythm.** Fragments, asides, and varied sentence lengths are welcome when
+  they sound natural aloud; a run of consecutive polished aphorisms reads as an essay
+  and needs a conversational turn between them.
+
 **Precision controls what we claim. Personality controls how we say it.** Write like a
 well-educated best friend with a brutal sense of humor. Do not confuse factual precision
 with sterile vocabulary. Blunt judgment, emotionally loaded everyday words, and controlled
@@ -337,7 +362,10 @@ For evidence-backed finalization:
    spoken blockquote narration. Visible inline evidence indicators may appear within those
    blockquotes as the sole non-spoken review annotations. Put all other metadata and
    production annotations in a final appendix whose beat entries match the narration beat
-   numbers and titles.
+   numbers and titles. For a `FULL-SCRIPT` episode, include the appendix `Shorts plan`
+   section required by the annotated script format: three to five golden-nugget
+   candidates with beat references, standalone three-second hooks, and cut boundaries,
+   planned while the long-form exists as beats rather than after production.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
    retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,

@@ -388,6 +388,12 @@ Humor may be sharp or brutal toward mechanisms, incentives, institutions, hypocr
 absurd consequences. Keep it legible. Do not turn explanatory force into cruelty toward
 vulnerable people or random contempt detached from the idea.
 
+Sustain the comic energy through the body, not only the opening. In a complete
+narration, each major beat lands at least one earned comic or surprising turn; when two
+consecutive beats have neither, flag the dry stretch and either earn a turn from the
+beat's own mechanism or report the deliberate exception — a boundary or sobriety beat
+may stay dry when levity would undercut the harm being described.
+
 Callbacks and repeated language can give the narration a spine. Reuse a compact sound or
 image after the stakes change so the joke gains meaning instead of merely repeating.
 Carry the opening's concrete vocabulary into the viewer application and final line when it
@@ -536,6 +542,16 @@ Before returning rapid work, check internally:
   mechanism without becoming a second opening or a universal claim?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
+- Does each major beat carry at least one first-person narrator reaction and one
+  direct-address check-in, with spoken transitions instead of outline labels and no
+  unbroken run of polished aphorisms?
+- In a complete narration, does each major beat land at least one earned comic or
+  surprising turn, with any dry stretch of two consecutive beats either reworked or
+  reported as a deliberate sobriety exception?
+- In a complete narration, does an open question, contradiction, or promised test give
+  the viewer a live reason to keep watching roughly every 60–90 seconds of spoken time?
+- Does the episode make its rule-system legible — players, real goal, scored proxy,
+  rewarded strategy, consequence — without decorative game or play vocabulary?
 - Is the central paradox understandable without specialist language?
 - Does the opening ask the big question and explain why the viewer should care?
 - If the opening claims that informed, trained, expert, or skeptical people remain

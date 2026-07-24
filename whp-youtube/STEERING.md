@@ -293,6 +293,12 @@ without weakening the audience-first test for problem-led growth episodes.
   contractions, direct address, and brief controlled hyperbole when they sound natural.
   Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
   learning promise.
+- **Compose the register from concrete conversational moves.** Each major beat carries a
+  first-person narrator reaction and a direct-address check-in; documented cases run as
+  present-tense scenes inside the evidence boundary; transitions are spoken, never
+  outline labels; diction stays everyday when the claim's scope survives; and a run of
+  consecutive polished aphorisms is an essay symptom that needs a conversational turn.
+  Reactions and opinions are voice — invented autobiography is still forbidden.
 - **Give that friend a real personality.** **Precision controls what we claim. Personality
   controls how we say it.** Write like a well-educated best friend with a brutal sense of
   humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,
@@ -455,6 +461,13 @@ millions on junk science).
 
 - **Literal and grounded.** Play, intellect, learning, game theory, the human condition.
   **No consciousness / "woo" / spirituality drift. Ever.**
+- **The WHP lens is a mechanism, not a vocabulary.** An episode carries the brand lens
+  when it makes a rule-system legible — the players, the real goal, what actually gets
+  scored, the strategies the scoring rewards, and what that does to the players. Game or
+  play wording is never required to satisfy the lens, and a game or play metaphor that
+  does no explanatory work is a defect to cut, not brand fidelity. Topics such as
+  human–technology intersections qualify through their incentive structure, not through
+  forced play framing.
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
 - **Keep facts traceable inside the production script.** In Phase 2, map every factual
   narration sentence or separable factual clause to an `F-###` claim entry in the matching
