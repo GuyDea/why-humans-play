@@ -91,7 +91,7 @@ interface EpisodeProposal {
           <div class="button-row">
             <button
               type="button"
-              [disabled]="busy() || editor() === null"
+              [disabled]="busy() || editor() === null || !canGenerate()"
               (click)="acceptEpisodeProposal()"
             >
               Accept episode proposal
@@ -310,7 +310,7 @@ export class NarrationActions {
   protected acceptEpisodeProposal(): void {
     const proposal = this.proposal();
     const editor = this.editor();
-    if (!proposal || !editor || this.busy()) return;
+    if (!proposal || !editor || this.busy() || !this.canGenerate()) return;
     void this.acceptProposal(proposal, editor);
   }
 

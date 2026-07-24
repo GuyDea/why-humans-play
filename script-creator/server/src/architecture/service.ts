@@ -16,6 +16,7 @@ import {
   withCreativePhase,
 } from '../documents/service.js';
 import {
+  DraftWriteReservationError,
   type ArchitectureSagaAction,
   type ArchitectureSagaRecord,
   type DocumentStore,
@@ -885,6 +886,7 @@ export class ArchitectureService {
         error: null,
       });
     } catch (error) {
+      if (error instanceof DraftWriteReservationError) throw error;
       return this.failPromotion(promotion, errorMessage(error));
     }
   }

@@ -342,6 +342,34 @@ async function main(): Promise<void> {
     'Approval paused — resume required',
   );
   await assertArchitectureEditingDisabled(architecturePanel, coreAnswer);
+  const editorHost = page.locator('app-editor-host');
+  const editor = page.locator('[data-testid="editor"] .ProseMirror');
+  await editor.waitFor();
+  await waitForText(
+    editorHost,
+    'Architecture approval paused — resume or resolve first.',
+  );
+  await waitForAttribute(editor, 'contenteditable', 'false');
+  const pausedNarration = await editor.textContent();
+  const revisionsBeforeBlockedEdit = await api<unknown[]>(
+    daemon!.handshake,
+    `/api/drafts/${encodeURIComponent(draft.id)}/revisions`,
+  );
+  await editor.click();
+  await page.keyboard.press('End');
+  await page.keyboard.type(' This edit must stay blocked.');
+  assert(
+    await editor.textContent() === pausedNarration,
+    'paused approval allowed a narration editor mutation',
+  );
+  const pausedRevisions = await api<unknown[]>(
+    daemon!.handshake,
+    `/api/drafts/${encodeURIComponent(draft.id)}/revisions`,
+  );
+  assert(
+    pausedRevisions.length === revisionsBeforeBlockedEdit.length,
+    'paused editor attempt appended a narration revision',
+  );
   assert(
     await architecturePanel.getByRole(
       'button',
@@ -359,6 +387,11 @@ async function main(): Promise<void> {
     architecturePanel.locator('[data-testid="architecture-ribbon"]'),
     'data-state',
     'approved',
+  );
+  await waitForAttribute(editor, 'contenteditable', 'true');
+  await waitForCount(
+    editorHost.locator('[data-testid="editor-blocked-callout"]'),
+    0,
   );
   await assertArchitectureEditingDisabled(architecturePanel, coreAnswer);
   const narrationActions = page.locator('app-narration-actions');
@@ -389,8 +422,6 @@ async function main(): Promise<void> {
     await waitForCount(episodeProposal, 0);
   };
   await acceptEpisodeProposal();
-  const editor = page.locator('[data-testid="editor"] .ProseMirror');
-  await editor.waitFor();
   await waitForText(
     editor,
     'A queue quietly turns waiting into a strategic game.',

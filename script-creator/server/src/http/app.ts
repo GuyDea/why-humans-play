@@ -21,6 +21,7 @@ import {
   type DocumentService,
   type SaveDraftInput,
 } from '../documents/service.js';
+import { DraftWriteReservationError } from '../documents/store.js';
 import type { OperationName } from '../operations/registry.js';
 import type { OperationService } from '../operations/service.js';
 import {
@@ -1674,6 +1675,9 @@ function sendDocumentError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof DraftWriteReservationError) {
+    return sendDraftWriteReservationError(reply, error);
+  }
   if (error instanceof ExportBlockedError) {
     return reply.code(409).send({
       error: error.message,
@@ -1768,6 +1772,9 @@ function sendArchitectureError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof DraftWriteReservationError) {
+    return sendDraftWriteReservationError(reply, error);
+  }
   if (error instanceof ArchitectureRevisionConflictError) {
     return reply.code(409).send({
       error: error.message,
@@ -1871,6 +1878,9 @@ function sendPromotionError(
   reply: FastifyReply,
   error: unknown,
 ) {
+  if (error instanceof DraftWriteReservationError) {
+    return sendDraftWriteReservationError(reply, error);
+  }
   const message = error instanceof Error
     ? error.message
     : 'promotion failed';
@@ -1882,6 +1892,18 @@ function sendPromotionError(
   }
   reply.log.error({ err: error }, 'promotion request failed');
   return reply.code(500).send({ error: 'internal server error' });
+}
+
+function sendDraftWriteReservationError(
+  reply: FastifyReply,
+  error: DraftWriteReservationError,
+) {
+  return reply.code(409).send({
+    error: error.message,
+    code: error.code,
+    reservation: error.reservation,
+    recoverable: error.recoverable,
+  });
 }
 
 function sendTopicError(

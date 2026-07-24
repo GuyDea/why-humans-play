@@ -636,3 +636,20 @@ repository parse failures.
 `docs/superpowers/plans/2026-07-23-script-creator-plan5-topics.md`, and this ledger.
 `BRAND.md`, `CLAUDE.md`, and `whp-youtube/STEERING.md` remain unchanged because these
 decisions tighten the internal workbench contract without changing WHP doctrine.
+
+## 2026-07-24 — Reserve narration writes during paused architecture approval
+
+**Decision:** While a Script Creator draft has a pending architecture-approval saga,
+reserve every generic narration revision write—including autosaves,
+proposal-acceptance replacement saves, and imports—with a structured recoverable
+conflict; keep the routed narration editor and autosave blocked until the approval is
+resumed or resolved, without weakening the saga's latest-revision requirement.
+
+**Rationale:** Any narration revision appended after the saga's approval revision made
+every Resume conflict while save, approve, and Reopen were also unavailable, permanently
+stranding the draft.
+
+**Documents:** `.superpowers/sdd/p6-final-review-report.md`,
+`.superpowers/sdd/progress.md`, and this ledger. `BRAND.md`, `CLAUDE.md`, and
+`whp-youtube/STEERING.md` remain unchanged because this is an internal workbench
+concurrency and recovery contract, not a change to WHP doctrine.

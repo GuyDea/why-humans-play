@@ -528,29 +528,75 @@ describe('architecture approval and Reopen HTTP API', () => {
     );
   });
 
-  it('refuses to resume a paused approval after a later draft revision', async () => {
+  it('refuses autosave during a paused approval and resumes afterward', async () => {
+    const fixture = makeFixture();
+    fixture.write.mockResolvedValueOnce({
+      conflict: true,
+      currentHash: 'external-hash',
+    });
+    const paused = await approve(fixture, 0);
+    expect(paused.statusCode).toBe(409);
+    const resumeKey = paused.json().state.approvalSaga.resumeKey as string;
+    const currentDoc = fixture.store.getDraft('draft-1')!.doc;
+    const save = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: currentDoc,
+        disposition: 'autosave',
+      },
+    });
+
+    expect(save.statusCode).toBe(409);
+    expect(save.json()).toEqual({
+      error:
+        'draft write refused: architecture approval is paused; resume or resolve approval first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-approval',
+      recoverable: true,
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+
+    const resumed = await resumeApproval(fixture, resumeKey);
+
+    expect(resumed.statusCode).toBe(200);
+    expect(resumed.json()).toMatchObject({
+      complete: true,
+      state: {
+        approvalSaga: null,
+        revisionSeq: 1,
+      },
+    });
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
+  });
+
+  it('refuses a proposal-acceptance replacement save while approval is paused', async () => {
     const fixture = makeFixture();
     fixture.write.mockResolvedValueOnce({
       conflict: true,
       currentHash: 'external-hash',
     });
     expect((await approve(fixture, 0)).statusCode).toBe(409);
-    const currentDoc = fixture.store.getDraft('draft-1')!.doc;
-    fixture.documentService.saveDraft('draft-1', {
-      doc: currentDoc,
-      disposition: 'concurrent-narration-save',
-    });
-    fixture.write.mockClear();
 
-    const response = await approve(fixture, 0);
+    const response = await fixture.app.inject({
+      method: 'PUT',
+      url: '/api/drafts/draft-1',
+      headers: AUTH,
+      payload: {
+        doc: fixture.store.getDraft('draft-1')!.doc,
+        opId: 'generate-episode-1',
+        disposition: 'episode-generation-accepted',
+      },
+    });
 
     expect(response.statusCode).toBe(409);
     expect(response.json()).toMatchObject({
-      error: 'architecture revision conflict',
-      current: { revisionSeq: 2 },
+      code: 'draft-write-reserved',
+      reservation: 'architecture-approval',
+      recoverable: true,
     });
-    expect(fixture.write).not.toHaveBeenCalled();
-    expect(fixture.upsert).not.toHaveBeenCalled();
+    expect(fixture.store.listRevisions('draft-1')).toHaveLength(1);
   });
 
   it('resumes after the architecture write boundary without duplicating a revision', async () => {

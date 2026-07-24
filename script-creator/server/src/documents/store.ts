@@ -168,6 +168,19 @@ export interface ImportPromotionRecord {
   };
 }
 
+export class DraftWriteReservationError extends Error {
+  readonly code = 'draft-write-reserved';
+  readonly reservation = 'architecture-approval';
+  readonly recoverable = true;
+
+  constructor() {
+    super(
+      'draft write refused: architecture approval is paused; resume or resolve approval first',
+    );
+    this.name = 'DraftWriteReservationError';
+  }
+}
+
 interface DraftRow {
   id: string;
   episode_slug: string;
@@ -625,6 +638,9 @@ export class DocumentStore {
       }
       const current = this.getDraft(id);
       if (!current) throw new Error(`draft not found: ${id}`);
+      this.assertDraftWriteAvailable(id, {
+        allowProductionSynchronization: true,
+      });
       const doc = preserveWorkflowMetadata(update.doc, current.doc);
       const nextSeq = this.currentRevisionSeq(id) + 1;
       this.db.prepare(
@@ -674,7 +690,9 @@ export class DocumentStore {
   ): { draft: DraftRecord; revision: RevisionRecord } | null {
     return this.db.transaction(() => {
       if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
-      this.assertDraftWriteAvailable(id);
+      this.assertDraftWriteAvailable(id, {
+        allowArchitectureApprovalSaga: true,
+      });
       const currentSeq = this.currentRevisionSeq(id);
       if (currentSeq !== update.expectedRevisionSeq) return null;
 
@@ -940,7 +958,19 @@ export class DocumentStore {
     migrateStateDatabase(this.db);
   }
 
-  private assertDraftWriteAvailable(id: string): void {
+  private assertDraftWriteAvailable(
+    id: string,
+    options: {
+      allowArchitectureApprovalSaga?: boolean;
+      allowProductionSynchronization?: boolean;
+    } = {},
+  ): void {
+    if (
+      options.allowArchitectureApprovalSaga !== true
+      && this.getPendingArchitectureSaga(id, 'approve')
+    ) {
+      throw new DraftWriteReservationError();
+    }
     const draft = this.getDraft(id)!;
     const phase = draftCreativePhase(draft.doc);
     if (
@@ -953,7 +983,10 @@ export class DocumentStore {
         'draft write deferred: narration approval is in progress',
       );
     }
-    if (this.getLatestPromotion(id)?.state === 'output-ready') {
+    if (
+      options.allowProductionSynchronization !== true
+      && this.getLatestPromotion(id)?.state === 'output-ready'
+    ) {
       throw new Error(
         'draft write deferred: production synchronization is in progress',
       );

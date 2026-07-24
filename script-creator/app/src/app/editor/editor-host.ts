@@ -308,11 +308,24 @@ interface AutosaveSnapshot {
         }
       </header>
 
+      @if (narrationBlocked()) {
+        <aside
+          class="editor-blocked-callout"
+          data-testid="editor-blocked-callout"
+          role="status"
+        >
+          <strong>Architecture approval paused — resume or resolve first.</strong>
+          <span>Narration editing and autosave are blocked.</span>
+        </aside>
+      }
+
       <div
         #editorMount
         class="editor"
         data-testid="editor"
         [class.clean-narration]="productionHidden()"
+        [class.editor-blocked]="narrationBlocked()"
+        [attr.aria-readonly]="narrationBlocked()"
       ></div>
 
       @if (operationError()) {
@@ -438,6 +451,21 @@ interface AutosaveSnapshot {
       font-size: 0.78rem;
     }
 
+    .editor-blocked-callout {
+      display: grid;
+      gap: 0.2rem;
+      border-left: 3px solid var(--whp-warning);
+      background: var(--whp-warning-tint);
+      padding: 0.7rem 0.8rem;
+      color: var(--whp-warning);
+      font-size: 0.78rem;
+    }
+
+    .editor.editor-blocked {
+      background: var(--whp-panel);
+      opacity: 0.78;
+    }
+
     .pacing {
       display: grid;
       gap: 0.5rem;
@@ -504,6 +532,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   readonly client = input.required<DaemonClient>();
   readonly session = input.required<StudioSession>();
   readonly wpm = input(150);
+  readonly narrationBlocked = input(false);
 
   readonly doc = signal<DocumentJson | null>(null);
   readonly editorState = signal<EditorState | null>(null);
@@ -578,6 +607,14 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       && !changes['draft'].firstChange
     ) {
       this.mountDraft(this.draft());
+      return;
+    }
+    if (
+      this.editorMount
+      && changes['narrationBlocked']
+      && !changes['narrationBlocked'].firstChange
+    ) {
+      this.updateNarrationAvailability();
     }
   }
 
@@ -615,6 +652,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     markdown: string,
     opId: string,
   ): Promise<void> {
+    this.requireNarrationWriteAvailable();
     const view = this.editorView;
     const draftId = this.activeDraftId;
     const brief = this.brief();
@@ -623,6 +661,9 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     }
     const parsed = parseMarkdown(markdown);
     const source = brief.draft().doc;
+    const stateBeforeReplacement = view.state;
+    const dirtyBeforeReplacement = this.currentDirty();
+    const saveErrorBeforeReplacement = this.saveError();
     const preserved = preserveDraftDocument(
       parsed.toJSON() as DocumentJson,
       source,
@@ -645,19 +686,43 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     } finally {
       this.applyingAcceptedNarration = false;
     }
-    const document = this.doc();
-    if (!document) throw new Error('Generated narration could not be parsed.');
-    const saved = await brief.save(draftId, {
-      doc: document,
-      opId,
-      disposition: 'episode-generation-accepted',
-    });
-    this.selectionContextDocument = saved.draft.doc;
-    this.doc.set(saved.draft.doc as DocumentJson);
-    this.currentDirty.set(false);
-    this.saveError.set(null);
-    this.revisions.update((revisions) => [...revisions, saved.revision]);
-    this.latestRevision.set(saved.revision);
+    view.setProps({ editable: () => false });
+    try {
+      const document = this.doc();
+      if (!document) throw new Error('Generated narration could not be parsed.');
+      const saved = await brief.save(draftId, {
+        doc: document,
+        opId,
+        disposition: 'episode-generation-accepted',
+      });
+      this.selectionContextDocument = saved.draft.doc;
+      this.doc.set(saved.draft.doc as DocumentJson);
+      this.currentDirty.set(false);
+      this.saveError.set(null);
+      this.revisions.update((revisions) => [...revisions, saved.revision]);
+      this.latestRevision.set(saved.revision);
+    } catch (error) {
+      if (this.editorView === view && this.activeDraftId === draftId) {
+        this.autosave.cancel();
+        view.updateState(stateBeforeReplacement);
+        this.editorState.set(stateBeforeReplacement);
+        this.selectionContextDocument = source;
+        brief.syncDocument(source);
+        this.doc.set(source as DocumentJson);
+        this.currentDirty.set(dirtyBeforeReplacement);
+        this.saveError.set(saveErrorBeforeReplacement);
+        if (dirtyBeforeReplacement && !this.narrationBlocked()) {
+          this.scheduleAutosave(source as DocumentJson);
+        }
+      }
+      throw error;
+    } finally {
+      if (this.editorView === view) {
+        view.setProps({
+          editable: () => !this.narrationBlocked(),
+        });
+      }
+    }
   }
 
   setCleanNarration(clean: boolean): void {
@@ -742,6 +807,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     bodyMd: string;
     replacement: string;
   }): boolean {
+    if (this.narrationBlocked()) return false;
     const view = this.editorView;
     if (!view) return false;
     let markerCount = 0;
@@ -927,8 +993,10 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     mountedView = new EditorView(mount, {
       state,
       nodeViews: variantNodeViews,
+      editable: () => !this.narrationBlocked(),
       dispatchTransaction: (transaction) => {
         if (this.editorView !== mountedView || mountedView === null) return;
+        if (transaction.docChanged && this.narrationBlocked()) return;
         const nextState = mountedView.state.apply(transaction);
         mountedView.updateState(nextState);
         this.editorState.set(nextState);
@@ -946,6 +1014,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       },
     });
     this.editorView = mountedView;
+    this.updateNarrationAvailability();
     this.editorState.set(mountedView.state);
     const composition = composeStudio(
       mountedView,
@@ -979,6 +1048,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
   }
 
   private scheduleAutosave(doc: DocumentJson): void {
+    if (this.narrationBlocked()) return;
     const draftId = this.activeDraftId;
     if (!draftId) return;
 
@@ -1037,6 +1107,12 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     const runtime = composition.runtime;
     const accept = runtime.acceptProposal.bind(runtime);
     runtime.acceptProposal = (proposalId: string) => {
+      if (this.narrationBlocked()) {
+        this.operationError.set(
+          'Architecture approval paused — resume or resolve first.',
+        );
+        return false;
+      }
       const operationId = this.operationIdForProposal(
         composition,
         proposalId,
@@ -1119,6 +1195,26 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
       );
       return launch;
     };
+  }
+
+  private updateNarrationAvailability(): void {
+    const view = this.editorView;
+    if (!view) return;
+    view.setProps({ editable: () => !this.narrationBlocked() });
+    if (this.narrationBlocked()) {
+      this.autosave.cancel();
+      return;
+    }
+    const document = this.doc();
+    if (this.currentDirty() && document) this.scheduleAutosave(document);
+  }
+
+  private requireNarrationWriteAvailable(): void {
+    if (this.narrationBlocked()) {
+      throw new Error(
+        'Architecture approval paused — resume or resolve first.',
+      );
+    }
   }
 
   private operationIdForProposal(
@@ -1230,9 +1326,25 @@ function promotionLauncher(
 }
 
 function saveErrorMessage(error: unknown): string {
+  if (isArchitectureApprovalReservation(error)) {
+    return 'Architecture approval paused — resume or resolve first. Narration remains unsaved.';
+  }
   return error instanceof Error && error.message.trim() !== ''
     ? error.message
     : 'save failed';
+}
+
+function isArchitectureApprovalReservation(error: unknown): boolean {
+  if (!(error instanceof DaemonClientError) || error.status !== 409) {
+    return false;
+  }
+  const body = error.body;
+  return body !== null
+    && typeof body === 'object'
+    && (body as Record<string, unknown>)['code'] === 'draft-write-reserved'
+    && (body as Record<string, unknown>)['reservation']
+      === 'architecture-approval'
+    && (body as Record<string, unknown>)['recoverable'] === true;
 }
 
 function operationErrorMessage(error: unknown): string {

@@ -158,6 +158,110 @@ describe('staged Promote HTTP workflow', () => {
     )).toHaveLength(1);
   });
 
+  it('refuses a production import while architecture approval is paused', async () => {
+    const production = productionMarkdown();
+    const fixture = makeFixture({
+      read: async () => ({
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        content: production,
+        hash: 'phase-two-hash',
+      }),
+      validationResults: [{
+        ok: true,
+        errors: [],
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        hash: 'phase-two-hash',
+      }],
+    });
+    await submit(fixture, {
+      target_path: 'whp-youtube/episodes/01-composition-net.md',
+    });
+    const promotion = fixture.store.getPromotionByOperation('promote-1')!;
+    fixture.store.updatePromotion({
+      ...promotion,
+      state: 'validation-required',
+      targetHash: 'staged-hash',
+    });
+    fixture.store.createArchitectureSaga({
+      draftId: 'draft-1',
+      action: 'approve',
+      expectedRevisionSeq: 0,
+      input: {},
+      revisionAppended: true,
+      artifactWritten: false,
+      pipelineUpserted: false,
+      draftUpdated: false,
+      createdAt: '2026-07-24T14:00:00.000Z',
+      updatedAt: '2026-07-24T14:00:00.000Z',
+    });
+
+    const response = await fixture.app.inject({
+      method: 'POST',
+      url: '/api/drafts/draft-1/validate',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error:
+        'draft write refused: architecture approval is paused; resume or resolve approval first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-approval',
+      recoverable: true,
+    });
+    expect(fixture.store.listRevisions('draft-1').filter(
+      ({ disposition }) => disposition === 'production-import',
+    )).toHaveLength(0);
+  });
+
+  it('keeps a Promote-result import recoverable while architecture approval is paused', async () => {
+    const fixture = makeFixture({
+      read: async () => ({
+        path: 'whp-youtube/episodes/01-composition-net.md',
+        content: productionMarkdown(),
+        hash: 'phase-two-hash',
+      }),
+    });
+    await submit(fixture, {
+      target_path: 'whp-youtube/episodes/01-composition-net.md',
+    });
+    fixture.store.createArchitectureSaga({
+      draftId: 'draft-1',
+      action: 'approve',
+      expectedRevisionSeq: 0,
+      input: {},
+      revisionAppended: true,
+      artifactWritten: false,
+      pipelineUpserted: false,
+      draftUpdated: false,
+      createdAt: '2026-07-24T14:00:00.000Z',
+      updatedAt: '2026-07-24T14:00:00.000Z',
+    });
+
+    const response = await fixture.app.inject({
+      method: 'GET',
+      url: '/api/ops/promote-1/result',
+      headers: AUTH,
+    });
+
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({
+      error:
+        'draft write refused: architecture approval is paused; resume or resolve approval first',
+      code: 'draft-write-reserved',
+      reservation: 'architecture-approval',
+      recoverable: true,
+    });
+    expect(fixture.store.getPromotionByOperation('promote-1')).toMatchObject({
+      state: 'output-ready',
+      targetHash: 'phase-two-hash',
+      error: null,
+    });
+    expect(fixture.store.listRevisions('draft-1').filter(
+      ({ disposition }) => disposition === 'production-import',
+    )).toHaveLength(0);
+  });
+
   it.each([
     {
       name: 'missing output',

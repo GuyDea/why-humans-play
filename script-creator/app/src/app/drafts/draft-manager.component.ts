@@ -140,6 +140,9 @@ import { RevisionTimeline } from './revision-timeline';
               [draft]="activeDraft"
               [client]="client()"
               [session]="session()"
+              [narrationBlocked]="
+                architectureModel()?.state?.approvalSaga != null
+              "
             />
             <app-production-panel
               [draft]="activeDraft"
