@@ -31,6 +31,20 @@ Require all five to describe the same video. State the useful change in how the
 viewer will see or act. Do not begin with an interesting scene that cannot lead
 directly to that change.
 
+For a problem-led opening with a predictable “not me; I know the tricks” response, use the
+five-move anti-skip intro:
+`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+Complete the first four moves before detailed case exposition. A short sourced result may
+tease the case during the disarm; develop the real story only after the promise. Treat
+measured skepticism, lower trust ratings, expertise, training, or prior warning as
+sufficient observable resistance; do not require proof of the participants' exact inner
+monologue. You may say “If you think this cannot happen to me…” and then present a case
+with observable resistance; that compares the viewer's defense with the case instead of
+attributing the viewer's words to the participants. Do not invent thoughts, motives, or
+quotations for the people in the case. Keep the remedy promise literal and joke-free, then
+use the developed case to show the trap and foreshadow the warning sign that the promised
+response will surface. This contract overrides a generic hook spine when it applies.
+
 ## Compare and score three opening candidates
 
 Use this three-candidate comparison only in Phase 2 or when Martin explicitly requests
@@ -66,6 +80,81 @@ mechanism; do not open a second full story or turn two examples into a universal
 first case earns attention and teaches the mechanism; the echo proves that the question is
 not trapped in history.
 
+When the opening tells an informed viewer that awareness or expertise is not immunity,
+require a documented observed case involving informed, trained, expert, or skeptical
+participants. Do not let a theory, analogy, or hypothetical carry that relevance claim.
+Match the case's population, behavior, mechanism, and outcome to the narration. Evidence
+that people followed wrong AI advice does not by itself prove sycophancy. Use such a case
+only to establish susceptibility, state that boundary aloud, and introduce separate
+evidence for the conversational mechanism.
+Connect the two proof jobs as
+`case → exact takeaway → why it matters here → remaining question → next evidence`.
+Do not let the boundary become a dead-end disclaimer: the first case must positively earn
+one part of the argument, and its limit must open the question the next evidence answers.
+Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
+equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
+
+Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
+element must earn its place by increasing trust, first-hearing clarity, or magnetism;
+otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified
+date and place when available, plus the relevant person, team, or institution when it adds
+credibility or orientation. Make the stages audible without sounding like slide labels.
+Use natural connective language that explains what changes next—such as “So that was the
+setup,” “Then researchers changed one thing,” or “And this is the kicker”—and vary it to
+fit the story. Do not march through repeated “Here was…” labels or expose the outline as
+meta-commentary. A transition should explain what changes next, not merely announce the
+section. When a result creates a clean comic opening, add one short punchline that sharpens
+the mechanism, consequence, or AHA; skip it when it competes with the lesson.
+
+Use the fewest story elements that preserve the causal truth. Remove or collapse technical
+inputs, intermediate objects, roles, and counts when the mechanism remains accurate without
+them. Keep separate only the entities the listener must distinguish to understand the
+manipulation and result. An accurate detail does not earn narration time merely because it
+appears in the source. Do not simplify past the causal hinge, material caveat, or evidence
+boundary. Spend the attention you save on the surprising turn, consequence, or AHA that
+carries the lesson.
+
+Preserve the causal minimum, not the procedural maximum. A teaser and its developed case
+have different detail budgets. In an anti-skip disarm, state only the relevant qualification
+or resistance and the fact that it failed to protect; defer the task, group split, metric,
+and comparator to the developed case.
+Compression removes clutter, never connective tissue. Before naming a result, introduce
+every actor, group, task, goal, success criterion, metric, and comparison it depends on.
+For an experiment, preserve this causal-completeness sequence:
+`participants → exact task → group split → changed variable → measured result → meaning`.
+Describe a participant task by its audience-facing objective and success condition, not by
+response controls or interface options that do not advance the story. Compress a formal
+task to its practical purpose only when the paraphrase preserves the scored objective and
+does not invent a different instruction.
+State the task as an observable action with a success criterion, then report the result in
+the same concrete vocabulary. Lock the story vocabulary before drafting: give each entity
+one stable spoken name, and do not switch synonyms unless the narration explicitly
+introduces the relationship. Use the broadest truthful role label that keeps different
+actors easy to distinguish; preserve a narrower title only when it matters to the causal
+claim. Describe the changed variable with nouns already established in the story. State a
+measurement as the measured object plus the measured property, such as
+`diagnoses → trustworthiness`. Name both the metric and the comparator in every comparison.
+Do not replace a concrete noun from the setup with an undefined abstraction in the result.
+Every new noun must perform a necessary causal job or be cut.
+Distinguish an expressed reaction from an effective behavioral response; do not call the
+reaction absent when an attitude changed but performance did not. Prefer a concrete
+real-world analogy whose roles and action map point for point to the mechanism. Do not use
+an ordinal group label, pronoun, or outcome term before introducing its referent. After
+each sentence, ask what a first-hearing listener still has to resolve. Questions such as
+“judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
+setup that must be restored before polishing.
+
+Name the container in a learning promise: write “By the end of this video” rather than
+leaving “by the end” without a referent.
+
+For a source-label experiment, narrate the visible chain with the story's locked nouns:
+`item or question → claimed source → participant objective or outcome`. If researchers
+labeled human-written material as AI-generated, state what was real, what was only a label,
+and what human behavior the manipulation tested before interpreting the result. Attach
+every correct-or-incorrect count to its stable noun; never leave the listener guessing
+which item or final outcome was wrong. Separate what the case proves about human response
+from what later evidence proves about AI behavior.
+
 Score every candidate from 0 to 2 on each criterion:
 
 | Criterion | 0 | 1 | 2 |
@@ -74,7 +163,7 @@ Score every candidate from 0 to 2 on each criterion:
 | Surprise | Predictable or generic | Some tension | A supportable expectation reversal |
 | Stakes | No reason to care | Stakes require setup | Viewer consequence or human meaning is immediate |
 | Visuality | No usable anchor | Abstract or uncertain treatment | Concrete, legible, producible visual action |
-| Evidence strength | Rejected, hidden uncertainty, or no source | Qualified or incomplete support | Strong support with status-matched wording |
+| Evidence strength | Rejected, hidden uncertainty, no source, or theory-only viewer relevance | Qualified, indirect, or incomplete support with an audible boundary | Direct observed support for load-bearing claims with status-matched wording |
 | Payoff connection | Opens an unrelated loop | Indirect connection | Makes the promised answer necessary |
 
 Add the six scores for a maximum of 12. Disqualify any candidate with a 0 in Promise
@@ -144,7 +233,14 @@ When a beat teaches through a metric, target, or incentive failure, map the full
 
 Prefer a compact documented case over a generic hypothetical when the evidence supports
 one. Earn humor from the mechanism or institution without aiming it at the people who absorb
-the harm, then state the damaged goal and human cost plainly before moving on.
+the harm, then state the damaged goal and human cost plainly before moving on. A
+hypothetical may clarify the mechanism or application, but it cannot establish prevalence,
+real-world consequence, or who is vulnerable.
+
+Prefer a well-supported Western case when one can perform the same proof job clearly.
+Use the strongest non-Western case when no Western candidate passes the evidence,
+causal-fit, consequence, and spoken-clarity gates. Keep the event's actual geography
+explicit and let globally varied supporting examples establish broader scope.
 
 When the pattern is worldwide, use familiarity and novelty for different jobs. Prefer a
 well-supported lesser-known case for a developed consequence chain when it teaches the
@@ -174,6 +270,28 @@ Audit the opening loop separately and ensure the final payoff answers the questi
 the packaging and first seconds actually created.
 
 ## Write and test for speech
+
+Write like a smart friend walking the viewer through something surprising, not like a
+paper abstract, conference talk, or legal disclaimer. Use the conversational progression
+`fact → plain reaction → why it matters → next question`. Use contractions, direct address,
+and brief controlled hyperbole when they sound natural. Friendly does not mean filler,
+invented dialogue, weakened caveats, or jokes inside the learning promise.
+
+**Precision controls what we claim. Personality controls how we say it.** Write like a
+well-educated best friend with a brutal sense of humor. Do not confuse factual precision
+with sterile vocabulary. Blunt judgment, emotionally loaded everyday words, and controlled
+hyperbole are allowed when they make the stakes clearer and the underlying claim remains
+supportable. Judge the decision, behavior, mechanism, or institution—not a person's
+inherent worth. Calling a choice “stupid” or “the dumbest decision of your life” is allowed
+when the line judges the choice and the episode earns the underlying stakes. Do not
+automatically trade it for a bloodless synonym because the subject is serious. Keep the
+human context humane; never make a vulnerable person the punchline. Emotional force never
+waives factual support.
+
+Separate setup from punchline. Keep a standalone punchline to one short spoken
+sentence—usually no more than 12 words. If the joke needs a relative clause or a second
+sentence to explain it, rewrite it. Let the setup establish the factual logic before the
+joke compresses or exaggerates the consequence.
 
 Write conversational, pronounceable sentences with controlled information density.
 Prefer one new relationship per sentence. Define necessary terms at the moment they
@@ -301,6 +419,8 @@ Reject or rewrite an opening that contains any of these red flags:
 
 - a trivia dump before the central question;
 - a delayed title, thumbnail, or viewer promise;
+- a problem-led immunity defense whose remedy promise arrives only after the detailed
+  proof case;
 - unsourced cinematic detail;
 - shock unrelated to the final payoff;
 - a decorative montage or decorative animation; or

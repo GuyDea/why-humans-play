@@ -2,19 +2,53 @@
 
 ## 1. The answer you wanted
 
-> Why does bad advice from AI feel so convincing?
+> Can AI talk you into the dumbest decision of your life—even when you don't trust it?
 >
-> In 2023, researchers at Anthropic tested five leading AI assistants. [F-001](https://arxiv.org/abs/2310.13548)
+> You may be thinking, “Not me. I know about hallucinations, sycophancy—all the tricks.”
 >
-> Across four tasks, those assistants often shifted their answers toward the user's stated beliefs—even when those beliefs were wrong. [F-001](https://arxiv.org/abs/2310.13548)
+> Good. Your guard is up.
 >
-> The machine wasn't giving a second opinion. It was giving the first opinion a software update.
+> So were the experienced radiologists in our next story. Their guard still failed miserably. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Researchers call this pattern sycophancy. [F-001](https://arxiv.org/abs/2310.13548)
+> By the end of this video, you'll know four questions you can ask AI to expose the assumptions behind its advice before you act on it.
 >
-> That matters when you ask AI about a career, relationship, business, or any decision you care about. If it repeats what you already believe, the answer can feel like confirmation from outside the room. But it may be your own assumption returning with better punctuation.
+> A 2021 study recruited 138 experienced radiologists practicing in the United States and Canada. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> By the end, you'll understand why AI agreement can feel like independent advice, and you'll know four questions you can ask to expose its blind spots.
+> Each radiologist was asked to review eight diagnoses and find the wrong ones. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> Six diagnoses were correct. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Two were deliberately wrong. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> Researchers then split the radiologists into two groups. [F-009](https://www.nature.com/articles/s41746-021-00385-9) One group was told every diagnosis came from another independent doctor. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other was told every diagnosis came from AI. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> In reality, doctors had written every diagnosis in both groups. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> Same diagnoses. Different label of origin. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> And this is the kicker: the AI-label group rated the diagnoses as less trustworthy. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> Yet they caught the wrong diagnoses no better than the group told the diagnoses came from another doctor. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> The goalkeeper was on alert. The ball still rolled between his legs.
+>
+> That is the trap: distrusting a diagnosis is not the same as catching its error.
+>
+> The AI existed only on the label. This experiment exposed the human half of the problem: distrust alone did not help experts catch the wrong diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+>
+> Now for the machine half: when AI really writes the answer, can it bend that answer toward what you already believe?
+>
+> In 2023, Anthropic researchers tested five leading AI assistants. Across four tasks, those assistants often shifted their answers toward users' stated beliefs—even when those beliefs were wrong. [F-001](https://arxiv.org/abs/2310.13548)
+>
+> That second trap is called sycophancy. [F-001](https://arxiv.org/abs/2310.13548)
+>
+> Distrusting advice may not stop it from influencing your decision. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Sycophancy can point AI's advice back toward what you already believe. [F-001](https://arxiv.org/abs/2310.13548)
+>
+> Put them together, and your hunch can come back with a doctorate.
+>
+> Ask AI whether to quit your job, end a relationship, dismiss a health worry, or bet your savings on a business idea, and you may think you received a second opinion. You may have received your first opinion with much better posture.
+>
+> That is how a dumb idea becomes dangerous: not by sounding dumb, but by sounding independently confirmed.
+>
+> To see how that happens, start with the question you give it.
 
 ## 2. Your question has a cast
 

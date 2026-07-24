@@ -26,12 +26,63 @@ complete narration.
 4. Preserve the approved thesis, practical test, strongest comic lines, and final lesson.
 5. Add length through mechanism, consequence, and application—not extra terminology or
    decorative background.
+6. Disarm the informed viewer with the 2021 US-and-Canada physician study before
+   introducing sycophancy: first establish that radiologists' lower opinion of supposedly
+   AI-sourced advice did not reduce their reliance on it, then use the Anthropic study to
+   establish the separate conversational mechanism.
+7. Make the proof handoff explicit:
+   `case → exact takeaway → why it matters here → remaining question → next evidence`.
+   Lead with the positive takeaway. The first case's boundary must open the second question
+   rather than interrupt the story with a disclaimer.
+8. Use the friendly conversation format and keep standalone punchlines to one short
+   sentence. Put factual setup and explanation outside the joke.
+9. Use the five-move anti-skip intro for this problem-led opening:
+   `intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+   Let the measured skepticism result disarm the viewer's “this cannot happen to me”
+   defense, state the four-question remedy before developing the physician story, and do
+   not attribute the viewer's exact thought to the participants.
+10. Use the channel's best-friend voice throughout: precision controls the factual claim;
+    personality controls its delivery. Allow blunt emotional judgment and brutal humor
+    toward stupid decisions, broken mechanisms, and absurd behavior without reducing a
+    person to their worst choice or weakening the evidence boundary.
+11. Explain the physician experiment with the fewest elements needed for its causal truth.
+    Each experienced radiologist reviewed eight diagnoses and had to catch the wrong ones.
+    Six diagnoses were correct and two were deliberately wrong. Researchers split the
+    radiologists into two groups and changed only whether the diagnoses were labeled as
+    coming from another independent doctor or AI. Collapse the X-rays, response controls,
+    and diagnostic advice into the single narrative element “diagnoses.” State plainly that
+    doctors wrote every diagnosis, so the false AI label tested the human response; use the
+    Anthropic study for actual AI behavior.
+12. Apply the smallest-magnetic-truthful-story rule generally. Every element must increase
+    trust, first-hearing clarity, or magnetism. Begin documented stories with a compact
+    verified date-and-place anchor; add a person, team, or institution when useful.
+    Make setup, experiment or action, result, and meaning audible through varied natural
+    connective language rather than repeated outline labels. Each transition should explain
+    what changes next. Remove or collapse accurate technical inputs, intermediate objects,
+    roles, and counts that serve none of those jobs, but preserve the causal hinge,
+    material caveat, evidence boundary, surprising turn, and AHA. Add one short joke when
+    the result creates a clean opening and the joke sharpens rather than delays the lesson.
+13. Keep compression causally complete:
+    `participants → exact task → group split → changed variable → measured result → meaning`.
+    Introduce every actor, group, goal, success criterion, metric, and comparator before it
+    is used. Report results in the task's concrete vocabulary, name both sides of every
+    comparison, and never replace an introduced noun with an undefined abstraction.
+    Distinguish the radiologists' lower advice rating from the absence of improved final
+    diagnoses. Any joke must map to that exact attitude-versus-protection gap through a
+    concrete real-world analogy.
+14. Preserve the causal minimum, not the procedural maximum. Give the disarm teaser only
+    “experienced resistance → failed protection”; put the task, groups, property, and
+    comparator in the developed case. Lock the case vocabulary to `radiologists`,
+    `diagnoses`, `another doctor`, `AI label`, `wrong diagnoses`, and `trustworthiness`.
+    Describe the task by its practical objective, not its accept-adjust-reject controls.
+    State the changed variable as “same diagnoses, different label of origin.” Every new
+    noun must earn a causal job. Say “By the end of this video” in the learning promise.
 
 ## Narrative expansion
 
 | Beat | Narrative job | Word target |
 |---|---|---:|
-| 1. The answer you wanted | Preserve the hook, Anthropic study, stakes, and literal four-question promise. | 120 |
+| 1. The answer you wanted | Ask whether AI can talk a skeptical viewer into the dumbest decision of their life, voice the viewer's immunity defense, and disarm it quickly with experienced radiologists whose guard still failed. Say “By the end of this video” in the literal four-question promise, then develop the US-and-Canada story as experienced radiologists → eight diagnoses → catch the wrong ones → doctor-versus-AI origin label → trustworthiness rating → no better at catching wrong diagnoses. Keep those nouns stable, collapse the X-rays and response controls, and distinguish the fake AI label from actual AI behavior. Identify susceptibility to wrong diagnoses as the human half of the problem, make the unanswered directional question lead into the Anthropic sycophancy study, and connect both mechanisms to ordinary AI decisions. | 300 |
 | 2. Your question has a cast | Ask whether to quit, show a plausible polished AI answer, and expose the assumptions already assigned by the prompt. | 180 |
 | 3. Trained to agree | Explain the human-preference signal, the Anthropic finding, and OpenAI's 2025 rollback without anthropomorphizing the model. | 190 |
 | 4. Confidence gets a costume | Show how fluency and an algorithm label make the returned premise feel like new expertise. | 180 |
@@ -88,13 +139,24 @@ Preserve these lines unless a local transition requires Martin-approved revision
   prompt.”
 
 The opening promise remains literal and joke-free. New humor should expose the mechanism,
-not interrupt the explanation or mock the person making the decision.
+the stupid decision, or the absurd behavior without interrupting the explanation or
+reducing the person to that decision. Factual precision must not flatten emotionally honest
+spoken language into a clinical register.
 
 ## Evidence and factual boundaries
 
-- Reuse the eight existing evidence records for the current factual claims.
+- Reuse the eight existing evidence records for the current factual claims and add `F-009`
+  for the 2021 *npj Digital Medicine* physician study.
 - Do not add a new named study, date, institution, quotation, or real-world incident during
   narration prototyping without a later evidence record.
+- `F-009` establishes that 138 radiologists and 127 internal- or emergency-medicine
+  physicians recruited in the United States and Canada reviewed chest X-rays with
+  accurate or inaccurate expert-written advice labeled as either AI or an experienced
+  radiologist. Radiologists rated the supposedly AI-sourced advice lower, but that
+  expressed aversion did not reduce their reliance; inaccurate advice reduced diagnostic
+  accuracy regardless of its label. The study establishes over-reliance on advice and a
+  gap between expressed skepticism and behavior under those conditions. It does not test
+  AI-generated advice or sycophancy; use `F-001` separately for that mechanism.
 - The quitting scenario and any sample AI wording must be labeled hypothetical and must not
   be represented as output from a real product or study.
 - The borrowed-authority loop and Second-Opinion Test remain original editorial synthesis,
@@ -124,8 +186,13 @@ appendix apparently current when it is not.
 ## Success criteria
 
 - The complete narration lands near 1,350 words before the timing audit.
-- The opening question, real study, viewer relevance, and by-end promise all remain clear
-  within the opening beat.
+- The opening question, physician proof case, exact over-reliance takeaway, reason that
+  takeaway matters, remaining directional question, Anthropic mechanism, viewer relevance,
+  and by-end promise all remain clear within the opening beat.
+- The opening follows the five-move anti-skip order, with only the short skepticism result
+  before the remedy promise and the detailed physician case after it.
+- The opening sounds like a friendly explanation rather than a study abstract, and no
+  standalone punchline exceeds one short sentence or contains its own causal explanation.
 - Every abstract mechanism is followed by the recurring scenario, a documented experiment,
   or a concrete consequence.
 - Each return to the quitting scenario advances the causal explanation rather than merely

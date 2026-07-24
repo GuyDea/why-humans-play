@@ -154,6 +154,13 @@ Use three to five distinct, escalating insights. For each:
 Every step must move the viewer's model forward. Remove an insight that merely paraphrases
 an earlier step.
 
+For a material claim that a pattern affects real people—especially informed, trained,
+expert, or skeptical people—a hypothetical placeholder is not an approvable proof case.
+Require a documented observed case matching the claimed population and outcome, or mark
+the insight `NEEDS-VERIFICATION` and narrow the architecture's relevance claim. A
+hypothetical may explain how a demonstrated mechanism works; it cannot establish that the
+mechanism affects people in the world.
+
 ### Phenomenon and paradox map
 
 Map every useful established phenomenon, paradox, bias, law, or tension to the exact
@@ -197,12 +204,23 @@ For each insight and the earned reframe, list:
 
 - the best available real-world case;
 - the exact job the case performs in the argument;
+- the exact population, behavior, mechanism, and outcome it establishes;
+- any gap between the case and the episode claim, plus the separate evidence needed to
+  bridge that gap;
 - the affected people and consequence;
 - its current factual status: `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or
   `HYPOTHETICAL`;
 - a backup case when the primary example may be too familiar, too complex, or too weak.
 
-Prefer examples from different regions when this improves scope and surprise. Do not
+For every proof case, state what it proves, why the episode needs that fact, what it does
+not explain, and how the next evidence resolves the remaining question. Map any adjacent
+handoff as `case → exact takeaway → why it matters here → remaining question → next
+evidence`; a limitation without the positive proof job and next question is not a bridge.
+
+Prefer a well-supported Western case when one can perform the same proof job clearly.
+Use the strongest non-Western case when no Western candidate passes the evidence,
+causal-fit, consequence, and spoken-clarity gates. After the hero or developed case is
+chosen, use examples from different regions when this improves scope and surprise. Do not
 research or invent missing case specificity during ordinary rapid architecture work beyond
 the bounded concept-discovery scan; mark what the later evidence pass must verify.
 
@@ -260,6 +278,12 @@ Review the architecture without drafting around its weaknesses:
 - Does each insight add a new causal relationship?
 - Does the ladder escalate toward the earned reframe?
 - Does each example prove its assigned claim rather than merely decorate it?
+- Does every material real-world vulnerability claim have direct observed proof for its
+  population and outcome rather than a theory, analogy, or hypothetical?
+- Does every adjacent proof case state what it establishes and what separate evidence the
+  episode mechanism still needs?
+- Does the route between proof cases state the exact takeaway, its relevance, the remaining
+  question, and why the next evidence is necessary?
 - Does the phenomenon map clarify the argument instead of displaying terminology?
 - Does the reframe change interpretation or prediction beyond the opening case?
 - Does the learning-and-action contract revise a prior model and produce one concrete,

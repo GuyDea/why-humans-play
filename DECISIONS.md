@@ -725,3 +725,214 @@ practical demonstration rather than more terminology, disconnected studies, or f
 `BRAND.md` and `whp-youtube/STEERING.md` remain unchanged because eight minutes already
 fits the channel's six-to-ten-minute rule, and this decision does not settle the separate
 canonical Episode 1 launch-sequence conflict.
+
+## 2026-07-24 — Prove viewer vulnerability before explaining it
+
+**Decision:** Do not ask viewers to accept a material real-world vulnerability or
+consequence from theory, analogy, warning, or a hypothetical alone. Use a documented
+observed case matching the claimed population and outcome; when the case is adjacent to
+the episode's exact mechanism, state that boundary and introduce separate evidence for the
+mechanism. Hypotheticals may explain or rehearse a demonstrated pattern, but they cannot
+prove that real people are affected.
+
+**Rationale:** A viewer who already recognizes an AI bias can dismiss a theory-only
+warning as familiar caution. Showing that the effect has already changed the judgments of
+informed or expert people defeats that immunity assumption with evidence instead of asking
+the viewer to believe another assertion.
+
+**Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. The production episode remains unchanged until the full prototype clears creative
+review and enters the separate evidence-and-production pass.
+
+## 2026-07-24 — Make proof handoffs conversational and explicit
+
+**Decision:** Narration must connect adjacent proof cases as
+`case → exact takeaway → why it matters here → remaining question → next evidence`.
+A scope boundary cannot serve as the transition by itself. WHP narration uses a friendly
+conversation format—fact, plain reaction, meaning, next question—and keeps each standalone
+punchline to one short spoken sentence, normally no more than 12 words. Factual setup and
+causal explanation stay outside the joke. Lead every proof handoff with the case's positive
+takeaway; a sentence beginning “this study did not…” cannot introduce the bridge.
+
+For this Western-oriented English-language launch, prefer a well-supported Western case
+when it can perform the same proof job clearly. Use the strongest non-Western case when no
+Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity gates;
+never weaken evidence or misstate geography to satisfy audience proximity.
+
+**Episode 1 application:** Replace the 2026 Pakistan physician trial in the opening with
+the 2021 US-and-Canada physician study. The Western study is a closer match for the
+specific anti-skip claim: radiologists rated supposedly AI-sourced advice lower, yet that
+expressed skepticism did not reduce reliance. State that all advice was expert-written and
+only labeled by source. Use it solely to establish over-reliance on advice; then make the
+remaining question—where conversational AI points that influence—lead directly to the
+separate Anthropic sycophancy evidence.
+
+**Rationale:** The prior intro ended the doctors' story with what it did not prove, so the
+caveat severed the logic instead of advancing it. It also buried a small joke inside a long
+explanatory clause and sounded more like a research summary than a person guiding another
+person through a surprising result.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. The production episode remains unchanged pending creative approval of the complete
+prototype.
+
+## 2026-07-24 — Put the remedy before the detailed anti-skip case
+
+**Decision:** When a problem-led opening invites an informed viewer to think “this cannot
+happen to me,” use:
+`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+Complete the first four moves before developing the proof case. A short sourced result may
+tease the case during the disarm, but the literal, joke-free remedy promise must give the
+viewer a reason to hear the full story.
+
+Measured skepticism, lower trust ratings, expertise, training, or prior warning is enough
+observable resistance for the comparison. Narration may say “If you think this cannot
+happen to me…” and then show a case involving such resistance. That compares the viewer's
+defense with the case; it does not claim that participants held or voiced the viewer's exact
+thought. Do not invent their thoughts, motives, or quotations.
+
+**Rationale:** Baseline rewrites repeatedly treated the by-end promise as the final line of
+the opening. That forced the viewer through the entire evidence setup before explaining why
+the method would be useful. The revised order defeats the skip response quickly, offers the
+practical payoff, and then earns the full example without weakening the evidence boundary.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. The production episode remains unchanged pending creative approval of the complete
+prototype.
+
+## 2026-07-24 — Keep precise claims emotionally alive
+
+**Decision:** WHP uses the voice principle “Precision controls what we claim. Personality
+controls how we say it.” Narration should sound like a well-educated best friend with a
+brutal sense of humor. It may use blunt judgment, emotionally loaded everyday words, and
+controlled hyperbole—including calling a choice “stupid” or “the dumbest decision of your
+life”—when the line targets the decision rather than the person's inherent worth and the
+episode supports the underlying stakes. Serious subject matter does not automatically
+require clinical or euphemistic wording. Emotional force never lowers the evidence bar,
+and vulnerable people do not become the punchline.
+
+**Rationale:** Polished, defensive vocabulary drained the channel's personality and made
+friendly speech sound like an institutional disclaimer. A knowledgeable friend can call a
+catastrophically self-defeating choice stupid while remaining humane toward the person who
+made it. The channel needs that emotional honesty and brutal humor to feel authentic.
+
+**Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. Historical and unrelated documents remain unchanged.
+
+## 2026-07-24 — Make manipulated-advice experiments visible
+
+**Decision:** Explain an advice experiment as a visible
+`case or question → advice → participant decision or outcome` chain. When researchers use
+human-written advice carrying a false AI label, state immediately what was real, what was
+only a label, and what human behavior the label tested. Attach every accuracy count to the
+specific thing that was correct or wrong, and separate conclusions about human response
+from conclusions about actual AI behavior.
+
+**Rationale:** The physician story named eight X-rays, six correct items, two wrong items,
+diagnostic advice, and an AI label without first explaining how those pieces fit together.
+That made real X-rays sound possibly fake and made a label-manipulation study sound
+irrelevant to AI.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. `BRAND.md` remains unchanged because this is a channel-level story-clarity rule,
+not a change to the umbrella brand doctrine.
+
+## 2026-07-24 — Tell the smallest magnetic truthful story
+
+**Decision:** Tell the smallest story that preserves trust, causal clarity, and surprise.
+Every element must increase trust, first-hearing clarity, or magnetism; otherwise remove or
+collapse it. Prefix documented stories with a compact verified date-and-place anchor and a
+relevant person, team, or institution when useful. Make setup, experiment or action, result,
+and meaning audible through varied natural connective language rather than repeated
+“Here was…” outline labels. Each transition should explain what changes next. Never
+simplify past the causal hinge, material caveat, or evidence boundary, and spend the saved
+attention on the surprising turn, consequence, and AHA that carry the lesson. Add one short
+joke when the result creates a clean comic opening and the joke sharpens rather than delays
+the lesson.
+
+Compression removes clutter, never connective tissue. Before a result, introduce every
+actor, group, exact task, success criterion, metric, and comparator it needs. Preserve the
+sequence `participants → exact task → group split → changed variable → measured result →
+meaning`; report the result in the same concrete vocabulary as the task; and name both
+sides of every comparison. Never replace a defined noun with an unexplained abstraction
+such as “accuracy.” Distinguish a changed attitude from an effective behavioral response,
+and make any analogy map its concrete roles and action directly to that mechanism.
+
+Preserve the causal minimum, not the procedural maximum. The disarm teaser and developed
+case have different detail budgets: the teaser states only the relevant qualification or
+resistance and its failure to protect, while the case supplies the task, groups, measured
+property, and comparator. Describe a participant's audience-facing objective and success
+condition, not the study's response controls. A purpose-level paraphrase is allowed only
+when it preserves the scored objective without inventing a different instruction. Before
+drafting, lock one spoken name for every entity. Use the broadest truthful role labels that
+keep actors distinct, state the changed variable with established nouns, and express a
+measurement as object plus property. Every new noun must perform necessary causal work.
+Every learning promise names its container explicitly, such as “By the end of this video.”
+
+For the radiologist experiment, collapse the X-rays and diagnostic advice into one
+narrative element: diagnoses. Preserve the date, location, experienced participant group,
+the practical task of catching the wrong diagnoses, the correct-versus-wrong diagnosis
+mix, the doctor-versus-AI origin label, the trustworthiness rating, the wrong-diagnosis
+comparison, and the lesson that distrust is not the same as protection. Refer to the
+purported human source as another doctor so it cannot be confused with the participating
+radiologists. Do not introduce “advice,” “proposals,” “cases,” or “accuracy” into this
+compressed version.
+
+**Rationale:** A story should remain as fascinating and trustworthy as possible while
+becoming as simple and easy to understand as possible—but not simpler. The X-rays were
+medically accurate but added another relationship without changing the lesson. Dates,
+places, natural connective language, and the surprising result increase trust, orientation,
+and interest, so they remain. Repeated explicit labels make the structure sound mechanical,
+while a result-derived joke can increase retention without adding another factual element.
+The earlier compressed draft failed because it deleted relationships the listener needed
+to understand the task, groups, comparison, and AHA; logical specificity is itself a trust
+signal. The next draft failed in the opposite direction: it preserved source procedure and
+synonyms that were accurate but did no story work. Causal completeness and procedural
+completeness are not the same thing.
+
+**Documents:** `BRAND.md`, `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. Historical and published scripts remain unchanged.

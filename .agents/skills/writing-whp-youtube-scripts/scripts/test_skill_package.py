@@ -356,11 +356,12 @@ class SkillPackageTests(unittest.TestCase):
             "Default to Phase 1 for ideas, openings, hooks, rough drafts, short "
             "narration, humor or voice passes, and scoped refinement.",
             "Return the requested artifact directly.",
-            "Outside the bounded architecture concept-discovery scan, do not perform "
-            "web research, write an assignment contract or evidence packet, force "
-            "three opening candidates, create annotated-script scaffolding, plan "
-            "visuals or rights, run the production rubric, or invoke the validator "
-            "unless Martin explicitly asks for that work.",
+            "Outside the bounded architecture concept-discovery scan and the targeted "
+            "viewer-vulnerability proof-case lookup below, do not perform web "
+            "research, write an assignment contract or evidence packet, force three "
+            "opening candidates, create annotated-script scaffolding, plan visuals or "
+            "rights, run the production rubric, or invoke the validator unless Martin "
+            "explicitly asks for that work.",
         )
         for contract in contracts:
             with self.subTest(contract=contract):
@@ -791,6 +792,101 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
 
+    def test_problem_led_intro_uses_the_five_move_anti_skip_contract(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        sequence = (
+            "intriguing question → anticipated defense → evidence-backed disarm → "
+            "early remedy promise → real case"
+        )
+        ordering = (
+            "Complete the first four moves before detailed case exposition."
+        )
+        teaser_boundary = (
+            "A short sourced result may tease the case during the disarm; develop "
+            "the real story only after the promise."
+        )
+
+        for source_name, source in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn(sequence, source)
+                self.assertIn(ordering, source)
+                self.assertIn(teaser_boundary, source)
+
+    def test_observable_resistance_can_disarm_the_immunity_defense(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        resistance = (
+            "Treat measured skepticism, lower trust ratings, expertise, training, "
+            "or prior warning as sufficient observable resistance; do not require "
+            "proof of the participants' exact inner monologue."
+        )
+        invention_boundary = (
+            "Do not invent thoughts, motives, or quotations for the people in the case."
+        )
+        allowed_comparison = (
+            "You may say “If you think this cannot happen to me…” and then present "
+            "a case with observable resistance; that compares the viewer's defense "
+            "with the case instead of attributing the viewer's words to the "
+            "participants."
+        )
+
+        for source_name, source in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn(resistance, source)
+                self.assertIn(invention_boundary, source)
+                self.assertIn(allowed_comparison, source)
+
+    def test_quality_rubric_scores_anti_skip_promise_placement(self) -> None:
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        self.assertIn(
+            "A problem-led opening also scores 0 when it develops the proof case "
+            "before stating the remedy promise.",
+            rubric,
+        )
+        self.assertIn(
+            "When an immunity defense is predictable, full credit requires the "
+            "five-move anti-skip sequence and places the remedy promise before "
+            "detailed case exposition.",
+            rubric,
+        )
+
     def test_opening_proof_case_is_clear_on_first_hearing(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         rapid = " ".join(
@@ -946,6 +1042,509 @@ class SkillPackageTests(unittest.TestCase):
             "its damaged goal and human cost explicit.",
             skill,
         )
+
+    def test_viewer_vulnerability_claims_require_direct_observed_proof(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "brand": " ".join(
+                (REPO_ROOT / "BRAND.md").read_text(encoding="utf-8").split()
+            ),
+        }
+
+        contracts = {
+            "skill": (
+                "Do not ask the viewer to accept a material vulnerability claim on "
+                "theory, analogy, or a hypothetical alone.",
+                "A hypothetical may explain how a demonstrated mechanism works; it "
+                "cannot prove that the mechanism affects real people.",
+                "Treat any statement or implication that knowledge, intelligence, "
+                "expertise, training, or skepticism fails to protect someone as a "
+                "material vulnerability claim, even when phrased as a modest "
+                "observation, question, or transition.",
+            ),
+            "rapid": (
+                "observed case → exact result → comfortable defense defeated → scope "
+                "boundary → episode mechanism",
+                "If the opening says informed, trained, expert, or skeptical people "
+                "are still vulnerable, prove that exact claim with a documented "
+                "observed case involving that population.",
+                "No matching observed case means no anti-immunity claim: use the "
+                "allowed targeted proof-case lookup, narrow the relevance, or return "
+                "the evidence gap instead of drafting around it.",
+            ),
+            "story": (
+                "Evidence that people followed wrong AI advice does not by itself "
+                "prove sycophancy.",
+            ),
+            "steering": (
+                "When an opening says informed, trained, expert, or skeptical viewers "
+                "can still be affected, earn that relevance with a documented "
+                "observed case involving the claimed population.",
+            ),
+            "brand": (
+                "Do not ask the audience to accept a real-world vulnerability or "
+                "consequence from theory alone.",
+            ),
+        }
+
+        for source_name, required in contracts.items():
+            for contract in required:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, sources[source_name])
+
+    def test_adjacent_cases_require_an_explicit_inference_bridge(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "architecture": " ".join(
+                (SKILL_ROOT / "references/script-architecture.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        bridge = (
+            "case → exact takeaway → why it matters here → remaining question → "
+            "next evidence"
+        )
+
+        for source_name in ("skill", "rapid", "story", "steering"):
+            with self.subTest(source=source_name):
+                self.assertIn(bridge, sources[source_name])
+
+        self.assertIn(
+            "A scope boundary is not a transition.",
+            sources["rapid"],
+        )
+        self.assertIn(
+            "For every proof case, state what it proves, why the episode needs that "
+            "fact, what it does not explain, and how the next evidence resolves the "
+            "remaining question.",
+            sources["architecture"],
+        )
+
+    def test_proof_handoffs_lead_with_the_positive_takeaway(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Lead with the positive takeaway; never begin the bridge with “this "
+            "study did not…” or an equivalent disclaimer.",
+            "Use the limitation only after the viewer knows why the case belongs.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_punchlines_stay_short_and_separate_from_explanation(self) -> None:
+        sources = {
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Separate setup from punchline.",
+            "Keep a standalone punchline to one short spoken sentence—usually no "
+            "more than 12 words.",
+            "If the joke needs a relative clause or a second sentence to explain "
+            "it, rewrite it.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_narration_uses_the_friendly_conversation_format(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Write like a smart friend walking the viewer through something "
+            "surprising, not like a paper abstract, conference talk, or legal "
+            "disclaimer.",
+            "fact → plain reaction → why it matters → next question",
+            "Use contractions, direct address, and brief controlled hyperbole when "
+            "they sound natural.",
+            "Friendly does not mean filler, invented dialogue, weakened caveats, or "
+            "jokes inside the learning promise.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_voice_keeps_factual_precision_without_emotional_sterilization(
+        self,
+    ) -> None:
+        sources = {
+            "brand": " ".join(
+                (REPO_ROOT / "BRAND.md").read_text(encoding="utf-8").split()
+            ),
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        core_principle = (
+            "Precision controls what we claim. Personality controls how we say it."
+        )
+
+        for source_name, source_text in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn(core_principle, source_text)
+
+        voice_contracts = (
+            "Write like a well-educated best friend with a brutal sense of humor.",
+            "Do not confuse factual precision with sterile vocabulary.",
+            "Blunt judgment, emotionally loaded everyday words, and controlled "
+            "hyperbole are allowed when they make the stakes clearer and the "
+            "underlying claim remains supportable.",
+            "Judge the decision, behavior, mechanism, or institution—not a person's "
+            "inherent worth.",
+        )
+        for source_name in ("skill", "rapid", "story", "steering"):
+            for contract in voice_contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, sources[source_name])
+
+    def test_source_label_studies_keep_the_item_source_and_outcome_visible(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "For a source-label experiment, narrate the visible chain with the "
+            "story's locked nouns: `item or question → claimed source → "
+            "participant objective or outcome`.",
+            "If researchers labeled human-written material as AI-generated, state "
+            "what was real, what was only a label, and what human behavior the "
+            "manipulation tested before interpreting the result.",
+            "Attach every correct-or-incorrect count to its stable noun; never "
+            "leave the listener guessing which item or final outcome was wrong.",
+            "Separate what the case proves about human response from what later "
+            "evidence proves about AI behavior.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_story_uses_the_fewest_elements_that_preserve_causal_truth(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Use the fewest story elements that preserve the causal truth.",
+            "Remove or collapse technical inputs, intermediate objects, roles, and "
+            "counts when the mechanism remains accurate without them.",
+            "Keep separate only the entities the listener must distinguish to "
+            "understand the manipulation and result.",
+            "An accurate detail does not earn narration time merely because it "
+            "appears in the source.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_story_compression_preserves_trust_clarity_and_magnetism(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Tell the smallest story that preserves trust, causal clarity, and "
+            "surprise.",
+            "Every story element must earn its place by increasing trust, "
+            "first-hearing clarity, or magnetism; otherwise cut or collapse it.",
+            "Open a documented story with a compact trust anchor: verified date "
+            "and place when available, plus the relevant person, team, or "
+            "institution when it adds credibility or orientation.",
+            "Make the stages audible without sounding like slide labels.",
+            "Use natural connective language that explains what changes next—such "
+            "as “So that was the setup,” “Then researchers changed one thing,” "
+            "or “And this is the kicker”—and vary it to fit the story.",
+            "Do not march through repeated “Here was…” labels or expose the "
+            "outline as meta-commentary.",
+            "A transition should explain what changes next, not merely announce "
+            "the section.",
+            "When a result creates a clean comic opening, add one short punchline "
+            "that sharpens the mechanism, consequence, or AHA; skip it when it "
+            "competes with the lesson.",
+            "Do not simplify past the causal hinge, material caveat, or evidence "
+            "boundary.",
+            "Spend the attention you save on the surprising turn, consequence, "
+            "or AHA that carries the lesson.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_story_compression_preserves_causal_completeness(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Compression removes clutter, never connective tissue.",
+            "Before naming a result, introduce every actor, group, task, goal, "
+            "success criterion, metric, and comparison it depends on.",
+            "For an experiment, preserve this causal-completeness sequence: "
+            "`participants → exact task → group split → changed variable → "
+            "measured result → meaning`.",
+            "State the task as an observable action with a success criterion, "
+            "then report the result in the same concrete vocabulary.",
+            "Name both the metric and the comparator in every comparison.",
+            "Do not replace a concrete noun from the setup with an undefined "
+            "abstraction in the result.",
+            "Distinguish an expressed reaction from an effective behavioral "
+            "response; do not call the reaction absent when an attitude changed "
+            "but performance did not.",
+            "Prefer a concrete real-world analogy whose roles and action map "
+            "point for point to the mechanism.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_story_uses_causal_minimum_and_locked_vocabulary(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "story": " ".join(
+                (SKILL_ROOT / "references/story-and-hook-method.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contracts = (
+            "Preserve the causal minimum, not the procedural maximum.",
+            "A teaser and its developed case have different detail budgets.",
+            "In an anti-skip disarm, state only the relevant qualification or "
+            "resistance and the fact that it failed to protect; defer the task, "
+            "group split, metric, and comparator to the developed case.",
+            "Describe a participant task by its audience-facing objective and "
+            "success condition, not by response controls or interface options "
+            "that do not advance the story.",
+            "Lock the story vocabulary before drafting: give each entity one "
+            "stable spoken name, and do not switch synonyms unless the narration "
+            "explicitly introduces the relationship.",
+            "Use the broadest truthful role label that keeps different actors "
+            "easy to distinguish; preserve a narrower title only when it matters "
+            "to the causal claim.",
+            "Describe the changed variable with nouns already established in the "
+            "story.",
+            "State a measurement as the measured object plus the measured "
+            "property, such as `diagnoses → trustworthiness`.",
+            "Name the container in a learning promise: write “By the end of this "
+            "video” rather than leaving “by the end” without a referent.",
+            "Compress a formal task to its practical purpose only when the "
+            "paraphrase preserves the scored objective and does not invent a "
+            "different instruction.",
+        )
+
+        for source_name, source_text in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source_text)
+
+    def test_case_selection_prefers_western_audience_proximity_after_proof_fit(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "architecture": " ".join(
+                (SKILL_ROOT / "references/script-architecture.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        preference = (
+            "Prefer a well-supported Western case when one can perform the same "
+            "proof job clearly."
+        )
+        fallback = (
+            "Use the strongest non-Western case when no Western candidate passes "
+            "the evidence, causal-fit, consequence, and spoken-clarity gates."
+        )
+
+        for source_name, source_text in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn(preference, source_text)
+                self.assertIn(fallback, source_text)
 
     def test_worldwide_patterns_use_novel_cases_then_a_global_montage(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
