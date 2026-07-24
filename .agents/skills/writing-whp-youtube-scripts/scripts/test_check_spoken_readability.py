@@ -16,7 +16,9 @@ class SpokenReadabilityTests(unittest.TestCase):
 
 Metadata does not count.
 
-> A short factual sentence. [F-001](https://example.com/source)
+> A short factual sentence. [F-001](https://example.com/source) <!-- PI-001: Martin input -->
+>
+> Another spoken sentence. F-002
 
 ## Appendix
 
@@ -27,7 +29,7 @@ Metadata does not count.
 
         self.assertEqual(
             [sentence.text for sentence in sentences],
-            ["A short factual sentence."],
+            ["A short factual sentence.", "Another spoken sentence."],
         )
 
     def test_splits_multiple_spoken_sentences_from_one_blockquote_line(self) -> None:
@@ -49,18 +51,46 @@ Metadata does not count.
         self.assertEqual(finding.reason, "26 spoken words exceeds the maximum of 25")
 
     def test_twenty_one_through_twenty_five_words_require_review(self) -> None:
-        sentence = " ".join(f"word{index}" for index in range(21)) + "."
+        for word_count in range(21, 26):
+            sentence = " ".join(
+                f"word{index}" for index in range(word_count)
+            ) + "."
 
-        finding = analyze_markdown(f"> {sentence}")[0]
+            with self.subTest(word_count=word_count):
+                finding = analyze_markdown(f"> {sentence}")[0]
 
-        self.assertEqual(finding.level, "review")
-        self.assertEqual(finding.reason, "21 spoken words requires first-hearing review")
+                self.assertEqual(finding.level, "review")
+                self.assertEqual(
+                    finding.reason,
+                    (
+                        f"{word_count} spoken words requires "
+                        "first-hearing review"
+                    ),
+                )
 
     def test_twenty_words_pass_the_mechanical_gate(self) -> None:
         sentence = " ".join(f"word{index}" for index in range(20)) + "."
 
         finding = analyze_markdown(f"> {sentence}")[0]
 
+        self.assertEqual(finding.level, "pass")
+
+    def test_bare_url_is_removed_before_the_word_count(self) -> None:
+        sentence = " ".join(f"word{index}" for index in range(24))
+
+        finding = analyze_markdown(
+            f"> {sentence} https://example.com/a-long-source-name"
+        )[0]
+
+        self.assertEqual(finding.word_count, 24)
+        self.assertEqual(finding.level, "review")
+
+    def test_accented_word_counts_as_one_spoken_word(self) -> None:
+        sentence = " ".join(["résumé", *(["word"] * 19)]) + "."
+
+        finding = analyze_markdown(f"> {sentence}")[0]
+
+        self.assertEqual(finding.word_count, 20)
         self.assertEqual(finding.level, "pass")
 
     def test_user_supplied_short_dense_sentences_fail(self) -> None:
@@ -78,6 +108,21 @@ Metadata does not count.
                 finding = analyze_markdown(f"> {sentence}")[0]
                 self.assertEqual(finding.level, "fail")
                 self.assertIn("structurally difficult", finding.reason)
+
+    def test_user_supplied_long_list_fails_the_word_ceiling(self) -> None:
+        sentence = (
+            "Ask AI whether to quit your job, end a relationship, dismiss a health "
+            "concern, or bet your savings on a business idea, and you may think you "
+            "received a second opinion."
+        )
+
+        finding = analyze_markdown(f"> {sentence}")[0]
+
+        self.assertEqual(finding.level, "fail")
+        self.assertEqual(
+            finding.reason,
+            "31 spoken words exceeds the maximum of 25",
+        )
 
     def test_plain_sentence_with_necessary_names_does_not_fail_on_score_alone(
         self,
@@ -103,6 +148,37 @@ Metadata does not count.
 
         self.assertEqual(unresolved_result, 1)
         self.assertEqual(reviewed_result, 0)
+
+    def test_reviewed_flag_does_not_clear_structural_failure(self) -> None:
+        sentence = (
+            "Those assistants often shifted their answers toward users' stated "
+            "beliefs—even when those beliefs were wrong."
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "script.md"
+            path.write_text(f"> {sentence}\n", encoding="utf-8")
+
+            with contextlib.redirect_stdout(io.StringIO()):
+                result = main(["--reviewed", str(path)])
+
+        self.assertEqual(result, 1)
+
+    def test_cli_rejects_a_file_without_spoken_narration(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "script.md"
+            path.write_text(
+                "# Script\n\nThis is metadata, not narration.\n",
+                encoding="utf-8",
+            )
+
+            with (
+                contextlib.redirect_stdout(io.StringIO()),
+                contextlib.redirect_stderr(io.StringIO()) as stderr,
+            ):
+                result = main([str(path)])
+
+        self.assertEqual(result, 2)
+        self.assertIn("No spoken narration found", stderr.getvalue())
 
 
 if __name__ == "__main__":

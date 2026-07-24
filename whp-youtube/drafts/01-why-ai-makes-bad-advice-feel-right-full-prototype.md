@@ -10,7 +10,7 @@
 >
 > So were the experienced radiologists in our next story. Their guard still failed miserably. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> By the end of this video, you'll understand why distrust is not enough. You'll also learn four questions that expose an AI's assumptions before you act.
+> By the end of this video, you'll understand why distrust is not enough. You'll learn four questions you can ask AI. They expose its assumptions before you act.
 >
 > In 2021, a study recruited 138 experienced radiologists in the United States and Canada. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
@@ -96,7 +96,7 @@
 >
 > AI adds another layer. If the advice stays the same, its supposed author should not matter.
 >
-> But in six experiments, people sometimes valued advice more when they thought an algorithm wrote it. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Researchers call this algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> In six experiments, people received equivalent advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Yet they sometimes valued it more when they thought an algorithm wrote it instead of a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Researchers call this algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
 > Now return to “Should I quit?” Your hunch enters the chat wearing sweatpants. It returns as:
 >

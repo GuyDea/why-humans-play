@@ -22,7 +22,8 @@ EVIDENCE_LINK_RE = re.compile(
 EVIDENCE_MARKER_RE = re.compile(r"\s*\[?F-\d{3}\]?", re.IGNORECASE)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
-WORD_RE = re.compile(r"[A-Za-z0-9]+(?:[’'-][A-Za-z0-9]+)*")
+BARE_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
+WORD_RE = re.compile(r"[^\W_]+(?:[’'-][^\W_]+)*", re.UNICODE)
 SENTENCE_END_RE = re.compile(r"[.!?]+[”\"’']*(?=\s+|$)")
 RELATIONSHIP_RE = re.compile(
     r"\b(?:but|because|although|though|whereas|unless|until|while|which|who|"
@@ -66,6 +67,7 @@ def _strip_non_spoken_annotations(text: str) -> str:
     text = EVIDENCE_LINK_RE.sub("", text)
     text = EVIDENCE_MARKER_RE.sub("", text)
     text = MARKDOWN_LINK_RE.sub(r"\1", text)
+    text = BARE_URL_RE.sub("", text)
     return " ".join(text.split())
 
 
@@ -149,7 +151,7 @@ def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
 def _word_stats(text: str) -> tuple[int, int]:
     words = WORD_RE.findall(text)
     character_count = sum(
-        len(re.sub(r"[^A-Za-z0-9]", "", word)) for word in words
+        character.isalnum() for word in words for character in word
     )
     return len(words), character_count
 
@@ -248,6 +250,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         return 2
 
     findings = analyze_markdown(markdown)
+    if not findings:
+        print(
+            f"No spoken narration found in {args.script}.",
+            file=sys.stderr,
+        )
+        return 2
+
     failures = [finding for finding in findings if finding.level == "fail"]
     reviews = [finding for finding in findings if finding.level == "review"]
 

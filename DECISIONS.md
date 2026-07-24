@@ -1035,7 +1035,16 @@ the first-hearing review prevents a word-count formula from approving short but 
 language or flattening clear rhythmic speech.
 
 **Documents:** `whp-youtube/STEERING.md`,
-`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`, and this ledger.
-`BRAND.md` remains unchanged because its existing first-hearing clarity doctrine already
-supports this channel-level delivery gate. Historical and published scripts remain
-unchanged.
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readability.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_check_spoken_readability.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`docs/superpowers/plans/2026-07-24-spoken-readability-gate.md`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md`,
+`whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`, and this
+ledger. `BRAND.md` remains unchanged because its existing first-hearing clarity doctrine
+already supports this channel-level delivery gate. Historical and published scripts
+remain unchanged.

@@ -27,7 +27,7 @@ abstraction.
 - Create:
   `.agents/skills/writing-whp-youtube-scripts/scripts/test_check_spoken_readability.py`
 
-- [ ] **Step 1: Write the failing extraction and threshold tests**
+- [x] **Step 1: Write the failing extraction and threshold tests**
 
 Cover these behaviors with `unittest`:
 
@@ -66,7 +66,7 @@ def test_short_structurally_dense_sentence_is_a_failure():
     self.assertEqual(finding.level, "fail")
 ```
 
-- [ ] **Step 2: Run the test and verify RED**
+- [x] **Step 2: Run the test and verify RED**
 
 Run:
 
@@ -76,7 +76,7 @@ python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_check_spoken_rea
 
 Expected: `ModuleNotFoundError` because the checker does not exist.
 
-- [ ] **Step 3: Implement the minimal checker**
+- [x] **Step 3: Implement the minimal checker**
 
 Implement:
 
@@ -114,13 +114,13 @@ sentence that crosses the structural-difficulty rule. It also exits `1` for 21�
 review items unless `--reviewed` is supplied after the first-hearing review. It exits `0`
 only when no unresolved mechanical item remains.
 
-- [ ] **Step 4: Run the checker tests and verify GREEN**
+- [x] **Step 4: Run the checker tests and verify GREEN**
 
 Run the Task 1 test command again.
 
 Expected: all readability-checker tests pass.
 
-- [ ] **Step 5: Commit the checker**
+- [x] **Step 5: Commit the checker**
 
 Commit:
 
@@ -141,7 +141,7 @@ feat(skill): add spoken readability checker
 - Modify:
   `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 
-- [ ] **Step 1: Add a failing distributed-contract test**
+- [x] **Step 1: Add a failing distributed-contract test**
 
 Require the core guidance to state:
 
@@ -157,7 +157,7 @@ what, what changed, and why it matters.
 
 Require the skill to name the checker command and the rubric to score the same gate.
 
-- [ ] **Step 2: Run the skill-package suite and verify RED**
+- [x] **Step 2: Run the skill-package suite and verify RED**
 
 Run:
 
@@ -167,7 +167,7 @@ python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py
 
 Expected: the new readability contract test fails because the guidance is incomplete.
 
-- [ ] **Step 3: Add the minimal workflow guidance**
+- [x] **Step 3: Add the minimal workflow guidance**
 
 State that the gate runs before narration is shown, unlike later timing and retention
 audits. Require agents to:
@@ -182,7 +182,7 @@ audits. Require agents to:
    personality;
 7. rerun the checker before delivery.
 
-- [ ] **Step 4: Run the skill-package suite and quick validation**
+- [x] **Step 4: Run the skill-package suite and quick validation**
 
 Run:
 
@@ -194,7 +194,7 @@ python3 /home/martin/.codex/skills/.system/skill-creator/scripts/quick_validate.
 
 Expected: all tests pass and the skill reports `Skill is valid!`.
 
-- [ ] **Step 5: Commit the skill contract**
+- [x] **Step 5: Commit the skill contract**
 
 Commit:
 
@@ -208,7 +208,7 @@ feat(skill): enforce narration readability gate
 - Modify:
   `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
 
-- [ ] **Step 1: Run the checker and capture the expected failures**
+- [x] **Step 1: Run the checker and capture the expected failures**
 
 Run:
 
@@ -219,24 +219,24 @@ python3 .agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readabil
 
 Expected: current 26+ sentences fail and current 21–25 sentences require review.
 
-- [ ] **Step 2: Rewrite every hard failure**
+- [x] **Step 2: Rewrite every hard failure**
 
 Split at causal or rhetorical boundaries. Preserve factual claims, adjacent source markers,
 the approved message, the best-friend voice, and the joke's setup.
 
-- [ ] **Step 3: Clear every review-range sentence**
+- [x] **Step 3: Clear every review-range sentence**
 
 For each 21–25-word sentence, confirm that a listener can identify the actor, action,
 comparison, result, and consequence after one hearing. Rewrite any sentence that cannot.
 
-- [ ] **Step 4: Rerun the gate**
+- [x] **Step 4: Rerun the gate**
 
 Run the checker without `--reviewed` if all sentences are 20 words or fewer. Otherwise
 conduct the documented first-hearing review and rerun with `--reviewed`.
 
 Expected: exit `0` with no unresolved readability items.
 
-- [ ] **Step 5: Commit the revised narration**
+- [x] **Step 5: Commit the revised narration**
 
 Commit:
 
@@ -249,7 +249,7 @@ content(youtube): pass episode one readability gate
 **Files:**
 - Verify all task-owned files above.
 
-- [ ] **Step 1: Run both checker and skill suites**
+- [x] **Step 1: Run both checker and skill suites**
 
 Run:
 
@@ -265,7 +265,7 @@ git diff --check
 
 Expected: every command exits `0`.
 
-- [ ] **Step 2: Review the complete diff and branch status**
+- [x] **Step 2: Review the complete diff and branch status**
 
 Confirm that no historical or concurrent Script Creator artifact changed, the current
 worktree is clean, and the commits remain limited to this feature branch.
