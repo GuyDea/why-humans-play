@@ -1,12 +1,11 @@
 # Script Creator — Plan 7 Learning Loop: Evidence
 
-**Date:** 2026-07-24 (rewritten after fix waves 1–3; supersedes the pre-review
-version, whose totals and claims were stale)
+**Date:** 2026-07-24 (final: fix waves 1–5, confirmation reviews 1–5)
 **Plan:** [2026-07-24-script-creator-plan7-learning.md](../plans/2026-07-24-script-creator-plan7-learning.md)
 
-## Deterministic suites (host, two consecutive runs each, post-wave-3)
+## Deterministic suites (host, two consecutive runs each, final)
 
-- Server: 49 files / 557 tests, twice; `tsc --noEmit` clean.
+- Server: 49 files / 565 tests, twice; `tsc --noEmit` clean.
 - editor-core: 12 files / 45 tests, twice; clean.
 - App: 28 files / 215 tests, twice; `tsc --noEmit` clean; `ng build` completes
   (pre-existing budget warnings only).
@@ -94,5 +93,8 @@ automatic decision retention with optional why-notes, skill-owned distillation
 over frozen evidence, Martin-gated application — episode-local lessons as
 server-authoritative envelope context; durable doctrine only through
 reconcile-whp with causally-bound verification — and no doctrine text stored
-app-side after application. Remaining gate: the confirmation review of fix
-wave 3.
+app-side after application. The final review loop ran five fix waves under five fresh confirmation
+reviews (9 findings converging 9 → 6 → 3 → 2 → 0), the last closing multi-run
+candidate scrubbing and durable restart-resumable redaction.
+**Confirmation review 5: Spec compliance PASS / Code quality APPROVED — no
+findings.**
