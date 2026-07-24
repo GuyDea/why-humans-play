@@ -1511,7 +1511,7 @@ class SkillPackageTests(unittest.TestCase):
                 with self.subTest(source=source_name, contract=contract):
                     self.assertIn(contract, source_text)
 
-    def test_story_rules_apply_script_wide_and_resolve_each_result_once(
+    def test_story_rule_contract_is_distributed_across_core_guidance(
         self,
     ) -> None:
         sources = {
@@ -1557,6 +1557,21 @@ class SkillPackageTests(unittest.TestCase):
             for contract in contracts:
                 with self.subTest(source=source_name, contract=contract):
                     self.assertIn(contract, source_text)
+
+        rubric = " ".join(
+            (SKILL_ROOT / "references/quality-rubric.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        rubric_contracts = (
+            "When an expectation is needed",
+            "one mechanism-mapped punchline and one exact takeaway",
+            "Adjacent cases keep their proof jobs distinct",
+            "each beat closes once",
+        )
+        for contract in rubric_contracts:
+            with self.subTest(source="rubric", contract=contract):
+                self.assertIn(contract, rubric)
 
     def test_complete_episode_promise_names_understanding_and_response(
         self,
