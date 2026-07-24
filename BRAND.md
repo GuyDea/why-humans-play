@@ -147,6 +147,31 @@ Brand work must not displace active app-launch priorities.
 
 - **Rigor over hype** — cite, caveat, steelman; no woo, no consciousness drift, no
   fabricated numbers or fake shock.
+- **Precision in claims, personality in delivery** — **Precision controls what we claim.
+  Personality controls how we say it.** Evidence must remain exact; the language carrying
+  it should sound like a well-educated best friend with a brutal sense of humor, not an
+  institution sanding every human edge off the thought.
+- **Proof before warning** — Do not ask the audience to accept a real-world vulnerability or
+  consequence from theory alone. Show the documented behavior in real people, then use the
+  theory to explain it. A hypothetical may clarify how a proven mechanism works, but it
+  cannot establish that the mechanism affects people in the world.
+- **The smallest magnetic truthful story** — Tell the smallest story that preserves trust,
+  causal clarity, and surprise. Every detail must increase trust, make the sequence easier
+  to understand on first hearing, or sharpen the fascinating turn and lesson. Anchor a
+  documented story with verified date and place when available. Make its essential stages
+  audible through natural connective language, not repeated outline labels. Collapse
+  everything else, never simplify past the causal hinge, material caveat, or evidence
+  boundary, and use a short joke when the result itself creates a clean comic opening.
+  Compression removes clutter, never connective tissue: introduce every actor, group,
+  task, success criterion, metric, and comparator before the result needs it; describe the
+  result in the task's concrete vocabulary; and distinguish a changed attitude from an
+  effective change in behavior. Preserve the causal minimum, not the procedural maximum:
+  describe the participant's practical objective rather than reciting response controls.
+  Give a teaser only the qualification and failed protection needed to defeat the viewer's
+  defense; reserve the full task and comparison for the developed case. Give every entity
+  one stable spoken name, distinguish different roles with the broadest truthful labels,
+  and reject synonyms or new nouns that do no necessary causal work. Prefer concrete
+  analogies whose roles and actions map directly to the mechanism.
 - **Useful over clever** — if it doesn't change how someone sees or acts, cut it.
 - **Respect the viewer's intelligence.**
 - **Play is serious inquiry, not childishness.**
