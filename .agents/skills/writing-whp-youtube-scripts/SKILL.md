@@ -232,6 +232,8 @@ For evidence-backed finalization:
   never as preverified episode content.
 - During the final Phase 2 editorial pass, read
   [the quality rubric](references/quality-rubric.md).
+- For a **Distill session lessons** operation — and only for that operation — read
+  [the lesson distillation method](references/lesson-distillation.md).
 
 ## Validation and completion
 
