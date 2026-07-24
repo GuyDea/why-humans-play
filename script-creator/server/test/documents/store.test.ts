@@ -274,6 +274,60 @@ describe('DocumentStore', () => {
     ]);
   });
 
+  it('preserves server-owned workflow metadata across production imports', () => {
+    const store = openStore();
+    store.createDraft(draft({
+      doc: {
+        type: 'doc',
+        attrs: { format: 'narration', preamble: '' },
+        metadata: {
+          topic: 'Stored topic',
+          creativeStatus: {
+            phase: 'rapid-prototype',
+            readiness: 'EDITORIAL-DRAFT',
+          },
+          directionApproved: false,
+        },
+        content: [],
+      },
+    }));
+
+    const imported = store.importPromotion('draft-1', {
+      format: 'annotated',
+      doc: {
+        type: 'doc',
+        attrs: { format: 'annotated', preamble: '' },
+        metadata: {
+          topic: 'Imported topic',
+          creativeStatus: {
+            phase: 'architecture',
+            readiness: 'forged',
+          },
+          directionApproved: true,
+        },
+        content: [],
+      },
+      updatedAt: '2026-07-24T10:00:00.000Z',
+      revision: {
+        id: 'production-import-1',
+        opId: 'promote-1',
+        createdAt: '2026-07-24T10:00:00.000Z',
+      },
+    });
+
+    expect(imported.draft.doc).toMatchObject({
+      metadata: {
+        topic: 'Imported topic',
+        creativeStatus: {
+          phase: 'rapid-prototype',
+          readiness: 'EDITORIAL-DRAFT',
+        },
+        directionApproved: false,
+      },
+    });
+    expect(imported.revision.doc).toEqual(imported.draft.doc);
+  });
+
   it('does not append a revision when the draft does not exist', () => {
     const store = openStore();
 

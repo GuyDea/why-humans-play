@@ -400,8 +400,10 @@ export class DocumentStore {
     update: SaveDraftRecord,
   ): { draft: DraftRecord; revision: RevisionRecord } {
     return this.db.transaction(() => {
-      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      const current = this.getDraft(id);
+      if (!current) throw new Error(`draft not found: ${id}`);
       this.assertDraftWriteAvailable(id);
+      const doc = preserveWorkflowMetadata(update.doc, current.doc);
       const result = this.db.prepare(
         `UPDATE drafts
          SET title = ?, format = ?, doc_json = ?, updated_at = ?
@@ -409,7 +411,7 @@ export class DocumentStore {
       ).run(
         update.title,
         update.format,
-        JSON.stringify(update.doc),
+        JSON.stringify(doc),
         update.updatedAt,
         id,
       );
@@ -430,7 +432,7 @@ export class DocumentStore {
         next.seq,
         update.revision.opId,
         update.revision.disposition,
-        JSON.stringify(update.doc),
+        JSON.stringify(doc),
         update.revision.createdAt,
         update.revision.kind ?? 'narration',
       );
@@ -621,7 +623,9 @@ export class DocumentStore {
       if (existing) {
         return { draft: this.getDraft(id)!, revision: existing };
       }
-      if (!this.getDraft(id)) throw new Error(`draft not found: ${id}`);
+      const current = this.getDraft(id);
+      if (!current) throw new Error(`draft not found: ${id}`);
+      const doc = preserveWorkflowMetadata(update.doc, current.doc);
       const nextSeq = this.currentRevisionSeq(id) + 1;
       this.db.prepare(
         `UPDATE drafts
@@ -629,7 +633,7 @@ export class DocumentStore {
          WHERE id = ?`,
       ).run(
         update.format,
-        JSON.stringify(update.doc),
+        JSON.stringify(doc),
         update.updatedAt,
         id,
       );
@@ -642,7 +646,7 @@ export class DocumentStore {
         id,
         nextSeq,
         update.revision.opId,
-        JSON.stringify(update.doc),
+        JSON.stringify(doc),
         update.revision.createdAt,
       );
       return {
@@ -956,6 +960,32 @@ function objectValue(
     && !Array.isArray(value)
     ? value as Record<string, unknown>
     : null;
+}
+
+function preserveWorkflowMetadata(
+  incoming: DraftDocument,
+  stored: DraftDocument,
+): DraftDocument {
+  const incomingMetadata = objectValue(incoming['metadata']);
+  const storedMetadata = objectValue(stored['metadata']);
+  if (!incomingMetadata && !storedMetadata) return incoming;
+  const metadata = {
+    ...(incomingMetadata ?? {}),
+  };
+  for (const field of ['creativeStatus', 'directionApproved']) {
+    if (
+      storedMetadata
+      && Object.prototype.hasOwnProperty.call(storedMetadata, field)
+    ) {
+      metadata[field] = storedMetadata[field];
+    } else {
+      delete metadata[field];
+    }
+  }
+  return {
+    ...incoming,
+    metadata,
+  };
 }
 
 function emptyArchitecture(): DraftArchitecture {

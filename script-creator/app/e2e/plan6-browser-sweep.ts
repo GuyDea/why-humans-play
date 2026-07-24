@@ -426,7 +426,8 @@ async function main(): Promise<void> {
     'Approve complete narration before Promote.',
   );
   await editor.locator('p').first().click();
-  await page.keyboard.type('A queue turns waiting into a game.');
+  await page.keyboard.press('End');
+  await page.keyboard.type(' A queue turns waiting into a game.');
   await waitForEditorSave(page);
 
   const productionPanel = page.locator('app-production-panel');

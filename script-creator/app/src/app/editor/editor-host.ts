@@ -668,6 +668,16 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
     this.mountDraft(draft);
   }
 
+  refreshWorkflowMetadata(draft: DraftRecord): void {
+    if (draft.id !== this.activeDraftId) return;
+    this.brief()?.refreshWorkflowMetadata(draft);
+    const document = this.brief()?.draft().doc;
+    if (document) {
+      this.selectionContextDocument = document;
+      this.doc.set(document as DocumentJson);
+    }
+  }
+
   currentMarkdown(): string {
     const view = this.editorView;
     if (!view) return '';

@@ -259,6 +259,46 @@ describe('architecture approval and Reopen HTTP API', () => {
     ]);
   });
 
+  it('keeps dedicated workflow phases authoritative across stale narration saves', async () => {
+    const fixture = makeFixture();
+    expect((await approve(fixture, 0)).statusCode).toBe(200);
+    const approved = fixture.store.getDraft('draft-1')!;
+
+    const saved = fixture.documentService.saveDraft('draft-1', {
+      doc: {
+        ...approved.doc,
+        metadata: {
+          ...approved.doc['metadata'] as Record<string, unknown>,
+          creativeStatus: {
+            phase: 'architecture',
+            clientOnlyStatus: 'stale',
+          },
+          directionApproved: true,
+        },
+      },
+      disposition: 'autosave',
+    });
+
+    expect(saved.draft.doc).toMatchObject({
+      metadata: {
+        creativeStatus: { phase: 'rapid-prototype' },
+        directionApproved: false,
+      },
+    });
+    expect(saved.draft.doc['metadata']).not.toMatchObject({
+      creativeStatus: { clientOnlyStatus: 'stale' },
+    });
+    expect(saved.revision.doc).toEqual(saved.draft.doc);
+
+    expect((await reopen(fixture, 2)).statusCode).toBe(200);
+    expect(fixture.store.getDraft('draft-1')?.doc).toMatchObject({
+      metadata: {
+        creativeStatus: { phase: 'architecture' },
+        directionApproved: false,
+      },
+    });
+  });
+
   it.each([
     {
       label: 'missing fixed section',

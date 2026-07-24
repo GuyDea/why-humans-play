@@ -199,6 +199,20 @@ export class BriefPanelModel {
     }));
   }
 
+  refreshWorkflowMetadata(serverDraft: DraftRecord): void {
+    const serverMetadata = readDraftMetadata(serverDraft.doc);
+    const metadata = cloneMetadata({
+      ...this.metadata(),
+      creativeStatus: serverMetadata.creativeStatus,
+      directionApproved: serverMetadata.directionApproved,
+    });
+    this.metadata.set(metadata);
+    this.draft.update((draft) => ({
+      ...serverDraft,
+      doc: withDraftMetadata(draft.doc, metadata),
+    }));
+  }
+
   save(id: string, input: SaveDraftInput): Promise<SavedDraft> {
     return this.enqueueSave(id, () => input);
   }
@@ -346,7 +360,7 @@ export class ApprovalGate {
         <input
           type="text"
           [value]="model().metadata().creativeStatus.phase"
-          (change)="setPhase($event)"
+          readonly
         />
       </label>
       @if (model().metadata().creativeStatus.phase.trim() === '') {
@@ -604,17 +618,6 @@ export class BriefPanel {
     const value = controlValue(event);
     if (value === null) return;
     void this.model().update({ [field]: splitLines(value) });
-  }
-
-  protected setPhase(event: Event): void {
-    const phase = controlValue(event)?.trim();
-    if (!phase) return;
-    void this.model().update({
-      creativeStatus: {
-        ...this.model().metadata().creativeStatus,
-        phase,
-      },
-    });
   }
 
 }

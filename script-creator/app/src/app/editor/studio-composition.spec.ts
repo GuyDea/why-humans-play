@@ -1406,6 +1406,11 @@ describe('mounted Script Studio composition', () => {
     await vi.waitFor(() => {
       studio.tick();
       expect(architecturePanel.textContent).toContain('Approved Jul 24, 2026');
+      expect(
+        studio.root.querySelector<HTMLInputElement>(
+          'app-brief-panel input[type="text"]',
+        )?.value,
+      ).toBe('rapid-prototype');
       expect(studio.client.canonicalArchitectureWrites).toEqual([
         'whp-youtube/architectures/composition-net.md',
       ]);
@@ -1927,7 +1932,7 @@ async function mountStudio(
     hydrateSignalInputs(EditorHost, ['draft', 'client', 'session', 'wpm']);
     hydrateSignalInputs(AgentConsole, ['model', 'client']);
     hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
-    hydrateSignalInputs(ArchitecturePanel, ['model', 'draft']);
+    hydrateSignalInputs(ArchitecturePanel, ['model', 'draft', 'version']);
     hydrateSignalInputs(NarrationActions, [
       'model',
       'draft',
@@ -1940,7 +1945,7 @@ async function mountStudio(
       'client',
       'editor',
     ]);
-    hydrateSignalOutputs(ArchitecturePanel, ['changed']);
+    hydrateSignalOutputs(ArchitecturePanel, ['changed', 'workflowChanged']);
     hydrateSignalOutputs(NarrationActions, ['changed']);
     hydrateSignalInputs(DraftManagerComponent, ['client', 'session']);
     const draftManagerDefinition = ɵgetComponentDef(DraftManagerComponent);

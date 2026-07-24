@@ -466,6 +466,7 @@ export class ArchitecturePanel {
   readonly version = input(0);
   readonly draft = input.required<DraftRecord>();
   readonly changed = output<void>();
+  readonly workflowChanged = output<void>();
 
   protected readonly generationConstraints = signal('');
   protected readonly busy = signal(false);
@@ -615,7 +616,7 @@ export class ArchitecturePanel {
 
   protected approve(): void {
     if (this.busy()) return;
-    void this.run(() => this.model().approve());
+    void this.run(() => this.runWorkflowAction(() => this.model().approve()));
   }
 
   protected reopen(): void {
@@ -624,7 +625,15 @@ export class ArchitecturePanel {
       'Reopen architecture? Existing narration is preserved but must be reconciled.',
     );
     if (!confirmed) return;
-    void this.run(() => this.model().reopen(true));
+    void this.run(() =>
+      this.runWorkflowAction(() => this.model().reopen(true)));
+  }
+
+  private async runWorkflowAction(action: () => Promise<void>): Promise<void> {
+    await action();
+    if (!this.model().failure && !this.model().actionConflict) {
+      this.workflowChanged.emit();
+    }
   }
 
   private async run(action: () => Promise<void>): Promise<void> {

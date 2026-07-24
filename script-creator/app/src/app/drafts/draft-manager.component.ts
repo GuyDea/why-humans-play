@@ -125,6 +125,7 @@ import { RevisionTimeline } from './revision-timeline';
                 [draft]="activeDraft"
                 [version]="architectureVersion()"
                 (changed)="architectureChanged()"
+                (workflowChanged)="refreshWorkflowDraft()"
               />
               <app-narration-actions
                 [model]="architecture"
@@ -528,6 +529,24 @@ export class DraftManagerComponent implements OnInit {
 
   protected architectureChanged(): void {
     this.architectureVersion.update((version) => version + 1);
+  }
+
+  protected refreshWorkflowDraft(): void {
+    const manager = this.manager();
+    const active = manager?.activeDraft();
+    if (!manager || !active) return;
+    void this.client().get(active.id).then((fresh) => {
+      if (manager.activeDraft()?.id !== fresh.id) return;
+      const editor = this.editorHost();
+      editor?.refreshWorkflowMetadata(fresh);
+      Object.assign(active, fresh, {
+        doc: editor?.brief()?.draft().doc ?? fresh.doc,
+      });
+    }).catch((error: unknown) => {
+      manager.actionError.set(
+        error instanceof Error ? error.message : 'Draft refresh failed.',
+      );
+    });
   }
 
   protected updatedDate(value: string): string {
