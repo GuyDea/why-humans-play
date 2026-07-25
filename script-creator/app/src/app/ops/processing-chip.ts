@@ -3,7 +3,7 @@ import {
   Component,
   computed,
   inject,
-  Input,
+  input,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { OperationName } from '../api/client';
@@ -67,7 +67,7 @@ import { ActiveOperationsService, type ActiveOp } from './active-operations.serv
 })
 export class ProcessingChip {
   private readonly active = inject(ActiveOperationsService);
-  @Input() readonly operations: readonly OperationName[] | null = null;
+  readonly operations = input<readonly OperationName[] | null>(null);
 
   constructor() {
     // Any placement of the chip boots the shared poll (masthead is always
@@ -76,7 +76,7 @@ export class ProcessingChip {
   }
 
   protected readonly primary = computed<ActiveOp | null>(() => {
-    const filter = this.operations as readonly OperationName[] | null;
+    const filter = this.operations();
     const ops = this.active.activeOperations();
     const matches = filter
       ? ops.filter((op) => filter.includes(op.name))
