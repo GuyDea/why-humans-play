@@ -178,8 +178,10 @@ class StudioLifecycleRenderer {
     pending.dataset['testid'] = 'selection-operation-pending';
     pending.dataset['phase'] = active.phase();
     pending.setAttribute('role', 'status');
-    pending.textContent =
-      `${operationLabel(active.operation)} · ${active.phase()}…`;
+    pending.textContent = selectionActivityMessage(
+      active.operation,
+      active.phase(),
+    );
     positionPending(pending, runtime.toolbar.element);
     this.hosts.editor.append(pending);
     this.pending = pending;
@@ -465,6 +467,29 @@ function operationLabel(operation: string): string {
     .split('-')
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
+}
+
+/**
+ * Human-readable status for the activity indicator. It names the operation and,
+ * crucially, where its result will land — Review findings go to the right-rail
+ * panel (off the editor), so the indicator points there rather than leaving the
+ * click looking inert.
+ */
+export function selectionActivityMessage(
+  operation: string,
+  phase: string,
+): string {
+  const running = phase === 'submitting' ? 'starting' : 'running';
+  switch (operation) {
+    case 'review':
+      return `Review ${running} — findings appear in the Review findings panel`;
+    case 'generate-alternatives':
+      return `Generating alternatives — options appear inline when ready`;
+    case 'rewrite-selection':
+      return `Rewrite ${running} — a proposal appears at your selection`;
+    default:
+      return `${operationLabel(operation)} · ${phase}…`;
+  }
 }
 
 function lastActiveRecord(

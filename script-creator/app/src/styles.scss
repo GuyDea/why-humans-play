@@ -751,16 +751,46 @@ app-full-run-panel .handoff-actions p {
 
 .selection-operation-pending {
   z-index: 19;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   border: 1px solid color-mix(in srgb, var(--whp-ground) 18%, transparent);
+  border-left: 3px solid var(--whp-accent);
   border-radius: 0.2rem;
   color: var(--whp-ground);
   background: var(--whp-ink);
-  padding: 0.38rem 0.55rem;
+  padding: 0.42rem 0.6rem;
   box-shadow: 0 0.5rem 1.4rem color-mix(in srgb, var(--whp-ink) 22%, transparent);
   font-family: var(--whp-font-ui);
-  font-size: 0.65rem;
+  font-size: 0.68rem;
   font-weight: 750;
   letter-spacing: 0.02em;
+}
+
+.selection-operation-pending::before {
+  content: '';
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--whp-accent);
+  animation: selection-operation-pulse 1s ease-in-out infinite;
+}
+
+@keyframes selection-operation-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selection-operation-pending::before {
+    animation: none;
+  }
 }
 
 .operation-failure-callouts,

@@ -447,6 +447,7 @@ function actionButton(
 function alternativeCountSelect(): HTMLLabelElement {
   const label = document.createElement('label');
   label.className = 'alternative-count';
+  label.title = 'Number of options the Alternatives action generates';
   const text = document.createElement('span');
   text.textContent = 'Count';
   const select = document.createElement('select');

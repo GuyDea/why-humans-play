@@ -355,6 +355,10 @@ describe('SelectionToolbar', () => {
     expect(settings.querySelector('select[data-alternative-count]')).not.toBeNull();
     expect(settings.querySelector('select[data-model-select]')).not.toBeNull();
 
+    // The Count control explains its purpose (it only feeds Alternatives).
+    const countControl = settings.querySelector<HTMLElement>('.alternative-count')!;
+    expect(countControl.title.toLowerCase()).toContain('alternatives');
+
     // No settings controls leak into the action groups.
     expect(groups[0].querySelector('select')).toBeNull();
     expect(groups[0].textContent).toContain('Review');
