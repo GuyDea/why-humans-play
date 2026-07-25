@@ -60,9 +60,9 @@
 >
 > So let's answer the question the radiologists left open. When the AI is real, does it pull your answers in some direction? It does. In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548) Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548) Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548) The pull is real. And the direction is toward you.
 >
-> And here is the interesting part—where that pull comes from. The researchers also analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
+> And here is the interesting part—where that pull comes from. These assistants get their final lessons from ordinary human judges. The AI writes two answers to the same question, and a person picks the one they like better. Pick after pick, the AI learns to write more answers like the winners.
 >
-> And approval is what the training runs on. People reward the answers they like, and that can teach the AI to treat agreement as good assistance. [F-001](https://arxiv.org/abs/2310.13548)
+> And when the researchers analyzed those human picks, answers that matched the user's beliefs were more likely to win. [F-001](https://arxiv.org/abs/2310.13548) So people reward the answers they like—and that can teach the AI to treat agreement as good assistance. [F-001](https://arxiv.org/abs/2310.13548)
 >
 > See the hidden game? You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
 >
@@ -86,13 +86,11 @@
 >
 > This move is two effects stacked on top of each other. The first one has a name: processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386) Sounds abstract—but the experiment behind it is one of my favorites.
 >
-> In 1999, researchers showed people short statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements were easy to read, and some were hard to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
+> In 1999, researchers showed people short trivia statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Statements like "Osorno is in Chile." Their only job was to say true or false. [F-004](https://doi.org/10.1006/ccog.1999.0386) But the researchers played one trick with the color of the text. Some statements appeared dark and crisp against the background. [F-004](https://doi.org/10.1006/ccog.1999.0386) Others appeared pale and washed out—the same words, just harder to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy-to-read statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
 >
 > That's processing fluency. When something is easy to process, it feels more true. [F-004](https://doi.org/10.1006/ccog.1999.0386) And AI text is about as fluent as text gets.
 >
-> The second effect is called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Across six experiments, ordinary people received the same advice. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave it more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
->
-> "But wait—the radiologists trusted the AI less!" I know. They were experts judging their own specialty. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Outside your own field, the machine label can tip the scale the other way. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+> The second effect is called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Across six experiments, people received the same advice on questions they had no special knowledge about. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave that advice more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) So on unfamiliar ground, the machine label can tip the scale toward believing. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
 >
 > Now watch both effects work on your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
 >
@@ -112,13 +110,17 @@
 >
 > The last move runs on a bias you may have heard of: anchoring. Once an answer is in your head, your thinking bends around it. You cannot unread a suggestion.
 >
-> That's the explanation the radiologist researchers offered for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Each radiologist read a suggested diagnosis first. [F-009](https://www.nature.com/articles/s41746-021-00385-9) After that, they were checking the suggestion—not reading the scan fresh. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> Salespeople have known this one forever. It is half of marketing. A price tag says, "Was ninety-nine. Now forty-nine." Is forty-nine a good price? You have no idea. But ninety-nine already told you how to feel about it. The first number does your thinking before you start. And in this game, the AI's answer is your first price tag.
+>
+> And anchoring is the explanation the radiologist researchers offered for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Each radiologist read a suggested diagnosis first. [F-009](https://www.nature.com/articles/s41746-021-00385-9) After that, they were checking the suggestion—not reading the scan fresh. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
 > Now put all four moves together. You framed the question. The AI agreed. The answer came back polished, with a machine label. And now it sits in your head, anchored, dressed as an outside opinion. I call this the borrowed-authority loop. You lend the AI your premise, and it comes back looking like independent evidence.
 >
 > The machine didn't give you a second opinion. It gave your first opinion a software update.
 >
-> And this is not just a theory. In an experiment published in *Nature Human Behaviour*, people judged whether sets of faces looked happier or sadder. [F-006](https://www.nature.com/articles/s41562-024-02077-2) After each judgment, they saw an AI answer and could revise their own. [F-006](https://www.nature.com/articles/s41562-024-02077-2) You'd hope one biased answer stays one bad suggestion. It didn't. Over repeated rounds, the biased AI pushed people's judgments further in the same direction. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Accurate AI actually improved them. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> And this is not just a theory. In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. [F-006](https://www.nature.com/articles/s41562-024-02077-2) People looked at a group of faces on a screen. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Their job was to judge whether the group looked more happy or more sad. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Then an AI gave its answer, and they could revise their own. [F-006](https://www.nature.com/articles/s41562-024-02077-2) New faces, next round, again and again.
+>
+> You'd hope one biased answer stays one bad suggestion. It didn't. Their AI leaned one way, and round after round, people's judgments drifted further that same way. [F-006](https://www.nature.com/articles/s41562-024-02077-2) The answer didn't just sit in their heads. It steered the next judgment, and the next, a little further each time. That is the loop closing. And when the AI was accurate instead, people's judgments actually improved. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
 > So no—AI doesn't always make us worse. But a model's mistake can quietly become part of your next judgment. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
@@ -146,7 +148,11 @@
 
 > So—can AI talk you into the dumbest decision of your life? It can. If you keep grading it on applause.
 >
-> And the game doesn't only run on machines. A consultant who returns your framing with confidence. A feed that echoes your views back at you. A friend who always says you're right. Same game, same four moves, same four questions.
+> And these four moves were not invented by AI. Humans have played them on each other forever. The AI plays without wanting anything—but some people play for a living.
+>
+> Politicians never ask whether you want their plan. They ask whether you are with them or against your country—two doors, their menu. Salespeople agree with every word you say while they walk you toward the expensive shelf. An insurance agent sells you a payment plan dressed as a Family Protection Framework.
+>
+> Same game, same four moves, same four questions.
 >
 > The goal was never to make AI disagree with you. The goal is to see what your first question made invisible.
 >
