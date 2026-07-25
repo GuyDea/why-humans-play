@@ -1357,3 +1357,26 @@ were less specific or muddy at that size.
 `apple-touch-icon.png`, and `script-creator/app/src/index.html` (committed separately).
 `BRAND.md` and other steering remain unchanged because this applies existing brand
 palette and mark doctrine to one app surface and sets no new brand rule.
+
+## 2026-07-25 — Episode 1 beat 1 closes on its own lesson
+
+**Decision:** In the Episode 1 prototype, beat 1 keeps the developed radiologist case but
+acknowledges the hook's already-revealed result instead of re-revealing it, cuts the
+goalkeeper plant sentence, voices the explicit lesson in place — suspicion by itself does
+not change what you do; it needs a prepared question, and the four counter-questions are
+those prepared questions — and leaves the real-AI question open; the Anthropic finding and
+the sycophancy acknowledgment move into Move two, which now answers that question.
+
+**Rationale:** Martin reviewed beat 1 as a long prelude with no tangible lesson at its
+point of delivery, whose Anthropic passage instantly paid off the open question with a
+fact the target viewer already owns. The rework keeps the radiologist case where the
+anti-skip intro contract requires it and where three later callbacks depend on it, but
+states its lesson explicitly inside beat 1 and relocates the Anthropic evidence to the
+move it actually supports. A "Trick" rename for "Move" was discussed and not adopted; the
+four-moves game naming stands.
+
+**Documents:** `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+(narration and planning notes, branch `episode-01-beat1-rework`) and this ledger.
+`BRAND.md` and `whp-youtube/STEERING.md` remain unchanged because this applies existing
+narration doctrine inside one episode artifact and sets no channel rule; the separate
+canonical Episode 1 launch-sequence conflict noted on 2026-07-24 stays open.
