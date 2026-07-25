@@ -9,10 +9,12 @@ import {
 import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
 import type {
+  DaemonClient,
   OperationListResponse,
   OperationRecord,
 } from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
+import { StudioSession } from '../studio-session';
 import {
   AgentConsole,
   AgentConsoleModel,
@@ -21,6 +23,15 @@ import {
   type AgentConsoleTracker,
   type StudioConsoleEntry,
 } from './agent-console';
+
+function opSummary(id: string) {
+  return {
+    id, operation: 'review' as const, state: 'running' as const, createdAt: '',
+    finishedAt: null, stalled: false, usageAvailable: 0 as const,
+    inputTokens: null, cachedInputTokens: null, outputTokens: null,
+    reasoningOutputTokens: null,
+  };
+}
 
 interface Meta {
   operation: string;
@@ -542,6 +553,57 @@ describe('AgentConsoleModel', () => {
     } finally {
       vi.useRealTimers();
       if (attached) application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
+});
+
+describe('AgentConsole focusOperationId', () => {
+  it('loads the operation named by focusOperationId', async () => {
+    const getOp = vi.fn(async (id: string): Promise<OperationRecord> => ({
+      id, operation: 'review', state: 'running', stalled: false,
+      envelopeJson: '{}', jobDir: '', threadId: null, retryOf: null,
+      resumedFrom: null, createdAt: '', startedAt: null, finishedAt: null,
+      inputTokens: null, cachedInputTokens: null, outputTokens: null,
+      reasoningOutputTokens: null, usageAvailable: 0, error: null,
+      inputs: {}, operationLessons: [],
+    }));
+    const client = {
+      listOps: vi.fn(async () => ({
+        operations: [opSummary('op-1'), opSummary('op-2')],
+      })),
+      getOp,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const session = new StudioSession(client as unknown as DaemonClient);
+    const model = new AgentConsoleModel(session);
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    const clientNode = component.instance.client[ɵSIGNAL] as
+      ɵInputSignalNode<typeof client, typeof client>;
+    clientNode.applyValueToInputSignal(clientNode, client);
+    const focusNode = component.instance.focusOperationId[ɵSIGNAL] as
+      ɵInputSignalNode<string | null, string | null>;
+    focusNode.applyValueToInputSignal(focusNode, 'op-2');
+
+    try {
+      application.attachView(component.hostView);
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(getOp).toHaveBeenCalledWith('op-2'));
+    } finally {
+      application.detachView(component.hostView);
       component.destroy();
       application.destroy();
       host.remove();
