@@ -253,7 +253,58 @@ export const HELP_MASTHEAD: readonly HelpComponent[] = [
   },
 ];
 
-export const HELP_FULLRUN: readonly HelpComponent[] = [];
+export const HELP_FULLRUN: readonly HelpComponent[] = [
+  {
+    id: 'fullrun.launcher',
+    title: 'Full topic run',
+    summary:
+      'Runs the topic-selection skill’s full protocol and renders its work; durable runs ' +
+      'are re-selectable. The skill owns the research, gates, scoring, and recommendation — ' +
+      'this surface only transports inputs and shows output.',
+    controls: [
+      'Refresh runs / Select run — reload durable run history and load a saved run’s snapshot; a still-running run resumes polling.',
+      'Starting territory + Constraints — the run inputs; Starting territory is required.',
+      'Launch full run — starts the run and polls until it finishes.',
+      'Checklist and Research report — the live protocol steps and the returned report (read-only).',
+    ],
+  },
+  {
+    id: 'fullrun.shortlist',
+    title: 'Shortlist',
+    summary:
+      'The scored candidate board from a completed run. Sort by total or any criterion; ' +
+      'each candidate can carry six-gate chips.',
+    controls: [
+      'Column-header buttons — sort by Total, Demand, Opening, Package, Satisfaction, WHP, Evidence, or Feasibility.',
+      'Test packages — start a focused package test for that candidate, one at a time.',
+    ],
+    unlockedBy: 'Appears only when the run produced a structured summary.',
+  },
+  {
+    id: 'fullrun.packages',
+    title: 'Packaging directions',
+    summary:
+      'The run’s packaging table plus the focused package tester for a finalist. Each ' +
+      'saved test lists three promises and whether they survive honestly.',
+    controls: [
+      'Use this package — selects a winning direction from a saved test; one selection per test.',
+    ],
+    unlockedBy: 'The focused tester appears after Test packages is pressed on a candidate.',
+  },
+  {
+    id: 'fullrun.handoff',
+    title: 'Winner & handoff',
+    summary:
+      'The winner card and the acceptance-gate handoff that creates a Studio draft. ' +
+      'Handoffs are durable and resumable.',
+    controls: [
+      'Preview handoff — prepares the selected-topic brief; needs a winner with subject and angle.',
+      'Confirm handoff — creates the draft, writes the brief, records the pipeline milestone, promotes the idea, and opens the draft in Studio.',
+      'Resume handoff — continues an incomplete handoff from its stored state.',
+    ],
+    unlockedBy: 'Requires a selected durable run before confirming.',
+  },
+];
 
 export const HELP_GLOSSARY: readonly GlossaryEntry[] = [
   {
