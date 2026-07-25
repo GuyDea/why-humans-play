@@ -1254,3 +1254,38 @@ app-welcome-page .skill-pointers code {
     gap: 0.25rem;
   }
 }
+
+/* Interactive Help mode: region outline + corner cue (see help-target.directive.ts) */
+.help-target {
+  position: relative;
+  outline: 1px dashed rgba(59, 59, 59, 0.45);
+  outline-offset: 2px;
+}
+
+.help-target--selected {
+  outline: 2px solid #aa0a0a;
+}
+
+.help-target-cue {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 5;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #aa0a0a;
+  border-radius: 50%;
+  background: #f8f8f8;
+  color: #aa0a0a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.help-target-cue:hover,
+.help-target-cue:focus-visible {
+  background: #aa0a0a;
+  color: #f8f8f8;
+}
