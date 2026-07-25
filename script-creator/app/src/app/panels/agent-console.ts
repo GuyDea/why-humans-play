@@ -649,15 +649,20 @@ export class AgentConsole implements OnInit, OnDestroy {
   private refreshGeneration = 0;
   private detailGeneration = 0;
   private destroyed = false;
+  private lastFocus: string | null = null;
 
   constructor() {
     effect(() => {
       const id = this.focusOperationId();
+      const ops = this.model().operations(); // keep tracked (reload-survival)
       if (!id) return;
-      this.selectedId.set(id);
-      void this.loadOperation(id);
-      const live = this.model().operations().find((op) => op.id() === id);
-      if (live) this.model().selectOperation(live);
+      if (id !== this.lastFocus) { // apply focus only on an actual change
+        this.lastFocus = id;
+        this.selectedId.set(id);
+        void this.loadOperation(id);
+      }
+      const live = ops.find((op) => op.id() === id);
+      if (live && this.selectedId() === id) this.model().selectOperation(live);
     });
   }
 
