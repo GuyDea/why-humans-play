@@ -292,6 +292,7 @@ function redactTransportFields(value: unknown): unknown {
     if (
       key === 'cwd'
       || key === 'codexBin'
+      || key === 'claudeBin'
       || key === 'jobDir'
       || key.toLowerCase().includes('nonce')
     ) {

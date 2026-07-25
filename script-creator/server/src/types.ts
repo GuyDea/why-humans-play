@@ -5,7 +5,9 @@ export interface JobEnvelope {
   sandbox: 'read-only' | 'workspace-write';
   outputSchema?: Record<string, unknown>;
   resumeThreadId?: string;
+  backend?: 'codex' | 'claude'; // runner backend; default 'codex'
   codexBin?: string;   // test override; default 'codex'
+  claudeBin?: string;  // test override; default 'claude'
   graceMs?: number;    // cancel escalation grace; default 5000
   model?: string;      // codex -m override; default global codex config
   effort?: string;     // codex model_reasoning_effort override

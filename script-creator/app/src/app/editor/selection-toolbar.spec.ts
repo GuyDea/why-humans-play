@@ -321,7 +321,7 @@ describe('SelectionToolbar', () => {
     )!;
     expect(select).not.toBeNull();
     expect(Array.from(select.options).map((option) => option.textContent))
-      .toEqual(['Default', 'Sol · xhigh', 'Sol · medium']);
+      .toEqual(['Default', 'Sol · xhigh', 'Sol · medium', 'Opus 4.8', 'Fable 5']);
     expect(select.selectedIndex).toBe(0);
 
     select.value = '1';

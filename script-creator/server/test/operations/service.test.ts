@@ -22,6 +22,7 @@ import type { JobRecord } from '../../src/types.js';
 import { waitFor } from '../helpers.js';
 
 const FAKE_CODEX = join(import.meta.dirname, '..', 'fake-codex.mjs');
+const FAKE_CLAUDE = join(import.meta.dirname, '..', 'fake-claude.mjs');
 const REPO_ROOT = resolve(import.meta.dirname, '../../../..');
 const SCOPED_TIMEOUT_MS = 15 * 60 * 1000;
 
@@ -89,6 +90,7 @@ function makeFixture(
   extraEnv: Record<string, string> = {},
   codexBin?: string,
   fallbacks: { model?: string; effort?: string } = {},
+  claudeBin?: string,
 ): Fixture {
   const root = mkdtempSync(join(tmpdir(), 'operation-service-'));
   const binDir = join(root, 'bin');
@@ -102,6 +104,7 @@ function makeFixture(
     env: {
       ...extraEnv,
       FAKE_CODEX_MODE: mode,
+      FAKE_CLAUDE_MODE: 'happy',
       FAKE_CODEX_ATTEMPT_FILE: join(root, 'attempt.marker'),
       PATH: `${binDir}:${process.env.PATH ?? ''}`,
     },
@@ -112,6 +115,7 @@ function makeFixture(
     store,
     clock,
     codexBin,
+    claudeBin,
     model: fallbacks.model,
     effort: fallbacks.effort,
   });
@@ -208,6 +212,45 @@ describe('OperationService', () => {
 
     const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
     expect(envelope.codexBin).toBe(codexBin);
+  });
+
+  it('routes a Claude model id onto the claude backend and runs it end to end', async () => {
+    const claudeBin = `${process.execPath} ${FAKE_CLAUDE}`;
+    const fixture = makeFixture('happy', {}, undefined, {}, claudeBin);
+    const id = submit(
+      fixture,
+      'generate-architecture',
+      { topic_brief: 'A queue is a game.', approved_lessons: [], user_constraints: '' },
+      { model: 'claude-opus-4-8', effort: 'high' },
+    );
+
+    await terminal(fixture, id);
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.backend).toBe('claude');
+    expect(envelope.claudeBin).toBe(claudeBin);
+    expect(envelope.model).toBe('claude-opus-4-8');
+    expect(envelope.effort).toBe('high');
+    // The claude backend produced final-message.txt (it has no `-o`).
+    expect(fixture.service.result(id)).toEqual({
+      kind: 'raw',
+      markdown: 'OK-CLAUDE',
+    });
+  });
+
+  it('keeps a gpt model id on the codex backend', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original passage.' },
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
+
+    await terminal(fixture, id);
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.backend).toBe('codex');
   });
 
   it('places requested model and effort on the submitted envelope and record', async () => {
@@ -309,6 +352,65 @@ describe('OperationService', () => {
     const resumed = await terminal(fixture, resumedId);
     const envelope = JSON.parse(resumed.envelopeJson);
     expect(envelope.effort).toBe('medium');
+  });
+
+  it('rejects resuming a claude operation with a codex model override', async () => {
+    const claudeBin = `${process.execPath} ${FAKE_CLAUDE}`;
+    const fixture = makeFixture('happy', {}, undefined, {}, claudeBin);
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original.' },
+      { model: 'claude-opus-4-8', effort: 'high' },
+    );
+    await operationTerminal(fixture, id);
+    expect(fixture.store.activeAttempt(id)!.threadId).toBeTruthy();
+
+    // A gpt override would flip the backend and hand the claude session id to
+    // codex; that doomed `codex exec resume <uuid>` run is rejected up front.
+    expect(() => fixture.service.submit(
+      'rewrite-selection',
+      { selection: 'Fresh.' },
+      { resumeOf: id, model: 'gpt-5.6-sol' },
+    )).toThrow(/cannot resume a claude operation with a codex model/);
+  });
+
+  it('resumes a claude operation onto the claude backend for no or same-backend overrides', async () => {
+    const claudeBin = `${process.execPath} ${FAKE_CLAUDE}`;
+    const fixture = makeFixture('happy', {}, undefined, {}, claudeBin);
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original.' },
+      { model: 'claude-opus-4-8', effort: 'high' },
+    );
+    await operationTerminal(fixture, id);
+    const parentThreadId = fixture.store.activeAttempt(id)!.threadId;
+    expect(parentThreadId).toBeTruthy();
+
+    // No override: pins the claude backend and inherits the parent's model.
+    const inheritedId = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Fresh.' },
+      { resumeOf: id },
+    );
+    const inherited = JSON.parse(fixture.store.get(inheritedId)!.envelopeJson);
+    expect(inherited.backend).toBe('claude');
+    expect(inherited.model).toBe('claude-opus-4-8');
+    expect(inherited.resumeThreadId).toBe(parentThreadId);
+
+    // Same-backend override: tunes the model while staying on claude.
+    const overriddenId = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Fresh.' },
+      { resumeOf: id, model: 'claude-fable-5' },
+    );
+    const overridden = JSON.parse(fixture.store.get(overriddenId)!.envelopeJson);
+    expect(overridden.backend).toBe('claude');
+    expect(overridden.model).toBe('claude-fable-5');
+    expect(overridden.resumeThreadId).toBe(parentThreadId);
   });
 
   it('returns the final Markdown for a raw operation', async () => {
