@@ -7,10 +7,15 @@ export interface ModelOption {
 }
 
 // This is the single place to edit when adding a selectable model/effort.
+// A Claude model id (Opus/Fable) routes the run onto the Claude Code CLI
+// backend; the gpt-* entries run on codex. Effort values must be accepted by
+// both the server validator and the target CLI (high/xhigh satisfy both).
 export const MODEL_OPTIONS: ModelOption[] = [
   { label: 'Default' }, // no override — codex uses its global configuration
   { label: 'Sol · xhigh', model: 'gpt-5.6-sol', effort: 'xhigh' },
   { label: 'Sol · medium', model: 'gpt-5.6-sol', effort: 'medium' },
+  { label: 'Opus 4.8', model: 'claude-opus-4-8', effort: 'high' },
+  { label: 'Fable 5', model: 'claude-fable-5', effort: 'high' },
 ];
 
 /**

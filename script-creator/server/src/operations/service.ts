@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { isClaudeModel } from '../backends/index.js';
 import type { JobStore } from '../job-store.js';
 import { jobPaths } from '../runner-status.js';
 import type { JobSupervisor } from '../supervisor.js';
@@ -117,6 +118,7 @@ export class OperationService {
   private readonly store: JobStore;
   private readonly clock: OperationClock;
   private readonly codexBin: string | undefined;
+  private readonly claudeBin: string | undefined;
   private readonly modelFallback: string | undefined;
   private readonly effortFallback: string | undefined;
   private readonly activity = new Map<string, Activity>();
@@ -129,6 +131,7 @@ export class OperationService {
     store: JobStore;
     clock?: OperationClock;
     codexBin?: string;
+    claudeBin?: string;
     model?: string;
     effort?: string;
   }) {
@@ -136,6 +139,7 @@ export class OperationService {
     this.store = opts.store;
     this.clock = opts.clock ?? SYSTEM_CLOCK;
     this.codexBin = opts.codexBin;
+    this.claudeBin = opts.claudeBin;
     this.modelFallback = opts.model;
     this.effortFallback = opts.effort;
     this.unsubscribeTerminal = this.store.onOperationTerminal(
@@ -257,6 +261,7 @@ export class OperationService {
     let resumeThreadId: string | undefined;
     let inheritedModel: string | undefined;
     let inheritedEffort: string | undefined;
+    let inheritedBackend: 'codex' | 'claude' | undefined;
     if (opts.resumeOf !== undefined) {
       const parentOperation = this.requireOperation(opts.resumeOf);
       if (parentOperation.draftId !== (opts.draftId ?? null)) {
@@ -284,9 +289,15 @@ export class OperationService {
       const priorEnvelope = JSON.parse(parent.envelopeJson) as {
         model?: string;
         effort?: string;
+        backend?: 'codex' | 'claude';
       };
       inheritedModel = priorEnvelope.model;
       inheritedEffort = priorEnvelope.effort;
+      // The parent's session id is backend-specific (a codex thread id vs a
+      // claude session UUID), so the resume is pinned to the parent's backend.
+      // Older envelopes predate the field; derive it from the parent model.
+      inheritedBackend = priorEnvelope.backend
+        ?? (isClaudeModel(priorEnvelope.model) ? 'claude' : 'codex');
     }
 
     // Explicit request wins; then a resumed operation inherits its prior
@@ -294,6 +305,27 @@ export class OperationService {
     // left unset so codex uses its global configuration.
     const model = opts.model ?? inheritedModel ?? this.modelFallback;
     const effort = opts.effort ?? inheritedEffort ?? this.effortFallback;
+    // A Claude model id routes the run onto the Claude Code CLI backend;
+    // everything else stays on codex. On resume the backend is pinned to the
+    // parent's: a same-backend model/effort override is fine, but an override
+    // that would flip the backend is rejected rather than handing the parent's
+    // session id to the wrong CLI (a doomed run, e.g. `codex exec resume
+    // <claude-uuid>`).
+    let backend: 'codex' | 'claude';
+    if (inheritedBackend !== undefined) {
+      if (
+        opts.model !== undefined
+        && isClaudeModel(opts.model) !== (inheritedBackend === 'claude')
+      ) {
+        const overrideBackend = isClaudeModel(opts.model) ? 'claude' : 'codex';
+        throw new Error(
+          `cannot resume a ${inheritedBackend} operation with a ${overrideBackend} model`,
+        );
+      }
+      backend = inheritedBackend;
+    } else {
+      backend = isClaudeModel(model) ? 'claude' : 'codex';
+    }
 
     const id = randomUUID();
     const createdAtMs = this.clock.now();
@@ -310,7 +342,9 @@ export class OperationService {
         ? definition.result.schema
         : undefined,
       resumeThreadId,
+      backend,
       codexBin: this.codexBin,
+      claudeBin: this.claudeBin,
       ...(model !== undefined ? { model } : {}),
       ...(effort !== undefined ? { effort } : {}),
     }, {

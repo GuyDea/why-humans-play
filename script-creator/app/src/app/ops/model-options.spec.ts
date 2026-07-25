@@ -6,6 +6,33 @@ import {
   type ModelOption,
 } from './model-options';
 
+describe('MODEL_OPTIONS', () => {
+  it('keeps the Default entry first with no override', () => {
+    expect(MODEL_OPTIONS[0]).toEqual({ label: 'Default' });
+  });
+
+  it('exposes the Claude Opus and Fable models with server- and CLI-accepted effort', () => {
+    const claudeEntries = MODEL_OPTIONS.filter(
+      (option) => option.model?.startsWith('claude'),
+    );
+    expect(claudeEntries).toEqual([
+      { label: 'Opus 4.8', model: 'claude-opus-4-8', effort: 'high' },
+      { label: 'Fable 5', model: 'claude-fable-5', effort: 'high' },
+    ]);
+    // high/xhigh are accepted by both the server validator and the Claude CLI.
+    for (const entry of claudeEntries) {
+      expect(['high', 'xhigh']).toContain(entry.effort);
+    }
+  });
+
+  it('retains the existing Sol codex entries', () => {
+    expect(MODEL_OPTIONS).toEqual(expect.arrayContaining([
+      { label: 'Sol · xhigh', model: 'gpt-5.6-sol', effort: 'xhigh' },
+      { label: 'Sol · medium', model: 'gpt-5.6-sol', effort: 'medium' },
+    ]));
+  });
+});
+
 describe('choiceForModelOption', () => {
   it('returns null for the Default (no-field) option', () => {
     expect(choiceForModelOption({ label: 'Default' })).toBeNull();

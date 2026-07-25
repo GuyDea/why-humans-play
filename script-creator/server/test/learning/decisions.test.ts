@@ -201,6 +201,7 @@ describe('mechanical decision projection', () => {
           cwd: '/tmp/private-worktree',
           sandbox: 'workspace-write',
           codexBin: '/tmp/fake-codex',
+          claudeBin: '/tmp/fake-claude',
           nonce: 'secret',
           model: 'gpt-5.6-sol',
           effort: 'xhigh',
@@ -213,7 +214,18 @@ describe('mechanical decision projection', () => {
       }),
     });
 
-    expect(projector.resolve('decision-1')).toEqual(expect.objectContaining({
+    const resolved = projector.resolve('decision-1');
+    // Transport-only fields are redacted from resolved decision context; the
+    // claude binary override must be stripped just like the codex one.
+    const resolvedEnvelope = (
+      resolved as { context: { operation: { envelope: Record<string, unknown> } } }
+    ).context.operation.envelope;
+    expect(resolvedEnvelope).not.toHaveProperty('codexBin');
+    expect(resolvedEnvelope).not.toHaveProperty('claudeBin');
+    expect(resolvedEnvelope).not.toHaveProperty('cwd');
+    expect(resolvedEnvelope).not.toHaveProperty('nonce');
+
+    expect(resolved).toEqual(expect.objectContaining({
       id: 'decision-1',
       note: 'Keep the concrete image.',
       context: expect.objectContaining({
