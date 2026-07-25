@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, computed, signal, type Signal } from '@angular/core';
 
 // A stored preference sets at least one of model/effort; each maps to an
 // independent codex flag, so model-only and effort-only choices are valid.
@@ -18,7 +18,13 @@ export interface ModelPreferenceStore extends ModelPreferenceReader {
 }
 
 export const MODEL_PREFERENCE_STORAGE_KEY = 'sc.model-preference.v1';
-const DEFAULT_KEY = 'default';
+
+/**
+ * The shared preference key the header selector and the editor selection
+ * toolbar both read/write, and that `get`/`watch` fall back to for any
+ * operation without its own choice.
+ */
+export const DEFAULT_PREFERENCE_KEY = 'default';
 
 type PreferenceMap = Record<string, ModelChoice>;
 
@@ -76,7 +82,19 @@ export class ModelPreferenceService implements ModelPreferenceReader {
 
   get(operation: string): ModelChoice | null {
     const map = this.preferences();
-    return map[operation] ?? map[DEFAULT_KEY] ?? null;
+    return map[operation] ?? map[DEFAULT_PREFERENCE_KEY] ?? null;
+  }
+
+  /**
+   * A reactive view of the effective choice for an operation, applying the same
+   * 'default' fallback as `get`. Lets components (e.g. the masthead selector)
+   * re-render whenever any writer updates the shared store.
+   */
+  watch(operation: string): Signal<ModelChoice | null> {
+    return computed(() => {
+      const map = this.preferences();
+      return map[operation] ?? map[DEFAULT_PREFERENCE_KEY] ?? null;
+    });
   }
 
   set(operation: string, choice: ModelChoice | null): void {

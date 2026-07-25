@@ -106,4 +106,25 @@ describe('ModelPreferenceService', () => {
 
     expect(service.get('default')).toBeNull();
   });
+
+  it('watch() returns a reactive signal that tracks default writes', () => {
+    const service = new ModelPreferenceService();
+    const choice = service.watch('default');
+
+    expect(choice()).toBeNull();
+
+    service.set('default', { model: 'gpt-5.6-sol', effort: 'xhigh' });
+    expect(choice()).toEqual({ model: 'gpt-5.6-sol', effort: 'xhigh' });
+
+    service.set('default', null);
+    expect(choice()).toBeNull();
+  });
+
+  it('watch() applies the default fallback for an operation without its own choice', () => {
+    const service = new ModelPreferenceService();
+    const choice = service.watch('review');
+
+    service.set('default', { model: 'gpt-5.6-sol', effort: 'medium' });
+    expect(choice()).toEqual({ model: 'gpt-5.6-sol', effort: 'medium' });
+  });
 });
