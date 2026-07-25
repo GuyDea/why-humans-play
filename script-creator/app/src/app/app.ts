@@ -15,6 +15,7 @@ import {
 } from '@angular/router';
 import { filter, type Subscription } from 'rxjs';
 import { HelpDrawer } from './help/help-drawer';
+import { MastheadModelSelector } from './masthead-model-selector';
 import { OnboardingState } from './onboarding/onboarding-state';
 
 @Component({
@@ -25,6 +26,7 @@ import { OnboardingState } from './onboarding/onboarding-state';
     RouterLinkActive,
     RouterOutlet,
     HelpDrawer,
+    MastheadModelSelector,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

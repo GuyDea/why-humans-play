@@ -12,7 +12,10 @@ import {
   choiceForModelOption,
   modelOptionIndex,
 } from '../ops/model-options';
-import { type ModelPreferenceStore } from '../ops/model-preference';
+import {
+  DEFAULT_PREFERENCE_KEY,
+  type ModelPreferenceStore,
+} from '../ops/model-preference';
 import type {
   BridgeLaunch,
   SelectionTarget,
@@ -59,8 +62,6 @@ export interface SelectionToolbarOptions {
   onError?: (error: unknown) => void;
   modelPreference?: ModelPreferenceStore;
 }
-
-const DEFAULT_PREFERENCE_KEY = 'default';
 
 const PROMPTS: Record<ToolbarPromptKind, string> = {
   customInstruction: 'What should the rewrite do?',

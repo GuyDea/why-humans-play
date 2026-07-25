@@ -53,6 +53,11 @@
   gap: 0.3rem;
 }
 
+.masthead .masthead-tools {
+  display: flex;
+  align-items: center;
+}
+
 .masthead a {
   border-bottom: 2px solid transparent;
   color: color-mix(in srgb, var(--whp-ground) 72%, transparent);
