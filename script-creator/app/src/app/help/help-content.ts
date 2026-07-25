@@ -10,9 +10,18 @@ export const HELP_ROUTES = [
 
 export type HelpRoute = typeof HELP_ROUTES[number];
 
-export interface HelpTopic {
+export interface HelpComponent {
+  id: string;
   title: string;
-  description: string;
+  summary: string;
+  controls: string[];
+  unlockedBy?: string;
+}
+
+export interface HelpPage {
+  title: string;
+  goal: string;
+  components: HelpComponent[];
 }
 
 export interface GlossaryEntry {
@@ -20,43 +29,93 @@ export interface GlossaryEntry {
   definition: string;
 }
 
-export const HELP_TOPICS: Record<HelpRoute, HelpTopic> = {
+export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
   '/': {
     title: 'Studio',
-    description:
-      'Studio opens working drafts. Its rails expose draft selection, revisions, architecture, narration controls, findings, production state, and pending milestones for the active draft.',
+    goal:
+      'Studio opens working drafts. Its rails expose draft selection, revisions, ' +
+      'architecture, narration controls, findings, production state, and pending ' +
+      'milestones for the active draft.',
+    components: [],
   },
   '/welcome': {
     title: 'Welcome',
-    description:
-      'Welcome explains the workbench surfaces and reads existing topic-run, pipeline, and draft state to show live first-episode progress.',
+    goal:
+      'Welcome explains the workbench surfaces and reads existing topic-run, ' +
+      'pipeline, and draft state to show live first-episode progress.',
+    components: [],
   },
   '/discover': {
     title: 'Discover',
-    description:
-      'Discover is a cold-start ideation surface that needs no seed idea. Supply audience and constraints, and the topic skill proposes subject-and-angle suggestions. Send ones you want to the Topics inbox, or launch a full researched run to hand off to a draft.',
+    goal:
+      'Discover is a cold-start ideation surface that needs no seed idea. Supply ' +
+      'audience and constraints, and the topic skill proposes subject-and-angle ' +
+      'suggestions. Send ones you want to the Topics inbox, or launch a full ' +
+      'researched run to hand off to a draft.',
+    components: [],
   },
   '/topics': {
     title: 'Topics',
-    description:
-      'Topics stores captured ideas, topic operations, candidate boards, package tests, durable run history, and the explicit handoff that creates a Studio draft.',
+    goal:
+      'Topics stores captured ideas, topic operations, candidate boards, package ' +
+      'tests, durable run history, and the explicit handoff that creates a Studio draft.',
+    components: [],
   },
   '/pipeline': {
     title: 'Pipeline',
-    description:
-      'Pipeline is a read-only lifecycle board. Each card opens the working draft in Studio or the repository-backed topic material in Topics.',
+    goal:
+      'Pipeline is a read-only lifecycle board. Each card opens the working draft ' +
+      'in Studio or the repository-backed topic material in Topics.',
+    components: [],
   },
   '/lessons': {
     title: 'Lessons',
-    description:
-      'Lessons shows captured decisions, distillation runs, reviewable lesson proposals, episode-local activation, and durable reconciliation handoffs.',
+    goal:
+      'Lessons shows captured decisions, distillation runs, reviewable lesson ' +
+      'proposals, episode-local activation, and durable reconciliation handoffs.',
+    components: [],
   },
   '/console': {
     title: 'Console',
-    description:
-      'Console lists durable operations and their state, events, usage, inputs, recovery controls, and supplied lesson provenance across the workbench.',
+    goal:
+      'Console lists durable operations and their state, events, usage, inputs, ' +
+      'recovery controls, and supplied lesson provenance across the workbench.',
+    components: [],
   },
 };
+
+export const HELP_MASTHEAD: readonly HelpComponent[] = [
+  {
+    id: 'masthead.nav',
+    title: 'Workbench navigation',
+    summary:
+      'The row of surfaces that make up the workbench. Each link opens one surface; ' +
+      'the active surface is underlined.',
+    controls: [
+      'Studio — the working draft: architecture, narration, production, and repository milestones.',
+      'Discover — cold-start ideation with no seed; proposes subjects and angles.',
+      'Topics — captured ideas, topic runs, candidate boards, package tests, and the handoff that creates a draft.',
+      'Pipeline — a read-only board of every episode’s lifecycle stage.',
+      'Lessons — captured decisions and the lesson proposals distilled from them.',
+      'Console — durable operation history, telemetry, and recovery controls.',
+      'Welcome — orientation and a live first-episode checklist.',
+    ],
+  },
+  {
+    id: 'masthead.model',
+    title: 'Default model',
+    summary:
+      'Sets the default model and effort that operations use across the workbench. It ' +
+      'writes the shared default preference the editor’s per-selection picker also reads.',
+    controls: [
+      'Default — no override; codex uses its global configuration.',
+      'Sol · xhigh — gpt-5.6-sol at xhigh effort.',
+      'Sol · medium — gpt-5.6-sol at medium effort.',
+    ],
+  },
+];
+
+export const HELP_FULLRUN: readonly HelpComponent[] = [];
 
 export const HELP_GLOSSARY: readonly GlossaryEntry[] = [
   {
@@ -132,6 +191,17 @@ export const EDITORIAL_METHOD = {
     },
   ],
 } as const;
+
+export function findHelpComponent(id: string): HelpComponent | undefined {
+  for (const route of HELP_ROUTES) {
+    const hit = HELP_PAGES[route].components.find((component) => component.id === id);
+    if (hit) return hit;
+  }
+  return (
+    HELP_MASTHEAD.find((component) => component.id === id)
+    ?? HELP_FULLRUN.find((component) => component.id === id)
+  );
+}
 
 export function helpRoute(url: string): HelpRoute {
   const path = url.split(/[?#]/u, 1)[0]?.replace(/\/+$/u, '') || '/';

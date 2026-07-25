@@ -14,7 +14,7 @@ import { filter, type Subscription } from 'rxjs';
 import {
   EDITORIAL_METHOD,
   HELP_GLOSSARY,
-  HELP_TOPICS,
+  HELP_PAGES,
   helpRoute,
 } from './help-content';
 
@@ -61,8 +61,8 @@ const FOCUSABLE_SELECTOR = [
             aria-atomic="true"
           >
             <p>On this page</p>
-            <h3>{{ topic().title }}</h3>
-            <p>{{ topic().description }}</p>
+            <h3>{{ page().title }}</h3>
+            <p>{{ page().goal }}</p>
           </section>
 
           <section class="help-glossary" aria-labelledby="glossary-heading">
@@ -108,7 +108,7 @@ export class HelpDrawer implements AfterViewInit, OnDestroy {
   private readonly routeState = signal(helpRoute(this.router.url));
   private readonly navigationSubscription: Subscription;
 
-  protected readonly topic = computed(() => HELP_TOPICS[this.routeState()]);
+  protected readonly page = computed(() => HELP_PAGES[this.routeState()]);
   protected readonly glossary = HELP_GLOSSARY;
   protected readonly editorialMethod = EDITORIAL_METHOD;
 
