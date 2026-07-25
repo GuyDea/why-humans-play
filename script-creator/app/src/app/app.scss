@@ -1,5 +1,7 @@
 .masthead {
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
   display: flex;
   min-height: 3.75rem;
   align-items: center;
@@ -61,6 +63,22 @@
   text-decoration: none;
 }
 
+.masthead .help-trigger {
+  border: 1px solid color-mix(in srgb, var(--whp-ground) 34%, transparent);
+  padding: 0.38rem 0.6rem;
+  color: var(--whp-ground);
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.masthead .help-trigger:hover,
+.masthead .help-trigger[aria-expanded='true'] {
+  border-color: var(--whp-accent);
+  background: color-mix(in srgb, var(--whp-ground) 8%, transparent);
+}
+
 .masthead a:hover,
 .masthead a.active {
   border-bottom-color: var(--whp-accent);
@@ -81,5 +99,6 @@
 
   .masthead nav {
     align-self: stretch;
+    flex-wrap: wrap;
   }
 }

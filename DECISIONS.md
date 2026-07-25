@@ -1322,3 +1322,20 @@ early episodes" law is unchanged as channel doctrine.
 
 **Documents:** `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
 (planning notes updated); `whp-youtube/STEERING.md` deliberately unchanged.
+
+## 2026-07-25 — Keep Script Creator Help alongside the active app
+
+**Decision:** Script Creator Help is a labelled non-modal slide-over below the masthead
+that moves focus inside on open, closes on Escape, restores focus to the Help button on
+close, and leaves the masthead and routed page interactive without a focus trap or
+full-page backdrop so its route-aware context can update during navigation.
+
+**Rationale:** The modal drawer covered the right-aligned masthead navigation and trapped
+focus, preventing the alongside-app navigation that the route-aware “On this page”
+content is meant to support.
+
+**Documents:** `docs/superpowers/plans/2026-07-25-script-creator-onboarding.md` and this
+ledger. `BRAND.md`, `whp-youtube/STEERING.md`, and the accepted Script Creator
+requirements and technical design remain unchanged because this decision corrects the
+interaction contract of an existing internal workbench aid without changing brand,
+editorial, or application architecture.

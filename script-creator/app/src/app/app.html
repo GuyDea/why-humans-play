@@ -16,7 +16,23 @@
     <a routerLink="/pipeline" routerLinkActive="active">Pipeline</a>
     <a routerLink="/lessons" routerLinkActive="active">Lessons</a>
     <a routerLink="/console" routerLinkActive="active">Console</a>
+    <a routerLink="/welcome" routerLinkActive="active">Welcome</a>
+    <button
+      id="help-trigger"
+      class="help-trigger"
+      type="button"
+      aria-label="Open help"
+      aria-controls="script-creator-help"
+      [attr.aria-expanded]="helpOpen()"
+      (click)="openHelp()"
+    >
+      Help
+    </button>
   </nav>
 </header>
 
 <router-outlet />
+
+@if (helpOpen()) {
+  <app-help-drawer (helpClose)="closeHelp()" />
+}

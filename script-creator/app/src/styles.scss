@@ -1028,3 +1028,229 @@ app-narration-actions {
     width: 100%;
   }
 }
+
+app-welcome-page .skill-pointers {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--whp-line-strong);
+  padding-top: 1rem;
+}
+
+app-welcome-page .skill-pointers h3 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+app-welcome-page .skill-pointers dl {
+  display: grid;
+  gap: 0.8rem;
+  margin-bottom: 0;
+}
+
+app-welcome-page .skill-pointers dl > div,
+app-welcome-page .skill-pointers dd {
+  display: grid;
+  gap: 0.25rem;
+}
+
+app-welcome-page .skill-pointers dt {
+  color: var(--whp-accent);
+  font-size: 0.7rem;
+  font-weight: 820;
+}
+
+app-welcome-page .skill-pointers dd {
+  margin: 0;
+}
+
+app-welcome-page .skill-pointers code {
+  overflow-wrap: anywhere;
+  color: var(--whp-ink);
+  font-family: var(--whp-font-mono);
+  font-size: 0.62rem;
+}
+
+.help-drawer {
+  position: fixed;
+  inset-block-start: var(--sc-masthead-height, 3.75rem);
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  z-index: 900;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(42rem, calc(100vw - 2rem));
+  border-left: 1px solid var(--whp-line-strong);
+  box-shadow: -1.5rem 0 3rem color-mix(in srgb, var(--whp-ink) 22%, transparent);
+  color: var(--whp-ink);
+  background: var(--whp-ground);
+  animation: help-drawer-in 190ms ease-out;
+}
+
+.help-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 3px solid var(--whp-ink);
+  padding: 1rem clamp(1rem, 4vw, 1.75rem);
+  background: var(--whp-surface);
+}
+
+.help-drawer-header p,
+.help-section-heading > p,
+.help-topic > p:first-child {
+  margin: 0 0 0.25rem;
+  color: var(--whp-accent);
+  font-size: 0.6rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.help-drawer :where(h2, h3, p, dl) {
+  margin-top: 0;
+}
+
+.help-drawer h2 {
+  margin-bottom: 0;
+  font-family: var(--whp-font-editor);
+  font-size: 1.8rem;
+  font-weight: 520;
+}
+
+.help-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid var(--whp-line-strong);
+  padding: 0.4rem 0.55rem;
+  color: var(--whp-ink);
+  background: var(--whp-ground);
+  cursor: pointer;
+  font-size: 0.66rem;
+  font-weight: 800;
+}
+
+.help-close > span:first-child {
+  color: var(--whp-accent);
+  font-family: var(--whp-font-editor);
+  font-size: 1.1rem;
+  line-height: 0.7;
+}
+
+.help-drawer-scroll {
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.help-topic,
+.help-glossary,
+.help-method {
+  padding: clamp(1rem, 4vw, 1.75rem);
+}
+
+.help-topic {
+  border-bottom: 1px solid var(--whp-line-strong);
+  background: var(--whp-panel);
+}
+
+.help-topic h3 {
+  margin-bottom: 0.45rem;
+  font-family: var(--whp-font-editor);
+  font-size: clamp(1.5rem, 3vw, 2.25rem);
+  font-weight: 520;
+}
+
+.help-topic > p:last-child,
+.help-method > p {
+  margin-bottom: 0;
+  color: var(--whp-muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.help-section-heading {
+  border-bottom: 1px solid var(--whp-line-strong);
+  padding-bottom: 0.7rem;
+}
+
+.help-section-heading h3 {
+  margin-bottom: 0;
+  font-family: var(--whp-font-editor);
+  font-size: 1.3rem;
+  font-weight: 540;
+}
+
+.help-glossary dl,
+.help-method dl {
+  display: grid;
+  margin-bottom: 0;
+}
+
+.help-glossary dl > div,
+.help-method dl > div {
+  display: grid;
+  grid-template-columns: minmax(7rem, 0.35fr) minmax(0, 1fr);
+  gap: 1rem;
+  border-bottom: 1px solid var(--whp-line);
+  padding: 0.75rem 0;
+}
+
+.help-glossary dt,
+.help-method dt {
+  color: var(--whp-ink);
+  font-family: var(--whp-font-mono);
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.help-glossary dd,
+.help-method dd {
+  margin: 0;
+  color: var(--whp-muted);
+  font-size: 0.72rem;
+  line-height: 1.55;
+}
+
+.help-method {
+  border-top: 3px solid var(--whp-ink);
+  background: var(--whp-surface);
+}
+
+.help-method > p {
+  margin: 1rem 0;
+}
+
+.help-method dd {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.help-method code {
+  overflow-wrap: anywhere;
+  color: var(--whp-ink);
+  font-family: var(--whp-font-mono);
+  font-size: 0.62rem;
+}
+
+@keyframes help-drawer-in {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 34rem) {
+  .help-drawer {
+    width: 100vw;
+  }
+
+  .help-glossary dl > div,
+  .help-method dl > div {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+}

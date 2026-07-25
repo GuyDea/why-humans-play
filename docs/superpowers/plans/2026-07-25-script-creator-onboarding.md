@@ -79,16 +79,19 @@ pattern), so there is no schema migration.
   every route has a topic and that the copy contains no editorial-rule phrasing
   (a denylist guard: e.g. no "you should"/"make sure to" imperatives aimed at
   script quality) so the boundary can't silently erode.
-- [ ] `HelpDrawer`: an accessible slide-over (focus trap, Esc to close,
-  `aria-modal`, labelled) that shows the current route's topic, the glossary, and
-  the editorial-method pointers. Driven by the active route.
+- [ ] `HelpDrawer`: an accessible, labelled non-modal slide-over positioned below
+  the masthead. It moves focus inside on open, closes on Esc, restores focus to
+  Help on close, and leaves the masthead and routed page interactive so the
+  current route's topic can update while it remains open. It shows the glossary
+  and editorial-method pointers and has no focus trap or full-page backdrop.
 - [ ] Masthead: a **Help** button in `app.html` toggles the drawer via a signal
   in `App`; the drawer host lives in the shell so it overlays every route.
 - [ ] `help-composition.spec.ts` (real router + App shell + HelpDrawer + stub):
   open from the masthead → the on-this-page topic matches the current route →
-  navigate to another route with the drawer open → topic updates → glossary and
-  skill pointers render → Esc/close returns focus to the Help button. Keyboard
-  order, labels, and `aria-live`/`aria-modal` covered.
+  click a real, unobscured masthead route link with the drawer open → topic
+  updates → glossary and skill pointers render → Esc/close returns focus to the
+  Help button. Keyboard order, labels, `aria-live`, and non-modal semantics
+  covered.
 
 **Commit:** `feat(script-creator): help drawer with per-page context and a glossary`
 
