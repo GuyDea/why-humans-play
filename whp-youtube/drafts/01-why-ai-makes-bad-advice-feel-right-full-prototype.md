@@ -20,21 +20,17 @@
 >
 > So if distrust protects you, one thing should happen. The radiologists who thought an AI wrote their diagnoses should catch more of the planted mistakes. Right?
 >
-> Yeah… no. They trusted the AI-labeled diagnoses less. [F-009](https://www.nature.com/articles/s41746-021-00385-9) And they caught exactly as many planted mistakes as the other group. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+> Well, you already know the ending—I told you at the start. But here is exactly how it failed. They trusted the AI-labeled diagnoses less. [F-009](https://www.nature.com/articles/s41746-021-00385-9) And they caught exactly as many planted mistakes as the other group. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
-> Their distrust was like a goalkeeper who watches the shot come in—and never dives. Remember that goalkeeper. By the end of this video, he's going to dive.
+> Their distrust was like a goalkeeper who watches the shot come in—and never dives.
 >
-> Distrust is a feeling. Checking is a behavior. And in that experiment, the feeling showed up alone. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
->
-> Now, the radiologists proved one thing. Feeling suspicious does not automatically change what you do. But no AI was involved—the experiment only tested how people react to the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question is still open. When the AI is real, does it actually pull your answers in some direction?
->
-> It does. And the direction is toward you. In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548) Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548) Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548)
->
-> And that's the sycophancy you mentioned at the start. [F-001](https://arxiv.org/abs/2310.13548) You've probably heard that word a hundred times by now. But knowing the word is just like distrusting the label. It's a feeling of being protected—and it doesn't check anything by itself.
+> Distrust is a feeling. Checking is a behavior. And in that experiment, the feeling showed up alone. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So here is the real lesson. Suspicion by itself does not change what you do. It needs a prepared question to turn into an actual check. And that is what you're collecting in this video. Four counter-questions, one for each move.
 >
 > This matters because we ask AI real questions. "Should I quit my job?" "Should I end this relationship?" "Should I put my savings into this idea?" The answer comes back feeling like a second opinion. But your first opinion may have written half of it.
 >
-> The clearest way I can explain it is as a game with four moves. And the uncomfortable part is that the first move is yours.
+> One honest note, though. The radiologists never faced a real AI—only the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question is still open. When the AI is real, does it actually pull your answers in some direction? We're getting there. But that is not where this starts.
+>
+> The clearest way I can explain all of this is as a game with four moves. And the uncomfortable part is that the first move is yours.
 
 ## 2. Move one — you pick the menu
 
@@ -60,9 +56,11 @@
 
 > Move two. The AI is trained to agree.
 >
-> You already know this move's name—sycophancy, the one from your list. But the name is not the interesting part. The interesting part is why it happens.
+> You already know this move's name—sycophancy, the one from your list. But knowing the word is just like distrusting the label. It's a feeling of being protected—and it doesn't check anything by itself.
 >
-> Remember the Anthropic study from the beginning? The researchers also looked at where the agreement comes from. They analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
+> So let's answer the question the radiologists left open. When the AI is real, does it pull your answers in some direction? It does. In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548) Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548) Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548) The pull is real. And the direction is toward you.
+>
+> And here is the interesting part—where that pull comes from. The researchers also analyzed the human ratings that are used to train these models. [F-001](https://arxiv.org/abs/2310.13548) Answers that matched the user's beliefs were more likely to win human approval. [F-001](https://arxiv.org/abs/2310.13548)
 >
 > And approval is what the training runs on. People reward the answers they like, and that can teach the AI to treat agreement as good assistance. [F-001](https://arxiv.org/abs/2310.13548)
 >
@@ -183,15 +181,15 @@
 
 ### Timing and cut ledger (review-reversible)
 
-Current narration is 1,890 spoken words—approximately 11–12 minutes at a natural pace.
+Current narration is approximately 1,920 spoken words (beat-1 rework 2026-07-25: beat 1
+−46 words, Move two +73)—still approximately 11–12 minutes at a natural pace.
 Martin removed the word/runtime constraint for this episode (2026-07-25, see
 `DECISIONS.md`); the ledger below is optional polish, not a required trim. Candidates,
-roughly 500–700 words available:
+roughly 500–650 words available:
 
 - Beat 4 radiologist-objection check-in ("But wait—the radiologists trusted the AI less!" passage) — resolves a real viewer objection; cutting risks a comment-section gotcha.
 - Beat 5 favorite extra check (changed-fact test) — second tool in one beat; could move to pinned comment/description.
 - Beat 7 transfer montage (consultant/feed/friend) — voices the architecture's transfer element; compress to one line rather than delete.
-- Beat 1 goalkeeper plant sentence ("Remember that goalkeeper…") — payoff still works unplanted, weaker.
 - Beat 3 "That doesn't mean the AI wants anything…" de-anthropomorphizing aside — compress to one sentence.
 - Beat 2 second hypothetical door ("Maybe there is no budget this year.") — keep one door.
 - Per-move outro bridges can each lose one sentence if the name cards carry the structure.
@@ -199,7 +197,13 @@ roughly 500–700 words available:
 ### Status
 
 - Narration prototype for creative review under the rev-2 architecture. Passed the
-  spoken-readability gate (228 sentences, no unresolved items) on 2026-07-25.
+  spoken-readability gate (236 sentences, no unresolved items) on 2026-07-25, re-run
+  after the beat-1 rework.
+- Beat 1 reworked on Martin's review (2026-07-25): the hook's spoiler is owned instead
+  of re-revealed; the goalkeeper plant sentence is cut (beat-6 payoff now unplanted);
+  the explicit checking-behaviors lesson is voiced inside beat 1; the Anthropic finding
+  and the sycophancy acknowledgment moved into Move two, which now answers the real-AI
+  question beat 1 leaves open.
 - Phase 2 (assignment contract, claim mapping, F-009 full evidence record incorporation,
   audits, validator) follows Martin's creative approval and runtime decision.
 - Personal-input decision remains open (`INPUT-REQUESTED` from prior session; adding a
