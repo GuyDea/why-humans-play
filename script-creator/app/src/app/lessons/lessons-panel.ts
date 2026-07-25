@@ -5,6 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import type { LessonDetail } from '../api/client';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { LessonsModel } from './model';
 
 type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
@@ -12,10 +13,15 @@ type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
 @Component({
   selector: 'app-lessons-panel',
   standalone: true,
+  imports: [HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="learning-grid">
-      <aside class="decision-rail" aria-labelledby="sessions-heading">
+      <aside
+        class="decision-rail"
+        aria-labelledby="sessions-heading"
+        appHelpTarget="lessons.decisions"
+      >
         <section>
           <header class="section-heading">
             <p>Decision windows</p>
@@ -60,7 +66,11 @@ type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
       </aside>
 
       <div class="review-column">
-        <section class="distill-console" aria-labelledby="distill-heading">
+        <section
+          class="distill-console"
+          aria-labelledby="distill-heading"
+          appHelpTarget="lessons.distillation"
+        >
           <div>
             <p class="eyebrow">Read-only skill run</p>
             <h2 id="distill-heading">Distill the decision window</h2>
@@ -120,7 +130,11 @@ type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
           </div>
         }
 
-        <section class="review-queue" aria-labelledby="review-heading">
+        <section
+          class="review-queue"
+          aria-labelledby="review-heading"
+          appHelpTarget="lessons.queue"
+        >
           <header class="queue-heading">
             <div>
               <p class="eyebrow">Martin-reviewed context</p>
@@ -251,7 +265,11 @@ type ConfirmAction = 'approve' | 'reject' | 'retire' | 'supersede';
               }
 
               @if (lesson.reconciliation; as reconciliation) {
-                <section class="handoff" aria-label="Durable reconciliation handoff">
+                <section
+                class="handoff"
+                aria-label="Durable reconciliation handoff"
+                appHelpTarget="lessons.reconcile"
+              >
                   <header>
                     <div>
                       <p class="eyebrow">External reconcile-whp handoff</p>

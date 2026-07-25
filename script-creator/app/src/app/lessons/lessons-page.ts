@@ -5,6 +5,7 @@ import {
   type OnDestroy,
   type OnInit,
 } from '@angular/core';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { STUDIO_SESSION } from '../studio-session';
 import { LessonsModel } from './model';
 import { LessonsPanel } from './lessons-panel';
@@ -12,7 +13,7 @@ import { LessonsPanel } from './lessons-panel';
 @Component({
   selector: 'app-lessons-page',
   standalone: true,
-  imports: [LessonsPanel],
+  imports: [LessonsPanel, HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="lessons-page" data-testid="lessons-page">
@@ -21,7 +22,7 @@ import { LessonsPanel } from './lessons-panel';
           <p>Editorial memory</p>
           <h1>Lessons remain proposals until Martin decides.</h1>
         </div>
-        <label for="lesson-draft">
+        <label for="lesson-draft" appHelpTarget="lessons.draftpicker">
           <span>Episode draft</span>
           <select
             id="lesson-draft"

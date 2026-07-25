@@ -284,7 +284,65 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
     goal:
       'Lessons shows captured decisions, distillation runs, reviewable lesson ' +
       'proposals, episode-local activation, and durable reconciliation handoffs.',
-    components: [],
+    components: [
+      {
+        id: 'lessons.draftpicker',
+        title: 'Episode draft',
+        summary:
+          'Chooses which episode draft’s decisions, sessions, and lessons the page shows.',
+        controls: [
+          'Episode draft — selects the draft; loading its data is disabled while a load is in flight.',
+        ],
+      },
+      {
+        id: 'lessons.decisions',
+        title: 'Decisions & sessions',
+        summary:
+          'The decision windows (sessions) and the exact decision feed for the selected draft. ' +
+          'Read-only provenance.',
+        controls: [],
+      },
+      {
+        id: 'lessons.distillation',
+        title: 'Distillation',
+        summary:
+          'Runs the read-only distillation skill over the open decision window to propose ' +
+          'lessons. Neither action runs on navigation or unload.',
+        controls: [
+          'Distill now — snapshots the open window and proposes lessons.',
+          'End session & distill — closes the current session’s cursor, then distills.',
+        ],
+        unlockedBy: 'Both need a selected draft and no run already in flight.',
+      },
+      {
+        id: 'lessons.queue',
+        title: 'Lesson review queue',
+        summary:
+          'Lesson proposals stay proposals until explicitly decided. Each card shows its ' +
+          'classification (episode-local or durable), state, evidence, and provenance. Saving ' +
+          'reviewed text does not approve it.',
+        controls: [
+          'Save review — stores edited lesson text without approving it.',
+          'Approve / Reject — record the decision; each routes through a confirmation step.',
+          'Predecessor lesson ID + Supersede — replace an existing lesson.',
+          'Retire — retire an approved lesson; blocked while repository provenance is unresolved.',
+        ],
+        unlockedBy: 'Available actions depend on the card’s state, and every action confirms first.',
+      },
+      {
+        id: 'lessons.reconcile',
+        title: 'Reconcile-whp handoff',
+        summary:
+          'For durable lessons, the external handoff to apply doctrine in the repository. ' +
+          'Script Creator does not edit or commit doctrine.',
+        controls: [
+          'Copy handoff — copies the prepared proposal to run externally.',
+          'I started external reconciliation — marks the handoff awaiting; the repository is unchanged.',
+          'Verify external commit — records the reviewed reconciliation commit hash.',
+        ],
+        unlockedBy: 'Appears on durable lessons that carry a reconciliation record.',
+      },
+    ],
   },
   '/console': {
     title: 'Console',
