@@ -66,6 +66,8 @@
 >
 > See the hidden game? You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
 >
+> And notice how we actually ask. Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room—the one you asked for, and the one the model was trained on. Your approval. Guess which one wins.
+>
 > That doesn't mean the AI wants anything. It's repeating a very human habit: say "you're right" first, and check reality later.
 >
 > Back to your boss question. The AI accepts "brilliant," accepts "ignoring," and builds sensible advice on top. And sensible is the dangerous part. Obvious nonsense gets inspected. "Document your achievements and explore your options" walks straight past security.
