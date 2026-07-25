@@ -327,6 +327,46 @@ describe('SelectionToolbar', () => {
     container.remove();
   });
 
+  it('toggles Lock to Unlock over a locked range and unlocks it', () => {
+    const { view, target, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+      nextId: () => 'lock-1',
+    });
+    toolbar.update();
+
+    // Unlocked selection: the toggle offers Lock.
+    expect(button(toolbar, 'lock').textContent).toBe('Lock');
+    expect(
+      toolbar.element.querySelector('button[data-action="unlock"]'),
+    ).toBeNull();
+
+    // Lock the selection, then the toggle must flip to Unlock over the same range.
+    button(toolbar, 'lock').click();
+    expect(getLocks(view.state)).toEqual([{ lockId: 'lock-1', ...target }]);
+    toolbar.update();
+    const unlock = toolbar.element.querySelector<HTMLButtonElement>(
+      'button[data-action="unlock"]',
+    );
+    expect(unlock).not.toBeNull();
+    expect(unlock!.textContent).toBe('Unlock');
+    expect(toolbar.element.querySelector('button[data-action="lock"]')).toBeNull();
+
+    // Unlock removes the lock and flips the toggle back to Lock.
+    unlock!.click();
+    expect(getLocks(view.state)).toEqual([]);
+    toolbar.update();
+    expect(button(toolbar, 'lock').textContent).toBe('Lock');
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('renders the model dropdown, persists a choice, and clears on Default', () => {
     const { view, container } = selectedEditor();
     const { bridge } = bridgeFixture();

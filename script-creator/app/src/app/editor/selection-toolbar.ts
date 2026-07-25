@@ -1,6 +1,8 @@
 import {
   addAnnotation,
+  getLocks,
   lockRange,
+  unlockRange,
   type EditorView,
 } from '@whp/script-creator-editor-core';
 import {
@@ -48,6 +50,7 @@ export type ToolbarAction =
   | 'alternatives'
   | 'custom'
   | 'lock'
+  | 'unlock'
   | 'annotate'
   | 'evidence';
 
@@ -84,6 +87,7 @@ export class SelectionToolbar {
   private readonly onError: (error: unknown) => void;
   private readonly modelPreference: ModelPreferenceStore | undefined;
   private alternativeCount: 2 | 3 = 2;
+  private lockButton!: HTMLButtonElement;
 
   private readonly handleMouseDown = (event: MouseEvent): void => {
     if (
@@ -154,6 +158,7 @@ export class SelectionToolbar {
     }
 
     this.element.hidden = false;
+    this.updateLockButton(target);
     const start = this.view.coordsAtPos(target.from);
     const end = this.view.coordsAtPos(target.to);
     const containerRect = this.container.getBoundingClientRect();
@@ -206,7 +211,7 @@ export class SelectionToolbar {
       alternativeCountSelect(),
       modelSelect(this.currentModelIndex()),
       actionButton('custom', 'Custom instruction'),
-      actionButton('lock', 'Lock'),
+      (this.lockButton = actionButton('lock', 'Lock')),
       actionButton('annotate', 'Annotate'),
       actionButton('evidence', 'Flag for evidence'),
     );
@@ -246,6 +251,9 @@ export class SelectionToolbar {
           break;
         case 'lock':
           this.lock(target);
+          break;
+        case 'unlock':
+          this.unlock(target);
           break;
         case 'annotate':
           this.annotate(target, 'reviewFinding', 'annotation');
@@ -311,6 +319,37 @@ export class SelectionToolbar {
       this.view.state,
       (transaction) => this.view.dispatch(transaction),
       { lockId: this.nextId(), ...target },
+    );
+  }
+
+  private unlock(target: SelectionTarget): void {
+    const lockIds = new Set(
+      this.locksOverlapping(target).map((lock) => lock.lockId),
+    );
+    for (const lockId of lockIds) {
+      unlockRange(
+        this.view.state,
+        (transaction) => this.view.dispatch(transaction),
+        lockId,
+      );
+    }
+  }
+
+  private locksOverlapping(
+    target: SelectionTarget,
+  ): ReturnType<typeof getLocks> {
+    return getLocks(this.view.state).filter(
+      (lock) => lock.from < target.to && lock.to > target.from,
+    );
+  }
+
+  private updateLockButton(target: SelectionTarget): void {
+    const locked = this.locksOverlapping(target).length > 0;
+    this.lockButton.dataset['action'] = locked ? 'unlock' : 'lock';
+    this.lockButton.textContent = locked ? 'Unlock' : 'Lock';
+    this.lockButton.setAttribute(
+      'aria-label',
+      locked ? 'Unlock selected passage' : 'Lock selected passage',
     );
   }
 
