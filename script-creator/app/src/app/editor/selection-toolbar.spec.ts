@@ -327,6 +327,46 @@ describe('SelectionToolbar', () => {
     container.remove();
   });
 
+  it('groups AI actions and annotations, with Count and Model in a trailing settings cluster', () => {
+    const { view, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    const store = { get: vi.fn(() => null), set: vi.fn() };
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+      modelPreference: store,
+    });
+    toolbar.update();
+
+    const groups = Array.from(
+      toolbar.element.querySelectorAll<HTMLElement>('.toolbar-group'),
+    );
+    expect(groups.map((group) => group.dataset['group'])).toEqual([
+      'actions',
+      'annotations',
+      'settings',
+    ]);
+
+    // The settings cluster is the last thing in the bar and holds both selects.
+    const settings = groups[2];
+    expect(toolbar.element.lastElementChild).toBe(settings);
+    expect(settings.querySelector('select[data-alternative-count]')).not.toBeNull();
+    expect(settings.querySelector('select[data-model-select]')).not.toBeNull();
+
+    // No settings controls leak into the action groups.
+    expect(groups[0].querySelector('select')).toBeNull();
+    expect(groups[0].textContent).toContain('Review');
+    expect(groups[0].textContent).toContain('Alternatives');
+    expect(groups[1].textContent).toContain('Custom instruction');
+    expect(groups[1].textContent).toContain('Flag for evidence');
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('toggles Lock to Unlock over a locked range and unlocks it', () => {
     const { view, target, container } = selectedEditor();
     const { bridge } = bridgeFixture();

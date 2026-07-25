@@ -708,13 +708,31 @@ app-full-run-panel .handoff-actions p {
   background: var(--whp-accent);
 }
 
-.selection-toolbar .alternative-count {
+.selection-toolbar .toolbar-group {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.selection-toolbar .toolbar-settings {
+  gap: 0.45rem;
+}
+
+.selection-toolbar .toolbar-divider {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  margin-inline: 0.15rem;
+  background: color-mix(in srgb, var(--whp-ground) 22%, transparent);
+}
+
+.selection-toolbar .alternative-count,
+.selection-toolbar .model-select {
   display: inline-flex;
   flex: none;
   align-items: center;
   gap: 0.25rem;
-  border-inline: 1px solid color-mix(in srgb, var(--whp-ground) 18%, transparent);
-  padding-inline: 0.4rem;
   color: color-mix(in srgb, var(--whp-ground) 72%, transparent);
   font-size: 0.58rem;
   font-weight: 750;

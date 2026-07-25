@@ -204,16 +204,25 @@ export class SelectionToolbar {
     toolbar.setAttribute('role', 'toolbar');
     toolbar.setAttribute('aria-label', 'Selected text actions');
 
+    this.lockButton = actionButton('lock', 'Lock');
     toolbar.append(
-      actionButton('review', 'Review'),
-      actionButton('rewrite', 'Rewrite'),
-      actionButton('alternatives', 'Alternatives'),
-      alternativeCountSelect(),
-      modelSelect(this.currentModelIndex()),
-      actionButton('custom', 'Custom instruction'),
-      (this.lockButton = actionButton('lock', 'Lock')),
-      actionButton('annotate', 'Annotate'),
-      actionButton('evidence', 'Flag for evidence'),
+      toolbarGroup('actions', [
+        actionButton('review', 'Review'),
+        actionButton('rewrite', 'Rewrite'),
+        actionButton('alternatives', 'Alternatives'),
+      ]),
+      toolbarDivider(),
+      toolbarGroup('annotations', [
+        actionButton('custom', 'Custom instruction'),
+        this.lockButton,
+        actionButton('annotate', 'Annotate'),
+        actionButton('evidence', 'Flag for evidence'),
+      ]),
+      toolbarDivider(),
+      toolbarGroup('settings', [
+        alternativeCountSelect(),
+        modelSelect(this.currentModelIndex()),
+      ]),
     );
     return toolbar;
   }
@@ -404,6 +413,24 @@ export class SelectionToolbar {
       choiceForModelOption(MODEL_OPTIONS[index]),
     );
   }
+}
+
+function toolbarGroup(
+  name: 'actions' | 'annotations' | 'settings',
+  children: HTMLElement[],
+): HTMLDivElement {
+  const group = document.createElement('div');
+  group.className = `toolbar-group toolbar-${name}`;
+  group.dataset['group'] = name;
+  group.append(...children);
+  return group;
+}
+
+function toolbarDivider(): HTMLSpanElement {
+  const divider = document.createElement('span');
+  divider.className = 'toolbar-divider';
+  divider.setAttribute('aria-hidden', 'true');
+  return divider;
 }
 
 function actionButton(
