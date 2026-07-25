@@ -36,7 +36,145 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
       'Studio opens working drafts. Its rails expose draft selection, revisions, ' +
       'architecture, narration controls, findings, production state, and pending ' +
       'milestones for the active draft.',
-    components: [],
+    components: [
+      {
+        id: 'studio.drafts',
+        title: 'Drafts library',
+        summary:
+          'Lists narration drafts and opens one into the writing surface. Opening a ' +
+          'draft loads its architecture and populates the page.',
+        controls: [
+          'Create draft — makes a blank narration draft from a title and optional slug; an empty title is rejected.',
+          'Draft card — opens that draft; the active card is highlighted.',
+          'Import — brings in existing Markdown from the Revisions & transfer rail.',
+        ],
+      },
+      {
+        id: 'studio.milestones',
+        title: 'Milestones',
+        summary:
+          'Staged Git commits for this episode’s repository, prepared by the daemon. Each ' +
+          'pending milestone carries an immutable commit message, a fixed file list, and a ' +
+          'diff. Nothing is committed until you confirm.',
+        controls: [
+          'Choose where this episode lives — repository work is blocked until a workspace exists. Pick the recommended managed branch (using the editable task name), or explicitly tick and confirm the current branch.',
+          'Refresh milestones — re-fetches repository status and the pending list.',
+          'Confirm this exact file list and immutable commit message — the per-milestone checkbox that arms its commit.',
+          'Commit milestone — commits the staged change; enabled only after that milestone’s confirm checkbox is ticked. There is no discard button — an unconfirmed milestone simply stays pending.',
+        ],
+        unlockedBy:
+          'A chosen workspace. Commit milestone additionally requires that milestone’s confirmation checkbox.',
+      },
+      {
+        id: 'studio.architecture',
+        title: 'Architecture',
+        summary:
+          'Generates, reviews, refines, and approves the episode’s section cards from the ' +
+          'stored brief. A status ribbon shows whether it needs architecture, is approved, ' +
+          'or is paused.',
+        controls: [
+          'Generate architecture — builds sections from the brief plus any supplied constraints.',
+          'Review architecture — runs a review pass; needs at least one section.',
+          'Accept proposal / Reject proposal — resolve a proposed section change; an optional reason can accompany it.',
+          'Refine section — applies an instruction to one section.',
+          'Approve architecture — locks the structure; enabled only with sections and no pending proposals.',
+          'Reopen / Resume — reopen an approved architecture (narration is preserved but must be reconciled) or resume a paused approval.',
+        ],
+        unlockedBy:
+          'Editing is disabled while an approval is locked or a saga is paused — Reopen or Resume first.',
+      },
+      {
+        id: 'studio.narration',
+        title: 'Narration actions',
+        summary:
+          'Turns approved architecture into whole-episode narration and moves it toward Promote.',
+        controls: [
+          'Generate episode — produces a whole-document proposal you accept or reject into the editor.',
+          'Mark narration reconciled — clears the reconciliation requirement left by a reopen.',
+          'Promote — hands the approved narration to production.',
+        ],
+        unlockedBy:
+          'Generate episode unlocks when architecture is approved. Promote additionally needs approved narration and no pending reconciliation.',
+      },
+      {
+        id: 'studio.editor',
+        title: 'Editor',
+        summary:
+          'The narration editor plus its floating tools, inline agent proposals, the agent ' +
+          'console, and a per-beat pacing rail. It autosaves shortly after edits.',
+        controls: [
+          'Selection toolbar — on a text selection: Review, Rewrite, Alternatives, a count and model picker, custom instruction, Lock, Annotate, and Flag for evidence.',
+          'Inline proposal — Accept, Reject, or Re-roll a drafted replacement; conflicts show base, current, and proposed.',
+          'Agent console — per-operation phase and telemetry, with Cancel and Re-roll.',
+          'Pacing rail — words against target for each beat.',
+        ],
+        unlockedBy:
+          'Editing and autosave are blocked while an architecture saga is pending (“Architecture action paused — resume or resolve first”).',
+      },
+      {
+        id: 'studio.production',
+        title: 'Production document',
+        summary:
+          'The staged Promote workflow: approve the complete narration, promote to Phase 2, ' +
+          'and run the validator before completing.',
+        controls: [
+          'Clean narration — hides production-only sections in the editor.',
+          'Approve complete narration — freezes the current narration; blocked by unsaved changes or an existing promotion.',
+          'Production target + Promote to Phase 2 — stages the production document; needs approved narration and a non-empty target.',
+          'Run validator / Complete Promote — validate the staged document; Complete unlocks only on a passing validator.',
+          'Personal input queue — integrate a supplied response, then accept or reject the resulting proposal.',
+        ],
+        unlockedBy:
+          'Each step gates the next: approve narration, then promote, then a passing validator, then complete.',
+      },
+      {
+        id: 'studio.brief',
+        title: 'Brief & approval',
+        summary:
+          'The factual boundary that feeds generation: topic, supplied facts, and claims the ' +
+          'draft must not invent. It autosaves on change.',
+        controls: [
+          'Topic, Factual anchors, Open unknowns — the editable boundary fields.',
+          'Creative phase — read-only here; it is set before an operation launches.',
+          'Legacy direction approval — read-only; complete-narration approval lives in the Production document panel.',
+        ],
+      },
+      {
+        id: 'studio.findings',
+        title: 'Review findings',
+        summary:
+          'A read-only, pinned list of review findings. Each shows a severity, the quoted ' +
+          'anchor text, and whether it is still anchored or orphaned (its original text was ' +
+          'removed). Blocking findings carry an accent border.',
+        controls: [],
+      },
+      {
+        id: 'studio.parking',
+        title: 'Variants & parking',
+        summary:
+          'Manages unresolved alternative-variant sets and keeps discarded (parked) variants ' +
+          'recoverable.',
+        controls: [
+          'Option button / Make active — choose which variant is active in a set.',
+          'Pick active — resolves the set to the active choice; the losers move to the parked list.',
+        ],
+        unlockedBy:
+          'Variant edits route through the editor and are ignored while narration is blocked.',
+      },
+      {
+        id: 'studio.revisions',
+        title: 'Revisions & transfer',
+        summary:
+          'The revision timeline with compare and restore, and the repository import/export bridge.',
+        controls: [
+          'Refresh — reloads the revision list; needs an active draft.',
+          'Compare checkboxes — select up to two revisions to see a word-level narration diff.',
+          'Restore — saves a past revision’s document as a new revision.',
+          'Import draft / Choose file — load Markdown into a draft.',
+          'Export active draft / Write artifact — export narration; artifact writes are limited to whp-youtube/topics/ or whp-youtube/drafts/.',
+        ],
+      },
+    ],
   },
   '/welcome': {
     title: 'Welcome',
