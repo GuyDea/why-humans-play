@@ -1,6 +1,7 @@
 export const HELP_ROUTES = [
   '/',
   '/welcome',
+  '/discover',
   '/topics',
   '/pipeline',
   '/lessons',
@@ -29,6 +30,11 @@ export const HELP_TOPICS: Record<HelpRoute, HelpTopic> = {
     title: 'Welcome',
     description:
       'Welcome explains the workbench surfaces and reads existing topic-run, pipeline, and draft state to show live first-episode progress.',
+  },
+  '/discover': {
+    title: 'Discover',
+    description:
+      'Discover is a cold-start ideation surface that needs no seed idea. Supply audience and constraints, and the topic skill proposes subject-and-angle suggestions. Send ones you want to the Topics inbox, or launch a full researched run to hand off to a draft.',
   },
   '/topics': {
     title: 'Topics',
