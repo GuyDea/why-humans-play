@@ -166,13 +166,18 @@ export class SelectionToolbar {
         containerRect.width - this.element.offsetWidth - 8,
       ),
     );
-    const preferredTop =
-      Math.min(start.top, end.top)
-      - containerRect.top
-      - this.element.offsetHeight
-      - 12;
+    // Prefer placing the toolbar above the selection. When there is no room
+    // above (a top-of-editor selection), place it below the selection instead
+    // of clamping it on top of the very text it acts on — otherwise the toolbar
+    // covers that paragraph and blocks re-selecting it.
+    const selectionTop = Math.min(start.top, end.top) - containerRect.top;
+    const selectionBottom = Math.max(start.bottom, end.bottom) - containerRect.top;
+    const aboveTop = selectionTop - this.element.offsetHeight - 12;
+    const preferredTop = aboveTop >= 8
+      ? aboveTop
+      : selectionBottom + 12;
     this.element.style.left = `${left}px`;
-    this.element.style.top = `${Math.max(8, preferredTop)}px`;
+    this.element.style.top = `${preferredTop}px`;
   }
 
   destroy(): void {
