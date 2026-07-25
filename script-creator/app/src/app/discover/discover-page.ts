@@ -13,6 +13,7 @@ import {
 } from '../ops/tracker';
 import { STUDIO_SESSION } from '../studio-session';
 import { HelpTargetDirective } from '../help/help-target.directive';
+import { ProcessingChip } from '../ops/processing-chip';
 import { FullRunPanel } from '../topics/full-run-panel';
 import {
   parseIdeateCards,
@@ -41,7 +42,7 @@ interface SuggestionCard {
 @Component({
   selector: 'app-discover-page',
   standalone: true,
-  imports: [FullRunPanel, HelpTargetDirective],
+  imports: [FullRunPanel, HelpTargetDirective, ProcessingChip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="discover-page" data-testid="discover-page">
@@ -90,6 +91,7 @@ interface SuggestionCard {
             ></textarea>
             <div class="launcher-actions">
               <span>No seed needed — this is the cold-start door.</span>
+              <sc-processing-chip [operations]="['ideate']" />
               <button
                 class="primary-action"
                 type="button"

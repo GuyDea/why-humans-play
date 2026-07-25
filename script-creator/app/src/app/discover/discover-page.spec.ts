@@ -2,8 +2,11 @@ import '@angular/compiler';
 import {
   createComponent,
   provideZonelessChangeDetection,
+  signal,
   type ApplicationRef,
   type ComponentRef,
+  type Provider,
+  type Signal,
 } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
@@ -19,6 +22,10 @@ import type {
   StreamEventsOptions,
 } from '../api/client';
 import { MODEL_PREFERENCE_STORAGE_KEY } from '../ops/model-preference';
+import {
+  ActiveOperationsService,
+  type ActiveOp,
+} from '../ops/active-operations.service';
 import { STUDIO_SESSION, StudioSession } from '../studio-session';
 import { DiscoverPage } from './discover-page';
 
@@ -107,6 +114,12 @@ class DiscoverClientStub {
     });
     return release;
   }
+}
+
+class ActiveOpsStub {
+  readonly active = signal<readonly ActiveOp[]>([]);
+  readonly activeOperations: Signal<readonly ActiveOp[]> = this.active;
+  ensureStarted(): void { /* no-op */ }
 }
 
 interface Mounted {
@@ -362,8 +375,30 @@ describe('DiscoverPage', () => {
   });
 });
 
+describe('Discover inline processing chip', () => {
+  it('renders the chip in the launcher while an ideate op runs', async () => {
+    const activeOps = new ActiveOpsStub();
+    activeOps.active.set([
+      { id: 'op-5', name: 'ideate', state: 'running', stalled: false },
+    ]);
+    const view = await mountDiscover(new DiscoverClientStub(), [
+      { provide: ActiveOperationsService, useValue: activeOps },
+    ]);
+    view.tick();
+
+    const chip = view.root.querySelector(
+      '.suggest-launcher sc-processing-chip [data-testid="processing-chip"]',
+    );
+    expect(chip).toBeTruthy();
+    expect(chip?.textContent).toContain('In Processing');
+
+    view.destroy();
+  });
+});
+
 async function mountDiscover(
   client = new DiscoverClientStub(),
+  extraProviders: Provider[] = [],
 ): Promise<Mounted> {
   const session = new StudioSession(client as unknown as DaemonClient);
   const application = await createApplication({
@@ -371,6 +406,7 @@ async function mountDiscover(
       provideZonelessChangeDetection(),
       provideRouter([]),
       { provide: STUDIO_SESSION, useValue: session },
+      ...extraProviders,
     ],
   });
   const root = document.createElement('div');
