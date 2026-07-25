@@ -349,7 +349,38 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
     goal:
       'Console lists durable operations and their state, events, usage, inputs, ' +
       'recovery controls, and supplied lesson provenance across the workbench.',
-    components: [],
+    components: [
+      {
+        id: 'console.list',
+        title: 'Operation history',
+        summary:
+          'Durable operations, newest activity first, each with a state chip. The list ' +
+          'refreshes every few seconds, and selecting one loads its full record.',
+        controls: [
+          'Operation button — selects an operation to inspect its stream.',
+        ],
+      },
+      {
+        id: 'console.detail',
+        title: 'Operation detail',
+        summary:
+          'The selected operation’s telemetry (input, cached, output, and reasoning tokens ' +
+          'and usage), the immutable supplied-lessons envelope, and its console entries. ' +
+          'Durable doctrine is repository-native, not supplied as envelope context.',
+        controls: [],
+        unlockedBy: 'Shown once an operation is selected.',
+      },
+      {
+        id: 'console.recovery',
+        title: 'Recovery controls',
+        summary: 'Cancel a live operation or re-roll a resumable one.',
+        controls: [
+          'Cancel — cancels an operation that is queued, running, or cancelling.',
+          'Re-roll — replays a resumable operation (done or guardrail phase) with one fewer hop; unavailable once the resume budget is spent.',
+        ],
+        unlockedBy: 'Each control is enabled only when the selected operation’s state allows it.',
+      },
+    ],
   },
 };
 

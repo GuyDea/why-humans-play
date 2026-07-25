@@ -16,6 +16,7 @@ import type {
   SseFrame,
 } from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
+import { HelpTargetDirective } from '../help/help-target.directive';
 
 export type StudioConsoleKind =
   | 'thread'
@@ -217,6 +218,7 @@ function stringValue(value: unknown): string {
 @Component({
   selector: 'app-agent-console',
   standalone: true,
+  imports: [HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="panel studio-panel" aria-labelledby="agent-console-heading">
@@ -233,7 +235,7 @@ function stringValue(value: unknown): string {
       }
 
       <div class="console-layout">
-        <nav aria-label="Operation history">
+        <nav aria-label="Operation history" appHelpTarget="console.list">
           @for (
             operation of operations();
             track operation.id
@@ -255,7 +257,7 @@ function stringValue(value: unknown): string {
         </nav>
 
         @if (selected(); as operation) {
-          <div class="stream">
+          <div class="stream" appHelpTarget="console.detail">
             <div class="telemetry" aria-label="Operation telemetry">
               <span>
                 Input
@@ -346,7 +348,7 @@ function stringValue(value: unknown): string {
               </ol>
             }
 
-            <div class="actions">
+            <div class="actions" appHelpTarget="console.recovery">
               <button
                 type="button"
                 [disabled]="!canCancel(operation)"
