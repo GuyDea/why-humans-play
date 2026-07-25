@@ -1381,6 +1381,29 @@ four-moves game naming stands.
 narration doctrine inside one episode artifact and sets no channel rule; the separate
 canonical Episode 1 launch-sequence conflict noted on 2026-07-24 stays open.
 
+## 2026-07-25 — Pre-draft phase for fast script iteration
+
+**Decision:** Scripts under `whp-youtube/predrafts/` are pre-drafts: creative iteration
+there runs without the spoken-readability gate, word counts, planning-notes upkeep,
+editorial audits, or per-edit reconciliation, while the factual boundary and the
+architecture approval gate still apply; a pre-draft is promoted when Martin says it is
+ready, by running the readability gate, refreshing the planning-notes appendix, moving
+the file to `whp-youtube/drafts/`, and reconciling the promotion as one definite
+decision. The phase is marked by the directory path, not an in-file status marker, and
+the Episode 1 prototype is demoted to pre-draft for its remaining creative review.
+
+**Rationale:** Martin reviewed the beat-1 rework turnaround and found per-edit gates and
+reconciliation too slow for creative iteration; he asked for a phase where iteration is
+fast and checks run once at the boundary, and chose the directory mechanism and the
+immediate Episode 1 demotion from presented options.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (Phase 0 and gate
+conditional), `.agents/skills/reconcile-whp/SKILL.md` (decision-trigger exclusion),
+`CLAUDE.md`, `AGENTS.md`, and this ledger (branch `process/pre-draft-phase`).
+`BRAND.md` and `whp-youtube/STEERING.md` remain unchanged because the phase is workflow
+mechanics inside the script skill, not brand or channel doctrine. The Episode 1 file
+move happens on branch `episode-01-beat1-rework`, where its current content lives.
+
 ## 2026-07-25 — Episode 1 pre-draft round merged and promoted back to draft
 
 **Decision:** The Episode 1 prototype absorbs the inline-approved pre-draft round — the
