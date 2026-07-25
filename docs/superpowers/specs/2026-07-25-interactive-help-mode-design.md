@@ -62,13 +62,13 @@ what it is. The same gap exists on every page.
 
 1. **Enter.** The masthead **Help** button (`#help-trigger`) opens the drawer and, at the
    same time, activates Help mode for whatever page is showing. Documented regions render a
-   dashed outline and a `?` control on their header.
-2. **Inspect.** Clicking a region's header (or its `?`) selects that region. The drawer's
-   top section shows **This component** for the selected region. A "← Page overview" link
-   clears the selection and returns the top section to the page goal.
+   dashed outline and a small `?` cue button appended to the region's top corner.
+2. **Inspect.** Clicking a region's `?` cue selects that region. The drawer's top section
+   shows **This component** for the selected region. A "← Page overview" link clears the
+   selection and returns the top section to the page goal.
 3. **Operate.** The region's own controls remain fully interactive while Help is open. Help
-   mode intercepts only the header/`?` click, so the user can read help and act without
-   toggling anything off.
+   mode adds only the corner `?` cue as a click target, so the user can read help and act
+   without toggling anything off — Help mode never fires a region's real controls.
 4. **Change page.** Navigating with Help open keeps Help mode active and resets the
    selection to the new page's overview (mirrors today's route-driven drawer refresh).
 5. **Exit.** Closing Help (× button, Escape, or the Help toggle) removes all annotations
@@ -102,12 +102,17 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = { /* ... */ };
 // The masthead is persistent across every route, so its targets are a shared scope,
 // not tied to one page. They resolve regardless of the current route.
 export const HELP_MASTHEAD: readonly HelpComponent[] = [ /* ... */ ];
+
+// The Full topic run panel is one shared child component embedded on BOTH Topics and
+// Discover, so its targets are a shared scope too (ids prefixed `fullrun.`).
+export const HELP_FULLRUN: readonly HelpComponent[] = [ /* ... */ ];
 ```
 
 `HELP_GLOSSARY` and `EDITORIAL_METHOD` are kept as-is.
 
-Resolving a selected id checks the current page's `components` first, then `HELP_MASTHEAD`.
-Every id (page and masthead) is unique app-wide.
+Selection resolves by id against every scope (page `components`, `HELP_MASTHEAD`,
+`HELP_FULLRUN`); every id is unique app-wide, so a single `findHelpComponent(id)` lookup
+suffices regardless of the current route.
 
 **Composition test.** A spec asserts a two-way match between authored content and the UI:
 every `HelpComponent.id` in `HELP_PAGES` and `HELP_MASTHEAD` is applied to exactly one
@@ -122,11 +127,12 @@ the help text from drifting as the UI changes. (Extends the existing
 - **`HelpModeService`** — signal-backed shared state: `active` (Help mode on/off, driven by
   the drawer open state) and `selectedId` (currently inspected region, or null). Provides
   `select(id)`, `clear()`, and a registry of target ids present on the current page.
-- **`appHelpTarget="<id>"` directive** — applied to each region's root element. While
-  `active`, it renders the dashed outline and the header `?` control, and on
-  header/`?` click calls `service.select(id)`. It registers/unregisters its id on the
-  service for the composition test and for "unknown id" guards. It sets `aria-describedby`
-  / an accessible label so the `?` reads as "Explain <title>".
+- **`appHelpTarget="<id>"` directive** — applied to each region's root element (a child
+  component host or a wrapping `<details>`/`<aside>`). While `active`, it adds a dashed
+  outline class to the host and appends a corner `?` cue button; clicking the cue calls
+  `service.select(id)` (and stops propagation so the region's own controls never fire). It
+  registers/unregisters its id on the service for the "unknown id" guard, and gives the cue
+  an accessible name ("Explain <title>") resolved from the matching content entry.
 - **Drawer changes** ([`help-drawer.ts`](../../../script-creator/app/src/app/help/help-drawer.ts)) —
   the top section renders **This component** (title, summary, controls list, unlocked-by)
   when `selectedId` is set, otherwise the **Page overview** (goal). Glossary and method
@@ -141,11 +147,12 @@ The regions to annotate on each surface, with the source component that owns eac
 authored during implementation from the functionality already mapped; the ids below are the
 authoritative scope.
 
-**Masthead** (`app.ts` / `app.html` / `masthead-model-selector.ts`)
+**Masthead** (`app.html` / `masthead-model-selector.ts`)
 - `masthead.nav` — the surface switcher (Studio / Discover / Topics / Pipeline / Lessons /
   Console / Welcome); what each surface is for.
 - `masthead.model` — global default model/effort selector and what the options mean.
-- `masthead.help` — Help itself: what Help mode does and how to use it.
+- Help itself is explained by a static one-line hint in the drawer header when Help mode is
+  on (not a `?` cue — the Help button can't nest a cue button inside itself).
 
 **Studio** (`drafts/draft-manager.component.ts` and its panels)
 - `studio.drafts` — Drafts library (create / open / import).
@@ -159,18 +166,19 @@ authoritative scope.
 - `studio.parking` — Variants & parking (unsettled variant sets; parked losers).
 - `studio.revisions` — Revisions & transfer (timeline/diff/restore; import/export gates).
 
-**Discover** (`discover/discover-page.ts`)
-- `discover.suggest` — Suggest ideas (cold start; send-to-inbox).
-- `discover.fullrun` — Go deeper / full topic run (shared run panel; see Topics).
+**Full topic run — shared scope** (`topics/full-run-panel.ts`, embedded on Topics and Discover)
+- `fullrun.launcher` — Recent runs, run launcher, live protocol checklist, research report.
+- `fullrun.shortlist` — Candidate board / shortlist (sortable scores, gate chips).
+- `fullrun.packages` — Packaging directions + focused package tester (pick winner).
+- `fullrun.handoff` — Winner card + handoff preview → Confirm handoff (creates draft).
 
-**Topics** (`topics/topics-page.ts`, `topics/full-run-panel.ts`)
+**Discover** (`discover/discover-page.ts`) — plus the shared Full topic run scope
+- `discover.suggest` — Suggest ideas (cold start; send-to-inbox).
+
+**Topics** (`topics/topics-page.ts`) — plus the shared Full topic run scope
 - `topics.brief` — Repository selection brief (read-only, conditional).
 - `topics.inbox` — Idea inbox (capture; status Open/Promoted/Discarded; gate-check).
 - `topics.ideate` — Ideate angles (combine ideas + fresh thread).
-- `topics.fullrun` — Full topic run: launcher, recent runs, checklist, report.
-- `topics.shortlist` — Candidate board / shortlist (sortable scores, gate chips).
-- `topics.packages` — Packaging directions + focused package tester (pick winner).
-- `topics.handoff` — Winner card + handoff preview → Confirm handoff (creates draft).
 
 **Pipeline** (`pipeline/pipeline-page.ts`)
 - `pipeline.board` — the read-only lifecycle board: the 11 states and the count badges.
