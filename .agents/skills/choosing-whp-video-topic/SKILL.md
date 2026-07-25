@@ -9,6 +9,34 @@ description: Researches and selects the best next Why Humans Play YouTube video 
 
 Return one cited decision for WHP's next video: a specific subject, filmable angle, package direction, and research brief when a winner is responsibly supportable, or an explicit incomplete result when it is not. Never guarantee performance.
 
+## Operations
+
+This skill serves several caller-invoked operations. The caller supplies the operation label, the inputs, and the exact structured output shape to return. Honor the requested scope: do not expand a bounded operation into the full pipeline described in the rest of this document.
+
+- **Full topic-selection run** — the complete pipeline below: read WHP context, generate 30+ subjects, gate, score, package, and decide. The required checklist and references apply only to this operation.
+- **Ideate subjects/angles** — return diverse candidate subjects and angles only; do not gate, score, package, or pick a winner.
+- **Quick gate-check** — judge only the single supplied idea against the six named hard gates in "Apply hard gates at angle level", using only `BRAND.md` and `whp-youtube/STEERING.md` as doctrine. Read nothing else, run no signal scan, generate no alternatives, and do not score or package. Return the caller-supplied structured shape (an overall status, an overall verdict, the six gate verdicts with one-line reasons, and an optional guardrail note). The output schema is always supplied by the caller — never search for, reconstruct, or reverse-engineer it.
+- **Package test** — test the supplied title/thumbnail directions only.
+- **Topic-brief handoff (preview)** — prepare the handoff for an already-selected topic.
+
+For every operation, research means WHP brand and channel doctrine plus web and topic evidence — never this repository's application code.
+
+### Operation boundaries
+
+These apply to every operation of this skill, including the full run:
+
+- **Never read repository source code.** Do not run `rg`, `grep`, `sed`, `cat`, or any other search over `script-creator/` or other application source, and never hunt for schemas, registries, prompts, or operation definitions. The output shape is always supplied by the caller; when an input or instruction is unclear, judge it from WHP doctrine rather than investigating the application that invoked you.
+- **Stay inside the requested scope.** A scoped operation (Quick gate-check, Ideate, Package test) returns its bounded result directly; it does not run the full pipeline, read the episode backlog, or collect the full signal set.
+
+### Quick gate-check fast-fail
+
+Quick gate-check needs one specific candidate topic — a subject plus an angle — to judge. If the input is empty, meta, or not a specific topic (for example "tell me what to make", "give me ideas", or any request for ideas rather than a named subject and angle), return immediately without exploring anything:
+
+- `status`: `declined`;
+- `verdict`: `unknown`;
+- all six gates (`game_play_centrality`, `human_revelation`, `recognized_payoff`, `evidence_path`, `production_reality`, `portfolio_fit`): each `verdict` `unknown` with a one-line `reason_markdown` that the input is a request for ideas, not a specific topic to gate-check;
+- `guardrail_markdown`: one line stating that a gate-check needs a specific candidate topic and pointing the user to ideation or a full topic-selection run to generate ideas.
+
 ## Required progress checklist
 
 Track this checklist during the run. Do not compose the recommendation until every item is complete or an unavailable input is explicitly recorded as unknown with reduced confidence.

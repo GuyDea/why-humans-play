@@ -11,6 +11,7 @@ import {
 import type {
   OperationListResponse,
   OperationRecord,
+  OperationState,
   OperationSummary,
   SseFrame,
 } from '../api/client';
@@ -721,8 +722,17 @@ export class AgentConsole implements OnInit, OnDestroy {
       this.operations.set(operations);
       this.loadError.set(null);
       const selected = this.selected();
-      if (selected && this.selectedRecord()?.id !== selected.id) {
-        void this.loadOperation(selected.id);
+      if (selected) {
+        const detail = this.selectedRecord();
+        if (detail?.id !== selected.id) {
+          void this.loadOperation(selected.id);
+        } else if (!isTerminalOperationState(detail.state)) {
+          // Keep the selected operation's detail (state + usage) live while it
+          // is still running. The poll that first observes completion performs
+          // one final refetch; once the detail is terminal the condition stops
+          // re-polling it. No re-selection or reload is required.
+          void this.loadOperation(selected.id, { silent: true });
+        }
       }
     } catch (error) {
       if (!this.destroyed && generation === this.refreshGeneration) {
@@ -731,14 +741,19 @@ export class AgentConsole implements OnInit, OnDestroy {
     }
   }
 
-  private async loadOperation(id: string): Promise<void> {
+  private async loadOperation(
+    id: string,
+    opts: { silent?: boolean } = {},
+  ): Promise<void> {
     const getOp = this.client().getOp;
     if (!getOp) {
       this.selectedRecord.set(null);
       return;
     }
     const generation = ++this.detailGeneration;
-    this.detailLoading.set(true);
+    // Silent poll-driven refreshes update the record in place without flashing
+    // the detail loading state; only an on-select (id change) load shows it.
+    if (!opts.silent) this.detailLoading.set(true);
     try {
       const record = await getOp.call(this.client(), id);
       if (
@@ -758,6 +773,10 @@ export class AgentConsole implements OnInit, OnDestroy {
       }
     }
   }
+}
+
+function isTerminalOperationState(state: OperationState): boolean {
+  return !['queued', 'running', 'cancelling'].includes(state);
 }
 
 function errorMessage(error: unknown): string {
