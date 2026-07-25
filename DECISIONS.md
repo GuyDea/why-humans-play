@@ -1380,3 +1380,30 @@ four-moves game naming stands.
 `BRAND.md` and `whp-youtube/STEERING.md` remain unchanged because this applies existing
 narration doctrine inside one episode artifact and sets no channel rule; the separate
 canonical Episode 1 launch-sequence conflict noted on 2026-07-24 stays open.
+
+## 2026-07-25 — Episode 1 pre-draft round merged and promoted back to draft
+
+**Decision:** The Episode 1 prototype absorbs the inline-approved pre-draft round — the
+rate-my-plan cameo and a two-answers-one-pick training-loop explainer in Move two; the
+Osorno color-contrast stimulus example in Move three; the algorithm-appreciation
+boundary stated up front on unfamiliar-topic questions, replacing the radiologist
+objection check-in; a marketing price-tag anchor with the "AI's answer is your first
+price tag" bridge in Move four; a face-loop passage rewritten to voice the loop
+closing; and a beat-7 transfer montage of human players (politicians, salespeople, an
+insurance agent) without a best-friend line — and the file is promoted from
+`whp-youtube/predrafts/` back to `whp-youtube/drafts/` after passing the
+spoken-readability gate (264 sentences; approximately 2,270 spoken words).
+
+**Rationale:** Martin approved each passage inline during pre-draft iteration and
+requested the merge and promotion. He dropped the friend line to keep the outro warm,
+and declined the RLHF name-drop and a residual radiologist nod in favor of plain
+description; the montage judges behaviors rather than calling professions scams, and
+the boundary front-loading prevents the radiologist contradiction instead of defusing
+it.
+
+**Documents:** `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+(content, planning notes, and the move from `predrafts/`) and this ledger. `BRAND.md`
+and `whp-youtube/STEERING.md` remain unchanged because every change is episode-internal
+narration under existing doctrine. New Phase 2 verification items are recorded in the
+draft's status notes (Osorno stimulus check; F-001 mapping for the training-loop and
+cameo passages).

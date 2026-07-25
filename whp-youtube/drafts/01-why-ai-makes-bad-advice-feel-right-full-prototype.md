@@ -66,7 +66,7 @@
 >
 > See the hidden game? You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
 >
-> And notice how we actually ask. Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room—the one you asked for, and the one the model was trained on. Your approval. Guess which one wins.
+> And notice how we actually ask. Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room. One is the score you asked for. The other is the score the model was trained on—your approval. Guess which one wins.
 >
 > That doesn't mean the AI wants anything. It's repeating a very human habit: say "you're right" first, and check reality later.
 >
@@ -189,15 +189,15 @@
 
 ### Timing and cut ledger (review-reversible)
 
-Current narration is approximately 1,920 spoken words (beat-1 rework 2026-07-25: beat 1
-−46 words, Move two +73)—still approximately 11–12 minutes at a natural pace.
+Current narration is approximately 2,270 spoken words measured without inline
+indicators (2026-07-25 pre-draft round added the rate-my-plan cameo, training-loop
+explainer, Osorno example, algorithm-appreciation boundary, marketing anchor, face-loop
+rewrite, and human-players montage)—approximately 13–14 minutes at a natural pace.
 Martin removed the word/runtime constraint for this episode (2026-07-25, see
 `DECISIONS.md`); the ledger below is optional polish, not a required trim. Candidates,
-roughly 500–650 words available:
+roughly 250–350 words available:
 
-- Beat 4 radiologist-objection check-in ("But wait—the radiologists trusted the AI less!" passage) — resolves a real viewer objection; cutting risks a comment-section gotcha.
 - Beat 5 favorite extra check (changed-fact test) — second tool in one beat; could move to pinned comment/description.
-- Beat 7 transfer montage (consultant/feed/friend) — voices the architecture's transfer element; compress to one line rather than delete.
 - Beat 3 "That doesn't mean the AI wants anything…" de-anthropomorphizing aside — compress to one sentence.
 - Beat 2 second hypothetical door ("Maybe there is no budget this year.") — keep one door.
 - Per-move outro bridges can each lose one sentence if the name cards carry the structure.
@@ -205,8 +205,21 @@ roughly 500–650 words available:
 ### Status
 
 - Narration prototype for creative review under the rev-2 architecture. Passed the
-  spoken-readability gate (236 sentences, no unresolved items) on 2026-07-25, re-run
-  after the beat-1 rework.
+  spoken-readability gate (264 sentences, no unresolved items) on 2026-07-25 at
+  promotion from pre-draft.
+- Pre-draft round merged on Martin's inline approvals (2026-07-25): rate-my-plan cameo
+  and two-answers-one-pick training-loop explainer in Move two; Osorno color-contrast
+  example in Move three; algorithm-appreciation boundary front-loaded ("questions they
+  had no special knowledge about"), radiologist objection removed; marketing price-tag
+  anchor with "first price tag" bridge in Move four; face-loop passage rewritten to
+  voice the loop closing; beat-7 montage recast as human players (politicians,
+  salespeople, insurance agent) — friend line deliberately omitted, RLHF name-drop and
+  residual radiologist nod declined.
+- New Phase 2 verification items from that round: confirm "Osorno is in Chile" as an
+  actual Reber & Schwarz stimulus; map the training-loop description and the cameo's
+  "guess which one wins" implication to F-001 (feedback-sycophancy section); the
+  price-tag and human-players passages are recognition/rhetoric carrying no evidence
+  load.
 - Beat 1 reworked on Martin's review (2026-07-25): the hook's spoiler is owned instead
   of re-revealed; the goalkeeper plant sentence is cut (beat-6 payoff now unplanted);
   the explicit checking-behaviors lesson is voiced inside beat 1; the Anthropic finding
