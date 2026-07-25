@@ -388,8 +388,9 @@ export class ArchitectureService {
     draftId: string,
     operation: OperationName,
     inputs: unknown,
+    options: { model?: string; effort?: string } = {},
   ): string {
-    return this.submit(draftId, operation, inputs);
+    return this.submit(draftId, operation, inputs, options);
   }
 
   resumeOperation(
@@ -1569,7 +1570,12 @@ export class ArchitectureService {
     draftId: string,
     operation: OperationName,
     inputs: unknown,
-    options: { resumeOf?: string; cwd?: string } = {},
+    options: {
+      resumeOf?: string;
+      cwd?: string;
+      model?: string;
+      effort?: string;
+    } = {},
   ): string {
     const draft = this.requireDraft(draftId);
     const phase = readCreativePhase(draft.doc);

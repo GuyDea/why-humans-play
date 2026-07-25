@@ -45,6 +45,8 @@ export interface OperationRecord {
   reasoningOutputTokens: number | null;
   usageAvailable: 0 | 1;
   error: string | null;
+  model?: string | null;
+  effort?: string | null;
   inputs?: unknown;
   operationLessons?: OperationLessonLink[];
 }
@@ -69,6 +71,8 @@ export interface OperationSummary {
   cachedInputTokens: number | null;
   outputTokens: number | null;
   reasoningOutputTokens: number | null;
+  model?: string | null;
+  effort?: string | null;
 }
 
 export interface OperationListResponse {
@@ -672,6 +676,19 @@ export class DaemonClientError extends Error {
 const INITIAL_RECONNECT_MS = 250;
 const MAX_RECONNECT_MS = 5_000;
 
+export interface ModelSubmitOptions {
+  model?: string;
+  effort?: string;
+}
+
+function modelBody(options?: ModelSubmitOptions): ModelSubmitOptions {
+  if (!options) return {};
+  return {
+    ...(options.model !== undefined ? { model: options.model } : {}),
+    ...(options.effort !== undefined ? { effort: options.effort } : {}),
+  };
+}
+
 export class DaemonClient {
   private readonly baseUrl: string;
 
@@ -685,10 +702,11 @@ export class DaemonClient {
   async submitOp(
     operation: OperationName,
     inputs: unknown,
+    options?: ModelSubmitOptions,
   ): Promise<{ id: string }> {
     return this.request('/api/ops', {
       method: 'POST',
-      body: JSON.stringify({ operation, inputs }),
+      body: JSON.stringify({ operation, inputs, ...modelBody(options) }),
     });
   }
 
@@ -1110,12 +1128,13 @@ export class DaemonClient {
     draftId: string,
     operation: OperationName,
     inputs: unknown,
+    options?: ModelSubmitOptions,
   ): Promise<{ id: string }> {
     return this.request(
       `/api/drafts/${encodeURIComponent(draftId)}/ops`,
       {
         method: 'POST',
-        body: JSON.stringify({ operation, inputs }),
+        body: JSON.stringify({ operation, inputs, ...modelBody(options) }),
       },
     );
   }

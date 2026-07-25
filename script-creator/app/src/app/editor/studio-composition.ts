@@ -13,6 +13,7 @@ import {
   operationFailurePresentation,
   type OperationFailurePresentation,
 } from '../ops/failure-presentation';
+import { type ModelPreferenceStore } from '../ops/model-preference';
 import {
   formatElapsed,
   formatTokens,
@@ -36,6 +37,7 @@ export interface StudioHostElements {
   onFindings?: (findings: readonly FindingLayer[]) => void;
   onLaunch?: () => void;
   onError?: (error: unknown) => void;
+  modelPreference?: ModelPreferenceStore;
 }
 
 export interface StudioComposition {
@@ -68,6 +70,7 @@ export function composeStudio(
     },
     onLaunch: hosts.onLaunch,
     onError: hosts.onError,
+    modelPreference: hosts.modelPreference,
   });
   activeRuntime = runtime;
 

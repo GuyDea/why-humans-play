@@ -129,6 +129,38 @@ describe('DaemonClient', () => {
       .toBe(NONCE);
   });
 
+  it('includes model and effort in the submit body only when supplied', async () => {
+    const fetchMock = vi.fn(async () => jsonResponse({ id: 'op-1' }));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = new DaemonClient(BASE_URL, () => NONCE);
+
+    await client.submitOp('review', { selection: 'A passage.' });
+    expect(JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))).toEqual({
+      operation: 'review',
+      inputs: { selection: 'A passage.' },
+    });
+
+    await client.submitOp('review', { selection: 'A passage.' }, {
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+    expect(JSON.parse(String(fetchMock.mock.calls[1]?.[1]?.body))).toEqual({
+      operation: 'review',
+      inputs: { selection: 'A passage.' },
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+
+    await client.submitDraftOp('draft-1', 'rewrite-selection', { selection: 'X' }, {
+      effort: 'medium',
+    });
+    expect(JSON.parse(String(fetchMock.mock.calls[2]?.[1]?.body))).toEqual({
+      operation: 'rewrite-selection',
+      inputs: { selection: 'X' },
+      effort: 'medium',
+    });
+  });
+
   it('maps operation, draft, and validator calls and authenticates every request', async () => {
     const fetchMock = vi.fn(async () => jsonResponse({}));
     vi.stubGlobal('fetch', fetchMock);

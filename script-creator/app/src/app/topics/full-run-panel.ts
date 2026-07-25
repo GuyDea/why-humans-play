@@ -10,6 +10,7 @@ import {
 import { Router } from '@angular/router';
 import type {
   IdeaRecord,
+  OperationName,
   OperationState,
   PackageDirection,
   PackageTestRecord,
@@ -22,6 +23,7 @@ import type {
   TopicSummary,
 } from '../api/client';
 import { createBlankNarrationDocument } from '../drafts/draft-manager';
+import { ModelPreferenceService } from '../ops/model-preference';
 import { STUDIO_SESSION } from '../studio-session';
 import { buildTopicOperationInputs } from './inputs';
 
@@ -1270,7 +1272,18 @@ interface OperationOutcome {
 })
 export class FullRunPanel implements OnInit, OnDestroy {
   private readonly client = inject(STUDIO_SESSION).client;
+  private readonly modelPreference = inject(ModelPreferenceService);
   private readonly router = inject(Router);
+
+  private submitOpWithPreference(
+    operation: OperationName,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    const choice = this.modelPreference.get(operation) ?? null;
+    return choice
+      ? this.client.submitOp(operation, inputs, choice)
+      : this.client.submitOp(operation, inputs);
+  }
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private pollGeneration = 0;
 
@@ -1467,7 +1480,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
 
     try {
       const notes = this.constraints().trim();
-      const { id: opId } = await this.client.submitOp(
+      const { id: opId } = await this.submitOpWithPreference(
         'full-topic-run',
         buildTopicOperationInputs({
           ideaText: this.ideaText().trim(),
@@ -1716,7 +1729,7 @@ export class FullRunPanel implements OnInit, OnDestroy {
     operation: 'package-test' | 'handoff-preview',
     inputs: unknown,
   ): Promise<OperationOutcome & { id: string }> {
-    const { id } = await this.client.submitOp(operation, inputs);
+    const { id } = await this.submitOpWithPreference(operation, inputs);
     await this.client.streamEvents(id, {
       onEvent: () => undefined,
       onDone: () => undefined,
