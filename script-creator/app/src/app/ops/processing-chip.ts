@@ -3,7 +3,8 @@ import {
   Component,
   computed,
   inject,
-  input,
+  Input,
+  signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import type { OperationName } from '../api/client';
@@ -67,7 +68,20 @@ import { ActiveOperationsService, type ActiveOp } from './active-operations.serv
 })
 export class ProcessingChip {
   private readonly active = inject(ActiveOperationsService);
-  readonly operations = input<readonly OperationName[] | null>(null);
+  private readonly operationsFilter =
+    signal<readonly OperationName[] | null>(null);
+
+  /**
+   * Optional filter: when set, the chip only reflects active operations whose
+   * name is in this list (e.g. ['ideate'] on Discover); unset = any active op
+   * (masthead). A decorator input writing to a signal keeps the `primary`
+   * computed reactive while remaining bindable under the repo's JIT tests,
+   * which do not recognise signal `input()` as a template-bindable property.
+   */
+  @Input()
+  set operations(value: readonly OperationName[] | null) {
+    this.operationsFilter.set(value ?? null);
+  }
 
   constructor() {
     // Any placement of the chip boots the shared poll (masthead is always
@@ -76,7 +90,7 @@ export class ProcessingChip {
   }
 
   protected readonly primary = computed<ActiveOp | null>(() => {
-    const filter = this.operations();
+    const filter = this.operationsFilter();
     const ops = this.active.activeOperations();
     const matches = filter
       ? ops.filter((op) => filter.includes(op.name))

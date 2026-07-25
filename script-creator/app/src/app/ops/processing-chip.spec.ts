@@ -1,64 +1,48 @@
 import '@angular/compiler';
-import { afterEach, describe, expect, it } from 'vitest';
-import {
-  createComponent,
-  provideZonelessChangeDetection,
-  signal,
-  type ɵInputSignalNode,
-  ɵSIGNAL,
-} from '@angular/core';
-import { createApplication } from '@angular/platform-browser';
+import { afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { provideZonelessChangeDetection, signal, type Signal } from '@angular/core';
+import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import type { OperationName } from '../api/client';
+import {
+  BrowserTestingModule,
+  platformBrowserTesting,
+} from '@angular/platform-browser/testing';
 import { ActiveOperationsService, type ActiveOp } from './active-operations.service';
 import { ProcessingChip } from './processing-chip';
 
+beforeAll(() => {
+  try {
+    TestBed.initTestEnvironment(BrowserTestingModule, platformBrowserTesting());
+  } catch {
+    /* re-init across workers is fine */
+  }
+});
+
+afterEach(() => TestBed.resetTestingModule());
+
 class StubService {
   readonly active = signal<readonly ActiveOp[]>([]);
-  readonly activeOperations = this.active;
+  readonly activeOperations: Signal<readonly ActiveOp[]> = this.active;
   ensureStarted(): void {
     /* no-op in tests */
   }
 }
 
-async function setup(
-  active: readonly ActiveOp[],
-  operations?: readonly string[],
-) {
+function setup(active: readonly ActiveOp[], operations?: readonly string[]) {
   const stub = new StubService();
   stub.active.set(active);
-  const application = await createApplication({
+  TestBed.configureTestingModule({
+    imports: [ProcessingChip],
     providers: [
       provideZonelessChangeDetection(),
       provideRouter([]),
       { provide: ActiveOperationsService, useValue: stub },
     ],
   });
-
-  const host = document.createElement('sc-processing-chip');
-  document.body.append(host);
-
-  const component = createComponent(ProcessingChip, {
-    environmentInjector: application.injector,
-    hostElement: host,
-  });
-
-  if (operations) {
-    const node = (
-      component.instance.operations as unknown as {
-        [ɵSIGNAL]: ɵInputSignalNode<
-          readonly OperationName[] | null,
-          readonly OperationName[] | null
-        >;
-      }
-    )[ɵSIGNAL];
-    node.applyValueToInputSignal(node, operations as readonly OperationName[]);
-  }
-
-  application.attachView(component.hostView);
-  component.changeDetectorRef.detectChanges();
-
-  return { host, component, application };
+  const fixture = TestBed.createComponent(ProcessingChip);
+  if (operations) fixture.componentInstance.operations = operations as any;
+  fixture.detectChanges();
+  return fixture;
 }
 
 const runningIdeate: ActiveOp = {
@@ -69,25 +53,21 @@ const runningIdeate: ActiveOp = {
 };
 
 describe('ProcessingChip', () => {
-  afterEach(() => {
-    document.body.innerHTML = '';
+  it('is empty when nothing matches', () => {
+    const fixture = setup([]);
+    expect(fixture.nativeElement.textContent.trim()).toBe('');
   });
 
-  it('is empty when nothing matches', async () => {
-    const { host } = await setup([]);
-    expect(host.textContent?.trim()).toBe('');
+  it('shows "In Processing" and links to the Console trace', () => {
+    const fixture = setup([runningIdeate]);
+    const link = fixture.nativeElement.querySelector('a');
+    expect(fixture.nativeElement.textContent).toContain('In Processing');
+    expect(link.getAttribute('href')).toContain('/console');
+    expect(link.getAttribute('href')).toContain('op=op-9');
   });
 
-  it('shows "In Processing" and links to the Console trace', async () => {
-    const { host } = await setup([runningIdeate]);
-    const link = host.querySelector('a');
-    expect(host.textContent).toContain('In Processing');
-    expect(link?.getAttribute('href')).toContain('/console');
-    expect(link?.getAttribute('href')).toContain('op=op-9');
-  });
-
-  it('honours the operations filter', async () => {
-    const { host } = await setup([runningIdeate], ['review']);
-    expect(host.textContent?.trim()).toBe('');
+  it('honours the operations filter', () => {
+    const fixture = setup([runningIdeate], ['review']);
+    expect(fixture.nativeElement.textContent.trim()).toBe('');
   });
 });
