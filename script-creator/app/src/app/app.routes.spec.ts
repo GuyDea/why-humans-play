@@ -19,15 +19,26 @@ describe('Studio routes', () => {
     expect(routes[4]?.component?.name).toBe('LessonsPage');
   });
 
-  it('renders persistent Studio, Topics, Pipeline, and Console navigation around the router outlet', () => {
+  it('resolves the AI-first Discover route to its standalone component', () => {
+    const discover = routes.find((route) => route.path === 'discover');
+
+    expect(discover).toBeDefined();
+    expect(discover?.component?.name).toBe('DiscoverPage');
+  });
+
+  it('renders persistent Studio, Discover, Topics, Pipeline, and Console navigation around the router outlet', () => {
     const template = readFileSync('src/app/app.html', 'utf8');
 
     expect(template).toContain('routerLink="/"');
+    expect(template).toContain('routerLink="/discover"');
     expect(template).toContain('routerLink="/topics"');
     expect(template).toContain('routerLink="/pipeline"');
     expect(template).toContain('routerLink="/lessons"');
     expect(template).toContain('routerLink="/console"');
     expect(template).toContain('<router-outlet');
+    // Discover is the AI-first front door: first link after Studio.
+    expect(template.indexOf('routerLink="/discover"'))
+      .toBeLessThan(template.indexOf('routerLink="/topics"'));
   });
 
   it('mounts the brief, findings, and parking-lot panels in the studio right rail', () => {

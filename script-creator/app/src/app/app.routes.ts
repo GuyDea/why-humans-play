@@ -3,6 +3,7 @@ import {
   AgentConsolePage,
   StudioPage,
 } from './studio-pages';
+import { DiscoverPage } from './discover/discover-page';
 import { PipelinePage } from './pipeline/pipeline-page';
 import { TopicsPage } from './topics/topics-page';
 import { LessonsPage } from './lessons/lessons-page';
@@ -28,6 +29,10 @@ export const routes: Routes = [
   {
     path: 'lessons',
     component: LessonsPage,
+  },
+  {
+    path: 'discover',
+    component: DiscoverPage,
   },
   {
     path: '**',

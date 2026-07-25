@@ -36,6 +36,7 @@ import {
   type StudioRuntimeHandle,
 } from '../studio-session';
 import { FullRunPanel } from './full-run-panel';
+import { parseIdeateCards, type ParsedIdeateCard } from './ideate-cards';
 import { buildTopicOperationInputs } from './inputs';
 
 const TOPIC_GATE_NAMES = [
@@ -49,14 +50,9 @@ const TOPIC_GATE_NAMES = [
 
 type TopicVerdict = 'pass' | 'fail' | 'unknown';
 
-interface IdeateCard {
+interface IdeateCard extends ParsedIdeateCard {
   ideaId: string;
-  subject: string;
-  angleMarkdown: string;
-  seed: string;
 }
-
-type ParsedIdeateCard = Omit<IdeateCard, 'ideaId'>;
 
 interface GateCheckMeta {
   ideaId: string;
@@ -1337,27 +1333,6 @@ export class TopicsPage implements OnInit, OnDestroy {
       },
     ]);
   }
-}
-
-function parseIdeateCards(value: unknown): ParsedIdeateCard[] | null {
-  const result = record(value);
-  if (
-    result?.['status'] !== 'complete'
-    || !Array.isArray(result['cards'])
-  ) {
-    return null;
-  }
-
-  const cards: ParsedIdeateCard[] = [];
-  for (const candidate of result['cards']) {
-    const card = record(candidate);
-    const subject = nonEmptyString(card?.['subject']);
-    const angleMarkdown = nonEmptyString(card?.['angle_markdown']);
-    const seed = nonEmptyString(card?.['seed']);
-    if (!subject || !angleMarkdown || !seed) return null;
-    cards.push({ subject, angleMarkdown, seed });
-  }
-  return cards;
 }
 
 function parseGateResult(value: unknown): GateCheckResult | null {
