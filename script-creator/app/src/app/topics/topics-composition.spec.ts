@@ -2,9 +2,12 @@ import '@angular/compiler';
 import {
   createComponent,
   provideZonelessChangeDetection,
+  signal,
   ɵresolveComponentResources,
   type ApplicationRef,
   type ComponentRef,
+  type Provider,
+  type Signal,
 } from '@angular/core';
 import { createApplication } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
@@ -33,6 +36,10 @@ import { App } from '../app';
 import appTemplate from '../app.html?raw';
 import appStyles from '../app.scss?raw';
 import { routes } from '../app.routes';
+import {
+  ActiveOperationsService,
+  type ActiveOp,
+} from '../ops/active-operations.service';
 import { MODEL_PREFERENCE_STORAGE_KEY } from '../ops/model-preference';
 import { STUDIO_SESSION, StudioSession } from '../studio-session';
 
@@ -486,6 +493,12 @@ class TopicClientStub {
     if (!submission) throw new Error(`submission not found: ${id}`);
     return submission;
   }
+}
+
+class ActiveOpsStub {
+  readonly active = signal<readonly ActiveOp[]>([]);
+  readonly activeOperations: Signal<readonly ActiveOp[]> = this.active;
+  ensureStarted(): void { /* no-op */ }
 }
 
 interface MountedTopics {
@@ -1512,8 +1525,28 @@ describe('routed Topics composition', () => {
   });
 });
 
+describe('Topics inline processing chip', () => {
+  it('shows an inline processing chip in the hero while a topic op runs', async () => {
+    const activeOps = new ActiveOpsStub();
+    activeOps.active.set([
+      { id: 'op-8', name: 'quick-gate-check', state: 'running', stalled: false },
+    ]);
+    const topics = await mountTopics(new TopicClientStub(), [
+      { provide: ActiveOperationsService, useValue: activeOps },
+    ]);
+    topics.tick();
+
+    const chip = topics.root.querySelector(
+      '.topics-hero sc-processing-chip [data-testid="processing-chip"]',
+    );
+    expect(chip).toBeTruthy();
+    expect(chip?.textContent).toContain('In Processing');
+  });
+});
+
 async function mountTopics(
   client = new TopicClientStub(),
+  extraProviders: Provider[] = [],
 ): Promise<MountedTopics> {
   await ɵresolveComponentResources(async (url) =>
     url.endsWith('app.html') ? appTemplate : appStyles);
@@ -1524,6 +1557,7 @@ async function mountTopics(
       provideZonelessChangeDetection(),
       provideRouter(routes),
       { provide: STUDIO_SESSION, useValue: session },
+      ...extraProviders,
     ],
   });
   const root = document.createElement('app-root');
