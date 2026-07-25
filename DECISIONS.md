@@ -1407,3 +1407,32 @@ and `whp-youtube/STEERING.md` remain unchanged because every change is episode-i
 narration under existing doctrine. New Phase 2 verification items are recorded in the
 draft's status notes (Osorno stimulus check; F-001 mapping for the training-loop and
 cameo passages).
+
+## 2026-07-25 — Episode 1 promoted to evidence-backed full episode (Phase 2)
+
+**Decision:** The approved Episode 1 prototype is finalized as the Phase 2 annotated
+full episode at `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`
+(version 2.0, EDITORIAL-DRAFT, 2,276 spoken words, ≈13:45): rev-2 four-moves narration
+with eight verified evidence records — a new F-009 record for the Gaube 2021 radiologist
+study, F-001 extended to cover the RLHF/pairwise-preference training description and the
+feedback-sycophancy support for the rate-my-plan cameo, and F-004 extended with the
+verified "Osorno is in Chile" stimulus — plus per-beat claims maps, original-graphics
+visual treatments, a Shorts plan, and an issue ledger. Personal input is OMIT (Martin,
+2026-07-25). Two evidence-driven narration narrowings: the radiologists are now said to
+come "from hospitals in the US and Canada" (the research team was international; the
+participants were recruited in those countries), and the framing-effect line restores
+"can change." F-002 (GPT-4o rollback) is unused by this narration and its record is not
+carried; the ID stays retired.
+
+**Rationale:** Martin explicitly requested promotion to the full episode, which the
+skill treats as directly requesting evidence-backed finalization. He chose OMIT for the
+personal sequence. All structural gates pass (validator; spoken-readability, 264
+sentences); the post-review audits deliberately wait for Martin's review of the complete
+deliverable per the skill's ordering.
+
+**Documents:** `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`
+(overwritten from the superseded pre-rev-2 v0.9, preserved in git history) and this
+ledger. `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype.md`
+remains as the prototype record. `BRAND.md` and `whp-youtube/STEERING.md` unchanged; the
+canonical Episode 1 launch-sequence conflict (2026-07-24) remains open and is carried in
+the episode's issue ledger.
