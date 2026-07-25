@@ -340,7 +340,11 @@ export function pickActive(
     const chosen = variant.node.maybeChild(selectedIndex);
     if (chosen === null) return false;
 
-    variant.node.forEach((option, _offset, index) => {
+    variant.node.forEach((
+      option: ProseMirrorNode,
+      _offset: number,
+      index: number,
+    ) => {
       if (index !== selectedIndex) {
         entries.push({
           variantId,
@@ -367,5 +371,7 @@ export function pickActive(
 }
 
 export function getParkingLot(state: EditorState): ParkingLotEntry[] {
-  return (parkingLotKey.getState(state)?.entries ?? []).map((entry) => ({ ...entry }));
+  return (parkingLotKey.getState(state)?.entries ?? []).map(
+    (entry: ParkingLotEntry) => ({ ...entry }),
+  );
 }
