@@ -163,6 +163,35 @@ describe('SelectionToolbar', () => {
     container.remove();
   });
 
+  it('places the toolbar below a top-of-editor selection with no room above', () => {
+    const { view, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    // A top-of-editor selection: too little room above for a tall toolbar.
+    (view.coordsAtPos as unknown as ReturnType<typeof vi.fn>)
+      .mockImplementation(() => ({ left: 100, right: 100, top: 15, bottom: 35 }));
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+    });
+    Object.defineProperty(toolbar.element, 'offsetHeight', {
+      value: 44,
+      configurable: true,
+    });
+
+    toolbar.update();
+
+    // selectionTop = 5, aboveTop = 5 - 44 - 12 = -51 < 8, so flip below:
+    // selectionBottom (25) + 12 = 37.
+    expect(toolbar.element.hidden).toBe(false);
+    expect(toolbar.element.style.top).toBe('37px');
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('restores a non-empty selection toolbar when the editor regains focus', async () => {
     const { view, container } = selectedEditor();
     const { bridge } = bridgeFixture();
