@@ -23,6 +23,7 @@ import type {
   TopicSummary,
 } from '../api/client';
 import { createBlankNarrationDocument } from '../drafts/draft-manager';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { ModelPreferenceService } from '../ops/model-preference';
 import { STUDIO_SESSION } from '../studio-session';
 import { buildTopicOperationInputs } from './inputs';
@@ -86,6 +87,7 @@ interface OperationOutcome {
 @Component({
   selector: 'app-full-run-panel',
   standalone: true,
+  imports: [HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="full-run-stage" aria-labelledby="full-run-heading">
@@ -162,7 +164,7 @@ interface OperationOutcome {
         }
       </section>
 
-      <form class="run-launcher" (submit)="launch($event)">
+      <form class="run-launcher" appHelpTarget="fullrun.launcher" (submit)="launch($event)">
         <div class="run-field">
           <label for="full-run-idea">Starting territory</label>
           <textarea
@@ -283,6 +285,7 @@ interface OperationOutcome {
         @if (current.summary; as summary) {
           <section
             class="candidate-board"
+            appHelpTarget="fullrun.shortlist"
             data-testid="candidate-board"
             aria-labelledby="candidate-board-heading"
           >
@@ -392,7 +395,11 @@ interface OperationOutcome {
               </table>
             </div>
 
-            <section class="packages" aria-labelledby="packages-heading">
+            <section
+              class="packages"
+              aria-labelledby="packages-heading"
+              appHelpTarget="fullrun.packages"
+            >
               <header class="section-label">
                 <p>Promise test</p>
                 <h3 id="packages-heading">Packaging directions</h3>
@@ -553,6 +560,7 @@ interface OperationOutcome {
             <article
               class="winner-card"
               data-testid="winner-card"
+              appHelpTarget="fullrun.handoff"
               [attr.data-status]="summary.winner.decision_status"
             >
               <div class="winner-seal" aria-hidden="true">W</div>

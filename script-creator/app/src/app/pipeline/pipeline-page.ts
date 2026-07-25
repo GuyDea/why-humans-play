@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { Router } from '@angular/router';
 import type { PipelineDiagnostic, PipelineItem } from '../api/client';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { STUDIO_SESSION } from '../studio-session';
 
 const PIPELINE_COLUMNS = [
@@ -31,6 +32,7 @@ const KNOWN_STATES = new Set<string>(
 @Component({
   selector: 'app-pipeline-page',
   standalone: true,
+  imports: [HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="pipeline-page">
@@ -64,7 +66,11 @@ const KNOWN_STATES = new Set<string>(
       }
 
       @if (diagnostics().length > 0) {
-        <section class="pipeline-alert diagnostic-alert" role="alert">
+        <section
+          class="pipeline-alert diagnostic-alert"
+          role="alert"
+          appHelpTarget="pipeline.diagnostics"
+        >
           <div>
             <strong>Pipeline file needs attention</strong>
             <ul>
@@ -85,6 +91,7 @@ const KNOWN_STATES = new Set<string>(
         class="pipeline-board"
         data-testid="pipeline-board"
         aria-label="Episode production pipeline"
+        appHelpTarget="pipeline.board"
         [attr.aria-busy]="loading()"
       >
         @for (column of columns; track column.state; let index = $index) {

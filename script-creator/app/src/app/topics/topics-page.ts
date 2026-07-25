@@ -35,6 +35,7 @@ import {
   STUDIO_SESSION,
   type StudioRuntimeHandle,
 } from '../studio-session';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { FullRunPanel } from './full-run-panel';
 import { parseIdeateCards, type ParsedIdeateCard } from './ideate-cards';
 import { buildTopicOperationInputs } from './inputs';
@@ -78,7 +79,7 @@ interface GuardrailPresentation {
 @Component({
   selector: 'app-topics-page',
   standalone: true,
-  imports: [FullRunPanel],
+  imports: [FullRunPanel, HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="topics-page" data-testid="topics-page">
@@ -98,6 +99,7 @@ interface GuardrailPresentation {
           class="selected-topic-brief"
           data-testid="selected-topic-brief"
           aria-labelledby="selected-topic-heading"
+          appHelpTarget="topics.brief"
         >
           <header>
             <div>
@@ -152,7 +154,11 @@ interface GuardrailPresentation {
       </div>
 
       <div class="topic-workbench">
-        <section class="workbench-stage inbox-stage" aria-labelledby="inbox-heading">
+        <section
+          class="workbench-stage inbox-stage"
+          aria-labelledby="inbox-heading"
+          appHelpTarget="topics.inbox"
+        >
           <header class="stage-heading">
             <span class="stage-marker" aria-hidden="true">01</span>
             <div>
@@ -282,7 +288,11 @@ interface GuardrailPresentation {
           </div>
         </section>
 
-        <section class="workbench-stage ideate-stage" aria-labelledby="ideate-heading">
+        <section
+          class="workbench-stage ideate-stage"
+          aria-labelledby="ideate-heading"
+          appHelpTarget="topics.ideate"
+        >
           <header class="stage-heading">
             <span class="stage-marker" aria-hidden="true">02</span>
             <div>

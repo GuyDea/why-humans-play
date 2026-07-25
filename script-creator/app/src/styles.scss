@@ -1168,6 +1168,54 @@ app-welcome-page .skill-pointers code {
   line-height: 1.6;
 }
 
+.help-mode-hint {
+  margin-top: 0.35rem;
+  color: #aa0a0a;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.help-topic .help-controls {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.help-topic .help-controls li {
+  color: var(--whp-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.help-topic .help-gate {
+  margin: 0.75rem 0 0;
+  color: var(--whp-ink, #3b3b3b);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.help-topic .help-gate span {
+  font-weight: 700;
+}
+
+.help-overview-link {
+  margin-top: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #aa0a0a;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.help-overview-link:hover,
+.help-overview-link:focus-visible {
+  text-decoration: underline;
+}
+
 .help-section-heading {
   border-bottom: 1px solid var(--whp-line-strong);
   padding-bottom: 0.7rem;
@@ -1253,4 +1301,39 @@ app-welcome-page .skill-pointers code {
     grid-template-columns: 1fr;
     gap: 0.25rem;
   }
+}
+
+/* Interactive Help mode: region outline + corner cue (see help-target.directive.ts) */
+.help-target {
+  position: relative;
+  outline: 1px dashed rgba(59, 59, 59, 0.45);
+  outline-offset: 2px;
+}
+
+.help-target--selected {
+  outline: 2px solid #aa0a0a;
+}
+
+.help-target-cue {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 5;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid #aa0a0a;
+  border-radius: 50%;
+  background: #f8f8f8;
+  color: #aa0a0a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.help-target-cue:hover,
+.help-target-cue:focus-visible {
+  background: #aa0a0a;
+  color: #f8f8f8;
 }

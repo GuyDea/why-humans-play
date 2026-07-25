@@ -28,6 +28,7 @@ import {
 } from './draft-manager';
 import { DraftTransfer } from './draft-transfer';
 import { RevisionTimeline } from './revision-timeline';
+import { HelpTargetDirective } from '../help/help-target.directive';
 
 @Component({
   selector: 'app-draft-manager',
@@ -43,12 +44,17 @@ import { RevisionTimeline } from './revision-timeline';
     NarrationActions,
     ProductionPanel,
     RevisionTimeline,
+    HelpTargetDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (manager(); as studio) {
       <div class="studio">
-        <aside class="draft-rail" aria-labelledby="drafts-heading">
+        <aside
+          class="draft-rail"
+          aria-labelledby="drafts-heading"
+          appHelpTarget="studio.drafts"
+        >
           <div class="rail-heading">
             <div>
               <p class="eyebrow">Library</p>
@@ -120,11 +126,13 @@ import { RevisionTimeline } from './revision-timeline';
               <span>{{ activeDraft.episodeSlug }}</span>
             </header>
             <app-milestone-panel
+              appHelpTarget="studio.milestones"
               [draft]="activeDraft"
               [client]="client()"
             />
             @if (architectureModel(); as architecture) {
               <app-architecture-panel
+                appHelpTarget="studio.architecture"
                 [model]="architecture"
                 [draft]="activeDraft"
                 [version]="architectureVersion()"
@@ -132,6 +140,7 @@ import { RevisionTimeline } from './revision-timeline';
                 (workflowChanged)="refreshWorkflowDraft()"
               />
               <app-narration-actions
+                appHelpTarget="studio.narration"
                 [model]="architecture"
                 [draft]="activeDraft"
                 [client]="client()"
@@ -141,6 +150,7 @@ import { RevisionTimeline } from './revision-timeline';
               />
             }
             <app-editor-host
+              appHelpTarget="studio.editor"
               [draft]="activeDraft"
               [client]="client()"
               [session]="session()"
@@ -151,6 +161,7 @@ import { RevisionTimeline } from './revision-timeline';
               (architectureConflict)="architectureChanged()"
             />
             <app-production-panel
+              appHelpTarget="studio.production"
               [draft]="activeDraft"
               [client]="client()"
               [editor]="editorHost() ?? null"
@@ -174,7 +185,7 @@ import { RevisionTimeline } from './revision-timeline';
             @if (editorHost(); as activeEditor) {
               @if (activeEditor.brief(); as brief) {
                 @if (activeEditor.approvalGate(); as approvalGate) {
-                  <details open>
+                  <details open appHelpTarget="studio.brief">
                     <summary>Brief &amp; approval</summary>
                     <app-brief-panel
                       [model]="brief"
@@ -185,18 +196,18 @@ import { RevisionTimeline } from './revision-timeline';
                 }
               }
 
-              <details open>
+              <details open appHelpTarget="studio.findings">
                 <summary>Review findings</summary>
                 <app-findings-panel [findings]="activeEditor.findings()" />
               </details>
 
-              <details open>
+              <details open appHelpTarget="studio.parking">
                 <summary>Variants &amp; parking</summary>
                 <app-parking-lot [model]="activeEditor.parkingLot" />
               </details>
             }
 
-            <details>
+            <details appHelpTarget="studio.revisions">
               <summary>Revisions &amp; transfer</summary>
               <app-revision-timeline [manager]="studio" />
               <div class="rail-rule"></div>

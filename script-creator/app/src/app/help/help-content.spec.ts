@@ -1,9 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import {
   EDITORIAL_METHOD,
+  HELP_FULLRUN,
   HELP_GLOSSARY,
+  HELP_MASTHEAD,
+  HELP_PAGES,
   HELP_ROUTES,
-  HELP_TOPICS,
+  findHelpComponent,
+  type HelpComponent,
 } from './help-content';
 import {
   WELCOME_PRINCIPLES,
@@ -11,13 +15,41 @@ import {
   WELCOME_STAGES,
 } from '../onboarding/welcome-content';
 
+function allComponents(): HelpComponent[] {
+  return [
+    ...HELP_ROUTES.flatMap((route) => HELP_PAGES[route].components),
+    ...HELP_MASTHEAD,
+    ...HELP_FULLRUN,
+  ];
+}
+
 describe('Help content boundary', () => {
-  it('provides an on-this-page topic for every application route', () => {
-    expect(Object.keys(HELP_TOPICS)).toEqual(HELP_ROUTES);
+  it('provides a titled goal for every application route', () => {
+    expect(Object.keys(HELP_PAGES)).toEqual(HELP_ROUTES);
     for (const route of HELP_ROUTES) {
-      expect(HELP_TOPICS[route].title.trim()).not.toBe('');
-      expect(HELP_TOPICS[route].description.trim()).not.toBe('');
+      expect(HELP_PAGES[route].title.trim()).not.toBe('');
+      expect(HELP_PAGES[route].goal.trim()).not.toBe('');
     }
+  });
+
+  it('gives every help component a unique id, title and summary', () => {
+    const components = allComponents();
+    const ids = components.map((component) => component.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    for (const component of components) {
+      expect(component.id).toMatch(/^[a-z]+\.[a-z]+$/u);
+      expect(component.title.trim()).not.toBe('');
+      expect(component.summary.trim()).not.toBe('');
+      expect(Array.isArray(component.controls)).toBe(true);
+    }
+  });
+
+  it('resolves any component by id and rejects unknown ids', () => {
+    const components = allComponents();
+    if (components.length > 0) {
+      expect(findHelpComponent(components[0].id)).toBe(components[0]);
+    }
+    expect(findHelpComponent('does.notexist')).toBeUndefined();
   });
 
   it('defines every planned glossary term as a workbench concept', () => {
@@ -59,7 +91,9 @@ describe('Help content boundary', () => {
     // Both onboarding surfaces are boundary-protected: the app explains
     // workbench mechanics and never encodes editorial method.
     const copy = JSON.stringify({
-      topics: HELP_TOPICS,
+      pages: HELP_PAGES,
+      masthead: HELP_MASTHEAD,
+      fullRun: HELP_FULLRUN,
       glossary: HELP_GLOSSARY,
       editorialMethod: EDITORIAL_METHOD,
       welcomeStages: WELCOME_STAGES,

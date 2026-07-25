@@ -5,6 +5,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { OnboardingState } from './onboarding-state';
 import {
   WELCOME_PRINCIPLES,
@@ -15,7 +16,7 @@ import {
 @Component({
   selector: 'app-welcome-page',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="welcome-page">
@@ -30,7 +31,11 @@ import {
         </p>
       </header>
 
-      <section class="pipeline-map" aria-labelledby="pipeline-map-heading">
+      <section
+        class="pipeline-map"
+        aria-labelledby="pipeline-map-heading"
+        appHelpTarget="welcome.mentalmodel"
+      >
         <div class="section-heading">
           <p>One episode, five surfaces</p>
           <h2 id="pipeline-map-heading">The pipeline mental model</h2>
@@ -49,7 +54,11 @@ import {
       </section>
 
       <section class="welcome-grid">
-        <article class="checklist-card" aria-labelledby="checklist-heading">
+        <article
+          class="checklist-card"
+          aria-labelledby="checklist-heading"
+          appHelpTarget="welcome.checklist"
+        >
           <div class="section-heading">
             <p>Live progress</p>
             <h2 id="checklist-heading">First episode checklist</h2>
@@ -98,7 +107,11 @@ import {
           }
         </article>
 
-        <article class="principles-card" aria-labelledby="principles-heading">
+        <article
+          class="principles-card"
+          aria-labelledby="principles-heading"
+          appHelpTarget="welcome.boundaries"
+        >
           <div class="section-heading">
             <p>Control boundaries</p>
             <h2 id="principles-heading">How this workbench behaves</h2>

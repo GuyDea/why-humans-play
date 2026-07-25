@@ -122,6 +122,30 @@ describe('routed Help drawer composition', () => {
       '.agents/skills/writing-whp-youtube-scripts/SKILL.md',
     );
 
+    // Help mode annotates the masthead: a cue on the nav explains that region.
+    let navCue: HTMLButtonElement | null = null;
+    await vi.waitFor(() => {
+      help.tick();
+      navCue = help.root.querySelector<HTMLButtonElement>(
+        '.masthead nav .help-target-cue[data-help-cue="masthead.nav"]',
+      );
+      expect(navCue).not.toBeNull();
+    });
+    navCue!.click();
+    await vi.waitFor(() => {
+      help.tick();
+      expect(
+        drawer.querySelector('[data-testid="help-component"]')?.textContent,
+      ).toContain('Workbench navigation');
+    });
+
+    // "Page overview" clears the selection and restores the page goal.
+    findButton(drawer, '← Page overview').click();
+    await vi.waitFor(() => {
+      help.tick();
+      expect(drawer.querySelector('[data-testid="help-component"]')).toBeNull();
+    });
+
     document.dispatchEvent(new KeyboardEvent('keydown', {
       key: 'Escape',
       bubbles: true,
