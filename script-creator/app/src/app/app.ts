@@ -15,6 +15,8 @@ import {
 } from '@angular/router';
 import { filter, type Subscription } from 'rxjs';
 import { HelpDrawer } from './help/help-drawer';
+import { HelpModeService } from './help/help-mode.service';
+import { HelpTargetDirective } from './help/help-target.directive';
 import { MastheadModelSelector } from './masthead-model-selector';
 import { OnboardingState } from './onboarding/onboarding-state';
 
@@ -26,6 +28,7 @@ import { OnboardingState } from './onboarding/onboarding-state';
     RouterLinkActive,
     RouterOutlet,
     HelpDrawer,
+    HelpTargetDirective,
     MastheadModelSelector,
   ],
   templateUrl: './app.html',
@@ -34,6 +37,7 @@ import { OnboardingState } from './onboarding/onboarding-state';
 export class App implements AfterViewInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly onboarding = inject(OnboardingState);
+  private readonly helpMode = inject(HelpModeService);
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private initialNavigationHandled = false;
   private readonly navigationSubscription: Subscription;
@@ -72,10 +76,12 @@ export class App implements AfterViewInit, OnDestroy {
 
   protected openHelp(): void {
     this.helpOpen.set(true);
+    this.helpMode.activate();
   }
 
   protected closeHelp(): void {
     this.helpOpen.set(false);
+    this.helpMode.deactivate();
     queueMicrotask(() => {
       document.querySelector<HTMLButtonElement>('#help-trigger')?.focus();
     });
