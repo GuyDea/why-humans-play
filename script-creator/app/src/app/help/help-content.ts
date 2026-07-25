@@ -251,7 +251,33 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
     goal:
       'Pipeline is a read-only lifecycle board. Each card opens the working draft ' +
       'in Studio or the repository-backed topic material in Topics.',
-    components: [],
+    components: [
+      {
+        id: 'pipeline.board',
+        title: 'Production pipeline',
+        summary:
+          'A read-only board of every episode’s lifecycle stage across eleven columns ' +
+          '(Idea, Candidate, Selected, Architecture, Architecture approved, Prototyping, ' +
+          'Creative approved, Production, Record ready, Recorded, Published). Each column ' +
+          'shows a live count, and the board never changes the pipeline. Each card shows an ' +
+          'episode’s stage, title, slug, and source — a working Draft or repository Topic ' +
+          'material.',
+        controls: [
+          'Open a card — opens the working draft in Studio, or the topic material in Topics, depending on the card’s source.',
+        ],
+      },
+      {
+        id: 'pipeline.diagnostics',
+        title: 'Pipeline diagnostics',
+        summary:
+          'Notices about the pipeline file: episodes in an unrecognized state that cannot be ' +
+          'placed, and per-row problems that need attention.',
+        controls: [
+          'Try again — reloads the pipeline after a load error.',
+        ],
+        unlockedBy: 'Shown only when the pipeline reports unmapped states or diagnostics.',
+      },
+    ],
   },
   '/lessons': {
     title: 'Lessons',
