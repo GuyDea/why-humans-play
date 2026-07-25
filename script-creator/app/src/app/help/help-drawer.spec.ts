@@ -5,10 +5,8 @@ import {
   BrowserTestingModule,
   platformBrowserTesting,
 } from '@angular/platform-browser/testing';
-import { provideRouter } from '@angular/router';
 import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { HelpDrawer } from './help-drawer';
-import { HelpModeService } from './help-mode.service';
 
 beforeAll(() => {
   try {
@@ -18,10 +16,10 @@ beforeAll(() => {
   }
 });
 
-describe('HelpDrawer component section', () => {
+describe('HelpDrawer reference panel', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection(), provideRouter([])],
+      providers: [provideZonelessChangeDetection()],
     });
   });
 
@@ -29,31 +27,27 @@ describe('HelpDrawer component section', () => {
     TestBed.resetTestingModule();
   });
 
-  it('shows the page overview when nothing is selected', () => {
+  it('is a pure glossary and editorial-method reference', () => {
     const fixture = TestBed.createComponent(HelpDrawer);
     fixture.detectChanges();
-    const topic = fixture.nativeElement.querySelector('[data-testid="help-topic"]');
-    expect(topic.textContent).toContain('On this page');
-    expect(fixture.nativeElement.querySelector('[data-testid="help-component"]')).toBeNull();
-    expect(fixture.nativeElement.querySelector('.help-overview-link')).toBeNull();
-  });
+    const el = fixture.nativeElement as HTMLElement;
 
-  it('shows the selected component and clears back to overview', () => {
-    const service = TestBed.inject(HelpModeService);
-    const fixture = TestBed.createComponent(HelpDrawer);
-    fixture.detectChanges();
+    // Glossary + method owners are present.
+    expect(el.querySelector('#glossary-heading')?.textContent).toContain(
+      'Glossary',
+    );
+    expect(el.querySelector('#method-heading')?.textContent).toContain(
+      'Editorial method',
+    );
+    expect(el.textContent).toContain('choosing-whp-video-topic');
+    expect(el.textContent).toContain('writing-whp-youtube-scripts');
+    expect(el.textContent).toContain('.agents/skills/');
 
-    service.select('masthead.nav'); // resolves to authored content (Task 1)
-    fixture.detectChanges();
-    const component = fixture.nativeElement.querySelector('[data-testid="help-component"]');
-    expect(component.textContent).toContain('This component');
-    expect(component.textContent).toContain('Workbench navigation');
-
-    const overviewLink = fixture.nativeElement.querySelector('.help-overview-link') as HTMLButtonElement;
-    expect(overviewLink).not.toBeNull();
-    overviewLink.click();
-    fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('[data-testid="help-component"]')).toBeNull();
-    expect(service.selectedId()).toBeNull();
+    // Per-region / on-this-page content and help-mode wiring have moved out of
+    // the reference panel — those live in the anchored Help-mode popover now.
+    expect(el.querySelector('[data-testid="help-topic"]')).toBeNull();
+    expect(el.querySelector('[data-testid="help-component"]')).toBeNull();
+    expect(el.querySelector('.help-mode-hint')).toBeNull();
+    expect(el.textContent).not.toContain('On this page');
   });
 });

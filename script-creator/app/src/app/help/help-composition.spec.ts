@@ -45,8 +45,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('routed Help drawer composition', () => {
-  it('tracks the active route and exposes the glossary and skill owners', async () => {
+describe('routed Help composition', () => {
+  it('opens a non-modal glossary/method reference without activating Help mode', async () => {
     const help = await mountHelp();
     const trigger = findButton(help.root, 'Help');
 
@@ -60,42 +60,18 @@ describe('routed Help drawer composition', () => {
 
     const drawer = await renderedDrawer(help);
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
-    // Non-modal complementary panel: it must NOT be a modal dialog, and it
-    // must not lay a full-page backdrop over the masthead/page — that is what
-    // let the modal version silently block the nav links.
+    // Non-modal complementary panel: not a modal dialog, no full-page backdrop.
     expect(drawer.tagName).toBe('ASIDE');
     expect(drawer.getAttribute('role')).not.toBe('dialog');
     expect(drawer.getAttribute('aria-modal')).toBeNull();
     expect(drawer.getAttribute('aria-labelledby')).toBe('help-title');
     expect(help.root.querySelector('.help-backdrop')).toBeNull();
     expect(help.root.querySelector('.help-layer')).toBeNull();
-    expect(
-      drawer.querySelector('[data-testid="help-topic"]')?.textContent,
-    ).toContain('Pipeline');
-    expect(
-      drawer.querySelector('[data-testid="help-topic"]')
-        ?.getAttribute('aria-live'),
-    ).toBe('polite');
 
-    // Focus moves into the panel on open, but it does not trap: the Help
-    // trigger and every masthead link stay reachable while it is open.
-    const close = findButton(drawer, 'Close help');
-    await vi.waitFor(() => expect(document.activeElement).toBe(close));
-
-    // Navigate by CLICKING the real masthead link (not the router API) while
-    // the drawer is open, and confirm the route-aware topic updates. A modal
-    // that covered the masthead would defeat this in the real UI.
-    const topicsLink = mastheadLink(help.root, 'Topics');
-    topicsLink.click();
-    help.tick();
-    await vi.waitFor(() => {
-      help.tick();
-      expect(help.router.url).toBe('/topics');
-      expect(
-        drawer.querySelector('[data-testid="help-topic"]')?.textContent,
-      ).toContain('Topics');
-    });
-
+    // The reference panel is a pure glossary + method reference. Per-page /
+    // per-region explanation has moved to the Help-mode popover.
+    expect(drawer.querySelector('[data-testid="help-topic"]')).toBeNull();
+    expect(drawer.textContent).not.toContain('On this page');
     expect(
       Array.from(drawer.querySelectorAll('dt')).map(
         (entry) => entry.textContent?.trim(),
@@ -113,37 +89,25 @@ describe('routed Help drawer composition', () => {
       'lesson',
       'reconcile',
     ]));
-    expect(drawer.textContent).toContain('choosing-whp-video-topic');
     expect(drawer.textContent).toContain(
       '.agents/skills/choosing-whp-video-topic/SKILL.md',
     );
-    expect(drawer.textContent).toContain('writing-whp-youtube-scripts');
     expect(drawer.textContent).toContain(
       '.agents/skills/writing-whp-youtube-scripts/SKILL.md',
     );
 
-    // Help mode annotates the masthead: a cue on the nav explains that region.
-    let navCue: HTMLButtonElement | null = null;
-    await vi.waitFor(() => {
-      help.tick();
-      navCue = help.root.querySelector<HTMLButtonElement>(
-        '.masthead nav .help-target-cue[data-help-cue="masthead.nav"]',
-      );
-      expect(navCue).not.toBeNull();
-    });
-    navCue!.click();
-    await vi.waitFor(() => {
-      help.tick();
-      expect(
-        drawer.querySelector('[data-testid="help-component"]')?.textContent,
-      ).toContain('Workbench navigation');
-    });
+    // Opening the reference must NOT turn on Help mode: no region cues appear.
+    expect(help.root.querySelector('.help-target-cue')).toBeNull();
 
-    // "Page overview" clears the selection and restores the page goal.
-    findButton(drawer, '← Page overview').click();
+    // Focus moves into the panel; the masthead stays interactive (non-modal).
+    const close = findButton(drawer, 'Close help');
+    await vi.waitFor(() => expect(document.activeElement).toBe(close));
+    mastheadLink(help.root, 'Topics').click();
+    help.tick();
     await vi.waitFor(() => {
       help.tick();
-      expect(drawer.querySelector('[data-testid="help-component"]')).toBeNull();
+      expect(help.router.url).toBe('/topics');
+      expect(help.root.querySelector('#script-creator-help')).not.toBeNull();
     });
 
     document.dispatchEvent(new KeyboardEvent('keydown', {
@@ -155,6 +119,60 @@ describe('routed Help drawer composition', () => {
       help.tick();
       expect(help.root.querySelector('#script-creator-help')).toBeNull();
       expect(document.activeElement).toBe(trigger);
+    });
+  });
+
+  it('Explain regions toggles Help mode with anchored popovers, independent of the drawer', async () => {
+    const help = await mountHelp();
+    const toggle = findButton(help.root, 'Explain regions');
+    expect(toggle.getAttribute('aria-pressed')).toBe('false');
+
+    // Turn on Help mode WITHOUT opening the reference panel.
+    toggle.click();
+    help.tick();
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+    expect(help.root.querySelector('#script-creator-help')).toBeNull();
+
+    // Region cues appear; the drawer never covers them because it isn't open.
+    let navCue: HTMLButtonElement | null = null;
+    await vi.waitFor(() => {
+      help.tick();
+      navCue = help.root.querySelector<HTMLButtonElement>(
+        '.masthead nav .help-target-cue[data-help-cue="masthead.nav"]',
+      );
+      expect(navCue).not.toBeNull();
+    });
+
+    // Clicking a cue shows the explanation in an anchored popover (not the panel).
+    navCue!.click();
+    let popover: HTMLElement | null = null;
+    await vi.waitFor(() => {
+      help.tick();
+      popover = help.root.querySelector<HTMLElement>(
+        '[data-testid="help-popover"]',
+      );
+      expect(popover).not.toBeNull();
+      expect(popover!.textContent).toContain('Workbench navigation');
+    });
+    expect(popover!.getAttribute('role')).toBe('dialog');
+
+    // Escape dismisses the popover but leaves Help mode on.
+    document.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Escape',
+      bubbles: true,
+    }));
+    await vi.waitFor(() => {
+      help.tick();
+      expect(help.root.querySelector('[data-testid="help-popover"]')).toBeNull();
+    });
+    expect(toggle.getAttribute('aria-pressed')).toBe('true');
+
+    // Toggling off removes the cues.
+    toggle.click();
+    await vi.waitFor(() => {
+      help.tick();
+      expect(help.root.querySelector('.help-target-cue')).toBeNull();
+      expect(toggle.getAttribute('aria-pressed')).toBe('false');
     });
   });
 

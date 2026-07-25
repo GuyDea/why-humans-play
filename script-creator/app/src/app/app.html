@@ -29,6 +29,16 @@
     >
       Help
     </button>
+    <button
+      id="help-mode-trigger"
+      class="help-trigger help-mode-trigger"
+      type="button"
+      aria-label="Explain regions"
+      [attr.aria-pressed]="helpModeActive()"
+      (click)="toggleHelpMode()"
+    >
+      <span aria-hidden="true">?</span> Explain regions
+    </button>
   </nav>
   <div class="masthead-tools" appHelpTarget="masthead.model">
     <app-masthead-model-selector />
@@ -40,3 +50,5 @@
 @if (helpOpen()) {
   <app-help-drawer (helpClose)="closeHelp()" />
 }
+
+<app-help-popover />

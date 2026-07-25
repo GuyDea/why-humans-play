@@ -16,6 +16,7 @@ import {
 import { filter, type Subscription } from 'rxjs';
 import { HelpDrawer } from './help/help-drawer';
 import { HelpModeService } from './help/help-mode.service';
+import { HelpPopover } from './help/help-popover';
 import { HelpTargetDirective } from './help/help-target.directive';
 import { MastheadModelSelector } from './masthead-model-selector';
 import { OnboardingState } from './onboarding/onboarding-state';
@@ -28,6 +29,7 @@ import { OnboardingState } from './onboarding/onboarding-state';
     RouterLinkActive,
     RouterOutlet,
     HelpDrawer,
+    HelpPopover,
     HelpTargetDirective,
     MastheadModelSelector,
   ],
@@ -74,17 +76,22 @@ export class App implements AfterViewInit, OnDestroy {
     this.mastheadResizeObserver?.disconnect();
   }
 
+  protected readonly helpModeActive = this.helpMode.active;
+
   protected openHelp(): void {
     this.helpOpen.set(true);
-    this.helpMode.activate();
   }
 
   protected closeHelp(): void {
     this.helpOpen.set(false);
-    this.helpMode.deactivate();
     queueMicrotask(() => {
       document.querySelector<HTMLButtonElement>('#help-trigger')?.focus();
     });
+  }
+
+  protected toggleHelpMode(): void {
+    if (this.helpMode.active()) this.helpMode.deactivate();
+    else this.helpMode.activate();
   }
 
   private async showWelcomeForFreshDefaultLoad(): Promise<void> {

@@ -1385,3 +1385,90 @@ app-welcome-page .skill-pointers code {
   background: #aa0a0a;
   color: #f8f8f8;
 }
+
+.masthead .help-mode-trigger[aria-pressed='true'] {
+  border-color: var(--whp-accent);
+  background: var(--whp-accent);
+  color: var(--whp-ground);
+}
+
+/* Help-mode explanation popover, anchored to the selected region's cue. */
+.help-popover {
+  position: fixed;
+  z-index: 1100;
+  width: min(22rem, calc(100vw - 2rem));
+  border: 1px solid var(--whp-line-strong);
+  box-shadow: 0 1rem 2.5rem color-mix(in srgb, var(--whp-ink) 22%, transparent);
+  padding: 0.9rem 1rem 1rem;
+  color: var(--whp-ink);
+  background: var(--whp-ground);
+  animation: help-drawer-in 140ms ease-out;
+}
+
+.help-popover header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.help-popover header > div > p {
+  margin: 0;
+  color: var(--whp-accent);
+  font-size: 0.58rem;
+  font-weight: 850;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.help-popover h3 {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+}
+
+.help-popover-close {
+  flex: none;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 1px solid var(--whp-line);
+  padding: 0;
+  color: var(--whp-muted);
+  background: var(--whp-surface);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.help-popover-close:hover,
+.help-popover-close:focus-visible {
+  border-color: var(--whp-accent);
+  color: var(--whp-accent);
+}
+
+.help-popover-summary {
+  margin: 0.6rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.help-popover-controls {
+  margin: 0.55rem 0 0;
+  padding-left: 1.05rem;
+  color: var(--whp-muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.help-popover-gate {
+  margin: 0.6rem 0 0;
+  color: var(--whp-muted);
+  font-size: 0.68rem;
+}
+
+.help-popover-gate span {
+  color: var(--whp-accent);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
