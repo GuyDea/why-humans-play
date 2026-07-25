@@ -23,6 +23,12 @@ import {
 } from '../documents/service.js';
 import { DraftWriteReservationError } from '../documents/store.js';
 import {
+  EFFORT_ERROR,
+  isValidEffort,
+  isValidModel,
+  MODEL_ERROR,
+} from '../operations/model-config.js';
+import {
   DRAFT_WRITING_OPERATIONS,
   type OperationName,
 } from '../operations/registry.js';
@@ -186,6 +192,8 @@ export type MilestoneHttpService = Pick<
 interface SubmitBody {
   operation?: unknown;
   inputs?: unknown;
+  model?: unknown;
+  effort?: unknown;
 }
 
 interface ResumeBody {
@@ -1534,9 +1542,15 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
           '/api/drafts/:id/distill',
         );
       }
+      const model = optionalModel(request.body.model);
+      const effort = optionalEffort(request.body.effort);
       const id = options.operationService.submit(
         operation,
         request.body.inputs,
+        {
+          ...(model !== undefined ? { model } : {}),
+          ...(effort !== undefined ? { effort } : {}),
+        },
       );
       return { id };
     } catch (error) {
@@ -1560,12 +1574,25 @@ export function buildApp(options: BuildAppOptions): FastifyInstance {
             '/api/drafts/:id/distill',
           );
         }
+        const model = optionalModel(request.body.model);
+        const effort = optionalEffort(request.body.effort);
+        const modelOptions = {
+          ...(model !== undefined ? { model } : {}),
+          ...(effort !== undefined ? { effort } : {}),
+        };
         return {
-          id: architectureService.submitOperation(
-            request.params.id,
-            request.body.operation as OperationName,
-            request.body.inputs,
-          ),
+          id: Object.keys(modelOptions).length > 0
+            ? architectureService.submitOperation(
+                request.params.id,
+                request.body.operation as OperationName,
+                request.body.inputs,
+                modelOptions,
+              )
+            : architectureService.submitOperation(
+                request.params.id,
+                request.body.operation as OperationName,
+                request.body.inputs,
+              ),
         };
       } catch (error) {
         if (error instanceof DraftScopedSubmissionRequiredError) {
@@ -2173,6 +2200,22 @@ function optionalString(value: unknown, field: string): string | null {
   return value;
 }
 
+function optionalModel(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'string' || !isValidModel(value)) {
+    throw new Error(MODEL_ERROR);
+  }
+  return value;
+}
+
+function optionalEffort(value: unknown): string | undefined {
+  if (value === undefined || value === null) return undefined;
+  if (typeof value !== 'string' || !isValidEffort(value)) {
+    throw new Error(EFFORT_ERROR);
+  }
+  return value;
+}
+
 function optionalOneLineNote(value: unknown): string | null {
   if (value === undefined || value === null) return null;
   if (typeof value !== 'string' || /[\r\n]/u.test(value)) {
@@ -2493,6 +2536,8 @@ function sendArchitectureError(
     /^operation .+ is not resumable$/,
     /^maximum resume chain length is 3$/,
     /^operation cannot be resumed without a thread id$/,
+    /^model must be /,
+    /^effort must be one of /,
   ].some((pattern) => pattern.test(message))) {
     return reply.code(400).send({ error: message });
   }
@@ -2527,6 +2572,8 @@ function isOperationClientError(message: string): boolean {
     /^operation cannot be resumed without a thread id$/,
     /^operation (?:generate-episode|promote) requires a draft-scoped submission$/,
     /^fromSeq and Last-Event-ID must be /,
+    /^model must be /,
+    /^effort must be one of /,
   ].some((pattern) => pattern.test(message));
 }
 

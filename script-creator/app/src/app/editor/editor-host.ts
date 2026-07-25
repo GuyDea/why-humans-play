@@ -8,6 +8,7 @@ import {
   type SimpleChanges,
   ViewChild,
   computed,
+  inject,
   input,
   output,
   signal,
@@ -43,6 +44,7 @@ import {
   type DraftEnvelopeContext,
   type PromotionLauncher,
 } from '../panels/brief-panel';
+import { ModelPreferenceService } from '../ops/model-preference';
 import { ParkingLotModel } from '../panels/parking-lot';
 import {
   type StudioRuntimeHandle,
@@ -539,6 +541,7 @@ interface SaveProvenance {
   `,
 })
 export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
+  private readonly modelPreference = inject(ModelPreferenceService);
   readonly draft = input.required<DraftRecord>();
   readonly client = input.required<DaemonClient>();
   readonly session = input.required<StudioSession>();
@@ -998,6 +1001,7 @@ export class EditorHost implements AfterViewInit, OnChanges, OnDestroy {
         onError: (error) => {
           this.operationError.set(operationErrorMessage(error));
         },
+        modelPreference: this.modelPreference,
       },
     );
     this.bindNarrationProposalSettlements(composition, draft.id);
@@ -1380,7 +1384,8 @@ function draftScopedClient(
         return (
           operation: Parameters<DaemonClient['submitOp']>[0],
           inputs: unknown,
-        ) => target.submitDraftOp(draftId, operation, inputs);
+          options?: Parameters<DaemonClient['submitOp']>[2],
+        ) => target.submitDraftOp(draftId, operation, inputs, options);
       }
       if (property === 'resume') {
         return (operationId: string, inputs: unknown) => {

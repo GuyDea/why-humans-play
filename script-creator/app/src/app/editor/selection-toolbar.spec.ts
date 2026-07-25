@@ -298,6 +298,73 @@ describe('SelectionToolbar', () => {
     container.remove();
   });
 
+  it('renders the model dropdown, persists a choice, and clears on Default', () => {
+    const { view, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    const store = {
+      value: null as { model: string; effort: string } | null,
+      get: vi.fn(() => store.value),
+      set: vi.fn((_operation: string, choice: { model: string; effort: string } | null) => {
+        store.value = choice;
+      }),
+    };
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+      modelPreference: store,
+    });
+
+    const select = toolbar.element.querySelector<HTMLSelectElement>(
+      'select[data-model-select]',
+    )!;
+    expect(select).not.toBeNull();
+    expect(Array.from(select.options).map((option) => option.textContent))
+      .toEqual(['Default', 'Sol · xhigh', 'Sol · medium']);
+    expect(select.selectedIndex).toBe(0);
+
+    select.value = '1';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(store.set).toHaveBeenLastCalledWith('default', {
+      model: 'gpt-5.6-sol',
+      effort: 'xhigh',
+    });
+
+    select.value = '0';
+    select.dispatchEvent(new Event('change', { bubbles: true }));
+    expect(store.set).toHaveBeenLastCalledWith('default', null);
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
+  it('reflects the persisted model choice on init', () => {
+    const { view, container } = selectedEditor();
+    const { bridge } = bridgeFixture();
+    const store = {
+      get: vi.fn(() => ({ model: 'gpt-5.6-sol', effort: 'medium' })),
+      set: vi.fn(),
+    };
+    const toolbar = new SelectionToolbar({
+      view,
+      container,
+      bridge,
+      contextForSelection: () => context,
+      modelPreference: store,
+    });
+
+    const select = toolbar.element.querySelector<HTMLSelectElement>(
+      'select[data-model-select]',
+    )!;
+    expect(select.selectedIndex).toBe(2);
+
+    toolbar.destroy();
+    view.destroy();
+    container.remove();
+  });
+
   it('keeps the selection when interacting with its controls', () => {
     const { view, target, container } = selectedEditor();
     const { bridge } = bridgeFixture();

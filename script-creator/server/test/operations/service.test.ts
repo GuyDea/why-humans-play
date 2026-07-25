@@ -88,6 +88,7 @@ function makeFixture(
   mode: string,
   extraEnv: Record<string, string> = {},
   codexBin?: string,
+  fallbacks: { model?: string; effort?: string } = {},
 ): Fixture {
   const root = mkdtempSync(join(tmpdir(), 'operation-service-'));
   const binDir = join(root, 'bin');
@@ -111,6 +112,8 @@ function makeFixture(
     store,
     clock,
     codexBin,
+    model: fallbacks.model,
+    effort: fallbacks.effort,
   });
   const fixture = { root, service, supervisor, store, clock, ids: [] };
   fixtures.push(fixture);
@@ -205,6 +208,107 @@ describe('OperationService', () => {
 
     const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
     expect(envelope.codexBin).toBe(codexBin);
+  });
+
+  it('places requested model and effort on the submitted envelope and record', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original passage.' },
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.model).toBe('gpt-5.6-sol');
+    expect(envelope.effort).toBe('xhigh');
+    const record = fixture.service.get(id);
+    expect(record.model).toBe('gpt-5.6-sol');
+    expect(record.effort).toBe('xhigh');
+    const summary = fixture.service.list().find((op) => op.id === id);
+    expect(summary).toMatchObject({ model: 'gpt-5.6-sol', effort: 'xhigh' });
+  });
+
+  it('omits model and effort when neither request nor daemon fallback set them', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = submit(fixture, 'rewrite-selection', { selection: 'Plain.' });
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope).not.toHaveProperty('model');
+    expect(envelope).not.toHaveProperty('effort');
+    expect(fixture.service.get(id)).toMatchObject({ model: null, effort: null });
+  });
+
+  it('falls back to the daemon-level model and effort when unset', async () => {
+    const fixture = makeFixture('operation-schema', {}, undefined, {
+      model: 'gpt-5.6-sol',
+      effort: 'medium',
+    });
+    const id = submit(fixture, 'rewrite-selection', { selection: 'Fallback.' });
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.model).toBe('gpt-5.6-sol');
+    expect(envelope.effort).toBe('medium');
+  });
+
+  it('lets an explicit request override the daemon-level fallback', async () => {
+    const fixture = makeFixture('operation-schema', {}, undefined, {
+      model: 'fallback-model',
+      effort: 'low',
+    });
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Override.' },
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
+
+    const envelope = JSON.parse(fixture.store.get(id)!.envelopeJson);
+    expect(envelope.model).toBe('gpt-5.6-sol');
+    expect(envelope.effort).toBe('xhigh');
+  });
+
+  it('preserves the prior envelope model and effort across a resume', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original.' },
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
+    await terminal(fixture, id);
+
+    const resumedId = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Fresh.' },
+      { resumeOf: id },
+    );
+    const resumed = await terminal(fixture, resumedId);
+    const envelope = JSON.parse(resumed.envelopeJson);
+    expect(envelope.model).toBe('gpt-5.6-sol');
+    expect(envelope.effort).toBe('xhigh');
+  });
+
+  it('lets a resume request replace the inherited model and effort', async () => {
+    const fixture = makeFixture('operation-schema');
+    const id = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Original.' },
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
+    await terminal(fixture, id);
+
+    const resumedId = submit(
+      fixture,
+      'rewrite-selection',
+      { selection: 'Fresh.' },
+      { resumeOf: id, model: 'gpt-5.6-sol', effort: 'medium' },
+    );
+    const resumed = await terminal(fixture, resumedId);
+    const envelope = JSON.parse(resumed.envelopeJson);
+    expect(envelope.effort).toBe('medium');
   });
 
   it('returns the final Markdown for a raw operation', async () => {

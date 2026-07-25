@@ -214,6 +214,11 @@ transition.
   Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
   equivalent disclaimer. Use the limitation only after the viewer knows why the case
   belongs.
+  Voice the logical link in plain words: say what the last case established, what it could
+  not establish, and why the next evidence answers that open part. Do not pivot between
+  two pieces of evidence with a bare connective — “So:” plus a new question is not a
+  transition. If the narration never states how the two ideas connect, the transition
+  fails.
 - Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
   element must earn its place by increasing trust, first-hearing clarity, or magnetism;
   otherwise cut or collapse it. Open a documented story with a compact trust anchor:
@@ -356,9 +361,30 @@ pattern rather than opening three new stories. Evidence quality, causal fit, hum
 consequence, and factual support remain gates; novelty and recognition serve different
 narrative jobs.
 
-Demonstrate the pattern before naming the concept. Let a term such as Goodhart's law or
-specification gaming feel like a useful label for something the viewer already understands,
-not an entrance exam.
+Explain each named concept through the default explanation grammar:
+`term as promise → story as evidence → analogy as recognition → application`.
+Lead with the term as an open loop—a label whose meaning is promised, not defined
+(“Psychologists have a name for this: processing fluency. Sounds abstract—watch what it
+actually does.”). Pay the promise off with the documented story. Evidence always precedes
+the analogy: an analogy illustrates a proven mechanism and can never prove one. Place the
+analogy after the story as recognition—a scene the viewer has lived, whose roles map
+one-to-one onto the mechanism—then move to the application or counter. A term dropped as
+a bare definition sounds like a lecture; a term framed as a promise creates the itch the
+story scratches. The grammar composes with the familiarity check below: a mainstream term
+opens with acknowledgment instead of a promise. It is the default, not a straitjacket: a
+beat with no established term, or where the name itself is the earned punchline, may
+demonstrate first and name after.
+
+Check audience familiarity before naming any concept. When a term is already mainstream
+for the target audience — research current awareness rather than assuming — acknowledge
+the familiarity (“you've probably heard this called sycophancy”) and add something beyond
+the name. Reserve the reveal structure (“that pattern has a name”) for terms the audience
+plausibly does not know. Never unveil as news a term the script's own earlier narration —
+such as an anticipated-defense line — already put in the viewer's mouth.
+
+Match the form of an example to the behavior it illustrates. When narration claims people
+say, ask, or type something, immediately voice at least one verbatim example in that exact
+form — an asked question spoken as a question, not a list of topics.
 
 Prepare every unfamiliar proper name before its first spoken mention. Use `prepare the new
 idea or role → give the name → identify the person, institution, place, or concept → explain
@@ -388,11 +414,15 @@ Humor may be sharp or brutal toward mechanisms, incentives, institutions, hypocr
 absurd consequences. Keep it legible. Do not turn explanatory force into cruelty toward
 vulnerable people or random contempt detached from the idea.
 
-Sustain the comic energy through the body, not only the opening. In a complete
-narration, each major beat lands at least one earned comic or surprising turn; when two
-consecutive beats have neither, flag the dry stretch and either earn a turn from the
-beat's own mechanism or report the deliberate exception — a boundary or sobriety beat
-may stay dry when levity would undercut the harm being described.
+Sustain the comic energy through the body, not only the opening — but there is no
+per-beat joke quota. A joke ships only when it passes three tests: it maps to the
+mechanism, incentive, or consequence; it is transparent to a non-native listener on first
+hearing; and it sounds like something a person would spontaneously say aloud. A
+constructed aphorism that needs decoding fails. Delete a forced joke rather than
+defending it; a beat that teaches cleanly without a joke is healthy, and a boundary or
+sobriety beat may stay dry when levity would undercut the harm being described. When a
+long dry stretch appears, earn a turn from a beat's own mechanism — never manufacture
+one to fill a slot.
 
 Callbacks and repeated language can give the narration a spine. Reuse a compact sound or
 image after the stakes change so the joke gains meaning instead of merely repeating.
@@ -400,6 +430,28 @@ Carry the opening's concrete vocabulary into the viewer application and final li
 clarifies the lesson; do not force a callback that makes the explanation less direct.
 
 ## Write for speech and momentum
+
+Write for the real delivery context: Martin — a non-native English speaker — reads the
+narration aloud, often while walking and talking to the camera, for an audience that
+includes non-native listeners. Every factual sentence is a complete spoken clause with an
+explicit subject. Never narrate facts through colon-label fragments such as “The deal:” or
+“The sneaky part:” — labels with colons are written-prose devices that do not exist in
+speech. No line may depend on punctuation to be understood; if a sentence needs its em
+dash or colon to land, rewrite it as speech. Before keeping any line, test it: would
+Martin plausibly say this, unscripted, to a friend while walking? A line that only works
+as written prose or performed voice-over fails.
+
+When clarity and style pull in opposite directions, clarity wins. Referent completeness,
+locked nouns, counts attached to their nouns, and causal accuracy outrank rhythm,
+compression, punchiness, and humor. A fragment may omit only words recoverable from the
+immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
+result, or manipulation depends on.
+
+Prefer plain international English a non-native listener understands on first hearing.
+Widely understood conversational structures (`Right?`, `Yeah… no.`) are welcome; idioms,
+cultural shorthand, and compressed metaphors that need decoding (`your hunch comes back
+with a doctorate`) are not. A metaphor survives only when its image explains itself
+literally on first hearing.
 
 Write like a smart friend walking the viewer through something surprising, not like a
 paper abstract, conference talk, or legal disclaimer. Use the conversational progression
@@ -420,7 +472,8 @@ waives factual support.
 
 Use short, pronounceable sentences and controlled density. Prefer one new relationship per
 sentence. Use contrast, repetition, callbacks, and occasional fragments when they sound
-natural aloud. Read the draft aloud when the scope warrants it, but do not burden the response
+natural aloud; a fragment may omit only words recoverable from the immediately preceding
+sentence. Read the draft aloud when the scope warrants it, but do not burden the response
 with a visible audit.
 
 ## Pass the spoken-readability delivery gate
@@ -545,9 +598,23 @@ Before returning rapid work, check internally:
 - Does each major beat carry at least one first-person narrator reaction and one
   direct-address check-in, with spoken transitions instead of outline labels and no
   unbroken run of polished aphorisms?
-- In a complete narration, does each major beat land at least one earned comic or
-  surprising turn, with any dry stretch of two consecutive beats either reworked or
-  reported as a deliberate sobriety exception?
+- Is every factual sentence a complete spoken clause with an explicit subject, with no
+  colon-label fragments and no line that depends on punctuation to be understood?
+- Would Martin plausibly say each line, unscripted, to a friend while walking?
+- Is the diction plain international English, with no idiom or compressed metaphor a
+  non-native listener must decode?
+- Does every joke map to the mechanism, read transparently to a non-native listener, and
+  sound spontaneous aloud — with no joke kept merely to fill a beat?
+- Does every transition between evidence pieces say in plain words what the last case
+  established, what it left open, and why the next evidence answers it — no bare “So:”
+  pivots?
+- Is every already-mainstream term acknowledged as familiar rather than unveiled as news,
+  and is no term revealed that the script's own earlier lines already used?
+- Does each named concept follow the explanation grammar—term as promise (or
+  acknowledgment when mainstream), story as evidence, analogy as recognition, then
+  application?
+- When narration claims people say, ask, or type something, does it voice at least one
+  verbatim example in that exact form?
 - In a complete narration, does an open question, contradiction, or promised test give
   the viewer a live reason to keep watching roughly every 60–90 seconds of spoken time?
 - Does the episode make its rule-system legible — players, real goal, scored proxy,
@@ -605,7 +672,17 @@ Keep this audit internal unless Martin asks to see it.
   of the promise.
 - Treating “no verification” as permission to invent plausible detail.
 - Returning three drafts when one was requested.
-- Naming a concept before making its pattern visible.
+- Dropping a term as a bare definition instead of an open-loop promise, or letting an
+  analogy stand in for evidence.
+- Unveiling a mainstream term as news, or revealing a term the script's own earlier lines
+  already used.
+- Narrating facts through colon-label fragments (“The deal:”) or fragments that drop the
+  noun a count or result depends on.
+- Using an idiom or compressed metaphor a non-native listener must decode.
+- Pivoting between two studies with a bare “So:” instead of voicing the logical link.
+- Keeping a manufactured joke to satisfy comic energy instead of deleting it.
+- Claiming people ask AI questions while listing only topics, never voicing an actual
+  question.
 - Hiding a long setup and explanation inside the punchline.
 - Letting factual precision turn the narration into a paper abstract or legal disclaimer.
 - Adding jokes that could be removed without changing the explanation.

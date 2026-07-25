@@ -23,6 +23,12 @@ import { JobStore } from './job-store.js';
 import { LearningService } from './learning/service.js';
 import { LearningStore } from './learning/store.js';
 import {
+  isValidEffort,
+  isValidModel,
+  MODEL_ERROR,
+  EFFORT_ERROR,
+} from './operations/model-config.js';
+import {
   OperationService,
   type OperationClock,
 } from './operations/service.js';
@@ -64,6 +70,8 @@ export interface DaemonContext {
 
 export interface DaemonEnvironment extends AppDirEnvironment {
   SC_CODEX_BIN?: string;
+  SC_CODEX_MODEL?: string;
+  SC_CODEX_EFFORT?: string;
 }
 
 export interface CreateDaemonContextOptions {
@@ -115,6 +123,22 @@ export function generateNonce(): string {
   return randomBytes(16).toString('hex');
 }
 
+function validateEnvModel(value: string | undefined): string | undefined {
+  if (value === undefined || value === '') return undefined;
+  if (!isValidModel(value)) {
+    throw new Error(`SC_CODEX_MODEL is invalid: ${MODEL_ERROR}`);
+  }
+  return value;
+}
+
+function validateEnvEffort(value: string | undefined): string | undefined {
+  if (value === undefined || value === '') return undefined;
+  if (!isValidEffort(value)) {
+    throw new Error(`SC_CODEX_EFFORT is invalid: ${EFFORT_ERROR}`);
+  }
+  return value;
+}
+
 export function parsePort(args: readonly string[]): number {
   if (args.length === 0) return 0;
   if (args.length === 2 && args[0] === '--port') {
@@ -163,11 +187,15 @@ export function createDaemonContext(
       store: jobStore,
       jobsRoot: dirs.jobsRoot,
     });
+    const modelFallback = validateEnvModel(options.env.SC_CODEX_MODEL);
+    const effortFallback = validateEnvEffort(options.env.SC_CODEX_EFFORT);
     operationService = new OperationService({
       supervisor,
       store: jobStore,
       clock: options.clock,
       codexBin: options.env.SC_CODEX_BIN,
+      model: modelFallback,
+      effort: effortFallback,
     });
     operationService.enforceDeadlinesAtBoot();
     supervisor.reattach();
@@ -432,6 +460,8 @@ export async function startDaemon(
     XDG_DATA_HOME: process.env.XDG_DATA_HOME,
     XDG_STATE_HOME: process.env.XDG_STATE_HOME,
     SC_CODEX_BIN: process.env.SC_CODEX_BIN,
+    SC_CODEX_MODEL: process.env.SC_CODEX_MODEL,
+    SC_CODEX_EFFORT: process.env.SC_CODEX_EFFORT,
   };
   const context = createDaemonContext({ repoRoot, env });
   return startDaemonContext(context, { port: options.port ?? 0 });

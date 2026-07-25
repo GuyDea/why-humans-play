@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  inject,
   input,
   output,
   type OnInit,
@@ -11,6 +12,7 @@ import type {
   DaemonClient,
   DraftRecord,
   NarrationProposalRecord,
+  OperationName,
   OperationResult,
   PromotionRecord,
   ValidatorResult,
@@ -20,6 +22,7 @@ import {
   captureRoutedArchitectureConflict,
 } from '../architecture/model';
 import type { EditorHost } from '../editor/editor-host';
+import { ModelPreferenceService } from '../ops/model-preference';
 import { readDraftMetadata } from '../panels/brief-panel';
 import {
   buildPersonalInputOperationInputs,
@@ -495,6 +498,18 @@ interface PersonalInputProposal {
   `,
 })
 export class ProductionPanel implements OnInit {
+  private readonly modelPreference = inject(ModelPreferenceService);
+
+  private submitDraftOpWithPreference(
+    operation: OperationName,
+    inputs: unknown,
+  ): Promise<{ id: string }> {
+    const choice = this.modelPreference.get(operation) ?? null;
+    return choice
+      ? this.client().submitDraftOp(this.draft().id, operation, inputs, choice)
+      : this.client().submitDraftOp(this.draft().id, operation, inputs);
+  }
+
   readonly draft = input.required<DraftRecord>();
   readonly client = input.required<DaemonClient>();
   readonly editor = input<EditorHost | null>(null);
@@ -771,8 +786,7 @@ export class ProductionPanel implements OnInit {
     this.validatorResult.set(null);
     this.validatorSnapshotMarkdown.set(null);
     try {
-      const { id } = await this.client().submitDraftOp(
-        this.draft().id,
+      const { id } = await this.submitDraftOpWithPreference(
         'promote',
         { target_path: this.productionTarget().trim() },
       );
@@ -1006,8 +1020,7 @@ export class ProductionPanel implements OnInit {
         creativeStatus: metadata.creativeStatus,
         suppliedPersonalInput,
       });
-      const { id } = await this.client().submitDraftOp(
-        this.draft().id,
+      const { id } = await this.submitDraftOpWithPreference(
         'rewrite-selection',
         inputs,
       );

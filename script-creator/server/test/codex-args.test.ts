@@ -32,4 +32,33 @@ describe('buildCodexArgs', () => {
     expect(args).toContain('--json');
     expect(args[args.length - 1]).toBe('-');
   });
+
+  it('omits model and effort flags when unset', () => {
+    const args = buildCodexArgs(base, paths);
+    expect(args).not.toContain('-m');
+    expect(args.some((arg) => arg.startsWith('model_reasoning_effort='))).toBe(
+      false,
+    );
+  });
+
+  it('appends model and effort flags after --json group, before the trailing -', () => {
+    const args = buildCodexArgs(
+      { ...base, outputSchema: { type: 'object' }, model: 'gpt-5.6-sol', effort: 'xhigh' },
+      paths,
+    );
+    expect(args).toEqual([
+      'exec', '--json', '-C', '/repo', '-s', 'read-only',
+      '-o', '/tmp/j/final-message.txt', '--output-schema', '/tmp/j/schema.json',
+      '-m', 'gpt-5.6-sol', '-c', 'model_reasoning_effort=xhigh', '-',
+    ]);
+  });
+
+  it('emits only the model flag when effort is unset', () => {
+    const args = buildCodexArgs({ ...base, model: 'gpt-5.6-sol' }, paths);
+    expect(args[args.indexOf('-m') + 1]).toBe('gpt-5.6-sol');
+    expect(args.some((arg) => arg.startsWith('model_reasoning_effort='))).toBe(
+      false,
+    );
+    expect(args[args.length - 1]).toBe('-');
+  });
 });

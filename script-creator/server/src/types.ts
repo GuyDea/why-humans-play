@@ -7,6 +7,8 @@ export interface JobEnvelope {
   resumeThreadId?: string;
   codexBin?: string;   // test override; default 'codex'
   graceMs?: number;    // cancel escalation grace; default 5000
+  model?: string;      // codex -m override; default global codex config
+  effort?: string;     // codex model_reasoning_effort override
 }
 
 export interface RunnerPaths {

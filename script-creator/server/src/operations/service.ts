@@ -56,6 +56,8 @@ export interface OperationRecord
   draftId: string | null;
   state: OperationState;
   stalled: boolean;
+  model: string | null;
+  effort: string | null;
 }
 
 export interface OperationListRecord {
@@ -71,6 +73,8 @@ export interface OperationListRecord {
   cachedInputTokens: number | null;
   outputTokens: number | null;
   reasoningOutputTokens: number | null;
+  model: string | null;
+  effort: string | null;
 }
 
 export type OperationServiceResult =
@@ -113,6 +117,8 @@ export class OperationService {
   private readonly store: JobStore;
   private readonly clock: OperationClock;
   private readonly codexBin: string | undefined;
+  private readonly modelFallback: string | undefined;
+  private readonly effortFallback: string | undefined;
   private readonly activity = new Map<string, Activity>();
   private readonly deadlineTimers = new Map<string, unknown>();
   private readonly unsubscribeTerminal: () => void;
@@ -123,11 +129,15 @@ export class OperationService {
     store: JobStore;
     clock?: OperationClock;
     codexBin?: string;
+    model?: string;
+    effort?: string;
   }) {
     this.supervisor = opts.supervisor;
     this.store = opts.store;
     this.clock = opts.clock ?? SYSTEM_CLOCK;
     this.codexBin = opts.codexBin;
+    this.modelFallback = opts.model;
+    this.effortFallback = opts.effort;
     this.unsubscribeTerminal = this.store.onOperationTerminal(
       (id) => this.clearDeadline(id),
     );
@@ -137,7 +147,12 @@ export class OperationService {
   submit(
     opName: OperationName,
     inputs: unknown,
-    opts: { resumeOf?: string; cwd?: string } = {},
+    opts: {
+      resumeOf?: string;
+      cwd?: string;
+      model?: string;
+      effort?: string;
+    } = {},
   ): string {
     return this.submitPrepared(opName, inputs, null, opts);
   }
@@ -146,7 +161,13 @@ export class OperationService {
     opName: OperationName,
     inputs: unknown,
     approvedLessons: string[],
-    opts: { draftId: string; resumeOf?: string; cwd?: string },
+    opts: {
+      draftId: string;
+      resumeOf?: string;
+      cwd?: string;
+      model?: string;
+      effort?: string;
+    },
   ): string {
     if (!approvedLessons.every((lesson) => typeof lesson === 'string')) {
       throw new Error('authoritative approved lessons must be strings');
@@ -216,7 +237,13 @@ export class OperationService {
     opName: OperationName,
     inputs: unknown,
     approvedLessons: string[] | null,
-    opts: { draftId?: string; resumeOf?: string; cwd?: string },
+    opts: {
+      draftId?: string;
+      resumeOf?: string;
+      cwd?: string;
+      model?: string;
+      effort?: string;
+    },
   ): string {
     const definition = this.definition(opName);
     if (inputs === undefined) throw new Error('full inputs are required');
@@ -228,6 +255,8 @@ export class OperationService {
 
     let resumedFrom: string | undefined;
     let resumeThreadId: string | undefined;
+    let inheritedModel: string | undefined;
+    let inheritedEffort: string | undefined;
     if (opts.resumeOf !== undefined) {
       const parentOperation = this.requireOperation(opts.resumeOf);
       if (parentOperation.draftId !== (opts.draftId ?? null)) {
@@ -252,7 +281,19 @@ export class OperationService {
       }
       resumedFrom = parent.id;
       resumeThreadId = parent.threadId;
+      const priorEnvelope = JSON.parse(parent.envelopeJson) as {
+        model?: string;
+        effort?: string;
+      };
+      inheritedModel = priorEnvelope.model;
+      inheritedEffort = priorEnvelope.effort;
     }
+
+    // Explicit request wins; then a resumed operation inherits its prior
+    // envelope; then the daemon-level env fallback; otherwise the field is
+    // left unset so codex uses its global configuration.
+    const model = opts.model ?? inheritedModel ?? this.modelFallback;
+    const effort = opts.effort ?? inheritedEffort ?? this.effortFallback;
 
     const id = randomUUID();
     const createdAtMs = this.clock.now();
@@ -270,6 +311,8 @@ export class OperationService {
         : undefined,
       resumeThreadId,
       codexBin: this.codexBin,
+      ...(model !== undefined ? { model } : {}),
+      ...(effort !== undefined ? { effort } : {}),
     }, {
       resumedFrom,
       operation: {
@@ -294,6 +337,10 @@ export class OperationService {
     const events = this.events(id);
     this.observeEvents(id, job, events);
     const activity = this.activityFor(id, job);
+    const envelope = JSON.parse(job.envelopeJson) as {
+      model?: string;
+      effort?: string;
+    };
     return {
       ...job,
       id: operation.id,
@@ -304,6 +351,8 @@ export class OperationService {
         : job.state,
       stalled: job.state === 'running'
         && this.clock.now() - activity.lastEventAt >= STALL_MS,
+      model: envelope.model ?? null,
+      effort: envelope.effort ?? null,
     };
   }
 
@@ -323,6 +372,8 @@ export class OperationService {
         cachedInputTokens: record.cachedInputTokens,
         outputTokens: record.outputTokens,
         reasoningOutputTokens: record.reasoningOutputTokens,
+        model: record.model,
+        effort: record.effort,
       };
     });
   }

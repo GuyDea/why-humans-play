@@ -143,6 +143,10 @@ Do not stop at a disclaimer about what the first case did not prove. State its p
 proof job, then make the unanswered part create the need for the next case.
 Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
 equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
+Voice the logical link in plain words: say what the last case established, what it could
+not establish, and why the next evidence answers that open part. Do not pivot between two
+pieces of evidence with a bare connective — “So:” plus a new question is not a transition.
+If the narration never states how the two ideas connect, the transition fails.
 Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
 element must earn its place by increasing trust, first-hearing clarity, or magnetism;
 otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified
@@ -154,6 +158,10 @@ fit the story. Do not march through repeated “Here was…” labels or expose 
 meta-commentary. A transition should explain what changes next, not merely announce the
 section. When a result creates a clean comic opening, add one short punchline that sharpens
 the mechanism, consequence, or AHA; skip it when it competes with the lesson.
+There is no per-beat joke quota. A joke ships only when it maps to the mechanism,
+incentive, or consequence; is transparent to a non-native listener on first hearing; and
+sounds like something a person would spontaneously say aloud. Delete a forced joke rather
+than defending it.
 Use the fewest story elements that preserve the causal truth. Remove or collapse technical
 inputs, intermediate objects, roles, and counts when the mechanism remains accurate without
 them. Keep separate only the entities the listener must distinguish to understand the
@@ -208,12 +216,47 @@ offers useful surprise, then use a short montage of recognizable cases to demons
 global scope.
 Prepare every unfamiliar proper name before first use, then identify it and explain its
 relevance; never drop a name as if the viewer missed an earlier introduction.
+Explain each named concept through the default explanation grammar:
+`term as promise → story as evidence → analogy as recognition → application`.
+Lead with the term as an open loop—a label whose meaning is promised, not defined. Pay the
+promise off with the documented story; evidence always precedes the analogy, because an
+analogy illustrates a proven mechanism and can never prove one. Place the analogy after
+the story as recognition—a scene the viewer has lived, whose roles map one-to-one onto
+the mechanism—then move to the application or counter. Mainstream terms open with
+acknowledgment instead of a promise. The grammar is the default, not a straitjacket: a
+beat with no established term, or where the name itself is the earned punchline, may
+demonstrate first and name after.
+Check audience familiarity before naming any concept. When a term is already mainstream
+for the target audience — research current awareness rather than assuming — acknowledge
+the familiarity (“you've probably heard this called sycophancy”) and add something beyond
+the name. Reserve the reveal structure (“that pattern has a name”) for terms the audience
+plausibly does not know. Never unveil as news a term the script's own earlier narration —
+such as an anticipated-defense line — already put in the viewer's mouth.
+Match the form of an example to the behavior it illustrates. When narration claims people
+say, ask, or type something, immediately voice at least one verbatim example in that exact
+form — an asked question spoken as a question, not a list of topics.
 Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
 outcome`. If that chain is not clear on first hearing, replace the example rather than
 defending it with extra setup.
 For an enduring failure pattern, pair one vivid early warning with one compact current echo
 that demonstrates persistence and present relevance. Carry the opening's concrete vocabulary
 into the application and ending only when it keeps the lesson clearer.
+
+Write for the real delivery context: Martin — a non-native English speaker — reads the
+narration aloud, often while walking and talking to the camera, for an audience that
+includes non-native listeners. Every factual sentence is a complete spoken clause with an
+explicit subject. Never narrate facts through colon-label fragments such as “The deal:” or
+“The sneaky part:” — labels with colons are written-prose devices that do not exist in
+speech. No line may depend on punctuation to be understood; if a sentence needs its em
+dash or colon to land, rewrite it as speech. Before keeping any line, test it: would
+Martin plausibly say this, unscripted, to a friend while walking? A line that only works
+as written prose or performed voice-over fails.
+
+When clarity and style pull in opposite directions, clarity wins. Referent completeness,
+locked nouns, counts attached to their nouns, and causal accuracy outrank rhythm,
+compression, punchiness, and humor. A fragment may omit only words recoverable from the
+immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
+result, or manipulation depends on.
 
 Use the friendly conversation format. Write like a smart friend walking the viewer through
 something surprising, not like a paper abstract, conference talk, or legal disclaimer.
@@ -242,10 +285,17 @@ direct-address check-in:
 - **Everyday diction.** When the claim's scope survives, prefer everyday phrasing over
   research register (`slid its answer toward what you already believed`, not `moved
   answers toward stated beliefs`); status-matched wording bounds the claim, not the
-  diction.
+  diction. Everyday means simple, not native-only: prefer plain international English a
+  non-native listener understands on first hearing. Widely understood conversational
+  structures (`Right?`, `Yeah… no.`) are welcome; idioms, cultural shorthand, and
+  compressed metaphors that need decoding (`your hunch comes back with a doctorate`)
+  are not. A metaphor survives only when its image explains itself literally on first
+  hearing.
 - **Natural rhythm.** Fragments, asides, and varied sentence lengths are welcome when
   they sound natural aloud; a run of consecutive polished aphorisms reads as an essay
-  and needs a conversational turn between them.
+  and needs a conversational turn between them. A fragment may omit only words
+  recoverable from the immediately preceding sentence; a fragment that drops the noun a
+  count or result depends on fails, however punchy.
 
 **Precision controls what we claim. Personality controls how we say it.** Write like a
 well-educated best friend with a brutal sense of humor. Do not confuse factual precision

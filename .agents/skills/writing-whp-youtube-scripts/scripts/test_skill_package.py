@@ -772,7 +772,7 @@ class SkillPackageTests(unittest.TestCase):
             "to do by the end",
             "Follow every non-obvious abstraction with a concrete example, image, or "
             "consequence",
-            "Demonstrate the pattern before naming the concept",
+            "term as promise → story as evidence → analogy as recognition → application",
             "Push mechanism-derived humor to the stronger second or third beat",
         ):
             with self.subTest(contract=contract):

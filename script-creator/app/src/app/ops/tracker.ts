@@ -6,12 +6,14 @@ import {
 } from '@angular/core';
 import {
   type DaemonClient,
+  type ModelSubmitOptions,
   type OperationName,
   type OperationRecord,
   type OperationResult,
   type OperationState,
   type SseFrame,
 } from '../api/client';
+import { type ModelPreferenceReader } from './model-preference';
 
 const MAX_RESUME_HOPS = 3;
 
@@ -35,6 +37,7 @@ export type MapConsoleEvents<ConsoleEntry> = (
 export interface OpTrackerOptions {
   statusPollMs?: number;
   onChange?: () => void;
+  modelPreference?: ModelPreferenceReader;
 }
 
 export interface TrackedOperation<Meta = unknown, ConsoleEntry = unknown> {
@@ -78,6 +81,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     new Map<string, MutableTrackedOperation<Meta, ConsoleEntry>>();
   private readonly statusPollMs: number;
   private readonly onChange: () => void;
+  private readonly modelPreference: ModelPreferenceReader | undefined;
 
   readonly history = this.historyState.asReadonly();
 
@@ -88,12 +92,14 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
   ) {
     this.statusPollMs = options.statusPollMs ?? 5_000;
     this.onChange = options.onChange ?? (() => undefined);
+    this.modelPreference = options.modelPreference;
   }
 
   launch(
     operation: OperationName,
     inputs: unknown,
     meta: Meta,
+    override?: ModelSubmitOptions,
   ): TrackedOperation<Meta, ConsoleEntry> {
     const tracked = this.createTrackedOperation(
       operation,
@@ -102,7 +108,11 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       remainingHopsFrom(meta),
     );
     this.appendToHistory(tracked);
-    this.run(tracked, () => this.client.submitOp(operation, inputs));
+    // Explicit caller override wins, then the resolved preference, then omit.
+    const choice = override ?? this.modelPreference?.get(operation) ?? null;
+    this.run(tracked, () => choice
+      ? this.client.submitOp(operation, inputs, choice)
+      : this.client.submitOp(operation, inputs));
     return tracked;
   }
 

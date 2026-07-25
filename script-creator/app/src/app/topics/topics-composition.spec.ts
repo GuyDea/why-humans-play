@@ -33,6 +33,7 @@ import { App } from '../app';
 import appTemplate from '../app.html?raw';
 import appStyles from '../app.scss?raw';
 import { routes } from '../app.routes';
+import { MODEL_PREFERENCE_STORAGE_KEY } from '../ops/model-preference';
 import { STUDIO_SESSION, StudioSession } from '../studio-session';
 
 const GATES = [
@@ -505,6 +506,7 @@ afterEach(() => {
   while (mounted.length > 0) mounted.pop()?.destroy();
   document.body.replaceChildren();
   globalThis.history.replaceState(null, '', '/');
+  localStorage.clear();
   vi.restoreAllMocks();
 });
 
@@ -1479,6 +1481,34 @@ describe('routed Topics composition', () => {
     expect(topics.root.querySelector('[data-testid="summary-error"]')?.textContent)
       .toContain('No raw report was returned');
     expect(topics.root.querySelector('[data-testid="raw-topic-report"]')).toBeNull();
+  });
+
+  it('carries the persisted model preference into the full-run submit', async () => {
+    localStorage.setItem(
+      MODEL_PREFERENCE_STORAGE_KEY,
+      JSON.stringify({ default: { model: 'gpt-5.6-sol', effort: 'xhigh' } }),
+    );
+    const topics = await mountTopics();
+    topics.client.queueTopicRun({
+      ...snapshot('completed', 'done'),
+      summary: null,
+      summaryError: 'whp-summary block is missing',
+    });
+
+    enterText(
+      topics.root.querySelector('[data-testid="full-run-idea"]'),
+      'A run that honors the model preference',
+    );
+    topics.tick();
+    findButton(topics.root, 'Launch full run').click();
+    await flushAsync();
+    topics.tick();
+
+    expect(topics.client.submitOp).toHaveBeenCalledWith(
+      'full-topic-run',
+      expect.anything(),
+      { model: 'gpt-5.6-sol', effort: 'xhigh' },
+    );
   });
 });
 
