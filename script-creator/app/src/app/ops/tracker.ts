@@ -136,6 +136,22 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     return tracked;
   }
 
+  adopt(
+    operation: OperationName,
+    id: string,
+    meta: Meta,
+  ): TrackedOperation<Meta, ConsoleEntry> {
+    const existing = this.recordsById.get(id);
+    if (existing) return existing;
+    const tracked = this.createTrackedOperation(operation, null, meta, 0);
+    tracked.id.set(id);
+    tracked.phase.set('streaming');
+    this.recordsById.set(id, tracked);
+    this.appendToHistory(tracked);
+    void this.runStreaming(tracked, id);
+    return tracked;
+  }
+
   async cancel(id: string): Promise<void> {
     const tracked = this.requireRecord(id);
     await this.client.cancel(id);
@@ -203,16 +219,33 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
     tracked: MutableTrackedOperation<Meta, ConsoleEntry>,
     acquireId: () => Promise<{ id: string }>,
   ): Promise<void> {
-    let statusTimer:
-      | ReturnType<typeof globalThis.setInterval>
-      | undefined;
-
+    let id: string;
     try {
-      const { id } = await acquireId();
-      tracked.id.set(id);
-      this.recordsById.set(id, tracked);
-      tracked.phase.set('streaming');
-      this.onChange();
+      ({ id } = await acquireId());
+    } catch (error) {
+      if (tracked.phase() !== 'cancelled') {
+        tracked.result.set({ kind: 'failed', error: errorMessage(error) });
+        tracked.state.set('failed');
+        tracked.errorMessage.set(errorMessage(error));
+        tracked.phase.set('failed');
+        this.onChange();
+      }
+      tracked.resolveCompletion();
+      return;
+    }
+    tracked.id.set(id);
+    this.recordsById.set(id, tracked);
+    tracked.phase.set('streaming');
+    this.onChange();
+    await this.runStreaming(tracked, id);
+  }
+
+  private async runStreaming(
+    tracked: MutableTrackedOperation<Meta, ConsoleEntry>,
+    id: string,
+  ): Promise<void> {
+    let statusTimer: ReturnType<typeof globalThis.setInterval> | undefined;
+    try {
       statusTimer = globalThis.setInterval(() => {
         void this.refreshStatus(id, tracked);
       }, this.statusPollMs);
@@ -256,10 +289,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       this.onChange();
     } catch (error) {
       if (tracked.phase() === 'cancelled') return;
-      tracked.result.set({
-        kind: 'failed',
-        error: errorMessage(error),
-      });
+      tracked.result.set({ kind: 'failed', error: errorMessage(error) });
       tracked.state.set('failed');
       tracked.errorMessage.set(errorMessage(error));
       tracked.phase.set('failed');
