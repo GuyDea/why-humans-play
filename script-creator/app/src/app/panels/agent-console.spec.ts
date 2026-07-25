@@ -419,6 +419,134 @@ describe('AgentConsoleModel', () => {
       host.remove();
     }
   });
+
+  it('refreshes a selected operation to completed with usage on the next poll '
+    + 'without re-selection, then stops re-polling its detail', async () => {
+    const tracker: AgentConsoleTracker<Meta> = {
+      history: signal([tracked('op-1', { phase: 'streaming' })]),
+      cancel: vi.fn(),
+      resume: vi.fn(),
+    };
+    const model = new AgentConsoleModel(tracker);
+
+    let completed = false;
+    const runningSummary = {
+      id: 'op-1',
+      operation: 'review' as const,
+      state: 'running' as const,
+      createdAt: '2026-07-23T11:00:00.000Z',
+      finishedAt: null,
+      stalled: false,
+      usageAvailable: 0 as const,
+      inputTokens: null,
+      cachedInputTokens: null,
+      outputTokens: null,
+      reasoningOutputTokens: null,
+    };
+    const completedSummary = {
+      id: 'op-1',
+      operation: 'review' as const,
+      state: 'completed' as const,
+      createdAt: '2026-07-23T11:00:00.000Z',
+      finishedAt: '2026-07-23T11:00:05.000Z',
+      stalled: false,
+      usageAvailable: 1 as const,
+      inputTokens: 1_234,
+      cachedInputTokens: 40,
+      outputTokens: 30,
+      reasoningOutputTokens: 12,
+    };
+    const listOps = vi.fn(async () => ({
+      operations: [completed ? completedSummary : runningSummary],
+    }));
+    const getOp = vi.fn(async (id: string): Promise<OperationRecord> => ({
+      id,
+      operation: 'review',
+      state: completed ? 'completed' : 'running',
+      stalled: false,
+      envelopeJson: '{}',
+      jobDir: '/tmp/op-1',
+      threadId: 'thread-1',
+      retryOf: null,
+      resumedFrom: null,
+      createdAt: '2026-07-23T11:00:00.000Z',
+      startedAt: '2026-07-23T11:00:00.000Z',
+      finishedAt: completed ? '2026-07-23T11:00:05.000Z' : null,
+      inputTokens: completed ? 1_234 : null,
+      cachedInputTokens: completed ? 40 : null,
+      outputTokens: completed ? 30 : null,
+      reasoningOutputTokens: completed ? 12 : null,
+      usageAvailable: completed ? 1 : 0,
+      error: null,
+      inputs: {},
+      operationLessons: [],
+    }));
+    const client = {
+      listOps,
+      getOp,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    const clientNode = component.instance.client[ɵSIGNAL] as
+      ɵInputSignalNode<typeof client, typeof client>;
+    clientNode.applyValueToInputSignal(clientNode, client);
+    let attached = false;
+
+    try {
+      vi.useFakeTimers();
+      application.attachView(component.hostView);
+      attached = true;
+      component.changeDetectorRef.detectChanges();
+      await vi.advanceTimersByTimeAsync(0);
+      component.changeDetectorRef.detectChanges();
+
+      // Initial selection: running with no reported usage.
+      expect(host.querySelector('nav small')?.textContent?.trim())
+        .toBe('running');
+      expect(host.querySelector('.telemetry')?.textContent)
+        .toContain('unavailable');
+      expect(getOp).toHaveBeenCalledTimes(1);
+
+      // The operation completes server-side; the next poll must surface the
+      // terminal state and reported usage without any re-selection or reload.
+      completed = true;
+      await vi.advanceTimersByTimeAsync(5_000);
+      await vi.advanceTimersByTimeAsync(0);
+      component.changeDetectorRef.detectChanges();
+
+      expect(host.querySelector('nav small')?.textContent?.trim())
+        .toBe('completed');
+      const telemetry = host.querySelector('.telemetry')?.textContent ?? '';
+      expect(telemetry).toContain('1,234');
+      expect(telemetry).toContain('reported');
+      // The poll that observed completion performed one final detail refetch.
+      expect(getOp).toHaveBeenCalledTimes(2);
+
+      // Once terminal, the detail is no longer re-polled on subsequent ticks.
+      await vi.advanceTimersByTimeAsync(5_000);
+      await vi.advanceTimersByTimeAsync(0);
+      component.changeDetectorRef.detectChanges();
+      expect(getOp).toHaveBeenCalledTimes(2);
+      expect(listOps.mock.calls.length).toBeGreaterThanOrEqual(3);
+    } finally {
+      vi.useRealTimers();
+      if (attached) application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
 });
 
 describe('console telemetry labels', () => {

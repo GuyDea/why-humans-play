@@ -107,6 +107,50 @@ class TopicSkillPackageTests(unittest.TestCase):
                 self.assertIn(failure_contract, source)
                 self.assertIn(persistence_contract, source)
 
+    def test_operations_section_scopes_gate_check_and_forbids_source_reading(
+        self,
+    ) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+
+        scoping_contracts = (
+            "## Operations",
+            "judge only the single supplied idea against the six named hard gates",
+            "The output schema is always supplied by the caller",
+            "output shape is always supplied by the caller",
+        )
+        for contract in scoping_contracts:
+            with self.subTest(scoping=contract):
+                self.assertIn(contract, skill)
+
+        source_prohibitions = (
+            "Never read repository source code.",
+            "or any other search over `script-creator/`",
+            "never hunt for schemas, registries, prompts, or operation definitions",
+        )
+        for contract in source_prohibitions:
+            with self.subTest(prohibition=contract):
+                self.assertIn(contract, skill)
+
+        fast_fail_contracts = (
+            "Quick gate-check needs one specific candidate topic",
+            "`status`: `declined`",
+            "`verdict`: `unknown`",
+        )
+        for contract in fast_fail_contracts:
+            with self.subTest(fast_fail=contract):
+                self.assertIn(contract, skill)
+
+        for gate in (
+            "game_play_centrality",
+            "human_revelation",
+            "recognized_payoff",
+            "evidence_path",
+            "production_reality",
+            "portfolio_fit",
+        ):
+            with self.subTest(gate=gate):
+                self.assertIn(gate, skill)
+
 
 if __name__ == "__main__":
     unittest.main()
