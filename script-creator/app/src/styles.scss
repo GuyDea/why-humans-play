@@ -1168,6 +1168,54 @@ app-welcome-page .skill-pointers code {
   line-height: 1.6;
 }
 
+.help-mode-hint {
+  margin-top: 0.35rem;
+  color: #aa0a0a;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.help-topic .help-controls {
+  margin: 0.75rem 0 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.help-topic .help-controls li {
+  color: var(--whp-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.help-topic .help-gate {
+  margin: 0.75rem 0 0;
+  color: var(--whp-ink, #3b3b3b);
+  font-size: 0.76rem;
+  line-height: 1.5;
+}
+
+.help-topic .help-gate span {
+  font-weight: 700;
+}
+
+.help-overview-link {
+  margin-top: 0.9rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #aa0a0a;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.help-overview-link:hover,
+.help-overview-link:focus-visible {
+  text-decoration: underline;
+}
+
 .help-section-heading {
   border-bottom: 1px solid var(--whp-line-strong);
   padding-bottom: 0.7rem;

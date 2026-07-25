@@ -17,6 +17,7 @@ import {
   HELP_PAGES,
   helpRoute,
 } from './help-content';
+import { HelpModeService } from './help-mode.service';
 
 const FOCUSABLE_SELECTOR = [
   'a[href]',
@@ -41,6 +42,7 @@ const FOCUSABLE_SELECTOR = [
           <div>
             <p>Script Creator reference</p>
             <h2 id="help-title">Help</h2>
+            <p class="help-mode-hint">Help mode is on — click any ? to explain a region.</p>
           </div>
           <button
             class="help-close"
@@ -60,9 +62,36 @@ const FOCUSABLE_SELECTOR = [
             aria-live="polite"
             aria-atomic="true"
           >
-            <p>On this page</p>
-            <h3>{{ page().title }}</h3>
-            <p>{{ page().goal }}</p>
+            @if (selectedComponent(); as component) {
+              <div data-testid="help-component">
+                <p>This component</p>
+                <h3>{{ component.title }}</h3>
+                <p>{{ component.summary }}</p>
+                @if (component.controls.length > 0) {
+                  <ul class="help-controls">
+                    @for (line of component.controls; track line) {
+                      <li>{{ line }}</li>
+                    }
+                  </ul>
+                }
+                @if (component.unlockedBy) {
+                  <p class="help-gate">
+                    <span>Unlocked by</span> {{ component.unlockedBy }}
+                  </p>
+                }
+                <button
+                  type="button"
+                  class="help-overview-link"
+                  (click)="help.clear()"
+                >
+                  ← Page overview
+                </button>
+              </div>
+            } @else {
+              <p>On this page</p>
+              <h3>{{ page().title }}</h3>
+              <p>{{ page().goal }}</p>
+            }
           </section>
 
           <section class="help-glossary" aria-labelledby="glossary-heading">
@@ -108,6 +137,8 @@ export class HelpDrawer implements AfterViewInit, OnDestroy {
   private readonly routeState = signal(helpRoute(this.router.url));
   private readonly navigationSubscription: Subscription;
 
+  protected readonly help = inject(HelpModeService);
+  protected readonly selectedComponent = this.help.selected;
   protected readonly page = computed(() => HELP_PAGES[this.routeState()]);
   protected readonly glossary = HELP_GLOSSARY;
   protected readonly editorialMethod = EDITORIAL_METHOD;
