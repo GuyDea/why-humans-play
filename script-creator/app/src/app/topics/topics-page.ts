@@ -36,6 +36,7 @@ import {
   type StudioRuntimeHandle,
 } from '../studio-session';
 import { HelpTargetDirective } from '../help/help-target.directive';
+import { ProcessingChip } from '../ops/processing-chip';
 import { FullRunPanel } from './full-run-panel';
 import { parseIdeateCards, type ParsedIdeateCard } from './ideate-cards';
 import { buildTopicOperationInputs } from './inputs';
@@ -79,7 +80,7 @@ interface GuardrailPresentation {
 @Component({
   selector: 'app-topics-page',
   standalone: true,
-  imports: [FullRunPanel, HelpTargetDirective],
+  imports: [FullRunPanel, HelpTargetDirective, ProcessingChip],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="topics-page" data-testid="topics-page">
@@ -92,6 +93,12 @@ interface GuardrailPresentation {
           Catch a hunch, open it into angles, then test whether the strongest
           idea belongs on Why Humans Play.
         </p>
+        <sc-processing-chip
+          [operations]="[
+            'ideate', 'quick-gate-check', 'package-test',
+            'full-topic-run', 'handoff-preview'
+          ]"
+        />
       </header>
 
       @if (selectedTopicSlug()) {

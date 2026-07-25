@@ -3,6 +3,9 @@ import {
   Component,
   inject,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute } from '@angular/router';
+import { map } from 'rxjs';
 import { DraftManagerComponent } from './drafts/draft-manager.component';
 import {
   AgentConsole,
@@ -42,6 +45,7 @@ export class StudioPage {
       <app-agent-console
         [client]="session.client"
         [model]="model"
+        [focusOperationId]="focusOperationId()"
       />
     </main>
   `,
@@ -84,6 +88,11 @@ export class StudioPage {
   `,
 })
 export class AgentConsolePage {
+  private readonly route = inject(ActivatedRoute);
   protected readonly session = inject(STUDIO_SESSION);
   protected readonly model = new AgentConsoleModel(this.session);
+  protected readonly focusOperationId = toSignal(
+    this.route.queryParamMap.pipe(map((params) => params.get('op'))),
+    { initialValue: this.route.snapshot.queryParamMap.get('op') },
+  );
 }

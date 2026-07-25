@@ -352,3 +352,36 @@ describe('OpTracker', () => {
       .toBe('response failed schema validation');
   });
 });
+
+describe('OpTracker.adopt', () => {
+  it('streams and settles an existing operation without submitting', async () => {
+    const client = mockClient({
+      streamEvents: vi.fn(async (_id: string, options: StreamEventsOptions) => {
+        await options.onEvent(firstFrame);
+        await options.onDone();
+      }),
+    });
+    const tracker = new OpTracker(client, mapConsoleEvents);
+
+    const tracked = tracker.adopt('ideate', 'op-7', {});
+    expect(tracked.id()).toBe('op-7');
+    expect(tracked.phase()).toBe('streaming');
+    expect(client.submitOp).not.toHaveBeenCalled();
+    expect(tracker.history()).toHaveLength(1);
+
+    await tracked.completion;
+    expect(client.streamEvents).toHaveBeenCalledWith('op-7', expect.anything());
+    expect(tracked.phase()).toBe('done');
+    expect(tracked.consoleEntries()).toHaveLength(1);
+  });
+
+  it('returns the existing record when the id is already tracked', async () => {
+    const client = mockClient();
+    const tracker = new OpTracker(client, mapConsoleEvents);
+    const first = tracker.adopt('ideate', 'op-7', {});
+    const second = tracker.adopt('ideate', 'op-7', {});
+    expect(second).toBe(first);
+    expect(tracker.history()).toHaveLength(1);
+    await first.completion;
+  });
+});

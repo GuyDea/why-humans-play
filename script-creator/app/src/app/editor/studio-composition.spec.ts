@@ -3859,7 +3859,7 @@ async function mountStudio(
       'architectureModel',
     ]);
     hydrateSignalOutputs(EditorHost, ['architectureConflict']);
-    hydrateSignalInputs(AgentConsole, ['model', 'client']);
+    hydrateSignalInputs(AgentConsole, ['model', 'client', 'focusOperationId']);
     hydrateSignalInputs(LessonsPanel, ['model']);
     hydrateSignalInputs(MilestonePanel, ['draft', 'client']);
     hydrateSignalInputs(ArchitecturePanel, ['model', 'draft', 'version']);

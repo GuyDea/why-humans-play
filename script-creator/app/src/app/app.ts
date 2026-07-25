@@ -20,6 +20,7 @@ import { HelpPopover } from './help/help-popover';
 import { HelpTargetDirective } from './help/help-target.directive';
 import { MastheadModelSelector } from './masthead-model-selector';
 import { OnboardingState } from './onboarding/onboarding-state';
+import { ProcessingChip } from './ops/processing-chip';
 
 @Component({
   selector: 'app-root',
@@ -32,6 +33,7 @@ import { OnboardingState } from './onboarding/onboarding-state';
     HelpPopover,
     HelpTargetDirective,
     MastheadModelSelector,
+    ProcessingChip,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'

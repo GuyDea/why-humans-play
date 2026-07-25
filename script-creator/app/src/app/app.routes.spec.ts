@@ -52,3 +52,19 @@ describe('Studio routes', () => {
     expect(studio).toContain('<app-parking-lot');
   });
 });
+
+describe('keep-alive route flags', () => {
+  const keepAlivePaths = ['', 'console', 'topics', 'pipeline', 'lessons', 'discover'];
+
+  it('flags the working tabs keepAlive and excludes welcome and the wildcard', () => {
+    for (const path of keepAlivePaths) {
+      const route = routes.find((r) => r.path === path);
+      expect(route, `route ${path}`).toBeTruthy();
+      expect(route?.data?.['keepAlive'], `keepAlive on ${path}`).toBe(true);
+    }
+    expect(routes.find((r) => r.path === 'welcome')?.data?.['keepAlive'])
+      .toBeUndefined();
+    expect(routes.find((r) => r.path === '**')?.data?.['keepAlive'])
+      .toBeUndefined();
+  });
+});

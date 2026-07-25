@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   type OnDestroy,
   type OnInit,
@@ -612,6 +613,7 @@ function stringValue(value: unknown): string {
 export class AgentConsole implements OnInit, OnDestroy {
   readonly model = input.required<AgentConsoleModel<unknown>>();
   readonly client = input.required<AgentConsoleClient>();
+  readonly focusOperationId = input<string | null>(null);
   protected readonly operations =
     signal<readonly OperationSummary[]>([]);
   protected readonly loadError = signal<string | null>(null);
@@ -647,6 +649,22 @@ export class AgentConsole implements OnInit, OnDestroy {
   private refreshGeneration = 0;
   private detailGeneration = 0;
   private destroyed = false;
+  private lastFocus: string | null = null;
+
+  constructor() {
+    effect(() => {
+      const id = this.focusOperationId();
+      const ops = this.model().operations(); // keep tracked (reload-survival)
+      if (!id) return;
+      if (id !== this.lastFocus) { // apply focus only on an actual change
+        this.lastFocus = id;
+        this.selectedId.set(id);
+        void this.loadOperation(id);
+      }
+      const live = ops.find((op) => op.id() === id);
+      if (live && this.selectedId() === id) this.model().selectOperation(live);
+    });
+  }
 
   ngOnInit(): void {
     void this.refresh();

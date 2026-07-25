@@ -9,10 +9,12 @@ import {
 import { createApplication } from '@angular/platform-browser';
 import { describe, expect, it, vi } from 'vitest';
 import type {
+  DaemonClient,
   OperationListResponse,
   OperationRecord,
 } from '../api/client';
 import type { TrackedOperation } from '../ops/tracker';
+import { StudioSession } from '../studio-session';
 import {
   AgentConsole,
   AgentConsoleModel,
@@ -21,6 +23,15 @@ import {
   type AgentConsoleTracker,
   type StudioConsoleEntry,
 } from './agent-console';
+
+function opSummary(id: string) {
+  return {
+    id, operation: 'review' as const, state: 'running' as const, createdAt: '',
+    finishedAt: null, stalled: false, usageAvailable: 0 as const,
+    inputTokens: null, cachedInputTokens: null, outputTokens: null,
+    reasoningOutputTokens: null,
+  };
+}
 
 interface Meta {
   operation: string;
@@ -542,6 +553,156 @@ describe('AgentConsoleModel', () => {
     } finally {
       vi.useRealTimers();
       if (attached) application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
+});
+
+describe('AgentConsole focusOperationId', () => {
+  it('loads the operation named by focusOperationId', async () => {
+    const getOp = vi.fn(async (id: string): Promise<OperationRecord> => ({
+      id, operation: 'review', state: 'running', stalled: false,
+      envelopeJson: '{}', jobDir: '', threadId: null, retryOf: null,
+      resumedFrom: null, createdAt: '', startedAt: null, finishedAt: null,
+      inputTokens: null, cachedInputTokens: null, outputTokens: null,
+      reasoningOutputTokens: null, usageAvailable: 0, error: null,
+      inputs: {}, operationLessons: [],
+    }));
+    const client = {
+      listOps: vi.fn(async () => ({
+        operations: [opSummary('op-1'), opSummary('op-2')],
+      })),
+      getOp,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const session = new StudioSession(client as unknown as DaemonClient);
+    const model = new AgentConsoleModel(session);
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    const clientNode = component.instance.client[ɵSIGNAL] as
+      ɵInputSignalNode<typeof client, typeof client>;
+    clientNode.applyValueToInputSignal(clientNode, client);
+    const focusNode = component.instance.focusOperationId[ɵSIGNAL] as
+      ɵInputSignalNode<string | null, string | null>;
+    focusNode.applyValueToInputSignal(focusNode, 'op-2');
+
+    try {
+      application.attachView(component.hostView);
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(getOp).toHaveBeenCalledWith('op-2'));
+    } finally {
+      application.detachView(component.hostView);
+      component.destroy();
+      application.destroy();
+      host.remove();
+    }
+  });
+
+  it('keeps a manual sidebar selection when the tracked op list grows '
+    + 'around a fixed focusOperationId', async () => {
+    const op1 = tracked('op-1');
+    const op2 = tracked('op-2', { phase: 'streaming' });
+    const history = signal<TrackedOperation<Meta, StudioConsoleEntry>[]>(
+      [op1, op2],
+    );
+    const tracker: AgentConsoleTracker<Meta> = {
+      history,
+      cancel: vi.fn(),
+      resume: vi.fn(),
+    };
+    const model = new AgentConsoleModel(tracker);
+    const getOp = vi.fn(async (id: string): Promise<OperationRecord> => ({
+      id, operation: 'review', state: 'running', stalled: false,
+      envelopeJson: '{}', jobDir: '', threadId: null, retryOf: null,
+      resumedFrom: null, createdAt: '', startedAt: null, finishedAt: null,
+      inputTokens: null, cachedInputTokens: null, outputTokens: null,
+      reasoningOutputTokens: null, usageAvailable: 0, error: null,
+      inputs: {}, operationLessons: [],
+    }));
+    const client = {
+      listOps: vi.fn(async () => ({
+        operations: [opSummary('op-1'), opSummary('op-2')],
+      })),
+      getOp,
+      cancel: vi.fn(async (id: string) => ({ id })),
+    };
+    const application = await createApplication({
+      providers: [provideZonelessChangeDetection()],
+    });
+    const host = document.createElement('app-agent-console');
+    document.body.append(host);
+    const component = createComponent(AgentConsole, {
+      environmentInjector: application.injector,
+      hostElement: host,
+    });
+    const modelNode = component.instance.model[ɵSIGNAL] as
+      ɵInputSignalNode<AgentConsoleModel<unknown>, AgentConsoleModel<unknown>>;
+    modelNode.applyValueToInputSignal(modelNode, model);
+    const clientNode = component.instance.client[ɵSIGNAL] as
+      ɵInputSignalNode<typeof client, typeof client>;
+    clientNode.applyValueToInputSignal(clientNode, client);
+    const focusNode = component.instance.focusOperationId[ɵSIGNAL] as
+      ɵInputSignalNode<string | null, string | null>;
+    focusNode.applyValueToInputSignal(focusNode, 'op-2');
+
+    try {
+      application.attachView(component.hostView);
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(getOp).toHaveBeenCalledWith('op-2'));
+      component.changeDetectorRef.detectChanges();
+      expect(model.selected()).toBe(op2);
+
+      // Manual selection: the user clicks a different operation in the
+      // sidebar. This is the real production path (AgentConsole's own
+      // `selectOperation`), which updates both the component's own
+      // selection bookkeeping and the shared model's selected operation --
+      // this is what `model.selectOperation(<op-1 tracked>)` accomplishes.
+      const operationButtons = Array.from(
+        host.querySelectorAll<HTMLButtonElement>('nav button'),
+      );
+      operationButtons[0]!.click();
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(getOp).toHaveBeenCalledWith('op-1'));
+      expect(model.selected()).toBe(op1);
+      // Snapshot call counts right after the manual selection settles, so
+      // the benign initial race between the focus effect and refresh()'s
+      // own detail load (which can legitimately call getOp('op-2') twice
+      // during startup) doesn't pollute the post-growth comparison below.
+      const totalCallsBeforeGrowth = getOp.mock.calls.length;
+      const op2CallsBeforeGrowth =
+        getOp.mock.calls.filter(([id]) => id === 'op-2').length;
+
+      // Simulate ActiveOperationsService discovering a newly-adopted server
+      // operation roughly 5s later: session.history() grows while
+      // focusOperationId stays fixed at 'op-2'.
+      const op3 = tracked('op-3');
+      history.set([op1, op2, op3]);
+      component.changeDetectorRef.detectChanges();
+      await vi.waitFor(() => expect(model.operations()).toHaveLength(3));
+      component.changeDetectorRef.detectChanges();
+
+      // The manual selection must survive: it must not snap back to the
+      // focused op-2, and no further detail load for op-2 (or anything
+      // else) should occur as a side effect of the list growing.
+      expect(model.selected()).toBe(op1);
+      expect(
+        getOp.mock.calls.filter(([id]) => id === 'op-2').length,
+      ).toBe(op2CallsBeforeGrowth);
+      expect(getOp.mock.calls.length).toBe(totalCallsBeforeGrowth);
+    } finally {
+      application.detachView(component.hostView);
       component.destroy();
       application.destroy();
       host.remove();
