@@ -1339,3 +1339,21 @@ ledger. `BRAND.md`, `whp-youtube/STEERING.md`, and the accepted Script Creator
 requirements and technical design remain unchanged because this decision corrects the
 interaction contract of an existing internal workbench aid without changing brand,
 editorial, or application architecture.
+
+## 2026-07-25 — Script Studio favicon and page title
+
+**Decision:** Script Studio's browser icon is a charcoal app-tile bearing three off-white
+script lines cut by the WHP red editorial slash, shipped as a scalable `favicon.svg`
+(preferred) with a multi-resolution `favicon.ico` (16/32/48) fallback and a 180px
+`apple-touch-icon.png`; the app document title is set to "Script Studio".
+
+**Rationale:** Martin asked for a distinctive Script Studio favicon. The accepted concept
+reuses the established WHP mark language — charcoal bars / off-white ground / red slash,
+palette `#323232` / `#f8f8f8` / `#aa0a0a` — rather than a generic default, and stays
+legible at 16px where the previewed alternatives (umbrella-logo bars; a clapperboard)
+were less specific or muddy at that size.
+
+**Documents:** `script-creator/app/public/favicon.svg`, `favicon.ico`,
+`apple-touch-icon.png`, and `script-creator/app/src/index.html` (committed separately).
+`BRAND.md` and other steering remain unchanged because this applies existing brand
+palette and mark doctrine to one app surface and sets no new brand rule.
