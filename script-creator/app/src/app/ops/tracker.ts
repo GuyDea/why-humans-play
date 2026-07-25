@@ -224,11 +224,7 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       ({ id } = await acquireId());
     } catch (error) {
       if (tracked.phase() !== 'cancelled') {
-        tracked.result.set({ kind: 'failed', error: errorMessage(error) });
-        tracked.state.set('failed');
-        tracked.errorMessage.set(errorMessage(error));
-        tracked.phase.set('failed');
-        this.onChange();
+        this.markFailed(tracked, error);
       }
       tracked.resolveCompletion();
       return;
@@ -289,17 +285,24 @@ export class OpTracker<Meta = unknown, ConsoleEntry = unknown> {
       this.onChange();
     } catch (error) {
       if (tracked.phase() === 'cancelled') return;
-      tracked.result.set({ kind: 'failed', error: errorMessage(error) });
-      tracked.state.set('failed');
-      tracked.errorMessage.set(errorMessage(error));
-      tracked.phase.set('failed');
-      this.onChange();
+      this.markFailed(tracked, error);
     } finally {
       if (statusTimer !== undefined) {
         globalThis.clearInterval(statusTimer);
       }
       tracked.resolveCompletion();
     }
+  }
+
+  private markFailed(
+    tracked: MutableTrackedOperation<Meta, ConsoleEntry>,
+    error: unknown,
+  ): void {
+    tracked.result.set({ kind: 'failed', error: errorMessage(error) });
+    tracked.state.set('failed');
+    tracked.errorMessage.set(errorMessage(error));
+    tracked.phase.set('failed');
+    this.onChange();
   }
 
   private async refreshStatus(
