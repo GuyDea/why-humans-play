@@ -66,4 +66,6 @@ and opening sequence; the older proposals remain historical inputs only.
 After every definite WHP decision, read and follow
 [`reconcile-whp`](.agents/skills/reconcile-whp/SKILL.md) immediately. A definite decision
 is a settled user direction or explicit acceptance of a concrete proposal, not
-brainstorming or an unresolved suggestion.
+brainstorming or an unresolved suggestion. Edits to pre-draft scripts under
+`whp-youtube/predrafts/` are brainstorming by definition, never definite decisions;
+only a pre-draft's promotion into `whp-youtube/drafts/` is reconciled.

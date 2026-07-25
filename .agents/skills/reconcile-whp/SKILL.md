@@ -18,6 +18,9 @@ decision while preserving history and unrelated user work.
    concrete proposal as definite.
 5. Treat an imported statement such as "We previously decided X" as a definite user
    decision.
+6. Treat edits to pre-draft scripts under `whp-youtube/predrafts/` as brainstorming,
+   never as definite decisions; a pre-draft's promotion into `whp-youtube/drafts/` is
+   the reconcilable decision.
 
 If the decision or its material consequences have two plausible meanings, ask one
 focused question and stop. Do not write partial reconciliation changes while blocked.

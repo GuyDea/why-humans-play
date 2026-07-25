@@ -47,10 +47,35 @@ Honor the requested scope before choosing a phase:
 Use the visible topic brief, artifact or selection, surrounding context, requested operation,
 and creative status. Do not make an operation depend on invisible chat history.
 
+## Phase 0 — Pre-draft
+
+A script under `whp-youtube/predrafts/` is a pre-draft: fast creative iteration before
+draft status. For a pre-draft, return the requested architecture, narration, passage,
+review, or alternatives directly and stop.
+
+- Do not run the spoken-readability script, word counts, timing or cut ledgers,
+  editorial, retention, or timing audits, or the validator, and do not create or
+  maintain planning-notes scaffolding, unless Martin asks for that specific work by
+  name.
+- Do not treat pre-draft edits as definite WHP decisions; do not reconcile or ledger
+  them. Promotion is the decision.
+- The factual boundary applies unchanged: use supplied or project-known facts, never
+  invent specificity, and label hypotheticals. The architecture approval gate also
+  applies unchanged for a new episode or thesis-level rethink.
+- Write for spoken delivery — the register and clarity rules still describe good
+  narration — but enforcement waits for promotion.
+
+Promote a pre-draft when Martin says it is ready: run the spoken-readability gate and
+fix failures, add or refresh the planning-notes appendix, move the file to
+`whp-youtube/drafts/`, and reconcile the promotion as one definite decision. Promotion
+returns the script to normal Phase 1 handling; Phase 2 still requires the separate
+creative approval gate.
+
 ## Phase 1 — Rapid prototype
 
 Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, humor or voice
-passes, and scoped refinement.
+passes, and scoped refinement. For a script under `whp-youtube/predrafts/`, Phase 0
+applies instead.
 
 Return the requested artifact directly. Outside the bounded architecture
 concept-discovery scan and the targeted viewer-vulnerability proof-case lookup below, do
@@ -309,7 +334,9 @@ the evidence bar, and vulnerable people never become the punchline.
 
 ### Enforce spoken readability before delivery
 
-Readability is a delivery gate, not a post-draft editorial audit.
+Readability is a delivery gate, not a post-draft editorial audit. The gate governs
+drafts and Phase 2 deliverables; a pre-draft under `whp-youtube/predrafts/` runs it
+once, at promotion (see Phase 0).
 A sentence above 25 spoken words fails and must be rewritten before delivery.
 Every sentence from 21 through 25 spoken words requires a first-hearing review.
 A shorter sentence also fails when difficult vocabulary and multiple relationships make it
