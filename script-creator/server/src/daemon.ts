@@ -70,6 +70,7 @@ export interface DaemonContext {
 
 export interface DaemonEnvironment extends AppDirEnvironment {
   SC_CODEX_BIN?: string;
+  SC_CLAUDE_BIN?: string;
   SC_CODEX_MODEL?: string;
   SC_CODEX_EFFORT?: string;
 }
@@ -194,6 +195,7 @@ export function createDaemonContext(
       store: jobStore,
       clock: options.clock,
       codexBin: options.env.SC_CODEX_BIN,
+      claudeBin: options.env.SC_CLAUDE_BIN,
       model: modelFallback,
       effort: effortFallback,
     });
@@ -460,6 +462,7 @@ export async function startDaemon(
     XDG_DATA_HOME: process.env.XDG_DATA_HOME,
     XDG_STATE_HOME: process.env.XDG_STATE_HOME,
     SC_CODEX_BIN: process.env.SC_CODEX_BIN,
+    SC_CLAUDE_BIN: process.env.SC_CLAUDE_BIN,
     SC_CODEX_MODEL: process.env.SC_CODEX_MODEL,
     SC_CODEX_EFFORT: process.env.SC_CODEX_EFFORT,
   };

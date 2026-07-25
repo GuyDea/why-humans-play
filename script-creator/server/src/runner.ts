@@ -1,7 +1,7 @@
 import { spawn } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { createInterface } from 'node:readline';
-import { buildCodexArgs } from './codex-args.js';
+import { selectBackend } from './backends/index.js';
 import { EventLog } from './event-log.js';
 import { jobPaths, readStatus, writeStatus } from './runner-status.js';
 import type { JobEnvelope, RunnerStatus, RunnerUsage } from './types.js';
@@ -15,26 +15,12 @@ const log = new EventLog(paths.eventsFile);
 
 if (envelope.outputSchema) writeFileSync(paths.schemaFile, JSON.stringify(envelope.outputSchema));
 
-const [bin, ...binPre] = (envelope.codexBin ?? 'codex').split(' ');
-const args = [...binPre, ...buildCodexArgs(envelope, paths)];
-
-function validUsage(value: unknown): RunnerUsage | undefined {
-  if (!value || typeof value !== 'object') return undefined;
-  const candidate = value as Record<string, unknown>;
-  const fields = [
-    candidate.input_tokens,
-    candidate.cached_input_tokens,
-    candidate.output_tokens,
-    candidate.reasoning_output_tokens,
-  ];
-  if (!fields.every((field) => typeof field === 'number' && Number.isFinite(field))) return undefined;
-  return {
-    input_tokens: candidate.input_tokens as number,
-    cached_input_tokens: candidate.cached_input_tokens as number,
-    output_tokens: candidate.output_tokens as number,
-    reasoning_output_tokens: candidate.reasoning_output_tokens as number,
-  };
-}
+const backend = selectBackend(envelope.backend);
+const binSpec = backend.name === 'claude'
+  ? (envelope.claudeBin ?? 'claude')
+  : (envelope.codexBin ?? 'codex');
+const [bin, ...binPre] = binSpec.split(' ');
+const args = [...binPre, ...backend.buildArgs(envelope, paths)];
 
 const status: RunnerStatus = {
   state: 'running', pid: process.pid, pgid: process.pid,
@@ -48,26 +34,27 @@ const statusDelayMs = Number.isInteger(requestedStatusDelayMs) && requestedStatu
 if (statusDelayMs > 0) await new Promise<void>((resolve) => setTimeout(resolve, statusDelayMs));
 writeStatus(paths.statusFile, status);
 
-const child = spawn(bin!, args, { stdio: ['pipe', 'pipe', 'pipe'] });
+const child = spawn(bin!, args, { cwd: envelope.cwd, stdio: ['pipe', 'pipe', 'pipe'] });
 
 let usage: RunnerUsage | undefined;
 let turnFailedError: string | undefined;
+let finalMessage: string | undefined;
 const rl = createInterface({ input: child.stdout });
-rl.on('line', (line) => {
-  log.append(line);
-  try {
-    const e = JSON.parse(line);
-    if (e.type === 'thread.started' && typeof e.thread_id === 'string') {
-      status.threadId = e.thread_id;
-      writeStatus(paths.statusFile, status);
-    }
-    if (e.type === 'turn.completed') usage = validUsage(e.usage);
-    if (e.type === 'turn.failed') {
-      turnFailedError = typeof e.error?.message === 'string'
-        ? e.error.message
-        : 'turn failed';
-    }
-  } catch { /* malformed line already journaled raw */ }
+rl.on('line', (rawLine) => {
+  log.append(rawLine);
+  const parsed = backend.parseLine(rawLine);
+  // Journal any codex-shaped events the backend translated so the downstream
+  // progress/console parsers keep working across backends.
+  if (parsed.translatedEvents) {
+    for (const translated of parsed.translatedEvents) log.append(translated);
+  }
+  if (parsed.sessionId && !status.threadId) {
+    status.threadId = parsed.sessionId;
+    writeStatus(paths.statusFile, status);
+  }
+  if (parsed.usage) usage = parsed.usage;
+  if (parsed.failed) turnFailedError = parsed.failed;
+  if (parsed.finalMessage !== undefined) finalMessage = parsed.finalMessage;
 });
 
 let stderrTail = '';
@@ -77,7 +64,7 @@ let spawnError: Error | undefined;
 child.on('error', (error) => { spawnError = error; });
 child.stdin.on('error', (error) => { spawnError ??= error; });
 
-child.stdin.write(envelope.prompt);
+child.stdin.write(backend.transformPrompt(envelope.prompt));
 child.stdin.end();
 
 let cancelling = false;
@@ -93,6 +80,11 @@ child.on('exit', (code) => { exitCode = code; });
 
 child.on('close', (code) => {
   const finalCode = exitCode ?? code;
+  // Backends without an `-o` equivalent (claude) hand us the captured final
+  // text; persist it to the final-message.txt the rest of the system reads.
+  if (!backend.writesFinalMessageFile && finalMessage !== undefined) {
+    writeFileSync(paths.finalMessageFile, finalMessage);
+  }
   const final: RunnerStatus = {
     ...(readStatus(paths.statusFile) ?? status),
     state: cancelling
@@ -105,7 +97,7 @@ child.on('close', (code) => {
       ? undefined
       : turnFailedError
         ?? spawnError?.message
-        ?? (finalCode === 0 ? undefined : stderrTail || `codex exited ${finalCode}`),
+        ?? (finalCode === 0 ? undefined : stderrTail || `${backend.name} exited ${finalCode}`),
   };
   writeStatus(paths.statusFile, final);
   process.exit(cancelling ? 0 : finalCode ?? 1);
