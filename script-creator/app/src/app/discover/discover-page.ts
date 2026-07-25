@@ -12,6 +12,7 @@ import {
   type TrackedOperation,
 } from '../ops/tracker';
 import { STUDIO_SESSION } from '../studio-session';
+import { HelpTargetDirective } from '../help/help-target.directive';
 import { FullRunPanel } from '../topics/full-run-panel';
 import {
   parseIdeateCards,
@@ -40,7 +41,7 @@ interface SuggestionCard {
 @Component({
   selector: 'app-discover-page',
   standalone: true,
-  imports: [FullRunPanel],
+  imports: [FullRunPanel, HelpTargetDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="discover-page" data-testid="discover-page">
@@ -60,6 +61,7 @@ interface SuggestionCard {
         <section
           class="workbench-stage suggest-stage"
           aria-labelledby="suggest-heading"
+          appHelpTarget="discover.suggest"
         >
           <header class="stage-heading">
             <span class="stage-marker" aria-hidden="true">AI</span>

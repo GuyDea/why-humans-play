@@ -190,7 +190,20 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
       'audience and constraints, and the topic skill proposes subject-and-angle ' +
       'suggestions. Send ones you want to the Topics inbox, or launch a full ' +
       'researched run to hand off to a draft.',
-    components: [],
+    components: [
+      {
+        id: 'discover.suggest',
+        title: 'Suggest ideas',
+        summary:
+          'Cold-start ideation: proposes subjects and angles from optional constraints, with ' +
+          'no seed required. Leaving the box empty is a valid cold start.',
+        controls: [
+          'Constraints — optional guardrails such as audience, timing, or topics to avoid.',
+          'Suggest ideas — asks the topic studio for subject-and-angle cards.',
+          'Send to inbox — copies a suggestion into the Topics idea inbox.',
+        ],
+      },
+    ],
   },
   '/topics': {
     title: 'Topics',
