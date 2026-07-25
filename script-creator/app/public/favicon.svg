@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Script Studio">
+  <!--
+    Script Studio favicon — Why Humans Play.
+    Three lines of a script (off-white) cut by the WHP red editorial slash
+    on a charcoal tile. Palette: ink #323232, ground #f8f8f8, accent #aa0a0a.
+  -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a3a3a"/>
+      <stop offset="1" stop-color="#282828"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="64" height="64" rx="15" fill="url(#tile)"/>
+  <!-- lines of a script -->
+  <g stroke="#f4f4f2" stroke-width="5" stroke-linecap="round">
+    <line x1="16" y1="21" x2="41" y2="21"/>
+    <line x1="16" y1="32" x2="49" y2="32"/>
+    <line x1="16" y1="43" x2="34" y2="43"/>
+  </g>
+  <!-- the WHP red editorial slash: the cut that turns writing into a studio -->
+  <line x1="15" y1="51" x2="51" y2="14" stroke="#aa0a0a" stroke-width="7" stroke-linecap="round"/>
+</svg>
