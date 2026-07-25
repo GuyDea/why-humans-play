@@ -181,7 +181,37 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
     goal:
       'Welcome explains the workbench surfaces and reads existing topic-run, ' +
       'pipeline, and draft state to show live first-episode progress.',
-    components: [],
+    components: [
+      {
+        id: 'welcome.mentalmodel',
+        title: 'Pipeline mental model',
+        summary:
+          'The one-episode, five-surfaces map: Topic, Architecture, Narration, Production, ' +
+          'and Milestone. Static orientation.',
+        controls: [],
+      },
+      {
+        id: 'welcome.checklist',
+        title: 'First episode checklist',
+        summary:
+          'A live checklist of the first episode’s progress — complete a topic run, hand off, ' +
+          'approve architecture, approve narration, reach production — each with a link to the ' +
+          'right surface.',
+        controls: [
+          'Go — jumps to the surface for that step.',
+          'Don’t show this automatically — stops Welcome from auto-opening on a fresh launch; it stays available in the masthead.',
+        ],
+      },
+      {
+        id: 'welcome.boundaries',
+        title: 'How this workbench behaves',
+        summary:
+          'The control boundaries: nothing commits without you, editorial method stays in the ' +
+          'skills, and decisions become lessons you approve. It also points to the ' +
+          'method-owning skills.',
+        controls: [],
+      },
+    ],
   },
   '/discover': {
     title: 'Discover',
