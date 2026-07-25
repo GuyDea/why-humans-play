@@ -210,7 +210,41 @@ export const HELP_PAGES: Record<HelpRoute, HelpPage> = {
     goal:
       'Topics stores captured ideas, topic operations, candidate boards, package ' +
       'tests, durable run history, and the explicit handoff that creates a Studio draft.',
-    components: [],
+    components: [
+      {
+        id: 'topics.brief',
+        title: 'Repository selection brief',
+        summary:
+          'A read-only Markdown brief for a topic already in the repository, shown when the ' +
+          'page is opened for a specific topic reference.',
+        controls: [],
+        unlockedBy: 'Shown only when a topic and ref are supplied in the page address.',
+      },
+      {
+        id: 'topics.inbox',
+        title: 'Idea inbox',
+        summary:
+          'The captured-ideas store. Capture raw hunches, mark their status, select them for ' +
+          'ideation, and run a quick six-gate read.',
+        controls: [
+          'Capture idea — stores a hunch as an inbox card.',
+          'Use for ideation — the checkbox that feeds a card into the ideate stage.',
+          'Status — Open, Promoted, or Discarded (Discarded parks a card).',
+          'Gate-check — runs a six-gate read for one idea and pins the verdict to the card.',
+        ],
+      },
+      {
+        id: 'topics.ideate',
+        title: 'Ideate angles',
+        summary:
+          'Combines the checked inbox ideas with an optional fresh thread and asks the topic ' +
+          'skill for subjects and angles. Each returned angle is also saved back to the inbox.',
+        controls: [
+          'Fresh thread — an optional extra question or constraint for this pass.',
+          'Ideate angles — returns angle cards; enabled with at least one checked idea or some fresh-thread text.',
+        ],
+      },
+    ],
   },
   '/pipeline': {
     title: 'Pipeline',
