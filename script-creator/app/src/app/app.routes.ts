@@ -14,26 +14,32 @@ export const routes: Routes = [
     path: '',
     pathMatch: 'full',
     component: StudioPage,
+    data: { keepAlive: true },
   },
   {
     path: 'console',
     component: AgentConsolePage,
+    data: { keepAlive: true },
   },
   {
     path: 'topics',
     component: TopicsPage,
+    data: { keepAlive: true },
   },
   {
     path: 'pipeline',
     component: PipelinePage,
+    data: { keepAlive: true },
   },
   {
     path: 'lessons',
     component: LessonsPage,
+    data: { keepAlive: true },
   },
   {
     path: 'discover',
     component: DiscoverPage,
+    data: { keepAlive: true },
   },
   {
     path: 'welcome',
