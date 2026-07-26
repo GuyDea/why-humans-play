@@ -116,26 +116,31 @@ Use the strongest honest entry: question-first or event-first.
 
 For a problem-led opening with a predictable “not me; I know the tricks” response, use:
 
-`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`
+`intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`
 
 Complete the first four moves before detailed case exposition. A short sourced result may
 tease the case during the disarm; develop the real story only after the promise. This
 contract overrides the generic hook spines below when it applies.
 
 1. Ask one precise, intriguing question that names the viewer-level risk.
-2. Voice the anticipated defense in ordinary viewer language. Treat it as a reasonable
-   objection, not a prevalence claim.
-3. Disarm it with an observed result from people who displayed meaningful resistance.
-   Treat measured skepticism, lower trust ratings, expertise, training, or prior warning as
-   sufficient observable resistance; do not require proof of the participants' exact inner
-   monologue. You may say “If you think this cannot happen to me…” and then present a case
-   with observable resistance; that compares the viewer's defense with the case instead of
-   attributing the viewer's words to the participants. Do not invent thoughts, motives, or
-   quotations for the people in the case.
-4. State the remedy promise immediately. Say what the viewer will recognize or what
-   question, check, or sequence they will be able to use. Keep it literal, specific,
-   action-focused, and free of jokes. Promise a way to expose warning signs or reduce risk,
-   not guaranteed prevention, unless the evidence supports that guarantee.
+2. Voice the defense as the narrator's own former position, never as a rebuttal aimed at
+   the viewer: `I used to read those stories and think — how naive; everyone knows AI
+   makes things up.` The viewer recognizes their own objection inside the narrator's.
+   Treat it as a reasonable position, not a prevalence claim; the narrator's former belief
+   is his own voiced stance, confirmed by Martin at review.
+3. Overturn it with the observed result that sent the narrator digging — people who
+   displayed meaningful resistance and were not protected by it. Treat measured
+   skepticism, lower trust ratings, expertise, training, or prior warning as sufficient
+   observable resistance; do not require proof of the participants' exact inner monologue.
+   Do not invent thoughts, motives, or quotations for the people in the case. Because the
+   narrator held the same defense, the disarm lands as shared discovery instead of a
+   correction.
+4. State the remedy promise immediately, voiced as a friend sharing what held up (`stick
+   around and you'll have the four counter-questions that held up when I dug into this`).
+   Say what the viewer will recognize or what question, check, or sequence they will be
+   able to use. Keep it literal, specific, action-focused, and free of jokes. Promise a
+   way to expose warning signs or reduce risk, not guaranteed prevention, unless the
+   evidence supports that guarantee.
 5. Develop the documented case or cases. Show the trap and consequence, then connect them
    to the warning sign the promised method is designed to surface.
 
@@ -292,9 +297,15 @@ transition.
 - **Promise what the viewer will understand, recognize, identify, or be able to do by the
   end.** A vague tease such as “it gets stranger” is not a viewer promise.
 
-Write the by-end promise as a literal learning contract. Keep jokes, comic images,
-metaphors, and colorful callbacks out of the promise sentence. Humor may surround the
-promise, but it must not complicate what the viewer will learn.
+Write the by-end promise as a literal learning contract voiced as sharing, not lecturing:
+`I'll show you how people get tricked — and how to avoid being one of them` beats `By the
+end of this video, you'll know the four moves`. The container, the understanding, and the
+concrete response all stay named; only the stance changes. Keep jokes, comic images,
+metaphors, and colorful callbacks out of the promise sentence, and never let the sharing
+voice smuggle in claims the evidence does not support (no `the four countermeasures that
+work best` unless the evidence ranks them; `the four counter-questions that held up when
+I dug into this` stays inside the boundary). Humor may surround the promise, but it must
+not complicate what the viewer will learn.
 
 For a complete episode, make that promise reflect both halves of the approved contract:
 the new understanding and the concrete response the viewer will be able to use. Keep the
@@ -453,11 +464,21 @@ cultural shorthand, and compressed metaphors that need decoding (`your hunch com
 with a doctorate`) are not. A metaphor survives only when its image explains itself
 literally on first hearing.
 
-Write like a smart friend walking the viewer through something surprising, not like a
-paper abstract, conference talk, or legal disclaimer. Use the conversational progression
-`fact → plain reaction → why it matters → next question`. Use contractions, direct address,
-and brief controlled hyperbole when they sound natural. Friendly does not mean filler,
-invented dialogue, weakened caveats, or jokes inside the learning promise.
+Write like a smart friend on a walk sharing something he dug into, not like a presenter,
+paper abstract, conference talk, or legal disclaimer. The narrator is a peer
+investigator — one of the audience who got curious, did the digging, and came back to
+share — with the stance arc `I assumed X → then I ran into Y and dug in → here's what I
+found`. Use the conversational progression
+`fact → plain reaction → why it matters → next question`, and thread mini-hooks through
+the narration — roughly every ten to twenty spoken seconds, a short varied curiosity
+connective (`which I found odd, because…`, `and this is where it gets interesting`) that
+points at real content the next sentences deliver. Say quantities the way a friend would:
+claim-carrying numbers, small counts, dates, places, and institutions stay exact, while
+larger texture quantities round to a truthful conversational magnitude (`over a hundred
+radiologists` for 138), with the precise figure kept in the claim record. Use
+contractions, direct address, and brief controlled hyperbole when they sound natural.
+Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
+learning promise.
 
 **Precision controls what we claim. Personality controls how we say it.** Write like a
 well-educated best friend with a brutal sense of humor. Do not confuse factual precision
@@ -468,7 +489,9 @@ inherent worth. Calling a choice “stupid” or “the dumbest decision of your
 when the line judges the choice and the episode earns the underlying stakes. Do not
 automatically trade it for a bloodless synonym because the subject is serious. Keep the
 human context humane; never make a vulnerable person the punchline. Emotional force never
-waives factual support.
+waives factual support. The same warmth points inward: the narrator is never smarter than
+the viewer — aim self-mockery at his own former take, and cut know-it-all signals such as
+`obviously` or `as anyone can see`.
 
 Use short, pronounceable sentences and controlled density. Prefer one new relationship per
 sentence. Use contrast, repetition, callbacks, and occasional fragments when they sound
@@ -598,6 +621,12 @@ Before returning rapid work, check internally:
 - Does each major beat carry at least one first-person narrator reaction and one
   direct-address check-in, with spoken transitions instead of outline labels and no
   unbroken run of polished aphorisms?
+- Do varied mini-hook connectives arrive roughly every ten to twenty spoken seconds, each
+  pointing at real content the next sentences deliver?
+- Are texture quantities spoken as truthful conversational magnitudes while claim-carrying
+  numbers, small counts, dates, places, and institutions stay exact?
+- Does the narrator stay a peer throughout — former take mocked instead of the viewer,
+  no `obviously` or other know-it-all signals?
 - Is every factual sentence a complete spoken clause with an explicit subject, with no
   colon-label fragments and no line that depends on punctuation to be understood?
 - Would Martin plausibly say each line, unscripted, to a friend while walking?
@@ -624,8 +653,9 @@ Before returning rapid work, check internally:
 - If the opening claims that informed, trained, expert, or skeptical people remain
   vulnerable, does a documented observed case prove that exact population and outcome
   before theory explains it?
-- When the viewer has a predictable immunity defense, do the question, anticipated
-  defense, evidence-backed disarm, and remedy promise all arrive before the detailed case?
+- When the viewer has a predictable immunity defense, do the question, the narrator's
+  former defense, the evidence that overturned it, and the sharing-voiced remedy promise
+  all arrive before the detailed case?
 - Does the disarm use observable resistance without attributing the viewer's exact thought
   to the case participants?
 - Does every adjacent proof case state its scope boundary before the script transfers to

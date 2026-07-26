@@ -32,6 +32,16 @@ Metadata does not count.
             ["A short factual sentence.", "Another spoken sentence."],
         )
 
+    def test_locked_line_bolding_is_stripped_before_the_word_count(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> **This locked punchline is delivered word-perfect.**\n"
+        )
+
+        self.assertEqual(
+            [sentence.text for sentence in sentences],
+            ["This locked punchline is delivered word-perfect."],
+        )
+
     def test_splits_multiple_spoken_sentences_from_one_blockquote_line(self) -> None:
         sentences = extract_spoken_sentences(
             '> First sentence. “Second sentence?” Third sentence!\n'

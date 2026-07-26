@@ -41,8 +41,9 @@ or editorial commentary in the numbered narration layer.
 ## Numbered narration-only beats
 
 Use ordinary ascending numbers and a descriptive title. The beat body may contain only
-spoken blockquotes, blank lines, unresolved personal-input markers inside blockquotes, and
-inline evidence indicators appended to mapped factual narration inside those blockquotes:
+spoken blockquotes, blank lines, unresolved personal-input markers inside blockquotes,
+inline evidence indicators appended to mapped factual narration inside those blockquotes,
+and locked-line bolding on sentences that must be delivered word-perfect:
 
 ```markdown
 ## 1. Descriptive name
@@ -50,12 +51,17 @@ inline evidence indicators appended to mapped factual narration inside those blo
 > In 2016, OpenAI reported the experiment. [F-010](https://example.org/original)
 >
 > This sentence is interpretation, not a new factual claim.
+>
+> **This locked punchline is delivered word-perfect.**
 ```
 
 Append a visible `[F-###](Original URL)` indicator immediately after every mapped factual
 narration sentence or separable factual clause. Treat inline evidence indicators as review
 annotations, not spoken words; exclude them from narration extraction, word count, table
-reads, and teleprompter output. The visible label must exactly match `F-\d{3}`, the target
+reads, and teleprompter output. Treat locked-line bolding the same way for word counts and
+readability checks — the asterisks are annotation, not speech — but keep the bolding
+visible in teleprompter and rehearsal copy, where it tells Martin which lines are
+word-perfect and which he may say his own way. The visible label must exactly match `F-\d{3}`, the target
 must equal that record's `Original URL`, and the same ID must appear in the matching appendix
 beat's `Claims` section. Multiple indicators may follow one clause.
 
@@ -403,9 +409,11 @@ because its structure passes.
 
 Build table-read and teleprompter copy by concatenating only the blockquotes in numbered
 beats before `## Appendix`, in beat order. Preserve the spoken words and paragraph order,
-but strip personal-input marker annotations and inline evidence indicators. Never include
-appendix material in the narration-only copy. Count only the extracted spoken words after
-those review annotations are removed when updating `Word count`.
+but strip personal-input marker annotations and inline evidence indicators. Keep
+locked-line bolding in teleprompter and rehearsal copy; exclude the asterisks themselves
+from the word count. Never include appendix material in the narration-only copy. Count
+only the extracted spoken words after those review annotations are removed when updating
+`Word count`.
 
 ## Validation
 

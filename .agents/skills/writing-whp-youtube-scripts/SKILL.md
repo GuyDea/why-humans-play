@@ -132,17 +132,19 @@ mechanism, and outcome to the narration; state any gap and use separate evidence
 episode mechanism rather than allowing one adjacent finding to imply both.
 For a problem-led opening with a predictable “not me; I know the tricks” response, use the
 five-move anti-skip intro:
-`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
-Complete the first four moves before detailed case exposition. A short sourced result may
-tease the case during the disarm; develop the real story only after the promise. Treat
-measured skepticism, lower trust ratings, expertise, training, or prior warning as
-sufficient observable resistance; do not require proof of the participants' exact inner
-monologue. You may say “If you think this cannot happen to me…” and then present a case
-with observable resistance; that compares the viewer's defense with the case instead of
-attributing the viewer's words to the participants. Do not invent thoughts, motives, or
-quotations for the people in the case. Keep the early remedy promise literal, specific,
-action-focused, and joke-free. This five-move contract overrides a generic hook spine when
-it applies.
+`intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
+Voice the defense as the narrator's own former position (`I used to think — how naive;
+everyone knows AI makes things up`), never as a rebuttal aimed at the viewer; the viewer
+recognizes their own objection inside the narrator's, so the disarm lands as shared
+discovery instead of a correction. Complete the first four moves before detailed case
+exposition. A short sourced result may tease the case during the disarm; develop the
+real story only after the promise. Treat measured skepticism, lower trust ratings,
+expertise, training, or prior warning as sufficient observable resistance; do not require
+proof of the participants' exact inner monologue. Do not invent thoughts, motives, or
+quotations for the people in the case. The narrator's former belief is his own voiced
+stance, confirmed by Martin at review. Keep the early remedy promise literal, specific,
+action-focused, and joke-free, voiced as a friend sharing what held up, never as a
+lecture contract. This five-move contract overrides a generic hook spine when it applies.
 
 ### Apply story construction across the script
 
@@ -283,11 +285,15 @@ compression, punchiness, and humor. A fragment may omit only words recoverable f
 immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
 result, or manipulation depends on.
 
-Use the friendly conversation format. Write like a smart friend walking the viewer through
-something surprising, not like a paper abstract, conference talk, or legal disclaimer.
-Move through `fact → plain reaction → why it matters → next question`. Use contractions,
-direct address, and brief controlled hyperbole when they sound natural. Friendly does not
-mean filler, invented dialogue, weakened caveats, or jokes inside the learning promise.
+Use the friendly conversation format. Write like a smart friend on a walk sharing
+something he dug into, not like a presenter, paper abstract, conference talk, or legal
+disclaimer. The narrator is a peer investigator — one of the audience who did the
+digging — with the stance arc `I assumed X → then I ran into Y and dug in → here's what
+I found`; the viewer rides that discovery rather than receiving its conclusion. Voice
+the learning promise as sharing while keeping it literal and specific. Move through
+`fact → plain reaction → why it matters → next question`. Use contractions, direct
+address, and brief controlled hyperbole when they sound natural. Friendly does not mean
+filler, invented dialogue, weakened caveats, or jokes inside the learning promise.
 Keep each standalone punchline short and separate from its factual setup.
 
 Build the conversation from these concrete moves so the register stays spoken, not
@@ -295,15 +301,29 @@ essayistic. Each major beat contains at least one narrator reaction and at least
 direct-address check-in:
 
 - **Narrator presence.** React to the material in first person — anticipation, surprise,
-  exasperation, delight (`And I know what you're thinking`, `here's the part that gets
-  me`). Opinions and reactions are voice; never invent autobiography, memories, or
-  first-person facts.
+  exasperation, delight (`which I found odd, because…`, `here's the part that gets
+  me`). Claims about the episode's research process (`I read the studies behind this`,
+  `so I went digging`) are allowed when that work actually happened for this episode.
+  Opinions, reactions, and the narrator's stated former take are voice; never invent
+  autobiography, memories, personal testing, or first-person facts beyond that work.
 - **Check-ins.** Ask the viewer a question and pay it off immediately, including
-  self-answered questions (`Right? Yeah. No.`) and anticipated objections voiced for the
-  viewer, then answered.
+  self-answered questions (`Right? Yeah. No.`). Frame anticipated objections as shared
+  ground the narrator once held (`you'd probably have said the same thing I did`), not as
+  mind-reading aimed at the viewer.
+- **Mini-hooks.** Roughly every ten to twenty spoken seconds, a short curiosity
+  connective ties what was just said to why the next thing matters (`which I found odd,
+  because…`, `and this is where it gets interesting`). Vary the wording and let each one
+  point at real content the next sentences deliver; an empty promise, or the same
+  connective twice in a row, reads as a tic.
+- **Spoken numbers.** Say quantities the way a friend would. Small counts and any number
+  that carries the claim — the split, the result, the comparison — stay exact, as do
+  dates, places, and institutions: they are the trust anchor. Larger texture quantities
+  such as sample sizes round to a truthful conversational magnitude, never inflated:
+  `over a hundred radiologists` for 138, never `nearly two hundred`. The precise figure
+  remains in the appendix claim entry and stays available for on-screen text.
 - **Present-tense storytelling.** Tell documented cases as unfolding scenes (`2021.
-  Researchers round up 138 radiologists`) while every factual atom stays inside the
-  evidence boundary.
+  Researchers round up over a hundred radiologists`) while every factual atom stays
+  inside the evidence boundary.
 - **Spoken transitions.** Move between ideas the way speech does (`Okay, back to your
   boss.`, `So put the pieces together.`), never with outline labels such as `In our
   hypothetical` or `Now return to`.
@@ -331,6 +351,24 @@ inherent worth. A line may call a choice “stupid” or “the dumbest decision
 when it judges the choice and the episode earns the underlying stakes. Do not disinfect it
 into clinical language merely because the topic is serious. Emotional force never lowers
 the evidence bar, and vulnerable people never become the punchline.
+The same warmth points inward: the narrator is never smarter than the viewer. Aim
+self-mockery at the narrator's own former take (`how naive of me`), keep the clarity
+effortless rather than announced, and treat know-it-all signals — `obviously`, `as anyone
+can see`, condescending asides — as defects to cut. The viewer is never the butt.
+
+### Mark locked lines for memory delivery
+
+Martin delivers from memory while walking — there is no teleprompter on a walk. In a
+complete script, mark **locked lines** bold inside the blockquote: the opening question,
+the learning promise, each beat's punchline and exact-lesson line, and any sentence whose
+evidence-bounded wording a paraphrase could break. Deliver locked lines word-perfect and
+keep them memorizable — a handful per beat, each a single sentence. Everything unmarked
+is flexible tissue: Martin may say it his own way, because the written line fixes the
+meaning, facts, locked story nouns, and evidence boundary, not the exact words. Bold is a
+review-and-delivery annotation like an inline evidence indicator, not emphasis; strip it
+from word counts and readability checks. Mark locked lines in complete scripts (Phase 1
+prototype or Phase 2 deliverable); leave scoped passages and Phase 0 pre-drafts unmarked
+unless Martin asks.
 
 ### Enforce spoken readability before delivery
 
@@ -436,8 +474,8 @@ For evidence-backed finalization:
    and show it to Martin before auditing it. Read it aloud and revise for speech without
    imposing a runtime cut first.
 8. The readable script comes first as numbered beats containing only the beat heading and
-   spoken blockquote narration. Visible inline evidence indicators may appear within those
-   blockquotes as the sole non-spoken review annotations. Put all other metadata and
+   spoken blockquote narration. Visible inline evidence indicators and locked-line
+   bolding may appear within those blockquotes as the only non-spoken review annotations. Put all other metadata and
    production annotations in a final appendix whose beat entries match the narration beat
    numbers and titles. For a `FULL-SCRIPT` episode, include the appendix `Shorts plan`
    section required by the annotated script format: three to five golden-nugget
@@ -479,8 +517,8 @@ For evidence-backed finalization:
   ownable fallback, and never call an asset cleared without a documented basis.
 - State the explanatory purpose of each animation. If motion adds no understanding, choose
   a still or no animation.
-- Keep numbered beats narration-only except for visible inline evidence indicators, which
-  are non-spoken review annotations.
+- Keep numbered beats narration-only except for visible inline evidence indicators and
+  locked-line bolding, which are non-spoken review annotations.
 - Keep production notes in the matching appendix beat so their relationship to narration
   remains explicit without interrupting the readable script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or

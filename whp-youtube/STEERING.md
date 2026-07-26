@@ -194,16 +194,18 @@ without weakening the audience-first test for problem-led growth episodes.
   separate evidence for the episode's mechanism instead of letting one case imply both.
 - **Use the five-move anti-skip intro when the viewer can claim immunity.** For a
   problem-led opening with a predictable “not me; I know the tricks” response, use
-  `intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
+  `intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
+  Voice the defense as the narrator's own former position, never as a rebuttal aimed at
+  the viewer; the viewer recognizes their own objection inside the narrator's, so the
+  disarm lands as shared discovery instead of a correction.
   Complete the first four moves before detailed case exposition. A short sourced result
   may tease the case during the disarm; develop the real story only after the promise.
   Treat measured skepticism, lower trust ratings, expertise, training, or prior warning as
   sufficient observable resistance; do not require proof of the participants' exact inner
-  monologue. You may say “If you think this cannot happen to me…” and then present a case
-  with observable resistance; that compares the viewer's defense with the case instead of
-  attributing the viewer's words to the participants. Do not invent thoughts, motives, or
-  quotations for the people in the case. Keep the early remedy promise literal, specific,
-  action-focused, and joke-free. This contract overrides a generic hook spine when it
+  monologue. Do not invent thoughts, motives, or quotations for the people in the case.
+  The narrator's former belief is his own voiced stance, confirmed by Martin at review.
+  Keep the early remedy promise literal, specific, action-focused, and joke-free, voiced
+  as a friend sharing what held up. This contract overrides a generic hook spine when it
   applies.
 - **Make every proof handoff explicit.** Connect adjacent evidence as
   `case → exact takeaway → why it matters here → remaining question → next evidence`.
@@ -287,18 +289,28 @@ without weakening the audience-first test for problem-led growth episodes.
   can perform the same proof job clearly. Use the strongest non-Western case when no
   Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity
   gates. Keep the real location explicit and use later examples to widen geographic scope.
-- **Use the friendly conversation format.** Write like a smart friend walking the viewer
-  through something surprising, not like a paper abstract, conference talk, or legal
-  disclaimer. Move through `fact → plain reaction → why it matters → next question`. Use
+- **Use the friendly conversation format.** Write like a smart friend on a walk sharing
+  something he dug into, not like a presenter, paper abstract, conference talk, or legal
+  disclaimer. The narrator is a peer investigator — one of the audience who did the
+  digging — with the stance arc `I assumed X → then I ran into Y and dug in → here's
+  what I found`; the viewer rides that discovery rather than receiving its conclusion.
+  Move through `fact → plain reaction → why it matters → next question`. Use
   contractions, direct address, and brief controlled hyperbole when they sound natural.
   Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
   learning promise.
 - **Compose the register from concrete conversational moves.** Each major beat carries a
-  first-person narrator reaction and a direct-address check-in; documented cases run as
-  present-tense scenes inside the evidence boundary; transitions are spoken, never
-  outline labels; diction stays everyday when the claim's scope survives; and a run of
-  consecutive polished aphorisms is an essay symptom that needs a conversational turn.
-  Reactions and opinions are voice — invented autobiography is still forbidden.
+  first-person narrator reaction and a direct-address check-in; varied mini-hook
+  connectives arrive roughly every ten to twenty spoken seconds, each pointing at real
+  content the next sentences deliver; documented cases run as present-tense scenes inside
+  the evidence boundary; transitions are spoken, never outline labels; diction stays
+  everyday when the claim's scope survives; and a run of consecutive polished aphorisms
+  is an essay symptom that needs a conversational turn. Texture quantities are spoken as
+  truthful conversational magnitudes (`over a hundred radiologists` for 138, never
+  inflated), while claim-carrying numbers, small counts, dates, places, and institutions
+  stay exact, with precise figures kept in the claim record. Claims about the episode's
+  research process are allowed when that work actually happened; reactions, opinions,
+  and the narrator's stated former take are voice — invented autobiography is still
+  forbidden.
 - **Give that friend a real personality.** **Precision controls what we claim. Personality
   controls how we say it.** Write like a well-educated best friend with a brutal sense of
   humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,
@@ -308,7 +320,17 @@ without weakening the audience-first test for problem-led growth episodes.
   “stupid” or “the dumbest decision of your life” is allowed when the line judges the
   choice and the episode earns the underlying stakes; do not replace it with a clinical
   euphemism merely because the subject is serious. Emotional force never lowers the
-  evidence bar, and vulnerable people never become the punchline.
+  evidence bar, and vulnerable people never become the punchline. The same warmth points
+  inward: the narrator is never smarter than the viewer — aim self-mockery at his own
+  former take, and cut know-it-all signals such as `obviously` or `as anyone can see`.
+- **Mark locked lines for memory delivery.** Martin delivers from memory while walking —
+  there is no teleprompter on a walk. In a complete script, mark locked lines bold inside
+  the blockquote — the opening question, the learning promise, each beat's punchline and
+  exact-lesson line, and any sentence whose evidence-bounded wording a paraphrase could
+  break — and deliver them word-perfect, a handful per beat. Everything unmarked is
+  flexible tissue Martin may say his own way; the written line fixes the meaning, facts,
+  locked story nouns, and evidence boundary, not the exact words. Bold is a
+  review-and-delivery annotation, excluded from word counts and readability checks.
 - **Keep jokes short.** Separate setup from punchline. Keep a standalone punchline to one
   short spoken sentence—usually no more than 12 words. If the joke needs a relative clause
   or a second sentence to explain it, rewrite it. Put the factual setup and causal
@@ -317,10 +339,12 @@ without weakening the audience-first test for problem-led growth episodes.
   the concrete surprise to the larger unresolved question, explain why that question can
   matter to the viewer, and state what the viewer will understand, recognize, or be able
   to do by the end. A generic "keep watching" tease is not a viewer promise. Write the
-  promise itself as a literal learning contract: keep jokes, comic images, metaphors, and
-  colorful callbacks out of that sentence even when humor surrounds it.
-  A complete-episode promise must name both the understanding the viewer will gain and the
-  concrete response they will be able to use.
+  promise itself as a literal learning contract voiced as sharing, not lecturing (`I'll
+  show you how people get tricked — and how to avoid being one of them`): keep jokes,
+  comic images, metaphors, and colorful callbacks out of that sentence even when humor
+  surrounds it, and never let the sharing voice smuggle in claims the evidence does not
+  support. A complete-episode promise must name both the understanding the viewer will
+  gain and the concrete response they will be able to use.
 - **The Vsauce template `[verified]` (steal this exact shape):** question → concrete
   absurdity reframe ("games are weird — why would I invite a goalie to make scoring
   *harder*?") → intellectual anchor (a named idea / researcher). It lands the hook in

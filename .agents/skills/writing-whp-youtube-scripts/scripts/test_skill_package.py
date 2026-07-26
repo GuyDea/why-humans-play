@@ -812,8 +812,8 @@ class SkillPackageTests(unittest.TestCase):
             ),
         }
         sequence = (
-            "intriguing question → anticipated defense → evidence-backed disarm → "
-            "early remedy promise → real case"
+            "intriguing question → narrator's former defense → evidence that "
+            "overturned it → early remedy promise → real case"
         )
         ordering = (
             "Complete the first four moves before detailed case exposition."
@@ -857,10 +857,8 @@ class SkillPackageTests(unittest.TestCase):
             "Do not invent thoughts, motives, or quotations for the people in the case."
         )
         allowed_comparison = (
-            "You may say “If you think this cannot happen to me…” and then present "
-            "a case with observable resistance; that compares the viewer's defense "
-            "with the case instead of attributing the viewer's words to the "
-            "participants."
+            "narrator's former belief is his own voiced stance, confirmed by "
+            "Martin at review."
         )
 
         for source_name, source in sources.items():
@@ -962,9 +960,12 @@ class SkillPackageTests(unittest.TestCase):
             ).read_text(encoding="utf-8").split()
         )
         for contract in (
-            "Write the by-end promise as a literal learning contract.",
+            "Write the by-end promise as a literal learning contract voiced as "
+            "sharing, not lecturing",
             "Keep jokes, comic images, metaphors, and colorful callbacks out of the "
-            "promise sentence.",
+            "promise sentence",
+            "never let the sharing voice smuggle in claims the evidence does not "
+            "support",
             "Humor may surround the promise, but it must not complicate what the "
             "viewer will learn.",
         ):
@@ -1232,8 +1233,8 @@ class SkillPackageTests(unittest.TestCase):
             ),
         }
         contracts = (
-            "Write like a smart friend walking the viewer through something "
-            "surprising, not like a paper abstract, conference talk, or legal "
+            "Write like a smart friend on a walk sharing something he dug into, "
+            "not like a presenter, paper abstract, conference talk, or legal "
             "disclaimer.",
             "fact → plain reaction → why it matters → next question",
             "Use contractions, direct address, and brief controlled hyperbole when "

@@ -37,17 +37,19 @@ concrete response they will be able to use.
 
 For a problem-led opening with a predictable “not me; I know the tricks” response, use the
 five-move anti-skip intro:
-`intriguing question → anticipated defense → evidence-backed disarm → early remedy promise → real case`.
-Complete the first four moves before detailed case exposition. A short sourced result may
-tease the case during the disarm; develop the real story only after the promise. Treat
-measured skepticism, lower trust ratings, expertise, training, or prior warning as
-sufficient observable resistance; do not require proof of the participants' exact inner
-monologue. You may say “If you think this cannot happen to me…” and then present a case
-with observable resistance; that compares the viewer's defense with the case instead of
-attributing the viewer's words to the participants. Do not invent thoughts, motives, or
-quotations for the people in the case. Keep the remedy promise literal and joke-free, then
-use the developed case to show the trap and foreshadow the warning sign that the promised
-response will surface. This contract overrides a generic hook spine when it applies.
+`intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
+Voice the defense as the narrator's own former position, never as a rebuttal aimed at the
+viewer; the viewer recognizes their own objection inside the narrator's, so the disarm
+lands as shared discovery instead of a correction. Complete the first four moves before
+detailed case exposition. A short sourced result may tease the case during the disarm;
+develop the real story only after the promise. Treat measured skepticism, lower trust
+ratings, expertise, training, or prior warning as sufficient observable resistance; do not
+require proof of the participants' exact inner monologue. Do not invent thoughts, motives,
+or quotations for the people in the case. The narrator's former belief is his own voiced
+stance, confirmed by Martin at review. Keep the remedy promise literal and joke-free,
+voiced as a friend sharing what held up, then use the developed case to show the trap and
+foreshadow the warning sign that the promised response will surface. This contract
+overrides a generic hook spine when it applies.
 
 ## Compare and score three opening candidates
 
@@ -355,11 +357,16 @@ cultural shorthand, and compressed metaphors that need decoding (`your hunch com
 with a doctorate`) are not. A metaphor survives only when its image explains itself
 literally on first hearing.
 
-Write like a smart friend walking the viewer through something surprising, not like a
-paper abstract, conference talk, or legal disclaimer. Use the conversational progression
-`fact → plain reaction → why it matters → next question`. Use contractions, direct address,
-and brief controlled hyperbole when they sound natural. Friendly does not mean filler,
-invented dialogue, weakened caveats, or jokes inside the learning promise.
+Write like a smart friend on a walk sharing something he dug into, not like a presenter,
+paper abstract, conference talk, or legal disclaimer. The narrator is a peer investigator
+with the stance arc `I assumed X → then I ran into Y and dug in → here's what I found`.
+Use the conversational progression `fact → plain reaction → why it matters → next
+question`, thread varied mini-hook connectives through the narration roughly every ten to
+twenty spoken seconds, and say texture quantities as truthful conversational magnitudes
+while claim-carrying numbers, dates, places, and institutions stay exact. Use
+contractions, direct address, and brief controlled hyperbole when they sound natural.
+Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
+learning promise.
 
 **Precision controls what we claim. Personality controls how we say it.** Write like a
 well-educated best friend with a brutal sense of humor. Do not confuse factual precision
