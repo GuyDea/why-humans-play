@@ -69,6 +69,10 @@ Each numbered beat must have exactly one matching appendix beat entry. Its numbe
 must match exactly; narration beat `## 1. Descriptive name` maps to appendix beat
 `### Beat 01 — Descriptive name`.
 
+When a beat's narration uses a named storytelling move such as an investigation-challenge
+bridge, name that move and the real evidence gap it voices in the beat's `Story function`
+entry, so every use of the technique stays traceable from the appendix.
+
 ## Beat-matched production appendix
 
 Begin the appendix with `### Script metadata`. Place these 16 fields beneath it, using the

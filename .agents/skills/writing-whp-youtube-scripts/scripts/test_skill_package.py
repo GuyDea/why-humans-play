@@ -829,6 +829,29 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(ordering, source)
                 self.assertIn(teaser_boundary, source)
 
+    def test_investigation_challenge_bridge_is_real_and_reserved(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(
+                (SKILL_ROOT / "references/rapid-prototyping.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        contract = (
+            "The challenge must be epistemically real, never manufactured drama "
+            "or an invented personal event."
+        )
+        for source_name, source in sources.items():
+            with self.subTest(source=source_name):
+                self.assertIn("investigation challenge", source)
+                self.assertIn(contract, source)
+
     def test_observable_resistance_can_disarm_the_immunity_defense(self) -> None:
         sources = {
             "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),

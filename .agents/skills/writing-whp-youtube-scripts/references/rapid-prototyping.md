@@ -637,6 +637,10 @@ Before returning rapid work, check internally:
 - Does every transition between evidence pieces say in plain words what the last case
   established, what it left open, and why the next evidence answers it — no bare “So:”
   pivots?
+- Where a bridge uses an investigation challenge, is the gap real in the evidence record,
+  is the phrasing varied across the script, and is the move reserved for gaps that
+  genuinely threaten the emerging story? The challenge must be epistemically real, never
+  manufactured drama or an invented personal event.
 - Is every already-mainstream term acknowledged as familiar rather than unveiled as news,
   and is no term revealed that the script's own earlier lines already used?
 - Does each named concept follow the explanation grammar—term as promise (or

@@ -174,6 +174,14 @@ Voice the logical link in plain words: say what the last case established, what 
 not establish, and why the next evidence answers that open part. Do not pivot between two
 pieces of evidence with a bare connective — “So:” plus a new question is not a transition.
 If the narration never states how the two ideas connect, the transition fails.
+When the remaining question is a real gap in the evidence, you may voice the bridge as an
+investigation challenge: an obstacle the narrator hit while digging, resolved by the next
+evidence (`here's where my investigation hit a wall — I needed a study where the AI was
+real`). When two findings appear to contradict, name the contradiction as a challenge and
+resolve it inside the evidence scopes instead of sailing past it. The challenge must be
+epistemically real, never manufactured drama or an invented personal event. Reserve the
+move for bridges where the gap genuinely threatens the emerging story — not every
+handoff earns one, and two identical challenge phrasings in one script read as a tic.
 Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
 element must earn its place by increasing trust, first-hearing clarity, or magnetism;
 otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified

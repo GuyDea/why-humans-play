@@ -206,6 +206,13 @@ without weakening the audience-first test for problem-led growth episodes.
   Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
   equivalent disclaimer. Use the limitation only after the viewer knows why the case
   belongs.
+  When the remaining question is a real gap in the evidence, the bridge may become an
+  investigation challenge: an obstacle the narrator hit while digging, resolved by the
+  next evidence; an apparent contradiction between findings is named as a challenge and
+  resolved inside the evidence scopes instead of being sailed past. The challenge must be
+  epistemically real, never manufactured drama or an invented personal event. Reserve the
+  move for bridges where the gap genuinely threatens the emerging story, and name each
+  use in the production appendix's story-function entry so its placement stays traceable.
 - **Apply story construction script-wide.** Apply these story-construction rules to every
   beat and developed example in the complete script, not only to the opening. Before a
   surprising result, state the outcome the viewer should reasonably expect when that

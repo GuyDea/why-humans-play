@@ -1509,3 +1509,25 @@ working-state note), `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right
 this ledger. Dated planning and spec docs under `docs/superpowers/` that reference the
 retired concept stay unchanged as historical records; earlier ledger entries noting the
 conflict as open remain historical.
+
+## 2026-07-26 — Investigation-challenge bridges become a standard storytelling move
+
+**Decision:** WHP scripts may voice an evidence handoff as an investigation challenge —
+an obstacle the narrator hit while digging, resolved by the next evidence — and must
+name an apparent contradiction between findings as a challenge resolved inside the
+evidence scopes rather than sailing past it. The challenge must be epistemically real,
+never manufactured drama or an invented personal event; the move is reserved for bridges
+where the gap genuinely threatens the emerging story, phrasings vary within a script,
+and every use is named in the production appendix's story-function entry so placement
+stays traceable.
+
+**Rationale:** Martin heard about the present-a-challenge storytelling technique and
+approved three concrete Episode 1 examples; the move compounds with the walking-vlog
+peer-investigator register (the but/therefore rule on the evidence chain) while the
+honesty guardrail keeps it inside the rigor covenant.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`references/rapid-prototyping.md`, `references/annotated-script-format.md`,
+`scripts/test_skill_package.py` (new contract pin), `whp-youtube/STEERING.md`, and this
+ledger. Episode 1's three approved bridge passages are applied in a separate content
+commit.
