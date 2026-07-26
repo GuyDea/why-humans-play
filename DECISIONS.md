@@ -1459,3 +1459,34 @@ ledger. `whp-youtube/drafts/01-why-ai-makes-bad-advice-feel-right-full-prototype
 remains as the prototype record. `BRAND.md` and `whp-youtube/STEERING.md` unchanged; the
 canonical Episode 1 launch-sequence conflict (2026-07-24) remains open and is carried in
 the episode's issue ledger.
+
+## 2026-07-26 — Walking-vlog chat register and locked-line delivery format
+
+**Decision:** WHP narration adopts the walking-vlog peer-investigator register: the
+five-move anti-skip intro voices the defense as the narrator's own former position
+(`intriguing question → narrator's former defense → evidence that overturned it → early
+remedy promise → real case`); narration threads varied mini-hook connectives roughly
+every ten to twenty spoken seconds; texture quantities are spoken as truthful
+conversational magnitudes while claim-carrying numbers, small counts, dates, places, and
+institutions stay exact (precise figures remain in the claim record); the learning
+promise is voiced as sharing while staying literal, specific, and evidence-bounded;
+narrator research-process claims are allowed when the work actually happened for the
+episode; the narrator is never smarter than the viewer (self-mockery targets his own
+former take); and complete scripts mark locked lines in bold (word-perfect delivery —
+opening question, promise, punchlines, exact lessons, paraphrase-fragile evidence
+wording) with everything unmarked as flexible tissue Martin may say his own way, because
+he delivers from memory while walking.
+
+**Rationale:** Martin judged the prior register too polished-presenter for the walking
+format after reviewing narrator-coaching advice: the script must sound like a
+super-knowledgeable friend — "one of you, I just did more digging" — never arrogant,
+with the facts kept but delivered jovially; and since there is no teleprompter on a
+walk, a fully verbatim script would sound recited, so only load-bearing lines are locked.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`references/rapid-prototyping.md`, `references/story-and-hook-method.md`,
+`references/annotated-script-format.md`, `scripts/check_spoken_readability.py` (+ its
+test), `scripts/test_skill_package.py` (contract pins), `whp-youtube/STEERING.md`, and
+this ledger. `BRAND.md` unchanged (its mode "registers" concern content form, not
+delivery voice). Episode scripts are not restyled by this entry; the Episode 1 register
+reformat is tracked as its own follow-on work.
