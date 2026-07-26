@@ -1490,3 +1490,22 @@ test), `scripts/test_skill_package.py` (contract pins), `whp-youtube/STEERING.md
 this ledger. `BRAND.md` unchanged (its mode "registers" concern content form, not
 delivery voice). Episode scripts are not restyled by this entry; the Episode 1 register
 reformat is tracked as its own follow-on work.
+
+## 2026-07-26 — Reward-hacking EP1 retired; four-moves episode is canonical Episode 1
+
+**Decision:** Martin removed the reward-hacking Episode 1 ("Why AI cheats even when it
+follows every rule"): `whp-youtube/episodes/01-why-ai-cheats.md` is deleted (preserved in
+git history), and `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md` is the
+canonical Episode 1 in the launch sequence. This closes the canonical Episode 1
+launch-sequence conflict opened on 2026-07-24.
+
+**Rationale:** Direct instruction from Martin while merging the walking-vlog register
+work; the four-moves episode is the promoted, evidence-backed script actually in
+refinement.
+
+**Documents:** `whp-youtube/STEERING.md` (launch-sequence slot 1 and the Episode 1
+working-state note), `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`
+(issue ledger entry closed), `whp-youtube/episodes/01-why-ai-cheats.md` (deleted), and
+this ledger. Dated planning and spec docs under `docs/superpowers/` that reference the
+retired concept stay unchanged as historical records; earlier ledger entries noting the
+conflict as open remain historical.

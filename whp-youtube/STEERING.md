@@ -19,28 +19,19 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
-> **Episode 1 working state (2026-07-22):**
-> [`episodes/01-why-ai-cheats.md`](episodes/01-why-ai-cheats.md) is in script-first
-> refinement. Complete and show the whole narration before running editorial or timing
-> audits. Keep its numbered beat section narration-only and place evidence, production,
-> timing, and editorial metadata in the appendix after the script.
+> **Episode 1 working state (2026-07-26):**
+> [`episodes/01-why-ai-makes-bad-advice-feel-right.md`](episodes/01-why-ai-makes-bad-advice-feel-right.md)
+> is the canonical Episode 1 (v2.1, EDITORIAL-DRAFT, walking-vlog register). Martin's
+> review of the complete narration comes before the post-review audits per the skill's
+> ordering.
 
-1. **EP1 — Why AI cheats even when it follows every rule.** Use reward hacking and
-   specification gaming to reveal the hidden incentive game created whenever a score is
-   used as a proxy for a real goal. Research-draft title: *Why AI Cheats—Even When It
-   Follows Every Rule*. Research-draft thumbnail promise: a burning race boat circling
-   three targets while the finish line sits empty, with the words **AI WON?**. The selected opening uses
-   OpenAI's verified 2016 CoastRunners case: an agent repeatedly hits respawning targets
-   and earns a higher score without finishing the race. A compact 2025 coding-agent echo
-   shows the same score-versus-goal failure in current reasoning-model training without
-   opening a second full story. The human bridge skips hypothetical
-   warm-ups and uses attributed real-world cases to make Goodhart's and Campbell's laws
-   concrete. For this worldwide pattern, use a strong lesser-known case for useful surprise,
-   then follow the developed examples with a compact montage of recognizable cases from
-   other parts of the world. Each developed case must make the damaged real goal and human
-   cost explicit. The application gives viewers four questions
-   they can ask an AI to check whether its answer solved their real problem, without
-   treating the AI's self-assessment as proof of correctness or intent.
+1. **EP1 — Why AI makes bad advice feel right.** The evidence-backed four-moves episode:
+   framing, trained agreement, the machine label, and anchoring make AI agreement feel
+   like independent advice, and the viewer leaves with four counter-questions, one per
+   move. Accepted as Episode 1 on 2026-07-26, replacing the earlier reward-hacking
+   concept (*Why AI cheats even when it follows every rule*), which is retired from the
+   sequence; its research and drafts remain in git history and the dated planning docs
+   for future re-ranking.
 2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
    distinguish evidence of job performance from performance inside the interview.
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,

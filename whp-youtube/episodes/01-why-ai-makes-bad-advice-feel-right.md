@@ -530,7 +530,7 @@ Answers the opening question, transfers the four moves to human players so the t
 
 ### Issue ledger
 
-1. **Canonical Episode 1 conflict — OPEN.** `whp-youtube/STEERING.md` still records the reward-hacking concept ("Why AI cheats") as EP1; the 2026-07-24 ledger entry explicitly left this unsettled. Owner: Martin. Decision needed before publishing.
+1. **Canonical Episode 1 conflict — RESOLVED 2026-07-26.** Martin retired the reward-hacking concept ("Why AI cheats") and removed its episode file; this episode is the canonical EP1 in `whp-youtube/STEERING.md`.
 2. **Post-review audits — PENDING.** Story, personal-authenticity, evidence, fact, rights, visual, animation, application-boundary, accessibility, timing, retention, and format audits run after Martin reviews this complete deliverable, per the skill's review order.
 3. **Thumbnail and packaging — OPEN.** The metadata thumbnail promise is a pre-rev-2 working proposal; the four-moves framing may support stronger packaging. Owner: Martin.
 4. **Anchoring primary source — OPEN (low priority).** Tversky & Kahneman 1974 could not be opened this session (publisher 403). The narration treats anchoring as a mainstream acknowledgment and attributes the mechanism to the F-009 authors' hedged discussion, so no claim currently depends on the 1974 paper.
