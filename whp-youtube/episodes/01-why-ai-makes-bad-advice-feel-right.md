@@ -118,9 +118,9 @@
 >
 > The machine didn't give you a second opinion. **It gave your first opinion a software update.**
 >
-> And this is not just a theory. In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. [F-006](https://www.nature.com/articles/s41562-024-02077-2) People looked at a group of faces on a screen. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Their job was to judge whether the group looked more happy or more sad. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Then an AI gave its answer, and they could revise their own. [F-006](https://www.nature.com/articles/s41562-024-02077-2) New faces, next round, again and again.
+> And this is not just a theory. In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Here's how one round worked. People saw a group of faces on a screen and made one call. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Does this group look more happy, or more sad? [F-006](https://www.nature.com/articles/s41562-024-02077-2) Then an AI showed its answer for the same faces, and they could change their call or keep it. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Next round, new faces, same dance. And the trick was on the AI's side. Their AI had a built-in slant—it picked one of the two answers more often than it really should have. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
-> You'd hope one biased answer stays one bad suggestion. Honestly, that's what I was hoping while I read it. It didn't. Their AI leaned one way, and round after round, people's judgments drifted further that same way. [F-006](https://www.nature.com/articles/s41562-024-02077-2) The answer didn't just sit in their heads. It steered the next judgment, and the next, a little further each time. That is the loop closing. And here's the twist that keeps this honest. When the AI was accurate instead, people's judgments actually improved. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+> You'd hope a slanted answer costs you one round at most. You took one bad suggestion, and that's the whole damage. Honestly, that's what I was hoping while I read it. It didn't stop there. Round after round, on brand-new faces, people's own calls kept drifting the AI's way. [F-006](https://www.nature.com/articles/s41562-024-02077-2) The slant didn't stay in the AI's answers. It moved into their heads, and each round nudged the next one a little further. That is the loop closing. And here's the twist that keeps this honest. When the AI was accurate instead, people's judgments actually improved. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
 > So no—AI doesn't always make us worse. **But a model's mistake can quietly become part of your next judgment.** [F-006](https://www.nature.com/articles/s41562-024-02077-2)
 >
@@ -166,7 +166,7 @@
 - **Version:** 2.1 — narration reformatted to the walking-vlog register (no factual changes)
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 13:45
-- **Word count:** 2493
+- **Word count:** 2543
 - **Audience:** Curious adults who use conversational AI for advice or decisions
 - **Episode mode:** AI–human interaction (hidden-game lens)
 - **Title:** Why AI Makes Bad Advice Feel Right
@@ -395,7 +395,7 @@ Names move four, acknowledges anchoring as mainstream with the price-tag recogni
 #### Claims
 
 - `F-009` — Supports narration: "anchoring is the explanation the radiologist researchers offered," each radiologist reading a suggested diagnosis first, and the checking-the-suggestion interpretation, hedged as the authors' offered account. — `VERIFIED`.
-- `F-006` — Supports narration: the *Nature Human Behaviour* experiment run "round after round," the group-of-faces judgment task, the see-AI-answer-and-revise procedure, judgments drifting further in the biased AI's direction over rounds, improvement with accurate AI, and "a model's mistake can quietly become part of your next judgment." — `VERIFIED`. The price-tag passage is recognition rhetoric; "borrowed-authority loop" is an original label; the ballot photocopy is a metaphor. None carry indicators.
+- `F-006` — Supports narration: the *Nature Human Behaviour* experiment run "round after round," the group-of-faces judgment task, the see-AI-answer-and-revise procedure, the AI's built-in slant toward one of the two answers, people's own calls on new faces drifting the AI's way over rounds, improvement with accurate AI, and "a model's mistake can quietly become part of your next judgment." — `VERIFIED`. The price-tag passage is recognition rhetoric; "borrowed-authority loop" is an original label; the ballot photocopy is a metaphor. None carry indicators.
 
 #### Visual
 
@@ -614,7 +614,7 @@ Answers the opening question, transfers the four moves to human players so the t
 - **Contradictions:** Peer-reviewed article — COMPLETE — [full open article and task procedure/results checked; supports biased-AI amplification across rounds and accurate-AI improvement]; supplementary materials — PARTIAL — [linked methods and analysis materials are consistent with the paper]. The authors explicitly note that not all AI systems or interactions are biased and that the longevity of effects remains unknown.
 - **Status:** VERIFIED
 - **Caveat:** Keep the claim inside repeated controlled tasks, distinguish biased from accurate AI, and do not claim inevitable or permanent harm; “ran this exact loop” refers to the episode's feedback-loop concept, and the loop diagram is an editorial synthesis.
-- **Approved wording:** In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. People looked at a group of faces on a screen. Their job was to judge whether the group looked more happy or more sad. Then an AI gave its answer, and they could revise their own. Their AI leaned one way, and round after round, people's judgments drifted further that same way. And when the AI was accurate instead, people's judgments actually improved. A model's mistake can quietly become part of your next judgment.
+- **Approved wording:** In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. People saw a group of faces on a screen and made one call. Does this group look more happy, or more sad? Then an AI showed its answer for the same faces, and they could change their call or keep it. Their AI had a built-in slant—it picked one of the two answers more often than it really should have. Round after round, on brand-new faces, people's own calls kept drifting the AI's way. And when the AI was accurate instead, people's judgments actually improved. A model's mistake can quietly become part of your next judgment.
 
 ##### F-007 — Considering the opposite
 
