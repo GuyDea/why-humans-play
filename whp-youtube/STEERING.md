@@ -27,6 +27,8 @@ accepted current launch sequence, dated launch research, and historical episode 
 > preserves the four mechanisms, borrowed-authority loop, and Second-Opinion Test while
 > treating the prior order, examples, and supporting throughline as replaceable. No
 > replacement narration is canonical until it receives the later approvals and promotion.
+> The rebuild narration will be created separately at
+> [`predrafts/ep1_v2.md`](predrafts/ep1_v2.md); it will not overwrite the current episode.
 
 1. **EP1 — Why AI makes bad advice feel right.** The approved rebuild treats framing,
    sycophantic agreement, fluent machine authority, and anchoring or feedback as one

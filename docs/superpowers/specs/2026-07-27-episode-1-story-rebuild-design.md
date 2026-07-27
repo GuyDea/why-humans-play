@@ -3,6 +3,7 @@
 - **Status:** Architecture approved; Story Progression Plan pending
 - **Date:** 2026-07-27
 - **Target:** `Why AI Makes Bad Advice Feel Right`
+- **Narration target:** `whp-youtube/predrafts/ep1_v2.md`
 - **Branch:** `episode1-story-rebuild`
 - **Discovery status:** `INCOMPLETE—SEARCH BUDGET REACHED`; Martin accepted deferring
   the listed gaps to the later evidence phase
@@ -341,7 +342,8 @@ The rebuild deliberately excludes:
 1. Preserve this architecture as the intellectual baseline.
 2. Build one complete visible Story Progression Plan from it.
 3. Obtain explicit approval of that whole progression.
-4. Write one complete narration prototype from both approved baselines.
+4. Write one complete narration prototype from both approved baselines at
+   `whp-youtube/predrafts/ep1_v2.md`; do not replace the existing Episode 1.
 5. Show the narration before editorial, retention, timing, or production audits.
 6. After creative approval, verify the deferred research leads and promote the supported
    version through the normal evidence and production workflow.

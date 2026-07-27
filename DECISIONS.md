@@ -1664,3 +1664,16 @@ future story development), and this ledger. `BRAND.md` remains unchanged because
 decision refines one episode rather than umbrella doctrine. The canonical Episode 1 and
 its medical-sidecar pre-draft remain unchanged because no replacement progression or
 narration has been approved.
+
+## 2026-07-27 — Keep the Episode 1 rebuild in a separate v2 file
+
+**Decision:** The rebuilt Episode 1 narration will be created at
+`whp-youtube/predrafts/ep1_v2.md` and will not replace the existing canonical Episode 1
+file.
+
+**Rationale:** Martin explicitly requested an `ep1_v2` file and asked to preserve the old
+episode.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`, and this ledger.
+The existing canonical Episode 1 and medical-sidecar pre-draft remain unchanged.
