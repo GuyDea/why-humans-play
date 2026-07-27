@@ -7,10 +7,11 @@ description: "Use when ideating, drafting, reviewing, or revising Why Humans Pla
 
 ## Overview
 
-Use one skill for two phases: rapid creative development and evidence-backed production.
-Within the rapid phase, approve the episode's intellectual architecture before drafting
-narration. Enter production only after the separate creative approval gate. Put the viewer
-promise and honest inquiry before retention tricks.
+Use one skill for rapid creative development and evidence-backed production. For
+episode-scale work, approve the intellectual architecture, then approve the story
+progression, then draft and approve the complete narration. Enter production only after
+that separate creative approval. Put the viewer promise and honest inquiry before
+retention tricks.
 
 Do not use this skill for unrelated ads, social posts, or general marketing copy.
 
@@ -32,6 +33,10 @@ change the requested artifact.
 
 ## Choose the operation
 
+**Central-progression work** means a request that would set or materially change the causal
+route from the opening tension, through the insight ladder, to the final payoff. Use this
+same trigger in every phase.
+
 Honor the requested scope before choosing a phase:
 
 - **Generate:** return one requested architecture, structure, opening, passage, or narration,
@@ -52,6 +57,11 @@ and creative status. Do not make an operation depend on invisible chat history.
 A script under `whp-youtube/predrafts/` is a pre-draft: fast creative iteration before
 draft status. For a pre-draft, return the requested architecture, narration, passage,
 review, or alternatives directly and stop.
+
+For a new episode, thesis-level rethink, or other central-progression work, Phase 0 stops
+first at architecture and then at the Story Progression Plan. Scoped pre-draft work returns
+directly until it crosses that same trigger. A pre-draft plan is a visible creative
+baseline, not a definite WHP decision; promotion remains the reconcilable decision.
 
 - Do not run the spoken-readability script, word counts, timing or cut ledgers,
   editorial, retention, or timing audits, or the validator, and do not create or
@@ -101,11 +111,19 @@ artifact. Stop after returning the architecture. Do not draft the hook, beats, o
 until Martin explicitly approves it. Approval of a topic, title, isolated insight, or
 earlier script does not approve the architecture.
 
-Once Martin approves the architecture, use it as the content baseline for the first
-narration prototype. Preserve its central question, core answer, belief shift, insight
-ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson. Scoped work
-on existing narration does not require rebuilding the architecture unless the requested
-change alters the episode's central message.
+Once Martin approves the architecture, return one visible Story Progression Plan and stop.
+Do not order beats or draft narration until Martin explicitly approves the complete plan or
+directly instructs you to draft from that displayed complete plan. Preserve the approved
+architecture as the intellectual baseline and the approved progression as the story
+baseline. Scoped work on existing narration does not rebuild either artifact unless it
+changes the central message or crosses the central-progression trigger.
+
+After the complete progression is also approved, the architecture continues to govern
+content: Once Martin approves the architecture, use it as the content baseline for the
+first narration prototype. Preserve its central question, core answer, belief shift,
+insight ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson.
+Scoped work on existing narration does not require rebuilding the architecture unless the
+requested change alters the episode's central message.
 
 An architecture cannot be approved unless it contains both a non-obvious understanding
 and a concrete, evidence-bounded viewer response with an observable result. Check the
@@ -437,9 +455,23 @@ understanding must revise the viewer's prior model, and the response must name a
 situation, a concrete decision rule or sequence, an observable result, a real boundary,
 and at least one transfer case.
 
-Architecture approval authorizes beat ordering and narration prototyping, not evidence
-production. Preserve the approved architecture as the message baseline during prose
-iteration.
+Architecture approval authorizes story planning, not beat ordering or narration. Preserve
+the approved architecture as the intellectual baseline while planning.
+
+## Story progression approval gate
+
+For central-progression work with an approved architecture but no approved progression,
+return only the complete Story Progression Plan and wait. Positive feedback on one
+obstacle, transition, case, technique, or loop does not approve the whole artifact.
+
+Explicit approval—or a direct instruction to draft from that displayed complete
+plan—authorizes beat ordering and narration prototyping. When Martin requests a targeted
+revision, change only the addressed progression beat or field and name every downstream
+causal consequence instead of silently rewriting later beats.
+
+Keep the approved plan visible as supplied context. If no visible approved plan is
+supplied, treat the progression as unapproved. Story-progression approval precedes and does
+not replace creative approval of the complete narration and direction.
 
 ## Creative approval gate
 
@@ -468,8 +500,9 @@ For evidence-backed finalization:
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.
-4. Map a narrative spine in terms of how the viewer's understanding changes from the
-   opening question to the final payoff.
+4. Confirm the approved story progression as the narrative-spine baseline. Evidence may
+   narrow wording; if it breaks a load-bearing obstacle, reversal, proof handoff, or causal
+   link, surface the conflict and reopen progression approval.
 5. For a `FULL-SCRIPT`, choose one personal-input decision: request authentic input with
    specific prompts and bridges, integrate only material Martin supplied, or omit the
    sequence when it does no narrative work.
@@ -539,8 +572,8 @@ For evidence-backed finalization:
   [the script architecture method](references/script-architecture.md).
 - For Phase 1 narration and scoped operations, read
   [the rapid prototyping method](references/rapid-prototyping.md).
-- In Phase 2, or when Martin explicitly requests opening comparison or story restructuring,
-  read [the story and hook method](references/story-and-hook-method.md).
+- Before building or revising a Story Progression Plan, and for Phase 2 story or opening
+  work, read [the story and hook method](references/story-and-hook-method.md).
 - Before web research, claim approval, visual sourcing, or rights labeling, read
   [the research and rights method](references/research-and-rights.md).
 - Before drafting a Phase 2 deliverable, read

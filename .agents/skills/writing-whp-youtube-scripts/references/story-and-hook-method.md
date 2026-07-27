@@ -2,6 +2,7 @@
 
 ## Contents
 
+- [Plan story progression before beats](#plan-story-progression-before-beats)
 - [Start with the promise and payoff](#start-with-the-promise-and-payoff)
 - [Compare and score three opening candidates](#compare-and-score-three-opening-candidates)
 - [Build every story across the complete script](#build-every-story-across-the-complete-script)
@@ -17,6 +18,138 @@
 - [Animate only to explain](#animate-only-to-explain)
 - [Reject weak openings](#reject-weak-openings)
 - [Research basis](#research-basis)
+
+## Plan story progression before beats
+
+Use this gate for a new episode, thesis-level rethink, or any request that would set or
+materially change the causal route from opening tension through the insight ladder to the
+final payoff. The approved intellectual architecture comes first. Return the complete
+Story Progression Plan and stop; beats, hooks, jokes, final transitions, and narration come
+only after approval.
+
+If planning exposes a flat insight ladder, missing proof job, or other load-bearing
+architecture defect, return to architecture approval. Do not manufacture story tension
+around a weak payload. Planning creates no new Phase 1 research exception.
+
+When Martin asks for alternatives, return compact options containing only Story engine,
+technique deltas, and Beat-progression blocks. After he chooses, expand the selected option
+into the complete artifact below. When he targets a revision, change only the addressed
+progression beat or field. Name every downstream causal consequence instead of silently
+rewriting later beats.
+
+### Story engine
+
+State in one sentence how the episode moves from its opening tension to its final payoff.
+This is the causal and emotional route, not another thesis statement.
+
+### Story-material inventory
+
+Reference the approved architecture's evidence-row IDs and inherit their factual statuses.
+For each case, result, contradiction, consequence, human goal, or unknown, state its honest
+story opportunity and its boundary or risk. Do not re-enter an existing evidence record.
+Non-load-bearing texture may be added here; new load-bearing material returns to the
+architecture evidence map for approval.
+
+Use only `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL`. Inventory
+expectations, goals and obstacles, apparent contradictions, investigation gaps, causal
+consequences, demonstrations, recognition analogies, loops, callbacks, humor,
+informational rewards, and possible supporting throughlines. Inventory is not selection.
+
+### Technique selection
+
+Use a compact table with these fields:
+
+| Technique | Decision | Material basis | Narrative job | Planned placement | Boundary or rejection reason |
+|---|---|---|---|---|---|
+| Named move | `SELECTED`, notable `REJECTED`, or `NONE` | Exact inventory item | What changes for the viewer | Opening, beat, bridge, callback, or payoff | Why it is honest or not earned |
+
+Consider question-first or event-first entry; expectation and reversal; ordinary goal,
+obstacle, consequential choice, and outcome; investigation challenge; apparent
+contradiction and scoped resolution; proof handoff; open loop and payoff; demonstration;
+term, evidence, recognition analogy, and application; informational reward;
+mechanism-mapped punchline; callback; optional supporting narrative throughline; viewer
+application; and final declarative resolution.
+
+The catalog is a consideration checklist, not a fourteen-row quota. Record rows only for
+selected moves and notable rejections. If no move is earned, record one `NONE` row and use
+direct explanation.
+
+### Beat-progression blocks
+
+Use one addressable block per major beat:
+
+#### Progression beat SP01 — Descriptive name
+
+- **Starting question or expectation:** What the viewer expects or needs answered.
+- **Event or evidence:** What enters the story.
+- **BUT — complication:** What blocks, reverses, narrows, or complicates the route.
+- **THEREFORE — consequence or required next step:** What the complication causes the
+  narrator, argument, or viewer to need next.
+- **Selected technique:** The move doing the work, or `NONE`.
+- **Loop or payoff:** What opens, partially pays, transfers, or closes.
+- **Proof job and evidence boundary:** What this beat establishes and does not establish.
+
+But and Therefore are structural fields, not required spoken words. A setup, orientation,
+synthesis, or payoff may use `NOT APPLICABLE` only when it states its necessary logical
+job. Decorative conjunctions do not create causality.
+
+### Full causal read
+
+Compress the episode into a short end-to-end sequence using `BUT` and `THEREFORE` as
+diagnostic labels. This catches chain-level drift that individual beat blocks can miss.
+Any surviving “and then” transition needs a necessary proof or orientation job, reordering,
+or removal. Final narration uses natural spoken language.
+
+### Retention map
+
+A major handoff is a boundary between insight-ladder steps or an equivalent change in
+viewer understanding. Reference the relevant `SP` IDs and name the live reason to continue:
+a specific unresolved question, real obstacle, apparent contradiction, promised test,
+anticipated consequence, partial payoff, or outcome whose meaning remains unresolved. Do
+not re-enter the beat fields or use vague promises such as “it gets stranger.”
+
+### Natural bridge seeds
+
+Provide at most one short, non-final seed for a major handoff that needs one. Every Natural
+bridge seed must cite the inventory item or architecture row that makes it true. Natural
+forms include “But that seemed impossible, because…”, “That left me with one problem…”,
+“Which meant I needed a study that…”, and “The first case answered X. It left Y wide open.”
+
+Do not invent “I almost gave up,” surprise, frustration, a failed hypothesis, or chronology
+Martin did not experience. A logical gap may be voiced without pretending it was a personal
+event.
+
+### Loop and payoff check
+
+Reference the `SP` IDs where every important opening loop begins, partially pays when
+necessary, and finally resolves. This section checks global opening-to-ending closure; it
+does not duplicate per-beat loop state.
+
+### Throughline decision
+
+Use a supporting narrative throughline only when it earns the sidecar role. Otherwise
+record `NONE` and the concrete reason. If selected, map every return to new information,
+changed meaning, raised stakes, mechanism demonstration, tool application, or loop payoff.
+The argument remains the spine, and the throughline never substitutes for mechanism
+evidence.
+
+### Anti-shoehorn check
+
+Reject manufactured obstacles or contradictions; invented emotion, motive, memory,
+chronology, or research events; challenge language with no real gap; repetitive
+But / Therefore phrasing; “and then” sequencing with no necessary job; quota-driven
+techniques; a sidecar that competes with the thesis; and promises the episode does not pay.
+
+### Approval
+
+- **Status:** `AWAITING-APPROVAL` or `APPROVED`
+- **Approved by:** Martin or `PENDING`
+- **Approval scope:** Complete progression, not an isolated move
+- **Open evidence dependencies:** Every load-bearing `NEEDS-VERIFICATION` item
+
+The writer never self-approves the artifact. Positive feedback on one move is not complete
+approval. Explicit approval—or a direct instruction to draft from the displayed complete
+plan—makes it the visible story baseline.
 
 ## Start with the promise and payoff
 

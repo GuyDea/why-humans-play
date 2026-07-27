@@ -34,6 +34,27 @@
 - **Evidence review:** Primary paper checked; interpretation remains bounded.
 - **Rights review:** A-001 figure candidate recorded under CC BY 4.0; attribution and adaptation notice specified.
 
+### Approved story progression
+
+- **Status:** APPROVED
+- **Approved by:** Martin
+- **Story engine:** A bee's unrewarded detour raises the play question, BUT subjective experience remains unknowable, THEREFORE the episode pays off with observable criteria and an explicit boundary.
+- **Full causal read:** The direct route predicts reward-seeking, BUT some bees repeatedly detour to roll balls without food, THEREFORE the behavior is tested against operational play criteria, BUT behavior cannot reveal inner experience, THEREFORE the viewer gets a bounded observation method.
+- **Selected techniques:** SP01 — expectation → reversal; SP01 — evidence → bounded viewer application.
+- **Global loop / payoff closure:** SP01 opens and closes the question of whether this behavior meets observable play criteria.
+- **Throughline decision:** NONE — one beat cannot support three distinct sidecar returns.
+- **Open evidence dependencies:** NONE in this worked shape; independently recheck every copied source.
+- **Plan-change tradeoffs:** NONE.
+
+#### Progression beat SP01 — The detour
+- **Starting question or expectation:** An animal takes the unobstructed route to food.
+- **Event or evidence:** Some bees detour and repeatedly roll wooden balls without food reward.
+- **BUT — complication:** The behavior can meet operational play criteria without revealing subjective experience.
+- **THEREFORE — consequence or required next step:** Give the viewer observable criteria and state the interpretive boundary.
+- **Selected technique:** Expectation → reversal, followed by bounded application.
+- **Loop or payoff:** The opening question closes inside the same beat.
+- **Proof job and evidence boundary:** The experiment supports the reported behavior and criteria; it does not establish what a bee feels.
+
 ### Template note
 
 This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,

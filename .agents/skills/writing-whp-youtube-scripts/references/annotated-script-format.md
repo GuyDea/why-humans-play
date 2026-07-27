@@ -6,6 +6,7 @@
 - [Document layers](#document-layers)
 - [Numbered narration-only beats](#numbered-narration-only-beats)
 - [Beat-matched production appendix](#beat-matched-production-appendix)
+- [Approved story progression](#approved-story-progression)
 - [Personal input and viewer application](#personal-input-and-viewer-application)
 - [Stable IDs](#stable-ids)
 - [Evidence and asset records](#evidence-and-asset-records)
@@ -134,6 +135,40 @@ parent script's approved change.
 Keep metadata inside the appendix rather than above or inside the narration beats. Update
 the word count, runtime, version, and review summaries whenever the script changes
 materially.
+
+When the scope below requires it, add this compact record immediately after metadata:
+
+```markdown
+### Approved story progression
+
+- **Status:** APPROVED
+- **Approved by:** Martin
+- **Story engine:** One sentence describing the opening-to-payoff route.
+- **Full causal read:** A compact end-to-end `BUT` / `THEREFORE` diagnostic.
+- **Selected techniques:** The chosen moves and their `SP` beat IDs.
+- **Global loop / payoff closure:** Opening and final `SP` IDs for every important loop.
+- **Throughline decision:** `NONE` with a reason, or the selected sidecar and its job.
+- **Open evidence dependencies:** `NONE`, or every load-bearing provisional item.
+- **Plan-change tradeoffs:** `NONE`, or the evidence-driven change and preserved cost.
+
+#### Progression beat SP01 — Descriptive name
+- **Starting question or expectation:** The viewer's starting state.
+- **Event or evidence:** The material entering the story.
+- **BUT — complication:** `NOT APPLICABLE` — orientation beat with a stated job.
+- **THEREFORE — consequence or required next step:** The next logical need.
+- **Selected technique:** `NONE` when direct explanation is strongest.
+- **Loop or payoff:** The loop state.
+- **Proof job and evidence boundary:** What the beat proves and where it stops.
+```
+
+Populate the Narrative throughline audit from the approved plan's Throughline decision;
+do not make Phase 2 choose a second throughline. A `TARGETED-ARTIFACT` includes or updates
+the progression record only when its assigned scope sets or changes central progression.
+Require the record for a `FULL-SCRIPT` entering Phase 2 through the new gate. Do not
+fabricate or backfill a plan for a legacy script unless its central progression is being
+set or changed; the rubric evaluates intrinsic causality when no plan is in scope.
+The format, template, and package tests own this record in this refinement; structural
+validator scope is unchanged.
 
 After script metadata, add one production entry for every narration beat. Use two-digit
 beat numbers in unique, strictly ascending order and repeat the exact narration title:

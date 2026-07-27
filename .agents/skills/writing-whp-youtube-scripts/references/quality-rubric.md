@@ -124,6 +124,17 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   distinct before the narration synthesizes them, and each beat closes once instead of
   stacking equivalent analogies or thesis lines.
 
+When the appendix contains an approved Story Progression Plan, a top score also requires
+the narration to preserve its causal chain, selected honest moves, proof handoffs, and
+global loop/payoff closure. Penalize manufactured drama, quota-driven technique use, an
+unreported load-bearing deviation, or a bridge that promises content the narration never
+delivers.
+
+When no approved progression is in scope, score intrinsic causal movement. Do not penalize
+a legacy script or scoped `TARGETED-ARTIFACT` for the absence of a plan it was never
+required to contain. Audit only visible document state; record any evidence-driven
+plan-change tradeoff in the production appendix.
+
 ### 4. Spoken quality and credible runtime
 
 - **0:** The narration is unperformable, substantially mistimed, or dominated by

@@ -9,6 +9,11 @@ SKILL_ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = SKILL_ROOT.parents[2]
 SKILL_MD = SKILL_ROOT / "SKILL.md"
 ARCHITECTURE_MD = SKILL_ROOT / "references/script-architecture.md"
+STORY_METHOD_MD = SKILL_ROOT / "references/story-and-hook-method.md"
+RAPID_MD = SKILL_ROOT / "references/rapid-prototyping.md"
+FORMAT_MD = SKILL_ROOT / "references/annotated-script-format.md"
+RUBRIC_MD = SKILL_ROOT / "references/quality-rubric.md"
+TEMPLATE_MD = SKILL_ROOT / "assets/annotated-script-template.md"
 CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
@@ -387,6 +392,166 @@ class SkillPackageTests(unittest.TestCase):
         for contract in contracts:
             with self.subTest(contract=contract):
                 self.assertIn(contract, skill)
+
+    def test_story_progression_gate_is_phase_aware_and_ordered(self) -> None:
+        skill = SKILL_MD.read_text(encoding="utf-8")
+        normalized = " ".join(skill.split())
+
+        required = (
+            "central-progression work",
+            "Phase 0 stops first at architecture and then at the Story Progression Plan",
+            "Scoped pre-draft work returns directly until it crosses that same trigger",
+            "return one visible Story Progression Plan and stop",
+            "directly instructs you to draft from that displayed complete plan",
+            "If no visible approved plan is supplied, treat the progression as unapproved",
+            "Story-progression approval precedes and does not replace creative approval",
+        )
+        for contract in required:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, normalized)
+
+        self.assertLess(
+            skill.index("## Architecture approval gate"),
+            skill.index("## Story progression approval gate"),
+        )
+        self.assertLess(
+            skill.index("## Story progression approval gate"),
+            skill.index("## Creative approval gate"),
+        )
+
+    def test_story_progression_method_owns_the_complete_plan_schema(self) -> None:
+        story = STORY_METHOD_MD.read_text(encoding="utf-8")
+        consumers = {
+            "skill": SKILL_MD.read_text(encoding="utf-8"),
+            "rapid": RAPID_MD.read_text(encoding="utf-8"),
+        }
+
+        headings = (
+            "## Plan story progression before beats",
+            "### Story engine",
+            "### Story-material inventory",
+            "### Technique selection",
+            "### Beat-progression blocks",
+            "### Full causal read",
+            "### Retention map",
+            "### Natural bridge seeds",
+            "### Loop and payoff check",
+            "### Throughline decision",
+            "### Anti-shoehorn check",
+            "### Approval",
+        )
+        for heading in headings:
+            with self.subTest(heading=heading):
+                self.assertIn(heading, story)
+            for consumer_name, consumer in consumers.items():
+                with self.subTest(consumer=consumer_name, forbidden_schema=heading):
+                    self.assertNotIn(heading, consumer)
+
+        for field in (
+            "#### Progression beat SP01 — Descriptive name",
+            "**Starting question or expectation:**",
+            "**Event or evidence:**",
+            "**BUT — complication:**",
+            "**THEREFORE — consequence or required next step:**",
+            "**Selected technique:**",
+            "**Loop or payoff:**",
+            "**Proof job and evidence boundary:**",
+            "`AWAITING-APPROVAL`",
+            "`NONE`",
+            "`NOT APPLICABLE`",
+        ):
+            with self.subTest(field=field):
+                self.assertIn(field, story)
+
+    def test_story_progression_handoffs_route_through_the_owner(self) -> None:
+        sources = {
+            "skill": SKILL_MD.read_text(encoding="utf-8"),
+            "architecture": ARCHITECTURE_MD.read_text(encoding="utf-8"),
+            "rapid": RAPID_MD.read_text(encoding="utf-8"),
+        }
+
+        self.assertIn(
+            "[the story and hook method](references/story-and-hook-method.md)",
+            sources["skill"],
+        )
+        self.assertIn(
+            "Architecture approval authorizes story planning, not beat ordering or narration.",
+            sources["architecture"],
+        )
+        self.assertIn(
+            "## Draft from the approved architecture and story progression",
+            sources["rapid"],
+        )
+        self.assertIn(
+            "[story-progression method](story-and-hook-method.md#plan-story-progression-before-beats)",
+            sources["rapid"],
+        )
+        self.assertIn(
+            "Planning creates no additional Phase 1 research exception.",
+            sources["rapid"],
+        )
+
+    def test_story_progression_record_and_rubric_are_scope_aware(self) -> None:
+        format_text = FORMAT_MD.read_text(encoding="utf-8")
+        template = TEMPLATE_MD.read_text(encoding="utf-8")
+        rubric = RUBRIC_MD.read_text(encoding="utf-8")
+        normalized_format = " ".join(format_text.split())
+        normalized_rubric = " ".join(rubric.split())
+
+        record_fields = (
+            "### Approved story progression",
+            "**Status:** APPROVED",
+            "**Approved by:** Martin",
+            "**Story engine:**",
+            "**Full causal read:**",
+            "**Selected techniques:**",
+            "**Global loop / payoff closure:**",
+            "**Throughline decision:**",
+            "**Open evidence dependencies:**",
+            "**Plan-change tradeoffs:**",
+        )
+        for source_name, source in (("format", format_text), ("template", template)):
+            for field in record_fields:
+                with self.subTest(source=source_name, field=field):
+                    self.assertIn(field, source)
+
+        self.assertIn(
+            "Populate the Narrative throughline audit from the approved plan's "
+            "Throughline decision",
+            normalized_format,
+        )
+        self.assertIn(
+            "Do not fabricate or backfill a plan for a legacy script",
+            normalized_format,
+        )
+        self.assertIn(
+            "When no approved progression is in scope, score intrinsic causal movement",
+            normalized_rubric,
+        )
+        self.assertIn(
+            "Do not penalize a legacy script or scoped `TARGETED-ARTIFACT` for the "
+            "absence of a plan it was never required to contain.",
+            normalized_rubric,
+        )
+
+    def test_story_progression_method_preserves_honesty_and_targeted_revision(self) -> None:
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+        contracts = (
+            "But and Therefore are structural fields, not required spoken words.",
+            "Record rows only for selected moves and notable rejections",
+            "Every Natural bridge seed must cite the inventory item or architecture row "
+            "that makes it true.",
+            "Do not invent “I almost gave up,” surprise, frustration, a failed "
+            "hypothesis, or chronology",
+            "change only the addressed progression beat or field",
+            "Name every downstream causal consequence instead of silently rewriting "
+            "later beats.",
+            "If planning exposes a flat insight ladder, missing proof job, or other "
+            "load-bearing architecture defect, return to architecture approval.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, story)
 
     def test_script_architecture_has_the_complete_message_contract(self) -> None:
         self.assertTrue(ARCHITECTURE_MD.is_file())

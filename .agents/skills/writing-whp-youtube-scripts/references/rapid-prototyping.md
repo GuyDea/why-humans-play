@@ -8,9 +8,9 @@ ideation unless Martin explicitly asks.
 Carry forward any supplied topic and angle, audience, title and thumbnail promise, core
 tension or open question, by-end viewer promise, intended payoff, factual anchors, and
 important unknowns. Route a new episode through the
-[script architecture method](script-architecture.md) before narration. Missing nonessential
-fields do not block a useful architecture or prototype. Ask only when a missing choice
-would materially change the requested artifact.
+script architecture method and then the story-progression method before narration.
+Missing nonessential fields do not block a useful architecture or prototype. Ask only
+when a missing choice would materially change the requested artifact.
 
 Before presenting a new or thesis-level architecture, run a bounded primary-source
 concept-discovery scan even in Phase 1. This is the required exception to rapid mode's
@@ -84,18 +84,23 @@ direct request for evidence-backed finalization. Freeze the approved prototype a
 baseline, extract its material claims, and enter the production workflow. Research may bound
 the claims; it must not quietly replace the personality that earned approval.
 
-## Draft from the approved architecture
+## Draft from the approved architecture and story progression
+
+For a new episode or thesis-level rethink, use the approved architecture as the
+intellectual baseline, then follow the
+[story-progression method](story-and-hook-method.md#plan-story-progression-before-beats).
+Return that plan and stop. Draft only when both complete artifacts are visibly approved.
+
+Preserve the Story engine, causal chain, selected moves, evidence boundaries, loops, and
+payoffs while finding natural spoken phrasing. If a requested change crosses the
+central-progression trigger, reopen the plan instead of silently restructuring the draft.
+Planning creates no additional Phase 1 research exception.
 
 Do not write narration as a way to discover what the episode means. Treat examples, stories,
 humor, and hooks as the delivery system for an approved payload, not as substitutes for that
 payload. Do not write hook copy, jokes, transitions, scene direction, or complete narration
 inside the architecture artifact. Refine weak, redundant, obvious, or disconnected ideas at
 architecture level before spending prose on them.
-
-After Martin approves the architecture, discover the best delivery by writing it, hearing it,
-and refining only what Martin targets. Keep the prototype easy to discard and fast to revise,
-but preserve the approved central question, core answer, insight ladder, earned reframe,
-practical payoff, boundaries, and final lesson.
 
 Carry the approved learning-and-action contract into the opening promise, explanation,
 viewer application, and final lesson. The narration must teach the new model before asking
@@ -600,6 +605,8 @@ Before returning rapid work, check internally:
   rule before the architecture was presented?
 - For episode-scale work, was the complete architecture explicitly approved before any
   opening, beat outline, or narration was drafted?
+- Was the complete Story Progression Plan visibly approved before any beat outline or
+  narration, and does this draft preserve its causal chain?
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
   without adding a competing thesis?
 - Does it teach the approved new understanding before asking the viewer to use the

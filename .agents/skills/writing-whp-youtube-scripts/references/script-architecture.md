@@ -27,11 +27,10 @@ For a new episode, a newly selected topic, or a thesis-level rethink, return one
 architecture artifact and stop. Do not continue into an outline or narration in the same
 turn. Wait for Martin to refine and explicitly approve the architecture.
 
-When an approved architecture is visible in the supplied context, use it as the content
-baseline for beat ordering and narration. Preserve its central question, core answer,
-belief shift, insight ladder, earned reframe, boundaries, payoff, and final lesson. Do not
-smuggle in a new thesis because it creates an attractive anecdote or joke. Preserve its
-learning-and-action contract as part of that baseline.
+When an approved architecture is visible in the supplied context, use it as the
+intellectual baseline for the Story Progression Plan. Architecture approval authorizes story planning, not beat ordering or narration.
+Preserve its central question, core answer, belief shift, insight ladder, earned reframe,
+boundaries, payoff, final lesson, and learning-and-action contract.
 
 For a scoped review, rewrite, or alternatives request against existing narration, operate
 on the supplied selection. Rebuild the architecture only when Martin asks or when the
@@ -310,9 +309,10 @@ recall-only, unsourced, omits the intervention and countermeasure bucket, or hid
 near-neighbor exclusions. An offline provisional map may be refined, but it is not
 approval-ready unless Martin explicitly accepts the documented omission risk.
 
-After presenting or revising the complete architecture, stop and wait. Proceed to beat
-ordering, hook writing, and narration only after Martin explicitly approves the architecture
-or directly instructs you to draft from that displayed version.
+After presenting or revising the complete architecture, stop and wait. Proceed to the
+Story Progression Plan only after Martin explicitly approves the architecture or directly
+instructs you to plan from that displayed version. Beat ordering, hook writing, and
+narration still require the separate story-progression approval.
 
 After approval, freeze the architecture as the content baseline. A later factual check may
 narrow a claim, but a narration pass must not quietly replace the central question, core
@@ -326,7 +326,11 @@ answer, insight ladder, earned reframe, practical payoff, or final lesson.
 - Claiming exhaustive coverage without a bounded search and saturation record.
 - Presenting an original phrase as though it were an established law or effect.
 - Treating a beat outline as message architecture.
+- Proceeding from architecture approval directly to beats or narration without the Story
+  Progression Plan.
 - Producing a generic topic summary with no earned reframe.
+- Repairing a flat insight ladder with manufactured story tension instead of reopening
+  architecture.
 - Producing a surprising reframe with no concrete viewer response.
 - Attaching generic advice or a loose checklist that does not follow from the mechanism.
 - Adding controversy that the mechanism cannot support.
