@@ -178,9 +178,9 @@ Use either flexible spine:
   clearer documented case instead of adding a mechanism lecture to the hook. Treat examples
   as tools, not sunk costs: a technically exact example still fails when its causal action
   is hard to picture or explain aloud.
-- For an enduring failure pattern, pair one vivid early warning with one compact current echo
-  that demonstrates persistence and present relevance. Keep the echo to the same causal
-  mechanism; do not open a second full story or turn two examples into a universal claim.
+- Preserve an approved early-warning/current-echo move as planned; its selection and
+  boundaries belong to
+  [the story owner's opening-candidate method](story-and-hook-method.md#compare-and-score-three-opening-candidates).
 - Earn anti-skip relevance with proof, not a warning. If the opening says informed, trained,
   expert, or skeptical people are still vulnerable, prove that exact claim with a
   documented observed case involving that population. Use this sequence:
@@ -329,18 +329,9 @@ sentence says someone can raise a number while making the real goal worse, show 
 a support agent ends calls faster while customers still need help, or a student memorizes the
 answer pattern without learning the idea.
 
-For each substantial point, prefer a compact documented real-world case already available
-within the factual boundary. Build an incentive-failure example as a complete consequence
-chain:
-
-`goal → measure or target → changed behavior → improved number → damaged goal and human cost`
-
-Earn humor from the mechanism, incentive, or institution, then state plainly what got worse
-and who absorbed the cost. The punchline does not discharge the explanatory debt. If no
-suitable verified case is available, use a clearly labeled hypothetical; never make a
-plausible example sound historical. A hypothetical can explain a mechanism or rehearse an
-application, but it cannot prove prevalence, real-world consequence, or viewer
-vulnerability.
+For substantial-point case selection and incentive-failure consequence structure, follow
+[the structural story owner](story-and-hook-method.md#build-every-story-across-the-complete-script).
+This section only renders the approved case and chain in spoken form.
 
 Prefer a well-supported Western case when one can perform the same proof job clearly.
 Use the strongest non-Western case when no Western candidate passes the evidence,

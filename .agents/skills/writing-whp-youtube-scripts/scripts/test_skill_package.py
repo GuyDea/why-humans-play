@@ -2502,11 +2502,18 @@ class SkillPackageTests(unittest.TestCase):
             "Before a surprising result, state the outcome the viewer should reasonably expect",
             "case → exact takeaway → why it matters here → remaining question → next evidence",
             "The challenge must be epistemically real, never manufactured drama",
+            "For an enduring failure pattern, pair one vivid early warning with one "
+            "compact current echo that demonstrates persistence and present relevance.",
+            "goal → measure or target → changed behavior → improved number → "
+            "damaged goal and human cost",
         )
         drafting_owner_anchors = (
             "Tell the smallest story that preserves trust, causal clarity, and surprise.",
             "Compression removes clutter, never connective tissue.",
             "Preserve the causal minimum, not the procedural maximum.",
+            "Test every factual hook as `intended goal → visible score or proxy → "
+            "shortcut → absurd outcome`.",
+            "Separate setup from punchline.",
         )
 
         for anchor in structural_owner_anchors:

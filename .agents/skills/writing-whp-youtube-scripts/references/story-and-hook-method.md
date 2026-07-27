@@ -211,12 +211,9 @@ Create this compact card for each candidate:
 - **Visual anchor:** The concrete evidence, asset candidate, demonstration, or graphic.
 - **Payoff connection:** How the opening creates a need for the final answer.
 
-Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
-outcome`. Do this before scoring it. The listener must understand the causal link before the
-punchline; humor may compress the consequence, but it never supplies missing logic. If a
-first-hearing listener must ask why the score improved, replace the example with a clearer
-documented case instead of adding a mechanism lecture to the hook. Treat the opening case as
-replaceable: strong evidence cannot rescue weak causal or visual legibility.
+Before scoring a factual hook, apply
+[the rapid method's first-hearing hook check](rapid-prototyping.md#build-the-complete-hook).
+That section owns causal legibility, the replacement threshold, and the humor boundary.
 
 For an enduring failure pattern, pair one vivid early warning with one compact current echo
 that demonstrates persistence and present relevance. Keep the echo to the same causal
@@ -449,10 +446,8 @@ automatically trade it for a bloodless synonym because the subject is serious. K
 human context humane; never make a vulnerable person the punchline. Emotional force never
 waives factual support.
 
-Separate setup from punchline. Keep a standalone punchline to one short spoken
-sentence—usually no more than 12 words. If the joke needs a relative clause or a second
-sentence to explain it, rewrite it. Let the setup establish the factual logic before the
-joke compresses or exaggerates the consequence.
+For setup, punchline length, and explanation placement, follow
+[the rapid humor method](rapid-prototyping.md#make-humor-carry-meaning).
 
 Write conversational, pronounceable sentences with controlled information density.
 Prefer one new relationship per sentence. Define necessary terms at the moment they
