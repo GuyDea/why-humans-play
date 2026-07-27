@@ -3,6 +3,7 @@
 **Date:** 2026-07-27
 **Status:** Approved design
 **Branch:** `episode-1-narrative-throughline`
+**Review:** Reconciled after an independent read-only Claude Opus 5 package review
 
 ## Context
 
@@ -30,11 +31,15 @@ approval and beat ordering or narration:
 
 `approved intellectual architecture → approved story progression → beats and narration`
 
-For new episodes, thesis-level rethinks, and episode-scale story-structure ideation, the
-writer must return the Story Progression Plan and stop for explicit approval. This gate
-applies in pre-draft, rapid-prototype, and production workflows. Scoped work on existing
-narration does not rebuild the plan unless the requested change alters the central
-progression.
+Use one effect-based trigger across all phases: **central-progression work** means a request
+that would set or materially change the causal route from the opening tension, through the
+insight ladder, to the final payoff.
+
+For a new episode, a thesis-level rethink, or other central-progression work, the writer must
+return the Story Progression Plan and stop for explicit approval. This gate applies in
+pre-draft, rapid-prototype, and production workflows. Scoped work on existing narration
+returns directly and does not rebuild the plan unless it crosses the same central-progression
+trigger.
 
 Make `references/story-and-hook-method.md` the single detailed owner of the planning method.
 Keep concise routing, consumption, persistence, and audit contracts in the files that need
@@ -49,7 +54,8 @@ them. Do not mirror the detailed method across the package.
 - Keep evidence boundaries visible while planning.
 - Prevent manufactured roadblocks, emotions, chronology, or research events.
 - Preserve the approved progression as a baseline through narration and production.
-- Remove detailed-rule duplication and reduce `SKILL.md` below 500 lines.
+- Remove detailed-rule duplication and leave `SKILL.md` with a real safety margin: target at
+  most 480 lines while preserving the hard 500-line ceiling.
 - Replace prose-synchronization tests with ownership and behavior contracts.
 
 ## Non-goals
@@ -74,21 +80,32 @@ practical payoff, final lesson, and scope.
 
 Architecture approval authorizes story planning, not beats or narration.
 
+If story planning exposes a flat insight ladder, a missing proof job, or another
+load-bearing architecture defect, surface it and return to this gate. Do not compensate for a
+weak payload with stronger-sounding story technique.
+
 ### 2. Build the Story Progression Plan
 
 Inspect the approved architecture and available factual material for story moves that the
 episode genuinely earns. Plan the progression before writing beat prose, hooks, jokes, or
-transitions.
+final transitions. The short, non-final **Natural bridge seeds** defined in the artifact are
+the only transition fragments allowed at this stage.
 
 Return one visible Story Progression Plan and stop.
 
 ### 3. Approve the complete story progression
 
 Positive feedback on one obstacle, transition, case, technique, or loop does not approve the
-whole plan. Explicit approval freezes the progression as the story baseline.
+whole plan. Explicit approval—or a direct instruction to draft from the displayed complete
+plan—freezes the progression as the story baseline.
 
-When Martin requests alternatives, return distinct complete progression options without
-choosing or approving one. After a choice, return the resulting complete plan for approval.
+When Martin requests alternatives, return compact options containing only the Story engine,
+technique deltas, and Beat-progression blocks. Do not choose or approve one. After a choice,
+expand the selected option into the complete plan for approval.
+
+When Martin requests a targeted revision, change only the addressed beat or field. Name every
+downstream causal consequence that the change creates instead of silently rewriting later
+beats. Return the resulting complete plan so approval scope remains visible.
 
 ### 4. Draft from the approved progression
 
@@ -102,8 +119,30 @@ approval instead of silently restructuring the episode.
 
 ### 5. Preserve and audit the plan
 
-Phase 2 stores the approved plan in the production appendix. The final story audit compares
-the narration with that approved baseline while still allowing natural prose development.
+In Phase 0 and Phase 1, treat the approved plan like the approved architecture: it must remain
+a visible supplied input in the current conversation or subsequent request. Do not make
+drafting depend on invisible chat history or create planning-notes scaffolding merely to
+store it. If no visible approved plan is supplied, treat the progression as unapproved.
+
+Phase 2 stores a compact approved-plan record in the production appendix. The final story
+audit compares the narration with that approved baseline while still allowing natural prose
+development.
+
+Story-progression approval precedes and does not replace creative approval. The complete
+sequence is:
+
+`architecture → progression → narration prototype → creative approval → Phase 2`
+
+### Phase behavior
+
+- **Phase 0:** A new episode, thesis-level rethink, or other central-progression request
+  stops first at architecture and then at progression. Scoped pre-draft iteration still
+  returns directly. An approved progression is a creative baseline, not a definite WHP
+  doctrine decision; promotion is when the pre-draft is reconciled.
+- **Phase 1:** Require the approved progression before episode-scale beats or narration.
+  Scoped work remains exempt until it crosses the central-progression trigger.
+- **Phase 2:** Consume the approved progression as the production story baseline. Reopen it
+  only when evidence or a requested change breaks a load-bearing causal choice.
 
 ## Story Progression Plan artifact
 
@@ -118,9 +157,15 @@ This is the causal and emotional route, not another statement of the thesis.
 
 Inventory the available material before selecting techniques.
 
-| Material | Factual status | Story opportunity | Boundary or risk |
+| Material or architecture evidence-row ID | Inherited factual status | Story opportunity | Boundary or risk |
 |---|---|---|---|
-| Case, result, contradiction, consequence, human goal, or unknown | `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL` | The obstacle, reversal, question, proof job, callback, or payoff it could support | What it cannot establish or what must remain provisional |
+| Architecture row reference, case, result, contradiction, consequence, human goal, or unknown | Reuse `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL` from architecture | The obstacle, reversal, question, proof job, callback, or payoff it could support | What it cannot establish or what must remain provisional |
+
+Reference existing architecture evidence-map rows and inherit their status instead of
+re-entering the same evidence record. The plan may add non-load-bearing story texture that
+was not relevant to the evidence map. If new material becomes load-bearing, add it to the
+architecture evidence map and return that artifact for approval. Any status disagreement
+also reopens architecture.
 
 Include genuine:
 
@@ -138,7 +183,7 @@ Do not select a technique during inventory merely because the material resembles
 
 | Technique | Decision | Material basis | Narrative job | Planned placement | Boundary or rejection reason |
 |---|---|---|---|---|---|
-| Named move | `SELECTED` or `REJECTED` | Exact inventory item | What it changes for the viewer | Opening, beat, bridge, callback, or payoff | Why it remains honest, or why it is not earned |
+| Named move | `SELECTED`, notable `REJECTED`, or `NONE` | Exact inventory item | What it changes for the viewer | Opening, beat, bridge, callback, or payoff | Why it remains honest, or why an expected move is not earned |
 
 Consider at least:
 
@@ -157,14 +202,28 @@ Consider at least:
 - optional supporting narrative throughline;
 - viewer application and final declarative resolution.
 
-The inventory is broad; the selected set stays minimal. Record `NONE` when a candidate move
-or throughline is not earned.
+The list above is a consideration checklist, not a requirement to create fourteen table
+rows. Record rows only for selected moves and notable rejections a reviewer would reasonably
+expect. If no move is earned, record one `NONE` row and use direct explanation. The selected
+set stays minimal.
 
-### Beat-progression map
+### Beat-progression blocks
 
-| Beat | Starting question or expectation | Event or evidence | BUT: complication | THEREFORE: consequence or required next step | Selected technique | Loop or payoff | Proof job and evidence boundary |
-|---|---|---|---|---|---|---|---|
-| Descriptive beat name | What the viewer currently expects or needs answered | What enters the story | What blocks, reverses, narrows, or complicates the current route | What the complication causes the narrator, argument, or viewer to need next | The move doing the work | Loop opened, partially paid, transferred, or closed | What this beat establishes and what it does not |
+Use one addressable block per major beat so sentence-length causal fields remain readable and
+targeted revisions can identify the exact unit:
+
+```markdown
+#### Progression beat SP01 — Descriptive name
+
+- **Starting question or expectation:** What the viewer currently expects or needs answered.
+- **Event or evidence:** What enters the story.
+- **BUT — complication:** What blocks, reverses, narrows, or complicates the current route.
+- **THEREFORE — consequence or required next step:** What the complication causes the
+  narrator, argument, or viewer to need next.
+- **Selected technique:** The move doing the work, or `NONE`.
+- **Loop or payoff:** What opens, partially pays, transfers, or closes.
+- **Proof job and evidence boundary:** What this beat establishes and what it does not.
+```
 
 But and Therefore are structural fields, not required spoken words. A necessary setup,
 orientation, synthesis, or payoff may use `NOT APPLICABLE` only when its logical job is
@@ -176,11 +235,14 @@ Compress the episode into a short sequence using `BUT` and `THEREFORE` as diagno
 Identify any surviving “and then” transition. Give it a necessary proof or orientation job,
 reorder it, or cut it.
 
-The causal read tests structure; the final narration uses natural spoken language.
+The causal read tests end-to-end chain coherence that row-local beat checks can miss; it does
+not duplicate each beat block. The final narration uses natural spoken language.
 
 ### Retention map
 
-For each major handoff, state the live reason to continue:
+For each major handoff, reference the relevant `SP` beat IDs and state the live reason to
+continue without re-entering the beat fields. A **major handoff** is a boundary between
+insight-ladder steps or an equivalent change in viewer understanding. Valid reasons include:
 
 - a specific unresolved question;
 - a real obstacle;
@@ -194,8 +256,9 @@ Do not use vague promises such as “it gets stranger.”
 
 ### Natural bridge seeds
 
-Provide short, non-final spoken seeds only for the most important transitions. Examples of
-form include:
+Provide at most one short, non-final spoken seed for each major handoff that needs one. Cite
+the source inventory item or architecture row that makes the bridge true. Examples of form
+include:
 
 - “But that seemed impossible, because…”
 - “That left me with one problem…”
@@ -208,9 +271,10 @@ experience.
 
 ### Loop and payoff check
 
-Map each important loop to its opening beat, any partial payoff, and its final resolution.
-Confirm that the ending answers the question and useful promise created by the packaging and
-opening.
+Check only global closure here: reference the `SP` beat IDs where each important opening loop
+begins, partially pays if necessary, and finally resolves. Do not re-enter the per-beat loop
+state. Confirm that the ending answers the question and useful promise created by the
+packaging and opening.
 
 ### Throughline decision
 
@@ -244,30 +308,51 @@ The writer never self-approves the artifact.
 
 ## Responsibility boundaries and drift repair
 
+### Ownership partition
+
+- `SKILL.md` owns concise phase, gate, routing, and always-loaded invariants.
+- `story-and-hook-method.md` owns the detailed progression-planning method and artifact
+  schema.
+- `rapid-prototyping.md` owns draft-time spoken delivery, case narration, hook, humor, and
+  rapid factual-boundary application.
+- `script-architecture.md` owns intellectual payload and evidence mapping.
+- `STEERING.md` owns concise permanent channel doctrine, not the detailed method.
+
+A detailed rule may appear outside its owner only when that file must enforce it while
+drafting in its phase. Mark that copy as derived from a linked owner section. Otherwise use a
+routing pointer. This draft-time-enforcement test replaces the vague exception “where
+operationally required.”
+
 ### `.agents/skills/writing-whp-youtube-scripts/SKILL.md`
 
 Own:
 
-- when the story-progression gate applies;
+- the single central-progression trigger and its Phase 0, Phase 1, and Phase 2 behavior;
 - the requirement to return the visible plan and stop;
-- explicit approval and baseline-preservation behavior;
+- explicit approval, direct-drafting override, and visible-baseline behavior;
 - scoped-work exemption;
-- mandatory resource routing.
+- mandatory routing to `story-and-hook-method.md` before building the plan;
+- the complete gate order through creative approval.
 
-Remove the duplicated detailed story-construction method. Keep only concise invariants that
-must be visible whenever the skill loads. End below the existing 500-line maximum.
+Remove the detailed material under `### Apply story construction across the script —
+optional supporting narrative throughline` that belongs to the detailed owner, retaining
+only concise always-loaded invariants and derived draft-time rules that pass the ownership
+test above. Target at most 480 lines and never exceed the existing 500-line ceiling.
 
 ### `references/script-architecture.md`
 
 Change the post-approval handoff from beat ordering or narration to the Story Progression
 Plan. Preserve architecture as the intellectual payload and do not add story prose to the
-architecture artifact.
+architecture artifact. A load-bearing evidence item first discovered during planning returns
+to the evidence map here.
 
 ### `references/story-and-hook-method.md`
 
 Own the complete Story Progression Plan workflow, artifact schema, technique catalog,
 But / Therefore diagnostic, natural bridge seeds, approval rules, and anti-shoehorn
-guardrails. Consolidate existing detailed story-construction rules here.
+guardrails. Consolidate existing detailed story-construction rules here. Treat the approved
+progression as the narrative-spine baseline consumed by Phase 2, not as a competing second
+spine.
 
 ### `references/rapid-prototyping.md`
 
@@ -279,12 +364,34 @@ Own how Phase 1 consumes the approved progression:
 - apply spoken voice and rapid factual boundaries while drafting.
 
 Replace detailed copies of the story method with concise references to the detailed owner.
+Planning creates no third research exception beyond the bounded architecture concept scan
+and targeted viewer-vulnerability proof lookup already allowed in Phase 1.
+
+### Superseded handoffs
+
+Update every existing architecture-to-narration shortcut, not only the architecture reference:
+
+- `SKILL.md`: Overview; the Phase 1 post-architecture paragraph; Architecture approval gate;
+  the Phase 2 narrative-spine step; and Resource routing.
+- `references/script-architecture.md`: Route episode-scale work; Approve the architecture;
+  and the corresponding Common mistakes entry.
+- `references/rapid-prototyping.md`: Inputs and selected topic handoff; Draft from the
+  approved architecture heading and opening paragraphs; and the Rapid quality check.
+- `scripts/test_skill_package.py`:
+  `test_episode_scale_generation_requires_approved_architecture`.
+
+All of these must express the same chain:
+
+`architecture → progression → narration prototype → creative approval → Phase 2`
 
 ### `references/annotated-script-format.md`
 
-Define how the approved plan is stored in the production appendix. Preserve the story
-engine, full causal read, technique and beat map, loop/payoff map, throughline decision,
-evidence dependencies, and approval metadata.
+Define how a compact approved-plan record is stored in the production appendix. Preserve the
+Story engine, Full causal read, selected techniques, Beat-progression blocks, global
+loop/payoff closure, Throughline decision, evidence dependencies, approval metadata, and a
+Plan-change tradeoffs field that uses `NONE` when evidence did not force a change. Populate
+the existing Narrative throughline audit from the plan's Throughline decision rather than
+asking Phase 2 to invent a second answer.
 
 ### `assets/annotated-script-template.md`
 
@@ -295,12 +402,25 @@ never preverified episode content.
 
 Audit outcomes rather than repeat planning instructions. A top story score requires:
 
-- narration that follows the approved causal progression;
+- narration that follows the approved causal progression when the appendix contains one;
 - genuine, resolved obstacles and contradictions;
 - explicit proof handoffs;
 - loops and payoffs that resolve as planned;
 - no manufactured drama or technique quota;
 - surfaced tradeoffs when evidence forced a plan change.
+
+For a legacy script, scoped `TARGETED-ARTIFACT`, or other artifact with no approved plan in
+scope, score intrinsic causal movement and do not penalize the absent plan. Name any surfaced
+tradeoff in the production appendix so the rubric audits a document rather than hidden
+process.
+
+### `scripts/validate_annotated_script.py`
+
+Keep validator scope unchanged in this refinement. The existing Narrative throughline audit
+is owned by the format and template and tested by the package suite without validator
+enforcement; use the same precedent for the compact approved-plan record. Validator
+enforcement may be considered as a separate follow-up rather than silently widening this
+change into a new structural-validation contract.
 
 ### `whp-youtube/STEERING.md`
 
@@ -311,20 +431,56 @@ artifact schema into channel doctrine.
 
 Replace tests that demand identical detailed prose across multiple files with tests for:
 
-- one detailed owner;
+- one detailed planning owner inside `SKILL_ROOT`;
 - correct gate order and mandatory routing;
 - complete artifact schema;
 - handoff and consumption contracts;
 - persistence and audit contracts;
-- the 500-line core-skill ceiling.
+- the 480-line task target and 500-line hard core-skill ceiling.
+
+The single-owner assertion is positive and scoped: planning-method anchors and the artifact
+schema exist in `story-and-hook-method.md`; `SKILL.md` and `rapid-prototyping.md` link to that
+owner and do not mirror the schema. It does not assert that all storytelling doctrine appears
+once across the repository, and it does not treat concise channel steering as a second
+detailed owner.
+
+Before editing the skill package, audit and rewrite the known distribution-test set below.
+Each rewritten test must target the declared owner or a phase consumer explicitly marked as
+derived; no test may require byte-identical paragraphs in every file:
+
+- `test_investigation_challenge_bridge_is_real_and_reserved`
+- `test_observable_resistance_can_disarm_the_immunity_defense`
+- `test_opening_proof_case_is_clear_on_first_hearing`
+- `test_enduring_failure_uses_an_early_case_and_current_echo`
+- `test_examples_follow_a_real_world_consequence_chain`
+- `test_adjacent_cases_require_an_explicit_inference_bridge`
+- `test_proof_handoffs_lead_with_the_positive_takeaway`
+- `test_punchlines_stay_short_and_separate_from_explanation`
+- `test_narration_uses_the_friendly_conversation_format`
+- `test_voice_keeps_factual_precision_without_emotional_sterilization`
+- `test_source_label_studies_keep_the_item_source_and_outcome_visible`
+- `test_story_uses_the_fewest_elements_that_preserve_causal_truth`
+- `test_story_compression_preserves_trust_clarity_and_magnetism`
+- `test_story_compression_preserves_causal_completeness`
+- `test_story_uses_causal_minimum_and_locked_vocabulary`
+- `test_story_rule_contract_is_distributed_across_core_guidance`
+- `test_worldwide_patterns_use_novel_cases_then_a_global_montage`
+- `test_unfamiliar_names_are_prepared_and_introduced`
+- `test_supporting_narrative_throughline_contract_is_distributed`
 
 ## Failure and boundary handling
 
 - **No approved architecture:** return only the architecture.
 - **No approved progression:** return only the Story Progression Plan or its requested
   revision.
+- **Planning exposes a flat or defective architecture:** surface the exact defect and return
+  to architecture approval; do not manufacture story tension around a weak insight ladder.
 - **No genuine technique opportunity:** record `NONE`; use direct explanation.
 - **Unverified material:** keep the move provisional and name the evidence dependency.
+- **New load-bearing material appears:** add it to the architecture evidence map before using
+  it as a story hinge.
+- **Planning suggests more research:** retain the existing Phase 1 research limits; the plan
+  creates no new lookup exception.
 - **Load-bearing evidence fails later:** narrow the claim or reopen story approval.
 - **Scoped rewrite changes central progression:** stop treating it as scoped work and reopen
   the plan.
@@ -342,7 +498,8 @@ Add focused package tests before editing the skill guidance:
 
 1. The core workflow orders architecture approval before a default visible Story
    Progression Plan and orders progression approval before beats or narration.
-2. Episode-scale Phase 0 and Phase 1 work cannot bypass the gate.
+2. New, thesis-level, and other central-progression work in Phase 0 and Phase 1 cannot bypass
+   the gate, while truly scoped pre-draft work remains direct.
 3. The detailed story method contains every required artifact section and field.
 4. But / Therefore is a causal diagnostic, not a literal-word quota.
 5. `NONE`, `NOT APPLICABLE`, provisional evidence, and scoped-work behavior are defined.
@@ -350,15 +507,21 @@ Add focused package tests before editing the skill guidance:
 7. Rapid prototyping consumes and preserves the approved plan.
 8. The annotated format and template preserve the approved plan.
 9. The rubric audits adherence and manufactured-drama failures.
-10. The detailed planning contract has one owner rather than verbatim mirrors.
+10. The detailed planning contract has one owner inside `SKILL_ROOT` rather than verbatim
+    schema mirrors.
+11. The direct-drafting override, visible-baseline rule, targeted-revision behavior, and
+    complete gate chain are explicit.
+12. The format, template, and package suite enforce the compact production record.
 
 Run the focused tests and confirm they fail because the new gate and artifact do not yet
-exist.
+exist. Anchor new tests on stable headings, field labels, sentinel values
+(`AWAITING-APPROVAL`, `NONE`, and `NOT APPLICABLE`), and gate order rather than long copied
+paragraphs.
 
-Subagent pressure testing is intentionally omitted because the active workspace instruction
-forbids delegation unless the user explicitly asks for it. The current user-reported
-failure—story techniques being noticed after structure instead of shaping it—provides the
-behavioral regression, while deterministic package tests provide repeatable enforcement.
+An independent read-only Claude Opus 5 review pressure-tested this design against the live
+package. The current user-reported failure—story techniques being noticed after structure
+instead of shaping it—provides the behavioral regression, while deterministic package tests
+provide repeatable enforcement.
 
 ### GREEN
 
@@ -368,7 +531,10 @@ focused package tests after every cohesive change.
 ### REFACTOR
 
 Remove detailed duplication from the core and rapid guidance while keeping tests green.
-Keep `SKILL.md` below 500 lines and preserve unrelated walking-vlog changes.
+Keep `SKILL.md` at or below the 480-line target and preserve unrelated walking-vlog changes.
+Because the known distribution-test audit exceeds twelve tests, keep the work revertible in
+at least two cohesive commits on the same branch: land the gate and additive contracts first,
+then land ownership cleanup and test rewrites.
 
 ### Final validation
 
@@ -390,13 +556,20 @@ python3 -m unittest discover \
 Validate the skill folder:
 
 ```bash
-python3 /home/martin/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
+python3 "<resolved-skill-creator-root>/scripts/quick_validate.py" \
   .agents/skills/writing-whp-youtube-scripts
 ```
 
-Finally run `git diff --check`, inspect the complete task-owned diff, and confirm the
-Episode 1 pre-draft, walking-vlog checker implementation, historical artifacts, and
-unrelated worktrees remain unchanged by this refinement.
+Resolve `<resolved-skill-creator-root>` from the loaded `skill-creator` skill rather than
+hardcoding a machine-specific path.
+
+Run one representative dry run against a historical or synthetic approved architecture.
+Store its review evidence under `docs/superpowers/`, never in `whp-youtube/`, and confirm the
+gate produces an honest causal progression without technique quotas or invented drama.
+
+Finally run `git diff --check`, inspect the complete task-owned diff, and confirm the Episode
+1 pre-draft, walking-vlog checker implementation, historical artifacts, and unrelated
+worktrees remain unchanged by this refinement.
 
 ## Success criteria
 
@@ -407,6 +580,7 @@ unrelated worktrees remain unchanged by this refinement.
 - But / Therefore exposes weak “and then” sequencing without becoming formulaic prose.
 - The approved plan survives into rapid drafting and production auditing.
 - Detailed story guidance has one owner.
-- `SKILL.md` is below 500 lines.
+- `SKILL.md` is at most 480 lines and remains below the hard 500-line ceiling.
 - Deterministic tests fail before implementation and pass afterward.
+- A representative dry run demonstrates the gate on an approved architecture.
 - Existing walking-vlog and throughline work remains intact.
