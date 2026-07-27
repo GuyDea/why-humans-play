@@ -205,6 +205,8 @@ def test_story_progression_record_and_rubric_are_scope_aware(self) -> None:
     format_text = FORMAT_MD.read_text(encoding="utf-8")
     template = TEMPLATE_MD.read_text(encoding="utf-8")
     rubric = RUBRIC_MD.read_text(encoding="utf-8")
+    normalized_format = " ".join(format_text.split())
+    normalized_rubric = " ".join(rubric.split())
 
     record_fields = (
         "### Approved story progression",
@@ -226,20 +228,20 @@ def test_story_progression_record_and_rubric_are_scope_aware(self) -> None:
     self.assertIn(
         "Populate the Narrative throughline audit from the approved plan's "
         "Throughline decision",
-        format_text,
+        normalized_format,
     )
     self.assertIn(
         "Do not fabricate or backfill a plan for a legacy script",
-        format_text,
+        normalized_format,
     )
     self.assertIn(
         "When no approved progression is in scope, score intrinsic causal movement",
-        rubric,
+        normalized_rubric,
     )
     self.assertIn(
         "Do not penalize a legacy script or scoped `TARGETED-ARTIFACT` for the "
         "absence of a plan it was never required to contain.",
-        rubric,
+        normalized_rubric,
     )
 ```
 
