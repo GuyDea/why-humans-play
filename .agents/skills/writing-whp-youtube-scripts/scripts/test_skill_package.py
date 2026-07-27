@@ -1521,8 +1521,16 @@ class SkillPackageTests(unittest.TestCase):
         )
 
     def test_narration_uses_the_friendly_conversation_format(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
         contracts = (
             "Write like a smart friend on a walk sharing something he dug into, "
             "not like a presenter, paper abstract, conference talk, or legal "
@@ -1536,13 +1544,29 @@ class SkillPackageTests(unittest.TestCase):
 
         for contract in contracts:
             with self.subTest(owner="rapid", contract=contract):
-                self.assertIn(contract, rapid)
-                self.assertNotIn(contract, skill)
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "steering"):
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertNotIn(contract, sources[consumer])
 
         self.assertIn(
             "Write for spoken delivery — the register and clarity rules still "
             "describe good narration — but enforcement waits for promotion.",
-            skill,
+            sources["skill"],
+        )
+        self.assertIn(
+            "The narrator stays a peer, never above the viewer.",
+            sources["steering"],
+        )
+        self.assertIn(
+            "[the rapid voice owner]"
+            "(../.agents/skills/writing-whp-youtube-scripts/references/"
+            "rapid-prototyping.md#write-for-speech-and-momentum)",
+            sources["steering"],
+        )
+        self.assertIn(
+            "## Write for speech and momentum",
+            RAPID_MD.read_text(encoding="utf-8"),
         )
 
     def test_voice_keeps_factual_precision_without_emotional_sterilization(
@@ -1552,7 +1576,9 @@ class SkillPackageTests(unittest.TestCase):
             "brand": " ".join(
                 (REPO_ROOT / "BRAND.md").read_text(encoding="utf-8").split()
             ),
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
             "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
             "steering": " ".join(
                 (REPO_ROOT / "whp-youtube/STEERING.md")
                 .read_text(encoding="utf-8")
@@ -1576,10 +1602,29 @@ class SkillPackageTests(unittest.TestCase):
             "Judge the decision, behavior, mechanism, or institution—not a person's "
             "inherent worth.",
         )
-        for source_name in ("rapid", "steering"):
-            for contract in voice_contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, sources[source_name])
+        for contract in voice_contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "steering"):
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertNotIn(contract, sources[consumer])
+
+        steering_contracts = (
+            "The narrator stays a peer, never above the viewer.",
+            "Claim personal research chronology only when Martin supplied or "
+            "confirmed it.",
+            "First-person narrator reactions and direct-address check-ins are "
+            "optional tools used only when the approved plan and material earn "
+            "them; neither is a per-beat quota.",
+            "Emotional directness and humor may sharpen supported stakes, but they "
+            "never lower the evidence bar or target vulnerable people.",
+            "[the rapid voice owner]"
+            "(../.agents/skills/writing-whp-youtube-scripts/references/"
+            "rapid-prototyping.md#write-for-speech-and-momentum)",
+        )
+        for contract in steering_contracts:
+            with self.subTest(source="steering", contract=contract):
+                self.assertIn(contract, sources["steering"])
 
     def test_source_label_studies_keep_the_item_source_and_outcome_visible(
         self,
@@ -2024,11 +2069,10 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertLess(guard_index - claim_index, 700)
 
         self.assertIn(
-            "Claims about the episode's research process are allowed when that work "
-            "actually happened",
+            "Claim personal research chronology only when Martin supplied or "
+            "confirmed it.",
             steering,
         )
-        self.assertIn("invented autobiography is still forbidden.", steering)
 
     def test_complete_episode_promise_names_understanding_and_response(
         self,
@@ -2720,6 +2764,11 @@ class SkillPackageTests(unittest.TestCase):
             "or prior warning as sufficient observable resistance; do not require "
             "proof of the participants' exact inner monologue.",
             "Readability is a delivery gate, not a post-draft editorial audit.",
+            "Write like a smart friend on a walk sharing something he dug into, "
+            "not like a presenter, paper abstract, conference talk, or legal "
+            "disclaimer.",
+            "fact → plain reaction → why it matters → next question",
+            "Write like a well-educated best friend with a brutal sense of humor.",
         )
 
         for anchor in structural_owner_anchors:

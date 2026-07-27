@@ -271,39 +271,14 @@ without weakening the audience-first test for problem-led growth episodes.
   can perform the same proof job clearly. Use the strongest non-Western case when no
   Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity
   gates. Keep the real location explicit and use later examples to widen geographic scope.
-- **Use the friendly conversation format.** Write like a smart friend on a walk sharing
-  something he dug into, not like a presenter, paper abstract, conference talk, or legal
-  disclaimer. The narrator is a peer investigator; claim a personal research sequence only
-  when Martin supplied or confirmed it, and otherwise share the finding without invented
-  chronology. Move through `fact → plain reaction → why it matters → next question`. Use
-  contractions, direct address, and brief controlled hyperbole when they sound natural.
-  Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
-  learning promise.
-- **Compose the register from concrete conversational moves.** First-person narrator
-  reactions and direct-address check-ins are optional tools used only when the approved plan
-  and material earn them; neither is a per-beat quota. Varied mini-hook connectives arrive
-  roughly every ten to twenty spoken seconds, each pointing at real content the next
-  sentences deliver; documented cases run as present-tense scenes inside the evidence
-  boundary; transitions are spoken, never outline labels; diction stays everyday when the
-  claim's scope survives; and a run of consecutive polished aphorisms is an essay symptom
-  that needs a conversational turn. Texture quantities are spoken as truthful conversational
-  magnitudes (`over a hundred radiologists` for 138, never inflated), while claim-carrying
-  numbers, small counts, dates, places, and institutions stay exact, with precise figures
-  kept in the claim record. Claims about the episode's research process are allowed when
-  that work actually happened; reactions, opinions, and the narrator's stated former take
-  are voice — invented autobiography is still forbidden.
-- **Give that friend a real personality.** **Precision controls what we claim. Personality
-  controls how we say it.** Write like a well-educated best friend with a brutal sense of
-  humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,
-  emotionally loaded everyday words, and controlled hyperbole are allowed when they make
-  the stakes clearer and the underlying claim remains supportable. Judge the decision,
-  behavior, mechanism, or institution—not a person's inherent worth. Calling a choice
-  “stupid” or “the dumbest decision of your life” is allowed when the line judges the
-  choice and the episode earns the underlying stakes; do not replace it with a clinical
-  euphemism merely because the subject is serious. Emotional force never lowers the
-  evidence bar, and vulnerable people never become the punchline. The same warmth points
-  inward: the narrator is never smarter than the viewer — aim self-mockery at his own
-  former take, and cut know-it-all signals such as `obviously` or `as anyone can see`.
+- **Keep voice truthful, peer-level, and evidence-bounded.** **Precision controls what we
+  claim. Personality controls how we say it.** The narrator stays a peer, never above the
+  viewer. Claim personal research chronology only when Martin supplied or confirmed it.
+  First-person narrator reactions and direct-address check-ins are optional tools used only
+  when the approved plan and material earn them; neither is a per-beat quota. Emotional
+  directness and humor may sharpen supported stakes, but they never lower the evidence bar
+  or target vulnerable people. Detailed cadence, wording, quantities, and humor execution
+  live in [the rapid voice owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#write-for-speech-and-momentum).
 - **Mark locked lines for memory delivery.** Martin delivers from memory while walking —
   there is no teleprompter on a walk. In a complete script, mark locked lines bold inside
   the blockquote — the opening question, the learning promise, each beat's punchline and
