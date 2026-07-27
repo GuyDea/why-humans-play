@@ -41,11 +41,10 @@ evidence-funnel workflow:
 1. Read current WHP doctrine, episode history, backlog, and production constraints.
 2. Generate a deliberately diverse subject pool from independent internal and external
    signals.
-3. For problem-led candidates, generate and compare specific lived painpoints before
-   choosing the explanatory mechanism; for wonder-, history-, and explicit-game-led
-   candidates, use the analogous shared mystery, desire, or tension.
-4. Turn those audience tensions and subjects into specific video angles with a human
-   stake and an earned payoff.
+3. Apply the canonical subject-to-angle method to promising raw subjects before choosing
+   an explanatory mechanism or package.
+4. Turn the selected human nerve or shared tension into a specific, evidence-backed angle
+   with an honest payoff.
 5. Apply WHP, rigor, payoff, duplication, and feasibility gates.
 6. Research surviving candidates through multiple independent signals.
 7. Rank them with a reach-weighted scorecard and explicit evidence confidence.
@@ -53,18 +52,13 @@ evidence-funnel workflow:
 9. Return a dated, cited winner decision—or an explicit incomplete result—with risks,
    comparison evidence, and follow-ups where supported.
 
-Keep the core procedure in `SKILL.md`. Put the detailed research protocol and output
-contract in directly linked reference files. Read canonical WHP documents at run time
-instead of copying their doctrine into the skill.
-
-For a problem-led angle, “widest” means widest **specific and recognizable** pain, not the
-broadest category label. Record the target viewer, the lived moment, the cost, evidence of
-reach or recurrence, the familiar surface explanation, the hidden game or mechanism, the
-new understanding, and the usable response. Compare reach, recognition, frequency,
-consequence, and unresolvedness as separate evidence-backed dimensions rather than
-pretending they multiply into a precise market-size number. A mechanism such as reward
-hacking can explain a winning angle, but it cannot substitute for the human problem that
-makes a stranger care.
+Keep operation routing in `SKILL.md`, report shapes in `references/output-contract.md`, and
+the complete audience-language, human-nerve, specificity, mechanism-fit, and
+promise-fidelity method in
+[`references/research-method.md#subject-to-angle-development`](../../.agents/skills/choosing-whp-video-topic/references/research-method.md#subject-to-angle-development).
+That section is the single detailed owner. Canonical steering and the script-writing skill
+state only the invariant and handoff boundary, then link or invoke this owner instead of
+mirroring its checklist.
 
 ## Alternatives
 

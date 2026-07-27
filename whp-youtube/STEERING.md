@@ -94,21 +94,19 @@ lottery ticket.
 
 These are laws, not suggestions. They apply to every WHP video forever.
 
-### Start problem-led episodes from the viewer's widest specific pain
+### Start every angle from a specific human nerve
 
-When an episode competes on a problem the viewer already lives—AI, work, money,
-relationships, attention, or institutions—generate and compare the painpoints before
-choosing the technical mechanism. Seek the widest **specific, recognizable, recurring**
-pain that WHP can honestly explain and help with. Name the person, the moment, and the
-cost in one sentence; “AI is changing everything” and “reward hacking” are subjects, not
-painpoints. Use current evidence to test reach, frequency, consequence, and whether the
-problem remains unresolved. Do not select an interesting mechanism and manufacture human
-relevance afterward.
+A raw subject or interesting mechanism is not an angle. Every episode needs a specific,
+personally recognizable fear, desire, dilemma, identity stake, or fascination that its
+evidence can honestly explain. The title and opening must make that tension immediately
+legible and the episode must fully pay the promise; never manufacture relevance or use
+clickbait. Wonder-, history-, and explicit-game-led work may begin from mystery or desire
+instead of suffering.
 
-Wonder-led, history-led, and explicit-game episodes may begin from a widely shared mystery,
-desire, or tension instead of suffering. They still need an immediately recognizable human
-stake and the same useful payoff. This distinction preserves WHP's full field of inquiry
-without weakening the audience-first test for problem-led growth episodes.
+The detailed discovery, specificity, evidence, and promise-fidelity gates live only in
+[the subject-to-angle owner](../.agents/skills/choosing-whp-video-topic/references/research-method.md#subject-to-angle-development).
+Topic selection applies that method; scripting consumes its approved handoff rather than
+recreating it.
 
 ## Law 1 — Packaging is the product
 

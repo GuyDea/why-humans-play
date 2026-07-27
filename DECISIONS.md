@@ -1677,3 +1677,27 @@ episode.
 **Documents:** `whp-youtube/STEERING.md`,
 `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`, and this ledger.
 The existing canonical Episode 1 and medical-sidecar pre-draft remain unchanged.
+
+## 2026-07-28 — Require a specific human nerve before mechanism and packaging
+
+**Decision:** Treat every raw WHP subject as search territory rather than an angle; select
+the strongest evidence-supported specific human nerve or shared tension before choosing
+the mechanism, title, opening, or story, and require the delivered evidence and payoff to
+fully satisfy that personal promise without clickbait. Keep the complete method in one
+subject-to-angle owner and make every other active workflow route to or consume it instead
+of duplicating it.
+
+**Rationale:** The existing painpoint-first language still allowed `Popularity` to become
+an abstract taste-autonomy title built around social proof. Martin identified the missing
+standard: research what people are most fascinated or troubled by, find the deepest
+specific fear, desire, dilemma, identity stake, or fascination, and make the concrete nerve
+drive the angle. A second pass succeeded by framing popularity around the belonging fear
+“Am I less wanted than everyone around me?” The recent story-guidance cleanup also
+established that one detailed owner is necessary to prevent future drift.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/steering/whp-video-topic-skill.md`,
+`docs/superpowers/specs/2026-07-28-whp-human-nerve-angle-gate-design.md`, and this ledger.
+`BRAND.md` remains unchanged because this refines YouTube angle-selection workflow rather
+than umbrella doctrine. The topic and script skill implementation will follow the accepted
+single-owner design. Episode 1 files remain unchanged.
