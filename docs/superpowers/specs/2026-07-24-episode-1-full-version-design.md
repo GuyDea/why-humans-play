@@ -1,5 +1,12 @@
 # Episode 1 Eight-Minute Expansion — Design
 
+> **Superseded for future Episode 1 story development (2026-07-27):** This document
+> remains the historical design for the current evidence-backed script. New story work
+> follows the approved
+> [counterfeit-second-opinion architecture](2026-07-27-episode-1-story-rebuild-design.md);
+> the current script remains canonical until a replacement narration passes its separate
+> progression, creative, and promotion gates.
+
 - **Status:** Accepted for narration prototyping
 - **Date:** 2026-07-24
 - **Target:** `Why AI Makes Bad Advice Feel Right`

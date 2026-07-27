@@ -1643,3 +1643,24 @@ and implementation plan remain at
 `docs/superpowers/plans/2026-07-27-whp-story-progression-planning.md`. `BRAND.md` remains
 unchanged because this refines YouTube story-planning workflow rather than umbrella
 doctrine. The current Episode 1 pre-draft and walking-vlog regression plan remain separate.
+
+## 2026-07-27 — Rebuild Episode 1 around a counterfeit second opinion
+
+**Decision:** Episode 1 will be rebuilt from an approved intellectual architecture that
+retains framing, sycophantic agreement, fluent machine authority, anchoring or feedback,
+the borrowed-authority loop, and the Second-Opinion Test while treating the prior story
+order, examples, evidence sequence, and supporting throughline as replaceable; its earned
+reframe is that a second opinion requires an independent route to a checkable conclusion,
+and the architecture's listed search-budget gaps are deferred to the later evidence phase.
+
+**Rationale:** Martin asked to recreate Episode 1 with the new storytelling-first workflow,
+chose to preserve only the intellectual core, selected the counterfeit-second-opinion
+direction, and approved the complete architecture and its deferred discovery boundary.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`,
+`docs/superpowers/specs/2026-07-24-episode-1-full-version-design.md` (marked superseded for
+future story development), and this ledger. `BRAND.md` remains unchanged because the
+decision refines one episode rather than umbrella doctrine. The canonical Episode 1 and
+its medical-sidecar pre-draft remain unchanged because no replacement progression or
+narration has been approved.

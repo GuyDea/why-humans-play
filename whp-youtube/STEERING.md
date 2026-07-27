@@ -19,19 +19,25 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
-> **Episode 1 working state (2026-07-26):**
+> **Episode 1 working state (2026-07-27):**
 > [`episodes/01-why-ai-makes-bad-advice-feel-right.md`](episodes/01-why-ai-makes-bad-advice-feel-right.md)
-> is the canonical Episode 1 (v2.1, EDITORIAL-DRAFT, walking-vlog register). Martin's
-> review of the complete narration comes before the post-review audits per the skill's
-> ordering.
+> remains the canonical evidence-backed Episode 1 while a thesis-level rebuild moves
+> through the architecture → Story Progression Plan → narration gates. The rebuild's
+> [approved architecture](../docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md)
+> preserves the four mechanisms, borrowed-authority loop, and Second-Opinion Test while
+> treating the prior order, examples, and supporting throughline as replaceable. No
+> replacement narration is canonical until it receives the later approvals and promotion.
 
-1. **EP1 — Why AI makes bad advice feel right.** The evidence-backed four-moves episode:
-   framing, trained agreement, the machine label, and anchoring make AI agreement feel
-   like independent advice, and the viewer leaves with four counter-questions, one per
-   move. Accepted as Episode 1 on 2026-07-26, replacing the earlier reward-hacking
-   concept (*Why AI cheats even when it follows every rule*), which is retired from the
-   sequence; its research and drafts remain in git history and the dated planning docs
-   for future re-ranking.
+1. **EP1 — Why AI makes bad advice feel right.** The approved rebuild treats framing,
+   sycophantic agreement, fluent machine authority, and anchoring or feedback as one
+   borrowed-authority loop that can make a user's premise feel like an independent
+   second opinion. The preserved Second-Opinion Test now serves a deeper rule: another
+   answer counts only when the process adds an independent route to checkable evidence.
+   The existing evidence-backed script remains the canonical production artifact during
+   the rebuild. This episode replaced the earlier reward-hacking concept (*Why AI cheats
+   even when it follows every rule*), which remains retired from the sequence; its
+   research and drafts stay in git history and dated planning documents for possible
+   future re-ranking.
 2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
    distinguish evidence of job performance from performance inside the interview.
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
