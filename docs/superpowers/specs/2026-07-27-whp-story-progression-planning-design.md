@@ -541,8 +541,7 @@ then land ownership cleanup and test rewrites.
 Run:
 
 ```bash
-python3 -m unittest \
-  .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py
+python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py
 ```
 
 Then run all skill-package tests:
