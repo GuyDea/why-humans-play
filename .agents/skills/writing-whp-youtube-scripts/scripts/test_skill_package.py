@@ -1123,47 +1123,37 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(teaser_boundary, source)
 
     def test_investigation_challenge_bridge_is_real_and_reserved(self) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contract = (
             "The challenge must be epistemically real, never manufactured drama "
             "or an invented personal event."
         )
-        for source_name, source in sources.items():
-            with self.subTest(source=source_name):
-                self.assertIn("investigation challenge", source)
-                self.assertIn(contract, source)
+
+        self.assertIn("investigation challenge", story)
+        self.assertIn(contract, story)
+        self.assertNotIn(contract, skill)
+        self.assertNotIn(contract, rapid)
+        self.assertIn(
+            "For the detailed progression schema and structural story rules, "
+            "follow the story and hook method.",
+            skill,
+        )
+        self.assertIn(
+            "[the story and hook method](references/story-and-hook-method.md)",
+            skill,
+        )
+        self.assertIn("Derived from the structural story owner", rapid)
+        self.assertIn(
+            "[Build every story across the complete script]"
+            "(story-and-hook-method.md#build-every-story-across-the-complete-script)",
+            rapid,
+        )
 
     def test_observable_resistance_can_disarm_the_immunity_defense(self) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
         resistance = (
             "Treat measured skepticism, lower trust ratings, expertise, training, "
             "or prior warning as sufficient observable resistance; do not require "
@@ -1177,11 +1167,16 @@ class SkillPackageTests(unittest.TestCase):
             "Martin at review."
         )
 
-        for source_name, source in sources.items():
-            with self.subTest(source=source_name):
-                self.assertIn(resistance, source)
-                self.assertIn(invention_boundary, source)
-                self.assertIn(allowed_comparison, source)
+        for contract in (resistance, invention_boundary, allowed_comparison):
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+                self.assertNotIn(contract, skill)
+
+        self.assertIn(
+            "Never invent factual scene details such as dialogue, weather, motives, "
+            "thoughts, chronology, or sensory detail.",
+            skill,
+        )
 
     def test_quality_rubric_scores_anti_skip_promise_placement(self) -> None:
         rubric = " ".join(
@@ -1202,17 +1197,8 @@ class SkillPackageTests(unittest.TestCase):
         )
 
     def test_opening_proof_case_is_clear_on_first_hearing(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(
-            (SKILL_ROOT / "references/rapid-prototyping.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-        story = " ".join(
-            (SKILL_ROOT / "references/story-and-hook-method.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
 
         first_hearing_contract = (
             "Test every factual hook as `intended goal → visible score or proxy → "
@@ -1228,25 +1214,27 @@ class SkillPackageTests(unittest.TestCase):
             "may compress the consequence, but it never supplies missing logic."
         )
 
-        self.assertIn(first_hearing_contract, skill)
-        for source_name, source in (("rapid", rapid), ("story", story)):
-            with self.subTest(source=source_name):
-                self.assertIn(first_hearing_contract, source)
-                self.assertIn(failure_contract, source)
-                self.assertIn(joke_contract, source)
+        for contract in (
+            first_hearing_contract,
+            failure_contract,
+            joke_contract,
+        ):
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_enduring_failure_uses_an_early_case_and_current_echo(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(
-            (SKILL_ROOT / "references/rapid-prototyping.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-        story = " ".join(
-            (SKILL_ROOT / "references/story-and-hook-method.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
 
         temporal_bridge = (
             "For an enduring failure pattern, pair one vivid early warning with one "
@@ -1262,12 +1250,15 @@ class SkillPackageTests(unittest.TestCase):
             "makes the explanation less direct."
         )
 
-        self.assertIn(temporal_bridge, skill)
-        for source_name, source in (("rapid", rapid), ("story", story)):
-            with self.subTest(source=source_name):
-                self.assertIn(temporal_bridge, source)
-                self.assertIn(echo_boundary, source)
-                self.assertIn(callback_contract, source)
+        for contract in (temporal_bridge, echo_boundary, callback_contract):
+            with self.subTest(owner="story", contract=contract):
+                self.assertIn(contract, story)
+
+        self.assertIn(
+            "Preserve the Story engine, causal chain, selected moves, evidence "
+            "boundaries, loops, and payoffs",
+            rapid,
+        )
 
     def test_rapid_viewer_promise_is_literal_and_joke_free(self) -> None:
         rapid = " ".join(
@@ -1321,43 +1312,33 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(contract, rapid)
 
     def test_examples_follow_a_real_world_consequence_chain(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(
-            (SKILL_ROOT / "references/rapid-prototyping.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-        story = " ".join(
-            (SKILL_ROOT / "references/story-and-hook-method.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         consequence_chain = (
             "goal → measure or target → changed behavior → improved number → "
             "damaged goal and human cost"
         )
 
-        self.assertIn(
+        contracts = (
             "For each substantial point, prefer a compact documented real-world "
             "case already available within the factual boundary.",
-            rapid,
-        )
-        self.assertIn(consequence_chain, rapid)
-        self.assertIn(consequence_chain, story)
-        self.assertIn(
+            consequence_chain,
             "Earn humor from the mechanism, incentive, or institution, then state "
             "plainly what got worse and who absorbed the cost.",
-            rapid,
-        )
-        self.assertIn(
             "If no suitable verified case is available, use a clearly labeled "
             "hypothetical; never make a plausible example sound historical.",
-            rapid,
-        )
-        self.assertIn(
             "Prefer a documented real-world case for each substantial point and make "
             "its damaged goal and human cost explicit.",
-            skill,
+        )
+        for contract in contracts:
+            with self.subTest(owner="story", contract=contract):
+                self.assertIn(contract, story)
+
+        self.assertIn("Derived from the structural story owner", rapid)
+        self.assertIn(
+            "[Build every story across the complete script]"
+            "(story-and-hook-method.md#build-every-story-across-the-complete-script)",
+            rapid,
         )
 
     def test_viewer_vulnerability_claims_require_direct_observed_proof(self) -> None:
@@ -1425,97 +1406,50 @@ class SkillPackageTests(unittest.TestCase):
                     self.assertIn(contract, sources[source_name])
 
     def test_adjacent_cases_require_an_explicit_inference_bridge(self) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "architecture": " ".join(
-                (SKILL_ROOT / "references/script-architecture.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
         bridge = (
             "case → exact takeaway → why it matters here → remaining question → "
             "next evidence"
         )
 
-        for source_name in ("skill", "rapid", "story", "steering"):
-            with self.subTest(source=source_name):
-                self.assertIn(bridge, sources[source_name])
-
+        self.assertIn(bridge, story)
         self.assertIn(
             "A scope boundary is not a transition.",
-            sources["rapid"],
+            story,
         )
         self.assertIn(
             "For every proof case, state what it proves, why the episode needs that "
             "fact, what it does not explain, and how the next evidence resolves the "
             "remaining question.",
-            sources["architecture"],
+            architecture,
         )
 
     def test_proof_handoffs_lead_with_the_positive_takeaway(self) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Lead with the positive takeaway; never begin the bridge with “this "
             "study did not…” or an equivalent disclaimer.",
             "Use the limitation only after the viewer knows why the case belongs.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="story", contract=contract):
+                self.assertIn(contract, story)
+
+        self.assertIn("Derived from the structural story owner", rapid)
+        self.assertIn(
+            "[Build every story across the complete script]"
+            "(story-and-hook-method.md#build-every-story-across-the-complete-script)",
+            rapid,
+        )
 
     def test_punchlines_stay_short_and_separate_from_explanation(self) -> None:
-        sources = {
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Separate setup from punchline.",
             "Keep a standalone punchline to one short spoken sentence—usually no "
@@ -1524,30 +1458,23 @@ class SkillPackageTests(unittest.TestCase):
             "it, rewrite it.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_narration_uses_the_friendly_conversation_format(self) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Write like a smart friend on a walk sharing something he dug into, "
             "not like a presenter, paper abstract, conference talk, or legal "
@@ -1559,10 +1486,16 @@ class SkillPackageTests(unittest.TestCase):
             "jokes inside the learning promise.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+                self.assertNotIn(contract, skill)
+
+        self.assertIn(
+            "Write for spoken delivery — the register and clarity rules still "
+            "describe good narration — but enforcement waits for promotion.",
+            skill,
+        )
 
     def test_voice_keeps_factual_precision_without_emotional_sterilization(
         self,
@@ -1571,17 +1504,7 @@ class SkillPackageTests(unittest.TestCase):
             "brand": " ".join(
                 (REPO_ROOT / "BRAND.md").read_text(encoding="utf-8").split()
             ),
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
             "steering": " ".join(
                 (REPO_ROOT / "whp-youtube/STEERING.md")
                 .read_text(encoding="utf-8")
@@ -1592,9 +1515,9 @@ class SkillPackageTests(unittest.TestCase):
             "Precision controls what we claim. Personality controls how we say it."
         )
 
-        for source_name, source_text in sources.items():
+        for source_name in ("brand", "rapid", "steering"):
             with self.subTest(source=source_name):
-                self.assertIn(core_principle, source_text)
+                self.assertIn(core_principle, sources[source_name])
 
         voice_contracts = (
             "Write like a well-educated best friend with a brutal sense of humor.",
@@ -1605,7 +1528,7 @@ class SkillPackageTests(unittest.TestCase):
             "Judge the decision, behavior, mechanism, or institution—not a person's "
             "inherent worth.",
         )
-        for source_name in ("skill", "rapid", "story", "steering"):
+        for source_name in ("rapid", "steering"):
             for contract in voice_contracts:
                 with self.subTest(source=source_name, contract=contract):
                     self.assertIn(contract, sources[source_name])
@@ -1613,19 +1536,8 @@ class SkillPackageTests(unittest.TestCase):
     def test_source_label_studies_keep_the_item_source_and_outcome_visible(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "For a source-label experiment, narrate the visible chain with the "
             "story's locked nouns: `item or question → claimed source → "
@@ -1639,32 +1551,25 @@ class SkillPackageTests(unittest.TestCase):
             "evidence proves about AI behavior.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_story_uses_the_fewest_elements_that_preserve_causal_truth(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Use the fewest story elements that preserve the causal truth.",
             "Remove or collapse technical inputs, intermediate objects, roles, and "
@@ -1675,32 +1580,25 @@ class SkillPackageTests(unittest.TestCase):
             "appears in the source.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_story_compression_preserves_trust_clarity_and_magnetism(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Tell the smallest story that preserves trust, causal clarity, and "
             "surprise.",
@@ -1726,32 +1624,25 @@ class SkillPackageTests(unittest.TestCase):
             "or AHA that carries the lesson.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_story_compression_preserves_causal_completeness(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Compression removes clutter, never connective tissue.",
             "Before naming a result, introduce every actor, group, task, goal, "
@@ -1771,32 +1662,25 @@ class SkillPackageTests(unittest.TestCase):
             "point for point to the mechanism.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
+
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
 
     def test_story_uses_causal_minimum_and_locked_vocabulary(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Preserve the causal minimum, not the procedural maximum.",
             "A teaser and its developed case have different detail budgets.",
@@ -1823,32 +1707,26 @@ class SkillPackageTests(unittest.TestCase):
             "different instruction.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
 
-    def test_story_rule_contract_is_distributed_across_core_guidance(
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+        self.assertIn(
+            "[the rapid drafting method]"
+            "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+            story,
+        )
+
+    def test_structural_story_contract_lives_in_story_owner(
         self,
     ) -> None:
-        sources = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "steering": " ".join(
-                (REPO_ROOT / "whp-youtube/STEERING.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-        }
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
         contracts = (
             "Apply these story-construction rules to every beat and developed "
             "example in the complete script, not only to the opening.",
@@ -1870,15 +1748,28 @@ class SkillPackageTests(unittest.TestCase):
             "one exact lesson, and transition.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="story", contract=contract):
+                self.assertIn(contract, story)
+
+        self.assertIn(
+            "For the detailed progression schema and structural story rules, "
+            "follow the story and hook method.",
+            skill,
+        )
+        self.assertIn(
+            "[the story and hook method](references/story-and-hook-method.md)",
+            skill,
+        )
+        self.assertIn("Derived from the structural story owner", rapid)
+        self.assertIn(
+            "[Build every story across the complete script]"
+            "(story-and-hook-method.md#build-every-story-across-the-complete-script)",
+            rapid,
+        )
 
         rubric = " ".join(
-            (SKILL_ROOT / "references/quality-rubric.md")
-            .read_text(encoding="utf-8")
-            .split()
+            RUBRIC_MD.read_text(encoding="utf-8").split()
         )
         rubric_contracts = (
             "When an expectation is needed",
@@ -2013,17 +1904,7 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(fallback, source_text)
 
     def test_worldwide_patterns_use_novel_cases_then_a_global_montage(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(
-            (SKILL_ROOT / "references/rapid-prototyping.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-        story = " ".join(
-            (SKILL_ROOT / "references/story-and-hook-method.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
 
         main_contract = (
             "For a worldwide pattern, prefer a strong lesser-known case for the "
@@ -2041,30 +1922,16 @@ class SkillPackageTests(unittest.TestCase):
             "remain gates; novelty and recognition serve different narrative jobs."
         )
 
-        self.assertIn(main_contract, skill)
-        for source_name, source_text in (("rapid", rapid), ("story", story)):
-            with self.subTest(source=source_name):
-                self.assertIn(detailed_contract, source_text)
-                self.assertIn(priority_contract, source_text)
+        for contract in (main_contract, detailed_contract, priority_contract):
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
 
     def test_unfamiliar_names_are_prepared_and_introduced(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(
-            (SKILL_ROOT / "references/rapid-prototyping.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-        story = " ".join(
-            (SKILL_ROOT / "references/story-and-hook-method.md")
-            .read_text(encoding="utf-8")
-            .split()
-        )
-
-        self.assertIn(
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        core_contract = (
             "Prepare every unfamiliar proper name before first use, then identify "
             "it and explain its relevance; never drop a name as if the viewer "
-            "missed an earlier introduction.",
-            skill,
+            "missed an earlier introduction."
         )
         detailed_contract = (
             "Use `prepare the new idea or role → give the name → identify the "
@@ -2075,10 +1942,9 @@ class SkillPackageTests(unittest.TestCase):
             "viewer has not met him; first signal the harsher phenomenon, name "
             "Campbell's law, and identify Campbell in plain language."
         )
-        for source_name, source_text in (("rapid", rapid), ("story", story)):
-            with self.subTest(source=source_name):
-                self.assertIn(detailed_contract, source_text)
-                self.assertIn(cold_name_warning, source_text)
+        for contract in (core_contract, detailed_contract, cold_name_warning):
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, rapid)
 
     def test_complete_narration_closes_with_a_declarative_lesson(self) -> None:
         story = " ".join(
@@ -2627,8 +2493,84 @@ class SkillPackageTests(unittest.TestCase):
             self.assertTrue(resolved_target.is_file())
             self.assertTrue(resolved_target.is_relative_to(resolved_skill_root))
 
+    def test_detailed_story_rules_are_not_verbatim_mirrors(self) -> None:
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+
+        structural_owner_anchors = (
+            "Before a surprising result, state the outcome the viewer should reasonably expect",
+            "case → exact takeaway → why it matters here → remaining question → next evidence",
+            "The challenge must be epistemically real, never manufactured drama",
+        )
+        drafting_owner_anchors = (
+            "Tell the smallest story that preserves trust, causal clarity, and surprise.",
+            "Compression removes clutter, never connective tissue.",
+            "Preserve the causal minimum, not the procedural maximum.",
+        )
+
+        for anchor in structural_owner_anchors:
+            with self.subTest(owner="story", anchor=anchor):
+                self.assertIn(anchor, story)
+                self.assertNotIn(anchor, skill)
+                self.assertNotIn(anchor, rapid)
+
+        for anchor in drafting_owner_anchors:
+            with self.subTest(owner="rapid", anchor=anchor):
+                self.assertIn(anchor, rapid)
+                self.assertNotIn(anchor, skill)
+                self.assertNotIn(anchor, story)
+
+        self.assertIn(
+            "Derived from the structural story owner",
+            rapid,
+        )
+        self.assertIn(
+            "For line-level case narration, spoken compression, and humor, read",
+            story,
+        )
+
+    def test_story_owner_cross_links_target_declared_headings(self) -> None:
+        story = STORY_METHOD_MD.read_text(encoding="utf-8")
+        rapid = RAPID_MD.read_text(encoding="utf-8")
+        cross_links = (
+            (
+                "rapid",
+                rapid,
+                "[Plan story progression before beats]"
+                "(story-and-hook-method.md#plan-story-progression-before-beats)",
+                "story",
+                story,
+                "## Plan story progression before beats",
+            ),
+            (
+                "rapid",
+                rapid,
+                "[Build every story across the complete script]"
+                "(story-and-hook-method.md#build-every-story-across-the-complete-script)",
+                "story",
+                story,
+                "## Build every story across the complete script",
+            ),
+            (
+                "story",
+                story,
+                "[the rapid drafting method]"
+                "(rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+                "rapid",
+                rapid,
+                "## Apply the approved progression while drafting",
+            ),
+        )
+
+        for source_name, source, link, target_name, target, heading in cross_links:
+            with self.subTest(source=source_name, link=link):
+                self.assertIn(link, source)
+            with self.subTest(target=target_name, heading=heading):
+                self.assertIn(heading, target)
+
     def test_skill_entrypoint_stays_below_progressive_disclosure_limit(self) -> None:
-        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 500)
+        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 480)
 
     def test_claude_discovery_is_one_relative_symlink_to_the_canonical_package(self) -> None:
         self.assertTrue(CLAUDE_LINK.is_symlink())

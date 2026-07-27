@@ -197,42 +197,18 @@ Use either flexible spine:
   establishes susceptibility to an adjacent behavior rather than the episode's exact
   mechanism, say so and introduce separate evidence for that mechanism.
 
-## Build every story across the complete script
+## Apply the approved progression while drafting
 
-Apply these story-construction rules to every beat and developed example in the complete
-script, not only to the opening.
+> Derived from the structural story owner:
+> [Plan story progression before beats](story-and-hook-method.md#plan-story-progression-before-beats)
+> and
+> [Build every story across the complete script](story-and-hook-method.md#build-every-story-across-the-complete-script).
 
-Before a surprising result, state the outcome the viewer should reasonably expect when that
-expectation is necessary to understand why the result matters. Reveal the result in direct
-contrast to that expectation.
+Require a visible approved progression before episode-scale narration. Preserve its `SP`
+sequence, selected techniques, proof jobs, loops, and payoff. This section owns how those
+decisions become concise, spoken, first-hearing-clear prose; it does not choose a second
+structure.
 
-After the result, use at most one mechanism-mapped punchline and one precise takeaway before
-moving forward. Do not restate the same result through a stack of analogies, paraphrases,
-and thesis lines.
-
-When consecutive cases prove different parts of the argument, name each case's distinct
-proof job before combining them. The synthesis may combine established findings; it must
-not make either case appear to prove the other case's claim.
-
-Prefer everyday spoken language over research-administration phrases when both preserve the
-same claim.
-
-End each beat once: choose the strongest closing image or joke, state one exact lesson, and
-transition.
-
-- Build the handoff from any adjacent case as
-  `case → exact takeaway → why it matters here → remaining question → next evidence`.
-  A scope boundary is not a transition. Never end the case with only what it did not prove.
-  State the narrower thing it did prove, explain why the episode needs that fact, name the
-  unanswered part, and let the next evidence answer it.
-  Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
-  equivalent disclaimer. Use the limitation only after the viewer knows why the case
-  belongs.
-  Voice the logical link in plain words: say what the last case established, what it could
-  not establish, and why the next evidence answers that open part. Do not pivot between
-  two pieces of evidence with a bare connective — “So:” plus a new question is not a
-  transition. If the narration never states how the two ideas connect, the transition
-  fails.
 - Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
   element must earn its place by increasing trust, first-hearing clarity, or magnetism;
   otherwise cut or collapse it. Open a documented story with a compact trust anchor:
@@ -372,9 +348,10 @@ causal-fit, consequence, and spoken-clarity gates. Treat this as an audience-pro
 preference after the proof gates, never as permission to use a weaker case or misstate
 where an event happened.
 
-When the pattern is worldwide, use familiarity and novelty for different jobs. Prefer a
-well-supported lesser-known case for a developed consequence chain when it teaches the
-mechanism as clearly as a famous case; useful surprise gives the viewer a reason to listen.
+For a worldwide pattern, prefer a strong lesser-known case for the developed story when it
+offers useful surprise, then use a short montage of recognizable cases to demonstrate
+global scope. Use familiarity and novelty for different jobs: the developed case teaches
+the mechanism, while the compact montage establishes breadth.
 After the developed examples, name roughly three familiar cases with years in one compact
 line, spread across regions when possible, and give only enough context to reveal the shared
 pattern rather than opening three new stories. Evidence quality, causal fit, human
@@ -406,11 +383,12 @@ Match the form of an example to the behavior it illustrates. When narration clai
 say, ask, or type something, immediately voice at least one verbatim example in that exact
 form — an asked question spoken as a question, not a list of topics.
 
-Prepare every unfamiliar proper name before its first spoken mention. Use `prepare the new
-idea or role → give the name → identify the person, institution, place, or concept → explain
-why it matters here`. A sentence such as ‘Donald Campbell warned’ is incomplete when the
-viewer has not met him; first signal the harsher phenomenon, name Campbell's law, and
-identify Campbell in plain language.
+Prepare every unfamiliar proper name before first use, then identify it and explain its
+relevance; never drop a name as if the viewer missed an earlier introduction. Use
+`prepare the new idea or role → give the name → identify the person, institution, place, or
+concept → explain why it matters here`. A sentence such as ‘Donald Campbell warned’ is
+incomplete when the viewer has not met him; first signal the harsher phenomenon, name
+Campbell's law, and identify Campbell in plain language.
 
 ## Add useful informational rewards
 
@@ -650,10 +628,8 @@ Before returning rapid work, check internally:
 - Does every transition between evidence pieces say in plain words what the last case
   established, what it left open, and why the next evidence answers it — no bare “So:”
   pivots?
-- Where a bridge uses an investigation challenge, is the gap real in the evidence record,
-  is the phrasing varied across the script, and is the move reserved for gaps that
-  genuinely threaten the emerging story? The challenge must be epistemically real, never
-  manufactured drama or an invented personal event.
+- Where the approved plan uses an investigation challenge, does the prose preserve its
+  evidence gap, scoped resolution, varied phrasing, and reserved placement?
 - Is every already-mainstream term acknowledged as familiar rather than unveiled as news,
   and is no term revealed that the script's own earlier lines already used?
 - Does each named concept follow the explanation grammar—term as promise (or

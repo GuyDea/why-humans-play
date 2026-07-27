@@ -110,6 +110,7 @@ before writing any opening or narration. Put the sourced concept inventory first
 artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
 until Martin explicitly approves it. Approval of a topic, title, isolated insight, or
 earlier script does not approve the architecture.
+Use [the script architecture method](references/script-architecture.md) for that stage.
 
 Once Martin approves the architecture, return one visible Story Progression Plan and stop.
 Do not order beats or draft narration until Martin explicitly approves the complete plan or
@@ -148,232 +149,41 @@ Voice the defense as the narrator's own former position (`I used to think — ho
 everyone knows AI makes things up`), never as a rebuttal aimed at the viewer; the viewer
 recognizes their own objection inside the narrator's, so the disarm lands as shared
 discovery instead of a correction. Complete the first four moves before detailed case
-exposition. A short sourced result may tease the case during the disarm; develop the
-real story only after the promise. Treat measured skepticism, lower trust ratings,
-expertise, training, or prior warning as sufficient observable resistance; do not require
-proof of the participants' exact inner monologue. Do not invent thoughts, motives, or
-quotations for the people in the case. The narrator's former belief is his own voiced
-stance, confirmed by Martin at review. Keep the early remedy promise literal, specific,
-action-focused, and joke-free, voiced as a friend sharing what held up, never as a
-lecture contract. This five-move contract overrides a generic hook spine when it applies.
+exposition. A short sourced result may tease the case during the disarm; develop the real story only after the promise. Ground the
+disarm in observable evidence rather than attributed inner states, and keep the narrator's voiced former position
+distinct from claims about participants. Keep the early remedy promise literal, specific, action-focused, and joke-free,
+voiced as a friend sharing what held up, never as a lecture contract. This five-move contract overrides a generic hook
+spine when it applies.
 
-### Apply story construction across the script
+### Preserve the approved progression while drafting
 
-Apply these story-construction rules to every beat and developed example in the complete
-script, not only to the opening.
-Before a surprising result, state the outcome the viewer should reasonably expect when that
-expectation is necessary to understand why the result matters. Reveal the result in direct
-contrast to that expectation.
-After the result, use at most one mechanism-mapped punchline and one precise takeaway before
-moving forward. Do not restate the same result through a stack of analogies, paraphrases,
-and thesis lines.
-When consecutive cases prove different parts of the argument, name each case's distinct
-proof job before combining them. The synthesis may combine established findings; it must
-not make either case appear to prove the other case's claim.
-Prefer everyday spoken language over research-administration phrases when both preserve the
-same claim.
-End each beat once: choose the strongest closing image or joke, state one exact lesson, and
-transition.
+For central-progression work, read the detailed story owner before planning. After approval,
+preserve the Story engine, causal chain, selected moves, proof jobs, evidence boundaries,
+loops, payoff, and Throughline decision. Reopen the gate instead of silently changing a
+load-bearing choice.
 
-When an adjacent case and the episode mechanism need separate evidence, connect them as
-`case → exact takeaway → why it matters here → remaining question → next evidence`.
-Do not stop at a disclaimer about what the first case did not prove. State its positive
-proof job, then make the unanswered part create the need for the next case.
-Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
-equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
-Voice the logical link in plain words: say what the last case established, what it could
-not establish, and why the next evidence answers that open part. Do not pivot between two
-pieces of evidence with a bare connective — “So:” plus a new question is not a transition.
-If the narration never states how the two ideas connect, the transition fails.
-When the remaining question is a real gap in the evidence, you may voice the bridge as an
-investigation challenge: an obstacle the narrator hit while digging, resolved by the next
-evidence (`here's where my investigation hit a wall — I needed a study where the AI was
-real`). When two findings appear to contradict, name the contradiction as a challenge and
-resolve it inside the evidence scopes instead of sailing past it. The challenge must be
-epistemically real, never manufactured drama or an invented personal event. Reserve the
-move for bridges where the gap genuinely threatens the emerging story — not every
-handoff earns one, and two identical challenge phrasings in one script read as a tic.
-Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
-element must earn its place by increasing trust, first-hearing clarity, or magnetism;
-otherwise cut or collapse it. Open a documented story with a compact trust anchor: verified
-date and place when available, plus the relevant person, team, or institution when it adds
-credibility or orientation. Make the stages audible without sounding like slide labels.
-Use natural connective language that explains what changes next—such as “So that was the
-setup,” “Then researchers changed one thing,” or “And this is the kicker”—and vary it to
-fit the story. Do not march through repeated “Here was…” labels or expose the outline as
-meta-commentary. A transition should explain what changes next, not merely announce the
-section. When a result creates a clean comic opening, add one short punchline that sharpens
-the mechanism, consequence, or AHA; skip it when it competes with the lesson.
-There is no per-beat joke quota. A joke ships only when it maps to the mechanism,
-incentive, or consequence; is transparent to a non-native listener on first hearing; and
-sounds like something a person would spontaneously say aloud. Delete a forced joke rather
-than defending it.
-Use the fewest story elements that preserve the causal truth. Remove or collapse technical
-inputs, intermediate objects, roles, and counts when the mechanism remains accurate without
-them. Keep separate only the entities the listener must distinguish to understand the
-manipulation and result. An accurate detail does not earn narration time merely because it
-appears in the source. Do not simplify past the causal hinge, material caveat, or evidence
-boundary. Spend the attention you save on the surprising turn, consequence, or AHA that
-carries the lesson.
-Preserve the causal minimum, not the procedural maximum. A teaser and its developed case
-have different detail budgets. In an anti-skip disarm, state only the relevant qualification
-or resistance and the fact that it failed to protect; defer the task, group split, metric,
-and comparator to the developed case.
-Compression removes clutter, never connective tissue. Before naming a result, introduce
-every actor, group, task, goal, success criterion, metric, and comparison it depends on.
-For an experiment, preserve this causal-completeness sequence:
-`participants → exact task → group split → changed variable → measured result → meaning`.
-Describe a participant task by its audience-facing objective and success condition, not by
-response controls or interface options that do not advance the story. Compress a formal
-task to its practical purpose only when the paraphrase preserves the scored objective and
-does not invent a different instruction.
-State the task as an observable action with a success criterion, then report the result in
-the same concrete vocabulary. Lock the story vocabulary before drafting: give each entity
-one stable spoken name, and do not switch synonyms unless the narration explicitly
-introduces the relationship. Use the broadest truthful role label that keeps different
-actors easy to distinguish; preserve a narrower title only when it matters to the causal
-claim. Describe the changed variable with nouns already established in the story. State a
-measurement as the measured object plus the measured property, such as
-`diagnoses → trustworthiness`. Name both the metric and the comparator in every comparison.
-Do not replace a concrete noun from the setup with an undefined abstraction in the result.
-Every new noun must perform a necessary causal job or be cut.
-Distinguish an expressed reaction from an effective behavioral response; do not call the
-reaction absent when an attitude changed but performance did not. Prefer a concrete
-real-world analogy whose roles and action map point for point to the mechanism. Do not use
-an ordinal group label, pronoun, or outcome term before introducing its referent. After
-each sentence, ask what a first-hearing listener still has to resolve. Questions such as
-“judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
-setup that must be restored before polishing.
-Name the container in a learning promise: write “By the end of this video” rather than
-leaving “by the end” without a referent.
-For a source-label experiment, narrate the visible chain with the story's locked nouns:
-`item or question → claimed source → participant objective or outcome`. If researchers
-labeled human-written material as AI-generated, state what was real, what was only a label,
-and what human behavior the manipulation tested before interpreting the result. Attach
-every correct-or-incorrect count to its stable noun; never leave the listener guessing
-which item or final outcome was wrong. Separate what the case proves about human response
-from what later evidence proves about AI behavior.
-Prefer a well-supported Western case when one can perform the same proof job clearly.
-Use the strongest non-Western case when no Western candidate passes the evidence,
-causal-fit, consequence, and spoken-clarity gates. Never hide, relocate, or imply a
-geography the source does not establish.
-For a worldwide pattern, prefer a strong lesser-known case for the developed story when it
-offers useful surprise, then use a short montage of recognizable cases to demonstrate
-global scope.
-Prepare every unfamiliar proper name before first use, then identify it and explain its
-relevance; never drop a name as if the viewer missed an earlier introduction.
-Explain each named concept through the default explanation grammar:
-`term as promise → story as evidence → analogy as recognition → application`.
-Lead with the term as an open loop—a label whose meaning is promised, not defined. Pay the
-promise off with the documented story; evidence always precedes the analogy, because an
-analogy illustrates a proven mechanism and can never prove one. Place the analogy after
-the story as recognition—a scene the viewer has lived, whose roles map one-to-one onto
-the mechanism—then move to the application or counter. Mainstream terms open with
-acknowledgment instead of a promise. The grammar is the default, not a straitjacket: a
-beat with no established term, or where the name itself is the earned punchline, may
-demonstrate first and name after.
-Check audience familiarity before naming any concept. When a term is already mainstream
-for the target audience — research current awareness rather than assuming — acknowledge
-the familiarity (“you've probably heard this called sycophancy”) and add something beyond
-the name. Reserve the reveal structure (“that pattern has a name”) for terms the audience
-plausibly does not know. Never unveil as news a term the script's own earlier narration —
-such as an anticipated-defense line — already put in the viewer's mouth.
-Match the form of an example to the behavior it illustrates. When narration claims people
-say, ask, or type something, immediately voice at least one verbatim example in that exact
-form — an asked question spoken as a question, not a list of topics.
-Test every factual hook as `intended goal → visible score or proxy → shortcut → absurd
-outcome`. If that chain is not clear on first hearing, replace the example rather than
-defending it with extra setup.
-For an enduring failure pattern, pair one vivid early warning with one compact current echo
-that demonstrates persistence and present relevance. Carry the opening's concrete vocabulary
-into the application and ending only when it keeps the lesson clearer.
+Always-loaded invariants:
 
-Write for the real delivery context: Martin — a non-native English speaker — reads the
-narration aloud, often while walking and talking to the camera, for an audience that
-includes non-native listeners. Every factual sentence is a complete spoken clause with an
-explicit subject. Never narrate facts through colon-label fragments such as “The deal:” or
-“The sneaky part:” — labels with colons are written-prose devices that do not exist in
-speech. No line may depend on punctuation to be understood; if a sentence needs its em
-dash or colon to land, rewrite it as speech. Before keeping any line, test it: would
-Martin plausibly say this, unscripted, to a friend while walking? A line that only works
-as written prose or performed voice-over fails.
+- Use only story moves the real material earns. Never invent a roadblock, contradiction,
+  emotion, motive, chronology, failed hypothesis, research event, or near-surrender. Never
+  invent factual scene details such as dialogue, weather, motives, thoughts, chronology, or
+  sensory detail.
+- But / Therefore diagnoses causal movement; it is not a literal-word or per-beat quota.
+- Keep adjacent proof jobs distinct and make the remaining question create the next
+  evidence need.
+- Prefer a well-supported Western case when one can perform the same proof job clearly.
+  Use the strongest non-Western case when no Western candidate passes the evidence,
+  causal-fit, consequence, and spoken-clarity gates.
+- The argument remains the spine. A supporting narrative throughline is optional and never
+  substitutes for mechanism evidence.
+- Apply selected humor, callbacks, loops, and payoffs without turning the approved plan into
+  formulaic phrasing.
 
-When clarity and style pull in opposite directions, clarity wins. Referent completeness,
-locked nouns, counts attached to their nouns, and causal accuracy outrank rhythm,
-compression, punchiness, and humor. A fragment may omit only words recoverable from the
-immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
-result, or manipulation depends on.
-
-Use the friendly conversation format. Write like a smart friend on a walk sharing
-something he dug into, not like a presenter, paper abstract, conference talk, or legal
-disclaimer. The narrator is a peer investigator — one of the audience who did the
-digging — with the stance arc `I assumed X → then I ran into Y and dug in → here's what
-I found`; the viewer rides that discovery rather than receiving its conclusion. Voice
-the learning promise as sharing while keeping it literal and specific. Move through
-`fact → plain reaction → why it matters → next question`. Use contractions, direct
-address, and brief controlled hyperbole when they sound natural. Friendly does not mean
-filler, invented dialogue, weakened caveats, or jokes inside the learning promise.
-Keep each standalone punchline short and separate from its factual setup.
-
-Build the conversation from these concrete moves so the register stays spoken, not
-essayistic. Each major beat contains at least one narrator reaction and at least one
-direct-address check-in:
-
-- **Narrator presence.** React to the material in first person — anticipation, surprise,
-  exasperation, delight (`which I found odd, because…`, `here's the part that gets
-  me`). Claims about the episode's research process (`I read the studies behind this`,
-  `so I went digging`) are allowed when that work actually happened for this episode.
-  Opinions, reactions, and the narrator's stated former take are voice; never invent
-  autobiography, memories, personal testing, or first-person facts beyond that work.
-- **Check-ins.** Ask the viewer a question and pay it off immediately, including
-  self-answered questions (`Right? Yeah. No.`). Frame anticipated objections as shared
-  ground the narrator once held (`you'd probably have said the same thing I did`), not as
-  mind-reading aimed at the viewer.
-- **Mini-hooks.** Roughly every ten to twenty spoken seconds, a short curiosity
-  connective ties what was just said to why the next thing matters (`which I found odd,
-  because…`, `and this is where it gets interesting`). Vary the wording and let each one
-  point at real content the next sentences deliver; an empty promise, or the same
-  connective twice in a row, reads as a tic.
-- **Spoken numbers.** Say quantities the way a friend would. Small counts and any number
-  that carries the claim — the split, the result, the comparison — stay exact, as do
-  dates, places, and institutions: they are the trust anchor. Larger texture quantities
-  such as sample sizes round to a truthful conversational magnitude, never inflated:
-  `over a hundred radiologists` for 138, never `nearly two hundred`. The precise figure
-  remains in the appendix claim entry and stays available for on-screen text.
-- **Present-tense storytelling.** Tell documented cases as unfolding scenes (`2021.
-  Researchers round up over a hundred radiologists`) while every factual atom stays
-  inside the evidence boundary.
-- **Spoken transitions.** Move between ideas the way speech does (`Okay, back to your
-  boss.`, `So put the pieces together.`), never with outline labels such as `In our
-  hypothetical` or `Now return to`.
-- **Everyday diction.** When the claim's scope survives, prefer everyday phrasing over
-  research register (`slid its answer toward what you already believed`, not `moved
-  answers toward stated beliefs`); status-matched wording bounds the claim, not the
-  diction. Everyday means simple, not native-only: prefer plain international English a
-  non-native listener understands on first hearing. Widely understood conversational
-  structures (`Right?`, `Yeah… no.`) are welcome; idioms, cultural shorthand, and
-  compressed metaphors that need decoding (`your hunch comes back with a doctorate`)
-  are not. A metaphor survives only when its image explains itself literally on first
-  hearing.
-- **Natural rhythm.** Fragments, asides, and varied sentence lengths are welcome when
-  they sound natural aloud; a run of consecutive polished aphorisms reads as an essay
-  and needs a conversational turn between them. A fragment may omit only words
-  recoverable from the immediately preceding sentence; a fragment that drops the noun a
-  count or result depends on fails, however punchy.
-
-**Precision controls what we claim. Personality controls how we say it.** Write like a
-well-educated best friend with a brutal sense of humor. Do not confuse factual precision
-with sterile vocabulary. Blunt judgment, emotionally loaded everyday words, and controlled
-hyperbole are allowed when they make the stakes clearer and the underlying claim remains
-supportable. Judge the decision, behavior, mechanism, or institution—not a person's
-inherent worth. A line may call a choice “stupid” or “the dumbest decision of your life”
-when it judges the choice and the episode earns the underlying stakes. Do not disinfect it
-into clinical language merely because the topic is serious. Emotional force never lowers
-the evidence bar, and vulnerable people never become the punchline.
-The same warmth points inward: the narrator is never smarter than the viewer. Aim
-self-mockery at the narrator's own former take (`how naive of me`), keep the clarity
-effortless rather than announced, and treat know-it-all signals — `obviously`, `as anyone
-can see`, condescending asides — as defects to cut. The viewer is never the butt.
+For Phase 1 line-level case narration, spoken compression, hook, humor, and factual-boundary
+application, follow the rapid method. For the detailed progression schema and structural
+story rules, follow the story and hook method. Routes:
+[the rapid drafting method](references/rapid-prototyping.md) and
+[the story and hook method](references/story-and-hook-method.md).
 
 ### Mark locked lines for memory delivery
 
@@ -558,12 +368,6 @@ For evidence-backed finalization:
 
 ## Resource routing
 
-- For a new episode, an unapproved message, or a thesis-level rethink, read
-  [the script architecture method](references/script-architecture.md).
-- For Phase 1 narration and scoped operations, read
-  [the rapid prototyping method](references/rapid-prototyping.md).
-- Before building or revising a Story Progression Plan, and for Phase 2 story or opening
-  work, read [the story and hook method](references/story-and-hook-method.md).
 - Before web research, claim approval, visual sourcing, or rights labeling, read
   [the research and rights method](references/research-and-rights.md).
 - Before drafting a Phase 2 deliverable, read
