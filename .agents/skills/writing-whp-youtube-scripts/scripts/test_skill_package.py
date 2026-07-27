@@ -372,8 +372,13 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, skill)
 
-    def test_episode_scale_generation_requires_approved_architecture(self) -> None:
+    def test_episode_scale_generation_requires_approved_architecture_and_progression(
+        self,
+    ) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
         contracts = (
             "For a new episode or a thesis-level rethink, produce and refine the "
             "script architecture before writing any opening or narration.",
@@ -381,17 +386,31 @@ class SkillPackageTests(unittest.TestCase):
             "narration until Martin explicitly approves it.",
             "Approval of a topic, title, isolated insight, or earlier script does not "
             "approve the architecture.",
-            "Once Martin approves the architecture, use it as the content baseline "
-            "for the first narration prototype.",
-            "Preserve its central question, core answer, belief shift, insight ladder, "
-            "phenomenon map, earned reframe, boundaries, payoff, and final lesson.",
-            "Scoped work on existing narration does not require rebuilding the "
-            "architecture unless the requested change alters the episode's central "
-            "message.",
+            "Once Martin approves the architecture, return one visible Story "
+            "Progression Plan and stop.",
+            "Do not order beats or draft narration until Martin explicitly approves "
+            "the complete plan or directly instructs you to draft from that displayed "
+            "complete plan.",
+            "Preserve the approved architecture as the intellectual baseline and the "
+            "approved progression as the story baseline.",
+            "Scoped work on existing narration does not rebuild either artifact unless "
+            "it changes the central message or crosses the central-progression trigger.",
         )
         for contract in contracts:
             with self.subTest(contract=contract):
                 self.assertIn(contract, skill)
+
+        self.assertIn(
+            "Preserve its central question, core answer, belief shift, insight ladder, "
+            "earned reframe, boundaries, payoff, final lesson, and learning-and-action "
+            "contract.",
+            architecture,
+        )
+        self.assertNotIn(
+            "use it as the content baseline for the first narration "
+            "prototype",
+            skill,
+        )
 
     def test_story_progression_gate_is_phase_aware_and_ordered(self) -> None:
         skill = SKILL_MD.read_text(encoding="utf-8")
@@ -469,6 +488,10 @@ class SkillPackageTests(unittest.TestCase):
             "architecture": ARCHITECTURE_MD.read_text(encoding="utf-8"),
             "rapid": RAPID_MD.read_text(encoding="utf-8"),
         }
+        normalized = {
+            source_name: " ".join(source.split())
+            for source_name, source in sources.items()
+        }
 
         self.assertIn(
             "[the story and hook method](references/story-and-hook-method.md)",
@@ -476,7 +499,7 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertIn(
             "Architecture approval authorizes story planning, not beat ordering or narration.",
-            sources["architecture"],
+            normalized["architecture"],
         )
         self.assertIn(
             "## Draft from the approved architecture and story progression",
@@ -488,7 +511,7 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertIn(
             "Planning creates no additional Phase 1 research exception.",
-            sources["rapid"],
+            normalized["rapid"],
         )
 
     def test_story_progression_record_and_rubric_are_scope_aware(self) -> None:

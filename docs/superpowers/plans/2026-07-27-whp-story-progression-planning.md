@@ -178,6 +178,10 @@ def test_story_progression_handoffs_route_through_the_owner(self) -> None:
         "architecture": ARCHITECTURE_MD.read_text(encoding="utf-8"),
         "rapid": RAPID_MD.read_text(encoding="utf-8"),
     }
+    normalized = {
+        source_name: " ".join(source.split())
+        for source_name, source in sources.items()
+    }
 
     self.assertIn(
         "[the story and hook method](references/story-and-hook-method.md)",
@@ -185,7 +189,7 @@ def test_story_progression_handoffs_route_through_the_owner(self) -> None:
     )
     self.assertIn(
         "Architecture approval authorizes story planning, not beat ordering or narration.",
-        sources["architecture"],
+        normalized["architecture"],
     )
     self.assertIn(
         "## Draft from the approved architecture and story progression",
@@ -197,7 +201,7 @@ def test_story_progression_handoffs_route_through_the_owner(self) -> None:
     )
     self.assertIn(
         "Planning creates no additional Phase 1 research exception.",
-        sources["rapid"],
+        normalized["rapid"],
     )
 
 

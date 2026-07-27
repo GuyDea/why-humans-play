@@ -28,9 +28,10 @@ architecture artifact and stop. Do not continue into an outline or narration in 
 turn. Wait for Martin to refine and explicitly approve the architecture.
 
 When an approved architecture is visible in the supplied context, use it as the
-intellectual baseline for the Story Progression Plan. Architecture approval authorizes story planning, not beat ordering or narration.
-Preserve its central question, core answer, belief shift, insight ladder, earned reframe,
-boundaries, payoff, final lesson, and learning-and-action contract.
+intellectual baseline for the Story Progression Plan. Architecture approval authorizes
+story planning, not beat ordering or narration. Preserve its central question, core
+answer, belief shift, insight ladder, earned reframe, boundaries, payoff, final lesson,
+and learning-and-action contract.
 
 For a scoped review, rewrite, or alternatives request against existing narration, operate
 on the supplied selection. Rebuild the architecture only when Martin asks or when the

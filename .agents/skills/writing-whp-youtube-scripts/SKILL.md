@@ -118,13 +118,6 @@ architecture as the intellectual baseline and the approved progression as the st
 baseline. Scoped work on existing narration does not rebuild either artifact unless it
 changes the central message or crosses the central-progression trigger.
 
-After the complete progression is also approved, the architecture continues to govern
-content: Once Martin approves the architecture, use it as the content baseline for the
-first narration prototype. Preserve its central question, core answer, belief shift,
-insight ladder, phenomenon map, earned reframe, boundaries, payoff, and final lesson.
-Scoped work on existing narration does not require rebuilding the architecture unless the
-requested change alters the episode's central message.
-
 An architecture cannot be approved unless it contains both a non-obvious understanding
 and a concrete, evidence-bounded viewer response with an observable result. Check the
 complete transformation explicitly: `Before, I thought X. Now, I understand Y. Next time,
