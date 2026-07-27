@@ -272,7 +272,26 @@ def test_story_progression_method_preserves_honesty_and_targeted_revision(self) 
             self.assertIn(contract, story)
 ```
 
-- [ ] **Step 6: Run the focused RED tests**
+- [ ] **Step 6: Add the three reviewed-handoff regression tests**
+
+Add these focused methods:
+
+- `test_story_progression_uses_stable_architecture_evidence_ids` requires stable,
+  non-recycled architecture `E-##` IDs, status inheritance by reference in the story
+  inventory, and separation from production `F-###` claim-evidence IDs.
+- `test_story_progression_direct_instruction_records_scoped_approval` requires matching
+  explicit-approval and direct-instruction routes, `APPROVED` / Martin recording, both
+  complete artifacts visibly supplied, and authorization limited to the named next stage
+  rather than complete narration or direction.
+- `test_story_progression_targeted_revision_resets_approval` requires the complete revised
+  plan to return with `AWAITING-APPROVAL` / `PENDING`, forbids approval carryover, and
+  requires renewed whole-plan approval or a matching direct instruction from the newly
+  displayed complete revision.
+
+Run each test independently before editing guidance. Expected: assertion failures for the
+missing contracts, with no import, fixture, or setup errors.
+
+- [ ] **Step 7: Run the focused RED tests**
 
 Run:
 
@@ -281,9 +300,10 @@ python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py
   -k story_progression -v
 ```
 
-Expected: the five new tests fail because the gate, owner schema, handoffs, production
-record, and scope-aware rubric do not yet exist. Existing non-story-progression tests are
-not part of this focused run.
+Expected: the eight story-progression tests fail because the gate, owner schema, handoffs,
+stable evidence identities, scoped approvals, revision reset, production record, and
+scope-aware rubric do not yet exist. Existing non-story-progression tests are not part of
+this focused run.
 
 ### Task 2: Implement the additive gate, owner schema, and phase consumers
 
@@ -361,9 +381,15 @@ return only the complete Story Progression Plan and wait. Positive feedback on o
 obstacle, transition, case, technique, or loop does not approve the whole artifact.
 
 Explicit approval—or a direct instruction to draft from that displayed complete
-plan—authorizes beat ordering and narration prototyping. When Martin requests a targeted
-revision, change only the addressed progression beat or field and name every downstream
-causal consequence instead of silently rewriting later beats.
+plan—records that plan as `APPROVED` by Martin and authorizes beat ordering and narration
+prototyping only. It does not approve the complete narration or direction.
+
+When Martin requests a targeted revision, change only the addressed progression beat or
+field and name every downstream causal consequence instead of silently rewriting later
+beats. Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, then stop.
+Prior approval does not carry across a progression revision. Re-entry requires renewed
+whole-plan approval or a direct instruction to draft from that newly displayed complete
+revised plan; the revision request itself does not count as renewed approval.
 
 Keep the approved plan visible as supplied context. If no visible approved plan is
 supplied, treat the progression as unapproved. Story-progression approval precedes and does
@@ -404,13 +430,23 @@ answer, belief shift, insight ladder, earned reframe, boundaries, payoff, final 
 and learning-and-action contract.
 ```
 
+At the start of `Real-world evidence map`, add:
+
+```markdown
+Assign every row a stable ID in `E-##` form (`E-01`, `E-02`, and so on). Preserve an ID
+when the row's wording or status changes, and never recycle an ID after deletion. The
+Story Progression Plan references these IDs instead of copying evidence-map entries.
+Architecture `E-##` row IDs remain separate from production `F-###` claim-evidence IDs.
+```
+
 Replace the approval exit with:
 
 ```markdown
-After presenting or revising the complete architecture, stop and wait. Proceed to the
-Story Progression Plan only after Martin explicitly approves the architecture or directly
-instructs you to plan from that displayed version. Beat ordering, hook writing, and
-narration still require the separate story-progression approval.
+After presenting or revising the complete architecture, stop and wait. Explicit
+approval—or Martin's direct instruction to plan from that displayed complete
+version—records that architecture as the approved intellectual baseline for story planning
+only. Neither route authorizes beat ordering, hook writing, or narration; those still
+require story-progression approval.
 ```
 
 Add these Common mistakes:
@@ -444,7 +480,11 @@ When Martin asks for alternatives, return compact options containing only Story 
 technique deltas, and Beat-progression blocks. After he chooses, expand the selected option
 into the complete artifact below. When he targets a revision, change only the addressed
 progression beat or field. Name every downstream causal consequence instead of silently
-rewriting later beats.
+rewriting later beats. Return the complete revised plan with `AWAITING-APPROVAL` and
+`PENDING`, then stop. Prior approval does not carry across a progression revision. Re-entry
+requires renewed whole-plan approval or a direct instruction to draft from that newly
+displayed complete revised plan; the revision request itself does not count as renewed
+approval.
 
 ### Story engine
 
@@ -453,11 +493,11 @@ This is the causal and emotional route, not another thesis statement.
 
 ### Story-material inventory
 
-Reference the approved architecture's evidence-row IDs and inherit their factual statuses.
-For each case, result, contradiction, consequence, human goal, or unknown, state its honest
-story opportunity and its boundary or risk. Do not re-enter an existing evidence record.
-Non-load-bearing texture may be added here; new load-bearing material returns to the
-architecture evidence map for approval.
+Reference the approved architecture's stable `E-##` evidence-row IDs and inherit their
+factual statuses. For each case, result, contradiction, consequence, human goal, or unknown,
+state its honest story opportunity and its boundary or risk. Do not re-enter an existing
+evidence record. Non-load-bearing texture may be added here; new load-bearing material
+returns to the architecture evidence map for approval.
 
 Use only `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL`. Inventory
 expectations, goals and obstacles, apparent contradictions, investigation gaps, causal
@@ -557,8 +597,9 @@ techniques; a sidecar that competes with the thesis; and promises the episode do
 - **Open evidence dependencies:** Every load-bearing `NEEDS-VERIFICATION` item
 
 The writer never self-approves the artifact. Positive feedback on one move is not complete
-approval. Explicit approval—or a direct instruction to draft from the displayed complete
-plan—makes it the visible story baseline.
+approval. Explicit approval—or a direct instruction to draft from that displayed complete
+plan—records it as `APPROVED` by Martin and makes it the visible story baseline for drafting
+only. It does not replace creative approval of the complete narration or direction.
 ```
 
 - [ ] **Step 4: Make rapid mode consume the approved plan**
@@ -583,7 +624,11 @@ Replace its opening with:
 For a new episode or thesis-level rethink, use the approved architecture as the
 intellectual baseline, then follow the
 [story-progression method](story-and-hook-method.md#plan-story-progression-before-beats).
-Return that plan and stop. Draft only when both complete artifacts are visibly approved.
+Return that plan and stop. Draft only when both complete artifacts are visible and the
+architecture has explicit approval or Martin's direct instruction to plan from that
+displayed complete version, and the Story Progression Plan has explicit approval or
+Martin's direct instruction to draft from that displayed complete plan. Each direct
+instruction counts only as approval of that artifact for the named next stage.
 
 Preserve the Story engine, causal chain, selected moves, evidence boundaries, loops, and
 payoffs while finding natural spoken phrasing. If a requested change crosses the
@@ -591,11 +636,15 @@ central-progression trigger, reopen the plan instead of silently restructuring t
 Planning creates no additional Phase 1 research exception.
 ```
 
-Add this question to `Rapid quality check` immediately after the architecture question:
+Replace the architecture and progression questions in `Rapid quality check` with:
 
 ```markdown
-- Was the complete Story Progression Plan visibly approved before any beat outline or
-  narration, and does this draft preserve its causal chain?
+- For episode-scale work, confirm that the complete architecture is visible and has explicit
+  approval or Martin's direct instruction to plan from that displayed complete version
+  before planning begins.
+- Confirm that the complete Story Progression Plan is visible and has explicit approval or
+  Martin's direct instruction to draft from that displayed complete plan before any beat
+  outline or narration, and that this draft preserves its causal chain.
 ```
 
 - [ ] **Step 5: Add the compact production record**

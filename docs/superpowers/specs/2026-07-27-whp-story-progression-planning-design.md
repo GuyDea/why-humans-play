@@ -78,7 +78,14 @@ inventory, package and audience, central question, core answer, belief shift, in
 ladder, phenomenon map, earned reframe, evidence map, learning-and-action contract,
 practical payoff, final lesson, and scope.
 
-Architecture approval authorizes story planning, not beats or narration.
+Every architecture evidence-map row has a stable `E-##` identity. Its ID survives wording
+and status changes and is never recycled after deletion. Story planning references those
+rows and inherits their factual statuses rather than copying them. Architecture `E-##`
+row IDs remain distinct from the production workflow's `F-###` claim-evidence IDs.
+
+Explicit architecture approval—or Martin's direct instruction to plan from the displayed
+complete architecture—records that version as the intellectual baseline for story planning
+only. Architecture approval authorizes story planning, not beats, hooks, or narration.
 
 If story planning exposes a flat insight ladder, a missing proof job, or another
 load-bearing architecture defect, surface it and return to this gate. Do not compensate for a
@@ -97,7 +104,9 @@ Return one visible Story Progression Plan and stop.
 
 Positive feedback on one obstacle, transition, case, technique, or loop does not approve the
 whole plan. Explicit approval—or a direct instruction to draft from the displayed complete
-plan—freezes the progression as the story baseline.
+plan—records it as `APPROVED` by Martin and freezes it as the visible story baseline for
+beat ordering and narration prototyping only. It does not approve the complete narration
+or direction.
 
 When Martin requests alternatives, return compact options containing only the Story engine,
 technique deltas, and Beat-progression blocks. Do not choose or approve one. After a choice,
@@ -105,13 +114,18 @@ expand the selected option into the complete plan for approval.
 
 When Martin requests a targeted revision, change only the addressed beat or field. Name every
 downstream causal consequence that the change creates instead of silently rewriting later
-beats. Return the resulting complete plan so approval scope remains visible.
+beats. Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, then stop.
+Prior approval does not carry across a progression revision. Re-entry requires renewed
+whole-plan approval or a direct instruction to draft from the newly displayed complete
+revised plan; the revision request itself is not renewed approval.
 
 ### 4. Draft from the approved progression
 
-Order beats and draft narration only after story-progression approval. Preserve the
-approved story engine, causal chain, selected moves, evidence boundaries, loops, and
-payoffs.
+Order beats and draft narration only when both complete artifacts are visible: the
+architecture has explicit approval or Martin's matching direct instruction to plan, and
+the Story Progression Plan has explicit approval or Martin's matching direct instruction
+to draft. Preserve the approved story engine, causal chain, selected moves, evidence
+boundaries, loops, and payoffs.
 
 Later evidence may narrow a claim. If new evidence breaks a load-bearing obstacle,
 reversal, proof handoff, or causal link, surface the conflict and return a revised plan for
@@ -157,15 +171,15 @@ This is the causal and emotional route, not another statement of the thesis.
 
 Inventory the available material before selecting techniques.
 
-| Material or architecture evidence-row ID | Inherited factual status | Story opportunity | Boundary or risk |
+| Material or stable architecture `E-##` evidence-row ID | Inherited factual status | Story opportunity | Boundary or risk |
 |---|---|---|---|
 | Architecture row reference, case, result, contradiction, consequence, human goal, or unknown | Reuse `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL` from architecture | The obstacle, reversal, question, proof job, callback, or payoff it could support | What it cannot establish or what must remain provisional |
 
-Reference existing architecture evidence-map rows and inherit their status instead of
-re-entering the same evidence record. The plan may add non-load-bearing story texture that
-was not relevant to the evidence map. If new material becomes load-bearing, add it to the
-architecture evidence map and return that artifact for approval. Any status disagreement
-also reopens architecture.
+Reference existing stable architecture `E-##` evidence-map rows and inherit their status
+instead of re-entering the same evidence record. The plan may add non-load-bearing story
+texture that was not relevant to the evidence map. If new material becomes load-bearing,
+add it to the architecture evidence map and return that artifact for approval. Any status
+disagreement also reopens architecture.
 
 Include genuine:
 
@@ -304,7 +318,11 @@ Record:
 - **Approval scope:** complete progression, not an isolated move;
 - **Open evidence dependencies:** every load-bearing `NEEDS-VERIFICATION` item.
 
-The writer never self-approves the artifact.
+The writer never self-approves the artifact. Explicit approval or a direct instruction to
+draft from the displayed complete plan records `APPROVED` by Martin for the story baseline
+and named drafting stage only. It does not replace creative approval of the complete
+narration or direction. A targeted revision resets the complete artifact to
+`AWAITING-APPROVAL` / `PENDING`; the revision request itself cannot renew approval.
 
 ## Responsibility boundaries and drift repair
 
@@ -512,6 +530,13 @@ Add focused package tests before editing the skill guidance:
 11. The direct-drafting override, visible-baseline rule, targeted-revision behavior, and
     complete gate chain are explicit.
 12. The format, template, and package suite enforce the compact production record.
+13. Architecture evidence rows use stable, non-recycled `E-##` IDs, story planning inherits
+    their statuses by reference, and `E-##` remains distinct from production `F-###`.
+14. Explicit approval and a matching direct instruction record the same artifact state but
+    only for the named next stage; neither route skips creative narration approval.
+15. Any targeted progression revision returns the complete plan to
+    `AWAITING-APPROVAL` / `PENDING`, and only renewed whole-plan approval or a matching
+    direct instruction from that newly displayed version reopens drafting.
 
 Run the focused tests and confirm they fail because the new gate and artifact do not yet
 exist. Anchor new tests on stable headings, field labels, sentinel values

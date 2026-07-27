@@ -89,7 +89,11 @@ the claims; it must not quietly replace the personality that earned approval.
 For a new episode or thesis-level rethink, use the approved architecture as the
 intellectual baseline, then follow the
 [story-progression method](story-and-hook-method.md#plan-story-progression-before-beats).
-Return that plan and stop. Draft only when both complete artifacts are visibly approved.
+Return that plan and stop. Draft only when both complete artifacts are visible and the
+architecture has explicit approval or Martin's direct instruction to plan from that
+displayed complete version, and the Story Progression Plan has explicit approval or
+Martin's direct instruction to draft from that displayed complete plan. Each direct
+instruction counts only as approval of that artifact for the named next stage.
 
 Preserve the Story engine, causal chain, selected moves, evidence boundaries, loops, and
 payoffs while finding natural spoken phrasing. If a requested change crosses the
@@ -603,10 +607,12 @@ Before returning rapid work, check internally:
 - For a new or thesis-level architecture, did the bounded concept-discovery scan cover both
   explanations and interventions, show sources and exclusions, and reach its saturation
   rule before the architecture was presented?
-- For episode-scale work, was the complete architecture explicitly approved before any
-  opening, beat outline, or narration was drafted?
-- Was the complete Story Progression Plan visibly approved before any beat outline or
-  narration, and does this draft preserve its causal chain?
+- For episode-scale work, confirm that the complete architecture is visible and has explicit
+  approval or Martin's direct instruction to plan from that displayed complete version
+  before planning begins.
+- Confirm that the complete Story Progression Plan is visible and has explicit approval or
+  Martin's direct instruction to draft from that displayed complete plan before any beat
+  outline or narration, and that this draft preserves its causal chain.
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
   without adding a competing thesis?
 - Does it teach the approved new understanding before asking the viewer to use the

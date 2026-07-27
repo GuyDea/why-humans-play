@@ -514,6 +514,111 @@ class SkillPackageTests(unittest.TestCase):
             normalized["rapid"],
         )
 
+    def test_story_progression_uses_stable_architecture_evidence_ids(self) -> None:
+        architecture = " ".join(
+            ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+        )
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+
+        architecture_contracts = (
+            "Assign every row a stable ID in `E-##` form (`E-01`, `E-02`, and so on).",
+            "Preserve an ID when the row's wording or status changes, and never recycle "
+            "an ID after deletion.",
+            "The Story Progression Plan references these IDs instead of copying "
+            "evidence-map entries.",
+            "Architecture `E-##` row IDs remain separate from production `F-###` "
+            "claim-evidence IDs.",
+        )
+        for contract in architecture_contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, architecture)
+
+        self.assertIn(
+            "Reference the approved architecture's stable `E-##` evidence-row IDs and "
+            "inherit their factual statuses.",
+            story,
+        )
+
+    def test_story_progression_direct_instruction_records_scoped_approval(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "architecture": " ".join(
+                ARCHITECTURE_MD.read_text(encoding="utf-8").split()
+            ),
+            "story": " ".join(
+                STORY_METHOD_MD.read_text(encoding="utf-8").split()
+            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+        }
+
+        self.assertIn(
+            "Explicit approval—or Martin's direct instruction to plan from that "
+            "displayed complete version—records that architecture as the approved "
+            "intellectual baseline for story planning only.",
+            sources["architecture"],
+        )
+        self.assertIn(
+            "Neither route authorizes beat ordering, hook writing, or narration; those "
+            "still require story-progression approval.",
+            sources["architecture"],
+        )
+        self.assertIn(
+            "Explicit approval—or a direct instruction to draft from that displayed "
+            "complete plan—records that plan as `APPROVED` by Martin and authorizes beat "
+            "ordering and narration prototyping only.",
+            sources["skill"],
+        )
+        self.assertIn(
+            "It does not approve the complete narration or direction.",
+            sources["skill"],
+        )
+        self.assertIn(
+            "Explicit approval—or a direct instruction to draft from that displayed "
+            "complete plan—records it as `APPROVED` by Martin and makes it the visible "
+            "story baseline for drafting only.",
+            sources["story"],
+        )
+        self.assertIn(
+            "It does not replace creative approval of the complete narration or direction.",
+            sources["story"],
+        )
+        for contract in (
+            "Draft only when both complete artifacts are visible and the architecture "
+            "has explicit approval or Martin's direct instruction to plan from that "
+            "displayed complete version, and the Story Progression Plan has explicit "
+            "approval or Martin's direct instruction to draft from that displayed "
+            "complete plan.",
+            "the complete architecture is visible and has explicit approval or Martin's "
+            "direct instruction to plan from that displayed complete version",
+            "the complete Story Progression Plan is visible and has explicit approval or "
+            "Martin's direct instruction to draft from that displayed complete plan",
+            "Each direct instruction counts only as approval of that artifact for the "
+            "named next stage.",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, sources["rapid"])
+
+    def test_story_progression_targeted_revision_resets_approval(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(
+                STORY_METHOD_MD.read_text(encoding="utf-8").split()
+            ),
+        }
+        contracts = (
+            "Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, "
+            "then stop. Prior approval does not carry across a progression revision.",
+            "Re-entry requires renewed whole-plan approval or a direct instruction to "
+            "draft from that newly displayed complete revised plan; the revision "
+            "request itself does not count as renewed approval.",
+        )
+        for source_name, source in sources.items():
+            for contract in contracts:
+                with self.subTest(source=source_name, contract=contract):
+                    self.assertIn(contract, source)
+
     def test_story_progression_record_and_rubric_are_scope_aware(self) -> None:
         format_text = FORMAT_MD.read_text(encoding="utf-8")
         template = TEMPLATE_MD.read_text(encoding="utf-8")

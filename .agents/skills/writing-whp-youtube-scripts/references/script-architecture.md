@@ -200,6 +200,11 @@ stronger than the facts and mechanisms beneath it.
 
 ### Real-world evidence map
 
+Assign every row a stable ID in `E-##` form (`E-01`, `E-02`, and so on). Preserve an ID
+when the row's wording or status changes, and never recycle an ID after deletion. The
+Story Progression Plan references these IDs instead of copying evidence-map entries.
+Architecture `E-##` row IDs remain separate from production `F-###` claim-evidence IDs.
+
 For each insight and the earned reframe, list:
 
 - the best available real-world case;
@@ -310,10 +315,11 @@ recall-only, unsourced, omits the intervention and countermeasure bucket, or hid
 near-neighbor exclusions. An offline provisional map may be refined, but it is not
 approval-ready unless Martin explicitly accepts the documented omission risk.
 
-After presenting or revising the complete architecture, stop and wait. Proceed to the
-Story Progression Plan only after Martin explicitly approves the architecture or directly
-instructs you to plan from that displayed version. Beat ordering, hook writing, and
-narration still require the separate story-progression approval.
+After presenting or revising the complete architecture, stop and wait. Explicit
+approval—or Martin's direct instruction to plan from that displayed complete
+version—records that architecture as the approved intellectual baseline for story planning
+only. Neither route authorizes beat ordering, hook writing, or narration; those still
+require story-progression approval.
 
 After approval, freeze the architecture as the content baseline. A later factual check may
 narrow a claim, but a narration pass must not quietly replace the central question, core

@@ -35,7 +35,11 @@ When Martin asks for alternatives, return compact options containing only Story 
 technique deltas, and Beat-progression blocks. After he chooses, expand the selected option
 into the complete artifact below. When he targets a revision, change only the addressed
 progression beat or field. Name every downstream causal consequence instead of silently
-rewriting later beats.
+rewriting later beats. Return the complete revised plan with `AWAITING-APPROVAL` and
+`PENDING`, then stop. Prior approval does not carry across a progression revision. Re-entry
+requires renewed whole-plan approval or a direct instruction to draft from that newly
+displayed complete revised plan; the revision request itself does not count as renewed
+approval.
 
 ### Story engine
 
@@ -44,11 +48,11 @@ This is the causal and emotional route, not another thesis statement.
 
 ### Story-material inventory
 
-Reference the approved architecture's evidence-row IDs and inherit their factual statuses.
-For each case, result, contradiction, consequence, human goal, or unknown, state its honest
-story opportunity and its boundary or risk. Do not re-enter an existing evidence record.
-Non-load-bearing texture may be added here; new load-bearing material returns to the
-architecture evidence map for approval.
+Reference the approved architecture's stable `E-##` evidence-row IDs and inherit their
+factual statuses. For each case, result, contradiction, consequence, human goal, or unknown,
+state its honest story opportunity and its boundary or risk. Do not re-enter an existing
+evidence record. Non-load-bearing texture may be added here; new load-bearing material
+returns to the architecture evidence map for approval.
 
 Use only `SUPPLIED`, `PROJECT-KNOWN`, `NEEDS-VERIFICATION`, or `HYPOTHETICAL`. Inventory
 expectations, goals and obstacles, apparent contradictions, investigation gaps, causal
@@ -148,8 +152,9 @@ techniques; a sidecar that competes with the thesis; and promises the episode do
 - **Open evidence dependencies:** Every load-bearing `NEEDS-VERIFICATION` item
 
 The writer never self-approves the artifact. Positive feedback on one move is not complete
-approval. Explicit approval—or a direct instruction to draft from the displayed complete
-plan—makes it the visible story baseline.
+approval. Explicit approval—or a direct instruction to draft from that displayed complete
+plan—records it as `APPROVED` by Martin and makes it the visible story baseline for drafting
+only. It does not replace creative approval of the complete narration or direction.
 
 ## Start with the promise and payoff
 

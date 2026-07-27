@@ -457,10 +457,7 @@ For central-progression work with an approved architecture but no approved progr
 return only the complete Story Progression Plan and wait. Positive feedback on one
 obstacle, transition, case, technique, or loop does not approve the whole artifact.
 
-Explicit approval—or a direct instruction to draft from that displayed complete
-plan—authorizes beat ordering and narration prototyping. When Martin requests a targeted
-revision, change only the addressed progression beat or field and name every downstream
-causal consequence instead of silently rewriting later beats.
+Explicit approval—or a direct instruction to draft from that displayed complete plan—records that plan as `APPROVED` by Martin and authorizes beat ordering and narration prototyping only. It does not approve the complete narration or direction. When Martin requests a targeted revision, change only the addressed progression beat or field and name every downstream causal consequence instead of silently rewriting later beats. Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, then stop. Prior approval does not carry across a progression revision. Re-entry requires renewed whole-plan approval or a direct instruction to draft from that newly displayed complete revised plan; the revision request itself does not count as renewed approval.
 
 Keep the approved plan visible as supplied context. If no visible approved plan is
 supplied, treat the progression as unapproved. Story-progression approval precedes and does
