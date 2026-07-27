@@ -487,6 +487,9 @@ class SkillPackageTests(unittest.TestCase):
             "skill": SKILL_MD.read_text(encoding="utf-8"),
             "architecture": ARCHITECTURE_MD.read_text(encoding="utf-8"),
             "rapid": RAPID_MD.read_text(encoding="utf-8"),
+            "steering": (
+                REPO_ROOT / "whp-youtube/STEERING.md"
+            ).read_text(encoding="utf-8"),
         }
         normalized = {
             source_name: " ".join(source.split())
@@ -512,6 +515,64 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn(
             "Planning creates no additional Phase 1 research exception.",
             normalized["rapid"],
+        )
+        workflow = normalized["steering"].split(
+            "### Develop the message, then the voice, before the production package",
+            1,
+        )[1].split(
+            "The architecture must go beyond a competent summary of familiar material.",
+            1,
+        )[0]
+        architecture_approval = (
+            "obtain explicit approval of the complete intellectual payload"
+        )
+        progression_plan = (
+            "Return that plan as the default visible artifact and stop"
+        )
+        complete_narration = "Write one complete narration prototype from the approved"
+
+        for anchor in (
+            architecture_approval,
+            progression_plan,
+            complete_narration,
+        ):
+            self.assertIn(anchor, workflow)
+        self.assertLess(
+            workflow.index(architecture_approval),
+            workflow.index(progression_plan),
+        )
+        self.assertLess(
+            workflow.index(progression_plan),
+            workflow.index(complete_narration),
+        )
+        self.assertIn(
+            "This gate applies to a new episode, thesis-level rethink, or other "
+            "central-progression work.",
+            workflow,
+        )
+        self.assertIn(
+            "Continue only after Martin gives explicit whole-plan approval or directly "
+            "instructs drafting from the displayed complete plan.",
+            workflow,
+        )
+        self.assertIn(
+            "A load-bearing progression change reopens whole-plan approval.",
+            workflow,
+        )
+        self.assertIn(
+            "Do not order beats or draft narration before that approval.",
+            workflow,
+        )
+        self.assertIn(
+            "This step authorizes ordering beats and writing narration only from both "
+            "approved baselines: the approved architecture and approved Story "
+            "Progression Plan.",
+            workflow,
+        )
+        self.assertRegex(
+            workflow,
+            r"Write one complete narration prototype from the approved architecture "
+            r"and approved (?:Story Progression Plan|story progression)",
         )
 
     def test_story_progression_uses_stable_architecture_evidence_ids(self) -> None:
@@ -2776,6 +2837,7 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(anchor, story)
                 self.assertNotIn(anchor, skill)
                 self.assertNotIn(anchor, rapid)
+                self.assertNotIn(anchor, steering)
 
         for anchor in drafting_owner_anchors:
             with self.subTest(owner="rapid", anchor=anchor):
@@ -2841,6 +2903,26 @@ class SkillPackageTests(unittest.TestCase):
                 "rapid",
                 rapid,
                 "### Use the five-move anti-skip intro",
+            ),
+            (
+                "steering",
+                steering,
+                "[the structural story owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "story-and-hook-method.md#plan-story-progression-before-beats)",
+                "story",
+                story,
+                "## Plan story progression before beats",
+            ),
+            (
+                "steering",
+                steering,
+                "[the rapid drafting owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#apply-the-approved-progression-while-drafting)",
+                "rapid",
+                rapid,
+                "## Apply the approved progression while drafting",
             ),
             (
                 "steering",

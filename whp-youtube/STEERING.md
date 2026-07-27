@@ -182,91 +182,15 @@ without weakening the audience-first test for problem-led growth episodes.
   never attribute participant inner states or invent research chronology. Apply the move
   only when the evidence earns it; exact execution lives in
   [the rapid anti-skip owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#use-the-five-move-anti-skip-intro).
-- **Make every proof handoff explicit.** Connect adjacent evidence as
-  `case → exact takeaway → why it matters here → remaining question → next evidence`.
-  A boundary is necessary, but it is not the transition by itself. State the first case's
-  positive proof job, explain why the episode needs it, then let its unresolved question
-  create the next step.
-  Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
-  equivalent disclaimer. Use the limitation only after the viewer knows why the case
-  belongs.
-  When the remaining question is a real gap in the evidence, the bridge may become an
-  investigation challenge: an obstacle the narrator hit while digging, resolved by the
-  next evidence; an apparent contradiction between findings is named as a challenge and
-  resolved inside the evidence scopes instead of being sailed past. The challenge must be
-  epistemically real, never manufactured drama or an invented personal event. Reserve the
-  move for bridges where the gap genuinely threatens the emerging story, and name each
-  use in the production appendix's story-function entry so its placement stays traceable.
-- **Apply story construction script-wide.** Apply these story-construction rules to every
-  beat and developed example in the complete script, not only to the opening. Before a
-  surprising result, state the outcome the viewer should reasonably expect when that
-  expectation is necessary to understand why the result matters. Reveal the result in
-  direct contrast to that expectation. After the result, use at most one mechanism-mapped
-  punchline and one precise takeaway before moving forward. Do not restate the same result
-  through a stack of analogies, paraphrases, and thesis lines. When consecutive cases prove
-  different parts of the argument, name each case's distinct proof job before combining
-  them. The synthesis may combine established findings; it must not make either case appear
-  to prove the other case's claim. Prefer everyday spoken language over
-  research-administration phrases when both preserve the same claim. End each beat once:
-  choose the strongest closing image or joke, state one exact lesson, and transition.
-- **Tell the smallest magnetic truthful story.** Tell the smallest story that preserves
-  trust, causal clarity, and surprise. Every story element must earn its place by increasing
-  trust, first-hearing clarity, or magnetism; otherwise cut or collapse it. Open a
-  documented story with a compact trust anchor: verified date and place when available,
-  plus the relevant person, team, or institution when it adds credibility or orientation.
-  Make the stages audible without sounding like slide labels. Use natural connective
-  language that explains what changes next—such as “So that was the setup,” “Then
-  researchers changed one thing,” or “And this is the kicker”—and vary it to fit the story.
-  Do not march through repeated “Here was…” labels or expose the outline as
-  meta-commentary. A transition should explain what changes next, not merely announce the
-  section. When a result creates a clean comic opening, add one short punchline that
-  sharpens the mechanism, consequence, or AHA; skip it when it competes with the lesson.
-  Use the fewest story elements that preserve the causal truth. Remove or collapse
-  technical inputs, intermediate objects, roles, and counts when the mechanism remains
-  accurate without them. Keep separate only the entities the listener must distinguish to
-  understand the manipulation and result. An accurate detail does not earn narration time
-  merely because it appears in the source. Do not simplify past the causal hinge, material
-  caveat, or evidence boundary. Spend the attention you save on the surprising turn,
-  consequence, or AHA that carries the lesson.
-- **Keep compressed stories fully wired.** Compression removes clutter, never connective
-  tissue. Preserve the causal minimum, not the procedural maximum. A teaser and its
-  developed case have different detail budgets. In an anti-skip disarm, state only the
-  relevant qualification or resistance and the fact that it failed to protect; defer the
-  task, group split, metric, and comparator to the developed case. Before naming a result,
-  introduce every actor, group, task, goal, success criterion, metric, and comparison it
-  depends on. For an experiment, preserve this
-  causal-completeness sequence:
-  `participants → exact task → group split → changed variable → measured result → meaning`.
-  Describe a participant task by its audience-facing objective and success condition, not
-  by response controls or interface options that do not advance the story. Compress a
-  formal task to its practical purpose only when the paraphrase preserves the scored
-  objective and does not invent a different instruction.
-  State the task as an observable action with a success criterion, then report the result
-  in the same concrete vocabulary. Lock the story vocabulary before drafting: give each
-  entity one stable spoken name, and do not switch synonyms unless the narration explicitly
-  introduces the relationship. Use the broadest truthful role label that keeps different
-  actors easy to distinguish; preserve a narrower title only when it matters to the causal
-  claim. Describe the changed variable with nouns already established in the story. State
-  a measurement as the measured object plus the measured property, such as
-  `diagnoses → trustworthiness`. Name both the metric and the comparator in every
-  comparison. Do not replace a concrete noun from the setup with an undefined abstraction
-  in the result. Every new noun must perform a necessary causal job or be cut. Distinguish
-  an expressed reaction from an effective behavioral response; do not call the reaction
-  absent when an attitude changed but performance did not. Prefer a concrete real-world
-  analogy whose roles and action map point for point to the mechanism. Do not use an
-  ordinal group label, pronoun, or outcome term before introducing its referent. After each
-  sentence, ask what a first-hearing listener still has to resolve. Questions such as
-  “judged what?”, “which groups?”, “what accuracy?”, or “compared with whom?” expose missing
-  setup that must be restored before polishing. Name the container in a learning promise:
-  write “By the end of this video” rather than leaving “by the end” without a referent.
-- **Make every experiment visible on first hearing.** For a source-label experiment,
-  narrate the visible chain with the story's locked nouns:
-  `item or question → claimed source → participant objective or outcome`. If researchers
-  labeled human-written material as AI-generated, state what was real, what was only a
-  label, and what human behavior the manipulation tested before interpreting the result.
-  Attach every correct-or-incorrect count to its stable noun; never leave the listener
-  guessing which item or final outcome was wrong. Separate what the case proves about human
-  response from what later evidence proves about AI behavior.
+- **Keep story momentum evidence-earned and owner-routed.** Use only story moves earned by
+  the real material. Never manufacture an obstacle, contradiction, emotion, failed
+  hypothesis, research chronology, or personal event. Treat But / Therefore as a causal
+  diagnostic, not mandatory wording. Once approved, the Story Progression Plan remains the
+  story baseline; any load-bearing progression change reopens whole-plan approval.
+  Structural planning lives in
+  [the structural story owner](../.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md#plan-story-progression-before-beats);
+  draft-time case narration, spoken compression, and humor live in
+  [the rapid drafting owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#apply-the-approved-progression-while-drafting).
 - **Choose the closest strong proof case.** Prefer a well-supported Western case when one
   can perform the same proof job clearly. Use the strongest non-Western case when no
   Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity
@@ -336,20 +260,29 @@ Use this order for WHP scripts:
 3. Refine that architecture with Martin and obtain explicit approval of the complete
    intellectual payload. Approval of the topic, title, one example, or one clever insight
    does not approve the architecture.
-4. Write one complete narration prototype from the approved architecture, testing the
+4. Build one complete visible Story Progression Plan from the approved architecture.
+   This gate applies to a new episode, thesis-level rethink, or other central-progression
+   work. Return that plan as the default visible artifact and stop. Continue only after
+   Martin gives explicit whole-plan approval or directly instructs drafting from the
+   displayed complete plan. A load-bearing progression change reopens whole-plan approval.
+   Do not order beats or draft narration before that approval.
+5. Write one complete narration prototype from the approved architecture and approved
+   Story Progression Plan, testing the
    hook, humor, human connection, examples, and ending as one continuous story. Do not
    quietly replace the approved question, core answer, insight ladder, earned reframe,
    payoff, or final lesson because a different anecdote is easier to write.
-5. Show Martin the complete narration before running editorial, retention, or timing
+   This step authorizes ordering beats and writing narration only from both approved
+   baselines: the approved architecture and approved Story Progression Plan.
+6. Show Martin the complete narration before running editorial, retention, or timing
    audits. Do not pre-cut context from a version he has not seen.
-6. Refine it with Martin at line level, preserving approved language and changing only
+7. Refine it with Martin at line level, preserving approved language and changing only
    the requested scope.
-7. Obtain explicit approval of the complete narration and creative direction.
-8. Only then gather or refresh evidence, add production structure, and run claims, rights,
+8. Obtain explicit approval of the complete narration and creative direction.
+9. Only then gather or refresh evidence, add production structure, and run claims, rights,
    editorial, retention, timing, and format checks.
-9. Present audit concerns separately before making any context-losing rewrite. An audit
+10. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
-10. Close the central lesson with a short declarative button. A final question or forward
+11. Close the central lesson with a short declarative button. A final question or forward
    hook may follow only when it does not leave the episode's main answer unresolved.
 
 The architecture must go beyond a competent summary of familiar material. Its insight
@@ -478,15 +411,9 @@ millions on junk science).
   institution, place, or concept, signal why a new name is entering, identify it in plain
   language, and explain its immediate relevance. Never make the viewer wonder whether they
   missed an earlier introduction.
-- **Prove substantial points through consequence chains.** For each non-obvious point,
-  look first for a compact documented real-world case. Tell it as `goal → measure or
-  target → changed behavior → improved number → damaged goal and human cost`.
-  Earn humor from the absurd mechanism or institution, then state plainly what got worse
-  and who absorbed the cost; the punchline never substitutes for the implication. Use a
-  clearly labeled hypothetical when a real case is unavailable, unverified, or would
-  obscure the story rather than sharpen it. A hypothetical may explain a mechanism or let
-  the viewer rehearse a response; it cannot carry a factual claim about prevalence,
-  consequence, or who is vulnerable.
+- **Keep substantial proof factual.** Prefer a documented real-world case for a non-obvious
+  point. A clearly labeled hypothetical may explain a mechanism or let the viewer rehearse
+  a response, but it cannot establish prevalence, consequence, or who is vulnerable.
 - **Use novelty for the story and recognition for scale.** When a pattern is worldwide,
   prefer a strong, well-supported lesser-known case for the developed story when it offers
   useful surprise. After the developed examples, a compact montage may name roughly three
