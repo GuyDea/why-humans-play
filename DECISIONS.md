@@ -1531,3 +1531,89 @@ honesty guardrail keeps it inside the rigor covenant.
 `scripts/test_skill_package.py` (new contract pin), `whp-youtube/STEERING.md`, and this
 ledger. Episode 1's three approved bridge passages are applied in a separate content
 commit.
+
+## 2026-07-27 — Supporting narrative throughlines are optional story sidecars
+
+**Decision:** WHP calls a recurring relatable case a **supporting narrative
+throughline**, not a core thread: the episode's argument remains the spine while the
+throughline runs beside it as an optional sidecar. Use one only when a person or situation
+offers an understandable goal, a real obstacle, at least three non-repetitive returns, and
+an earned payoff. Every return must add information or change meaning, the case may not
+stand in for separate mechanism evidence, and the production appendix records its status
+and beat-by-beat roles or explains why no candidate earned the role.
+
+**Rationale:** Martin clarified that the recurring case is not the center of the story.
+“Narrative throughline” is therefore more accurate than “core thread,” and making it
+optional prevents the sidecar from displacing the episode's explanatory argument.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`references/story-and-hook-method.md`, `references/rapid-prototyping.md`,
+`references/annotated-script-format.md`, `references/quality-rubric.md`,
+`assets/annotated-script-template.md`, `scripts/test_skill_package.py`, and this ledger.
+`BRAND.md` remains unchanged because this is YouTube story-construction doctrine, not a
+change to the umbrella brand. Episode 1's pre-draft implementation remains brainstorming
+until promotion.
+
+## 2026-07-27 — Storytelling techniques shape structure before narration
+
+**Decision:** WHP treats storytelling-technique selection as the default visible
+story-structure gate after intellectual architecture approval and before beat ordering or
+narration. One effect-based trigger applies across pre-draft, rapid-prototype, and
+production work: a new episode, thesis-level rethink, or any request that would set or
+materially change the causal route from opening tension through the insight ladder to the
+final payoff must pass the gate. Scoped work returns directly until it crosses that trigger.
+For an episode-scale pre-draft, the workflow stops first at architecture and then at
+progression; the approved plan is a creative baseline, while promotion remains the
+reconcilable pre-draft decision.
+
+The plan inventories the moves genuinely available in the material—such as obstacles,
+reversals, contradictions, investigation challenges, causal consequences, proof handoffs,
+loops and payoffs, callbacks, humor, and an optional supporting throughline—then uses them
+to shape the progression. Major handoffs are tested with But / Therefore rather than
+accepted as an “and then” sequence; this is a causal planning test, not a requirement to say
+those exact words or to force a technique. Technique rows cover selected moves and only
+notable rejections, with `NONE` when no move or throughline is earned. The plan reuses
+architecture evidence rows instead of creating a second evidence record, and any new
+load-bearing material or architecture defect returns to architecture approval.
+
+`references/story-and-hook-method.md` is the single detailed owner of this method. The core
+skill owns the trigger, gate, and routing; the architecture method hands off to it; the
+rapid method consumes the approved plan; the annotated format preserves a compact approved
+record; and the rubric audits the result without penalizing legacy or scoped artifacts that
+have no plan in scope. Package tests verify ownership and phase consumption instead of
+requiring verbatim copies of detailed guidance. The visible artifact contains a
+one-sentence story engine, a story-material inventory, selected techniques and notable
+rejections, addressable beat-progression blocks with But and Therefore fields, a full
+causal-chain read, beat-referenced retention and global loop/payoff checks, short non-final
+bridge seeds, evidence boundaries, an anti-shoehorn check, and approval metadata.
+
+Positive feedback on one move does not approve the whole artifact. Explicit approval—or a
+direct instruction to draft from the displayed complete plan—makes it the visible story
+baseline. A missing visible plan means the progression is unapproved; later evidence may
+narrow a claim but may not silently replace the progression. Story-progression approval
+precedes and does not replace approval of the complete narration and creative direction.
+
+**Rationale:** Martin wants retention-bearing story progression designed beforehand,
+instead of adding storytelling devices to completed prose. A real research obstacle may
+be voiced naturally—for example, “But that seemed impossible, because…”—without inventing
+an “I almost gave up” event or shoehorning drama where the material does not support it.
+Keeping one detailed owner fixes the observed maintenance drift without adding another
+overlapping story reference.
+
+**Documents:** The writing-skill implementation follows the approved design in
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/annotated-script-format.md`,
+`.agents/skills/writing-whp-youtube-scripts/assets/annotated-script-template.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/STEERING.md`, and the synthetic dry-run record at
+`docs/superpowers/evidence/2026-07-27-whp-story-progression-gate.md`. The accepted design
+and implementation plan remain at
+`docs/superpowers/specs/2026-07-27-whp-story-progression-planning-design.md` and
+`docs/superpowers/plans/2026-07-27-whp-story-progression-planning.md`. `BRAND.md` remains
+unchanged because this refines YouTube story-planning workflow rather than umbrella
+doctrine. The current Episode 1 pre-draft and walking-vlog regression plan remain separate.

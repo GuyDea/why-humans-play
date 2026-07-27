@@ -55,6 +55,17 @@
 - **Loop or payoff:** The opening question closes inside the same beat.
 - **Proof job and evidence boundary:** The experiment supports the reported behavior and criteria; it does not establish what a bee feels.
 
+### Narrative throughline audit
+
+- **Status:** NONE
+- **Throughline:** No supporting narrative throughline is used in this one-beat example.
+- **Audience connection:** The bee's voluntary detour supplies the immediate point of recognition without opening a separate human story.
+- **Opening hook / loop:** The single beat asks whether the behavior meets operational play criteria and answers it in place.
+- **Obstacle / tension:** No sidecar obstacle is needed; adding one would compete with the laboratory result.
+- **Payoff:** The evidence-bounded interpretation closes inside the same beat.
+- **Beat map:** None — this worked template demonstrates a direct one-beat evidence route.
+- **Absence reason:** A recurring sidecar cannot earn three distinct returns or a separate payoff in a thirty-second script.
+
 ### Template note
 
 This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,

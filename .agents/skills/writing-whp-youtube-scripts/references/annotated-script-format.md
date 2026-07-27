@@ -170,6 +170,33 @@ set or changed; the rubric evaluates intrinsic causality when no plan is in scop
 The format, template, and package tests own this record in this refinement; structural
 validator scope is unchanged.
 
+After metadata, add this transparent story-structure record for every `FULL-SCRIPT`
+entering Phase 2 through the plan gate:
+
+```markdown
+### Narrative throughline audit
+
+- **Status:** FOUND
+- **Throughline:** The person, situation, or documented case that runs beside the argument.
+- **Audience connection:** Why the target viewer recognizes the goal, temptation, or stakes.
+- **Opening hook / loop:** The exact unresolved turn opened near the beginning.
+- **Obstacle / tension:** The goal and real obstacle that keep the sidecar moving.
+- **Payoff:** How the outcome sharpens the final lesson.
+- **Beat map:** Beat 01 — hook; Beat 02 — setup; Beat 04 — reinterpretation; Beat 07 — payoff.
+- **Absence reason:** Not applicable — a supporting narrative throughline was found.
+```
+
+Use `FOUND` only when the story recurs with distinct jobs and earns an explicit payoff.
+The episode's argument remains the spine; the supporting narrative throughline is a
+sidecar. In each matching appendix beat's `Story function`, name the throughline role and
+the new information or changed meaning delivered there. Do not use the case as proof for a
+mechanism established by separate evidence.
+
+When no candidate earns the role, use `NONE` and explain why in `Absence reason`. Keep the
+other fields explicit about the absence instead of inventing a story, scattering unrelated
+examples, or forcing a callback. For a `TARGETED-ARTIFACT`, include or update this audit
+only when the assigned scope creates, removes, or changes the parent script's throughline.
+
 After script metadata, add one production entry for every narration beat. Use two-digit
 beat numbers in unique, strictly ascending order and repeat the exact narration title:
 

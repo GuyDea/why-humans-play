@@ -10,6 +10,7 @@
 - [Build scenes without invention](#build-scenes-without-invention)
 - [Choose story only when it serves the promise](#choose-story-only-when-it-serves-the-promise)
 - [Draft from the approved progression](#draft-from-the-approved-progression)
+- [Add a supporting narrative throughline](#add-a-supporting-narrative-throughline)
 - [Open and close specific loops](#open-and-close-specific-loops)
 - [Write and test for speech](#write-and-test-for-speech)
 - [Design personal experience as a story beat](#design-personal-experience-as-a-story-beat)
@@ -370,8 +371,57 @@ change inside a smoother transition.
 
 ## Add a supporting narrative throughline
 
-Populate this section from the approved plan's Throughline decision. Planning chooses the
-sidecar; drafting realizes its mapped returns.
+During story-progression planning, use this method to produce the plan's Throughline
+decision. When a candidate passes, record the selected sidecar and its mapped returns; when
+none passes, record `NONE` and the reason. Drafting later consumes that approved mapping and
+does not choose again.
+
+Use this technique when one relatable person, situation, or documented case can help the
+viewer follow the episode's changing argument. The episode's argument remains the spine;
+the supporting narrative throughline is a sidecar, not the center of the story.
+
+Find a candidate with this compact story shape:
+
+`person → ordinary goal → obstacle → consequential choice → outcome → changed meaning`
+
+Prefer a situation the target viewer either recognizes from life or finds immediately
+interesting. High stakes help only when the case still maps cleanly to the episode's
+question. The candidate must pass all five gates:
+
+1. **Hook:** one concrete unresolved turn can open a specific information gap;
+2. **Identification:** the person's goal or temptation is understandable without a
+   biography;
+3. **Recurrence:** at least three returns can add different information;
+4. **Evidence boundary:** the case can be told truthfully without pretending it proves
+   every mechanism in the episode; and
+5. **Payoff:** resolving the case makes the final lesson more useful or emotionally clear.
+
+Build the sidecar with this progression:
+
+`tease consequence → reveal setup → expose goal or obstacle → reinterpret the choice → reveal outcome → apply the viewer tool → close the loop`
+
+Combine it with the hook and challenge methods deliberately:
+
+- In the opening, reveal enough consequence to make the missing answer matter, but keep
+  one specific question unresolved.
+- At the first return, reveal the exact setup or choice that the next mechanism explains.
+- At later returns, use the person's goal, obstacle, or consequence to make an abstract
+  mechanism concrete.
+- Before the ending, reveal the outcome and distinguish what the case illustrates from
+  what separate research establishes.
+- In the conclusion, replay the viewer tool against the choice and state only the
+  counterfactual the evidence permits. Never claim that knowing the lesson would
+  definitely have changed the person's behavior.
+
+Every return must reveal new information, reinterpret an earlier detail, raise the stakes,
+demonstrate a mechanism, apply the viewer tool, or pay off the opening loop. A reminder that
+does none of these is repetition, not a callback. Do not claim that the throughline case
+proves a mechanism established by separate evidence.
+
+Do not force a throughline. Reject a candidate that competes with the thesis, needs invented
+detail, opens a second unrelated promise, or has no earned ending. When no candidate passes,
+let the argument and evidence carry the episode directly and record the reason in the
+appendix.
 
 ## Open and close specific loops
 
@@ -526,6 +576,9 @@ Reject or rewrite an opening that contains any of these red flags:
 - [YouTube Help — Content performance for YouTube](https://support.google.com/youtube/answer/16559650?hl=en)
 - [YouTube Help — Measure key moments for audience retention](https://support.google.com/youtube/answer/9314415?hl=en)
 - [Mar et al. — Meta-analysis of narrative effects](https://doi.org/10.3758/s13423-020-01853-1)
+- [The Podcast Host — Narrative throughlines in nonfiction audio](https://www.thepodcasthost.com/storytelling/characters-and-story/)
+- [Kenn Adams's Story Spine — Improv Encyclopedia](https://improvencyclopedia.org/games/Story_Spine.html)
+- [Gruber and Ranganath — Information gaps and curiosity](https://pmc.ncbi.nlm.nih.gov/articles/PMC4635443/)
 - [Educational Research Review — Signaling principle meta-analysis](https://www.sciencedirect.com/science/article/pii/S1747938X17300581)
 - [Learning and Instruction — Animation meta-analysis](https://doi.org/10.1016/j.learninstruc.2007.09.013)
 - [ERIC — Seductive details in multimedia learning](https://eric.ed.gov/?id=EJ1263249)

@@ -124,6 +124,13 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   distinct before the narration synthesizes them, and each beat closes once instead of
   stacking equivalent analogies or thesis lines.
 
+When the appendix identifies a supporting narrative throughline, a top score also requires
+the argument to remain the spine, every mapped callback to add information or change
+meaning, the case's proof job to stay bounded, and the opening loop to receive an earned
+payoff. Do not penalize a script for using no throughline when the audit explains why no
+candidate improved the episode. Penalize a forced or repetitive sidecar that competes with
+the thesis.
+
 When the appendix contains an approved Story Progression Plan, a top score also requires
 the narration to preserve its causal chain, selected honest moves, proof handoffs, and
 global loop/payoff closure. Penalize manufactured drama, quota-driven technique use, an

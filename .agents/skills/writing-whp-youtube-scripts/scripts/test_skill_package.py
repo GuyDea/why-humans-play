@@ -575,6 +575,45 @@ class SkillPackageTests(unittest.TestCase):
             r"and approved (?:Story Progression Plan|story progression)",
         )
 
+    def test_canonical_steering_does_not_restore_detailed_story_owner(
+        self,
+    ) -> None:
+        steering = " ".join(
+            (REPO_ROOT / "whp-youtube/STEERING.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        decisions = " ".join(
+            (REPO_ROOT / "DECISIONS.md").read_text(encoding="utf-8").split()
+        )
+
+        with self.subTest(regression="long steering mirror"):
+            stale_story_owner = (
+                "Design the storytelling engine before writing the beat structure."
+            )
+            self.assertFalse(
+                stale_story_owner in steering,
+                "STEERING still contains the detailed story-owner mirror",
+            )
+        with self.subTest(regression="repeated direct-instruction wording"):
+            direct_instruction = (
+                "directly instructs drafting from the displayed complete plan"
+            )
+            self.assertEqual(
+                steering.count(direct_instruction),
+                1,
+                "STEERING must state the direct-instruction exception exactly once",
+            )
+        with self.subTest(regression="stale future-tense decision"):
+            stale_future_decision = (
+                "The writing-skill implementation will follow the approved design"
+            )
+            self.assertFalse(
+                stale_future_decision in decisions,
+                "DECISIONS still describes the writing-skill implementation as "
+                "future work",
+            )
+
     def test_story_progression_uses_stable_architecture_evidence_ids(self) -> None:
         architecture = " ".join(
             ARCHITECTURE_MD.read_text(encoding="utf-8").split()
@@ -2790,6 +2829,187 @@ class SkillPackageTests(unittest.TestCase):
             resolved_target = (SKILL_ROOT / relative_target).resolve(strict=True)
             self.assertTrue(resolved_target.is_file())
             self.assertTrue(resolved_target.is_relative_to(resolved_skill_root))
+
+    def test_supporting_narrative_throughline_contract_is_distributed(self) -> None:
+        story = STORY_METHOD_MD.read_text(encoding="utf-8")
+        format_text = FORMAT_MD.read_text(encoding="utf-8")
+        template = TEMPLATE_MD.read_text(encoding="utf-8")
+
+        self.assertIn("supporting narrative throughline", story.lower())
+        normalized_story = " ".join(story.split())
+        story_contracts = (
+            "The episode's argument remains the spine; the supporting narrative "
+            "throughline is a sidecar, not the center of the story.",
+            "Every return must reveal new information, reinterpret an earlier detail, "
+            "raise the stakes, demonstrate a mechanism, apply the viewer tool, or pay "
+            "off the opening loop.",
+            "Do not claim that the throughline case proves a mechanism established by "
+            "separate evidence.",
+        )
+        for contract in story_contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, normalized_story)
+
+        format_contract = " ".join(format_text.split())
+        self.assertIn(
+            "When no candidate earns the role, use `NONE` and explain why",
+            format_contract,
+        )
+
+        for anchor in (
+            "### Narrative throughline audit",
+            "FOUND",
+            "NONE",
+            "Beat map",
+            "Absence reason",
+        ):
+            with self.subTest(record="format", anchor=anchor):
+                self.assertIn(anchor, format_text)
+        for anchor in (
+            "### Narrative throughline audit",
+            "NONE",
+            "Beat map",
+            "Absence reason",
+        ):
+            with self.subTest(record="template", anchor=anchor):
+                self.assertIn(anchor, template)
+
+    def test_supporting_throughline_has_one_structural_owner(self) -> None:
+        sources = {
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+
+        owner_anchors = (
+            "person → ordinary goal → obstacle → consequential choice → outcome → changed meaning",
+            "1. **Hook:**",
+            "3. **Recurrence:**",
+            "4. **Evidence boundary:**",
+            "5. **Payoff:**",
+        )
+        for anchor in owner_anchors:
+            with self.subTest(owner="story", anchor=anchor):
+                self.assertTrue(
+                    anchor in sources["story"],
+                    f"story owner is missing detailed anchor: {anchor}",
+                )
+            for consumer in ("rapid", "steering"):
+                with self.subTest(consumer=consumer, forbidden_owner_anchor=anchor):
+                    self.assertFalse(
+                        anchor in sources[consumer],
+                        f"{consumer} copies story-owner anchor: {anchor}",
+                    )
+
+        mirrored_selection_detail = {
+            "rapid": (
+                "Look for a person with an ordinary goal, a real obstacle, a "
+                "consequential choice, and an outcome that sharpens the final lesson."
+            ),
+            "steering": (
+                "Prefer a candidate with an ordinary goal, a real obstacle, a "
+                "consequential choice, and an outcome that sharpens the final lesson."
+            ),
+        }
+        for consumer, detail in mirrored_selection_detail.items():
+            with self.subTest(consumer=consumer, forbidden_selection_detail=detail):
+                self.assertFalse(
+                    detail in sources[consumer],
+                    f"{consumer} mirrors throughline selection detail: {detail}",
+                )
+
+    def test_supporting_throughline_integration_contracts_are_phase_owned(
+        self,
+    ) -> None:
+        def h2_section(text: str, heading: str) -> str:
+            marker = f"## {heading}\n"
+            start = text.index(marker) + len(marker)
+            remainder = text[start:]
+            next_heading = re.search(r"^## ", remainder, flags=re.MULTILINE)
+            return remainder if next_heading is None else remainder[: next_heading.start()]
+
+        rapid_text = RAPID_MD.read_text(encoding="utf-8")
+        story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+        format_text = " ".join(FORMAT_MD.read_text(encoding="utf-8").split())
+        apply_section = " ".join(
+            h2_section(
+                rapid_text,
+                "Apply the approved progression while drafting",
+            ).split()
+        )
+        humor_section = " ".join(
+            h2_section(rapid_text, "Make humor carry meaning").split()
+        )
+
+        realization_contract = (
+            "When the approved Story Progression Plan selects a supporting narrative "
+            "throughline, realize only its mapped returns. Each return must perform its "
+            "approved new-information, reinterpretation, stakes, demonstration, "
+            "application, or payoff job. Do not reselect the sidecar during drafting or "
+            "let its case stand in for separate mechanism evidence. If the approved plan "
+            "records `NONE`, keep the argument direct."
+        )
+        with self.subTest(integration="rapid owns draft-time realization"):
+            self.assertTrue(
+                realization_contract in apply_section,
+                "rapid realization contract is outside its approved-progression section",
+            )
+            self.assertFalse(
+                realization_contract in humor_section,
+                "rapid realization contract still lives in the humor section",
+            )
+            self.assertEqual(
+                " ".join(rapid_text.split()).count(realization_contract),
+                1,
+                "rapid realization contract must appear exactly once",
+            )
+
+        circular_story_intro = (
+            "Populate this section from the approved plan's Throughline decision. "
+            "Planning chooses the sidecar; drafting realizes its mapped returns."
+        )
+        planning_direction = (
+            "During story-progression planning, use this method to produce the plan's "
+            "Throughline decision. When a candidate passes, record the selected sidecar "
+            "and its mapped returns; when none passes, record `NONE` and the reason. "
+            "Drafting later consumes that approved mapping and does not choose again."
+        )
+        with self.subTest(integration="story produces the plan decision"):
+            self.assertFalse(
+                circular_story_intro in story,
+                "story owner still describes its own output as an approved input",
+            )
+            self.assertTrue(
+                planning_direction in story,
+                "story owner is missing the planning-to-record-to-drafting direction",
+            )
+
+        unconditional_record = (
+            "After metadata, add this transparent story-structure record for every "
+            "`FULL-SCRIPT`:"
+        )
+        plan_gated_record = (
+            "After metadata, add this transparent story-structure record for every "
+            "`FULL-SCRIPT` entering Phase 2 through the plan gate:"
+        )
+        with self.subTest(integration="audit record is plan gated"):
+            self.assertFalse(
+                unconditional_record in format_text,
+                "format still requires the throughline audit for every FULL-SCRIPT",
+            )
+            self.assertTrue(
+                plan_gated_record in format_text,
+                "format is missing the plan-gated FULL-SCRIPT scope",
+            )
+            self.assertTrue(
+                "Do not fabricate or backfill a plan for a legacy script"
+                in format_text,
+                "format lost the no-backfill legacy rule",
+            )
 
     def test_detailed_story_rules_are_not_verbatim_mirrors(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())

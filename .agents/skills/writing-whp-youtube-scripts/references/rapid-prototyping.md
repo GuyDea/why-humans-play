@@ -211,6 +211,12 @@ sequence, selected techniques, proof jobs, loops, and payoff. This section owns 
 decisions become concise, spoken, first-hearing-clear prose; it does not choose a second
 structure.
 
+When the approved Story Progression Plan selects a supporting narrative throughline,
+realize only its mapped returns. Each return must perform its approved new-information,
+reinterpretation, stakes, demonstration, application, or payoff job. Do not reselect the
+sidecar during drafting or let its case stand in for separate mechanism evidence. If the
+approved plan records `NONE`, keep the argument direct.
+
 - Tell the smallest story that preserves trust, causal clarity, and surprise. Every story
   element must earn its place by increasing trust, first-hearing clarity, or magnetism;
   otherwise cut or collapse it. Open a documented story with a compact trust anchor:

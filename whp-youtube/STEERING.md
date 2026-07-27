@@ -191,6 +191,11 @@ without weakening the audience-first test for problem-led growth episodes.
   [the structural story owner](../.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md#plan-story-progression-before-beats);
   draft-time case narration, spoken compression, and humor live in
   [the rapid drafting owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#apply-the-approved-progression-while-drafting).
+- **Use a supporting narrative throughline only when it earns the sidecar role.** The
+  episode's argument remains the spine; the throughline is optional and never substitutes
+  for mechanism evidence. Route selection, recurrence, evidence boundaries, and payoff to
+  [the structural story owner](../.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md#add-a-supporting-narrative-throughline);
+  use `NONE` instead of forcing continuity.
 - **Choose the closest strong proof case.** Prefer a well-supported Western case when one
   can perform the same proof job clearly. Use the strongest non-Western case when no
   Western candidate passes the evidence, causal-fit, consequence, and spoken-clarity
