@@ -149,9 +149,9 @@ Run:
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
   -k canonical_steering -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
-  -k throughline_owner -v
+  -k supporting_throughline_has_one_structural_owner -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
-  -k memory_owner -v
+  -k memory_first_walking_pass_has_one_detailed_owner -v
 ```
 
 Expected: failures expose the long steering mirror, repeated direct-instruction wording,
@@ -256,7 +256,7 @@ Run:
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
   -k supporting_narrative_throughline -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
-  -k throughline_owner -v
+  -k supporting_throughline_has_one_structural_owner -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
   -k canonical_steering -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
@@ -369,7 +369,7 @@ Run:
 ```bash
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_check_spoken_readability.py
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
-  -k memory_owner -v
+  -k memory_first_walking_pass_has_one_detailed_owner -v
 python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py \
   -k explicit_walking_predraft -v
 python3 /home/martin/.codex/skills/.system/skill-creator/scripts/quick_validate.py \
