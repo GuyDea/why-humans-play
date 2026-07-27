@@ -142,18 +142,12 @@ targeted primary-source proof-case lookup. If no matching case is found, narrow 
 claim rather than drafting around the gap. Match the case's population, behavior,
 mechanism, and outcome to the narration; state any gap and use separate evidence for the
 episode mechanism rather than allowing one adjacent finding to imply both.
-For a problem-led opening with a predictable “not me; I know the tricks” response, use the
-five-move anti-skip intro:
-`intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
-Voice the defense as the narrator's own former position (`I used to think — how naive;
-everyone knows AI makes things up`), never as a rebuttal aimed at the viewer; the viewer
-recognizes their own objection inside the narrator's, so the disarm lands as shared
-discovery instead of a correction. Complete the first four moves before detailed case
-exposition. A short sourced result may tease the case during the disarm; develop the real story only after the promise. Ground the
-disarm in observable evidence rather than attributed inner states, and keep the narrator's voiced former position
-distinct from claims about participants. Keep the early remedy promise literal, specific, action-focused, and joke-free,
-voiced as a friend sharing what held up, never as a lecture contract. This five-move contract overrides a generic hook
-spine when it applies.
+For a problem-led opening where the viewer may claim immunity, use concise anti-skip doctrine.
+Keep the narrator stance truthful, ground the disarm in observed behavior rather than
+attributed inner states, and place a literal remedy before detailed case exposition. Never
+invent the narrator's research process or chronology. Follow
+[the rapid drafting method](references/rapid-prototyping.md) for the exact anti-skip
+sequence, proof interpretation, and line-level execution.
 
 ### Preserve the approved progression while drafting
 
@@ -180,9 +174,8 @@ Always-loaded invariants:
   formulaic phrasing.
 
 For Phase 1 line-level case narration, spoken compression, hook, humor, and factual-boundary
-application, follow the rapid method. For the detailed progression schema and structural
-story rules, follow the story and hook method. Routes:
-[the rapid drafting method](references/rapid-prototyping.md) and
+application, follow the rapid method linked above. For the detailed progression schema and
+structural story rules, follow the story and hook method. Route:
 [the story and hook method](references/story-and-hook-method.md).
 
 ### Mark locked lines for memory delivery
@@ -201,24 +194,13 @@ unless Martin asks.
 
 ### Enforce spoken readability before delivery
 
-Readability is a delivery gate, not a post-draft editorial audit. The gate governs
-drafts and Phase 2 deliverables; a pre-draft under `whp-youtube/predrafts/` runs it
-once, at promotion (see Phase 0).
-A sentence above 25 spoken words fails and must be rewritten before delivery.
-Every sentence from 21 through 25 spoken words requires a first-hearing review.
-A shorter sentence also fails when difficult vocabulary and multiple relationships make it
-hard to process.
-A sentence of any length fails when a first-hearing listener cannot identify who did what,
-what changed, and why it matters.
-Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
-or personality.
+Spoken readability is mandatory before returning draft or Phase 2 narration; a pre-draft
+runs this gate once at promotion. Use 25 spoken words as a hard ceiling. Send every
+21–25-word line through first-hearing review, and reject shorter lines when actor, action,
+relationship, or consequence remains unclear. Preserve evidence boundaries and personality
+during every rewrite.
 
-Strip inline evidence indicators, URLs, personal-input markers, and every other non-spoken
-annotation before checking. Treat the 25-word ceiling as a backstop, not as the definition
-of clarity. For every sentence, require one main relationship, explicit actors and
-referents, a concrete action or comparison, and no stacked condition, contrast, caveat, or
-unexplained abstraction. Necessary technical terms may remain, but introduce them through a
-short plain sentence rather than surrounding them with more difficult language.
+> Detailed line-level owner: [the rapid drafting method](references/rapid-prototyping.md).
 
 For narration stored in a file, resolve the target to an absolute path, change to the skill
 directory, and run:
@@ -227,11 +209,9 @@ directory, and run:
 python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"
 ```
 
-Rewrite every `FAIL`. Review every `REVIEW` aloud and rewrite it unless its actor, action,
-relationship, and consequence are immediately clear. After that review, rerun with
-`--reviewed` only when a clear 21–25-word sentence remains. Do not use `--reviewed` to waive
-a difficult sentence. Apply the same sentence-by-sentence gate to chat-only narration
-before returning it.
+Rewrite every `FAIL`. Read every `REVIEW` aloud; use `--reviewed` only after a
+21–25-word line is clear, never to waive difficulty. Apply the same semantic gate to
+chat-only narration before returning it.
 
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or

@@ -173,21 +173,13 @@ directly to that change.
 A complete-episode promise must name both the understanding the viewer will gain and the
 concrete response they will be able to use.
 
-For a problem-led opening with a predictable “not me; I know the tricks” response, use the
-five-move anti-skip intro:
-`intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
-Voice the defense as the narrator's own former position, never as a rebuttal aimed at the
-viewer; the viewer recognizes their own objection inside the narrator's, so the disarm
-lands as shared discovery instead of a correction. Complete the first four moves before
-detailed case exposition. A short sourced result may tease the case during the disarm;
-develop the real story only after the promise. Treat measured skepticism, lower trust
-ratings, expertise, training, or prior warning as sufficient observable resistance; do not
-require proof of the participants' exact inner monologue. Do not invent thoughts, motives,
-or quotations for the people in the case. The narrator's former belief is his own voiced
-stance, confirmed by Martin at review. Keep the remedy promise literal and joke-free,
-voiced as a friend sharing what held up, then use the developed case to show the trap and
-foreshadow the warning sign that the promised response will surface. This contract
-overrides a generic hook spine when it applies.
+When a problem-led opening faces a credible immunity defense, select the anti-skip move only
+when observed evidence earns it and plan the remedy before the developed case. Selection may
+rely on observed behavior, never attributed participant thoughts or invented narrator
+history. For exact execution, follow
+[the rapid anti-skip method](rapid-prototyping.md#use-the-five-move-anti-skip-intro).
+Story planning owns anti-skip selection and remedy placement; rapid drafting owns the
+sequence, evidence interpretation, and wording.
 
 ## Compare and score three opening candidates
 
@@ -402,83 +394,13 @@ from an unfinished script.
 
 ## Write and test for speech
 
-Write for the real delivery context: Martin — a non-native English speaker — reads the
-narration aloud, often while walking and talking to the camera, for an audience that
-includes non-native listeners. Every factual sentence is a complete spoken clause with an
-explicit subject. Never narrate facts through colon-label fragments such as “The deal:” or
-“The sneaky part:” — labels with colons are written-prose devices that do not exist in
-speech. No line may depend on punctuation to be understood; if a sentence needs its em
-dash or colon to land, rewrite it as speech. Before keeping any line, test it: would
-Martin plausibly say this, unscripted, to a friend while walking? A line that only works
-as written prose or performed voice-over fails.
+Story planning retains structural and evidence-boundary responsibility; rapid drafting owns
+line-level voice, speech, and readability. Keep each beat's approved causal job, proof scope,
+and next question or payoff intact while wording develops.
 
-When clarity and style pull in opposite directions, clarity wins. Referent completeness,
-locked nouns, counts attached to their nouns, and causal accuracy outrank rhythm,
-compression, punchiness, and humor. A fragment may omit only words recoverable from the
-immediately preceding sentence. A stylistic rewrite may never delete a noun that a count,
-result, or manipulation depends on.
-
-Prefer plain international English a non-native listener understands on first hearing.
-Widely understood conversational structures (`Right?`, `Yeah… no.`) are welcome; idioms,
-cultural shorthand, and compressed metaphors that need decoding (`your hunch comes back
-with a doctorate`) are not. A metaphor survives only when its image explains itself
-literally on first hearing.
-
-Write like a smart friend on a walk sharing something he dug into, not like a presenter,
-paper abstract, conference talk, or legal disclaimer. The narrator is a peer investigator
-with the stance arc `I assumed X → then I ran into Y and dug in → here's what I found`.
-Use the conversational progression `fact → plain reaction → why it matters → next
-question`, thread varied mini-hook connectives through the narration roughly every ten to
-twenty spoken seconds, and say texture quantities as truthful conversational magnitudes
-while claim-carrying numbers, dates, places, and institutions stay exact. Use
-contractions, direct address, and brief controlled hyperbole when they sound natural.
-Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
-learning promise.
-
-**Precision controls what we claim. Personality controls how we say it.** Write like a
-well-educated best friend with a brutal sense of humor. Do not confuse factual precision
-with sterile vocabulary. Blunt judgment, emotionally loaded everyday words, and controlled
-hyperbole are allowed when they make the stakes clearer and the underlying claim remains
-supportable. Judge the decision, behavior, mechanism, or institution—not a person's
-inherent worth. Calling a choice “stupid” or “the dumbest decision of your life” is allowed
-when the line judges the choice and the episode earns the underlying stakes. Do not
-automatically trade it for a bloodless synonym because the subject is serious. Keep the
-human context humane; never make a vulnerable person the punchline. Emotional force never
-waives factual support.
-
-For setup, punchline length, and explanation placement, follow
-[the rapid humor method](rapid-prototyping.md#make-humor-carry-meaning).
-
-Write conversational, pronounceable sentences with controlled information density.
-Prefer one new relationship per sentence. Define necessary terms at the moment they
-become useful; cut terminology that does not change the answer.
-
-Readability is a delivery gate, not a post-draft editorial audit.
-A sentence above 25 spoken words fails and must be rewritten before delivery.
-Every sentence from 21 through 25 spoken words requires a first-hearing review.
-A shorter sentence also fails when difficult vocabulary and multiple relationships make it
-hard to process.
-A sentence of any length fails when a first-hearing listener cannot identify who did what,
-what changed, and why it matters.
-Split difficult sentences without deleting evidence boundaries, connective tissue, humor,
-or personality.
-
-Strip non-spoken annotations before checking. Rewrite any sentence that stacks a condition,
-contrast, comparison, caveat, and conclusion, even when its word count is low. Introduce a
-necessary name or technical term in a short plain sentence. For file-backed narration, run
-the skill's `scripts/check_spoken_readability.py` before delivery; use the required
-first-hearing review for every 21–25-word sentence. Apply the same semantic gate to every
-shorter sentence and to chat-only narration.
-
-Read the full narration aloud. Mark stumbles, ambiguous pronouns, overloaded clauses,
-breathless lists, abrupt caveats, and citation language that sounds written rather
-than spoken. Time the read at an honest delivery pace, update word count and runtime,
-then revise and read again.
-
-Preserve Martin's natural delivery and the WHP voice: grounded, rigorous, useful,
-curious, and respectful of the viewer's intelligence. Do not imitate another
-creator's verbal tics. Let uncertainty sound confident in its limits rather than
-apologetic or evasive.
+For delivery execution, follow
+[the rapid spoken-delivery method](rapid-prototyping.md#write-for-speech-and-momentum) and
+[its readability gate](rapid-prototyping.md#pass-the-spoken-readability-delivery-gate).
 
 ## Design personal experience as a story beat
 

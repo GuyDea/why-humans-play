@@ -143,7 +143,9 @@ contract overrides the generic hook spines below when it applies.
    observable resistance; do not require proof of the participants' exact inner monologue.
    Do not invent thoughts, motives, or quotations for the people in the case. Because the
    narrator held the same defense, the disarm lands as shared discovery instead of a
-   correction.
+   correction. Say that the result sent the narrator digging only when Martin supplied or
+   confirmed that chronology; otherwise state only how the observed result changes the
+   episode question.
 4. State the remedy promise immediately, voiced as a friend sharing what held up (`stick
    around and you'll have the four counter-questions that held up when I dug into this`).
    Say what the viewer will recognize or what question, check, or sequence they will be
@@ -446,7 +448,9 @@ Write like a smart friend on a walk sharing something he dug into, not like a pr
 paper abstract, conference talk, or legal disclaimer. The narrator is a peer
 investigator — one of the audience who got curious, did the digging, and came back to
 share — with the stance arc `I assumed X → then I ran into Y and dug in → here's what I
-found`. Use the conversational progression
+found`. Use that stance arc only when Martin supplied or confirmed the research chronology;
+otherwise keep the peer voice without claiming when or why the digging happened. Use the
+conversational progression
 `fact → plain reaction → why it matters → next question`, and thread mini-hooks through
 the narration — roughly every ten to twenty spoken seconds, a short varied curiosity
 connective (`which I found odd, because…`, `and this is where it gets interesting`) that
@@ -600,9 +604,9 @@ Before returning rapid work, check internally:
   mechanism without becoming a second opening or a universal claim?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
-- Does each major beat carry at least one first-person narrator reaction and one
-  direct-address check-in, with spoken transitions instead of outline labels and no
-  unbroken run of polished aphorisms?
+- Use a first-person narrator reaction or direct-address check-in only when the approved
+  plan and material earn it; neither is required in every major beat. Keep transitions
+  spoken, avoid outline labels, and break up unearned runs of polished aphorisms.
 - Do varied mini-hook connectives arrive roughly every ten to twenty spoken seconds, each
   pointing at real content the next sentences deliver?
 - Are texture quantities spoken as truthful conversational magnitudes while claim-carrying

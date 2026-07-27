@@ -1088,16 +1088,8 @@ class SkillPackageTests(unittest.TestCase):
     def test_problem_led_intro_uses_the_five_move_anti_skip_contract(self) -> None:
         sources = {
             "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
             "steering": " ".join(
                 (REPO_ROOT / "whp-youtube/STEERING.md")
                 .read_text(encoding="utf-8")
@@ -1116,11 +1108,44 @@ class SkillPackageTests(unittest.TestCase):
             "the real story only after the promise."
         )
 
-        for source_name, source in sources.items():
-            with self.subTest(source=source_name):
-                self.assertIn(sequence, source)
-                self.assertIn(ordering, source)
-                self.assertIn(teaser_boundary, source)
+        for contract in (sequence, ordering, teaser_boundary):
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "steering"):
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertNotIn(contract, sources[consumer])
+
+        consumer_contracts = {
+            "skill": (
+                "Keep the narrator stance truthful, ground the disarm in observed "
+                "behavior rather than attributed inner states, and place a literal "
+                "remedy before detailed case exposition.",
+                "[the rapid drafting method](references/rapid-prototyping.md)",
+            ),
+            "story": (
+                "Story planning owns anti-skip selection and remedy placement; rapid "
+                "drafting owns the sequence, evidence interpretation, and wording.",
+                "[the rapid anti-skip method]"
+                "(rapid-prototyping.md#use-the-five-move-anti-skip-intro)",
+            ),
+            "steering": (
+                "Use a truthful narrator stance and observed proof, place the literal "
+                "remedy before detailed case exposition, and never attribute "
+                "participant inner states or invent research chronology.",
+                "[the rapid anti-skip owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#use-the-five-move-anti-skip-intro)",
+            ),
+        }
+        for consumer, contracts in consumer_contracts.items():
+            for contract in contracts:
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertIn(contract, sources[consumer])
+
+        self.assertIn(
+            "### Use the five-move anti-skip intro",
+            RAPID_MD.read_text(encoding="utf-8"),
+        )
 
     def test_investigation_challenge_bridge_is_real_and_reserved(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
@@ -1152,8 +1177,16 @@ class SkillPackageTests(unittest.TestCase):
         )
 
     def test_observable_resistance_can_disarm_the_immunity_defense(self) -> None:
-        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
-        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
         resistance = (
             "Treat measured skepticism, lower trust ratings, expertise, training, "
             "or prior warning as sufficient observable resistance; do not require "
@@ -1169,13 +1202,28 @@ class SkillPackageTests(unittest.TestCase):
 
         for contract in (resistance, invention_boundary, allowed_comparison):
             with self.subTest(owner="rapid", contract=contract):
-                self.assertIn(contract, rapid)
-                self.assertNotIn(contract, skill)
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "steering"):
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertNotIn(contract, sources[consumer])
 
         self.assertIn(
             "Never invent factual scene details such as dialogue, weather, motives, "
             "thoughts, chronology, or sensory detail.",
-            skill,
+            sources["skill"],
+        )
+        self.assertIn(
+            "ground the disarm in observed behavior rather than attributed inner states",
+            sources["skill"],
+        )
+        self.assertIn(
+            "Selection may rely on observed behavior, never attributed participant "
+            "thoughts or invented narrator history.",
+            sources["story"],
+        )
+        self.assertIn(
+            "never attribute participant inner states or invent research chronology",
+            sources["steering"],
         )
 
     def test_quality_rubric_scores_anti_skip_promise_placement(self) -> None:
@@ -1784,16 +1832,8 @@ class SkillPackageTests(unittest.TestCase):
     def test_spoken_readability_is_a_pre_delivery_hard_gate(self) -> None:
         sources = {
             "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "rapid": " ".join(
-                (SKILL_ROOT / "references/rapid-prototyping.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
-            "story": " ".join(
-                (SKILL_ROOT / "references/story-and-hook-method.md")
-                .read_text(encoding="utf-8")
-                .split()
-            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
             "steering": " ".join(
                 (REPO_ROOT / "whp-youtube/STEERING.md")
                 .read_text(encoding="utf-8")
@@ -1814,10 +1854,53 @@ class SkillPackageTests(unittest.TestCase):
             "connective tissue, humor, or personality.",
         )
 
-        for source_name, source_text in sources.items():
-            for contract in contracts:
-                with self.subTest(source=source_name, contract=contract):
-                    self.assertIn(contract, source_text)
+        for contract in contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "steering"):
+                with self.subTest(consumer=consumer, contract=contract):
+                    self.assertNotIn(contract, sources[consumer])
+
+        for contract in (
+            "Spoken readability is mandatory before returning draft or Phase 2 "
+            "narration; a pre-draft runs this gate once at promotion.",
+            "Use 25 spoken words as a hard ceiling. Send every 21–25-word line "
+            "through first-hearing review, and reject shorter lines when actor, "
+            "action, relationship, or consequence remains unclear.",
+            "> Detailed line-level owner: [the rapid drafting method]"
+            "(references/rapid-prototyping.md).",
+        ):
+            with self.subTest(source="skill", contract=contract):
+                self.assertIn(contract, sources["skill"])
+
+        for contract in (
+            "Story planning retains structural and evidence-boundary responsibility; "
+            "rapid drafting owns line-level voice, speech, and readability.",
+            "[the rapid spoken-delivery method]"
+            "(rapid-prototyping.md#write-for-speech-and-momentum)",
+            "[its readability gate]"
+            "(rapid-prototyping.md#pass-the-spoken-readability-delivery-gate)",
+        ):
+            with self.subTest(source="story", contract=contract):
+                self.assertIn(contract, sources["story"])
+
+        for contract in (
+            "Keep the 25-word ceiling and first-hearing review as permanent delivery "
+            "requirements; detailed line-level checks live in",
+            "[the rapid spoken-readability owner]"
+            "(../.agents/skills/writing-whp-youtube-scripts/references/"
+            "rapid-prototyping.md#pass-the-spoken-readability-delivery-gate)",
+        ):
+            with self.subTest(source="steering", contract=contract):
+                self.assertIn(contract, sources["steering"])
+
+        rapid_raw = RAPID_MD.read_text(encoding="utf-8")
+        for heading in (
+            "## Write for speech and momentum",
+            "## Pass the spoken-readability delivery gate",
+        ):
+            with self.subTest(target="rapid", heading=heading):
+                self.assertIn(heading, rapid_raw)
 
         rubric = " ".join(
             (SKILL_ROOT / "references/quality-rubric.md")
@@ -1837,6 +1920,115 @@ class SkillPackageTests(unittest.TestCase):
             'python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"'
         )
         self.assertIn(command, SKILL_MD.read_text(encoding="utf-8"))
+
+    def test_narrator_voice_is_earned_and_research_chronology_is_truthful(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+        rapid = sources["rapid"]
+        steering = sources["steering"]
+
+        for forbidden in (
+            "Does each major beat carry at least one first-person narrator reaction "
+            "and one direct-address check-in",
+            "Each major beat carries a first-person narrator reaction and a "
+            "direct-address check-in",
+        ):
+            for source_name, source in sources.items():
+                with self.subTest(source=source_name, forbidden=forbidden):
+                    self.assertNotIn(forbidden, source)
+
+        quota = (
+            r"\b(?:(?:each|every) (?:major )?beat|"
+            r"per[- ](?:major[- ])?beat)\b"
+        )
+        voice = r"\b(?:first-person|direct-address)\b"
+        mandate = (
+            r"\b(?:carries|contains|includes|requires|needs|has|have|must|should|"
+            r"mandatory|required|quota)\b"
+        )
+        span = r"(?:(?!\b(?:neither|not|optional)\b).){0,160}"
+        mandatory_quota_patterns = (
+            quota + span + mandate + span + voice,
+            quota + span + voice + span + mandate,
+            voice + span + mandate + span + quota,
+            voice + span + quota + span + mandate,
+            r"\bat least one " + voice + span + quota,
+        )
+        for forbidden_example in (
+            "Per-beat first-person reactions are mandatory.",
+            "Direct-address check-ins are required in every major beat.",
+            "Every major beat must carry a first-person narrator reaction.",
+        ):
+            with self.subTest(forbidden_example=forbidden_example):
+                self.assertTrue(
+                    any(
+                        re.search(
+                            pattern,
+                            forbidden_example,
+                            flags=re.IGNORECASE,
+                        )
+                        for pattern in mandatory_quota_patterns
+                    )
+                )
+
+        for source_name, source in sources.items():
+            for pattern in mandatory_quota_patterns:
+                with self.subTest(source=source_name, pattern=pattern):
+                    self.assertIsNone(re.search(pattern, source, flags=re.IGNORECASE))
+
+        self.assertIn(
+            "Use a first-person narrator reaction or direct-address check-in only "
+            "when the approved plan and material earn it; neither is required in "
+            "every major beat.",
+            rapid,
+        )
+        self.assertIn(
+            "First-person narrator reactions and direct-address check-ins are "
+            "optional tools used only when the approved plan and material earn "
+            "them; neither is a per-beat quota.",
+            steering,
+        )
+
+        anti_skip_claim = "sent the narrator digging"
+        anti_skip_guard = (
+            "Say that the result sent the narrator digging only when Martin supplied "
+            "or confirmed that chronology; otherwise state only how the observed "
+            "result changes the episode question."
+        )
+        stance_claim = (
+            "I assumed X → then I ran into Y and dug in → here's what I found"
+        )
+        stance_guard = (
+            "Use that stance arc only when Martin supplied or confirmed the research "
+            "chronology; otherwise keep the peer voice without claiming when or why "
+            "the digging happened."
+        )
+        for claim, guard in (
+            (anti_skip_claim, anti_skip_guard),
+            (stance_claim, stance_guard),
+        ):
+            with self.subTest(claim=claim):
+                claim_index = rapid.index(claim)
+                guard_index = rapid.index(guard)
+                self.assertLess(claim_index, guard_index)
+                self.assertLess(guard_index - claim_index, 700)
+
+        self.assertIn(
+            "Claims about the episode's research process are allowed when that work "
+            "actually happened",
+            steering,
+        )
+        self.assertIn("invented autobiography is still forbidden.", steering)
 
     def test_complete_episode_promise_names_understanding_and_response(
         self,
@@ -2477,6 +2669,7 @@ class SkillPackageTests(unittest.TestCase):
             "references/script-architecture.md",
             "references/rapid-prototyping.md",
             "references/story-and-hook-method.md",
+            "references/rapid-prototyping.md",
             "references/research-and-rights.md",
             "references/annotated-script-format.md",
             "assets/annotated-script-template.md",
@@ -2497,6 +2690,11 @@ class SkillPackageTests(unittest.TestCase):
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
         story = " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split())
+        steering = " ".join(
+            (REPO_ROOT / "whp-youtube/STEERING.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
 
         structural_owner_anchors = (
             "Before a surprising result, state the outcome the viewer should reasonably expect",
@@ -2515,6 +2713,14 @@ class SkillPackageTests(unittest.TestCase):
             "shortcut → absurd outcome`.",
             "Separate setup from punchline.",
         )
+        drafting_owner_consumer_exclusions = (
+            "intriguing question → narrator's former defense → evidence that "
+            "overturned it → early remedy promise → real case",
+            "Treat measured skepticism, lower trust ratings, expertise, training, "
+            "or prior warning as sufficient observable resistance; do not require "
+            "proof of the participants' exact inner monologue.",
+            "Readability is a delivery gate, not a post-draft editorial audit.",
+        )
 
         for anchor in structural_owner_anchors:
             with self.subTest(owner="story", anchor=anchor):
@@ -2528,6 +2734,13 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertNotIn(anchor, skill)
                 self.assertNotIn(anchor, story)
 
+        for anchor in drafting_owner_consumer_exclusions:
+            with self.subTest(owner="rapid", exclusive_anchor=anchor):
+                self.assertIn(anchor, rapid)
+                self.assertNotIn(anchor, skill)
+                self.assertNotIn(anchor, story)
+                self.assertNotIn(anchor, steering)
+
         self.assertIn(
             "Derived from the structural story owner",
             rapid,
@@ -2540,6 +2753,9 @@ class SkillPackageTests(unittest.TestCase):
     def test_story_owner_cross_links_target_declared_headings(self) -> None:
         story = STORY_METHOD_MD.read_text(encoding="utf-8")
         rapid = RAPID_MD.read_text(encoding="utf-8")
+        steering = (REPO_ROOT / "whp-youtube/STEERING.md").read_text(
+            encoding="utf-8"
+        )
         cross_links = (
             (
                 "rapid",
@@ -2567,6 +2783,53 @@ class SkillPackageTests(unittest.TestCase):
                 "rapid",
                 rapid,
                 "## Apply the approved progression while drafting",
+            ),
+            (
+                "story",
+                story,
+                "[the rapid anti-skip method]"
+                "(rapid-prototyping.md#use-the-five-move-anti-skip-intro)",
+                "rapid",
+                rapid,
+                "### Use the five-move anti-skip intro",
+            ),
+            (
+                "steering",
+                steering,
+                "[the rapid anti-skip owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#use-the-five-move-anti-skip-intro)",
+                "rapid",
+                rapid,
+                "### Use the five-move anti-skip intro",
+            ),
+            (
+                "story",
+                story,
+                "[the rapid spoken-delivery method]"
+                "(rapid-prototyping.md#write-for-speech-and-momentum)",
+                "rapid",
+                rapid,
+                "## Write for speech and momentum",
+            ),
+            (
+                "story",
+                story,
+                "[its readability gate]"
+                "(rapid-prototyping.md#pass-the-spoken-readability-delivery-gate)",
+                "rapid",
+                rapid,
+                "## Pass the spoken-readability delivery gate",
+            ),
+            (
+                "steering",
+                steering,
+                "[the rapid spoken-readability owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#pass-the-spoken-readability-delivery-gate)",
+                "rapid",
+                rapid,
+                "## Pass the spoken-readability delivery gate",
             ),
         )
 

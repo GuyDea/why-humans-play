@@ -153,17 +153,11 @@ without weakening the audience-first test for problem-led growth episodes.
   syntax, and replace technical compound phrases with simpler words when meaning survives.
   Do not spend either sentence on a technical setup label. State the human-readable premise
   first; hold experimental qualifiers and mechanism detail until after the hook.
-- **Enforce spoken readability before delivery.** Readability is a delivery gate, not a
-  post-draft editorial audit. A sentence above 25 spoken words fails and must be rewritten
-  before delivery. Every sentence from 21 through 25 spoken words requires a first-hearing
-  review. A shorter sentence also fails when difficult vocabulary and multiple
-  relationships make it hard to process. A sentence of any length fails when a
-  first-hearing listener cannot identify who did what, what changed, and why it matters.
-  Split difficult sentences without deleting evidence boundaries, connective tissue,
-  humor, or personality. Remove source links and every other non-spoken annotation before
-  checking. Treat the word ceiling as a backstop, not as the definition of clarity. Reject
-  stacked conditions, contrasts, comparisons, caveats, unclear references, and unexplained
-  abstractions even when the sentence is short.
+- **Enforce spoken readability before delivery.** Keep the 25-word ceiling and first-hearing
+  review as permanent delivery requirements; detailed line-level checks live in
+  [the rapid spoken-readability owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#pass-the-spoken-readability-delivery-gate).
+  Short lines still fail when their actor, action, relationship, or consequence is unclear.
+  Preserve evidence boundaries and personality when rewriting.
 - **Make research events sound real because they are specific.** When supplied or verified,
   name the year and responsible institution or team in the opening. Do not flatten a known
   attribution into generic “scientists,” and never invent a university, city, lab,
@@ -183,21 +177,11 @@ without weakening the audience-first test for problem-led growth episodes.
   analogy, warning, or hypothetical cannot establish that it happens. Match the case's
   population, behavior, mechanism, and outcome to the claim; state any mismatch and supply
   separate evidence for the episode's mechanism instead of letting one case imply both.
-- **Use the five-move anti-skip intro when the viewer can claim immunity.** For a
-  problem-led opening with a predictable “not me; I know the tricks” response, use
-  `intriguing question → narrator's former defense → evidence that overturned it → early remedy promise → real case`.
-  Voice the defense as the narrator's own former position, never as a rebuttal aimed at
-  the viewer; the viewer recognizes their own objection inside the narrator's, so the
-  disarm lands as shared discovery instead of a correction.
-  Complete the first four moves before detailed case exposition. A short sourced result
-  may tease the case during the disarm; develop the real story only after the promise.
-  Treat measured skepticism, lower trust ratings, expertise, training, or prior warning as
-  sufficient observable resistance; do not require proof of the participants' exact inner
-  monologue. Do not invent thoughts, motives, or quotations for the people in the case.
-  The narrator's former belief is his own voiced stance, confirmed by Martin at review.
-  Keep the early remedy promise literal, specific, action-focused, and joke-free, voiced
-  as a friend sharing what held up. This contract overrides a generic hook spine when it
-  applies.
+- **Use the anti-skip intro when the viewer can claim immunity.** Use a truthful narrator
+  stance and observed proof, place the literal remedy before detailed case exposition, and
+  never attribute participant inner states or invent research chronology. Apply the move
+  only when the evidence earns it; exact execution lives in
+  [the rapid anti-skip owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#use-the-five-move-anti-skip-intro).
 - **Make every proof handoff explicit.** Connect adjacent evidence as
   `case → exact takeaway → why it matters here → remaining question → next evidence`.
   A boundary is necessary, but it is not the transition by itself. State the first case's
@@ -289,26 +273,25 @@ without weakening the audience-first test for problem-led growth episodes.
   gates. Keep the real location explicit and use later examples to widen geographic scope.
 - **Use the friendly conversation format.** Write like a smart friend on a walk sharing
   something he dug into, not like a presenter, paper abstract, conference talk, or legal
-  disclaimer. The narrator is a peer investigator — one of the audience who did the
-  digging — with the stance arc `I assumed X → then I ran into Y and dug in → here's
-  what I found`; the viewer rides that discovery rather than receiving its conclusion.
-  Move through `fact → plain reaction → why it matters → next question`. Use
+  disclaimer. The narrator is a peer investigator; claim a personal research sequence only
+  when Martin supplied or confirmed it, and otherwise share the finding without invented
+  chronology. Move through `fact → plain reaction → why it matters → next question`. Use
   contractions, direct address, and brief controlled hyperbole when they sound natural.
   Friendly does not mean filler, invented dialogue, weakened caveats, or jokes inside the
   learning promise.
-- **Compose the register from concrete conversational moves.** Each major beat carries a
-  first-person narrator reaction and a direct-address check-in; varied mini-hook
-  connectives arrive roughly every ten to twenty spoken seconds, each pointing at real
-  content the next sentences deliver; documented cases run as present-tense scenes inside
-  the evidence boundary; transitions are spoken, never outline labels; diction stays
-  everyday when the claim's scope survives; and a run of consecutive polished aphorisms
-  is an essay symptom that needs a conversational turn. Texture quantities are spoken as
-  truthful conversational magnitudes (`over a hundred radiologists` for 138, never
-  inflated), while claim-carrying numbers, small counts, dates, places, and institutions
-  stay exact, with precise figures kept in the claim record. Claims about the episode's
-  research process are allowed when that work actually happened; reactions, opinions,
-  and the narrator's stated former take are voice — invented autobiography is still
-  forbidden.
+- **Compose the register from concrete conversational moves.** First-person narrator
+  reactions and direct-address check-ins are optional tools used only when the approved plan
+  and material earn them; neither is a per-beat quota. Varied mini-hook connectives arrive
+  roughly every ten to twenty spoken seconds, each pointing at real content the next
+  sentences deliver; documented cases run as present-tense scenes inside the evidence
+  boundary; transitions are spoken, never outline labels; diction stays everyday when the
+  claim's scope survives; and a run of consecutive polished aphorisms is an essay symptom
+  that needs a conversational turn. Texture quantities are spoken as truthful conversational
+  magnitudes (`over a hundred radiologists` for 138, never inflated), while claim-carrying
+  numbers, small counts, dates, places, and institutions stay exact, with precise figures
+  kept in the claim record. Claims about the episode's research process are allowed when
+  that work actually happened; reactions, opinions, and the narrator's stated former take
+  are voice — invented autobiography is still forbidden.
 - **Give that friend a real personality.** **Precision controls what we claim. Personality
   controls how we say it.** Write like a well-educated best friend with a brutal sense of
   humor. Do not confuse factual precision with sterile vocabulary. Blunt judgment,
