@@ -75,6 +75,11 @@ baseline, not a definite WHP decision; promotion remains the reconcilable decisi
 - Write for spoken delivery — the register and clarity rules still describe good
   narration — but enforcement waits for promotion.
 
+When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
+no-teleprompter pre-draft, run the memory-first delivery pass before returning it. This is
+a focused delivery check, not a production audit. Follow
+[the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+
 Promote a pre-draft when Martin says it is ready: run the spoken-readability gate and
 fix failures, add or refresh the planning-notes appendix, move the file to
 `whp-youtube/drafts/`, and reconcile the promotion as one definite decision. Promotion

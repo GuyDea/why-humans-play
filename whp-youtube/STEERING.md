@@ -208,6 +208,11 @@ without weakening the audience-first test for problem-led growth episodes.
   directness and humor may sharpen supported stakes, but they never lower the evidence bar
   or target vulnerable people. Detailed cadence, wording, quantities, and humor execution
   live in [the rapid voice owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#write-for-speech-and-momentum).
+- **Run a memory-first pass when the delivery request is explicit.** When Martin
+  explicitly requests a walking-vlog, walk-and-talk, from-memory, or no-teleprompter
+  pre-draft, run the memory-first delivery pass before returning it. Source accuracy and
+  spoken reproducibility are separate decisions; detailed execution lives in [the
+  memory-first walking-vlog owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
 - **Mark locked lines for memory delivery.** Martin delivers from memory while walking —
   there is no teleprompter on a walk. In a complete script, mark locked lines bold inside
   the blockquote — the opening question, the learning promise, each beat's punchline and

@@ -487,6 +487,18 @@ natural aloud; a fragment may omit only words recoverable from the immediately p
 sentence. Read the draft aloud when the scope warrants it, but do not burden the response
 with a visible audit.
 
+### Run the memory-first walking-vlog pass
+
+When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
+no-teleprompter pre-draft, run the memory-first delivery pass before returning it. Source
+accuracy and spoken reproducibility are separate decisions. Classify each number as
+claim-carrying or texture. Keep exact dates, places, and institutions when they add a
+compact trust anchor; round texture sample sizes to a truthful conversational magnitude.
+Use a verbatim quotation in narration only when its exact wording earns the memory cost.
+Otherwise label and speak a faithful paraphrase, and preserve the exact wording in the
+appendix or source notes. Replace research-admin wording and outline transitions with
+language Martin could reproduce naturally after one hearing.
+
 ## Pass the spoken-readability delivery gate
 
 Readability is a delivery gate, not a post-draft editorial audit.

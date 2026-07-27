@@ -31,6 +31,18 @@ RELATIONSHIP_RE = re.compile(
     r"whose|if|even\s+when|when)\b",
     re.IGNORECASE,
 )
+EXACT_PARTICIPANT_COUNT_RE = re.compile(
+    r"\b(?:\d{2,3}|\d{1,3},\d{3})\s+"
+    r"(?!(?:percent(?:age)?|per(?:\s+|-)cent)\b)"
+    r"(?:[^\W\d_]+(?:[’'-][^\W\d_]+)*\s+){0,2}"
+    r"(?:radiologists|participants|physicians|doctors|users|people|students|"
+    r"undergraduates|subjects|experts|patients|nurses|clinicians)\b",
+    re.IGNORECASE,
+)
+SUBSTANTIAL_QUOTATION_RE = re.compile(r"[“\"](?P<quotation>[^”\"]+)[”\"]")
+SUBSTANTIAL_QUOTATION_REVIEW_REASON = (
+    "substantial quotation requires verbatim-or-paraphrase memory review"
+)
 COMMON_ABBREVIATIONS = {
     "dr",
     "e.g",
@@ -50,6 +62,7 @@ COMMON_ABBREVIATIONS = {
 class SpokenSentence:
     line: int
     text: str
+    semantic_review_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -91,21 +104,39 @@ def _looks_like_abbreviation(text: str, end: int) -> bool:
     return bool(re.fullmatch(r"(?:[A-Za-z]\.)+[A-Za-z]?", token))
 
 
-def _split_sentences(text: str) -> list[str]:
-    sentences: list[str] = []
+def _split_sentence_spans(text: str) -> list[tuple[int, int]]:
+    spans: list[tuple[int, int]] = []
     start = 0
     for match in SENTENCE_END_RE.finditer(text):
         if _looks_like_abbreviation(text, match.end()):
             continue
-        sentence = text[start : match.end()].strip()
-        if sentence:
-            sentences.append(sentence)
+        sentence_start = start
+        sentence_end = match.end()
+        while sentence_start < sentence_end and text[sentence_start].isspace():
+            sentence_start += 1
+        while sentence_end > sentence_start and text[sentence_end - 1].isspace():
+            sentence_end -= 1
+        if sentence_start < sentence_end:
+            spans.append((sentence_start, sentence_end))
         start = match.end()
 
-    remainder = text[start:].strip()
-    if remainder:
-        sentences.append(remainder)
-    return sentences
+    sentence_start = start
+    sentence_end = len(text)
+    while sentence_start < sentence_end and text[sentence_start].isspace():
+        sentence_start += 1
+    while sentence_end > sentence_start and text[sentence_end - 1].isspace():
+        sentence_end -= 1
+    if sentence_start < sentence_end:
+        spans.append((sentence_start, sentence_end))
+    return spans
+
+
+def _substantial_quotation_spans(text: str) -> list[tuple[int, int]]:
+    spans: list[tuple[int, int]] = []
+    for match in SUBSTANTIAL_QUOTATION_RE.finditer(text):
+        if len(WORD_RE.findall(match.group("quotation"))) >= 8:
+            spans.append(match.span("quotation"))
+    return spans
 
 
 def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
@@ -145,8 +176,22 @@ def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
 
     sentences: list[SpokenSentence] = []
     for line_number, paragraph in paragraphs:
-        for sentence in _split_sentences(paragraph):
-            sentences.append(SpokenSentence(line=line_number, text=sentence))
+        quotation_spans = _substantial_quotation_spans(paragraph)
+        for sentence_start, sentence_end in _split_sentence_spans(paragraph):
+            semantic_review_reason = None
+            if any(
+                sentence_start < quotation_end
+                and quotation_start < sentence_end
+                for quotation_start, quotation_end in quotation_spans
+            ):
+                semantic_review_reason = SUBSTANTIAL_QUOTATION_REVIEW_REASON
+            sentences.append(
+                SpokenSentence(
+                    line=line_number,
+                    text=paragraph[sentence_start:sentence_end],
+                    semantic_review_reason=semantic_review_reason,
+                )
+            )
     return sentences
 
 
@@ -174,6 +219,16 @@ def _relationship_count(text: str) -> int:
     return punctuation_count + connective_count
 
 
+def _semantic_review_reason(text: str) -> str | None:
+    if EXACT_PARTICIPANT_COUNT_RE.search(text):
+        return "exact participant count requires spoken-number review"
+    for match in SUBSTANTIAL_QUOTATION_RE.finditer(text):
+        quotation_word_count, _ = _word_stats(match.group("quotation"))
+        if quotation_word_count >= 8:
+            return SUBSTANTIAL_QUOTATION_REVIEW_REASON
+    return None
+
+
 def analyze_markdown(markdown: str) -> list[ReadabilityFinding]:
     """Classify spoken sentences by length and structural readability."""
 
@@ -185,6 +240,10 @@ def analyze_markdown(markdown: str) -> list[ReadabilityFinding]:
             character_count,
         )
         relationship_count = _relationship_count(sentence.text)
+        semantic_review_reason = (
+            sentence.semantic_review_reason
+            or _semantic_review_reason(sentence.text)
+        )
 
         if word_count > HARD_MAX_WORDS:
             level = "fail"
@@ -204,6 +263,9 @@ def analyze_markdown(markdown: str) -> list[ReadabilityFinding]:
                 f"{relationship_count} relationship marker"
                 f"{'' if relationship_count == 1 else 's'})"
             )
+        elif semantic_review_reason is not None:
+            level = "review"
+            reason = semantic_review_reason
         elif word_count >= REVIEW_MIN_WORDS:
             level = "review"
             reason = (
@@ -235,8 +297,8 @@ def _build_parser() -> argparse.ArgumentParser:
         "--reviewed",
         action="store_true",
         help=(
-            "Confirm that every 21-25-word review item passed a manual "
-            "first-hearing check."
+            "Confirm that every length, spoken-number, and quotation review item "
+            "passed a manual first-hearing and memory-delivery check."
         ),
     )
     parser.add_argument("script", type=Path, help="Markdown script to check.")

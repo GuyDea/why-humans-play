@@ -442,6 +442,9 @@ structural aim while arranging beats and as a post-draft diagnostic afterward â€
 as a clock that erases setup, referents, causality, humor, or the learning promise
 from an unfinished script.
 
+For memory-first delivery, follow [the memory-first walking-vlog
+pass](rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+
 ## Write and test for speech
 
 Story planning retains structural and evidence-boundary responsibility; rapid drafting owns

@@ -166,6 +166,10 @@ plan-change tradeoff in the production appendix.
   a joke that sounds constructed rather than spontaneous costs this criterion its top
   score.
 
+For an explicitly requested walking-vlog pre-draft, a top delivery score requires every
+flagged number and quotation to have a deliberate, documented spoken treatment that
+preserves the factual boundary and can be reproduced naturally from memory.
+
 Spoken readability is a non-compensable delivery gate:
 
 - No spoken sentence exceeds 25 words.

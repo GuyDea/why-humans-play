@@ -2803,13 +2803,14 @@ class SkillPackageTests(unittest.TestCase):
         text = SKILL_MD.read_text(encoding="utf-8")
         targets = re.findall(r"\[[^]]+\]\(([^)]+)\)", text)
         local = [
-            target
+            target.partition("#")[0]
             for target in targets
             if "://" not in target
             and not target.startswith("#")
             and target != "Original URL"
         ]
         expected = [
+            "references/rapid-prototyping.md",
             "references/script-architecture.md",
             "references/rapid-prototyping.md",
             "references/story-and-hook-method.md",
@@ -3189,6 +3190,119 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(link, source)
             with self.subTest(target=target_name, heading=heading):
                 self.assertIn(heading, target)
+
+    def test_explicit_walking_predraft_requires_memory_first_delivery_gate(
+        self,
+    ) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "rubric": " ".join(
+                RUBRIC_MD.read_text(encoding="utf-8").split()
+            ),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md").read_text(
+                    encoding="utf-8"
+                ).split()
+            ),
+        }
+        explicit_trigger = (
+            "When Martin explicitly requests a walking-vlog, walk-and-talk, "
+            "from-memory, or no-teleprompter pre-draft, run the memory-first "
+            "delivery pass before returning it."
+        )
+
+        for source_name in ("skill", "rapid", "steering"):
+            with self.subTest(source=source_name, contract="explicit trigger"):
+                self.assertIn(explicit_trigger, sources[source_name])
+
+        self.assertIn(
+            "For an explicitly requested walking-vlog pre-draft, a top delivery "
+            "score requires every flagged number and quotation to have a deliberate, "
+            "documented spoken treatment that preserves the factual boundary and can "
+            "be reproduced naturally from memory.",
+            sources["rubric"],
+        )
+
+    def test_memory_first_walking_pass_has_one_detailed_owner(self) -> None:
+        rapid_text = RAPID_MD.read_text(encoding="utf-8")
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(rapid_text.split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(
+                (REPO_ROOT / "whp-youtube/STEERING.md")
+                .read_text(encoding="utf-8")
+                .split()
+            ),
+        }
+
+        with self.subTest(owner="rapid", contract="declared heading"):
+            heading = "### Run the memory-first walking-vlog pass"
+            self.assertTrue(
+                heading in rapid_text,
+                f"rapid owner is missing declared heading: {heading}",
+            )
+
+        consumer_contracts = {
+            "skill": (
+                "When Martin explicitly requests a walking-vlog, walk-and-talk, "
+                "from-memory, or no-teleprompter pre-draft, run the memory-first "
+                "delivery pass before returning it. This is a focused delivery "
+                "check, not a production audit. Follow "
+                "[the rapid memory-first owner](references/rapid-prototyping.md"
+                "#run-the-memory-first-walking-vlog-pass)."
+            ),
+            "story": (
+                "For memory-first delivery, follow "
+                "[the memory-first walking-vlog pass]"
+                "(rapid-prototyping.md#run-the-memory-first-walking-vlog-pass)."
+            ),
+            "rubric": (
+                "For an explicitly requested walking-vlog pre-draft, a top delivery "
+                "score requires every flagged number and quotation to have a "
+                "deliberate, documented spoken treatment that preserves the factual "
+                "boundary and can be reproduced naturally from memory."
+            ),
+            "steering": (
+                "Source accuracy and spoken reproducibility are separate decisions; "
+                "detailed execution lives in "
+                "[the memory-first walking-vlog owner]"
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#run-the-memory-first-walking-vlog-pass)."
+            ),
+        }
+        for consumer, contract in consumer_contracts.items():
+            with self.subTest(consumer=consumer, contract="concise local contract"):
+                self.assertTrue(
+                    contract in sources[consumer],
+                    f"{consumer} is missing its concise local contract: {contract}",
+                )
+
+        detailed_contracts = (
+            "Classify each number as claim-carrying or texture.",
+            "round texture sample sizes to a truthful conversational magnitude",
+            "Use a verbatim quotation in narration only when its exact wording earns "
+            "the memory cost.",
+            "Replace research-admin wording and outline transitions with language "
+            "Martin could reproduce naturally after one hearing.",
+        )
+        for contract in detailed_contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertTrue(
+                    contract in sources["rapid"],
+                    f"rapid owner is missing detailed contract: {contract}",
+                )
+            for consumer in ("skill", "story", "rubric", "steering"):
+                with self.subTest(
+                    consumer=consumer,
+                    forbidden_detailed_contract=contract,
+                ):
+                    self.assertFalse(
+                        contract in sources[consumer],
+                        f"{consumer} copies rapid-owner contract: {contract}",
+                    )
 
     def test_skill_entrypoint_stays_below_progressive_disclosure_limit(self) -> None:
         self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 480)

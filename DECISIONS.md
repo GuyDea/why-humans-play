@@ -1555,6 +1555,32 @@ optional prevents the sidecar from displacing the episode's explanatory argument
 change to the umbrella brand. Episode 1's pre-draft implementation remains brainstorming
 until promotion.
 
+## 2026-07-27 — Explicit walking-vlog pre-drafts get a memory-first delivery gate
+
+**Decision:** When Martin explicitly requests a walking-vlog, walk-and-talk,
+from-memory, or no-teleprompter pre-draft, WHP runs a focused memory-first delivery pass
+before presenting it instead of waiting for draft promotion. Source accuracy and spoken
+reproducibility remain separate decisions. Mechanical findings for exact participant
+counts and substantial quotations are review-only prompts: a deliberate, documented
+spoken treatment remains a human editorial judgment, never an automatic rewrite or
+factual approval. Detailed execution lives only in [the rapid memory-first
+owner](.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+
+**Rationale:** Martin identified two regressions in an Episode 1 pre-draft: the narration
+said `138 radiologists` while dropping the easier and more credible 2021 US-and-Canada
+anchor, and it reproduced a documented technical medical question that would be hard to
+recall naturally on a walk. Predraft status can defer production audits, but it cannot
+defer an explicitly requested delivery format.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readability.py` and its
+tests, `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/STEERING.md`, and this ledger. `BRAND.md` remains unchanged because this is
+YouTube delivery doctrine. The Episode 1 pre-draft remains brainstorming until promotion.
+
 ## 2026-07-27 — Storytelling techniques shape structure before narration
 
 **Decision:** WHP treats storytelling-technique selection as the default visible

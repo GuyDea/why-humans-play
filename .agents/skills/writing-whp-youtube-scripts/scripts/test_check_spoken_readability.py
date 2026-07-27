@@ -146,6 +146,102 @@ Metadata does not count.
 
         self.assertEqual(finding.level, "pass")
 
+    def test_exact_participant_count_requires_spoken_number_review(self) -> None:
+        finding = analyze_markdown(
+            "> Then I found a study involving 138 radiologists.\n"
+        )[0]
+
+        self.assertEqual(finding.level, "review")
+        self.assertEqual(
+            finding.reason,
+            "exact participant count requires spoken-number review",
+        )
+
+    def test_common_participant_roles_require_spoken_number_review(self) -> None:
+        for role in ("patients", "nurses", "clinicians"):
+            with self.subTest(role=role):
+                finding = analyze_markdown(
+                    f"> The study included 138 {role}.\n"
+                )[0]
+
+                self.assertEqual(finding.level, "review")
+                self.assertEqual(
+                    finding.reason,
+                    "exact participant count requires spoken-number review",
+                )
+
+    def test_percentage_of_participants_is_not_an_exact_headcount(self) -> None:
+        percentage_phrases = (
+            "95 percent of participants",
+            "95 percentage of participants",
+            "95 per cent of participants",
+            "95 per-cent of participants",
+        )
+
+        for phrase in percentage_phrases:
+            with self.subTest(phrase=phrase):
+                finding = analyze_markdown(
+                    f"> The result applied to {phrase}.\n"
+                )[0]
+
+                self.assertEqual(finding.level, "pass")
+
+    def test_substantial_quotation_requires_memory_delivery_review(self) -> None:
+        finding = analyze_markdown(
+            "> “Is it possible to have visual disturbance after catheter ablation?”\n"
+        )[0]
+
+        self.assertEqual(finding.level, "review")
+        self.assertEqual(
+            finding.reason,
+            "substantial quotation requires verbatim-or-paraphrase memory review",
+        )
+
+    def test_split_substantial_quotation_requires_review_for_each_piece(
+        self,
+    ) -> None:
+        findings = analyze_markdown(
+            '> She said, “The scan looks normal. You can safely wait until tomorrow.”\n'
+        )
+
+        self.assertEqual(len(findings), 2)
+        self.assertEqual(
+            [finding.level for finding in findings],
+            ["review", "review"],
+        )
+        self.assertEqual(
+            [finding.reason for finding in findings],
+            [
+                "substantial quotation requires "
+                "verbatim-or-paraphrase memory review",
+                "substantial quotation requires "
+                "verbatim-or-paraphrase memory review",
+            ],
+        )
+
+    def test_short_quotation_does_not_require_memory_delivery_review(self) -> None:
+        finding = analyze_markdown(
+            '> He said, “Check outside the chat.”\n'
+        )[0]
+
+        self.assertEqual(finding.level, "pass")
+
+    def test_embedded_wrapped_quotation_requires_memory_delivery_review(
+        self,
+    ) -> None:
+        findings = analyze_markdown(
+            "> He asked ChatGPT something like, **“Could these vision problems be "
+            "from the heart\n"
+            "> procedure I just had?”**\n"
+        )
+
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0].level, "review")
+        self.assertEqual(
+            findings[0].reason,
+            "substantial quotation requires verbatim-or-paraphrase memory review",
+        )
+
     def test_cli_blocks_review_items_until_they_are_marked_reviewed(self) -> None:
         sentence = " ".join(f"word{index}" for index in range(21)) + "."
         with tempfile.TemporaryDirectory() as directory:
