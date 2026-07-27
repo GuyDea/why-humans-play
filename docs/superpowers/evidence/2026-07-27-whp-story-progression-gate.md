@@ -30,7 +30,8 @@ architecture. It is not episode content and makes no WHP content decision.
 
 Visible continuity promises the hypothetical learner momentum toward continued practice,
 `BUT` a missed day turns that same score into a display of loss, `THEREFORE` a bounded
-restart rule becomes the payoff that points the score back toward practice.
+restart rule becomes the payoff: notice what the next action serves and observe whether
+practice resumes.
 
 ### Story-material inventory
 
@@ -45,10 +46,10 @@ restart rule becomes the payoff that points the score back toward practice.
 
 | Technique | Decision | Material basis | Narrative job | Planned placement | Boundary or rejection reason |
 |---|---|---|---|---|---|
-| Expectation → reversal | `SELECTED` | `E-01`, `E-02` | Turn the same visible-continuity signal from promised momentum into displayed loss. | `SP01` → `SP02` | The reversal stays inside the approved hypothetical fixture. |
-| Ordinary goal → obstacle → consequential choice → outcome | `SELECTED` | `E-01`–`E-04` | Give the learner a clear practice goal, a broken-streak obstacle, a real choice between score and practice, and a bounded outcome. | `SP01`–`SP03` | The sequence illustrates the architecture; it does not claim a real person's experience. |
+| Expectation → reversal | `SELECTED` | `E-01`, `E-02` | Frame the counter as serving the ordinary practice goal, then reverse its role when the missed day makes it display loss. | `SP01` → `SP02` | The reversal stays inside the approved hypothetical fixture. |
+| Ordinary goal → obstacle → consequential choice → outcome | `SELECTED` | `E-01`–`E-04` | Give the learner a clear practice goal, a broken-streak obstacle, a real choice between score and practice, and an outcome observed through the next action. | `SP01`–`SP03` | The sequence illustrates the architecture; it does not claim a real person's experience or guarantee resumed practice. |
 | Open loop → final payoff | `SELECTED` | `E-01`–`E-04` | Ask whether the counter still serves practice after the miss, then resolve that question with the bounded restart rule and final lesson. | Open `SP01`; pressure `SP02`; close `SP03` | The payoff cannot promise more than the hypothetical rule change supports. |
-| Viewer application | `SELECTED` | `E-03`, `E-04` | Convert the score-versus-practice conflict into the approved notice, restart, and observe action. | `SP03` | This remains a low-risk observation within the fixture, not evidence-backed general advice. |
+| Viewer application | `SELECTED` | `E-03`, `E-04` | Convert the score-versus-practice conflict into the approved notice, restart, and observe whether practice resumes or the action merely repairs the score. | `SP03` | This remains a low-risk observation within the fixture, not evidence-backed general advice. |
 | Investigation challenge | `REJECTED` | `E-01`–`E-04` | No narrative job is earned. | No placement | No real research obstacle, evidence gap, or scoped contradiction occurred. |
 | Supporting narrative throughline | `NONE` | `E-01`–`E-04` | No sidecar job is earned. | No placement | Repeated returns to the same hypothetical learner would add neither distinct proof nor changed meaning. |
 
@@ -70,21 +71,24 @@ restart rule becomes the payoff that points the score back toward practice.
 - **Proof job and evidence boundary:** Establishes only the hypothetical learner's goal and
   the counter's assigned support role; it does not establish a behavioral effect.
 
-#### Progression beat SP02 — The same signal becomes a loss
+#### Progression beat SP02 — Restarting carries an extra conflict
 
-- **Starting question or expectation:** If visible continuity supports the next
-  repetition, the counter should still point the learner toward practice after one miss.
+- **Starting question or expectation:** In this hypothetical, beginning carries the
+  ordinary practice goal from `E-01`; after one miss, does restarting carry anything extra?
 - **Event or evidence:** `E-02` breaks the streak after a missed day, and `E-03` puts
   protecting the number in conflict with honest practice.
-- **BUT — complication:** The signal that promised momentum now displays loss, so restoring
-  the score can displace the learner's ordinary goal.
+- **BUT — complication:** Restarting now carries displayed loss and a score-repair conflict
+  that beginning did not—the fixture's bounded explanation for why restarting feels harder
+  than beginning.
 - **THEREFORE — consequence or required next step:** The plan needs a form of repair that
-  acknowledges the miss while making resumed practice the next valid move.
+  acknowledges the miss, makes a return to practice a valid next choice, and leaves the
+  result to observation.
 - **Selected technique:** Expectation → reversal, obstacle, and consequential choice.
-- **Loop or payoff:** Partially answer why restarting feels harder, then transfer the live
-  question to what kind of repair serves practice rather than the score.
+- **Loop or payoff:** Pay the package comparison inside the hypothetical: restarting feels
+  harder than beginning because it adds displayed loss and the score-repair conflict. Then
+  transfer the live question to what kind of repair serves practice rather than the score.
 - **Proof job and evidence boundary:** Establishes the fixture's hypothetical goal conflict;
-  it does not claim that real streak users think, feel, or behave this way.
+  it does not claim that real streak users experience this comparison, or how often they do.
 
 #### Progression beat SP03 — A bounded restart points back to practice
 
@@ -97,21 +101,24 @@ restart rule becomes the payoff that points the score back toward practice.
 - **THEREFORE — consequence or required next step:** Apply the approved action contract:
   notice what the next action serves, use one explicit restart rule, and observe whether
   practice resumes.
-- **Selected technique:** Consequential choice → outcome, viewer application, and final
-  payoff.
+- **Selected technique:** Consequential choice → observed outcome, viewer application, and
+  final payoff.
 - **Loop or payoff:** Close the opening question with the bounded restart rule and the
-  lesson that a useful score points back to practice rather than becoming it.
+  lesson that a useful score points back to practice rather than becoming it; whether
+  practice resumes remains observed rather than guaranteed.
 - **Proof job and evidence boundary:** Demonstrates the fixture's logical application and
-  payoff; it does not establish real-world efficacy.
+  next-choice change; it does not establish that practice resumed or that the rule has
+  real-world efficacy.
 
 ### Full causal read
 
-`E-01` gives the hypothetical learner an ordinary practice goal and makes continuity
-meaningful, `BUT` `E-02` turns the counter into a display of loss after a missed day,
-`THEREFORE` `E-03` makes the next choice a conflict between repairing the number and
-resuming honest practice; `BUT` score-only repair would preserve that conflict,
-`THEREFORE` `E-04` supplies a bounded restart rule whose payoff is resumed practice rather
-than a cosmetically protected score.
+`E-01` gives the hypothetical learner an ordinary practice goal, so beginning carries only
+the task of practicing; `BUT` after the missed day, `E-02` and `E-03` make restarting carry
+an extra displayed loss and score-repair conflict—the fixture's bounded answer to why
+restarting feels harder than beginning; `THEREFORE` `E-04` introduces a bounded restart
+rule; `BUT` that rule does not guarantee resumed practice, `THEREFORE` its outcome job is
+to notice what the next action serves and observe whether practice resumes or merely
+repairs the score.
 
 ### Retention map
 
@@ -119,18 +126,18 @@ than a cosmetically protected score.
 |---|---|---|
 | `SP01` → `SP02` | The counter has been assigned to support practice; the unresolved question is what its visible continuity means after a missed day. | `E-01` sets the hypothetical goal; `E-02` supplies the hypothetical miss. |
 | `SP02` → `SP03` | The reversal has exposed a score-versus-practice conflict; the unresolved question is what repair can acknowledge the loss without making the number the goal. | `E-03` supplies the hypothetical conflict; `E-04` supplies the bounded next choice. |
-| `SP03` payoff | The outcome still needs a meaning test: whether the restart serves resumed practice rather than cosmetic score repair. | `E-04` supports only the hypothetical choice and outcome. |
+| `SP03` payoff | The outcome remains an observation: whether the next action resumes practice or merely repairs the score. | `E-04` supports only the hypothetical next-choice change, not guaranteed resumption. |
 
 ### Natural bridge seeds
 
-- `SP01` → `SP02`, grounded in `E-02` and `E-03`: “But the same number that promised
-  momentum now displayed a loss.”
+- `SP01` → `SP02`, grounded in `E-02` and `E-03`: “But after the missed day, the broken
+  streak made protecting the number compete with practicing honestly.”
 
 ### Loop and payoff check
 
 | Loop | Opens | Partial payoff or transfer | Final resolution |
 |---|---|---|---|
-| Does the counter still serve practice after the streak breaks? | `SP01` opens the question from `E-01`. | `SP02` uses `E-02` and `E-03` to show why score repair alone cannot answer it. | `SP03` uses `E-04` to resolve it with a bounded restart rule and the approved final lesson. |
+| Why does restarting feel harder than beginning, and can the counter still serve practice after the streak breaks? | `SP01` uses `E-01` to establish that beginning carries the ordinary practice goal. | `SP02` uses `E-02` and `E-03` to show that, inside the hypothetical, restarting adds displayed loss and a score-repair conflict. | `SP03` uses `E-04` to resolve the planning question with a bounded restart rule and the approved final lesson; the learner still observes whether practice resumes. |
 
 ### Throughline decision
 
