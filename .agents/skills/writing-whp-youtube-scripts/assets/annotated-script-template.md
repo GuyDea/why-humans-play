@@ -2,13 +2,22 @@
 
 ## 1. The detour
 
-> In a 2022 experiment, bumblebees had an unobstructed path to food. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
+[MAIN HOOK | LOCKED WORDING — Opens on the voluntary detour that makes the play question worth resolving.]
+
+> <u>**In a 2022 experiment, bumblebees had an unobstructed path to food. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
 > Some detoured
 > into an object area, contacted wooden balls, and rolled them repeatedly without a
-> food reward. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
+> food reward. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)**</u>
+
 > <!-- PI-001: Martin input -->
+
+[DISARM — Uses the researchers' bounded criteria before drawing the larger conclusion.]
+
 > The researchers said this met their operational play criteria. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013) That
 > does not tell us what a bee feels [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)—but makes the detour hard to dismiss.
+
+[APPLICATION — Converts the bounded finding into an observation the viewer can use.]
+
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
 > experience. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)

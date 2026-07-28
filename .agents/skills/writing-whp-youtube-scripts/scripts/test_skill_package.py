@@ -3260,6 +3260,32 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(forbidden=forbidden):
                 self.assertNotIn(forbidden, main_script)
 
+    def test_annotated_format_owns_only_the_final_extended_appendix(self) -> None:
+        format_text = normalize_text(FORMAT_MD.read_text(encoding="utf-8"))
+        template = TEMPLATE_MD.read_text(encoding="utf-8")
+
+        for contract in (
+            "This reference owns only the complete `final/script.extended.md` appendix.",
+            "`final/script.raw.md` owns every spoken word and all storytelling markup.",
+            "Validate the raw/extended pair first",
+            "[Script Artifact Pair](script-artifact-pair.md)",
+        ):
+            with self.subTest(contract=contract):
+                self.assertIn(contract, format_text)
+
+        self.assertIn(
+            "[MAIN HOOK | LOCKED WORDING —",
+            template,
+        )
+        self.assertRegex(
+            template,
+            r"(?m)^\[[A-Z0-9 -]+(?: \| [A-Z0-9 -]+)* — [^\]]+\]$",
+        )
+        self.assertLess(
+            template.index("[MAIN HOOK | LOCKED WORDING —"),
+            template.index("\n## Appendix\n"),
+        )
+
     def test_phase_two_keeps_existing_production_resources(self) -> None:
         skill = SKILL_MD.read_text(encoding="utf-8")
         for resource in (

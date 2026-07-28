@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 import re
 
+from validate_annotated_script import validate_document
+
 
 EPISODE_RE = re.compile(r"^ep\d{3}-[a-z0-9]+(?:-[a-z0-9]+)*$")
 STAGES = {"blueprint", "draft", "final"}
@@ -104,6 +106,30 @@ STORY_MARKER_RE = re.compile(r"</?u>|\*+")
 ESCAPABLE_STORY_MARKER_RE = re.compile(r"</?u>|\*+|_+")
 
 DRIFT_ERROR = "extended narration does not exactly match raw"
+STAGE_APPENDIX_CONTRACTS = {
+    "blueprint": (
+        "- **Status:** BLUEPRINT",
+        (
+            "### Blueprint metadata",
+            "### Factual boundary and unresolved dependencies",
+            "### Intro design record",
+            "### Body logic map",
+            "### Promise and loop payoff map",
+            "### Approval state",
+        ),
+    ),
+    "draft": (
+        "- **Status:** DRAFT",
+        (
+            "### Draft metadata",
+            "### Story progression and payoff audit",
+            "### Evidence boundaries",
+            "### Spoken-readability result",
+            "### Personal-input decision",
+            "### Creative-approval state",
+        ),
+    ),
+}
 
 
 @dataclass(frozen=True)
@@ -1507,6 +1533,71 @@ def _extended_sync_surface(markdown: str) -> str:
     return "".join(projected)
 
 
+def _appendix_heading_count(markdown: str) -> int:
+    """Count literal exact Appendix headings."""
+
+    return sum(
+        APPENDIX_HEADING_RE.fullmatch(line) is not None
+        for line in _markdown_lines(markdown)
+    )
+
+
+def _appendix_body(markdown: str) -> str:
+    """Return all content after the document's single Appendix heading."""
+
+    lines = _markdown_lines(markdown)
+    appendix_index = next(
+        index
+        for index, line in enumerate(lines)
+        if APPENDIX_HEADING_RE.fullmatch(line)
+    )
+    return "\n".join(lines[appendix_index + 1 :])
+
+
+def _without_purpose_annotations(markdown: str) -> str:
+    """Strip standalone purpose lines while preserving evidence indicators."""
+
+    return "".join(
+        line
+        for line in _markdown_lines(markdown, keepends=True)
+        if PURPOSE_CANDIDATE_RE.fullmatch(line.rstrip("\r\n")) is None
+    )
+
+
+def _validate_stage_appendix(markdown: str, stage: str) -> list[str]:
+    """Validate the exact stage appendix or delegate the final schema."""
+
+    count = _appendix_heading_count(markdown)
+    if count != 1:
+        return [
+            "extended script requires exactly one Appendix; "
+            f"found {count}"
+        ]
+
+    if stage == "final":
+        return [
+            f"final appendix: {error}"
+            for error in validate_document(
+                _without_purpose_annotations(markdown)
+            )
+        ]
+
+    status, required_headings = STAGE_APPENDIX_CONTRACTS[stage]
+    appendix = _appendix_body(markdown)
+    appendix_lines = _markdown_lines(appendix)
+    errors: list[str] = []
+    if status not in appendix_lines:
+        errors.append(
+            f"{stage} appendix requires status {status!r}"
+        )
+    for heading in required_headings:
+        if appendix_lines.count(heading) != 1:
+            errors.append(
+                f"{stage} appendix requires heading: {heading}"
+            )
+    return errors
+
+
 def validate_pair(pair: PairPaths) -> list[str]:
     """Return raw, extended, and exact-synchronization validation errors."""
 
@@ -1516,7 +1607,14 @@ def validate_pair(pair: PairPaths) -> list[str]:
     errors = list(raw_errors)
     for error in _validate_extended(extended):
         _append_error(errors, error)
-    if not raw_errors and raw != _extended_sync_surface(extended):
+    appendix_errors = _validate_stage_appendix(extended, pair.stage)
+    for error in appendix_errors:
+        _append_error(errors, error)
+    if (
+        not raw_errors
+        and _appendix_heading_count(extended) == 1
+        and raw != _extended_sync_surface(extended)
+    ):
         _append_error(errors, DRIFT_ERROR)
     return errors
 

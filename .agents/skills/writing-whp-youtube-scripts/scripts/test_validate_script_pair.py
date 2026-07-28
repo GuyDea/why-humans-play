@@ -14,6 +14,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from validate_script_pair import (
     EVIDENCE_RE,
+    _extended_sync_surface,
     _has_raw_citation,
     _has_unsupported_html,
     _has_nested_block_structure,
@@ -72,6 +73,48 @@ The opening asks the central question.
 """
 
 DRIFT_ERROR = "extended narration does not exactly match raw"
+TEMPLATE_PATH = (
+    SCRIPT_DIR.parent / "assets" / "annotated-script-template.md"
+)
+
+DRAFT_EXTENDED = """# Episode
+
+## 1. Opening
+
+[MAIN HOOK | LOCKED WORDING — Opens the central personal-risk question.]
+
+> <u>**Could this happen to you?**</u>
+
+[MINI-HOOK — Turns the opening into the next evidence need.]
+
+> *But the next result changed the question.*
+
+## Appendix
+
+### Draft metadata
+
+- **Status:** DRAFT
+
+### Story progression and payoff audit
+
+- The opening question pays off in the final beat.
+
+### Evidence boundaries
+
+- The current evidence supports only the bounded mechanism claim.
+
+### Spoken-readability result
+
+- PASS.
+
+### Personal-input decision
+
+- OMIT.
+
+### Creative-approval state
+
+- Awaiting creative approval.
+"""
 
 
 class ScriptPairTests(unittest.TestCase):
@@ -139,9 +182,28 @@ class ScriptPairTests(unittest.TestCase):
         *,
         raw: str = RAW,
         extended: str = EXTENDED,
+        stage: str = "blueprint",
     ) -> list[str]:
-        stage_dir = self.make_pair(raw=raw, extended=extended)
+        stage_dir = self.make_pair(
+            raw=raw,
+            extended=extended,
+            stage=stage,
+        )
         return validate_pair(resolve_pair(stage_dir))
+
+    def make_valid_final_pair(self) -> Path:
+        extended = TEMPLATE_PATH.read_text(encoding="utf-8")
+        extended = extended.replace(
+            "- **Decision:** INPUT-REQUESTED",
+            "- **Decision:** COMPLETED",
+            1,
+        ).replace(
+            "> <!-- PI-001: Martin input -->\n",
+            "",
+            1,
+        )
+        raw = _extended_sync_surface(extended)
+        return self.make_pair(raw=raw, extended=extended, stage="final")
 
     def test_resolves_either_file_or_stage_directory(self) -> None:
         stage_dir = self.make_pair()
@@ -311,6 +373,141 @@ class ScriptPairTests(unittest.TestCase):
         self.assertEqual(
             self.validation_errors(raw=raw),
             ["raw script cannot contain an Appendix"],
+        )
+
+    def test_blueprint_requires_one_appendix_with_status_and_headings(
+        self,
+    ) -> None:
+        self.assertEqual(self.validation_errors(), [])
+
+        required_headings = (
+            "### Blueprint metadata",
+            "### Factual boundary and unresolved dependencies",
+            "### Intro design record",
+            "### Body logic map",
+            "### Promise and loop payoff map",
+            "### Approval state",
+        )
+        for heading in required_headings:
+            with self.subTest(missing_heading=heading):
+                extended = EXTENDED.replace(f"{heading}\n\n", "", 1)
+                self.assertEqual(
+                    self.validation_errors(extended=extended),
+                    [f"blueprint appendix requires heading: {heading}"],
+                )
+
+        wrong_status = EXTENDED.replace(
+            "- **Status:** BLUEPRINT",
+            "- **Status:** DRAFT",
+            1,
+        )
+        self.assertEqual(
+            self.validation_errors(extended=wrong_status),
+            [
+                "blueprint appendix requires status "
+                "'- **Status:** BLUEPRINT'"
+            ],
+        )
+
+    def test_draft_requires_one_appendix_with_status_and_headings(self) -> None:
+        self.assertEqual(
+            self.validation_errors(
+                extended=DRAFT_EXTENDED,
+                stage="draft",
+            ),
+            [],
+        )
+
+        required_headings = (
+            "### Draft metadata",
+            "### Story progression and payoff audit",
+            "### Evidence boundaries",
+            "### Spoken-readability result",
+            "### Personal-input decision",
+            "### Creative-approval state",
+        )
+        for heading in required_headings:
+            with self.subTest(missing_heading=heading):
+                extended = DRAFT_EXTENDED.replace(f"{heading}\n\n", "", 1)
+                self.assertEqual(
+                    self.validation_errors(
+                        extended=extended,
+                        stage="draft",
+                    ),
+                    [f"draft appendix requires heading: {heading}"],
+                )
+
+        wrong_status = DRAFT_EXTENDED.replace(
+            "- **Status:** DRAFT",
+            "- **Status:** BLUEPRINT",
+            1,
+        )
+        self.assertEqual(
+            self.validation_errors(
+                extended=wrong_status,
+                stage="draft",
+            ),
+            ["draft appendix requires status '- **Status:** DRAFT'"],
+        )
+
+    def test_extended_requires_exactly_one_appendix_heading(self) -> None:
+        for stage, extended in (
+            ("blueprint", EXTENDED),
+            ("draft", DRAFT_EXTENDED),
+        ):
+            without_appendix = extended.split("\n## Appendix\n", 1)[0] + "\n"
+            duplicate = extended + "\n## Appendix\n"
+            for candidate, count in (
+                (without_appendix, 0),
+                (duplicate, 2),
+            ):
+                with self.subTest(stage=stage, count=count):
+                    self.assertEqual(
+                        self.validation_errors(
+                            extended=candidate,
+                            stage=stage,
+                        ),
+                        [
+                            "extended script requires exactly one Appendix; "
+                            f"found {count}"
+                        ],
+                    )
+
+    def test_final_strips_purpose_lines_and_preserves_inline_evidence(
+        self,
+    ) -> None:
+        stage_dir = self.make_valid_final_pair()
+
+        self.assertEqual(validate_pair(resolve_pair(stage_dir)), [])
+
+    def test_final_prefixes_annotated_validator_errors(self) -> None:
+        stage_dir = self.make_valid_final_pair()
+        extended_path = stage_dir / "script.extended.md"
+        extended = extended_path.read_text(encoding="utf-8").replace(
+            "- **Status:** RESEARCH-DRAFT",
+            "- **Status:** NOT-A-READINESS-STATE",
+            1,
+        )
+        extended_path.write_text(extended, encoding="utf-8")
+
+        errors = validate_pair(resolve_pair(stage_dir))
+
+        self.assertTrue(errors)
+        self.assertTrue(
+            all(
+                error.startswith("final appendix:")
+                or error == DRIFT_ERROR
+                for error in errors
+            ),
+            errors,
+        )
+        self.assertTrue(
+            any(
+                error.startswith("final appendix:")
+                and "Invalid readiness Status" in error
+                for error in errors
+            ),
+            errors,
         )
 
     def test_raw_purity_rejects_nonspoken_structure(self) -> None:

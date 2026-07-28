@@ -19,32 +19,41 @@
 
 ## Purpose and source of truth
 
-Keep one Markdown document as the source of truth for each script, but give it two reading
-layers. Put the complete readable narration first as numbered beats. Put all metadata,
-evidence, and production direction in a final appendix whose beat entries match those
-narration beats. Do not maintain separate editable narration and production documents that
-can drift out of sync.
+This reference owns only the complete `final/script.extended.md` appendix. The
+[Script Artifact Pair](script-artifact-pair.md) reference owns the paired files, exact
+synchronization, storytelling markup, purpose annotations, and stage promotion.
+`final/script.raw.md` owns every spoken word and all storytelling markup.
+`final/script.extended.md` mirrors that raw narration exactly, then adds purpose
+annotations, inline evidence indicators, and the production appendix defined here.
+
+Validate the raw/extended pair first. Pair validation removes standalone purpose
+annotation lines only for the final appendix structural check, preserves inline evidence,
+and delegates that annotation-free extended view to the annotated-script validator. This
+keeps raw authoritative while retaining one review and production view that cannot silently
+drift from it.
 
 ## Document layers
 
-Use this top-level order:
+Use this top-level order in `final/script.extended.md`:
 
 1. H1 episode heading.
 2. Numbered narration-only beats.
 3. One `## Appendix` heading containing script metadata, production notes, editorial audit
    results, and references.
 
-Do not put header fields, timestamps, targets, story-function labels, claims, citations
-other than required inline evidence indicators, visuals, edit instructions, on-screen text,
-audio notes, accessibility notes, assets, personal-input fields, viewer-application fields,
-or editorial commentary in the numbered narration layer.
+The extended narration layer may add grouped standalone purpose annotations immediately
+before the passages they explain. Do not put header fields, timestamps, targets,
+story-function labels, claims, citations other than required inline evidence indicators,
+visuals, edit instructions, on-screen text, audio notes, accessibility notes, assets,
+personal-input fields, viewer-application fields, or editorial commentary in that layer.
 
 ## Numbered narration-only beats
 
-Use ordinary ascending numbers and a descriptive title. The beat body may contain only
-spoken blockquotes, blank lines, unresolved personal-input markers inside blockquotes,
-inline evidence indicators appended to mapped factual narration inside those blockquotes,
-and locked-line bolding on sentences that must be delivered word-perfect:
+Use ordinary ascending numbers and a descriptive title. In the final extended view, the
+beat body may contain only grouped standalone purpose annotations, spoken blockquotes,
+blank lines, unresolved personal-input markers inside blockquotes, inline evidence
+indicators appended to mapped factual narration inside those blockquotes, and the
+storytelling markup mirrored from raw:
 
 ```markdown
 ## 1. Descriptive name
@@ -483,7 +492,15 @@ only the extracted spoken words after those review annotations are removed when 
 
 ## Validation
 
-Resolve the target script path to an absolute path at runtime before changing to the skill directory. Resolve the skill directory from the loaded `SKILL.md`, change to it, and run:
+Validate the raw/extended pair first through the mandatory command owned by
+[Script Artifact Pair](script-artifact-pair.md). For a final pair, that validator applies
+this complete appendix schema after removing standalone purpose annotations and without
+removing inline evidence.
+
+The annotated-script validator remains the lower-level structural engine. When diagnosing
+an annotation-free final extended projection, follow this lower-level procedure.
+Resolve the target script path to an absolute path at runtime before changing to the skill directory. Resolve the skill directory from
+the loaded `SKILL.md`, change to it, and run:
 
 ```bash
 python3 scripts/validate_annotated_script.py -- "<resolved-script-path>"
