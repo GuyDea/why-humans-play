@@ -23,7 +23,9 @@ EVIDENCE_MARKER_RE = re.compile(r"\s*\[?F-\d{3}\]?", re.IGNORECASE)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 BARE_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
-LOCKED_LINE_BOLD_RE = re.compile(r"\*\*")
+STORYTELLING_MARKUP_RE = re.compile(
+    r"</?u>|(?<!\*)\*{1,3}(?!\*)"
+)
 WORD_RE = re.compile(r"[^\W_]+(?:[’'-][^\W_]+)*", re.UNICODE)
 SENTENCE_END_RE = re.compile(r"[.!?]+[”\"’']*(?=\s+|$)")
 RELATIONSHIP_RE = re.compile(
@@ -82,7 +84,7 @@ def _strip_non_spoken_annotations(text: str) -> str:
     text = EVIDENCE_MARKER_RE.sub("", text)
     text = MARKDOWN_LINK_RE.sub(r"\1", text)
     text = BARE_URL_RE.sub("", text)
-    text = LOCKED_LINE_BOLD_RE.sub("", text)
+    text = STORYTELLING_MARKUP_RE.sub("", text)
     return " ".join(text.split())
 
 

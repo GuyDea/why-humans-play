@@ -42,6 +42,31 @@ Metadata does not count.
             ["This locked punchline is delivered word-perfect."],
         )
 
+    def test_storytelling_markup_is_not_extracted_as_spoken_text(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> <u>**This main hook stays locked.**</u>\n"
+            "\n"
+            "> ***But this mini-hook is also locked.***\n"
+        )
+
+        self.assertEqual(
+            [sentence.text for sentence in sentences],
+            [
+                "This main hook stays locked.",
+                "But this mini-hook is also locked.",
+            ],
+        )
+
+    def test_arbitrary_html_is_not_stripped_as_storytelling_markup(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> <mark>This tag remains visible.</mark>\n"
+        )
+
+        self.assertEqual(
+            [sentence.text for sentence in sentences],
+            ["<mark>This tag remains visible.</mark>"],
+        )
+
     def test_splits_multiple_spoken_sentences_from_one_blockquote_line(self) -> None:
         sentences = extract_spoken_sentences(
             '> First sentence. “Second sentence?” Third sentence!\n'
