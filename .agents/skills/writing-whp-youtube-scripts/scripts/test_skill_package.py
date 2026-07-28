@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 import re
 import unittest
 from pathlib import Path
+
+from validate_script_pair import resolve_pair, validate_pair
 
 
 SKILL_ROOT = Path(__file__).resolve().parents[1]
@@ -21,6 +24,8 @@ AGENTS_MD = REPO_ROOT / "AGENTS.md"
 CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
 RECONCILE_MD = REPO_ROOT / ".agents" / "skills" / "reconcile-whp" / "SKILL.md"
 CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
+PAIR_EVIDENCE_RE = re.compile(r"\s*\[F-\d{3}\]\([^)]+\)")
+PAIR_STORY_MARKUP_RE = re.compile(r"</?u>|\*{1,3}")
 
 PAIR_CONSUMER_PATHS = {
     "skill": SKILL_MD,
@@ -92,7 +97,35 @@ def markdown_section(text: str, heading: str) -> str:
     return remainder
 
 
+def spoken_digest(path: Path) -> str:
+    spoken = " ".join(
+        line[1:].lstrip()
+        for line in path.read_text(encoding="utf-8").splitlines()
+        if line.startswith(">")
+    )
+    spoken = PAIR_EVIDENCE_RE.sub("", spoken)
+    spoken = PAIR_STORY_MARKUP_RE.sub("", spoken)
+    normalized = " ".join(spoken.split())
+    return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+
+
 class SkillPackageTests(unittest.TestCase):
+    def test_episode_one_blueprint_pair_is_valid(self) -> None:
+        stage = (
+            REPO_ROOT
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-ai-dangerous-advice"
+            / "blueprint"
+        )
+        self.assertTrue((stage / "script.raw.md").is_file())
+        self.assertTrue((stage / "script.extended.md").is_file())
+        self.assertEqual(validate_pair(resolve_pair(stage)), [])
+        self.assertEqual(
+            spoken_digest(stage / "script.raw.md"),
+            "f24eb7531093f73fd9779d05b05f4a0a5c54ac54acadc7a46f7b12e898fc2a7c",
+        )
+
     def test_episode_blueprint_contract_is_intro_first(self) -> None:
         skill = SKILL_MD.read_text(encoding="utf-8")
         normalized = " ".join(skill.split())
