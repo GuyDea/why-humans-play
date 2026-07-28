@@ -47,8 +47,9 @@ logic map, production note, audit, or appendix.
 `script.extended.md` mirrors the raw title, beat headings, blockquoted narration, wording,
 order, and storytelling markup exactly. It may add only:
 
-- grouped standalone `[TAG — episode-specific purpose]` annotations immediately before
-  the passage they explain;
+- grouped standalone `[TAG — episode-specific purpose]` or
+  `[TAG | TAG — episode-specific purpose]` annotations immediately before the passage
+  they explain;
 - inline evidence indicators when the current stage requires them; and
 - one stage-appropriate appendix.
 
@@ -72,9 +73,13 @@ Use only these purpose tags:
 - `LOCKED WORDING`
 
 Multiple tags may share an annotation when one passage genuinely performs multiple
-jobs. Group adjacent sentences only when they perform the same job. The explanation
-after the em dash must name that passage's episode-specific purpose; a generic tag is
-not enough.
+jobs. Use the literal multi-tag grammar
+`[TAG | TAG — episode-specific purpose]`. For example:
+`[MAIN HOOK | LOCKED WORDING — Opens the episode's central question in wording that must
+be delivered exactly.]`
+
+Group adjacent sentences only when they perform the same job. The explanation after the
+em dash must name that passage's episode-specific purpose; a generic tag is not enough.
 
 ## Storytelling markup
 
@@ -116,10 +121,16 @@ accessibility, and editorial records.
 
 ## Validate the pair before review or promotion
 
-Run the pair validator first. Then run the spoken-readability checker on
-`script.raw.md`. For `final/`, also run the annotated-script validator on
-`script.extended.md` after pair validation succeeds. A stage is not ready for review,
-approval, or promotion while any required check fails.
+Run this mandatory first command:
+
+```bash
+python3 scripts/validate_script_pair.py -- "<stage-or-pair-path>"
+```
+
+Only after it succeeds, run the spoken-readability checker on `script.raw.md`. For
+`final/`, also run the annotated-script validator on `script.extended.md` after pair
+validation succeeds. A stage is not ready for review, approval, or promotion while any
+required check fails.
 
 ## Promote without overwriting
 

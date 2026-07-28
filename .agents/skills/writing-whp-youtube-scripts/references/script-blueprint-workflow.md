@@ -2,10 +2,12 @@
 
 ## Purpose and ownership
 
-This file owns the exact episode-scale Script Blueprint contents and intro-readiness
-approval gate. The [script artifact pair](script-artifact-pair.md) owns the paired
-filenames, episode path, raw/extended synchronization, storytelling markup, purpose
-annotations, stage appendix boundary, validation order, and promotion mechanics.
+This file owns the editorial design of the polished intro and bullet-only body logic map,
+plus the intro-readiness approval gate. The
+[script artifact pair](script-artifact-pair.md) is the only authority for paired
+filenames, episode paths, raw/extended synchronization, storytelling markup, purpose
+annotations, literal appendix structure and required sections, validation order, and
+promotion mechanics.
 The [story and hook method](story-and-hook-method.md) owns the storytelling-technique
 inventory and progression logic. The
 [rapid drafting method](rapid-prototyping.md) owns sentence-level hook, transition,
@@ -27,22 +29,24 @@ create:
 - `whp-youtube/episodes/epNNN-stable-name/blueprint/script.extended.md`, mirroring that
   complete intro, adding grouped purpose annotations, and holding the BLUEPRINT appendix.
 
-Do not write body narration in either blueprint file. In the extended appendix, record:
+Do not write body narration in either blueprint file. Place the editorial outputs below
+in the owner-defined `BLUEPRINT` appendix; follow the pair owner for its literal heading
+and required sections.
 
-1. **Status and baselines:** title, `BLUEPRINT` status, approved architecture and
-   progression references, factual boundary, and any unresolved dependency.
-2. **Intro design record:** the specific human nerve and title promise; the intro jobs
-   selected; the evidence-earned techniques used; and any high-value technique considered
-   but rejected because it would duplicate another move, sound forced, exceed the evidence,
-   or open a loop the body cannot pay.
-3. **Body logic map:** bullet points only. Use one block per planned beat with:
-   - **What the viewer learns**
-   - **Why this beat comes here**
-   - **Evidence or story job and boundary**
-   - **Incoming transition**
-   - **Outgoing transition or mini-hook**
-   - **Promise or loop payoff**
-4. **Approval:** current intro and body-map approval state.
+Construct the intro design record by identifying the specific human nerve and title
+promise, the intro jobs selected, the evidence-earned techniques used, and any
+high-value technique considered but rejected because it would duplicate another move,
+sound forced, exceed the evidence, or open a loop the body cannot pay.
+
+Construct the bullet-only body logic map as one block per planned beat. In each block,
+answer these editorial questions:
+
+- **What the viewer learns**
+- **Why this beat comes here**
+- **Evidence or story job and boundary**
+- **Incoming transition**
+- **Outgoing transition or mini-hook**
+- **Promise or loop payoff**
 
 The raw intro must already pass the rapid method's natural-transition, walking-vlog,
 sentence-function, and spoken-readability checks.

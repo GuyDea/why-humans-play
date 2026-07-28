@@ -8,9 +8,9 @@
   explicit acceptance of a concrete proposal whose consequences are clear.
 - Recommendations, brainstorming, questions, rejected alternatives, silence, and
   partially resolved proposals are not decisions.
-- Edits to pre-draft scripts under `whp-youtube/predrafts/` are brainstorming by
-  definition and never definite decisions; a pre-draft's promotion into
-  `whp-youtube/drafts/` is the decision to reconcile.
+- Edits to an episode's Script Blueprint pair under its episode-first `blueprint/`
+  stage are exploratory and never definite decisions; only validated promotion from
+  `blueprint/` into that episode's `draft/` pair is reconciled.
 - Explicit agreement authorizes the resulting content updates. If the accepted outcome
   or its downstream meaning is ambiguous, ask one focused question before editing.
 - Reconciliation never overrides branch-isolation, approval, filesystem, or

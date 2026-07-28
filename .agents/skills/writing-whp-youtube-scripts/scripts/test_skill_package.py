@@ -17,7 +17,79 @@ FORMAT_MD = SKILL_ROOT / "references/annotated-script-format.md"
 RUBRIC_MD = SKILL_ROOT / "references/quality-rubric.md"
 TEMPLATE_MD = SKILL_ROOT / "assets/annotated-script-template.md"
 STEERING_MD = REPO_ROOT / "whp-youtube" / "STEERING.md"
+AGENTS_MD = REPO_ROOT / "AGENTS.md"
+CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
+RECONCILE_MD = REPO_ROOT / ".agents" / "skills" / "reconcile-whp" / "SKILL.md"
 CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
+
+PAIR_CONSUMER_PATHS = {
+    "skill": SKILL_MD,
+    "blueprint": BLUEPRINT_WORKFLOW_MD,
+    "rapid": RAPID_MD,
+    "story": STORY_METHOD_MD,
+    "rubric": RUBRIC_MD,
+    "steering": STEERING_MD,
+}
+PAIR_OWNER_LINKS = {
+    "skill": "(references/script-artifact-pair.md)",
+    "blueprint": "(script-artifact-pair.md)",
+    "rubric": "(script-artifact-pair.md)",
+    "steering": (
+        "(../.agents/skills/writing-whp-youtube-scripts/"
+        "references/script-artifact-pair.md)"
+    ),
+}
+ACTIVE_DOCUMENT_PATHS = {
+    "agents": AGENTS_MD,
+    "claude": CLAUDE_MD,
+    "reconcile": RECONCILE_MD,
+    "pair": PAIR_METHOD_MD,
+    **PAIR_CONSUMER_PATHS,
+}
+
+
+def normalize_text(text: str) -> str:
+    return " ".join(text.split())
+
+
+def read_documents(
+    paths: dict[str, Path], *, normalized: bool = False
+) -> dict[str, str]:
+    documents = {
+        name: path.read_text(encoding="utf-8")
+        for name, path in paths.items()
+    }
+    if normalized:
+        return {
+            name: normalize_text(text)
+            for name, text in documents.items()
+        }
+    return documents
+
+
+def pair_consumer_documents(*, normalized: bool = False) -> dict[str, str]:
+    return read_documents(PAIR_CONSUMER_PATHS, normalized=normalized)
+
+
+def active_workflow_documents(*, normalized: bool = False) -> dict[str, str]:
+    documents = read_documents(ACTIVE_DOCUMENT_PATHS)
+    documents["steering"] = documents["steering"].split("\n# PART 2", 1)[0]
+    if normalized:
+        return {
+            name: normalize_text(text)
+            for name, text in documents.items()
+        }
+    return documents
+
+
+def markdown_section(text: str, heading: str) -> str:
+    marker = f"{heading}\n"
+    remainder = text.split(marker, 1)[1]
+    level = len(heading) - len(heading.lstrip("#"))
+    next_heading = re.search(rf"(?m)^#{{1,{level}}} ", remainder)
+    if next_heading:
+        return remainder[: next_heading.start()]
+    return remainder
 
 
 class SkillPackageTests(unittest.TestCase):
@@ -92,17 +164,8 @@ class SkillPackageTests(unittest.TestCase):
         self.assertTrue(PAIR_METHOD_MD.is_file())
         self.assertTrue(BLUEPRINT_WORKFLOW_MD.is_file())
 
-        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
-        consumers = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "blueprint": " ".join(
-                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
-            ),
-            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
-            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
-            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
-            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
-        }
+        pair = normalize_text(PAIR_METHOD_MD.read_text(encoding="utf-8"))
+        consumers = pair_consumer_documents(normalized=True)
         contracts = (
             "## Episode-first directory contract",
             "## Raw script contract",
@@ -121,27 +184,14 @@ class SkillPackageTests(unittest.TestCase):
                 with self.subTest(consumer=consumer_name, excluded=contract):
                     self.assertNotIn(contract, consumer)
 
-        self.assertIn(
-            "(references/script-artifact-pair.md)",
-            SKILL_MD.read_text(encoding="utf-8"),
-        )
-        self.assertIn(
-            "(script-artifact-pair.md)",
-            BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8"),
-        )
+        raw_consumers = pair_consumer_documents()
+        for consumer_name, owner_link in PAIR_OWNER_LINKS.items():
+            with self.subTest(consumer=consumer_name, owner_link=owner_link):
+                self.assertIn(owner_link, raw_consumers[consumer_name])
 
     def test_pair_owner_locks_complete_raw_source_of_truth(self) -> None:
-        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
-        consumers = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "blueprint": " ".join(
-                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
-            ),
-            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
-            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
-            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
-            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
-        }
+        pair = normalize_text(PAIR_METHOD_MD.read_text(encoding="utf-8"))
+        consumers = pair_consumer_documents(normalized=True)
         contract = (
             "`script.raw.md` is the source of truth for every spoken word; paragraph "
             "order; beat titles, headings, and their order; and bold, italic, and "
@@ -154,59 +204,148 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertNotIn(contract, consumer)
 
     def test_pair_owner_locks_literal_stage_appendix_schemas(self) -> None:
-        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
-        consumers = {
-            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
-            "blueprint": " ".join(
-                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
-            ),
-            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
-            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
-            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
-            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
+        pair = PAIR_METHOD_MD.read_text(encoding="utf-8")
+        stage_appendices = markdown_section(pair, "## Stage appendices")
+        appendix_sections = {
+            "blueprint": markdown_section(stage_appendices, "### BLUEPRINT"),
+            "draft": markdown_section(stage_appendices, "### DRAFT"),
+            "final": markdown_section(stage_appendices, "### Final"),
         }
-        contracts = (
+        required_tokens = {
+            "blueprint": (
+                "stage metadata",
+                "approved baselines",
+                "factual boundary",
+                "unresolved dependencies",
+                "intro design record",
+                "bullet-only body logic map",
+                "promise and loop payoff destinations",
+                "approval state",
+            ),
+            "draft": (
+                "stage metadata",
+                "approved baselines",
+                "story-progression and payoff audit",
+                "evidence boundaries",
+                "open verification dependencies",
+                "spoken-readability result",
+                "unresolved personal-input decision",
+                "creative-approval state",
+            ),
+            "final": (
+                "complete final extended appendix",
+                "annotated-script format",
+                "[that format](annotated-script-format.md)",
+            ),
+        }
+
+        self.assertIn(
             "Every extended file ends with exactly one literal `## Appendix`.",
-            "Include stage metadata, approved baselines, the factual boundary and "
-            "unresolved dependencies, the intro design record, a bullet-only body "
-            "logic map, promise and loop payoff destinations, and the approval state.",
-            "Include stage metadata, approved baselines, the story-progression and "
-            "payoff audit, evidence boundaries and open verification dependencies, "
-            "the spoken-readability result, the unresolved personal-input decision, "
-            "and the creative-approval state.",
-            "Use the complete final extended appendix owned by the annotated-script "
-            "format",
+            stage_appendices,
+        )
+        for section_name, tokens in required_tokens.items():
+            section = normalize_text(appendix_sections[section_name]).lower()
+            for token in tokens:
+                with self.subTest(section=section_name, required=token):
+                    self.assertIn(token.lower(), section)
+
+        consumers = pair_consumer_documents(normalized=True)
+        for consumer_name, consumer in consumers.items():
+            for owner_contract in (
+                "## Stage appendices",
+                "Every extended file ends with exactly one literal `## Appendix`.",
+            ):
+                with self.subTest(
+                    consumer=consumer_name, forbidden_owner_contract=owner_contract
+                ):
+                    self.assertNotIn(owner_contract, consumer)
+
+        blueprint = consumers["blueprint"]
+        for forbidden_schema in (
+            "owns the exact episode-scale Script Blueprint contents",
+            "**Status and baselines:**",
+            "`BLUEPRINT` status",
+            "approved architecture and progression references",
+            "factual boundary, and any unresolved dependency",
+            "**Approval:**",
+            "current intro and body-map approval state",
+        ):
+            with self.subTest(
+                consumer="blueprint", forbidden_schema=forbidden_schema
+            ):
+                self.assertNotIn(forbidden_schema, blueprint)
+        for editorial_contract in (
+            "editorial design",
+            "polished intro",
+            "bullet-only body logic map",
+            "literal appendix structure",
+            "required sections",
+            "owner-defined `BLUEPRINT` appendix",
+        ):
+            with self.subTest(
+                consumer="blueprint", editorial_contract=editorial_contract
+            ):
+                self.assertIn(editorial_contract, blueprint)
+
+    def test_pair_validator_command_is_owner_only_and_runs_first(self) -> None:
+        pair = PAIR_METHOD_MD.read_text(encoding="utf-8")
+        validation = markdown_section(
+            pair, "## Validate the pair before review or promotion"
+        )
+        command = (
+            'python3 scripts/validate_script_pair.py -- "<stage-or-pair-path>"'
         )
 
-        for contract in contracts:
-            with self.subTest(owner="pair", contract=contract):
-                self.assertIn(contract, pair)
-            for consumer_name, consumer in consumers.items():
-                with self.subTest(consumer=consumer_name, excluded=contract):
-                    self.assertNotIn(contract, consumer)
+        self.assertIn("mandatory first command", validation)
+        self.assertEqual(pair.count(command), 1)
+        self.assertIn(command, validation)
+        self.assertLess(validation.index(command), validation.index("spoken-readability"))
+        self.assertLess(
+            validation.index(command), validation.index("annotated-script validator")
+        )
+        for consumer_name, consumer in pair_consumer_documents().items():
+            with self.subTest(consumer=consumer_name):
+                self.assertNotIn(command, consumer)
+
+    def test_pair_owner_defines_literal_multi_tag_annotation_grammar(self) -> None:
+        pair = PAIR_METHOD_MD.read_text(encoding="utf-8")
+        extended = markdown_section(pair, "## Extended script contract")
+        normalized_extended = normalize_text(extended)
+        grammar = "`[TAG | TAG — episode-specific purpose]`"
+        example = (
+            "`[MAIN HOOK | LOCKED WORDING — Opens the episode's central question in "
+            "wording that must be delivered exactly.]`"
+        )
+
+        self.assertIn(grammar, normalized_extended)
+        self.assertIn(example, normalized_extended)
+        match = re.search(
+            r"`\[(MAIN HOOK) \| (LOCKED WORDING) — ([^]]+)\]`",
+            normalized_extended,
+        )
+        self.assertIsNotNone(match)
+        for tag in match.group(1, 2):
+            with self.subTest(allowed_tag=tag):
+                self.assertIn(f"- `{tag}`", extended)
+        self.assertTrue(match.group(3).strip())
+        for consumer_name, consumer in pair_consumer_documents().items():
+            with self.subTest(consumer=consumer_name):
+                self.assertNotIn(grammar, consumer)
 
     def test_active_workflow_uses_blueprint_not_predraft(self) -> None:
         self.assertTrue(BLUEPRINT_WORKFLOW_MD.is_file())
 
-        active_text = "\n".join(
-            (
-                SKILL_MD.read_text(encoding="utf-8"),
-                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8"),
-                RAPID_MD.read_text(encoding="utf-8"),
-                STORY_METHOD_MD.read_text(encoding="utf-8"),
-                RUBRIC_MD.read_text(encoding="utf-8"),
-                STEERING_MD.read_text(encoding="utf-8").split("\n# PART 2", 1)[0],
-            )
-        ).lower()
-
+        active_documents = active_workflow_documents()
         for retired in (
             "predraft-intro-workflow.md",
             "whp-youtube/predrafts/",
             "pre-draft",
         ):
-            with self.subTest(retired=retired):
-                self.assertNotIn(retired, active_text)
+            for document_name, document in active_documents.items():
+                with self.subTest(document=document_name, retired=retired):
+                    self.assertNotIn(retired, document.lower())
 
+        active_text = "\n".join(active_documents.values()).lower()
         for active in (
             "script blueprint",
             "blueprint/script.raw.md",
@@ -214,6 +353,31 @@ class SkillPackageTests(unittest.TestCase):
         ):
             with self.subTest(active=active):
                 self.assertIn(active, active_text)
+
+        lifecycle_contract = (
+            "Edits to an episode's Script Blueprint pair under its episode-first "
+            "`blueprint/` stage are exploratory and never definite decisions; only "
+            "validated promotion from `blueprint/` into that episode's `draft/` pair "
+            "is reconciled."
+        )
+        for root_document in ("agents", "claude"):
+            with self.subTest(root_document=root_document):
+                self.assertIn(
+                    lifecycle_contract,
+                    normalize_text(active_documents[root_document]),
+                )
+
+        reconcile = normalize_text(active_documents["reconcile"])
+        for lifecycle_token in (
+            "Script Blueprint pair",
+            "exploratory",
+            "never as definite decisions",
+            "validated promotion",
+            "`blueprint/`",
+            "`draft/`",
+        ):
+            with self.subTest(document="reconcile", lifecycle=lifecycle_token):
+                self.assertIn(lifecycle_token, reconcile)
 
     def test_unresolved_template_personal_scaffold_stays_conditional(self) -> None:
         template = (
