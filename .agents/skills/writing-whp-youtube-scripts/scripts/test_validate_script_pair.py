@@ -989,17 +989,17 @@ class ScriptPairTests(unittest.TestCase):
             ),
             ("empty destination", "[source]()", [citation_error]),
             (
-                "double-quoted title",
-                '[source](/url "title")',
+                "double-quoted title with an unmatched opener",
+                '[source](/url "title (")',
                 [citation_error],
             ),
             (
-                "single-quoted title",
-                "[source](/url 'title')",
+                "single-quoted title with an unmatched opener",
+                "[source](/url 'title (')",
                 [citation_error],
             ),
             (
-                "parenthesized title",
+                "parenthesized title control",
                 "[source](/url (title))",
                 [citation_error],
             ),

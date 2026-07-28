@@ -640,7 +640,8 @@ def _surface_has_raw_citation(
 ) -> bool:
     """Detect complete citations on one logical Markdown surface."""
 
-    bracket_pairs, parenthesis_pairs = _balanced_delimiter_pairs(surface)
+    bracket_pairs, _ = _balanced_delimiter_pairs(surface)
+    last_inline_closer = surface.rfind(")")
     definition_opener: int | None = None
     if allow_reference_definition:
         indentation = 0
@@ -669,7 +670,8 @@ def _surface_has_raw_citation(
             return True
         if (
             surface[suffix] == "("
-            and suffix in parenthesis_pairs
+            and not _is_escaped(surface, suffix)
+            and suffix < last_inline_closer
             and _inline_link_end(surface, suffix) is not None
         ) or (
             surface[suffix] == "["
