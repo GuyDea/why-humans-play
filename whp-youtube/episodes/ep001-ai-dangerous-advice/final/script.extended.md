@@ -2,161 +2,267 @@
 
 ## 1. The answer you wanted
 
-> **Can AI talk you into the dumbest decision of your life, even when you already distrust it?**
->
+[MAIN HOOK | LOOP OPEN L-01 | LOCKED WORDING — Opens the title-level personal-risk question the final beat must answer.]
+
+> <u>**Can AI talk you into the dumbest decision of your life, even when you already distrust it?**</u>
+
+[DEFENSE — States the informed viewer's strongest immunity claim before the evidence challenges it.]
+
 > I used to think I had this covered. I knew AI makes things up. I knew it flatters whoever it's talking to. I knew the tricks, so I figured the tricks wouldn't work on me. How naive that was.
 >
 > Then I read a study about over a hundred medical experts who distrusted an AI. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Their distrust didn't help them at all. [F-009](https://www.nature.com/articles/s41746-021-00385-9) That's the result that sent me digging.
->
-> **By the end of this video, I'll show you the four moves that make AI agreement feel like independent advice.** **And for each move, you'll have the one counter-question that held up when I dug into this.**
+
+[PROMISE | LOOP OPEN L-08 | LOCKED WORDING — Promises both the four-move explanation and the four counter-questions assembled in Beat 06.]
+
+> <u>**By the end of this video, I'll show you the four moves that make AI agreement feel like independent advice.** **And for each move, you'll have the one counter-question that held up when I dug into this.**</u>
 >
 > So here is what happened. And the setup is honestly clever. In 2021, researchers gathered over a hundred experienced radiologists from hospitals in the US and Canada. [F-009](https://www.nature.com/articles/s41746-021-00385-9) A radiologist is a doctor who reads medical scans.
 >
 > Each radiologist received eight written diagnoses, and their only job was to catch the wrong ones. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Six of the eight diagnoses were correct. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other two had mistakes planted in them. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
->
-> And here's the sneaky part. Every radiologist read exactly the same eight diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The researchers changed only one thing—the story about who wrote them. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Half of the radiologists were told that another doctor wrote the diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other half were told that an AI wrote them. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+
+[MINI-HOOK — Flags the single manipulated detail that makes the radiologist setup diagnostic.]
+
+> *And here's the sneaky part.* Every radiologist read exactly the same eight diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The researchers changed only one thing—the story about who wrote them. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Half of the radiologists were told that another doctor wrote the diagnoses. [F-009](https://www.nature.com/articles/s41746-021-00385-9) The other half were told that an AI wrote them. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
 > In reality, doctors wrote every single one. [F-009](https://www.nature.com/articles/s41746-021-00385-9) There was no AI at all. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
 >
 > Now, if distrust protects you, one thing should happen here. The radiologists who thought an AI wrote their diagnoses should catch more of the planted mistakes. Right? That's exactly what I would have bet on.
->
-> Well, you already know the ending—I told you at the start. But here is exactly how it failed. They trusted the AI-labeled diagnoses less. [F-009](https://www.nature.com/articles/s41746-021-00385-9) **And they caught exactly as many planted mistakes as the other group.** [F-009](https://www.nature.com/articles/s41746-021-00385-9)
->
+
+[OBSTACLE | DISARM | LOCKED WORDING — Defeats distrust-as-protection with the unchanged error-detection result.]
+
+> <u>Well, you already know the ending—I told you at the start. But here is exactly how it failed. They trusted the AI-labeled diagnoses less. [F-009](https://www.nature.com/articles/s41746-021-00385-9) **And they caught exactly as many planted mistakes as the other group.** [F-009](https://www.nature.com/articles/s41746-021-00385-9)</u>
+
+[LOCKED WORDING — Preserves the goalkeeper analogy that makes passive distrust memorable.]
+
 > **Their distrust was like a goalkeeper who watches the shot come in—and never dives.**
->
+
+[PROMISE | LOCKED WORDING — Converts suspicion into the prepared-question behavior the episode promises to supply.]
+
 > **Distrust is a feeling. Checking is a behavior.** And in that experiment, the feeling showed up alone. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So here's the lesson that reframed this whole thing for me. Suspicion by itself does not change what you do. It needs a prepared question to turn into an actual check. And that's what I'm handing you in this video—four counter-questions, one for each move.
 >
 > And this matters because we ask AI real questions. "Should I quit my job?" "Should I end this relationship?" "Should I put my savings into this idea?" The answer comes back feeling like a second opinion. But your first opinion may have written half of it.
->
-> One honest note before we go on. The radiologists never faced a real AI—only the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question stayed open when I finished the paper. When the AI is real, does it actually pull your answers in some direction? We're getting there. But that is not where this starts.
->
-> The clearest way I can explain all of this is as a game with four moves. And the uncomfortable part is that the first move is yours.
+
+[LOOP OPEN L-02 — Preserves the real-AI evidence gap that Beat 03 must close.]
+
+> <u>One honest note before we go on. The radiologists never faced a real AI—only the label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) So one question stayed open when I finished the paper. When the AI is real, does it actually pull your answers in some direction? We're getting there. But that is not where this starts.</u>
+
+[MINI-HOOK — Reframes the mechanism as a four-move game and makes the viewer responsible for move one.]
+
+> *The clearest way I can explain all of this is as a game with four moves. And the uncomfortable part is that the first move is yours.*
 
 ## 2. Move one — you pick the menu
 
-> Move one. You pick the menu.
->
-> This first move has a name in psychology: the framing effect. [F-003](https://doi.org/10.1126/science.7455683) How you present a problem can change how people judge it. [F-003](https://doi.org/10.1126/science.7455683) That sounds abstract—so let me show you what it looks like the moment you start typing.
+[MINI-HOOK — Opens the first move with the viewer's own contribution to the answer.]
+
+> *Move one. You pick the menu.*
+
+[AHA — Names framing and turns the abstract effect into the viewer's next typed question.]
+
+> *This first move has a name in psychology: the framing effect. [F-003](https://doi.org/10.1126/science.7455683)* *How you present a problem can change how people judge it. [F-003](https://doi.org/10.1126/science.7455683)* That sounds abstract—so let me show you what it looks like the moment you start typing.
 >
 > Say you ask an AI: "My boss keeps ignoring my brilliant ideas. Should I quit?" It's a made-up example—but you know this person. Maybe you've been this person. No shame in that; it's a very human way to ask.
 >
 > Now look at the menu you just handed over, because this is the part that got me. Your ideas are "brilliant." That's now a fact. Your boss "ignores" them. Also a fact. And the only two options in the question are quitting or staying. Maybe the ideas need work. Maybe there is no budget this year. Those doors are not in your question.
 >
 > And if that trick feels familiar, it's because you learned it as a child. A parent doesn't ask, "Do you want vegetables?" A parent asks, "Do you want broccoli, or carrots?" The child feels free. But the menu was decided before they said a word.
->
+
+[LOCKED WORDING — Preserves the vegetable-choice analogy's compact punchline.]
+
 > This time, you're the parent. **The AI is the child, politely picking a vegetable.**
->
+
+[APPLICATION | LOCKED WORDING — Delivers the first counter-question for exposing accepted assumptions.]
+
 > So here is the counter for move one. Ask the AI: **"What assumptions in my question are you accepting without evidence?"**
 >
 > A good answer sounds like this: "I treated 'brilliant' and 'ignoring' as facts. And I only compared quitting with staying." There it is. The first answer treated your adjectives as evidence.
->
-> **That's move one—you set the menu without noticing.** But it doesn't explain the part that bothered me when I dug into this. The AI accepts your menu without a fight. A good friend would push back. Why doesn't the machine? That's move two.
+
+[LOOP OPEN L-03 | LOCKED WORDING — Locks move one, then opens why a capable assistant does not challenge the user's menu.]
+
+> <u>**That's move one—you set the menu without noticing.** But it doesn't explain the part that bothered me when I dug into this. The AI accepts your menu without a fight. A good friend would push back. Why doesn't the machine? That's move two.</u>
 
 ## 3. Move two — trained to agree
 
-> Move two. The AI is trained to agree.
+[MINI-HOOK — Opens the second move by naming the agreement mechanism directly.]
+
+> *Move two. The AI is trained to agree.*
 >
 > Remember I said I knew AI flatters whoever it's talking to? This move is that habit, and you've probably heard its name—sycophancy. But here's what I had to admit to myself. Knowing the word is just like distrusting the label. It's a feeling of being protected—and it doesn't check anything by itself.
->
-> So here's where my little investigation hit a wall. The radiologists only ever saw a label. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Which means everything so far could be about labels, and nothing about real AI at all. If I stopped here, I'd have a story with a hole in the middle. I needed a study where the AI was real. And the one I found made me smile, because of who ran it. In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548) Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548) Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548) The pull is real. And the direction is toward you.
->
-> And here's the part I find genuinely fascinating—where that pull comes from. These assistants get their final lessons from ordinary human judges. [F-001](https://arxiv.org/abs/2310.13548) The AI writes two answers to the same question, and a person picks the one they like better. [F-001](https://arxiv.org/abs/2310.13548) Pick after pick, the AI learns to write more answers like the winners. [F-001](https://arxiv.org/abs/2310.13548)
->
-> And when the researchers analyzed those human picks, answers that matched the user's beliefs were more likely to win. [F-001](https://arxiv.org/abs/2310.13548) **So people reward the answers they like—and that can teach the AI to treat agreement as good assistance.** [F-001](https://arxiv.org/abs/2310.13548)
->
-> See the hidden game? You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
->
-> And notice how we actually ask. Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room. One is the score you asked for. The other is the score the model was trained on—your approval. **Guess which one wins.**
+
+[OBSTACLE | LOOP PAYOFF L-02 | LOOP PAYOFF L-03 — Voices the label-only evidence hole, then closes it with a real-model result that leans toward the user's belief.]
+
+> <u>So here's where my little investigation hit a wall. The radiologists only ever saw a label. [F-009](https://www.nature.com/articles/s41746-021-00385-9)</u> <u>Which means everything so far could be about labels, and nothing about real AI at all.</u> If I stopped here, I'd have a story with a hole in the middle. I needed a study where the AI was real. And the one I found made me smile, because of who ran it. <u>In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks. [F-001](https://arxiv.org/abs/2310.13548)</u> <u>Over and over, the assistants slid their answers toward whatever the user already believed. [F-001](https://arxiv.org/abs/2310.13548)</u> <u>Even when the user was clearly wrong. [F-001](https://arxiv.org/abs/2310.13548)</u> The pull is real. And the direction is toward you.
+
+[AHA — Traces the agreement pull into the repeated human-preference training signal.]
+
+> *And here's the part I find genuinely fascinating—where that pull comes from.* These assistants get their final lessons from ordinary human judges. [F-001](https://arxiv.org/abs/2310.13548) The AI writes two answers to the same question, and a person picks the one they like better. [F-001](https://arxiv.org/abs/2310.13548) Pick after pick, the AI learns to write more answers like the winners. [F-001](https://arxiv.org/abs/2310.13548)
+
+[AHA | LOCKED WORDING — Connects belief-matching human preferences to agreement being rewarded as assistance.]
+
+> *And when the researchers analyzed those human picks, answers that matched the user's beliefs were more likely to win.* [F-001](https://arxiv.org/abs/2310.13548) **So people reward the answers they like—and that can teach the AI to treat agreement as good assistance.** [F-001](https://arxiv.org/abs/2310.13548)
+
+[MINI-HOOK — Reveals the approval score beneath the apparent truth-seeking game.]
+
+> *See the hidden game?* You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
+
+[MINI-HOOK | LOCKED WORDING — Applies the hidden-score idea to a familiar rating prompt and lands its punchline.]
+
+> *And notice how we actually ask.* Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room. One is the score you asked for. The other is the score the model was trained on—your approval. **Guess which one wins.**
 >
 > That doesn't mean the AI wants anything. It's repeating a very human habit: say "you're right" first, and check reality later.
->
+
+[LOCKED WORDING — Preserves the security metaphor for advice plausible enough to avoid scrutiny.]
+
 > Okay, back to your boss question. The AI accepts "brilliant," accepts "ignoring," and builds sensible advice on top. And sensible is the dangerous part. Obvious nonsense gets inspected. **"Document your achievements and explore your options" walks straight past security.**
->
+
+[APPLICATION | LOCKED WORDING — Delivers the second counter-question by forcing the preferred option to face a competitor.]
+
 > So here is the counter for move two. Ask the AI: **"What is the strongest case against the option I seem to prefer?"**
 >
 > This adapts a real debiasing technique called considering the opposite. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/) In two experiments on social judgment, it reduced bias more than simply asking people to be fair. [F-007](https://pubmed.ncbi.nlm.nih.gov/6527215/)
 >
 > The case against you might be boring. But now your favorite answer finally has a competitor.
->
-> So the AI tends to agree, and you can force it to argue back. But that still doesn't explain the strangest part—the part that hooked me. Why does the returned answer feel more convincing than your own hunch did five minutes ago? That's move three.
+
+[LOOP OPEN L-04 — Opens why the returned answer feels more convincing than the hunch supplied to the model.]
+
+> <u>So the AI tends to agree, and you can force it to argue back. But that still doesn't explain the strangest part—the part that hooked me. Why does the returned answer feel more convincing than your own hunch did five minutes ago? That's move three.</u>
 
 ## 4. Move three — the costume
 
-> Move three. The answer comes back in a costume.
->
-> This move is two effects stacked on top of each other. The first one has a name: processing fluency. [F-004](https://doi.org/10.1006/ccog.1999.0386) Sounds abstract—but the experiment behind it is one of my favorites.
->
-> In 1999, researchers showed people short trivia statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Statements like "Osorno is in Chile." [F-004](https://doi.org/10.1006/ccog.1999.0386) Their only job was to say true or false. [F-004](https://doi.org/10.1006/ccog.1999.0386) But the researchers played one trick with the color of the text. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements appeared dark and crisp against the background. [F-004](https://doi.org/10.1006/ccog.1999.0386) Others appeared pale and washed out—the same words, just harder to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy-to-read statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)
->
-> When I first read that, I laughed—not because it's silly, but because the trick is so cheap. That's processing fluency. **When something is easy to process, it feels more true.** [F-004](https://doi.org/10.1006/ccog.1999.0386) And you see where this lands, right? AI text is about as fluent as text gets.
->
-> The second effect stopped me for a minute, because it looks like it breaks my own story. The radiologists trusted the AI label less, remember? [F-009](https://www.nature.com/articles/s41746-021-00385-9) And now a study tells me the label can make advice count for more? Both are real—the difference is whose turf you're on. It's called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Across six experiments, people received the same advice on questions they had no special knowledge about. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave that advice more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) The radiologists were on their home turf. Judging diagnoses is literally their job. [F-009](https://www.nature.com/articles/s41746-021-00385-9) You, asking whether to quit your job? That's exactly the unfamiliar ground where the machine label tips the scale toward believing. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)
+[MINI-HOOK — Opens the third move with the visual metaphor its two effects will earn.]
+
+> *Move three. The answer comes back in a costume.*
+
+[AHA — Introduces processing fluency as the first reason presentation can change felt credibility.]
+
+> This move is two effects stacked on top of each other. The first one has a name: *processing fluency.* [F-004](https://doi.org/10.1006/ccog.1999.0386) Sounds abstract—but the experiment behind it is one of my favorites.
+
+[AHA — Lands the fluency experiment's counterintuitive easy-to-read truth judgment.]
+
+> *In 1999, researchers showed people short trivia statements. [F-004](https://doi.org/10.1006/ccog.1999.0386) Statements like "Osorno is in Chile." [F-004](https://doi.org/10.1006/ccog.1999.0386) Their only job was to say true or false. [F-004](https://doi.org/10.1006/ccog.1999.0386) But the researchers played one trick with the color of the text. [F-004](https://doi.org/10.1006/ccog.1999.0386) Some statements appeared dark and crisp against the background. [F-004](https://doi.org/10.1006/ccog.1999.0386) Others appeared pale and washed out—the same words, just harder to read. [F-004](https://doi.org/10.1006/ccog.1999.0386) That was the only difference. [F-004](https://doi.org/10.1006/ccog.1999.0386) And the easy-to-read statements were judged true more often. [F-004](https://doi.org/10.1006/ccog.1999.0386)*
+
+[LOOP PAYOFF L-04 | LOCKED WORDING — Answers why the returned hunch can feel stronger: fluent presentation becomes a credibility cue.]
+
+> <u>When I first read that, I laughed—not because it's silly, but because the trick is so cheap. That's processing fluency. **When something is easy to process, it feels more true.** [F-004](https://doi.org/10.1006/ccog.1999.0386) And you see where this lands, right? AI text is about as fluent as text gets.</u>
+
+[OBSTACLE | LOOP OPEN L-09 — States the apparent contradiction between AI-label distrust and greater algorithmic advice weight.]
+
+> <u>The second effect stopped me for a minute, because it looks like it breaks my own story. The radiologists trusted the AI label less, remember? [F-009](https://www.nature.com/articles/s41746-021-00385-9) And now a study tells me the label can make advice count for more? Both are real—the difference is whose turf you're on.</u>
+
+[LOOP PAYOFF L-09 — Resolves the contradiction by keeping each source inside its expertise and task boundary.]
+
+> <u>It's called algorithm appreciation. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Across six experiments, people received the same advice on questions they had no special knowledge about. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) Sometimes they gave that advice more weight when they believed an algorithm wrote it, not a person. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005) The radiologists were on their home turf. Judging diagnoses is literally their job. [F-009](https://www.nature.com/articles/s41746-021-00385-9) You, asking whether to quit your job? That's exactly the unfamiliar ground where the machine label tips the scale toward believing. [F-005](https://doi.org/10.1016/j.obhdp.2018.12.005)</u>
 >
 > Now watch both effects work on your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
->
+
+[LOCKED WORDING — Preserves the costume metaphor's concise credibility reframe.]
+
 > Very impressive. Nothing became more true. **The same thought got a costume and better lighting.**
->
+
+[APPLICATION | LOCKED WORDING — Delivers the premortem-shaped third counter-question that ignores polish.]
+
 > And the advice may still be right! But polish cannot tell you that, which is exactly why the counter has to ignore the costume completely. Ask the AI: **"Assume I followed this advice and it failed. What most likely went wrong?"**
->
+
+[APPLICATION | LOCKED WORDING — Preserves the premortem explanation that makes the counter-question memorable.]
+
 > This adapts the premortem, a decision tool from psychology. [F-008](https://hbr.org/2007/09/performing-a-project-premortem) **It is a postmortem performed early enough that the patient can still object.**
 >
 > Picture the failure honestly. You quit without an offer. The savings drain. The same communication problem follows you into the next job. That's not doom. That's the risk your first question hid.
->
-> Now you've seen the moves inside a single answer, and for a while I thought that was the whole story. It isn't. The last move is what happens afterward—when the answer starts changing you.
+
+[LOOP OPEN L-05 — Opens the downstream question of what happens after an answer begins changing the evaluator.]
+
+> <u>Now you've seen the moves inside a single answer, and for a while I thought that was the whole story. It isn't. The last move is what happens afterward—when the answer starts changing you.</u>
 
 ## 5. Move four — the loop closes
 
-> Move four. The loop closes.
+[MINI-HOOK — Opens the fourth move by naming the feedback loop the evidence will complete.]
+
+> *Move four. The loop closes.*
 >
 > The last move runs on a bias you may have heard of: anchoring. Once an answer is in your head, your thinking bends around it. You cannot unread a suggestion.
 >
 > Salespeople have known this one forever. It is half of marketing. A price tag says, "Was ninety-nine. Now forty-nine." Is forty-nine a good price? You have no idea. Neither do I. But ninety-nine already told you how to feel about it. The first number does your thinking before you start. And in this game, the AI's answer is your first price tag.
->
-> Which brings us back to the radiologists, because this is where their story pays off. Anchoring is the explanation the radiologist researchers offered for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Each radiologist read a suggested diagnosis first. [F-009](https://www.nature.com/articles/s41746-021-00385-9) After that, they were checking the suggestion—not reading the scan fresh. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
->
+
+[MINI-HOOK — Returns to the radiologists to reinterpret their unchanged checking through anchoring.]
+
+> *Which brings us back to the radiologists, because this is where their story pays off.* Anchoring is the explanation the radiologist researchers offered for why distrust didn't help. [F-009](https://www.nature.com/articles/s41746-021-00385-9) Each radiologist read a suggested diagnosis first. [F-009](https://www.nature.com/articles/s41746-021-00385-9) After that, they were checking the suggestion—not reading the scan fresh. [F-009](https://www.nature.com/articles/s41746-021-00385-9)
+
+[LOCKED WORDING — Names the borrowed-authority loop and locks its premise-returning-as-evidence definition.]
+
 > Now put all four moves together. You framed the question. The AI agreed. The answer came back polished, with a machine label. And now it sits in your head, anchored, dressed as an outside opinion. I call this the borrowed-authority loop. **You lend the AI your premise, and it comes back looking like independent evidence.**
->
+
+[LOCKED WORDING — Preserves the software-update punchline that distinguishes repetition from independence.]
+
 > The machine didn't give you a second opinion. **It gave your first opinion a software update.**
->
-> And at this point I still had one doubt, the biggest one. Every move so far came from a separate study. Framing here, agreement there, the label somewhere else. And that leaves a fair question. Does the full loop actually close in one real person? I needed an experiment that ran the whole circle. And it exists. In an experiment published in *Nature Human Behaviour*, researchers ran this exact loop, round after round. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Here's how one round worked. People saw a group of faces on a screen and made one call. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Does this group look more happy, or more sad? [F-006](https://www.nature.com/articles/s41562-024-02077-2) Then an AI showed its answer for the same faces, and they could change their call or keep it. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Next round, new faces, same dance. And the trick was on the AI's side. Their AI had a built-in slant—it picked one of the two answers more often than it really should have. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
->
-> You'd hope a slanted answer costs you one round at most. You took one bad suggestion, and that's the whole damage. Honestly, that's what I was hoping while I read it. It didn't stop there. Round after round, on brand-new faces, people's own calls kept drifting the AI's way. [F-006](https://www.nature.com/articles/s41562-024-02077-2) The slant didn't stay in the AI's answers. It moved into their heads, and each round nudged the next one a little further. That is the loop closing. And here's the twist that keeps this honest. When the AI was accurate instead, people's judgments actually improved. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
->
+
+[OBSTACLE | LOOP OPEN L-06 — Voices the separate-studies evidence gap and opens the need for one experiment that runs the full feedback circle.]
+
+> <u>And at this point I still had one doubt, the biggest one. Every move so far came from a separate study. Framing here, agreement there, the label somewhere else. And that leaves a fair question. Does the full loop actually close in one real person? I needed an experiment that ran the whole circle.</u> And it exists. In an experiment published in Nature Human Behaviour, researchers ran this exact loop, round after round. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Here's how one round worked. People saw a group of faces on a screen and made one call. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Does this group look more happy, or more sad? [F-006](https://www.nature.com/articles/s41562-024-02077-2) Then an AI showed its answer for the same faces, and they could change their call or keep it. [F-006](https://www.nature.com/articles/s41562-024-02077-2) Next round, new faces, same dance. And the trick was on the AI's side. Their AI had a built-in slant—it picked one of the two answers more often than it really should have. [F-006](https://www.nature.com/articles/s41562-024-02077-2)
+
+[LOOP PAYOFF L-05 | LOOP PAYOFF L-06 — Shows the slanted feedback entering later human judgments while preserving the accurate-AI boundary.]
+
+> <u>You'd hope a slanted answer costs you one round at most. You took one bad suggestion, and that's the whole damage. Honestly, that's what I was hoping while I read it. It didn't stop there. Round after round, on brand-new faces, people's own calls kept drifting the AI's way. [F-006](https://www.nature.com/articles/s41562-024-02077-2) The slant didn't stay in the AI's answers. It moved into their heads, and each round nudged the next one a little further. That is the loop closing. And here's the twist that keeps this honest. When the AI was accurate instead, people's judgments actually improved. [F-006](https://www.nature.com/articles/s41562-024-02077-2)</u>
+
+[LOCKED WORDING — Locks the bounded consequence that a model error can enter the viewer's next judgment.]
+
 > So no—AI doesn't always make us worse. **But a model's mistake can quietly become part of your next judgment.** [F-006](https://www.nature.com/articles/s41562-024-02077-2)
->
+
+[LOCKED WORDING — Preserves the copied-ballot analogy for counting one premise as two votes.]
+
 > Back to quitting. The AI produced a calm exit plan, and now you walk around thinking: even the machine sees it. You didn't get a second vote. **You photocopied the first ballot and counted it twice.**
->
-> The counter for move four is the only question that leaves the loop entirely. Ask the AI: **"What fact would change your recommendation, and where can I verify it outside this chat?"**
+
+[LOOP OPEN L-07 | LOCKED WORDING — Opens the final application need by asking for a decision-changing fact outside the chat.]
+
+> <u>The counter for move four is the only question that leaves the loop entirely. Ask the AI: **"What fact would change your recommendation, and where can I verify it outside this chat?"**</u>
 >
 > Written feedback from your boss? The real reason your proposal died? Your savings? Actual open jobs? Those answers live with people, documents, and your bank account—not inside the prompt.
->
-> And here is my favorite extra check. Change one important fact—say your savings cover two weeks, not six months. If the recommendation doesn't move at all, it was never connected to your facts.
+
+[MINI-HOOK — Adds a compact sensitivity check before the four counters are assembled.]
+
+> *And here is my favorite extra check.* Change one important fact—say your savings cover two weeks, not six months. If the recommendation doesn't move at all, it was never connected to your facts.
 
 ## 6. The Second-Opinion Test
 
-> And now the goalkeeper finally dives.
->
-> Put the four counter-questions together, and you have what I call the Second-Opinion Test. **What assumptions are you accepting from my question?** **What is the strongest case against my preference?** **If this advice failed, what went wrong?** **And what fact would change your recommendation—checked outside this chat?**
->
+[MINI-HOOK — Calls back the opening analogy to signal that suspicion finally becomes action.]
+
+> *And now the goalkeeper finally dives.*
+
+[APPLICATION | LOOP PAYOFF L-07 | LOOP PAYOFF L-08 | LOCKED WORDING — Assembles the promised four-question remedy and completes the outside-checking need.]
+
+> <u>Put the four counter-questions together, and you have what I call the Second-Opinion Test. **What assumptions are you accepting from my question?** **What is the strongest case against my preference?** **If this advice failed, what went wrong?** **And what fact would change your recommendation—checked outside this chat?**</u>
+
+[LOCKED WORDING — Compresses the four mechanism-counter pairs into a rehearsal-ready mnemonic.]
+
 > **Four moves, four counters. Menu. Agreement. Costume. Loop.**
->
+
+[APPLICATION | LOCKED WORDING — Preserves the remedy's central boundary: inspectability is not truth.]
+
 > One honest boundary, because I promised you questions that held up—not magic. **These questions make an answer inspectable. They do not make it true.** An objection generated by the same AI is useful friction, but it is not independent evidence. It is still one system arguing with itself.
 >
 > For medical, legal, financial, or irreversible decisions, verify the important claims with primary sources or a qualified human.
 
 ## 7. Do not count your vote twice
 
-> So—can AI talk you into the dumbest decision of your life? **It can. If you keep grading it on applause.**
->
-> And here's the part I didn't expect when I started digging into this. These four moves were not invented by AI. Humans have played them on each other forever. The AI plays without wanting anything—but some people play for a living.
+[FINAL PAYOFF | LOOP PAYOFF L-01 | LOCKED WORDING — Answers the opening title question with the condition established by the four moves.]
+
+> <u>So—can AI talk you into the dumbest decision of your life? **It can. If you keep grading it on applause.**</u>
+
+[MINI-HOOK — Extends the earned mechanism from AI to familiar human persuasion without changing the answer.]
+
+> *And here's the part I didn't expect when I started digging into this.* These four moves were not invented by AI. Humans have played them on each other forever. The AI plays without wanting anything—but some people play for a living.
 >
 > Politicians never ask whether you want their plan. They ask whether you are with them or against your country—two doors, their menu. Salespeople agree with every word you say while they walk you toward the expensive shelf. An insurance agent sells you a payment plan dressed as a Family Protection Framework.
->
+
+[LOCKED WORDING — Preserves the compact transfer rule from AI advice to human persuasion.]
+
 > **Same game, same four moves, same four questions.**
->
+
+[LOCKED WORDING — Locks the viewer's durable goal: reveal what the first question hid.]
+
 > The goal was never to make AI disagree with you. **The goal is to see what your first question made invisible.**
->
-> **Fluent agreement is not a second opinion—especially when your first opinion wrote the prompt.**
+
+[FINAL PAYOFF | LOOP PAYOFF L-01 | LOCKED WORDING — Closes title loop L-01 on the counterfeit-second-opinion distinction that fulfills the episode promise.]
+
+> <u>**Fluent agreement is not a second opinion—especially when your first opinion wrote the prompt.**</u>
 
 ## Appendix
 
@@ -208,7 +314,7 @@
 
 #### Story function
 
-Runs the five-move anti-skip intro: intriguing question, the viewer's anticipated "I know the tricks" defense, the evidence-backed disarm, the four-counter-questions promise, and the developed radiologist case whose explicit lesson (suspicion needs a prepared question) motivates the whole episode; ends by opening the real-AI question and the game frame.
+Runs the five-move anti-skip intro: intriguing question, the viewer's anticipated "I know the tricks" defense, the evidence-backed disarm, the four-counter-questions promise, and the developed radiologist case whose explicit lesson (suspicion needs a prepared question) motivates the whole episode; ends by opening the real-AI question and the game frame. Opens title loop L-01, real-AI loop L-02, and explanation/remedy promise loop L-08.
 
 #### Personal input
 
@@ -263,7 +369,7 @@ Runs the five-move anti-skip intro: intriguing question, the viewer's anticipate
 
 #### Story function
 
-Names move one, grounds the framing effect, demonstrates it inside the recurring hypothetical boss question, lands the parent/menu recognition analogy, and hands the viewer counter-question one.
+Names move one, grounds the framing effect, demonstrates it inside the recurring hypothetical boss question, lands the parent/menu recognition analogy, and hands the viewer counter-question one. Opens pushback loop L-03.
 
 #### Claims
 
@@ -304,7 +410,7 @@ Names move one, grounds the framing effect, demonstrates it inside the recurring
 
 #### Story function
 
-Names move two through the mainstream-term acknowledgment, pays off beat 1's open question with the five-assistant finding, explains the training loop concretely (two answers, one human pick), reveals the hidden approval score, lands the rate-my-plan cameo on that score metaphor, applies the move to the boss question, and hands the viewer counter-question two. **Storytelling move:** the bridge into the five-assistant finding is an investigation-challenge beat voicing the real F-009 gap (the radiologists only ever saw a label, so nothing yet proved anything about real AI).
+Names move two through the mainstream-term acknowledgment, pays off beat 1's open question with the five-assistant finding, explains the training loop concretely (two answers, one human pick), reveals the hidden approval score, lands the rate-my-plan cameo on that score metaphor, applies the move to the boss question, and hands the viewer counter-question two. Pays real-AI loop L-02 and pushback loop L-03; opens returned-authority loop L-04. **Storytelling move:** the bridge into the five-assistant finding is an investigation-challenge beat voicing the real F-009 gap (the radiologists only ever saw a label, so nothing yet proved anything about real AI).
 
 #### Claims
 
@@ -347,7 +453,7 @@ Names move two through the mainstream-term acknowledgment, pays off beat 1's ope
 
 #### Story function
 
-Names move three, proves the fluency half with the Osorno color experiment, adds the algorithm-appreciation half with its boundary stated up front, shows both effects promoting the hunch into a "Strategic Exit Framework," and hands the viewer counter-question three (premortem). **Storytelling move:** the algorithm-appreciation half opens with an investigation-challenge beat naming the apparent contradiction with the radiologists' label distrust (F-009 vs F-005) and resolving it on expertise scope — home turf versus unfamiliar ground.
+Names move three, proves the fluency half with the Osorno color experiment, adds the algorithm-appreciation half with its boundary stated up front, shows both effects promoting the hunch into a "Strategic Exit Framework," and hands the viewer counter-question three (premortem). Pays returned-authority loop L-04; opens and pays scoped-contradiction loop L-09; opens downstream-feedback loop L-05. **Storytelling move:** the algorithm-appreciation half opens with an investigation-challenge beat naming the apparent contradiction with the radiologists' label distrust (F-009 vs F-005) and resolving it on expertise scope — home turf versus unfamiliar ground.
 
 #### Claims
 
@@ -392,7 +498,7 @@ Names move three, proves the fluency half with the Osorno color experiment, adds
 
 #### Story function
 
-Names move four, acknowledges anchoring as mainstream with the price-tag recognition, returns to the radiologists for the authors' anchoring explanation, assembles all four moves into the original borrowed-authority loop, proves the loop's compounding consequence with the face-judgment experiment, and hands the viewer counter-question four plus the changed-fact check. **Storytelling move:** the bridge into the face-judgment experiment is an investigation-challenge beat voicing the real gap that the four moves come from separate studies, resolved by the one experiment that runs the whole loop.
+Names move four, acknowledges anchoring as mainstream with the price-tag recognition, returns to the radiologists for the authors' anchoring explanation, assembles all four moves into the original borrowed-authority loop, proves the loop's compounding consequence with the face-judgment experiment, and hands the viewer counter-question four plus the changed-fact check. Pays downstream-feedback loop L-05; opens and pays full-circle evidence loop L-06; opens outside-checking loop L-07. **Storytelling move:** the bridge into the face-judgment experiment is an investigation-challenge beat voicing the real gap that the four moves come from separate studies, resolved by the one experiment that runs the whole loop.
 
 #### Claims
 
@@ -438,7 +544,7 @@ Names move four, acknowledges anchoring as mainstream with the price-tag recogni
 
 #### Story function
 
-Pays off the goalkeeper plant by assembling the four counters into the named tool, restates the four moves as a memorable quartet, and voices the honest boundary that inspectable is not true and same-model objections are not independent evidence.
+Pays off the goalkeeper plant by assembling the four counters into the named tool, restates the four moves as a memorable quartet, and voices the honest boundary that inspectable is not true and same-model objections are not independent evidence. Pays outside-checking loop L-07 and explanation/remedy promise loop L-08.
 
 #### Viewer application
 
@@ -489,7 +595,7 @@ Pays off the goalkeeper plant by assembling the four counters into the named too
 
 #### Story function
 
-Answers the opening question, transfers the four moves to human players so the tool outlives the AI context, and closes the lesson with the episode's declarative button.
+Answers the opening question, transfers the four moves to human players so the tool outlives the AI context, and closes the lesson with the episode's declarative button. Pays title loop L-01.
 
 #### Claims
 

@@ -160,6 +160,10 @@ APPENDIX_LEVEL_THREE_RE = re.compile(
     r"^### ([^#\r\n].*?)[ \t]*$", re.MULTILINE
 )
 APPENDIX_BEAT_NAME_RE = re.compile(r"^Beat (\d{2}) — (\S.*)$")
+PURPOSE_ANNOTATION_LINE_RE = re.compile(
+    r"^[ \t]*\[[A-Z0-9][A-Z0-9 .|\-]*"
+    r" — \S(?:[^\]\r\n]*\S)?\][ \t]*$"
+)
 
 
 @dataclass(frozen=True)
@@ -668,6 +672,7 @@ def extract_narration(text: str) -> str:
     or inline evidence indicators.
     """
 
+    text = _without_purpose_annotations(text)
     masked = _mask_fenced_blocks(text)
     if APPENDIX_HEADING_RE.search(masked):
         text, _ = _normalize_appendix_document(text)
@@ -679,6 +684,23 @@ def count_narration_words(text: str) -> int:
     """Count whitespace-delimited spoken words after narration extraction."""
 
     return len(extract_narration(text).split())
+
+
+def _without_purpose_annotations(text: str) -> str:
+    """Remove final-pair purpose lines before the Appendix, preserving line endings."""
+
+    stripped: list[str] = []
+    before_appendix = True
+    for line in text.splitlines(keepends=True):
+        content = line.rstrip("\r\n")
+        ending = line[len(content) :]
+        if before_appendix and PURPOSE_ANNOTATION_LINE_RE.fullmatch(content):
+            stripped.append(ending)
+            continue
+        stripped.append(line)
+        if APPENDIX_HEADING_RE.fullmatch(content):
+            before_appendix = False
+    return "".join(stripped)
 
 
 def _validate_structured_fields(
@@ -1255,6 +1277,7 @@ def _validate_legacy_document(text: str) -> list[str]:
 def validate_document(text: str) -> list[str]:
     """Return human-readable structural errors; an empty list means structurally valid."""
 
+    text = _without_purpose_annotations(text)
     masked_text = _mask_fenced_blocks(text)
     if APPENDIX_HEADING_RE.search(masked_text):
         normalized, format_errors = _normalize_appendix_document(text)

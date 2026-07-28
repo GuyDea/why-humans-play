@@ -509,6 +509,26 @@ class ValidatorTests(unittest.TestCase):
     def test_numbered_narration_beats_with_appendix_pass(self) -> None:
         self.assertEqual(validate_document(APPENDIX_DOCUMENT), [])
 
+    def test_final_extended_purpose_annotations_are_non_spoken(self) -> None:
+        annotated = replace_exact(
+            APPENDIX_DOCUMENT,
+            "## 1. The detour\n\n",
+            (
+                "## 1. The detour\n\n"
+                "[MAIN HOOK | LOCKED WORDING — Opens the episode question.]\n\n"
+            ),
+        )
+
+        self.assertEqual(validate_document(annotated), [])
+        self.assertEqual(
+            validator.extract_narration(annotated),
+            validator.extract_narration(APPENDIX_DOCUMENT),
+        )
+        self.assertEqual(
+            validator.count_narration_words(annotated),
+            validator.count_narration_words(APPENDIX_DOCUMENT),
+        )
+
     def test_numbered_beat_rejects_metadata_inside_narration_layer(self) -> None:
         document = replace_exact(
             APPENDIX_DOCUMENT,

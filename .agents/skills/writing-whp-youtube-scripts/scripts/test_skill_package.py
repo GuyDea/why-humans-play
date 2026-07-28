@@ -110,6 +110,30 @@ def spoken_digest(path: Path) -> str:
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_episode_one_final_pair_is_valid_and_old_path_is_retired(self) -> None:
+        final = (
+            REPO_ROOT
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-ai-dangerous-advice"
+            / "final"
+        )
+        self.assertTrue((final / "script.raw.md").is_file())
+        self.assertTrue((final / "script.extended.md").is_file())
+        self.assertFalse(
+            (
+                REPO_ROOT
+                / "whp-youtube"
+                / "episodes"
+                / "01-why-ai-makes-bad-advice-feel-right.md"
+            ).exists()
+        )
+        self.assertEqual(validate_pair(resolve_pair(final)), [])
+        self.assertEqual(
+            spoken_digest(final / "script.raw.md"),
+            "1b43ac65b2c6255aa646a79e0be8cc9d01500a07f3000f8bd98d6d2cd95a2917",
+        )
+
     def test_episode_one_blueprint_pair_is_valid(self) -> None:
         stage = (
             REPO_ROOT
