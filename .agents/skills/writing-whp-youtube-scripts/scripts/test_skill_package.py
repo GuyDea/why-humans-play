@@ -134,9 +134,12 @@ class SkillPackageTests(unittest.TestCase):
         )
 
         for retired_path in (
-            "whp-youtube/predrafts/",
-            "whp-youtube/drafts/ep1_v2.md",
-            "episodes/01-why-ai-makes-bad-advice-feel-right.md",
+            "whp-youtube/"
+            "predrafts/",
+            "whp-youtube/drafts/"
+            "ep1_v2.md",
+            "episodes/01-why-ai-"
+            "makes-bad-advice-feel-right.md",
         ):
             for document_name, document in active_episode_one_documents.items():
                 with self.subTest(
@@ -463,8 +466,10 @@ class SkillPackageTests(unittest.TestCase):
 
         active_documents = active_workflow_documents()
         for retired in (
-            "predraft-intro-workflow.md",
-            "whp-youtube/predrafts/",
+            "predraft-intro-"
+            "workflow.md",
+            "whp-youtube/"
+            "predrafts/",
             "pre-draft",
         ):
             for document_name, document in active_documents.items():
