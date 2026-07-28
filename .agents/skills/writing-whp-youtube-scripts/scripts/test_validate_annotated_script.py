@@ -529,6 +529,16 @@ class ValidatorTests(unittest.TestCase):
             validator.count_narration_words(APPENDIX_DOCUMENT),
         )
 
+    def test_legacy_documents_do_not_strip_purpose_shaped_lines(self) -> None:
+        purpose = (
+            "[MAIN HOOK | LOCKED WORDING — Opens the episode question.]"
+        )
+
+        self.assertEqual(
+            validator._without_purpose_annotations(purpose),
+            purpose,
+        )
+
     def test_numbered_beat_rejects_metadata_inside_narration_layer(self) -> None:
         document = replace_exact(
             APPENDIX_DOCUMENT,

@@ -689,6 +689,9 @@ def count_narration_words(text: str) -> int:
 def _without_purpose_annotations(text: str) -> str:
     """Remove final-pair purpose lines before the Appendix, preserving line endings."""
 
+    if APPENDIX_HEADING_RE.search(_mask_fenced_blocks(text)) is None:
+        return text
+
     stripped: list[str] = []
     before_appendix = True
     for line in text.splitlines(keepends=True):
