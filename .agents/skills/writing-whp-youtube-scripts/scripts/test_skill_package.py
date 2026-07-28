@@ -1122,6 +1122,96 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(contract=contract):
                 self.assertIn(contract, rapid)
 
+    def test_topic_input_boundary_routes_only_raw_subjects_through_angle_proposals(
+        self,
+    ) -> None:
+        skill_text = SKILL_MD.read_text(encoding="utf-8")
+        required_context_heading = "## Required project context\n"
+        choose_operation_heading = "## Choose the operation\n"
+        self.assertTrue(
+            required_context_heading in skill_text,
+            "script skill is missing the Required project context heading",
+        )
+        self.assertTrue(
+            choose_operation_heading in skill_text,
+            "script skill is missing the Choose the operation heading",
+        )
+        required_context_start = skill_text.index(required_context_heading)
+        choose_operation_start = skill_text.index(choose_operation_heading)
+        self.assertLess(
+            required_context_start,
+            choose_operation_start,
+            "Required project context must precede Choose the operation",
+        )
+        required_context = skill_text[
+            required_context_start + len(required_context_heading) :
+            choose_operation_start
+        ]
+        normalized_required_context = " ".join(required_context.split())
+
+        contracts = (
+            "A raw subject alone is not a selected topic brief.",
+            "For a new episode supplied only as a raw subject, invoke the bounded "
+            "`choosing-whp-video-topic` `Ideate subjects/angles` operation and return "
+            "multiple exact angle proposals without choosing a winner.",
+            "Stop after returning the proposals; do not begin architecture until "
+            "Martin supplies or approves one exact angle.",
+            "Preserve a supplied or approved angle without reopening selection.",
+        )
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertTrue(
+                    contract in normalized_required_context,
+                    f"required project context is missing input boundary: {contract}",
+                )
+        self.assertNotIn(
+            "return the exact angle proposal before architecture.",
+            normalized_required_context,
+            "raw-subject routing must not collapse bounded ideation to one proposal",
+        )
+
+        link_pattern = re.compile(
+            r"(?<!!)\[[^\]\n]+\]\(\s*"
+            r"(?P<destination><[^>\n]+>|[^)\s]+)"
+            r"(?:\s+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?\s*\)"
+        )
+        expected_target = (
+            SKILL_ROOT.parent
+            / "choosing-whp-video-topic/references/research-method.md"
+        ).resolve()
+        expected_fragment = "subject-to-angle-development"
+        owner_links = []
+        for match in link_pattern.finditer(required_context):
+            destination = match.group("destination")
+            if destination.startswith("<") and destination.endswith(">"):
+                destination = destination[1:-1]
+            target_ref, separator, fragment = destination.partition("#")
+            if not separator or not target_ref:
+                continue
+            target_path = (SKILL_MD.parent / target_ref).resolve()
+            if (
+                target_path == expected_target
+                and fragment == expected_fragment
+            ):
+                owner_links.append((target_path, fragment))
+
+        self.assertEqual(
+            owner_links,
+            [(expected_target, expected_fragment)],
+            "required project context must contain exactly one resolvable "
+            "subject-to-angle owner link",
+        )
+        self.assertTrue(
+            expected_target.is_file(),
+            f"subject-to-angle owner target does not exist: {expected_target}",
+        )
+        expected_heading = "## Subject-to-angle development"
+        self.assertIn(
+            expected_heading,
+            expected_target.read_text(encoding="utf-8").splitlines(),
+            f"subject-to-angle owner target lacks {expected_heading}",
+        )
+
     def test_selected_topic_brief_is_consumed_without_rerunning_ideation(self) -> None:
         rapid_path = SKILL_ROOT / "references/rapid-prototyping.md"
         self.assertTrue(rapid_path.is_file())
@@ -2810,6 +2900,7 @@ class SkillPackageTests(unittest.TestCase):
             and target != "Original URL"
         ]
         expected = [
+            "../choosing-whp-video-topic/references/research-method.md",
             "references/rapid-prototyping.md",
             "references/script-architecture.md",
             "references/rapid-prototyping.md",
@@ -2826,10 +2917,22 @@ class SkillPackageTests(unittest.TestCase):
         for target in local:
             relative_target = Path(target)
             self.assertFalse(relative_target.is_absolute())
-            self.assertNotIn("..", relative_target.parts)
             resolved_target = (SKILL_ROOT / relative_target).resolve(strict=True)
             self.assertTrue(resolved_target.is_file())
-            self.assertTrue(resolved_target.is_relative_to(resolved_skill_root))
+            if ".." in relative_target.parts:
+                self.assertEqual(
+                    target,
+                    "../choosing-whp-video-topic/references/research-method.md",
+                )
+                self.assertTrue(
+                    resolved_target.is_relative_to(
+                        resolved_skill_root.parent
+                    )
+                )
+            else:
+                self.assertTrue(
+                    resolved_target.is_relative_to(resolved_skill_root)
+                )
 
     def test_supporting_narrative_throughline_contract_is_distributed(self) -> None:
         story = STORY_METHOD_MD.read_text(encoding="utf-8")

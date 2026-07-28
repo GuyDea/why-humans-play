@@ -185,16 +185,15 @@ function fullTopicRunEvents() {
     ['02-mode', 'Select and state the evidence mode.'],
     ['03-signals', 'Collect independent audience-demand, competitive-supply, and timing signals.'],
     ['04-pool', 'Record at least 30 distinct, diverse subjects before ranking.'],
-    ['05-painpoints', 'For problem-led candidates, compare specific lived painpoints before choosing the mechanism.'],
-    ['06-angles', 'Develop materially different angles for promising subjects.'],
-    ['07-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
-    ['08-gates', 'Audit every advancing angle against all six hard gates.'],
-    ['09-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
-    ['10-deep', 'Deeply research the finalists with multiple signals.'],
-    ['11-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
-    ['12-packages', 'Test three package promises for each top-three finalist.'],
-    ['13-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
-    ['14-audit', 'Complete the output and evidence audit.'],
+    ['05-angle-development', 'Complete the routed audience-language and subject-to-angle development for every promising raw subject.'],
+    ['06-proof-cases', 'Identify a first-hearing opening proof case and any needed current echo for each finalist.'],
+    ['07-gates', 'Audit every advancing angle against all six hard gates.'],
+    ['08-shallow', 'Run a shallow scan and narrow to roughly 8–12 candidates.'],
+    ['09-deep', 'Deeply research the finalists with multiple signals.'],
+    ['10-shortlist', 'Rank a shortlist of roughly five with the required scorecard.'],
+    ['11-packages', 'Test three package promises for each top-three finalist.'],
+    ['12-winner', 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.'],
+    ['13-audit', 'Complete the output and evidence audit.'],
   ];
   const event = (text) => ({
     type: 'item.completed',
@@ -204,12 +203,12 @@ function fullTopicRunEvents() {
     { type: 'thread.started', thread_id: 'fake-full-topic-thread' },
     { type: 'turn.started' },
     event(steps.map(([id, text]) =>
-      `WHP_PROGRESS/3 ${id} pending :: ${text}`).join('\n')),
+      `WHP_PROGRESS/4 ${id} pending :: ${text}`).join('\n')),
   ];
 
   for (const [id, text] of steps) {
     events.push(
-      event(`WHP_PROGRESS/3 ${id} active :: ${text}`),
+      event(`WHP_PROGRESS/4 ${id} active :: ${text}`),
       {
         type: 'item.completed',
         item: {
@@ -218,7 +217,7 @@ function fullTopicRunEvents() {
           exit_code: 0,
         },
       },
-      event(`WHP_PROGRESS/3 ${id} done :: ${text}`),
+      event(`WHP_PROGRESS/4 ${id} done :: ${text}`),
     );
   }
 

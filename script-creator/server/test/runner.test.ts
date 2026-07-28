@@ -54,7 +54,7 @@ describe('runner', () => {
         continue;
       }
       for (const line of message.text.split(/\r?\n/)) {
-        const match = /^WHP_PROGRESS\/3 (\S+) (\S+) :: /.exec(line);
+        const match = /^WHP_PROGRESS\/4 (\S+) (\S+) :: /.exec(line);
         if (!match) continue;
         const [, id, status] = match;
         histories.set(id!, [...(histories.get(id!) ?? []), status!]);

@@ -1697,7 +1697,14 @@ established that one detailed owner is necessary to prevent future drift.
 
 **Documents:** `whp-youtube/STEERING.md`,
 `docs/steering/whp-video-topic-skill.md`,
-`docs/superpowers/specs/2026-07-28-whp-human-nerve-angle-gate-design.md`, and this ledger.
-`BRAND.md` remains unchanged because this refines YouTube angle-selection workflow rather
-than umbrella doctrine. The topic and script skill implementation will follow the accepted
-single-owner design. Episode 1 files remain unchanged.
+`.agents/skills/choosing-whp-video-topic/SKILL.md`,
+`.agents/skills/choosing-whp-video-topic/references/research-method.md`,
+`.agents/skills/choosing-whp-video-topic/references/run-progress-transport.md`,
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`script-creator/server/src/operations/progress.ts`,
+`script-creator/app/src/app/topics/inputs.ts`,
+`docs/superpowers/specs/2026-07-28-whp-human-nerve-angle-gate-design.md`,
+`docs/superpowers/plans/2026-07-28-whp-human-nerve-angle-gate.md`, and the RED/GREEN record
+at `docs/superpowers/evidence/2026-07-28-whp-human-nerve-angle-gate.md`. `BRAND.md` remains
+unchanged because this refines YouTube angle-selection workflow rather than umbrella
+doctrine. Episode 1 files remain unchanged.

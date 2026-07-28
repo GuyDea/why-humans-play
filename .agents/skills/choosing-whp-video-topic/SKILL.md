@@ -13,8 +13,14 @@ Return one cited decision for WHP's next video: a specific subject, filmable ang
 
 This skill serves several caller-invoked operations. The caller supplies the operation label, the inputs, and the exact structured output shape to return. Honor the requested scope: do not expand a bounded operation into the full pipeline described in the rest of this document.
 
-- **Full topic-selection run** — the complete pipeline below: read WHP context, generate 30+ subjects, gate, score, package, and decide. The required checklist and references apply only to this operation.
-- **Ideate subjects/angles** — return diverse candidate subjects and angles only; do not gate, score, package, or pick a winner.
+- **Full topic-selection run** — the complete pipeline below: read WHP context, generate
+  30+ subjects, gate, score, package, and decide. The required progress checklist and
+  complete reads of both reference files apply only to this operation.
+- **Ideate subjects/angles** — run the bounded audience-language and subject-to-angle scan
+  in [the subject-to-angle owner](references/research-method.md#subject-to-angle-development)
+  for each promising raw subject, then return diverse candidate subjects and exact angle
+  proposals only; do not gate, score, package, read the episode backlog, collect the full
+  signal set, or pick a winner.
 - **Quick gate-check** — judge only the single supplied idea against the six named hard gates in "Apply hard gates at angle level", using only `BRAND.md` and `whp-youtube/STEERING.md` as doctrine. Read nothing else, run no signal scan, generate no alternatives, and do not score or package. Return the caller-supplied structured shape (an overall status, an overall verdict, the six gate verdicts with one-line reasons, and an optional guardrail note). The output schema is always supplied by the caller — never search for, reconstruct, or reverse-engineer it.
 - **Package test** — test the supplied title/thumbnail directions only.
 - **Topic-brief handoff (preview)** — prepare the handoff for an already-selected topic.
@@ -45,8 +51,7 @@ Track this checklist during the run. Do not compose the recommendation until eve
 - [ ] Select and state the evidence mode.
 - [ ] Collect independent audience-demand, competitive-supply, and timing signals.
 - [ ] Record at least 30 distinct, diverse subjects before ranking.
-- [ ] For problem-led candidates, compare specific lived painpoints before choosing the mechanism.
-- [ ] Develop materially different angles for promising subjects.
+- [ ] Complete the routed audience-language and subject-to-angle development for every promising raw subject.
 - [ ] Identify a first-hearing opening proof case and any needed current echo for each finalist.
 - [ ] Audit every advancing angle against all six hard gates.
 - [ ] Run a shallow scan and narrow to roughly 8–12 candidates.
@@ -103,48 +108,14 @@ Collect multiple independent audience-demand, competitive-supply, and timing sig
 
 Actual games and their histories are first-class candidates. Intelligence is one WHP pillar, not the whole brand. Avoid semantic duplicates and continue beyond the first fashionable cluster.
 
-Before choosing a mechanism for a problem-led candidate, generate and compare the specific
-lived painpoints first. Prioritize the widest specific, recognizable, recurring pain that
-credible evidence supports, not the broadest subject label. Do not begin with a technical
-mechanism and manufacture human relevance afterward.
+Treat each raw subject as territory to investigate, not as a ready angle. Route every
+promising subject through the linked subject-to-angle owner before it advances. In a full
+run, continue from its exact angle proposals into the gates and research below. In the
+bounded ideation operation, stop after those proposals and return them without running the
+rest of the pipeline.
 
-For each problem-led candidate, record:
-
-- the **target viewer**;
-- the exact **lived moment** in which the problem appears;
-- the **human cost**;
-- evidence of **reach or recurrence**;
-- the familiar **surface explanation** or misconception;
-- the **hidden game or mechanism** that can explain it;
-- the **new understanding** the episode can earn; and
-- the **usable response** the viewer can apply.
-
-Use the mechanism as the explanation of a supported human problem, not as a substitute for
-one. For wonder-, history-, and explicit-game-led candidates, use a widely shared mystery,
-desire, or tension instead of requiring suffering. Those candidates still need a
-recognizable human stake, earned understanding, and useful response.
-
-For every promising subject, create at least two materially different angles. Build each angle with this editorial bridge:
-
-```text
-familiar game, event, person, institution, or trend
-    + game/play mechanism
-    + recognizable human stakes
-    + evidence-backed surprise, use, or reframe
-```
-
-Make the entry point, tension, human stake, earned payoff, evidence path, and intended viewer concrete. A broad sentence such as “AI is changing everything” or one viral view count is not a filmable, evidenced WHP angle.
-
-Before an angle becomes a finalist, identify one documented opening proof case whose
-intended goal, visible measure, shortcut, and absurd outcome can be told in a few plain
-sentences. If a first-hearing listener would still ask why the measure improved, find a
-clearer case or lower the angle's opening potential; do not rescue a weak hook with a
-technical lecture. Treat the example as replaceable even after research begins.
-
-For a long-lived mechanism, identify one compact current echo that shows the pattern still
-matters without opening a second full story or claiming that every system behaves the same
-way. The older case supplies the vivid story; the current echo supplies continuity and
-present relevance.
+Carry each advancing finalist forward with the owner's documented opening proof case and
+any applicable current echo.
 
 ## Apply hard gates at angle level
 

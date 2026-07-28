@@ -95,36 +95,107 @@ Do not require every lane in every run or use lane coverage as a mechanical quot
 
 ## Subject-to-angle development
 
-For every promising subject, develop at least **two materially different angles**. A materially different angle changes the central tension, human stake, evidence spine, or payoff—not merely the title wording.
+A subject is search territory, not an angle. An angle begins with a specific **human
+nerve**: a personally recognizable fear, desire, dilemma, identity stake, or fascination
+that credible evidence shows people encounter and that an episode can honestly explain.
+The nerve is the viewer's tension, not a dramatic label pasted onto an interesting
+mechanism.
+
+### Find the specific human nerve
+
+Run a bounded audience-language scan before selecting the nerve. Start with three
+materially different query families from the practical patterns above—for example a
+problem or fear, a desire or identity stake, and a question or misconception. Inspect
+current search wording, comments, forums, Q&A pages, polls, and supplied audience material
+where available. Add no more than two targeted follow-up passes for unresolved candidates,
+then stop and record what remains unknown. For a bounded ideation operation, this scan
+replaces the full demand, supply, timing, scoring, and packaging pipeline; apply it only to
+the promising subjects being turned into exact angle proposals.
+
+Preserve recurring wording closely enough to show how people describe the moment and
+stake, while protecting private material. Separate an audience's wording from the truth of
+its premise: a repeated phrase can reveal a felt concern without proving the condition it
+describes. Date volatile observations, compare independent contexts, and treat one query,
+comment, post, poll, or autocomplete phrase as a lead rather than proof of breadth.
 
 Before choosing a mechanism for a problem-led candidate, generate and compare the specific
 lived painpoints first. Prioritize the widest specific, recognizable, recurring pain that
 credible evidence supports, not the broadest subject label. Do not begin with a technical
 mechanism and manufacture human relevance afterward.
 
-Record these fields for every problem-led candidate:
+For wonder-, history-, and explicit-game-led candidates, use a widely shared mystery,
+desire, or tension instead of requiring suffering. A mystery may be why a rule works, a
+desire may be mastery or discovery, and an identity stake may concern the kind of player
+or culture a game creates. Never invent suffering merely to intensify a subject. These
+candidates still need a recognizable moment, a personal reason to care, and evidence that
+the fascination is shared.
+
+Generate at least three materially different candidate nerves when the available evidence
+supports them. They are materially different only when the first-person concern, lived
+moment, primal stake, evidence path, or earned payoff changes—not when one abstract noun is
+replaced with another. If the scan supports fewer than three, show the limitation instead
+of fabricating alternatives.
+
+Write every candidate as a concrete first-person concern or dilemma. Use this diagnostic
+form before turning it into audience-facing language:
+
+```text
+In [specific moment], I fear/want/wonder [specific concern], because [human stake].
+```
+
+For a consequential dilemma that does not fit `fear`, `want`, or `wonder`, state both
+choices and what the person risks by each. Keep the person, moment, object, and consequence
+visible. Run the `Choose what?` test. If a viewer can still ask what is being chosen,
+compared, lost, wanted, feared, or understood, the concern is not specific enough.
+
+Apply all of these specificity tests:
+
+- **recognizable-moment test** — could the intended viewer picture the situation, the
+  relevant person or group, the concrete object, and what happens next without an
+  explanatory paragraph?
+- **personal-stake test** — does the concern name why this matters to the person, such as
+  belonging, status, autonomy, safety, competence, fairness, loss, mastery, or meaning?
+  Treat this as a primal stake only when the evidence earns that interpretation; do not
+  turn an editorial description into an evolutionary or psychological fact.
+- **evidence-breadth test** — do multiple independent signals support meaningful reach or
+  recurrence in the intended audience? Distinguish repeated wording from audience size and
+  record contrary or missing evidence.
+
+For each problem-led candidate, record:
 
 - **target viewer** — the person beyond existing followers who experiences the problem;
-- **lived moment** — the exact situation in which they recognize it;
-- **human cost** — what the problem wastes, damages, delays, or makes harder;
-- **reach or recurrence** — evidence that the pain is broad, repeated, or both;
+- **audience language** — the recurring first-person or conversational wording found;
+- **lived moment** — the exact situation, person, object, and consequence;
+- **human cost** — what the problem wastes, damages, delays, threatens, or makes harder;
+- **reach or recurrence** — the independent evidence that the concern is broad, repeated,
+  or both; and
+- **first-person concern or dilemma** — the concrete diagnostic statement that survives
+  the specificity tests.
+
+Then record the bridge the episode would need to earn:
+
 - **surface explanation** — the familiar story or misconception people use now;
-- **hidden game or mechanism** — the WHP explanation that makes the pattern legible;
-- **new understanding** — the non-obvious model the episode can earn; and
-- **usable response** — the evidence-bounded change the viewer can make afterward.
+- **hidden game or mechanism** — the prospective WHP explanation to verify after the nerve
+  is selected;
+- **new understanding** — the non-obvious model the episode could earn; and
+- **usable response** — the evidence-bounded action, observation, or reflection the viewer
+  could apply afterward.
+
+For non-problem-led candidates, use the same fields with **shared tension or fascination**
+in place of pain and **human stake** in place of a manufactured cost.
 
 Compare **reach**, **recognition**, **frequency**, **consequence**, and
 **unresolvedness**. Treat these as separate evidence-backed dimensions; do not multiply
-them into a fabricated market-size number. A large category does not rescue a vague pain
-statement, and a frequent annoyance does not automatically outrank a rarer serious cost.
-Record the evidence and editorial tradeoff.
+them into a fabricated market-size number. A large subject category does not rescue a
+vague nerve, a frequent annoyance does not automatically outrank a rarer serious
+consequence, and emotional force does not lower the evidence bar. Choose the strongest
+supported nerve, not the most dramatic one. If evidence does not distinguish the leading
+nerves, keep the choice provisional or return the supported alternatives instead of
+forcing certainty.
 
-For wonder-, history-, and explicit-game-led candidates, use a widely shared mystery,
-desire, or tension instead of requiring suffering. Apply the same specificity discipline:
-name the intended viewer, recognizable moment, human stake, new understanding, and usable
-response without pretending curiosity is pain.
-
-For each angle, identify:
+For every promising subject, develop at least **two materially different angles** across
+the supported nerves. A materially different angle changes the central tension, human
+stake, evidence spine, or payoff—not merely the title wording. For each angle, identify:
 
 - the familiar entry point;
 - the audience pain or shared tension;
@@ -142,7 +213,7 @@ Use this canonical distinction:
 
 This is an example of subject-to-angle specificity, not a default winner or recommendation.
 
-Build each angle through the editorial bridge defined in the core skill:
+Build each angle through this editorial bridge:
 
 ```text
 familiar game, event, person, institution, or trend
@@ -151,7 +222,43 @@ familiar game, event, person, institution, or trend
     + evidence-backed surprise, use, or reframe
 ```
 
-A weak angle does not automatically disqualify its subject. Reframe it through a different tension, stake, or evidence path, then apply all six hard gates again to the new angle.
+A weak angle does not automatically disqualify its subject. Reframe it through a different
+tension, stake, or evidence path, then apply all six hard gates again to the new angle.
+
+### Prove mechanism and promise fit
+
+Only after selecting an evidence-supported nerve, choose a mechanism. Run the
+**mechanism-fit test**: the mechanism must explain the selected concern in the stated
+person, context, and evidence boundary, and the evidence must support the link from
+mechanism to recognizable consequence. An interesting mechanism that merely touches the
+subject fails. Use the mechanism as the explanation of a supported human problem or shared
+tension, not as a substitute for one.
+
+Draft one honest working title and one literal opening promise for each advancing angle.
+This is a fidelity check, not the later three-direction packaging stress test. Name the
+object and personal tension plainly; reject vague referents, generic relevance, and titles
+whose importance needs a paragraph of explanation. Use `feel` or `seem` when the evidence
+explains an appearance rather than an objective condition. Do not turn a correlation, an
+average tendency, or a bounded mechanism into a universal claim.
+
+Run the **title-to-payoff test** in both directions:
+
+1. title to evidence — can the factual backbone and mechanism honestly answer every
+   load-bearing implication in the title and opening promise?
+2. evidence to payoff — will the earned understanding and usable response resolve the
+   exact first-person concern without claiming more than the evidence supports?
+
+If either direction fails, narrow the title and opening promise, change the mechanism, or
+reject the angle. Never preserve a strong click by handing scripting an undeliverable
+promise.
+
+Hand off the exact subject and angle, selected human nerve, intended viewer, lived moment
+and human stake, audience-language and breadth evidence, mechanism and evidence boundary,
+working title and opening promise, earned understanding, usable response, caveats, and
+unresolved verification. The handoff must bound both the payoff and its limits. Scripting
+may develop the approved promise but must not silently broaden it or rerun nerve selection.
+
+### Test the opening proof case
 
 Before an angle becomes a finalist, identify one documented opening proof case whose
 intended goal, visible measure, shortcut, and absurd outcome can be told in a few plain
@@ -163,7 +270,31 @@ well sourced; causal clarity and visual legibility are part of production realit
 For a long-lived mechanism, identify one compact current echo that shows the pattern still
 matters without opening a second full story or claiming that every system behaves the same
 way. Verify that both examples instantiate the same bounded mechanism. Use the historical
-case for story and the current echo for continuity rather than building two competing hooks.
+case for story and the current echo for continuity rather than building two competing
+hooks.
+
+### Worked example: Popularity
+
+The vague route starts with the broad subject `Popularity`, reaches first for a generic
+social-proof mechanism, and invents an abstract taste-autonomy concern such as “Am I
+choosing for myself?” That leaves the object, lived moment, and personal consequence
+unclear.
+
+A stronger candidate route is:
+
+```text
+nerve: Am I less wanted than everyone around me?
+title: Why Does It Feel Like Everyone Has More Friends Than You?
+mechanism: highly connected people are overrepresented in comparison sets
+payoff: popular people appear in more people's worlds
+```
+
+Here the title uses perception language, the mechanism can explain the appearance, and the
+payoff can return the comparison to its evidence boundary rather than claiming that the
+viewer objectively has fewer friends. This is a method illustration, not a selected
+episode or a verified factual package. Its audience breadth, mechanism, title, and claims
+still require verification in a real topic run; do not reuse the answer when current
+evidence supports a different nerve.
 
 ## Shallow and deep research
 

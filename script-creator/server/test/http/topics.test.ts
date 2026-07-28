@@ -219,7 +219,7 @@ describe('topics HTTP API', () => {
       type: 'item.completed',
       item: {
         type: 'agent_message',
-        text: 'WHP_PROGRESS/3 01-frame done :: Decision frame recorded.',
+        text: 'WHP_PROGRESS/4 01-frame done :: Decision frame recorded.',
       },
     };
     fixture.operation.events = [{

@@ -67,7 +67,7 @@ describe('buildTopicOperationInputs', () => {
     ]);
     expect(inputs.idea_text).toBe(context.ideaText);
     expect(inputs.user_constraints).toBe(context.userConstraints);
-    expect(inputs.progress_transport).toBe('WHP_PROGRESS/3');
+    expect(inputs.progress_transport).toBe('WHP_PROGRESS/4');
     expect(inputs.summary_transport).toBe('fenced-whp-summary');
   });
 

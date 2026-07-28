@@ -1,6 +1,6 @@
 import type { CodexEvent } from '../types.js';
 
-export const WHP_PROGRESS_VERSION = 'WHP_PROGRESS/3';
+export const WHP_PROGRESS_VERSION = 'WHP_PROGRESS/4';
 
 export const WHP_PROGRESS_ROWS = [
   {
@@ -20,43 +20,39 @@ export const WHP_PROGRESS_ROWS = [
     text: 'Record at least 30 distinct, diverse subjects before ranking.',
   },
   {
-    id: '05-painpoints',
-    text: 'For problem-led candidates, compare specific lived painpoints before choosing the mechanism.',
+    id: '05-angle-development',
+    text: 'Complete the routed audience-language and subject-to-angle development for every promising raw subject.',
   },
   {
-    id: '06-angles',
-    text: 'Develop materially different angles for promising subjects.',
-  },
-  {
-    id: '07-proof-cases',
+    id: '06-proof-cases',
     text: 'Identify a first-hearing opening proof case and any needed current echo for each finalist.',
   },
   {
-    id: '08-gates',
+    id: '07-gates',
     text: 'Audit every advancing angle against all six hard gates.',
   },
   {
-    id: '09-shallow',
+    id: '08-shallow',
     text: 'Run a shallow scan and narrow to roughly 8–12 candidates.',
   },
   {
-    id: '10-deep',
+    id: '09-deep',
     text: 'Deeply research the finalists with multiple signals.',
   },
   {
-    id: '11-shortlist',
+    id: '10-shortlist',
     text: 'Rank a shortlist of roughly five with the required scorecard.',
   },
   {
-    id: '12-packages',
+    id: '11-packages',
     text: 'Test three package promises for each top-three finalist.',
   },
   {
-    id: '13-winner',
+    id: '12-winner',
     text: 'Resolve winner status: select exactly one final topic only with at least two responsibly supported, winner-eligible finalists; otherwise return the required incomplete result.',
   },
   {
-    id: '14-audit',
+    id: '13-audit',
     text: 'Complete the output and evidence audit.',
   },
 ] as const;
@@ -89,7 +85,7 @@ export interface ConsoleEntry {
 }
 
 const PROGRESS_LINE =
-  /^WHP_PROGRESS\/3 (\S+) (pending|active|done|unknown) :: (.*)$/;
+  /^WHP_PROGRESS\/4 (\S+) (pending|active|done|unknown) :: (.*)$/;
 const KNOWN_IDS = new Set<string>(WHP_PROGRESS_IDS);
 const TOOL_ITEM_TYPES = new Set([
   'command_execution',

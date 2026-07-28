@@ -25,7 +25,7 @@ only their own doctrine or schema responsibilities.
 - Modify: `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 - Test: both modified `test_skill_package.py` files
 
-- [ ] **Step 1: Add the topic-package RED test**
+- [x] **Step 1: Add the topic-package RED test**
 
 Add repository and consumer paths plus a test that requires:
 
@@ -44,14 +44,14 @@ Require every owner anchor in `references/research-method.md` and forbid it in
 `docs/steering/whp-video-topic-skill.md`, and the script package. Require consumer links to
 target `#subject-to-angle-development`.
 
-- [ ] **Step 2: Add the script-package RED test**
+- [x] **Step 2: Add the script-package RED test**
 
 Require `SKILL.md` to distinguish a raw subject from a selected topic brief and to invoke
 the bounded `choosing-whp-video-topic` `Ideate subjects/angles` operation before
 architecture. Require it to preserve an already selected angle without rerunning
 selection.
 
-- [ ] **Step 3: Run the focused tests and verify RED**
+- [x] **Step 3: Run the focused tests and verify RED**
 
 Run:
 
@@ -72,7 +72,7 @@ exist; pre-existing tests remain green.
 - Modify: `.agents/skills/choosing-whp-video-topic/scripts/test_skill_package.py`
 - Test: `.agents/skills/choosing-whp-video-topic/scripts/test_skill_package.py`
 
-- [ ] **Step 1: Expand the canonical subject-to-angle owner**
+- [x] **Step 1: Expand the canonical subject-to-angle owner**
 
 Inside `## Subject-to-angle development`, add:
 
@@ -90,7 +90,7 @@ audience-language scan
 Define a human nerve broadly enough to include fear, desire, dilemma, identity stake, and
 fascination. Keep pain optional for wonder-, history-, and explicit-game-led work.
 
-- [ ] **Step 2: Add specificity and honesty gates**
+- [x] **Step 2: Add specificity and honesty gates**
 
 Require:
 
@@ -102,7 +102,7 @@ Use `Choose what?`, recognizable-moment, personal-stake, evidence-breadth,
 mechanism-fit, and title-to-payoff tests. Require perception language such as `feel` or
 `seem` when the evidence explains an appearance rather than an objective condition.
 
-- [ ] **Step 3: Add one worked regression example**
+- [x] **Step 3: Add one worked regression example**
 
 Contrast the vague `Popularity` route with:
 
@@ -116,20 +116,20 @@ payoff: popular people appear in more people's worlds
 Mark the example as a method illustration whose claims still require verification in a
 real topic run.
 
-- [ ] **Step 4: Thin the topic skill to routing**
+- [x] **Step 4: Thin the topic skill to routing**
 
 Make `Ideate subjects/angles` run the bounded audience-language and subject-to-angle scan.
 Replace the duplicated painpoint checklist in `SKILL.md` with a direct link to
 `references/research-method.md#subject-to-angle-development`. Keep operation triggers and
 the full-run checklist in `SKILL.md`.
 
-- [ ] **Step 5: Refactor the old distributed-contract test**
+- [x] **Step 5: Refactor the old distributed-contract test**
 
 Make the existing painpoint test validate the complete fields and comparison dimensions in
 the detailed owner only. Keep output-shape assertions in `references/output-contract.md`.
 Add negative assertions that prevent owner-only anchors from returning to consumers.
 
-- [ ] **Step 6: Run the topic package test and verify GREEN**
+- [x] **Step 6: Run the topic package test and verify GREEN**
 
 Run:
 
@@ -147,7 +147,7 @@ Expected: all topic package tests pass.
 - Modify: `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 - Test: `.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`
 
-- [ ] **Step 1: Add the raw-subject handoff**
+- [x] **Step 1: Add the raw-subject handoff**
 
 In required project context, state:
 
@@ -156,17 +156,17 @@ A raw subject alone is not a selected topic brief.
 ```
 
 For a new episode supplied only as a raw subject, require the
-`choosing-whp-video-topic` `Ideate subjects/angles` operation and return the exact angle
-proposal before architecture. Preserve a supplied or approved angle without reopening
-selection.
+`choosing-whp-video-topic` `Ideate subjects/angles` operation, return multiple exact angle
+proposals without selecting a winner, and stop for approval before architecture. Preserve
+a supplied or approved angle without reopening selection.
 
-- [ ] **Step 2: Keep the consumer thin**
+- [x] **Step 2: Keep the consumer thin**
 
 Link to the canonical topic method and forbid the script skill from copying its candidate
 fields, specificity tests, worked example, or research sequence. Script architecture and
 story progression remain unchanged.
 
-- [ ] **Step 3: Run the script package test and verify GREEN**
+- [x] **Step 3: Run the script package test and verify GREEN**
 
 Run:
 
@@ -183,6 +183,12 @@ Expected: all script package tests pass.
 - Create: `docs/superpowers/evidence/2026-07-28-whp-human-nerve-angle-gate.md`
 - Verify: all modified skill and steering files
 
+**Execution note (2026-07-28):** The neutral, immutable behavioral protocol in Steps 1–2
+was not completed. The retained runs used rubric-cued prompts, did not preserve raw
+transcripts, and included a project-saturated Sudoku case. The evidence record discloses
+those limits and treats the results only as development probes. Steps 1–2 therefore remain
+unchecked; deterministic validation and ownership checks proceed independently.
+
 - [ ] **Step 1: Forward-test unfamiliar subjects**
 
 Run fresh, context-isolated evaluations for at least one problem-led subject and one
@@ -195,7 +201,7 @@ Preserve the untouched-skill `Popularity` output, its failure analysis, the new 
 prompts and outputs, and a criterion-by-criterion verdict. Do not promote any evaluation
 topic into the episode backlog.
 
-- [ ] **Step 3: Run deterministic validation**
+- [x] **Step 3: Run deterministic validation**
 
 Run:
 
@@ -209,13 +215,13 @@ git diff --check
 
 Expected: both suites pass, both skill packages validate, and the diff check is clean.
 
-- [ ] **Step 4: Audit single ownership**
+- [x] **Step 4: Audit single ownership**
 
 Search active doctrine and both skill packages for every owner-only anchor. Confirm each
 appears once in `research-method.md` and nowhere else. Confirm every consumer link targets
 an existing heading.
 
-- [ ] **Step 5: Review and commit**
+- [x] **Step 5: Review and commit**
 
 Inspect the complete diff, stage only task-owned files, rerun staged diff checks, and commit
 with:

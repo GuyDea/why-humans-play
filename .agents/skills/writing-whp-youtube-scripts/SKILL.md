@@ -25,6 +25,14 @@ When a scoped review, selection rewrite, or alternatives request supplies the ar
 selection, surrounding context, and narrative job, use those inputs directly; do not reread
 canonical project files unless the request changes channel policy or lacks needed context.
 
+A raw subject alone is not a selected topic brief. For a new episode supplied only as a raw
+subject, invoke the bounded `choosing-whp-video-topic` `Ideate subjects/angles` operation
+and return multiple exact angle proposals without choosing a winner. Stop after returning
+the proposals; do not begin architecture until Martin supplies or approves one exact angle.
+**REQUIRED SUB-SKILL:** Use `choosing-whp-video-topic` for that bounded operation and follow
+its [subject-to-angle development method](../choosing-whp-video-topic/references/research-method.md#subject-to-angle-development).
+Preserve a supplied or approved angle without reopening selection.
+
 Use a supplied selected topic brief as the handoff from topic selection. Do not rerun topic
 ideation unless Martin explicitly asks. Carry forward the available audience, packaging
 promise, tension, by-end promise, payoff, factual anchors, and unknowns. Missing nonessential
