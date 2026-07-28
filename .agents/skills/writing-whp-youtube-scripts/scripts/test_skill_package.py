@@ -130,6 +130,61 @@ class SkillPackageTests(unittest.TestCase):
             BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8"),
         )
 
+    def test_pair_owner_locks_complete_raw_source_of_truth(self) -> None:
+        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
+        consumers = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "blueprint": " ".join(
+                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
+            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
+        }
+        contract = (
+            "`script.raw.md` is the source of truth for every spoken word; paragraph "
+            "order; beat titles, headings, and their order; and bold, italic, and "
+            "underline storytelling markup."
+        )
+
+        self.assertIn(contract, pair)
+        for consumer_name, consumer in consumers.items():
+            with self.subTest(consumer=consumer_name):
+                self.assertNotIn(contract, consumer)
+
+    def test_pair_owner_locks_literal_stage_appendix_schemas(self) -> None:
+        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
+        consumers = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "blueprint": " ".join(
+                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
+            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
+        }
+        contracts = (
+            "Every extended file ends with exactly one literal `## Appendix`.",
+            "Include stage metadata, approved baselines, the factual boundary and "
+            "unresolved dependencies, the intro design record, a bullet-only body "
+            "logic map, promise and loop payoff destinations, and the approval state.",
+            "Include stage metadata, approved baselines, the story-progression and "
+            "payoff audit, evidence boundaries and open verification dependencies, "
+            "the spoken-readability result, the unresolved personal-input decision, "
+            "and the creative-approval state.",
+            "Use the complete final extended appendix owned by the annotated-script "
+            "format",
+        )
+
+        for contract in contracts:
+            with self.subTest(owner="pair", contract=contract):
+                self.assertIn(contract, pair)
+            for consumer_name, consumer in consumers.items():
+                with self.subTest(consumer=consumer_name, excluded=contract):
+                    self.assertNotIn(contract, consumer)
+
     def test_active_workflow_uses_blueprint_not_predraft(self) -> None:
         self.assertTrue(BLUEPRINT_WORKFLOW_MD.is_file())
 

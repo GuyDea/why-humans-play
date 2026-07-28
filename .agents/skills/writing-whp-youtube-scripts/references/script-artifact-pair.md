@@ -28,8 +28,8 @@ artifact or make it compliant.
 
 ## Raw script contract
 
-`script.raw.md` is the source of truth for spoken words, beat order, and storytelling
-markup.
+`script.raw.md` is the source of truth for every spoken word; paragraph order; beat
+titles, headings, and their order; and bold, italic, and underline storytelling markup.
 
 Raw permits only:
 
@@ -93,26 +93,26 @@ connective prose merely to make the page look active.
 
 ## Stage appendices
 
-Every extended file ends with one appendix appropriate to its stage. The appendix owns
+Every extended file ends with exactly one literal `## Appendix`. The appendix owns
 non-spoken material and never repeats narration.
 
 ### BLUEPRINT
 
-Include approved baselines, the factual boundary and unresolved dependencies, the intro
-design record, a bullet-only body logic map, promise and loop payoff destinations, and
-the approval state.
+Include stage metadata, approved baselines, the factual boundary and unresolved
+dependencies, the intro design record, a bullet-only body logic map, promise and loop
+payoff destinations, and the approval state.
 
 ### DRAFT
 
-Include approved baselines, the story-progression and payoff audit, evidence boundaries
-and open verification dependencies, the spoken-readability result, the personal-input
-decision, and the creative-approval state.
+Include stage metadata, approved baselines, the story-progression and payoff audit,
+evidence boundaries and open verification dependencies, the spoken-readability result,
+the unresolved personal-input decision, and the creative-approval state.
 
 ### Final
 
-Use the complete final extended appendix owned by the
-[annotated-script format](annotated-script-format.md), including its evidence-backed
-production, rights, accessibility, and editorial records.
+Use the complete final extended appendix owned by the annotated-script format. Follow
+[that format](annotated-script-format.md) for its evidence-backed production, rights,
+accessibility, and editorial records.
 
 ## Validate the pair before review or promotion
 
