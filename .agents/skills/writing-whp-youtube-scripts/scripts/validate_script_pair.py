@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
+from html.entities import html5
 import json
 from pathlib import Path
 import re
@@ -16,8 +17,9 @@ RAW_NAME = "script.raw.md"
 EXTENDED_NAME = "script.extended.md"
 PAIR_NAMES = {RAW_NAME, EXTENDED_NAME}
 APPENDIX_SPLIT_RE = re.compile(
-    r"\r?\n## Appendix[ \t]*(?:\r?\n|$)"
+    r"(?:\r\n|\r|\n)## Appendix[ \t]*(?:(?:\r\n|\r|\n)|$)"
 )
+MARKDOWN_LINE_ENDING_RE = re.compile(r"\r\n|\r|\n")
 APPENDIX_HEADING_RE = re.compile(r"^## Appendix[ \t]*$")
 H1_RE = re.compile(r"^# (?=\S).+$")
 BEAT_HEADING_RE = re.compile(r"^## (?=\S).+$")
@@ -74,6 +76,13 @@ HTML_BLOCK_TAGS = frozenset(
 )
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
+)
+CHARACTER_REFERENCE_RE = re.compile(
+    r"&#(?:[0-9]{1,7}|[xX][0-9A-Fa-f]{1,6});"
+    r"|&[A-Za-z][A-Za-z0-9]*;"
+)
+RAW_NARRATION_WITH_ENDING_RE = re.compile(
+    r"(?m)^>[^\r\n]*(?=\r\n|\r|\n)"
 )
 ATX_HEADING_RE = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)")
 LIST_MARKER_RE = re.compile(
@@ -188,6 +197,38 @@ def _is_blank_separator(line: str) -> bool:
     return line.rstrip("\r\n").strip(" \t") == ""
 
 
+def _markdown_lines(
+    markdown: str,
+    *,
+    keepends: bool = False,
+) -> list[str]:
+    """Split only at CommonMark CR, LF, and CRLF line endings."""
+
+    lines: list[str] = []
+    start = 0
+    for match in MARKDOWN_LINE_ENDING_RE.finditer(markdown):
+        end = match.end() if keepends else match.start()
+        lines.append(markdown[start:end])
+        start = match.end()
+    if start < len(markdown):
+        lines.append(markdown[start:])
+    return lines
+
+
+def _is_ascii_punctuation(character: str) -> bool:
+    """Return whether character is CommonMark's escapable ASCII punctuation."""
+
+    if len(character) != 1:
+        return False
+    codepoint = ord(character)
+    return (
+        0x21 <= codepoint <= 0x2F
+        or 0x3A <= codepoint <= 0x40
+        or 0x5B <= codepoint <= 0x60
+        or 0x7B <= codepoint <= 0x7E
+    )
+
+
 def _append_error(errors: list[str], message: str) -> None:
     """Append one deterministic diagnostic without duplicating it."""
 
@@ -235,7 +276,7 @@ def _citation_surfaces(markdown: str) -> list[tuple[str, bool]]:
             surfaces.append(("\n".join(quoted_paragraph), True))
             quoted_paragraph.clear()
 
-    for line in markdown.splitlines():
+    for line in _markdown_lines(markdown):
         if line.startswith(">"):
             spoken = _blockquote_spoken(line)
             if spoken.strip(" \t") == "":
@@ -457,6 +498,141 @@ def _surface_has_autolink(surface: str) -> bool:
     return False
 
 
+def _skip_inline_link_space(text: str, start: int) -> int:
+    """Skip horizontal space and at most one normalized line ending."""
+
+    cursor = _skip_horizontal_space(text, start)
+    if cursor < len(text) and text[cursor] == "\n":
+        cursor = _skip_horizontal_space(text, cursor + 1)
+    return cursor
+
+
+def _inline_link_destination_end(
+    surface: str,
+    start: int,
+) -> int | None:
+    """Return the end of a valid inline-link destination."""
+
+    if start >= len(surface):
+        return None
+
+    if surface[start] == "<":
+        cursor = start + 1
+        while cursor < len(surface):
+            character = surface[cursor]
+            if character == "\n" or ord(character) < 32:
+                return None
+            if (
+                character == "\\"
+                and cursor + 1 < len(surface)
+                and _is_ascii_punctuation(surface[cursor + 1])
+            ):
+                cursor += 2
+                continue
+            if character == "<":
+                return None
+            if character == ">":
+                return cursor + 1
+            cursor += 1
+        return None
+
+    cursor = start
+    parenthesis_depth = 0
+    while cursor < len(surface):
+        character = surface[cursor]
+        if character in " \t\n":
+            break
+        if ord(character) < 32 or ord(character) == 127:
+            return None
+        if (
+            character == "\\"
+            and cursor + 1 < len(surface)
+            and _is_ascii_punctuation(surface[cursor + 1])
+        ):
+            cursor += 2
+            continue
+        if character == "(":
+            parenthesis_depth += 1
+        elif character == ")":
+            if parenthesis_depth == 0:
+                return cursor
+            parenthesis_depth -= 1
+        cursor += 1
+
+    if cursor == start or parenthesis_depth:
+        return None
+    return cursor
+
+
+def _inline_link_title_end(surface: str, start: int) -> int | None:
+    """Return the end of one complete CommonMark inline-link title."""
+
+    opener = surface[start]
+    closer = REFERENCE_TITLE_CLOSERS[opener]
+    cursor = start + 1
+    while cursor < len(surface):
+        character = surface[cursor]
+        if (
+            character == "\\"
+            and cursor + 1 < len(surface)
+            and _is_ascii_punctuation(surface[cursor + 1])
+        ):
+            cursor += 2
+            continue
+        if opener == "(" and character == "(":
+            return None
+        if character == closer:
+            return cursor + 1
+        cursor += 1
+    return None
+
+
+def _inline_link_end(surface: str, start: int) -> int | None:
+    """Parse one bounded CommonMark inline-link suffix."""
+
+    content_start = start + 1
+    cursor = _skip_inline_link_space(surface, content_start)
+    if cursor >= len(surface):
+        return None
+    if surface[cursor] == ")":
+        return cursor + 1
+
+    if (
+        cursor > content_start
+        and surface[cursor] in REFERENCE_TITLE_CLOSERS
+    ):
+        title_end = _inline_link_title_end(surface, cursor)
+        if title_end is not None:
+            closing = _skip_inline_link_space(surface, title_end)
+            if closing < len(surface) and surface[closing] == ")":
+                return closing + 1
+
+    destination_end = _inline_link_destination_end(surface, cursor)
+    if destination_end is None:
+        return None
+    if (
+        destination_end < len(surface)
+        and surface[destination_end] == ")"
+    ):
+        return destination_end + 1
+
+    separated = _skip_inline_link_space(surface, destination_end)
+    if separated == destination_end or separated >= len(surface):
+        return None
+    if surface[separated] == ")":
+        return separated + 1
+    if surface[separated] not in REFERENCE_TITLE_CLOSERS:
+        return None
+
+    title_end = _inline_link_title_end(surface, separated)
+    if title_end is None:
+        return None
+    closing = _skip_inline_link_space(surface, title_end)
+    if closing < len(surface) and surface[closing] == ")":
+        return closing + 1
+    return None
+
+
 def _surface_has_raw_citation(
     surface: str,
     *,
@@ -494,6 +670,7 @@ def _surface_has_raw_citation(
         if (
             surface[suffix] == "("
             and suffix in parenthesis_pairs
+            and _inline_link_end(surface, suffix) is not None
         ) or (
             surface[suffix] == "["
             and suffix in bracket_pairs
@@ -521,6 +698,58 @@ def _has_escaped_story_marker(markdown: str) -> bool:
     return any(
         _is_escaped(markdown, match.start())
         for match in ESCAPABLE_STORY_MARKER_RE.finditer(markdown)
+    )
+
+
+def _has_character_reference(markdown: str) -> bool:
+    """Return whether raw contains a valid CommonMark character reference."""
+
+    for match in CHARACTER_REFERENCE_RE.finditer(markdown):
+        reference = match.group()
+        if reference.startswith("&#") or reference[1:] in html5:
+            return True
+    return False
+
+
+def _has_backslash_escape(markdown: str) -> bool:
+    """Return whether raw backslash-escapes ASCII punctuation."""
+
+    cursor = markdown.find("\\")
+    while cursor != -1:
+        if (
+            cursor + 1 < len(markdown)
+            and _is_ascii_punctuation(markdown[cursor + 1])
+        ):
+            return True
+        cursor = markdown.find("\\", cursor + 1)
+    return False
+
+
+def _has_raw_hard_line_break(markdown: str) -> bool:
+    """Return whether blockquoted narration requests a hard line break."""
+
+    for match in RAW_NARRATION_WITH_ENDING_RE.finditer(markdown):
+        spoken = _blockquote_spoken(match.group())
+        if (
+            spoken.endswith("\\")
+            or (
+                spoken.endswith("  ")
+                and spoken.rstrip(" ")
+            )
+        ):
+            return True
+    return False
+
+
+def _has_raw_unsupported_markup(markdown: str) -> bool:
+    """Detect denied Markdown constructs outside the storytelling allow-list."""
+
+    return (
+        UNSUPPORTED_MARKDOWN_RE.search(markdown) is not None
+        or _has_escaped_story_marker(markdown)
+        or _has_character_reference(markdown)
+        or _has_backslash_escape(markdown)
+        or _has_raw_hard_line_break(markdown)
     )
 
 
@@ -854,7 +1083,7 @@ def _raw_blockquote_passages(markdown: str) -> list[str]:
 
     passages: list[str] = []
     current: list[str] = []
-    for line in markdown.splitlines():
+    for line in _markdown_lines(markdown):
         if line.startswith(">"):
             current.append(_blockquote_spoken(line))
             continue
@@ -963,7 +1192,7 @@ def _has_nested_block_structure(passage: str) -> bool:
 
     return any(
         _is_nested_block_line(line)
-        for line in passage.splitlines()
+        for line in _markdown_lines(passage)
     )
 
 
@@ -971,7 +1200,7 @@ def _validate_raw(markdown: str) -> list[str]:
     """Validate the raw file's intentionally narrow authoring surface."""
 
     errors: list[str] = []
-    lines = markdown.splitlines()
+    lines = _markdown_lines(markdown)
     appendix_index = next(
         (
             index
@@ -1029,10 +1258,7 @@ def _validate_raw(markdown: str) -> list[str]:
             errors,
             "raw script cannot contain citations or Markdown links",
         )
-    if (
-        UNSUPPORTED_MARKDOWN_RE.search(body)
-        or _has_escaped_story_marker(body)
-    ):
+    if _has_raw_unsupported_markup(body):
         _append_error(
             errors,
             "raw script cannot contain unsupported Markdown markup",
@@ -1144,7 +1370,7 @@ def _extended_passages(
         current_line = 0
 
     for line_number, line in enumerate(
-        _before_appendix(markdown).splitlines(),
+        _markdown_lines(_before_appendix(markdown)),
         start=1,
     ):
         if PURPOSE_CANDIDATE_RE.fullmatch(line):
@@ -1267,7 +1493,7 @@ def _extended_sync_surface(markdown: str) -> str:
 
     projected: list[str] = []
     skip_annotation_separator = False
-    for line in body.splitlines(keepends=True):
+    for line in _markdown_lines(body, keepends=True):
         if PURPOSE_CANDIDATE_RE.fullmatch(line.rstrip("\r\n")):
             skip_annotation_separator = True
             continue

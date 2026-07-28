@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import string
 import subprocess
 import sys
 import tempfile
@@ -16,6 +17,7 @@ from validate_script_pair import (
     _has_raw_citation,
     _has_unsupported_html,
     _has_nested_block_structure,
+    _validate_raw,
     resolve_pair,
     validate_pair,
 )
@@ -497,7 +499,9 @@ class ScriptPairTests(unittest.TestCase):
                     self.validation_errors(raw=raw),
                     [
                         "raw script cannot contain citations or "
-                        "Markdown links"
+                        "Markdown links",
+                        "raw script cannot contain unsupported "
+                        "Markdown markup",
                     ],
                 )
 
@@ -768,14 +772,19 @@ class ScriptPairTests(unittest.TestCase):
             ["raw script cannot contain unsupported HTML tags"],
         )
 
-        for case, spoken in (
+        for case, spoken, expected in (
             (
                 "malformed outer with ordinary angle text",
                 '<custom title="<2 ordinary>"!',
+                [],
             ),
             (
                 "escaped inner opening angle",
                 r'<custom title="\<em>"!',
+                [
+                    "raw script cannot contain unsupported "
+                    "Markdown markup"
+                ],
             ),
         ):
             with self.subTest(case=case):
@@ -791,7 +800,7 @@ class ScriptPairTests(unittest.TestCase):
 
                 self.assertEqual(
                     self.validation_errors(raw=raw, extended=extended),
-                    [],
+                    expected,
                 )
 
     def test_raw_purity_allows_incomplete_html_without_hidden_construct(
@@ -833,6 +842,60 @@ class ScriptPairTests(unittest.TestCase):
 
     def test_raw_purity_allows_exact_underline_tags(self) -> None:
         self.assertEqual(self.validation_errors(), [])
+
+    def test_unicode_line_separators_do_not_form_multiline_raw_html(
+        self,
+    ) -> None:
+        for separator in ("\u2028", "\u2029"):
+            with self.subTest(separator=repr(separator)):
+                spoken = f"<custom{separator}> data=x>"
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
+    def test_commonmark_line_endings_still_bound_multiline_raw_html(
+        self,
+    ) -> None:
+        for line_ending in ("\n", "\r\n", "\r"):
+            with self.subTest(line_ending=repr(line_ending)):
+                raw = line_ending.join(
+                    (
+                        "# Episode",
+                        "",
+                        "## 1. Opening",
+                        "",
+                        "> <custom",
+                        "> data=x>",
+                        "",
+                    )
+                )
+
+                self.assertEqual(
+                    _validate_raw(raw),
+                    ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_exact_sync_accepts_all_commonmark_line_endings(self) -> None:
+        for line_ending in ("\n", "\r\n", "\r"):
+            with self.subTest(line_ending=repr(line_ending)):
+                raw = RAW.replace("\n", line_ending)
+                extended = EXTENDED.replace("\n", line_ending)
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
 
     def test_raw_purity_rejects_reference_links_and_footnotes(self) -> None:
         for case, citation in (
@@ -890,7 +953,104 @@ class ScriptPairTests(unittest.TestCase):
                     [
                         "raw script cannot contain citations or "
                         "Markdown links"
-                    ],
+                    ]
+                    + (
+                        [
+                            "raw script cannot contain unsupported "
+                            "Markdown markup"
+                        ]
+                        if case == "even-backslash closing bracket"
+                        else []
+                    ),
+                )
+
+    def test_raw_purity_rejects_valid_commonmark_inline_links(self) -> None:
+        citation_error = (
+            "raw script cannot contain citations or Markdown links"
+        )
+        unsupported_error = (
+            "raw script cannot contain unsupported Markdown markup"
+        )
+        for case, link, expected in (
+            (
+                "angle destination",
+                "[source](<not the 2 treatment>)",
+                [citation_error],
+            ),
+            (
+                "three nested destination parentheses",
+                "[source](a(b(c(d)e)f)g)",
+                [citation_error],
+            ),
+            (
+                "escaped destination parentheses",
+                r"[source](a\(b\)c)",
+                [citation_error, unsupported_error],
+            ),
+            ("empty destination", "[source]()", [citation_error]),
+            (
+                "double-quoted title",
+                '[source](/url "title")',
+                [citation_error],
+            ),
+            (
+                "single-quoted title",
+                "[source](/url 'title')",
+                [citation_error],
+            ),
+            (
+                "parenthesized title",
+                "[source](/url (title))",
+                [citation_error],
+            ),
+            (
+                "separated by tabs and line endings",
+                '[source](\n> /url\t\n> "title"\t )',
+                [citation_error],
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {link}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    expected,
+                )
+
+    def test_raw_purity_allows_natural_or_malformed_inline_link_text(
+        self,
+    ) -> None:
+        for case, spoken in (
+            (
+                "natural-language parenthetical",
+                "[the control](not the treatment)",
+            ),
+            ("space in bare destination", "[source](/my uri)"),
+            ("unbalanced destination", "[source](foo(and(bar))"),
+            ("unclosed angle destination", "[source](<target)"),
+            ("unclosed title", '[source](/url "title)'),
+            (
+                "text after title",
+                '[source](/url "title" trailing)',
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
                 )
 
     def test_raw_purity_rejects_commonmark_uri_autolinks(self) -> None:
@@ -926,7 +1086,15 @@ class ScriptPairTests(unittest.TestCase):
                     [
                         "raw script cannot contain citations or "
                         "Markdown links"
-                    ],
+                    ]
+                    + (
+                        [
+                            "raw script cannot contain unsupported "
+                            "Markdown markup"
+                        ]
+                        if "backslash" in case
+                        else []
+                    ),
                 )
 
     def test_raw_purity_rejects_commonmark_email_autolinks(self) -> None:
@@ -960,38 +1128,52 @@ class ScriptPairTests(unittest.TestCase):
     def test_raw_purity_allows_non_autolink_angle_text(self) -> None:
         overlong_scheme = "a" + "1" * 32
         overlong_domain_label = "a" * 64
-        for case, spoken in (
-            ("empty angles", "<>"),
-            ("one-character scheme", "<m:abc>"),
+        for case, spoken, expected in (
+            ("empty angles", "<>", []),
+            ("one-character scheme", "<m:abc>", []),
             (
                 "overlong scheme",
                 f"<{overlong_scheme}:target>",
+                [],
             ),
-            ("underscore in scheme", "<ab_c:target>"),
-            ("numeric scheme start", "<1a:target>"),
-            ("space in URI", "<ab:has space>"),
-            ("ASCII control in URI", "<ab:has\x01control>"),
-            ("nested angle in URI", "<ab:nested<1>>"),
-            ("no URI separator", "<foo.bar.baz>"),
-            ("empty email local part", "<@example.com>"),
-            ("leading domain hyphen", "<source@-example.com>"),
-            ("trailing domain hyphen", "<source@example-.com>"),
-            ("empty domain label", "<source@example..com>"),
+            ("underscore in scheme", "<ab_c:target>", []),
+            ("numeric scheme start", "<1a:target>", []),
+            ("space in URI", "<ab:has space>", []),
+            ("ASCII control in URI", "<ab:has\x01control>", []),
+            ("nested angle in URI", "<ab:nested<1>>", []),
+            ("no URI separator", "<foo.bar.baz>", []),
+            ("empty email local part", "<@example.com>", []),
+            ("leading domain hyphen", "<source@-example.com>", []),
+            ("trailing domain hyphen", "<source@example-.com>", []),
+            ("empty domain label", "<source@example..com>", []),
             (
                 "overlong domain label",
                 f"<source@{overlong_domain_label}>",
+                [],
             ),
             (
                 "backslash in email local part",
                 r"<foo\+@bar.example.com>",
+                [
+                    "raw script cannot contain unsupported "
+                    "Markdown markup"
+                ],
             ),
             (
                 "escaped URI opening angle",
                 r"\<https://example.com>",
+                [
+                    "raw script cannot contain unsupported "
+                    "Markdown markup"
+                ],
             ),
             (
                 "escaped email opening angle",
                 r"\<source@example.com>",
+                [
+                    "raw script cannot contain unsupported "
+                    "Markdown markup"
+                ],
             ),
         ):
             with self.subTest(case=case):
@@ -1007,7 +1189,7 @@ class ScriptPairTests(unittest.TestCase):
 
                 self.assertEqual(
                     self.validation_errors(raw=raw, extended=extended),
-                    [],
+                    expected,
                 )
 
     def test_raw_purity_rejects_complete_links_across_supported_surfaces(
@@ -1096,7 +1278,14 @@ class ScriptPairTests(unittest.TestCase):
 
                 self.assertEqual(
                     self.validation_errors(raw=raw, extended=extended),
-                    [],
+                    (
+                        [
+                            "raw script cannot contain unsupported "
+                            "Markdown markup"
+                        ]
+                        if "escaped" in case
+                        else []
+                    ),
                 )
 
     def test_raw_purity_resets_citation_state_at_paragraph_boundaries(
@@ -1265,6 +1454,140 @@ class ScriptPairTests(unittest.TestCase):
                         "Markdown markup"
                     ],
                 )
+
+    def test_raw_purity_rejects_valid_character_references(self) -> None:
+        unsupported_error = (
+            "raw script cannot contain unsupported Markdown markup"
+        )
+        for case, character_reference in (
+            ("named", "&amp;"),
+            ("less common named", "&Dcaron;"),
+            ("decimal", "&#35;"),
+            ("seven-digit decimal", "&#1234567;"),
+            ("hexadecimal", "&#x22;"),
+            ("six-digit uppercase hexadecimal", "&#XABCDEF;"),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> literal {character_reference} speech",
+                )
+
+                self.assertEqual(
+                    _validate_raw(raw),
+                    [unsupported_error],
+                )
+
+    def test_raw_purity_allows_literal_or_malformed_ampersands(self) -> None:
+        for case, spoken in (
+            ("named reference without semicolon", "literal &amp speech"),
+            ("unknown named reference", "literal &MadeUpEntity; speech"),
+            ("empty decimal reference", "literal &#; speech"),
+            ("empty hexadecimal reference", "literal &#x; speech"),
+            ("eight-digit decimal", "literal &#12345678; speech"),
+            ("seven-digit hexadecimal", "literal &#xabcdef0; speech"),
+            ("initialism", "R&D is part of the speech"),
+            ("ordinary conjunction", "fish & chips remain literal"),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
+    def test_raw_purity_rejects_backslash_escaped_ascii_punctuation(
+        self,
+    ) -> None:
+        unsupported_error = (
+            "raw script cannot contain unsupported Markdown markup"
+        )
+        for punctuation in string.punctuation:
+            with self.subTest(punctuation=punctuation):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> literal \\{punctuation} escape",
+                )
+
+                self.assertIn(unsupported_error, _validate_raw(raw))
+
+    def test_raw_purity_allows_backslashes_before_nonpunctuation(self) -> None:
+        spoken = (
+            r"literal \A \3 \φ path\name and a slash before space\ "
+        )
+        raw = RAW.replace(
+            "> *But the next result changed the question.*",
+            f"> {spoken}",
+        )
+        extended = EXTENDED.replace(
+            "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+            "> *But the next result changed the question.*",
+            f"> {spoken}",
+        )
+
+        self.assertEqual(
+            self.validation_errors(raw=raw, extended=extended),
+            [],
+        )
+
+    def test_raw_purity_rejects_hard_line_breaks(self) -> None:
+        unsupported_error = (
+            "raw script cannot contain unsupported Markdown markup"
+        )
+        for line_ending in ("\n", "\r\n", "\r"):
+            for case, first_line in (
+                ("backslash", "first\\"),
+                ("two spaces", "first  "),
+                ("three spaces", "first   "),
+            ):
+                with self.subTest(
+                    line_ending=repr(line_ending),
+                    case=case,
+                ):
+                    raw = line_ending.join(
+                        (
+                            "# Episode",
+                            "",
+                            "## 1. Opening",
+                            "",
+                            f"> {first_line}",
+                            "> second",
+                            "",
+                        )
+                    )
+
+                    self.assertEqual(
+                        _validate_raw(raw),
+                        [unsupported_error],
+                    )
+
+    def test_raw_purity_allows_soft_wrapping_and_midline_backslashes(
+        self,
+    ) -> None:
+        for line_ending in ("\n", "\r\n", "\r"):
+            with self.subTest(line_ending=repr(line_ending)):
+                raw = line_ending.join(
+                    (
+                        "# Episode",
+                        "",
+                        "## 1. Opening",
+                        "",
+                        "> first ",
+                        r"> path\name",
+                        "",
+                    )
+                )
+
+                self.assertEqual(_validate_raw(raw), [])
 
     def test_raw_purity_rejects_nested_markdown_block_structures(self) -> None:
         for case, nested_block in (
@@ -1906,6 +2229,40 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             0.5,
             f"citation scan took {elapsed:.3f}s",
+        )
+
+    def test_inline_link_scan_is_linear_on_many_natural_parentheticals(
+        self,
+    ) -> None:
+        passage = "[x](not the treatment) " * 20_000
+
+        started = time.perf_counter()
+        has_citation = _has_raw_citation(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_citation)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"inline-link scan took {elapsed:.3f}s",
+        )
+
+    def test_raw_markup_scan_is_linear_on_literal_speech(self) -> None:
+        passage = (
+            "# Episode\n\n## 1. Opening\n\n> "
+            + r"ordinary & speech path\name " * 20_000
+            + "\n"
+        )
+
+        started = time.perf_counter()
+        errors = _validate_raw(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertEqual(errors, [])
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"raw markup scan took {elapsed:.3f}s",
         )
 
     def test_raw_html_scan_is_linear_on_many_incomplete_tags(self) -> None:
