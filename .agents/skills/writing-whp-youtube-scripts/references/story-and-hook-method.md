@@ -11,7 +11,7 @@
 - [Choose story only when it serves the promise](#choose-story-only-when-it-serves-the-promise)
 - [Draft from the approved progression](#draft-from-the-approved-progression)
 - [Add a supporting narrative throughline](#add-a-supporting-narrative-throughline)
-- [Open and close specific loops](#open-and-close-specific-loops)
+- [Plan loops without withholding clarity](#plan-loops-without-withholding-clarity)
 - [Write and test for speech](#write-and-test-for-speech)
 - [Design personal experience as a story beat](#design-personal-experience-as-a-story-beat)
 - [Hand the insight back to the viewer](#hand-the-insight-back-to-the-viewer)
@@ -25,8 +25,10 @@
 Use this gate for a new episode, thesis-level rethink, or any request that would set or
 materially change the causal route from opening tension through the insight ladder to the
 final payoff. The approved intellectual architecture comes first. Return the complete
-Story Progression Plan and stop; beats, hooks, jokes, final transitions, and narration come
-only after approval.
+Story Progression Plan and stop. Intro design and the body logic map come only after
+progression approval; the body logic map lives in the Script Blueprint extended appendix,
+and body narration comes only after the intro-first Script Blueprint is
+approved.
 
 If planning exposes a flat insight ladder, missing proof job, or other load-bearing
 architecture defect, return to architecture approval. Do not manufacture story tension
@@ -38,9 +40,9 @@ into the complete artifact below. When he targets a revision, change only the ad
 progression beat or field. Name every downstream causal consequence instead of silently
 rewriting later beats. Return the complete revised plan with `AWAITING-APPROVAL` and
 `PENDING`, then stop. Prior approval does not carry across a progression revision. Re-entry
-requires renewed whole-plan approval or a direct instruction to draft from that newly
-displayed complete revised plan; the revision request itself does not count as renewed
-approval.
+requires renewed whole-plan approval or a direct instruction to build the Script Blueprint
+from that newly displayed complete revised plan; the revision request itself does not
+count as renewed approval.
 
 ### Story engine
 
@@ -153,9 +155,11 @@ techniques; a sidecar that competes with the thesis; and promises the episode do
 - **Open evidence dependencies:** Every load-bearing `NEEDS-VERIFICATION` item
 
 The writer never self-approves the artifact. Positive feedback on one move is not complete
-approval. Explicit approval—or a direct instruction to draft from that displayed complete
-plan—records it as `APPROVED` by Martin and makes it the visible story baseline for drafting
-only. It does not replace creative approval of the complete narration or direction.
+approval. Explicit approval—or a direct instruction to build the Script Blueprint from
+that displayed complete plan—records it as `APPROVED` by Martin and makes it the visible
+story baseline for the polished intro and bullet-only body logic map. It does not
+authorize body narration or replace later creative approval of the complete narration and
+direction.
 
 ## Start with the promise and payoff
 
@@ -360,10 +364,12 @@ fulfill. If so, replace it rather than bending the episode around unrelated shoc
 ## Draft from the approved progression
 
 The approved Story engine and `SP` blocks are the narrative-spine baseline; do not build a
-second spine after planning. Convert each block into a beat that changes viewer
-understanding, preserves its proof boundary, and creates the recorded next question or
-consequence. Spoken phrasing may develop naturally, but the causal route, loop state, and
-payoff stay stable.
+second spine after planning. In the Script Blueprint, translate each block into the
+bullet-only body logic map in `blueprint/script.extended.md` and polish only the intro in
+`blueprint/script.raw.md`. After Martin approves both, convert each block into a narrated
+draft beat that changes viewer understanding, preserves its proof boundary, and creates
+the recorded next question or consequence. Spoken phrasing may develop naturally, but the
+causal route, loop state, and payoff stay stable.
 
 If prose reveals that one `BUT`, `THEREFORE`, proof job, or payoff cannot work honestly,
 surface the defect and return to the targeted progression revision rule. Do not hide the
@@ -423,7 +429,14 @@ detail, opens a second unrelated promise, or has no earned ending. When no candi
 let the argument and evidence carry the episode directly and record the reason in the
 appendix.
 
-## Open and close specific loops
+## Plan loops without withholding clarity
+
+An intro already tends to open the title question, the featured case, the explanation
+promise, and the remedy promise. Treat those as candidates, not a quota. Open another loop
+only when the viewer can still track the current thought and the Script Blueprint extended
+appendix's body logic map names its exact payoff. Never withhold prerequisite clarity to
+manufacture suspense. Use no fixed loop count. Prefer the fewest specific loops that
+preserve curiosity without obscuring the current argument.
 
 Write every open loop as a specific unresolved question, contradiction, comparison,
 or promised test. Name the beat where it will be paid off. Do not rely on vague
@@ -435,12 +448,10 @@ partial answer opens a new question, distinguish the paid portion from the new l
 Audit the opening loop separately and ensure the final payoff answers the question
 the packaging and first seconds actually created.
 
-Chain loops across the whole episode: open a question, pay part of it off, and open
-the next before the first fully closes, so that roughly every 60–90 seconds of spoken
-time gives the viewer a live reason to keep watching. Treat that cadence as a
-structural aim while arranging beats and as a post-draft diagnostic afterward — never
-as a clock that erases setup, referents, causality, humor, or the learning promise
-from an unfinished script.
+Chain loops only when the partial answer naturally creates a distinct next question.
+During the post-draft retention pass, flag any long stretch that merely coasts on
+delivered information, but diagnose the missing progression before adding suspense.
+A completed explanation does not need a decorative new loop.
 
 For memory-first delivery, follow [the memory-first walking-vlog
 pass](rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).

@@ -9,9 +9,9 @@ description: "Use when ideating, drafting, reviewing, or revising Why Humans Pla
 
 Use one skill for rapid creative development and evidence-backed production. For
 episode-scale work, approve the intellectual architecture, then approve the story
-progression, then draft and approve the complete narration. Enter production only after
-that separate creative approval. Put the viewer promise and honest inquiry before
-retention tricks.
+progression, then approve an intro-first Script Blueprint, then expand and approve the
+complete narration. Enter production only after that separate creative approval. Put the
+viewer promise and honest inquiry before retention tricks.
 
 Do not use this skill for unrelated ads, social posts, or general marketing copy.
 
@@ -60,51 +60,70 @@ Honor the requested scope before choosing a phase:
 Use the visible topic brief, artifact or selection, surrounding context, requested operation,
 and creative status. Do not make an operation depend on invisible chat history.
 
-## Phase 0 — Pre-draft
+## Phase 0 — Script Blueprint
 
-A script under `whp-youtube/predrafts/` is a pre-draft: fast creative iteration before
-draft status. For a pre-draft, return the requested architecture, narration, passage,
-review, or alternatives directly and stop.
+An episode-scale Script Blueprint lives in
+`whp-youtube/episodes/epNNN-stable-name/blueprint/` as
+`blueprint/script.raw.md` and `blueprint/script.extended.md`. Follow
+[the script artifact pair](references/script-artifact-pair.md) for the episode path,
+paired views, markup, validation, and promotion contract, then follow
+[the Script Blueprint workflow](references/script-blueprint-workflow.md) for the exact
+stage contents and approval gate.
+
+A Script Blueprint is not a rough full script. Its raw view contains one polished spoken
+intro. Its extended view mirrors that intro and owns one bullet-only body logic map in its
+appendix. Do not draft body narration in a Script Blueprint.
 
 For a new episode, thesis-level rethink, or other central-progression work, Phase 0 stops
-first at architecture and then at the Story Progression Plan. Scoped pre-draft work returns
-directly until it crosses that same trigger. A pre-draft plan is a visible creative
-baseline, not a definite WHP decision; promotion remains the reconcilable decision.
+first at architecture and then at the Story Progression Plan. Scoped Script Blueprint work
+returns directly until it crosses that same trigger. Once both artifacts are approved,
+design and polish the intro before expanding any body prose. A Script Blueprint is a
+visible creative baseline, not a definite WHP decision; advancement remains the
+reconcilable decision.
 
-- Do not run the spoken-readability script, word counts, timing or cut ledgers,
-  editorial, retention, or timing audits, or the validator, and do not create or
-  maintain planning-notes scaffolding, unless Martin asks for that specific work by
-  name.
-- Do not treat pre-draft edits as definite WHP decisions; do not reconcile or ledger
-  them. Promotion is the decision.
+- Run the spoken-readability and walking-conversation checks on
+  `blueprint/script.raw.md` only.
+  Do not run body word counts, timing or cut ledgers, editorial, retention, production
+  audits, final-format validation, or production scaffolding unless Martin asks for that
+  specific work by name. Validate the pair as the pair owner requires.
+- Treat Script Blueprint edits as exploratory; do not reconcile or ledger them. Validated
+  promotion into `draft/` is the decision.
 - The factual boundary applies unchanged: use supplied or project-known facts, never
   invent specificity, and label hypotheticals. The architecture approval gate also
   applies unchanged for a new episode or thesis-level rethink.
-- Write for spoken delivery — the register and clarity rules still describe good
-  narration — but enforcement waits for promotion.
+- No independent AI review is required during Phase 0. Do not call another model or add a
+  reviewer record unless Martin explicitly requests that review for the current artifact.
 
 When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
-no-teleprompter pre-draft, run the memory-first delivery pass before returning it. This is
-a focused delivery check, not a production audit. Follow
+no-teleprompter Script Blueprint, run the memory-first delivery pass before returning it.
+This is a focused delivery check, not a production audit. Follow
 [the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
 
-Promote a pre-draft when Martin says it is ready: run the spoken-readability gate and
-fix failures, add or refresh the planning-notes appendix, move the file to
-`whp-youtube/drafts/`, and reconcile the promotion as one definite decision. Promotion
-returns the script to normal Phase 1 handling; Phase 2 still requires the separate
-creative approval gate.
+Advance only after Martin explicitly approves both the polished intro and body logic map.
+Preserve the approved raw intro, expand the body logic map into complete narration in
+`whp-youtube/episodes/epNNN-stable-name/draft/script.raw.md`, build the matching
+`draft/script.extended.md`, validate the pair, run the full spoken-readability gate on raw,
+and reconcile that promotion as one definite decision. The resulting draft returns to
+normal Phase 1 handling; Phase 2 still requires the separate creative approval gate.
 
 ## Phase 1 — Rapid prototype
 
 Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, humor or voice
-passes, and scoped refinement. For a script under `whp-youtube/predrafts/`, Phase 0
+passes, and scoped refinement. For a script under an episode's `blueprint/`, Phase 0
 applies instead.
+
+For episode-scale work advancing from Phase 0, preserve the approved intro and use the
+approved body logic map to write one complete narration in the episode's `draft/` pair.
+Draft narration changes begin in `draft/script.raw.md`; keep annotations and the stage
+appendix in `draft/script.extended.md`. Do not quietly redesign the intro or causal route
+while expanding the body.
 
 Return the requested artifact directly. Outside the bounded architecture
 concept-discovery scan and the targeted viewer-vulnerability proof-case lookup below, do
 not perform web research, write an assignment contract or evidence packet, force three
 opening candidates, create annotated-script scaffolding, plan visuals or rights, run the
-production rubric, or invoke the validator unless Martin explicitly asks for that work.
+production rubric, or invoke final-format validation unless Martin explicitly asks for
+that work. Episode-stage pairs still require pair validation before review.
 
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
@@ -127,10 +146,11 @@ Use [the script architecture method](references/script-architecture.md) for that
 
 Once Martin approves the architecture, return one visible Story Progression Plan and stop.
 Do not order beats or draft narration until Martin explicitly approves the complete plan or
-directly instructs you to draft from that displayed complete plan. Preserve the approved
-architecture as the intellectual baseline and the approved progression as the story
-baseline. Scoped work on existing narration does not rebuild either artifact unless it
-changes the central message or crosses the central-progression trigger.
+directly instructs you to build the Script Blueprint from that displayed complete plan.
+Preserve the approved architecture as the intellectual baseline and the approved
+progression as the story baseline. Scoped work on existing narration does not rebuild
+either artifact unless it changes the central message or crosses the central-progression
+trigger.
 
 An architecture cannot be approved unless it contains both a non-obvious understanding
 and a concrete, evidence-bounded viewer response with an observable result. Check the
@@ -185,6 +205,11 @@ Always-loaded invariants:
   substitutes for mechanism evidence.
 - Apply selected humor, callbacks, loops, and payoffs without turning the approved plan into
   formulaic phrasing.
+- Keep every story device subordinate to conversational causality. Route line-level hooks
+  and mini-hooks through
+  [the rapid natural-package owner](references/rapid-prototyping.md#keep-story-devices-inside-the-conversation),
+  and route loop selection and payoff through
+  [the structural loop owner](references/story-and-hook-method.md#plan-loops-without-withholding-clarity).
 
 For Phase 1 line-level case narration, spoken compression, hook, humor, and factual-boundary
 application, follow the rapid method linked above. For the detailed progression schema and
@@ -199,19 +224,19 @@ the learning promise, each beat's punchline and exact-lesson line, and any sente
 evidence-bounded wording a paraphrase could break. Deliver locked lines word-perfect and
 keep them memorizable — a handful per beat, each a single sentence. Everything unmarked
 is flexible tissue: Martin may say it his own way, because the written line fixes the
-meaning, facts, locked story nouns, and evidence boundary, not the exact words. Bold is a
-review-and-delivery annotation like an inline evidence indicator, not emphasis; strip it
-from word counts and readability checks. Mark locked lines in complete scripts (Phase 1
-prototype or Phase 2 deliverable); leave scoped passages and Phase 0 pre-drafts unmarked
-unless Martin asks.
+meaning, facts, locked story nouns, and evidence boundary, not the exact words. Apply the
+pair owner's markup and synchronization contract after selecting these lines. Strip markup
+from word counts and readability checks. Mark locked lines in complete draft or final
+narration; for a Script Blueprint, mark only intro wording whose exact delivery has already
+been selected.
 
 ### Enforce spoken readability before delivery
 
-Spoken readability is mandatory before returning draft or Phase 2 narration; a pre-draft
-runs this gate once at promotion. Use 25 spoken words as a hard ceiling. Send every
-21–25-word line through first-hearing review, and reject shorter lines when actor, action,
-relationship, or consequence remains unclear. Preserve evidence boundaries and personality
-during every rewrite.
+Spoken readability is mandatory before returning the Script Blueprint intro, draft
+narration, or Phase 2 narration. Run it on each stage's `script.raw.md`. Use 25 spoken
+words as a hard ceiling. Send every 21–25-word line through first-hearing review, and
+reject shorter lines when actor, action, relationship, or consequence remains unclear.
+Preserve evidence boundaries and personality during every rewrite.
 
 > Detailed line-level owner: [the rapid drafting method](references/rapid-prototyping.md).
 
@@ -260,7 +285,16 @@ For central-progression work with an approved architecture but no approved progr
 return only the complete Story Progression Plan and wait. Positive feedback on one
 obstacle, transition, case, technique, or loop does not approve the whole artifact.
 
-Explicit approval—or a direct instruction to draft from that displayed complete plan—records that plan as `APPROVED` by Martin and authorizes beat ordering and narration prototyping only. It does not approve the complete narration or direction. When Martin requests a targeted revision, change only the addressed progression beat or field and name every downstream causal consequence instead of silently rewriting later beats. Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, then stop. Prior approval does not carry across a progression revision. Re-entry requires renewed whole-plan approval or a direct instruction to draft from that newly displayed complete revised plan; the revision request itself does not count as renewed approval.
+Explicit approval—or a direct instruction to build the Script Blueprint from that displayed
+complete plan—records that plan as `APPROVED` by Martin and authorizes the polished intro
+and bullet-only body logic map only. It does not authorize body narration or approve the
+complete narration or direction. When Martin requests a targeted revision, change only the
+addressed progression beat or field and name every downstream causal consequence instead
+of silently rewriting later beats. Return the complete revised plan with
+`AWAITING-APPROVAL` and `PENDING`, then stop. Prior approval does not carry across a
+progression revision. Re-entry requires renewed whole-plan approval or a direct
+instruction to build the Script Blueprint from that newly displayed complete revised
+plan; the revision request itself does not count as renewed approval.
 
 Keep the approved plan visible as supplied context. If no visible approved plan is
 supplied, treat the progression as unapproved. Story-progression approval precedes and does
@@ -277,7 +311,8 @@ not silently replace its structure or personality.
 
 ## Phase 2 — Evidence and production
 
-For evidence-backed finalization:
+For evidence-backed finalization, promote the approved draft into
+`whp-youtube/episodes/epNNN-stable-name/final/` without overwriting the draft pair:
 
 1. Write an assignment contract that fixes the episode mode, audience, promise,
    `Deliverable`, `Useful viewer change`, scope, runtime, constraints, and payoff.
@@ -287,9 +322,10 @@ For evidence-backed finalization:
    every factual narration sentence or separable factual clause to at least one `F-###` ID
    in the matching appendix beat's `#### Claims` section. Append a visible
    `[F-###](Original URL)` indicator immediately after every mapped factual narration
-   sentence or separable factual clause. Treat inline evidence indicators as review
-   annotations, not spoken words; exclude them from narration extraction, word count, table
-   reads, and teleprompter output. Keep the full evidence record in the appendix.
+   sentence or separable factual clause. Put these indicators only in
+   `final/script.extended.md`. Treat inline evidence indicators as review annotations, not
+   spoken words; exclude them from narration extraction, word count, table reads, and
+   teleprompter output. Keep the full evidence record in the extended appendix.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
    develop and score three eligible opening candidates; do not force that exercise when
    Martin has approved an opening that survives the evidence audit.
@@ -304,21 +340,21 @@ For evidence-backed finalization:
    its evidence. Voice all five elements in narration—the insight; the low-risk action,
    observation, or reflection; the observable signal; the boundary; and the larger
    benefit—not only in the structured block.
-7. Complete the narration for spoken delivery, pass the spoken-readability delivery gate,
-   and show it to Martin before auditing it. Read it aloud and revise for speech without
-   imposing a runtime cut first.
-8. The readable script comes first as numbered beats containing only the beat heading and
-   spoken blockquote narration. Visible inline evidence indicators and locked-line
-   bolding may appear within those blockquotes as the only non-spoken review annotations. Put all other metadata and
-   production annotations in a final appendix whose beat entries match the narration beat
-   numbers and titles. For a `FULL-SCRIPT` episode, include the appendix `Shorts plan`
+7. Complete `final/script.raw.md` for spoken delivery, pass the spoken-readability
+   delivery gate on raw, and show it to Martin before auditing it. Read it aloud and revise
+   for speech without imposing a runtime cut first.
+8. Build `final/script.extended.md` as the synchronized editorial and production view.
+   Keep purpose and evidence annotations plus all metadata and production material there,
+   with a final appendix whose beat entries match the raw narration beat numbers and titles.
+   For a `FULL-SCRIPT` episode, include the appendix `Shorts plan`
    section required by the annotated script format: three to five golden-nugget
    candidates with beat references, standalone three-second hooks, and cut boundaries,
    planned while the long-form exists as beats rather than after production.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
    retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
-   then run the deterministic validator on the production document.
+   then validate the pair and run the annotated-script validator on the final extended
+   document.
 
 ## Production non-negotiables
 
@@ -351,10 +387,10 @@ For evidence-backed finalization:
   ownable fallback, and never call an asset cleared without a documented basis.
 - State the explanatory purpose of each animation. If motion adds no understanding, choose
   a still or no animation.
-- Keep numbered beats narration-only except for visible inline evidence indicators and
-  locked-line bolding, which are non-spoken review annotations.
-- Keep production notes in the matching appendix beat so their relationship to narration
-  remains explicit without interrupting the readable script.
+- Keep raw narration free of evidence indicators and production annotations; keep the
+  matching editorial annotations and production notes in extended.
+- Keep production notes in the matching extended appendix beat so their relationship to
+  narration remains explicit without interrupting the readable raw script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or
   credits section.
 - Never self-promote a script to `RECORD-READY` from a validator result or rubric score.
@@ -363,7 +399,7 @@ For evidence-backed finalization:
 
 - Before web research, claim approval, visual sourcing, or rights labeling, read
   [the research and rights method](references/research-and-rights.md).
-- Before drafting a Phase 2 deliverable, read
+- Before building a final extended deliverable, read
   [the annotated script format](references/annotated-script-format.md).
 - Use [the annotated script template](assets/annotated-script-template.md) as a worked shape,
   never as preverified episode content.
@@ -374,7 +410,9 @@ For evidence-backed finalization:
 
 ## Validation and completion
 
-Validation applies to the annotated Phase 2 deliverable, not rapid prototypes.
+Validate every episode-stage pair before review or promotion. For final, run the
+annotated-script validator on `final/script.extended.md` only after pair validation and the
+raw spoken-readability check succeed.
 
 Resolve the target script path to an absolute path at runtime before changing to the skill directory.
 Resolve the skill directory from the loaded `SKILL.md`, change to it, and run:

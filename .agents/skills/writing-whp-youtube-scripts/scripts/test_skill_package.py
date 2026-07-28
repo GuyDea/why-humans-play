@@ -11,13 +11,155 @@ SKILL_MD = SKILL_ROOT / "SKILL.md"
 ARCHITECTURE_MD = SKILL_ROOT / "references/script-architecture.md"
 STORY_METHOD_MD = SKILL_ROOT / "references/story-and-hook-method.md"
 RAPID_MD = SKILL_ROOT / "references/rapid-prototyping.md"
+PAIR_METHOD_MD = SKILL_ROOT / "references/script-artifact-pair.md"
+BLUEPRINT_WORKFLOW_MD = SKILL_ROOT / "references/script-blueprint-workflow.md"
 FORMAT_MD = SKILL_ROOT / "references/annotated-script-format.md"
 RUBRIC_MD = SKILL_ROOT / "references/quality-rubric.md"
 TEMPLATE_MD = SKILL_ROOT / "assets/annotated-script-template.md"
+STEERING_MD = REPO_ROOT / "whp-youtube" / "STEERING.md"
 CLAUDE_LINK = REPO_ROOT / ".claude" / "skills" / SKILL_ROOT.name
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_episode_blueprint_contract_is_intro_first(self) -> None:
+        skill = SKILL_MD.read_text(encoding="utf-8")
+        normalized = " ".join(skill.split())
+
+        for required in (
+            "A Script Blueprint is not a rough full script.",
+            "one polished spoken intro",
+            "one bullet-only body logic map",
+            "Do not draft body narration in a Script Blueprint.",
+            "No independent AI review is required during Phase 0",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, normalized)
+
+        self.assertNotIn(
+            "For a Script Blueprint, return the requested architecture, narration, passage",
+            normalized,
+        )
+
+    def test_blueprint_workflow_owns_shape_and_drift_guards(self) -> None:
+        workflow = " ".join(
+            BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
+        )
+        skill = SKILL_MD.read_text(encoding="utf-8")
+        steering = STEERING_MD.read_text(encoding="utf-8")
+
+        self.assertIn("script-blueprint-workflow.md", skill)
+        self.assertIn("script-blueprint-workflow.md", steering)
+
+        required = (
+            "What the viewer learns",
+            "Why this beat comes here",
+            "Incoming transition",
+            "Outgoing transition",
+            "Promise or loop payoff",
+            "consider the complete applicable technique inventory",
+            "evidence-earned",
+            "No independent AI review is required during Phase 0",
+        )
+        for phrase in required:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, workflow)
+
+        for retired_gate in (
+            "strongest available independent model",
+            "REVIEW-BLOCKED",
+            "independent local-AI review",
+        ):
+            with self.subTest(retired_gate=retired_gate):
+                self.assertNotIn(retired_gate, workflow)
+                self.assertNotIn(retired_gate, skill)
+                self.assertNotIn(retired_gate, steering)
+
+    def test_blueprint_intro_promises_must_map_to_body_payoffs(self) -> None:
+        workflow = BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8")
+        normalized = " ".join(workflow.split())
+
+        self.assertIn(
+            "Every promise, question, and open loop in the intro must point to a named "
+            "payoff in the body logic map.",
+            normalized,
+        )
+        self.assertIn(
+            "narrow or remove the opening promise before polishing it",
+            normalized,
+        )
+
+    def test_script_artifact_pair_is_the_single_detailed_owner(self) -> None:
+        self.assertTrue(PAIR_METHOD_MD.is_file())
+        self.assertTrue(BLUEPRINT_WORKFLOW_MD.is_file())
+
+        pair = " ".join(PAIR_METHOD_MD.read_text(encoding="utf-8").split())
+        consumers = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "blueprint": " ".join(
+                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
+            ),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
+        }
+        contracts = (
+            "## Episode-first directory contract",
+            "## Raw script contract",
+            "## Extended script contract",
+            "## Storytelling markup",
+            "## Stage appendices",
+            "## Validate the pair before review or promotion",
+            "`script.raw.md` is the source of truth",
+            "Do not underline a mini-hook.",
+        )
+
+        for contract in contracts:
+            with self.subTest(owner="pair", contract=contract):
+                self.assertIn(contract, pair)
+            for consumer_name, consumer in consumers.items():
+                with self.subTest(consumer=consumer_name, excluded=contract):
+                    self.assertNotIn(contract, consumer)
+
+        self.assertIn(
+            "(references/script-artifact-pair.md)",
+            SKILL_MD.read_text(encoding="utf-8"),
+        )
+        self.assertIn(
+            "(script-artifact-pair.md)",
+            BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8"),
+        )
+
+    def test_active_workflow_uses_blueprint_not_predraft(self) -> None:
+        self.assertTrue(BLUEPRINT_WORKFLOW_MD.is_file())
+
+        active_text = "\n".join(
+            (
+                SKILL_MD.read_text(encoding="utf-8"),
+                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8"),
+                RAPID_MD.read_text(encoding="utf-8"),
+                STORY_METHOD_MD.read_text(encoding="utf-8"),
+                RUBRIC_MD.read_text(encoding="utf-8"),
+                STEERING_MD.read_text(encoding="utf-8").split("\n# PART 2", 1)[0],
+            )
+        ).lower()
+
+        for retired in (
+            "predraft-intro-workflow.md",
+            "whp-youtube/predrafts/",
+            "pre-draft",
+        ):
+            with self.subTest(retired=retired):
+                self.assertNotIn(retired, active_text)
+
+        for active in (
+            "script blueprint",
+            "blueprint/script.raw.md",
+            "blueprint/script.extended.md",
+        ):
+            with self.subTest(active=active):
+                self.assertIn(active, active_text)
+
     def test_unresolved_template_personal_scaffold_stays_conditional(self) -> None:
         template = (
             SKILL_ROOT / "assets/annotated-script-template.md"
@@ -365,8 +507,9 @@ class SkillPackageTests(unittest.TestCase):
             "viewer-vulnerability proof-case lookup below, do not perform web "
             "research, write an assignment contract or evidence packet, force three "
             "opening candidates, create annotated-script scaffolding, plan visuals or "
-            "rights, run the production rubric, or invoke the validator unless Martin "
-            "explicitly asks for that work.",
+            "rights, run the production rubric, or invoke final-format validation "
+            "unless Martin explicitly asks for that work. Episode-stage pairs still "
+            "require pair validation before review.",
         )
         for contract in contracts:
             with self.subTest(contract=contract):
@@ -389,8 +532,8 @@ class SkillPackageTests(unittest.TestCase):
             "Once Martin approves the architecture, return one visible Story "
             "Progression Plan and stop.",
             "Do not order beats or draft narration until Martin explicitly approves "
-            "the complete plan or directly instructs you to draft from that displayed "
-            "complete plan.",
+            "the complete plan or directly instructs you to build the Script Blueprint from "
+            "that displayed complete plan.",
             "Preserve the approved architecture as the intellectual baseline and the "
             "approved progression as the story baseline.",
             "Scoped work on existing narration does not rebuild either artifact unless "
@@ -419,9 +562,9 @@ class SkillPackageTests(unittest.TestCase):
         required = (
             "central-progression work",
             "Phase 0 stops first at architecture and then at the Story Progression Plan",
-            "Scoped pre-draft work returns directly until it crosses that same trigger",
+            "Scoped Script Blueprint work returns directly until it crosses that same trigger",
             "return one visible Story Progression Plan and stop",
-            "directly instructs you to draft from that displayed complete plan",
+            "directly instructs you to build the Script Blueprint from that displayed complete plan",
             "If no visible approved plan is supplied, treat the progression as unapproved",
             "Story-progression approval precedes and does not replace creative approval",
         )
@@ -529,11 +672,18 @@ class SkillPackageTests(unittest.TestCase):
         progression_plan = (
             "Return that plan as the default visible artifact and stop"
         )
-        complete_narration = "Write one complete narration prototype from the approved"
+        intro_blueprint = (
+            "Build one intro-first Script Blueprint pair from both approved baselines"
+        )
+        complete_narration = (
+            "Preserve the approved intro and expand the map into one complete "
+            "narration in the episode's `draft/` pair"
+        )
 
         for anchor in (
             architecture_approval,
             progression_plan,
+            intro_blueprint,
             complete_narration,
         ):
             self.assertIn(anchor, workflow)
@@ -543,6 +693,10 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertLess(
             workflow.index(progression_plan),
+            workflow.index(intro_blueprint),
+        )
+        self.assertLess(
+            workflow.index(intro_blueprint),
             workflow.index(complete_narration),
         )
         self.assertIn(
@@ -552,7 +706,7 @@ class SkillPackageTests(unittest.TestCase):
         )
         self.assertIn(
             "Continue only after Martin gives explicit whole-plan approval or directly "
-            "instructs drafting from the displayed complete plan.",
+            "instructs building the Script Blueprint from the displayed complete plan.",
             workflow,
         )
         self.assertIn(
@@ -560,19 +714,17 @@ class SkillPackageTests(unittest.TestCase):
             workflow,
         )
         self.assertIn(
-            "Do not order beats or draft narration before that approval.",
+            "Do not design the intro, map the body, or draft narration before that "
+            "approval.",
             workflow,
         )
         self.assertIn(
-            "This step authorizes ordering beats and writing narration only from both "
-            "approved baselines: the approved architecture and approved Story "
-            "Progression Plan.",
+            "Do not draft body narration.",
             workflow,
         )
-        self.assertRegex(
+        self.assertIn(
+            "Use the paired-script and Script Blueprint owners linked in Law 2.",
             workflow,
-            r"Write one complete narration prototype from the approved architecture "
-            r"and approved (?:Story Progression Plan|story progression)",
         )
 
     def test_canonical_steering_does_not_restore_detailed_story_owner(
@@ -597,7 +749,7 @@ class SkillPackageTests(unittest.TestCase):
             )
         with self.subTest(regression="repeated direct-instruction wording"):
             direct_instruction = (
-                "directly instructs drafting from the displayed complete plan"
+                "directly instructs building the Script Blueprint from the displayed complete plan"
             )
             self.assertEqual(
                 steering.count(direct_instruction),
@@ -665,35 +817,40 @@ class SkillPackageTests(unittest.TestCase):
             sources["architecture"],
         )
         self.assertIn(
-            "Explicit approval—or a direct instruction to draft from that displayed "
-            "complete plan—records that plan as `APPROVED` by Martin and authorizes beat "
-            "ordering and narration prototyping only.",
+            "Explicit approval—or a direct instruction to build the Script Blueprint from that "
+            "displayed complete plan—records that plan as `APPROVED` by Martin and "
+            "authorizes the polished intro and bullet-only body logic map only.",
             sources["skill"],
         )
         self.assertIn(
-            "It does not approve the complete narration or direction.",
+            "It does not authorize body narration or approve the complete narration or "
+            "direction.",
             sources["skill"],
         )
         self.assertIn(
-            "Explicit approval—or a direct instruction to draft from that displayed "
-            "complete plan—records it as `APPROVED` by Martin and makes it the visible "
-            "story baseline for drafting only.",
+            "Explicit approval—or a direct instruction to build the Script Blueprint from that "
+            "displayed complete plan—records it as `APPROVED` by Martin and makes it the "
+            "visible story baseline for the polished intro and bullet-only body logic "
+            "map.",
             sources["story"],
         )
         self.assertIn(
-            "It does not replace creative approval of the complete narration or direction.",
+            "It does not authorize body narration or replace later creative approval of "
+            "the complete narration and direction.",
             sources["story"],
         )
         for contract in (
-            "Draft only when both complete artifacts are visible and the architecture "
+            "Build the intro-first Script Blueprint only when both complete artifacts are "
+            "visible and the architecture "
             "has explicit approval or Martin's direct instruction to plan from that "
             "displayed complete version, and the Story Progression Plan has explicit "
-            "approval or Martin's direct instruction to draft from that displayed "
+            "approval or Martin's direct instruction to build the Script Blueprint from that displayed "
             "complete plan.",
             "the complete architecture is visible and has explicit approval or Martin's "
             "direct instruction to plan from that displayed complete version",
             "the complete Story Progression Plan is visible and has explicit approval or "
-            "Martin's direct instruction to draft from that displayed complete plan",
+            "Martin's direct instruction to build the Script Blueprint from that displayed "
+            "complete plan",
             "Each direct instruction counts only as approval of that artifact for the "
             "named next stage.",
         ):
@@ -711,7 +868,7 @@ class SkillPackageTests(unittest.TestCase):
             "Return the complete revised plan with `AWAITING-APPROVAL` and `PENDING`, "
             "then stop. Prior approval does not carry across a progression revision.",
             "Re-entry requires renewed whole-plan approval or a direct instruction to "
-            "draft from that newly displayed complete revised plan; the revision "
+            "build the Script Blueprint from that newly displayed complete revised plan; the revision "
             "request itself does not count as renewed approval.",
         )
         for source_name, source in sources.items():
@@ -1337,6 +1494,114 @@ class SkillPackageTests(unittest.TestCase):
             RAPID_MD.read_text(encoding="utf-8"),
         )
 
+    def test_anti_skip_speed_preserves_conversational_logic(self) -> None:
+        rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
+        contracts = (
+            "Move through the first four jobs as soon as the conversation logically "
+            "allows, but no sooner.",
+            "The defense must answer the opening question instead of appearing as a "
+            "free-floating reaction.",
+            "Introduce the case by stating why it challenges that defense before "
+            "giving the minimum factual teaser.",
+            "Speed comes from cutting detail, not from deleting the connective "
+            "sentence that gives the next beat a referent and a reason to exist.",
+        )
+
+        for contract in contracts:
+            with self.subTest(contract=contract):
+                self.assertIn(contract, rapid)
+
+    def test_natural_package_has_distinct_line_and_loop_owners(self) -> None:
+        sources = {
+            "skill": " ".join(SKILL_MD.read_text(encoding="utf-8").split()),
+            "rapid": " ".join(RAPID_MD.read_text(encoding="utf-8").split()),
+            "story": " ".join(STORY_METHOD_MD.read_text(encoding="utf-8").split()),
+            "blueprint": " ".join(
+                BLUEPRINT_WORKFLOW_MD.read_text(encoding="utf-8").split()
+            ),
+            "rubric": " ".join(RUBRIC_MD.read_text(encoding="utf-8").split()),
+            "steering": " ".join(STEERING_MD.read_text(encoding="utf-8").split()),
+        }
+        rapid_contracts = (
+            "### Keep story devices inside the conversation",
+            "Natural conversational causality outranks every retention device.",
+            "Engineer the structure underneath, but make the surface sound like one "
+            "person naturally following a thought.",
+            "A mini-hook is welcome in the intro or body when it is also the "
+            "truthful connective to the next thought and the next line pays it "
+            "immediately.",
+            "Never add a generic curiosity phrase or force a mini-hook to satisfy a "
+            "cadence.",
+        )
+        story_contracts = (
+            "## Plan loops without withholding clarity",
+            "An intro already tends to open the title question, the featured case, "
+            "the explanation promise, and the remedy promise.",
+            "Treat those as candidates, not a quota.",
+            "Open another loop only when the viewer can still track the current "
+            "thought and the Script Blueprint extended appendix's body logic map "
+            "names its exact payoff.",
+            "Never withhold prerequisite clarity to manufacture suspense.",
+            "Use no fixed loop count.",
+        )
+
+        for contract in rapid_contracts:
+            with self.subTest(owner="rapid", contract=contract):
+                self.assertIn(contract, sources["rapid"])
+            for consumer in ("skill", "story", "blueprint", "rubric", "steering"):
+                with self.subTest(consumer=consumer, excluded=contract):
+                    self.assertNotIn(contract, sources[consumer])
+
+        for contract in story_contracts:
+            with self.subTest(owner="story", contract=contract):
+                self.assertIn(contract, sources["story"])
+            for consumer in ("skill", "rapid", "blueprint", "rubric", "steering"):
+                with self.subTest(consumer=consumer, excluded=contract):
+                    self.assertNotIn(contract, sources[consumer])
+
+        owner_links = {
+            "skill": (
+                "(references/rapid-prototyping.md"
+                "#keep-story-devices-inside-the-conversation)",
+                "(references/story-and-hook-method.md"
+                "#plan-loops-without-withholding-clarity)",
+            ),
+            "blueprint": (
+                "(rapid-prototyping.md"
+                "#keep-story-devices-inside-the-conversation)",
+                "(story-and-hook-method.md"
+                "#plan-loops-without-withholding-clarity)",
+            ),
+            "rubric": (
+                "(story-and-hook-method.md"
+                "#plan-loops-without-withholding-clarity)",
+            ),
+            "steering": (
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "rapid-prototyping.md#keep-story-devices-inside-the-conversation)",
+                "(../.agents/skills/writing-whp-youtube-scripts/references/"
+                "story-and-hook-method.md#plan-loops-without-withholding-clarity)",
+            ),
+        }
+        for consumer, links in owner_links.items():
+            for link in links:
+                with self.subTest(consumer=consumer, link=link):
+                    self.assertIn(link, sources[consumer])
+
+        retired_rule = "reserve most loops and mini-hooks for the body"
+        for source_name, source in sources.items():
+            with self.subTest(source=source_name, retired=retired_rule):
+                self.assertNotIn(retired_rule, source.lower())
+
+        fixed_cadence_patterns = (
+            r"(?:roughly\s+)?every\s+~?\s*60[–-]90\s+seconds",
+            r"roughly every ten to twenty spoken seconds",
+        )
+        for source_name, source in sources.items():
+            for pattern in fixed_cadence_patterns:
+                with self.subTest(source=source_name, retired_pattern=pattern):
+                    self.assertIsNone(re.search(pattern, source, flags=re.IGNORECASE))
+
     def test_investigation_challenge_bridge_is_real_and_reserved(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         rapid = " ".join(RAPID_MD.read_text(encoding="utf-8").split())
@@ -1740,8 +2005,8 @@ class SkillPackageTests(unittest.TestCase):
                     self.assertNotIn(contract, sources[consumer])
 
         self.assertIn(
-            "Write for spoken delivery — the register and clarity rules still "
-            "describe good narration — but enforcement waits for promotion.",
+            "Run the spoken-readability and walking-conversation checks on "
+            "`blueprint/script.raw.md` only.",
             sources["skill"],
         )
         self.assertIn(
@@ -2097,8 +2362,9 @@ class SkillPackageTests(unittest.TestCase):
                     self.assertNotIn(contract, sources[consumer])
 
         for contract in (
-            "Spoken readability is mandatory before returning draft or Phase 2 "
-            "narration; a pre-draft runs this gate once at promotion.",
+            "Spoken readability is mandatory before returning the Script Blueprint "
+            "intro, draft narration, or Phase 2 narration. Run it on each stage's "
+            "`script.raw.md`.",
             "Use 25 spoken words as a hard ceiling. Send every 21–25-word line "
             "through first-hearing review, and reject shorter lines when actor, "
             "action, relationship, or consequence remains unclear.",
@@ -2747,13 +3013,15 @@ class SkillPackageTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         self.assertIn(
-            "The readable script comes first as numbered beats containing only the "
-            "beat heading and spoken blockquote narration.",
+            "Complete `final/script.raw.md` for spoken delivery, pass the spoken-readability "
+            "delivery gate on raw, and show it to Martin before auditing it.",
             skill,
         )
         self.assertIn(
-            "Put all other metadata and production annotations in a final appendix whose "
-            "beat entries match the narration beat numbers and titles.",
+            "Build `final/script.extended.md` as the synchronized editorial and "
+            "production view. Keep purpose and evidence annotations plus all metadata "
+            "and production material there, with a final appendix whose beat entries "
+            "match the raw narration beat numbers and titles.",
             skill,
         )
         self.assertIn("Numbered narration-only beats", format_text)
@@ -2901,9 +3169,13 @@ class SkillPackageTests(unittest.TestCase):
         ]
         expected = [
             "../choosing-whp-video-topic/references/research-method.md",
+            "references/script-artifact-pair.md",
+            "references/script-blueprint-workflow.md",
             "references/rapid-prototyping.md",
             "references/script-architecture.md",
             "references/rapid-prototyping.md",
+            "references/rapid-prototyping.md",
+            "references/story-and-hook-method.md",
             "references/story-and-hook-method.md",
             "references/rapid-prototyping.md",
             "references/research-and-rights.md",
@@ -3294,7 +3566,7 @@ class SkillPackageTests(unittest.TestCase):
             with self.subTest(target=target_name, heading=heading):
                 self.assertIn(heading, target)
 
-    def test_explicit_walking_predraft_requires_memory_first_delivery_gate(
+    def test_explicit_walking_blueprint_requires_memory_first_delivery_gate(
         self,
     ) -> None:
         sources = {
@@ -3311,7 +3583,7 @@ class SkillPackageTests(unittest.TestCase):
         }
         explicit_trigger = (
             "When Martin explicitly requests a walking-vlog, walk-and-talk, "
-            "from-memory, or no-teleprompter pre-draft, run the memory-first "
+            "from-memory, or no-teleprompter Script Blueprint, run the memory-first "
             "delivery pass before returning it."
         )
 
@@ -3320,7 +3592,7 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertIn(explicit_trigger, sources[source_name])
 
         self.assertIn(
-            "For an explicitly requested walking-vlog pre-draft, a top delivery "
+            "For an explicitly requested walking-vlog Script Blueprint, a top delivery "
             "score requires every flagged number and quotation to have a deliberate, "
             "documented spoken treatment that preserves the factual boundary and can "
             "be reproduced naturally from memory.",
@@ -3351,7 +3623,7 @@ class SkillPackageTests(unittest.TestCase):
         consumer_contracts = {
             "skill": (
                 "When Martin explicitly requests a walking-vlog, walk-and-talk, "
-                "from-memory, or no-teleprompter pre-draft, run the memory-first "
+                "from-memory, or no-teleprompter Script Blueprint, run the memory-first "
                 "delivery pass before returning it. This is a focused delivery "
                 "check, not a production audit. Follow "
                 "[the rapid memory-first owner](references/rapid-prototyping.md"
@@ -3363,7 +3635,7 @@ class SkillPackageTests(unittest.TestCase):
                 "(rapid-prototyping.md#run-the-memory-first-walking-vlog-pass)."
             ),
             "rubric": (
-                "For an explicitly requested walking-vlog pre-draft, a top delivery "
+                "For an explicitly requested walking-vlog Script Blueprint, a top delivery "
                 "score requires every flagged number and quotation to have a "
                 "deliberate, documented spoken treatment that preserves the factual "
                 "boundary and can be reproduced naturally from memory."

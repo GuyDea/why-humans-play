@@ -20,6 +20,12 @@ reviewer's reasoning and the version scored.
 Score what the script and its ledgers actually contain. Do not award credit for
 research, clearance, assets, or revisions that are merely intended.
 
+For an active episode stage, run narration reads, aloud delivery, timing, and spoken
+readability on `script.raw.md`. Run structural, annotation, evidence, appendix, and
+production audits on `script.extended.md`, comparing its mirrored narration with raw
+whenever the audit crosses both views. Pair synchronization and stage boundaries follow
+the [script artifact pair owner](script-artifact-pair.md).
+
 ## Apply the scoring scale
 
 Use the same scale on every dimension:
@@ -166,8 +172,8 @@ plan-change tradeoff in the production appendix.
   a joke that sounds constructed rather than spontaneous costs this criterion its top
   score.
 
-For an explicitly requested walking-vlog pre-draft, a top delivery score requires every
-flagged number and quotation to have a deliberate, documented spoken treatment that
+For an explicitly requested walking-vlog Script Blueprint, a top delivery score requires
+every flagged number and quotation to have a deliberate, documented spoken treatment that
 preserves the factual boundary and can be reproduced naturally from memory.
 
 Spoken readability is a non-compensable delivery gate:
@@ -324,6 +330,9 @@ Run each pass independently so one kind of fluency does not conceal another kind
 failure. Apply each pass only to the assigned or inherited scope; for a targeted
 artifact, record parent-script issues without inserting or scoring out-of-scope content:
 
+Use raw for every narration read. Use extended for structural and production records,
+evidence mapping, rights, visuals, accessibility planning, and readiness fields.
+
 Across passes 2 and 8, reverse-audit narration against its claim cards and every
 cross-check source: preserve limiting scope and modal terms, record every material
 conflict in `Contradictions` and bound its consequences, re-evaluate dependent evidence
@@ -389,14 +398,15 @@ chains under the status thresholds, and require stable source-native locators.
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Retention pacing:** Run this pass only after Martin has reviewed the complete
     narration; it is a diagnostic, never a drafting gate. Walk the script beat by beat
-    and confirm that an open question, unresolved contradiction, promised test, or
-    fresh consequence gives the viewer a reason to keep watching roughly every 60–90
-    seconds of estimated spoken time; name any longer stretch that coasts on delivered
-    information. Confirm the title and thumbnail promise is explicitly paid off in
-    narration, and that the early-episode runtime lands in the 6–10 minute band unless
-    the assignment contract fixes a different target. Report each sag or overrun as a
-    named passage with its tradeoff; do not cut setup, referents, causality, humor, or
-    the learning promise to satisfy this pass without Martin's review.
+    and name any stretch that coasts on delivered information instead of advancing a
+    question, contradiction, promised test, consequence, or payoff. Diagnose the missing
+    progression before proposing another loop, following
+    [the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity).
+    Confirm the title and thumbnail promise is explicitly paid off in narration, and that
+    the early-episode runtime lands in the 6–10 minute band unless the assignment contract
+    fixes a different target. Report each sag or overrun as a named passage with its
+    tradeoff; do not cut setup, referents, causality, humor, or the learning promise to
+    satisfy this pass without Martin's review.
 11. **Readiness label:** Reapply the score threshold, protected-dimension rules,
     format gate, and substantive blockers. For a `FULL-SCRIPT`, also reapply
     personal-input resolution, absence of unresolved input markers, and both

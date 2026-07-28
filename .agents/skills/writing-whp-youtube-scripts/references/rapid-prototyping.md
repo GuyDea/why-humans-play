@@ -9,6 +9,10 @@ Carry forward any supplied topic and angle, audience, title and thumbnail promis
 tension or open question, by-end viewer promise, intended payoff, factual anchors, and
 important unknowns. Route a new episode through the
 script architecture method and then the story-progression method before narration.
+When the episode-scale target is a Script Blueprint, draft the polished intro in
+`blueprint/script.raw.md` and keep its annotated mirror and body logic map in
+`blueprint/script.extended.md`. Follow the
+[Script Blueprint owner](script-blueprint-workflow.md); do not draft body prose there.
 Missing nonessential fields do not block a useful architecture or prototype. Ask only
 when a missing choice would materially change the requested artifact.
 
@@ -89,11 +93,13 @@ the claims; it must not quietly replace the personality that earned approval.
 For a new episode or thesis-level rethink, use the approved architecture as the
 intellectual baseline, then follow the
 [story-progression method](story-and-hook-method.md#plan-story-progression-before-beats).
-Return that plan and stop. Draft only when both complete artifacts are visible and the
-architecture has explicit approval or Martin's direct instruction to plan from that
-displayed complete version, and the Story Progression Plan has explicit approval or
-Martin's direct instruction to draft from that displayed complete plan. Each direct
-instruction counts only as approval of that artifact for the named next stage.
+Return that plan and stop. Build the intro-first Script Blueprint only when both complete
+artifacts are visible and the architecture has explicit approval or Martin's direct
+instruction to plan from that displayed complete version, and the Story Progression Plan
+has explicit approval or Martin's direct instruction to build the Script Blueprint from
+that displayed complete plan. Each direct instruction counts only as approval of that
+artifact for the named next stage. Draft the complete body only after Martin approves both
+the polished intro and body logic map.
 
 Preserve the Story engine, causal chain, selected moves, evidence boundaries, loops, and
 payoffs while finding natural spoken phrasing. If a requested change crosses the
@@ -130,6 +136,13 @@ For a problem-led opening with a predictable “not me; I know the tricks” res
 Complete the first four moves before detailed case exposition. A short sourced result may
 tease the case during the disarm; develop the real story only after the promise. This
 contract overrides the generic hook spines below when it applies.
+
+Move through the first four jobs as soon as the conversation logically allows, but no
+sooner. The defense must answer the opening question instead of appearing as a
+free-floating reaction. Introduce the case by stating why it challenges that defense
+before giving the minimum factual teaser. Speed comes from cutting detail, not from
+deleting the connective sentence that gives the next beat a referent and a reason to
+exist. Do not optimize the sequence to a sentence count or timestamp.
 
 1. Ask one precise, intriguing question that names the viewer-level risk.
 2. Voice the defense as the narrator's own former position, never as a rebuttal aimed at
@@ -428,6 +441,22 @@ clarifies the lesson; do not force a callback that makes the explanation less di
 
 ## Write for speech and momentum
 
+### Keep story devices inside the conversation
+
+Natural conversational causality outranks every retention device. Engineer the structure
+underneath, but make the surface sound like one person naturally following a thought.
+Every line needs a clear referent, and the previous thought must create the reason for the
+next.
+
+A mini-hook is welcome in the intro or body when it is also the truthful connective to the
+next thought and the next line pays it immediately. Never add a generic curiosity phrase
+or force a mini-hook to satisfy a cadence. If removing a mini-hook changes no logic and
+leaves only less hype, cut it.
+
+Longer loops are structural decisions. Select and map them with
+[the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity),
+then voice them without breaking the current thought.
+
 Write for the real delivery context: Martin — a non-native English speaker — reads the
 narration aloud, often while walking and talking to the camera, for an audience that
 includes non-native listeners. Every factual sentence is a complete spoken clause with an
@@ -457,10 +486,10 @@ share — with the stance arc `I assumed X → then I ran into Y and dug in → 
 found`. Use that stance arc only when Martin supplied or confirmed the research chronology;
 otherwise keep the peer voice without claiming when or why the digging happened. Use the
 conversational progression
-`fact → plain reaction → why it matters → next question`, and thread mini-hooks through
-the narration — roughly every ten to twenty spoken seconds, a short varied curiosity
-connective (`which I found odd, because…`, `and this is where it gets interesting`) that
-points at real content the next sentences deliver. Say quantities the way a friend would:
+`fact → plain reaction → why it matters → next question`. A mini-hook may carry one of
+those handoffs when it points at real content the next sentence delivers; follow
+[the natural-package rule](#keep-story-devices-inside-the-conversation) instead of
+scheduling curiosity phrases. Say quantities the way a friend would:
 claim-carrying numbers, small counts, dates, places, and institutions stay exact, while
 larger texture quantities round to a truthful conversational magnitude (`over a hundred
 radiologists` for 138), with the precise figure kept in the claim record. Use
@@ -490,9 +519,9 @@ with a visible audit.
 ### Run the memory-first walking-vlog pass
 
 When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
-no-teleprompter pre-draft, run the memory-first delivery pass before returning it. Source
-accuracy and spoken reproducibility are separate decisions. Classify each number as
-claim-carrying or texture. Keep exact dates, places, and institutions when they add a
+no-teleprompter Script Blueprint, run the memory-first delivery pass before returning it.
+Source accuracy and spoken reproducibility are separate decisions. Classify each number
+as claim-carrying or texture. Keep exact dates, places, and institutions when they add a
 compact trust anchor; round texture sample sizes to a truthful conversational magnitude.
 Use a verbatim quotation in narration only when its exact wording earns the memory cost.
 Otherwise label and speak a faithful paraphrase, and preserve the exact wording in the
@@ -517,10 +546,11 @@ pronouns, hidden comparisons, and sentences that make the listener translate the
 before understanding the point. A necessary technical term is not an excuse for a difficult
 sentence; give the term a short plain introduction.
 
-For file-backed narration, run `scripts/check_spoken_readability.py` from the skill
-directory before returning the text. Rewrite every failure. Read every 21–25-word review
-item aloud and keep it only when its actor, action, relationship, and consequence land
-after one hearing. Apply the same sentence-level gate manually to chat-only narration.
+For a file-backed episode stage, run `scripts/check_spoken_readability.py` on
+`script.raw.md` from the skill directory before returning the text. Rewrite every failure.
+Read every 21–25-word review item aloud and keep it only when its actor, action,
+relationship, and consequence land after one hearing. Apply the same sentence-level gate
+manually to chat-only narration.
 
 Preserve accepted language after feedback. Change only the requested opening, punchline,
 transition, example, or passage unless Martin asks for a broader rewrite.
@@ -602,8 +632,9 @@ Before returning rapid work, check internally:
   approval or Martin's direct instruction to plan from that displayed complete version
   before planning begins.
 - Confirm that the complete Story Progression Plan is visible and has explicit approval or
-  Martin's direct instruction to draft from that displayed complete plan before any beat
-  outline or narration, and that this draft preserves its causal chain.
+  Martin's direct instruction to build the Script Blueprint from that displayed complete
+  plan before polishing the intro or mapping the body, and that the artifact preserves
+  its causal chain.
 - Does the prototype deliver the approved core answer, insight ladder, and earned reframe
   without adding a competing thesis?
 - Does it teach the approved new understanding before asking the viewer to use the
@@ -625,8 +656,8 @@ Before returning rapid work, check internally:
 - Use a first-person narrator reaction or direct-address check-in only when the approved
   plan and material earn it; neither is required in every major beat. Keep transitions
   spoken, avoid outline labels, and break up unearned runs of polished aphorisms.
-- Do varied mini-hook connectives arrive roughly every ten to twenty spoken seconds, each
-  pointing at real content the next sentences deliver?
+- Does every mini-hook also make the next thought feel conversationally earned, with that
+  thought delivering the promised content immediately?
 - Are texture quantities spoken as truthful conversational magnitudes while claim-carrying
   numbers, small counts, dates, places, and institutions stay exact?
 - Does the narrator stay a peer throughout — former take mocked instead of the viewer,
@@ -650,8 +681,8 @@ Before returning rapid work, check internally:
   application?
 - When narration claims people say, ask, or type something, does it voice at least one
   verbatim example in that exact form?
-- In a complete narration, does an open question, contradiction, or promised test give
-  the viewer a live reason to keep watching roughly every 60–90 seconds of spoken time?
+- In a complete narration, do the selected loops preserve clarity and deliver their
+  approved named payoffs?
 - Does the episode make its rule-system legible — players, real goal, scored proxy,
   rewarded strategy, consequence — without decorative game or play vocabulary?
 - Is the central paradox understandable without specialist language?

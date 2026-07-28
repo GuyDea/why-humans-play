@@ -19,22 +19,29 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
-> **Episode 1 working state (2026-07-27):**
+> **Episode 1 working state (2026-07-28):**
 > [`episodes/01-why-ai-makes-bad-advice-feel-right.md`](episodes/01-why-ai-makes-bad-advice-feel-right.md)
-> remains the canonical evidence-backed Episode 1 while a thesis-level rebuild moves
-> through the architecture → Story Progression Plan → narration gates. The rebuild's
+> remains the canonical evidence-backed Episode 1 while a thesis-level rebuild moves into
+> its intro-first Script Blueprint. The rebuild's
 > [approved architecture](../docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md)
-> preserves the four mechanisms, borrowed-authority loop, and Second-Opinion Test while
-> treating the prior order, examples, and supporting throughline as replaceable. No
-> replacement narration is canonical until it receives the later approvals and promotion.
-> The rebuild narration will be created separately at
-> [`predrafts/ep1_v2.md`](predrafts/ep1_v2.md); it will not overwrite the current episode.
+> and [approved medical-case-first Story Progression Plan](../docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md)
+> organize the accepted personal nerve—fear that a calm, intelligent answer can make a
+> dangerous preferred choice feel rational—around the documented Swiss TIA case. The case
+> carries human stakes and recurring meaning while separate studies prove the four
+> mechanisms. No replacement narration is canonical until it receives the later approvals
+> and promotion.
+> The loose full narration and intro-first artifact remain migration-pending legacy
+> material, not active stages. The rebuild's active artifacts follow
+> `blueprint → draft → final` inside
+> `episodes/ep001-ai-dangerous-advice/`, without overwriting the current episode.
 
-1. **EP1 — Why AI makes bad advice feel right.** The approved rebuild treats framing,
-   sycophantic agreement, fluent machine authority, and anchoring or feedback as one
-   borrowed-authority loop that can make a user's premise feel like an independent
-   second opinion. The preserved Second-Opinion Test now serves a deeper rule: another
-   answer counts only when the process adds an independent route to checkable evidence.
+1. **EP1 — Could AI talk you into the dumbest decision of your life?** The approved
+   rebuild treats framing, sycophantic agreement, fluent machine authority, and anchoring
+   or feedback as one borrowed-authority loop that can make a user's premise feel like an
+   independent second opinion. Its central recognition is that a reasonable answer to
+   “Could this be harmless?” may not resolve “Is this safe?” The preserved
+   Second-Opinion Test serves the deeper rule that another answer counts only when the
+   process adds an independent route to checkable evidence.
    The existing evidence-backed script remains the canonical production artifact during
    the rebuild. This episode replaced the earlier reward-hacking concept (*Why AI cheats
    even when it follows every rule*), which remains retired from the sequence; its
@@ -139,9 +146,25 @@ recreating it.
   earn its place immediately. Treat retention benchmarks as post-draft production evidence,
   not as a clock that is allowed to erase the event, causal setup, referents, viewer stakes,
   or learning promise from an unfinished script.
-- **Complete and show the whole narration before any editorial or timing audit.** The first
-  creative review evaluates whether the story, explanation, humor, human connection, and
-  payoff work as one piece. Do not shorten an unseen draft to satisfy a timing target.
+- **Keep active script stages episode-first.** Use
+  `whp-youtube/episodes/epNNN-stable-name/` and advance
+  `blueprint → draft → final`; the paired-script owner below controls the detailed path
+  and promotion contract.
+- **Make the Script Blueprint intro-first.** After architecture and story-progression
+  approval, the episode's `blueprint/script.raw.md` contains one polished spoken intro and
+  `blueprint/script.extended.md` carries its annotated mirror and bullet-only body logic
+  map, never drafted body narration. Design the intro from every applicable,
+  evidence-earned hook method and map every opening promise to a body payoff. No
+  independent AI review is required during Phase 0 unless Martin explicitly requests one
+  for the current artifact. Follow
+  [the paired-script owner](../.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md)
+  for paths, views, validation, and promotion, and
+  [the Script Blueprint owner](../.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md)
+  for exact stage contents and readiness.
+- **After Script Blueprint approval, complete and show the whole narration before any
+  editorial or timing audit.** That creative review evaluates whether the story,
+  explanation, humor, human connection, and payoff work as one piece. Do not shorten an
+  unseen draft to satisfy a timing target.
 - After Martin has reviewed the whole narration, run timing and retention checks as
   diagnostics. Report the exact concern and the tradeoff separately; do not silently
   compress, reorder, or rewrite the approved script. Any proposed cut must preserve the
@@ -188,6 +211,12 @@ recreating it.
   never attribute participant inner states or invent research chronology. Apply the move
   only when the evidence earns it; exact execution lives in
   [the rapid anti-skip owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#use-the-five-move-anti-skip-intro).
+- **Keep every device inside the conversation.** Strong structure, hooks, mini-hooks, and
+  loops remain available only when the spoken thought still creates the next one. Route
+  line-level execution to
+  [the rapid natural-package owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#keep-story-devices-inside-the-conversation)
+  and loop choice and delivery to
+  [the structural loop owner](../.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md#plan-loops-without-withholding-clarity).
 - **Keep story momentum evidence-earned and owner-routed.** Use only story moves earned by
   the real material. Never manufacture an obstacle, contradiction, emotion, failed
   hypothesis, research chronology, or personal event. Treat But / Therefore as a causal
@@ -216,17 +245,12 @@ recreating it.
   live in [the rapid voice owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#write-for-speech-and-momentum).
 - **Run a memory-first pass when the delivery request is explicit.** When Martin
   explicitly requests a walking-vlog, walk-and-talk, from-memory, or no-teleprompter
-  pre-draft, run the memory-first delivery pass before returning it. Source accuracy and
-  spoken reproducibility are separate decisions; detailed execution lives in [the
-  memory-first walking-vlog owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
-- **Mark locked lines for memory delivery.** Martin delivers from memory while walking —
-  there is no teleprompter on a walk. In a complete script, mark locked lines bold inside
-  the blockquote — the opening question, the learning promise, each beat's punchline and
-  exact-lesson line, and any sentence whose evidence-bounded wording a paraphrase could
-  break — and deliver them word-perfect, a handful per beat. Everything unmarked is
-  flexible tissue Martin may say his own way; the written line fixes the meaning, facts,
-  locked story nouns, and evidence boundary, not the exact words. Bold is a
-  review-and-delivery annotation, excluded from word counts and readability checks.
+  Script Blueprint, run the memory-first delivery pass before returning it. Source
+  accuracy and spoken reproducibility are separate decisions; detailed execution lives in
+  [the memory-first walking-vlog owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+- **Mark locked lines for memory delivery.** Select exact-delivery wording through the
+  rapid line-level owner and apply it consistently across the paired views through the
+  paired-script owner linked above.
 - **Keep jokes short.** Separate setup from punchline. Keep a standalone punchline to one
   short spoken sentence—usually no more than 12 words. If the joke needs a relative clause
   or a second sentence to explain it, rewrite it. Put the factual setup and causal
@@ -279,26 +303,31 @@ Use this order for WHP scripts:
 4. Build one complete visible Story Progression Plan from the approved architecture.
    This gate applies to a new episode, thesis-level rethink, or other central-progression
    work. Return that plan as the default visible artifact and stop. Continue only after
-   Martin gives explicit whole-plan approval or directly instructs drafting from the
-   displayed complete plan. A load-bearing progression change reopens whole-plan approval.
-   Do not order beats or draft narration before that approval.
-5. Write one complete narration prototype from the approved architecture and approved
-   Story Progression Plan, testing the
-   hook, humor, human connection, examples, and ending as one continuous story. Do not
-   quietly replace the approved question, core answer, insight ladder, earned reframe,
-   payoff, or final lesson because a different anecdote is easier to write.
-   This step authorizes ordering beats and writing narration only from both approved
-   baselines: the approved architecture and approved Story Progression Plan.
-6. Show Martin the complete narration before running editorial, retention, or timing
-   audits. Do not pre-cut context from a version he has not seen.
-7. Refine it with Martin at line level, preserving approved language and changing only
-   the requested scope.
-8. Obtain explicit approval of the complete narration and creative direction.
-9. Only then gather or refresh evidence, add production structure, and run claims, rights,
-   editorial, retention, timing, and format checks.
-10. Present audit concerns separately before making any context-losing rewrite. An audit
+   Martin gives explicit whole-plan approval or directly instructs building the Script
+   Blueprint from the displayed complete plan. A load-bearing progression change reopens
+   whole-plan approval.
+   Do not design the intro, map the body, or draft narration before that approval.
+5. Build one intro-first Script Blueprint pair from both approved baselines in the
+   episode's `blueprint/` stage. Polish the complete spoken intro in raw; keep its
+   annotated mirror and the ordered, bullet-only body logic map in extended. Do not draft
+   body narration. Use the paired-script and Script Blueprint owners linked in Law 2.
+6. Show Martin the polished intro and body logic map. Refine only the requested scope.
+7. Obtain explicit approval of both the intro and body logic map.
+8. Preserve the approved intro and expand the map into one complete narration in the
+   episode's `draft/` pair, testing the hook, humor, human connection, examples,
+   transitions, and ending as one continuous story. Do not quietly replace the approved
+   question, core answer, insight ladder, causal route, earned reframe, payoff, or final
+   lesson because different prose is easier to write.
+9. Show Martin the complete narration before running editorial, retention, or timing
+   audits. Refine it at line level, preserving approved language and changing only the
+   requested scope.
+10. Obtain explicit approval of the complete narration and creative direction.
+11. Only then create the episode's `final/` pair, gather or refresh evidence, add
+   production structure in extended, and run claims, rights, editorial, retention, timing,
+   and format checks.
+12. Present audit concerns separately before making any context-losing rewrite. An audit
    diagnoses a tradeoff; it does not silently become the author.
-11. Close the central lesson with a short declarative button. A final question or forward
+13. Close the central lesson with a short declarative button. A final question or forward
    hook may follow only when it does not leave the episode's main answer unresolved.
 
 The architecture must go beyond a competent summary of familiar material. Its insight
@@ -321,17 +350,18 @@ when I observe W.` Add the real boundary and at least one transfer case. “Be c
 “think critically,” “ask better questions,” or a loose checklist without a decision rule,
 sequence, or observable result fails the gate.
 
-In the final production document, the readable script comes first as numbered beats that
-contain spoken narration only. Put all timestamps, targets, story functions, claims,
-sources, visuals, edit notes, on-screen text, audio and accessibility direction, asset and
-rights notes, personal-input prompts, viewer-application notes, and editorial audit results
-in an appendix after the narration.
+In the final pair, `final/script.raw.md` is the readable delivery view.
+`final/script.extended.md` carries the synchronized annotated narration and the production
+appendix with timestamps, targets, story functions, claims, sources, visuals, edit notes,
+on-screen text, audio and accessibility direction, asset and rights notes, personal-input
+prompts, viewer-application notes, and editorial audit results.
 
 Before creative approval, do not require an evidence packet, three-opening comparison,
-annotated-script scaffolding, visual or rights ledger, full rubric, or validator unless
-Martin explicitly requests that work. Rapid does not mean fabricated: use supplied or
-already-available facts, never invent a date, person, experiment, quotation, or mechanism,
-and write around an unavailable detail until the evidence phase.
+final annotated-script scaffolding, visual or rights ledger, or full rubric unless Martin
+explicitly requests that work. Stage-pair validation still applies. Rapid does not mean
+fabricated: use supplied or already-available facts, never invent a date, person,
+experiment, quotation, or mechanism, and write around an unavailable detail until the
+evidence phase.
 
 ### Preserve the local-workbench boundary
 
@@ -354,8 +384,9 @@ when that feature receives its own design; do not scaffold placeholder app code 
 - **Target 6–10 minutes for early episodes.** The 5–10 min band shows the highest
   average retention of any length (~31.5%). `[reported]` Don't pad to hit some imagined
   "long-form" length; a tight 7 minutes beats a soft 15.
-- **Chain open loops.** Open a question, pay part of it off, and open the next before the
-  first fully closes. Every ~60–90 seconds there should be a reason to keep watching.
+- **Use the fewest open loops that sustain a clear progression.** A partial answer may
+  create the next question, but a completed thought does not need decorative suspense.
+  Loop selection and payoff follow the structural loop owner linked in Law 2.
 - **Pay off the thumbnail promise.** Whatever the title/thumbnail implied must be
   delivered, explicitly, or retention collapses when viewers feel baited.
 - **Rigor is a retention tool, not a tax.** The "but here's the caveat…" beat (see Law 5)

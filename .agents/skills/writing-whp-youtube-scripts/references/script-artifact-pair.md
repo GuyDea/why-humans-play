@@ -1,0 +1,129 @@
+# Script Artifact Pair
+
+This file is the single detailed owner for episode directories, paired script files,
+storytelling markup, purpose annotations, stage appendices, pair validation, and stage
+promotion. Stage workflows and other consumers link here and state only their local
+invariants.
+
+## Episode-first directory contract
+
+Keep every active episode stage under:
+
+`whp-youtube/episodes/epNNN-stable-name/{blueprint,draft,final}/`
+
+Create only the stage directories the episode has reached. Each active stage contains
+exactly:
+
+- `script.raw.md`
+- `script.extended.md`
+
+Use a three-digit numeric episode ID and a stable lowercase kebab-case name. The numeric
+ID never changes. Treat the stable name as an internal identifier: later packaging-title
+changes update metadata, not the episode folder.
+
+An episode may also have `archive/`, but only for pre-workflow or superseded material
+that must remain accessible without being mistaken for an active pair. Keep explicit
+historical or migration-pending labels on archived files. Archiving does not promote an
+artifact or make it compliant.
+
+## Raw script contract
+
+`script.raw.md` is the source of truth for spoken words, beat order, and storytelling
+markup.
+
+Raw permits only:
+
+- one H1 episode title;
+- descriptive beat headings when the stage has multiple beats;
+- spoken narration in blockquotes;
+- blank lines; and
+- `<u>...</u>`, `*...*`, and `**...**` storytelling markup.
+
+Raw contains no purpose annotation, evidence indicator, citation, metadata field, body
+logic map, production note, audit, or appendix.
+
+## Extended script contract
+
+`script.extended.md` mirrors the raw title, beat headings, blockquoted narration, wording,
+order, and storytelling markup exactly. It may add only:
+
+- grouped standalone `[TAG — episode-specific purpose]` annotations immediately before
+  the passage they explain;
+- inline evidence indicators when the current stage requires them; and
+- one stage-appropriate appendix.
+
+Edit spoken wording in raw first, then reconcile the extended mirror.
+
+Use only these purpose tags:
+
+- `MAIN HOOK`
+- `LOOP OPEN L-##`
+- `LOOP PAYOFF L-##`
+- `OBSTACLE`
+- `MINI-HOOK`
+- `DEFENSE`
+- `DISARM`
+- `PROMISE`
+- `TRANSITION`
+- `REVERSAL`
+- `AHA`
+- `APPLICATION`
+- `FINAL PAYOFF`
+- `LOCKED WORDING`
+
+Multiple tags may share an annotation when one passage genuinely performs multiple
+jobs. Group adjacent sentences only when they perform the same job. The explanation
+after the em dash must name that passage's episode-specific purpose; a generic tag is
+not enough.
+
+## Storytelling markup
+
+- Underline marks only a main hook, major loop opening or payoff, or genuine obstacle
+  in the central progression.
+- Italics mark a supporting device such as a mini-hook, local teaser, small reversal,
+  or other secondary connective.
+- Bold marks wording that must be delivered exactly and may combine with either
+  structural tier.
+- Underline and italics are mutually exclusive on the same passage.
+
+Do not underline a mini-hook.
+
+Mark the smallest complete passage that performs the named job. Do not style ordinary
+connective prose merely to make the page look active.
+
+## Stage appendices
+
+Every extended file ends with one appendix appropriate to its stage. The appendix owns
+non-spoken material and never repeats narration.
+
+### BLUEPRINT
+
+Include approved baselines, the factual boundary and unresolved dependencies, the intro
+design record, a bullet-only body logic map, promise and loop payoff destinations, and
+the approval state.
+
+### DRAFT
+
+Include approved baselines, the story-progression and payoff audit, evidence boundaries
+and open verification dependencies, the spoken-readability result, the personal-input
+decision, and the creative-approval state.
+
+### Final
+
+Use the complete final extended appendix owned by the
+[annotated-script format](annotated-script-format.md), including its evidence-backed
+production, rights, accessibility, and editorial records.
+
+## Validate the pair before review or promotion
+
+Run the pair validator first. Then run the spoken-readability checker on
+`script.raw.md`. For `final/`, also run the annotated-script validator on
+`script.extended.md` after pair validation succeeds. A stage is not ready for review,
+approval, or promotion while any required check fails.
+
+## Promote without overwriting
+
+Blueprint approval creates `draft/`. Approval of the complete narration permits final
+production and eventual creation of `final/`. Copy the accepted raw narration forward,
+then build the new stage-specific extended mirror and appendix. Never overwrite or
+silently upgrade the earlier pair; earlier stages remain review snapshots.
