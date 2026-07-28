@@ -211,24 +211,15 @@ def _is_escaped(text: str, index: int) -> bool:
     return backslashes % 2 == 1
 
 
-def _find_unescaped(text: str, character: str, start: int) -> int:
-    """Return the next unescaped character position, or -1."""
-
-    cursor = text.find(character, start)
-    while cursor != -1 and _is_escaped(text, cursor):
-        cursor = text.find(character, cursor + 1)
-    return cursor
-
-
-def _citation_surfaces(markdown: str) -> list[str]:
+def _citation_surfaces(markdown: str) -> list[tuple[str, bool]]:
     """Split raw Markdown into independently scanned paragraph surfaces."""
 
-    surfaces: list[str] = []
+    surfaces: list[tuple[str, bool]] = []
     quoted_paragraph: list[str] = []
 
     def flush_quoted_paragraph() -> None:
         if quoted_paragraph:
-            surfaces.append("\n".join(quoted_paragraph))
+            surfaces.append(("\n".join(quoted_paragraph), True))
             quoted_paragraph.clear()
 
     for line in markdown.splitlines():
@@ -242,7 +233,7 @@ def _citation_surfaces(markdown: str) -> list[str]:
 
         flush_quoted_paragraph()
         if line.strip(" \t"):
-            surfaces.append(line)
+            surfaces.append((line, False))
 
     flush_quoted_paragraph()
     return surfaces
@@ -279,10 +270,35 @@ def _balanced_delimiter_pairs(
     return bracket_pairs, parenthesis_pairs
 
 
-def _surface_has_raw_citation(surface: str) -> bool:
-    """Detect complete footnotes, inline links, and reference links."""
+def _reference_definition_tail_is_valid(tail: str) -> bool:
+    """Validate a same-line or soft-wrapped reference destination tail."""
+
+    normalized = tail.replace("\n", " ")
+    return (
+        not normalized.strip(" \t")
+        or REFERENCE_DEFINITION_TAIL_RE.fullmatch(normalized) is not None
+    )
+
+
+def _surface_has_raw_citation(
+    surface: str,
+    *,
+    allow_reference_definition: bool,
+) -> bool:
+    """Detect complete citations on one logical Markdown surface."""
 
     bracket_pairs, parenthesis_pairs = _balanced_delimiter_pairs(surface)
+    definition_opener: int | None = None
+    if allow_reference_definition:
+        indentation = 0
+        while (
+            indentation < len(surface)
+            and surface[indentation] == " "
+        ):
+            indentation += 1
+        if indentation <= 3:
+            definition_opener = indentation
+
     for opener, closer in bracket_pairs.items():
         if surface.startswith("[^", opener):
             return True
@@ -290,6 +306,14 @@ def _surface_has_raw_citation(surface: str) -> bool:
         suffix = closer + 1
         if suffix >= len(surface):
             continue
+        if (
+            opener == definition_opener
+            and surface[suffix] == ":"
+            and _reference_definition_tail_is_valid(
+                surface[suffix + 1 :]
+            )
+        ):
+            return True
         if (
             surface[suffix] == "("
             and suffix in parenthesis_pairs
@@ -305,28 +329,12 @@ def _has_raw_citation(markdown: str) -> bool:
     """Detect complete citations without crossing paragraph boundaries."""
 
     return any(
-        _surface_has_raw_citation(surface)
-        for surface in _citation_surfaces(markdown)
+        _surface_has_raw_citation(
+            surface,
+            allow_reference_definition=is_blockquote,
+        )
+        for surface, is_blockquote in _citation_surfaces(markdown)
     )
-
-
-def _starts_reference_definition(line: str) -> bool:
-    """Detect a reference marker plus an empty or valid destination tail."""
-
-    content_start = len(line) - len(line.lstrip(" \t"))
-    if content_start > 3 or not line.startswith("[", content_start):
-        return False
-
-    closing = _find_unescaped(line, "]", content_start + 1)
-    while closing != -1:
-        if closing + 1 < len(line) and line[closing + 1] == ":":
-            tail = line[closing + 2 :]
-            return (
-                not tail.strip(" \t")
-                or REFERENCE_DEFINITION_TAIL_RE.fullmatch(tail) is not None
-            )
-        closing = _find_unescaped(line, "]", closing + 1)
-    return False
 
 
 def _has_escaped_story_marker(markdown: str) -> bool:
@@ -633,12 +641,7 @@ def _validate_raw(markdown: str) -> list[str]:
         )
 
     without_evidence = EVIDENCE_RE.sub("", body)
-    has_reference_definition = any(
-        _starts_reference_definition(_blockquote_spoken(line))
-        for line in body_lines
-        if line.startswith(">")
-    )
-    if _has_raw_citation(without_evidence) or has_reference_definition:
+    if _has_raw_citation(without_evidence):
         _append_error(
             errors,
             "raw script cannot contain citations or Markdown links",

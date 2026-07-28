@@ -329,6 +329,41 @@ class ScriptPairTests(unittest.TestCase):
                     ],
                 )
 
+    def test_raw_purity_rejects_soft_wrapped_reference_definitions(
+        self,
+    ) -> None:
+        for case, definition in (
+            (
+                "wrapped reference label",
+                "[study\n> source]: https://example.com/source",
+            ),
+            (
+                "indented wrapped reference label",
+                "   [study\n> source]: https://example.com/source",
+            ),
+            (
+                "wrapped label and continued destination",
+                "[study\n> source]:\n> https://example.com/source",
+            ),
+            (
+                "wrapped footnote label",
+                "[^study\n> source]: Supporting source details.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {definition}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
     def test_raw_purity_requires_exactly_one_h1_title(self) -> None:
         raw_variants = {
             "missing": RAW.replace("# Episode\n\n", "", 1),
@@ -577,6 +612,11 @@ class ScriptPairTests(unittest.TestCase):
                 "## 2. Boundary\n"
                 "> ](literally) stayed punctuation.",
             ),
+            (
+                "definition split by blank quoted line",
+                "> [study\n>\n"
+                "> source]: https://example.com/source",
+            ),
         ):
             with self.subTest(case=case):
                 raw = RAW.replace(
@@ -594,24 +634,38 @@ class ScriptPairTests(unittest.TestCase):
                     [],
                 )
 
-    def test_raw_purity_does_not_mistake_bracket_colon_prose_for_a_definition(
+    def test_raw_purity_allows_nondefinition_bracketed_speech(
         self,
     ) -> None:
-        spoken = "[the safer option]: I chose it."
-        raw = RAW.replace(
-            "> *But the next result changed the question.*",
-            f"> {spoken}",
-        )
-        extended = EXTENDED.replace(
-            "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
-            "> *But the next result changed the question.*",
-            f"> {spoken}",
-        )
+        for case, spoken in (
+            (
+                "paragraph-start colon prose",
+                "[the safer option]: I chose it.",
+            ),
+            (
+                "mid-sentence bracket colon",
+                "I chose [the safer option]: honestly.",
+            ),
+            (
+                "paragraph-start bracketed speech without colon",
+                "[the safer option] was still mine.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
 
-        self.assertEqual(
-            self.validation_errors(raw=raw, extended=extended),
-            [],
-        )
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
 
     def test_raw_purity_rejects_other_markdown_presentation_markup(self) -> None:
         for case, replacement in (
