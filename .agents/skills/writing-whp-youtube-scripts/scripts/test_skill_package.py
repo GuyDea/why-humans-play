@@ -110,6 +110,32 @@ def spoken_digest(path: Path) -> str:
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_episode_one_legacy_artifacts_are_archived_byte_for_byte(self) -> None:
+        archive = (
+            REPO_ROOT
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-ai-dangerous-advice"
+            / "archive"
+        )
+        expected = {
+            "throughline-experiment.md": (
+                "c203c1bca16707a4ebd331d612d02fddaa38ec7ec2c1d0baa9580b96453c89b3"
+            ),
+            "full-prototype.md": (
+                "4a8761e823173ee391240205b0580b5a94096a29fa7226d6ead0b675a65c08ed"
+            ),
+            "v2-preworkflow-narration.md": (
+                "dd2e7074bc321673077dae213caf350e5698c25dd3bfce52b3153ee0c2bbf5d1"
+            ),
+        }
+        for name, digest in expected.items():
+            with self.subTest(name=name):
+                self.assertEqual(
+                    hashlib.sha256((archive / name).read_bytes()).hexdigest(),
+                    digest,
+                )
+
     def test_episode_one_final_pair_is_valid_and_old_path_is_retired(self) -> None:
         final = (
             REPO_ROOT
