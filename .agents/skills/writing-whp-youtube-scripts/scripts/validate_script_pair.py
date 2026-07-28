@@ -76,7 +76,7 @@ HORIZONTAL_RULE_RE = re.compile(
     r"^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|"
     r"(?:_[ \t]*){3,})$"
 )
-TABLE_DELIMITER_CELL_RE = re.compile(r"^:?-{3,}:?$")
+TABLE_DELIMITER_CELL_RE = re.compile(r"^:?-+:?$")
 UNDERLINE_TAG_RE = re.compile(r"</?u>")
 STORY_MARKER_RE = re.compile(r"</?u>|\*+")
 ESCAPABLE_STORY_MARKER_RE = re.compile(r"</?u>|\*+|_+")
@@ -220,29 +220,94 @@ def _find_unescaped(text: str, character: str, start: int) -> int:
     return cursor
 
 
-def _has_raw_citation(markdown: str) -> bool:
-    """Detect footnotes and suffixes on balanced, unescaped labels."""
+def _citation_surfaces(markdown: str) -> list[str]:
+    """Split raw Markdown into independently scanned paragraph surfaces."""
+
+    surfaces: list[str] = []
+    quoted_paragraph: list[str] = []
+
+    def flush_quoted_paragraph() -> None:
+        if quoted_paragraph:
+            surfaces.append("\n".join(quoted_paragraph))
+            quoted_paragraph.clear()
+
+    for line in markdown.splitlines():
+        if line.startswith(">"):
+            spoken = _blockquote_spoken(line)
+            if spoken.strip(" \t") == "":
+                flush_quoted_paragraph()
+            else:
+                quoted_paragraph.append(spoken)
+            continue
+
+        flush_quoted_paragraph()
+        if line.strip(" \t"):
+            surfaces.append(line)
+
+    flush_quoted_paragraph()
+    return surfaces
+
+
+def _balanced_delimiter_pairs(
+    surface: str,
+) -> tuple[dict[int, int], dict[int, int]]:
+    """Map unescaped balanced bracket and parenthesis openers to closers."""
 
     bracket_openers: list[int] = []
-    for index, character in enumerate(markdown):
-        if character not in "[]":
+    parenthesis_openers: list[int] = []
+    bracket_pairs: dict[int, int] = {}
+    parenthesis_pairs: dict[int, int] = {}
+    escaped = False
+
+    for index, character in enumerate(surface):
+        if character == "\\":
+            escaped = not escaped
             continue
-        if _is_escaped(markdown, index):
-            continue
-        if character == "[":
-            bracket_openers.append(index)
-            continue
-        if character != "]" or not bracket_openers:
+        if escaped:
+            escaped = False
             continue
 
-        opener = bracket_openers.pop()
+        if character == "[":
+            bracket_openers.append(index)
+        elif character == "]" and bracket_openers:
+            bracket_pairs[bracket_openers.pop()] = index
+        elif character == "(":
+            parenthesis_openers.append(index)
+        elif character == ")" and parenthesis_openers:
+            parenthesis_pairs[parenthesis_openers.pop()] = index
+
+    return bracket_pairs, parenthesis_pairs
+
+
+def _surface_has_raw_citation(surface: str) -> bool:
+    """Detect complete footnotes, inline links, and reference links."""
+
+    bracket_pairs, parenthesis_pairs = _balanced_delimiter_pairs(surface)
+    for opener, closer in bracket_pairs.items():
+        if surface.startswith("[^", opener):
+            return True
+
+        suffix = closer + 1
+        if suffix >= len(surface):
+            continue
         if (
-            markdown.startswith("[^", opener)
-            or markdown.startswith("](", index)
-            or markdown.startswith("][", index)
+            surface[suffix] == "("
+            and suffix in parenthesis_pairs
+        ) or (
+            surface[suffix] == "["
+            and suffix in bracket_pairs
         ):
             return True
     return False
+
+
+def _has_raw_citation(markdown: str) -> bool:
+    """Detect complete citations without crossing paragraph boundaries."""
+
+    return any(
+        _surface_has_raw_citation(surface)
+        for surface in _citation_surfaces(markdown)
+    )
 
 
 def _starts_reference_definition(line: str) -> bool:

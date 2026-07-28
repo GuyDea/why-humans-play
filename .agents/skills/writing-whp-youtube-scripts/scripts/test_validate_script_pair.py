@@ -417,6 +417,10 @@ class ScriptPairTests(unittest.TestCase):
                 "nested-label inline image",
                 "See ![the [primary] chart](https://example.com/chart.png).",
             ),
+            (
+                "nested inline destination",
+                "See [the source](https://example.com/a(nested)).",
+            ),
             ("full reference link", "See [the source][study]."),
             (
                 "nested-label reference link",
@@ -462,6 +466,34 @@ class ScriptPairTests(unittest.TestCase):
                     ],
                 )
 
+    def test_raw_purity_rejects_complete_links_across_supported_surfaces(
+        self,
+    ) -> None:
+        raw_variants = {
+            "title": RAW.replace(
+                "# Episode",
+                "# [Episode](https://example.com/source)",
+            ),
+            "beat heading": RAW.replace(
+                "## 1. Opening",
+                "## [Opening][study]",
+            ),
+            "soft-wrapped blockquote label": RAW.replace(
+                "> *But the next result changed the question.*",
+                "> See [the primary\n"
+                "> source](https://example.com/a(nested)).",
+            ),
+        }
+        for case, raw in raw_variants.items():
+            with self.subTest(case=case):
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
     def test_raw_purity_allows_ordinary_spoken_bracket_text(self) -> None:
         for case, spoken in (
             ("ordinary brackets", "But I chose [the safer option]."),
@@ -486,6 +518,26 @@ class ScriptPairTests(unittest.TestCase):
                 "unmatched reference suffix",
                 "But ][reference] stayed punctuation.",
             ),
+            (
+                "incomplete inline suffix",
+                "But [text]( stayed punctuation.",
+            ),
+            (
+                "incomplete nested inline suffix",
+                "But [text](outer(inner) stayed punctuation.",
+            ),
+            (
+                "escaped inline suffix closer",
+                r"But [text](literal\) stayed punctuation.",
+            ),
+            (
+                "incomplete reference suffix",
+                "But [text][ stayed punctuation.",
+            ),
+            (
+                "escaped reference suffix closer",
+                r"But [text][reference\] stayed punctuation.",
+            ),
         ):
             with self.subTest(case=case):
                 raw = RAW.replace(
@@ -496,6 +548,45 @@ class ScriptPairTests(unittest.TestCase):
                     "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
                     "> *But the next result changed the question.*",
                     f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
+    def test_raw_purity_resets_citation_state_at_paragraph_boundaries(
+        self,
+    ) -> None:
+        for case, quoted_passages in (
+            (
+                "blank quoted line",
+                "> But [the phrase\n>\n> ](literally) stayed punctuation.",
+            ),
+            (
+                "whitespace-only quoted line",
+                "> But [the phrase\n>   \n> ](literally) stayed punctuation.",
+            ),
+            (
+                "separate blockquote passages",
+                "> But [the phrase\n\n> ](literally) stayed punctuation.",
+            ),
+            (
+                "non-blockquote boundary",
+                "> But [the phrase\n"
+                "## 2. Boundary\n"
+                "> ](literally) stayed punctuation.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    quoted_passages,
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    quoted_passages,
                 )
 
                 self.assertEqual(
@@ -582,6 +673,12 @@ class ScriptPairTests(unittest.TestCase):
             ),
             ("GFM alert", "[!NOTE]"),
             ("GFM table delimiter", "| :--- | ---: |"),
+            ("one-hyphen GFM table delimiter", "| - | - |"),
+            ("two-hyphen GFM table delimiter", "-- | --"),
+            (
+                "aligned short GFM table delimiter",
+                "| :- | -: |",
+            ),
             (
                 "GFM table with outer pipes",
                 "| Finding | Meaning |\n"
@@ -691,6 +788,10 @@ class ScriptPairTests(unittest.TestCase):
             (
                 "multi-pipe sentence",
                 "This sentence | uses pipes | as spoken punctuation.",
+            ),
+            (
+                "non-delimiter dash cells",
+                "| - Finding | Meaning - |",
             ),
         ):
             with self.subTest(case=case):
@@ -1145,6 +1246,22 @@ class ScriptPairTests(unittest.TestCase):
 
     def test_citation_scan_is_linear_on_incomplete_suffixes(self) -> None:
         passage = "](" * 200_000
+
+        started = time.perf_counter()
+        has_citation = _has_raw_citation(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_citation)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"citation scan took {elapsed:.3f}s",
+        )
+
+    def test_citation_scan_is_linear_on_complete_labels_with_open_suffixes(
+        self,
+    ) -> None:
+        passage = "[x](" * 50_000
 
         started = time.perf_counter()
         has_citation = _has_raw_citation(passage)
