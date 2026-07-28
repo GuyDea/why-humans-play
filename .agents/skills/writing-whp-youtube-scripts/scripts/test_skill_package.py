@@ -20,6 +20,20 @@ FORMAT_MD = SKILL_ROOT / "references/annotated-script-format.md"
 RUBRIC_MD = SKILL_ROOT / "references/quality-rubric.md"
 TEMPLATE_MD = SKILL_ROOT / "assets/annotated-script-template.md"
 STEERING_MD = REPO_ROOT / "whp-youtube" / "STEERING.md"
+EPISODE_ONE_DESIGN_MD = (
+    REPO_ROOT
+    / "docs"
+    / "superpowers"
+    / "specs"
+    / "2026-07-27-episode-1-story-rebuild-design.md"
+)
+EPISODE_ONE_PROGRESSION_MD = (
+    REPO_ROOT
+    / "docs"
+    / "superpowers"
+    / "plans"
+    / "2026-07-27-episode-1-v2-story-progression.md"
+)
 AGENTS_MD = REPO_ROOT / "AGENTS.md"
 CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
 RECONCILE_MD = REPO_ROOT / ".agents" / "skills" / "reconcile-whp" / "SKILL.md"
@@ -110,6 +124,35 @@ def spoken_digest(path: Path) -> str:
 
 
 class SkillPackageTests(unittest.TestCase):
+    def test_active_episode_one_routes_only_to_episode_first_artifacts(self) -> None:
+        active_episode_one_documents = read_documents(
+            {
+                "steering": STEERING_MD,
+                "design": EPISODE_ONE_DESIGN_MD,
+                "progression": EPISODE_ONE_PROGRESSION_MD,
+            }
+        )
+
+        for retired_path in (
+            "whp-youtube/predrafts/",
+            "whp-youtube/drafts/ep1_v2.md",
+            "episodes/01-why-ai-makes-bad-advice-feel-right.md",
+        ):
+            for document_name, document in active_episode_one_documents.items():
+                with self.subTest(
+                    document=document_name,
+                    retired_path=retired_path,
+                ):
+                    self.assertNotIn(retired_path, document)
+
+        active_text = "\n".join(active_episode_one_documents.values())
+        for current_path in (
+            "episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md",
+            "episodes/ep001-ai-dangerous-advice/final/script.extended.md",
+        ):
+            with self.subTest(current_path=current_path):
+                self.assertIn(current_path, active_text)
+
     def test_episode_one_legacy_artifacts_are_archived_byte_for_byte(self) -> None:
         archive = (
             REPO_ROOT

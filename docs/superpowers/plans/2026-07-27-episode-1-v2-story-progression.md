@@ -1,15 +1,19 @@
-# Episode 1 V2 Story Progression Implementation Plan
+# Episode 1 V2 Human-Nerve Story Progression Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Create a separate Episode 1 narration prototype at
-`whp-youtube/predrafts/ep1_v2.md` from an explicitly approved, retention-led causal
-progression without replacing the existing episode.
+**Goal:** Create the Episode 1 intro-first Script Blueprint pair at
+`whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/` that fulfills the approved
+promise “Could AI Talk You Into the Dumbest Decision of Your Life?” without replacing
+the canonical final pair.
 
-**Architecture:** The approved “Counterfeit Second Opinion” architecture remains the
-intellectual baseline. This plan makes the story advance through evidence-earned
-obstacles and reversals, with one recurring hypothetical used only to demonstrate the
-mechanism; narration begins only after Martin approves this complete progression.
+**Architecture:** Preserve the approved four-mechanism intellectual core and
+Second-Opinion Test, but rebuild the story around the documented Swiss medical case as
+the human-stakes sidecar. The viewer begins by judging the patient's choice, then each
+return to the case exposes why the decision was understandable while separate studies
+earn the mechanism; the ending replaces judgment with a usable checking procedure. Phase
+0 polishes the intro and maps the body in bullets only. Complete body narration begins
+only after Martin approves both.
 
 **Tech Stack:** Markdown, the local `writing-whp-youtube-scripts` skill, project evidence
 records, Git
@@ -18,348 +22,406 @@ records, Git
 
 ## File map
 
-- **Story baseline:** Create and approve
+- **Architecture baseline:** Modify and preserve
+  `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`.
+- **Story baseline:** Replace the superseded abstract-first progression in
   `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`.
-- **Narration prototype:** Create `whp-youtube/predrafts/ep1_v2.md` only after this whole
-  progression is approved.
-- **Existing artifacts to preserve:**
-  `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md` and
-  `whp-youtube/predrafts/01-why-ai-makes-bad-advice-feel-right-throughline.md`.
-- **Approval records:** After whole-plan approval, update
-  `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`,
-  `whp-youtube/STEERING.md`, and `DECISIONS.md` through the WHP reconciliation workflow.
+- **Legacy full-narration prototype:** Preserve at
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/v2-preworkflow-narration.md`.
+- **Intro-first Script Blueprint:** Use
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md` as the spoken
+  source of truth and `script.extended.md` for its annotated mirror and body logic map;
+  keep body narration out of this stage.
+- **Complete narration after Script Blueprint approval:** Create the raw/extended pair
+  under `whp-youtube/episodes/ep001-ai-dangerous-advice/draft/` only after Martin
+  approves the polished intro and body logic map.
+- **Case boundary source:** Read and preserve
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/throughline-experiment.md`.
+- **Canonical episode:** Preserve the final pair at
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/final/`, whose annotated production
+  view is `script.extended.md`.
+- **Approval records after approval:** Reconcile `whp-youtube/STEERING.md` and
+  `DECISIONS.md` without promoting V2 over the canonical episode.
 
 # Story Progression Plan
 
+## Packaging and promise lock
+
+- **Title:** *Could AI Talk You Into the Dumbest Decision of Your Life?*
+- **Human nerve:** A sensible person can make a disastrous choice because a calm,
+  intelligent answer makes the preferred option feel rational.
+- **Opening promise:** Understand how a dangerous choice can emerge without an obviously
+  stupid answer, then learn how to test whether the answer resolved the real decision.
+- **Final payoff:** A second answer is not a second opinion unless it reaches evidence by
+  an independent route.
+- **Promise boundary:** The episode does not claim that ChatGPT caused the patient's TIA,
+  ordered him to stay home, or proves the four mechanisms through one case.
+
 ## Story engine
 
-A skeptical viewer watches every apparent safeguard fail for a different, evidence-backed
-reason—awareness does not improve checking, framing is not independent input, polish hides
-the premise's ancestry, and same-model opposition is not outside evidence—until the story
-strips a counterfeit second opinion down to the procedure required for a real one.
+A viewer who initially thinks “I would never make that mistake” follows one frightened
+person's reasonable-looking decision through four hidden moves. Each study removes one
+comfortable defense, each medical-case return changes the meaning of the choice, and the
+final prompt comparison reveals that the apparent second opinion had answered the
+reassuring question rather than the safety decision that mattered.
 
 ## Story-material inventory
 
 | Material | Status | Honest story opportunity | Boundary or risk |
 |---|---|---|---|
-| **E-01 — Cheng et al. personal-advice sycophancy** | `NEEDS-VERIFICATION` | Open on the paradox that people can prefer affirming advice even when it leaves them more entrenched, less prosocial, or more dependent. This supplies a consequential reason to investigate why bad advice can feel right. | Exact populations, conditions, and effect sizes require review. It does not establish the full borrowed-authority chain. |
-| **Viewer's familiar safeguard — “I know AI can be wrong, so I will stay skeptical”** | `PROJECT-KNOWN` | Gives the opening a concrete expectation to overturn and lets the episode disarm the informed viewer without calling them gullible. | It is the approved audience model, not a prevalence claim about all viewers. |
-| **E-02 — Gaube et al. radiologist source-label experiment** | `PROJECT-KNOWN` | Creates the first obstacle: specialists trusted AI-labeled advice less but did not detect its errors better. Suspicion and checking behavior separate. | The advice was human-written and merely labeled as AI. It cannot prove real-model sycophancy. |
-| **Investigation gap — a distrust result without a real model** | `PROJECT-KNOWN` | Turns E-02's boundary into the next necessary proof job instead of hiding it in a caveat. | It is a logical evidence gap, not a personal research event or narrator setback. |
-| **E-04 — framing effect** | `PROJECT-KNOWN` | Shows that the user's wording determines which facts and alternatives enter first. It supports a concrete demonstration that the first manipulation can precede the answer. | Classic framing evidence concerns human judgment, not chatbot behavior. |
-| **Recurring house-decision demonstration** | `HYPOTHETICAL` | Contrast a preference-loaded question such as “Should I buy this house, or keep throwing money away on rent?” with a neutral decision frame. Return later to show the same premise polished and then run the Second-Opinion Test on it. | It explains the mechanism but proves nothing about real users, models, or outcomes. It must stay visibly hypothetical. |
-| **E-03 — Sharma et al. sycophancy and preference data** | `PROJECT-KNOWN` | Answers the real-model gap: tested assistants shifted toward users' stated beliefs, and belief-matching answers were favored in the analyzed preference data. | Models, prompts, and tasks vary. Preference feedback is not established as the sole cause. |
-| **Investigation gap — direction is not experienced independence** | `PROJECT-KNOWN` | E-03 explains why an answer may lean toward the prompt but leaves open why the returned premise feels like a separate, authoritative judgment. | The gap must be presented as a missing proof job, not invented confusion or emotion. |
-| **E-05 — processing fluency** | `PROJECT-KNOWN` | Explains how an easier-to-process presentation can feel more credible, letting organization be mistaken for new evidence. | Applying visual-fluency findings to AI prose is an explicit analogy, not a direct AI-advice result. |
-| **E-06 — algorithm appreciation** | `PROJECT-KNOWN` | Adds a contextual source cue: outside their expertise, laypeople sometimes weighted equivalent algorithmic advice more heavily. | The effect is not universal and cannot support “people trust AI.” Expertise and task type matter. |
-| **Apparent contradiction — E-02 distrust versus E-06 appreciation** | `PROJECT-KNOWN` | Creates an honest scoped reversal: experts in one task distrusted an AI label, while laypeople in other tasks sometimes gave algorithmic advice more weight. The useful common point is that source cues alter evaluation, while distrust alone still does not guarantee checking. | Do not flatten different populations and tasks into one universal tendency or pretend the studies directly conflict. |
-| **Investigation gap — persuasion now versus changed judgment later** | `PROJECT-KNOWN` | Fluency and source cues can explain immediate weight, but they do not establish that AI enters the user's next judgment. This demands direct feedback-loop evidence. | Keep the distinction between an inferred mechanism and a measured downstream effect. |
-| **E-07 — Glickman and Sharot human–AI feedback experiments** | `PROJECT-KNOWN` | Supplies the major consequence: biased AI amplified later human bias, while accurate AI improved judgment. The evaluator becomes part of the loop. | Controlled tasks do not establish permanent effects or every conversational context. The accurate-AI result prevents a generic anti-AI conclusion. |
-| **Borrowed-authority loop** | `PROJECT-KNOWN` | Names the earned synthesis only after framing, model lean, transformed presentation, and later influence have all appeared. | It is an original WHP synthesis; the complete four-stage loop has not been tested as one named effect. |
-| **Obvious fix — ask the same AI to argue the other side** | `HYPOTHETICAL` | Creates the final practical obstacle. It can improve inspection but still comes from the same evidence route, so another answer need not be another opinion. | Do not claim the tactic is useless. Its value is friction, not independence. |
-| **E-08 — cognitive forcing functions** | `NEEDS-VERIFICATION` | Shows that deliberate friction can reduce overreliance and supplies an informational reward: the more effective interfaces were liked less. | Transfer to personal chat advice is untested, and full result details require review. |
-| **E-09 — considering the opposite** | `PROJECT-KNOWN` | Supports constructing the strongest case against the preferred option. | Asking a chatbot to do this is an adaptation and does not create independent evidence. |
-| **E-10 — premortem** | `PROJECT-KNOWN` | Supports assuming the decision failed and identifying plausible causes before acting. | The source establishes the procedure, not universal outcome improvement. |
-| **E-11 — Ask, Don't Tell** | `NEEDS-VERIFICATION` | May add a compact supporting reward: turning an asserted opinion into a question can reduce sycophancy. | Emerging preprint; conditions and generalizability remain open. E-04 plus E-03 can carry the story without it. |
-| **E-12 — independent aggregation / hybrid confirmation tree** | `NEEDS-VERIFICATION` | Supports the deeper reframe that judgments should be elicited independently and disagreement resolved separately. | Preprint reanalysis, not a personal-advice trial. It supports but cannot carry the Second-Opinion Test. |
-| **Second-Opinion Test** | `PROJECT-KNOWN` | Pays off the story with a repeatable procedure: preserve the first judgment, expose assumptions, construct opposition, simulate failure, and require a decision-changing fact from outside the chat. | Original, unvalidated WHP package. It makes advice inspectable, not necessarily correct. |
-| **Vote / witness / counterfeit-stamp recognition motif** | `HYPOTHETICAL` | Gives callbacks and mechanism-mapped humor a shared visual idea: transformed wording does not automatically create another independent vote or witness. | It remains analogy and comic framing, never evidence. Final wording waits for narration drafting. |
-| **Possible narrator near-surrender or invented research chronology** | `HYPOTHETICAL` | No honest story opportunity. | Reject because no supplied chronology or emotion earns “I almost gave up,” “I discovered,” or a similar personal obstacle. |
+| **E-13 — Swiss TIA case** | `PROJECT-KNOWN` | Open with double vision after a heart procedure, AI reassurance, staying home, and a later ambulance. Return for the prompt, motive, perceived clarity, diagnosis, alternate prompt, and tool application. | It establishes one consequential decision route and prompt-sensitive answers, not causation, prevalence, or the four-mechanism synthesis. |
+| **Viewer's first judgment — “How could anyone be that naive?”** | `PROJECT-KNOWN` | Gives the episode a personal insecurity to confront: the viewer's confidence that obvious stupidity separates them from the patient. | It is the intended audience model, not an attributed thought from study participants. |
+| **Viewer's immunity defense — “I know AI lies and flatters”** | `PROJECT-KNOWN` | Lets the episode distinguish awareness from operational checking without calling the viewer gullible. | Do not claim every viewer says this or that awareness is useless. |
+| **E-02 — radiologist source-label experiment** | `PROJECT-KNOWN` | Removes the immunity defense: specialists trusted AI-labelled material less without finding more planted errors. | The advice was human-written and only labelled AI; it does not establish actual chatbot behavior. |
+| **E-04 — framing effect** | `PROJECT-KNOWN` | Clarifies the difference between “Could this be a harmless after-effect?” and “Is it safe to stay home?” | Classic framing research is not chatbot research; E-13 illustrates the distinction but does not prove the general effect. |
+| **E-03 — model sycophancy and preference data** | `PROJECT-KNOWN` | Establishes that tested assistants can shift toward a user's stated belief and that belief-matching answers were preferred in analyzed feedback data. | Models, prompts, and tasks vary; feedback is not the sole proven cause. |
+| **E-05 — processing fluency** | `PROJECT-KNOWN` | Explains why clear presentation can feel more credible and supports the recognition that precision of language can resemble precision of diagnosis. | The underlying study was not about AI prose; this application is a bounded analogy. |
+| **E-06 — algorithm appreciation** | `PROJECT-KNOWN` | Shows that laypeople sometimes gave equivalent algorithmic advice more weight outside their expertise. | It is contextual, not a universal “people trust AI” result. |
+| **E-02 / E-06 scoped tension** | `PROJECT-KNOWN` | Creates an honest apparent contradiction: experts distrusted an AI label while laypeople in other tasks sometimes weighted algorithms more heavily. | Resolve by population and task; neither reaction guarantees good checking. |
+| **E-07 — human–AI feedback experiments** | `PROJECT-KNOWN` | Establishes that repeated biased feedback can shift later unaided judgments, while accurate AI can improve them. | Controlled tasks do not establish permanence or every personal-advice context. |
+| **Borrowed-authority loop** | `PROJECT-KNOWN` | Names the earned synthesis after the viewer has seen framing, model lean, transformed presentation, and later influence. | Original WHP synthesis; never present it as one experimentally isolated effect. |
+| **E-08 through E-12 — friction and independence** | Mixed `PROJECT-KNOWN` / `NEEDS-VERIFICATION` | Support deliberate friction, considering the opposite, premortem, prompt form, and independent elicitation. | The Second-Opinion Test is an original, unvalidated package. Same-model disagreement remains useful friction, not independent evidence. |
+| **Alternate stroke-framed prompt in E-13** | `PROJECT-KNOWN` | Provides the climactic demonstration that changing the question exposed danger excluded by the first frame. | It proves a different response in this case, not that the patient would have acted differently or had a different outcome. |
+| **House-purchase transfer** | `HYPOTHETICAL` | Shows how to use the complete test when time permits and transfers the mechanism beyond medicine. | It is an application example, not evidence; it appears only after the medical payoff. |
+| **Possible narrator near-surrender or invented discovery chronology** | `HYPOTHETICAL` | No honest story opportunity. | Reject. Logical proof gaps can create obstacles without invented “I almost gave up,” surprise, motive, or chronology. |
 
 ## Technique selection
 
 | Technique | Decision | Material basis | Narrative job | Planned placement | Boundary or rejection reason |
 |---|---|---|---|---|---|
-| Question-first entry with evidence reversal | `SELECTED` | E-01 plus the familiar skepticism safeguard | Turn “bad advice should be rejected” into the episode's live mystery and promise both an explanation and a procedure. | SP01 opening | E-01 remains bounded and needs verification; the opening cannot imply that all affirming advice is wrong. |
-| Expectation and reversal | `SELECTED` | E-01, E-02, E-07, E-08 | Repeatedly replace a plausible safeguard with a more operational question: preference, checking, changed judgment, and friction. | SP01, SP02, SP06, SP07 | Each reversal must follow the cited result rather than dramatic wording alone. |
-| Investigation challenge | `SELECTED` | E-02's no-real-model gap; E-03's missing-independence gap; E-05/E-06's missing-downstream-effect gap | Make evidence boundaries propel the next proof job. | SP02→SP03, SP04→SP05, SP05→SP06 | Present logical gaps only; do not invent narrator frustration, surprise, chronology, or near-surrender. |
-| Apparent contradiction with scoped resolution | `SELECTED` | E-02 versus E-06 | Prevent a simplistic “people trust AI” claim and teach that source distrust and advice checking are different. | SP05 | Resolve by population and task scope; do not claim the studies measured the same behavior. |
-| Proof handoff | `SELECTED` | E-01 through E-12 evidence chain | Ensure every case answers one question while exposing the next missing proof. | Every major handoff | No evidence row may silently prove both its direct result and the entire synthesis. |
-| Recurring hypothetical demonstration | `SELECTED` | House-decision scenario | Let the viewer watch framing become polished advice and later watch the safeguard operate on the same decision. | SP03, SP05, SP08 | Clearly label it hypothetical and never use it to prove vulnerability or effectiveness. |
-| Open loops and progressive payoff | `SELECTED` | “Why does it feel right?”, “Why does it feel independent?”, and “What counts as a second opinion?” | Sustain a specific reason to continue while paying the mechanism in stages. | Open SP01; partial pays SP04–SP07; close SP08 | No vague “it gets stranger” promises. |
-| Informational reward | `SELECTED` | E-08's effectiveness–preference tradeoff; E-07's accurate-AI improvement | Add memorable nuance: useful safeguards may feel inconvenient, and the goal is not rejecting AI by default. | SP06 and SP07 | Both claims keep their experimental boundaries. |
-| Mechanism-mapped punchline | `SELECTED` | Vote / witness / counterfeit-stamp motif | Release pressure exactly where the viewer recognizes that the same premise or evidence route is being counted twice. | One light release after SP05 or SP06; callback in SP07 | Wording is deferred. Humor cannot interrupt human consequences or become a free-floating joke. |
-| Callback motif | `SELECTED` | Thumbnail's “SECOND OPINION?” stamp and vote/witness inventory item | Unify the opening mystery, borrowed-authority synthesis, and final decision rule. | SP01, SP06, SP08 | Use sparingly; it cannot replace the causal explanation. |
-| Supporting narrative throughline | `NONE` | No verified person or event currently supports three honest returns | Keep the argument as the spine and avoid importing the old medical sidecar merely because a throughline slot exists. | Whole episode | The house scenario is a recurring demonstration, not a narrative sidecar. |
-| Invented hero obstacle or personal near-surrender | `REJECTED` | No supplied narrator chronology or emotion | Protect truthfulness while still using real evidence obstacles. | Whole episode | “That seemed impossible because…” is allowed only when it describes a real logical conflict, not fabricated experience. |
-| Viewer application | `SELECTED` | Second-Opinion Test and house demonstration | Convert the reframe into an observable procedure on the same problem the viewer has already seen. | SP08 | State that same-model counterarguments are useful friction, not outside evidence. |
-| Final declarative resolution | `SELECTED` | Approved practical payoff and final lesson | Close the title promise with the independence rule rather than a generic warning. | End of SP08 | Preserve the package boundary and high-stakes escalation rule. |
+| Consequence-first question | `SELECTED` | Approved title plus E-13 | Hit the personal nerve immediately and make the title's “dumbest decision” concrete. | SP01 | State only documented behavior and withhold only the diagnosis, not a fabricated detail. |
+| Supporting narrative throughline | `SELECTED` | E-13 | Give the viewer one understandable person, goal, choice, and consequence to reinterpret across the whole episode. | SP01, SP03–SP08 | The case carries stakes and application; separate studies prove the mechanisms. |
+| Audience-identification reversal | `SELECTED` | Viewer's first judgment plus E-13 | Move the viewer from “what an idiot” to “I recognize the wish that shaped that question.” | Open SP01; deepen SP03–SP05; close SP08 | Never excuse the decision or claim every viewer would make it. |
+| Expectation and reversal | `SELECTED` | E-02, E-03, E-07, E-08 | Make each comfortable safeguard fail for a distinct evidenced reason. | SP02, SP04, SP06, SP07 | Every reversal follows the result and retains its scope. |
+| Investigation challenge | `SELECTED` | E-02's no-real-model gap; E-03's missing-authority gap; E-05/E-06's missing-later-effect gap | Let real proof boundaries generate the next necessary step. | SP02→SP04, SP04→SP05, SP05→SP06 | No invented narrator struggle or repeated theatrical challenge phrasing. |
+| Apparent contradiction and scoped resolution | `SELECTED` | E-02 versus E-06 | Prevent the false universal claim that people simply trust or distrust AI. | SP05 | Resolve through population, expertise, and task rather than flattening the studies. |
+| Possible-answer / safe-decision distinction | `SELECTED` | E-13 plus E-04 | Deliver the central aha: a plausible answer can still answer the wrong decision. | SP03; callbacks SP07–SP08 | Plain-language WHP distinction, not a named scientific effect. |
+| Proof handoff | `SELECTED` | E-02 through E-12 | Give every study one job and let its boundary open the next question. | All major handoffs | No case silently proves the complete synthesis. |
+| Progressive reveal | `SELECTED` | E-13's documented chronology and prompt comparison | Ensure each return adds prompt, motive, perceived clarity, outcome, changed wording, or tool application. | SP01, SP03–SP08 | No reminder-only callbacks. |
+| Open loops and payoff | `SELECTED` | Diagnosis, mechanism, alternate prompt, and promised test | Maintain concrete reasons to continue rather than vague escalation. | Open SP01; partial pays SP03–SP07; close SP08 | Every withheld answer has a named payoff beat. |
+| Mechanism-mapped humor | `SELECTED` | Menu, white-coat, and second-vote recognition ideas | Release pressure while clarifying framing, fluency, or borrowed authority. | One compact line in SP03 or SP05; one callback SP06 | No humor at the diagnosis reveal or human consequence. |
+| Obvious fix that fails partially | `SELECTED` | E-08 through E-12 | Preserve the value of asking for opposition while showing why it is not independent evidence. | SP07 | Do not call same-model opposition useless. |
+| Viewer application | `SELECTED` | Second-Opinion Test, E-13, and house transfer | Convert the mechanism into a bounded procedure and observable result. | SP08 | Medical emergencies leave the chat immediately; slower decisions can use all four questions. |
+| Invented hero obstacle or personal near-surrender | `REJECTED` | No supplied narrator event or emotion | Protect truthfulness. | Whole episode | Use real case obstacles and evidence gaps only. |
 
 ## Beat-progression blocks
 
-#### Progression beat SP01 — The advice people prefer
+#### Progression beat SP01 — The decision that does not sound dumb
 
-- **Starting question or expectation:** If AI advice is bad, an informed and skeptical
-  user should dislike or reject it.
-- **Event or evidence:** E-01 introduces the personal-advice paradox: sycophantic responses
-  can be preferred while leaving users more entrenched, less prosocial, or more dependent.
-- **BUT — complication:** Preference cannot tell the user whether the answer added evidence
-  or merely made their existing position feel better.
-- **THEREFORE — consequence or required next step:** The episode must discover both why
-  bad advice can feel right and what would make an AI consultation a genuine second
-  opinion. Preview the practical destination without yet giving the full test.
-- **Selected technique:** Question-first entry, expectation/reversal, and open loop.
-- **Loop or payoff:** Open “why does it feel right?”, “why doesn't skepticism protect
-  me?”, and the promised Second-Opinion Test.
-- **Proof job and evidence boundary:** Establish observed preference and consequential
-  effects within E-01's verified conditions. Do not imply that agreement is always wrong,
-  that every model behaves this way, or that E-01 proves the full mechanism.
+- **Starting question or expectation:** Could AI talk a sensible person into the dumbest
+  decision of their life, or would dangerous advice sound obviously dangerous?
+- **Event or evidence:** E-13: after a heart procedure, a man in his sixties experiences
+  recurrent double vision, asks ChatGPT whether it could be related to the procedure,
+  feels reassured, stays home, and calls an ambulance after another episode. Withhold the
+  diagnosis.
+- **BUT — complication:** ChatGPT did not order him to stay home, and the answer included
+  a recommendation to contact a doctor. The choice emerged from an answer that contained
+  both warning and reassurance.
+- **THEREFORE — consequence or required next step:** Reject the easy “obviously stupid
+  advice plus naive obedience” explanation. Promise to expose four moves and a check that
+  distinguishes a plausible explanation from a safe decision.
+- **Selected technique:** Consequence-first question, progressive reveal, audience
+  judgment, and specific open loop.
+- **Loop or payoff:** Open “What did doctors find?”, “Why did the answer feel safe
+  enough?”, and “Could this work on someone who already knows AI is unreliable?”
+- **Proof job and evidence boundary:** Establish the documented decision route and human
+  stakes only. Do not claim mechanism, causation, prevalence, or that the model instructed
+  him to remain home.
 
-#### Progression beat SP02 — Suspicion is not a checking method
+#### Progression beat SP02 — Knowing the danger is not the same as checking
 
-- **Starting question or expectation:** Awareness of AI risk—especially expertise plus
-  distrust—should improve error detection.
-- **Event or evidence:** In E-02, 138 radiologists rated identical AI-labeled advice lower
-  yet did not detect its errors better.
-- **BUT — complication:** Lower trust changed the rating, not the checking outcome.
-  Skepticism can remain a feeling instead of becoming a procedure.
-- **THEREFORE — consequence or required next step:** The story must move from how much a
-  person says they trust the source to how the recommendation itself is constructed and
-  checked.
-- **Selected technique:** Expectation/reversal and evidence-earned obstacle.
-- **Loop or payoff:** Close the simple “skepticism protects me” expectation; open the need
-  for evidence involving a real model.
+- **Starting question or expectation:** A viewer who knows AI can hallucinate and flatter
+  should be protected by distrust, especially if expertise improves detection.
+- **Event or evidence:** E-02: experienced radiologists rated identical AI-labelled
+  diagnoses lower but caught no more planted mistakes than radiologists who saw a human
+  label.
+- **BUT — complication:** Their suspicion changed the rating, not the checking outcome;
+  and because the diagnoses were human-written, this study contains no real model.
+- **THEREFORE — consequence or required next step:** Replace the attitude “stay
+  skeptical” with the operational question “what changed in the checking?” Then inspect
+  what the patient supplied to the real chatbot before asking whether models lean into
+  it.
+- **Selected technique:** Immunity-defense reversal and investigation challenge.
+- **Loop or payoff:** Close “distrust automatically protects me”; open the user's
+  contribution and the real-model proof gap.
 - **Proof job and evidence boundary:** Establish the distrust–checking gap in the tested
-  radiologists. Because the advice was human-written and only labeled as AI, this beat
-  cannot establish model sycophancy.
+  radiologists. Do not imply actual AI generated their advice or that expertise never
+  helps.
 
-#### Progression beat SP03 — The first move happens before the answer
+#### Progression beat SP03 — The reassuring question replaces the real decision
 
-- **Starting question or expectation:** A prompt neutrally hands a problem to an outside
-  adviser.
-- **Event or evidence:** E-04 establishes framing as a judgment mechanism. The recurring
-  hypothetical contrasts the loaded house question with a neutral inventory of the
-  conditions under which buying or renting would be better.
-- **BUT — complication:** The demonstration shows that a user can preselect the menu, but
-  framing evidence alone cannot show that a chatbot will stay inside that frame.
-- **THEREFORE — consequence or required next step:** The story now needs real-model
-  evidence that assistants lean toward a user's stated position.
-- **Selected technique:** Demonstration followed by a proof handoff.
-- **Loop or payoff:** Partially pay “where did the answer begin?”; keep “why does it feel
-  independent?” open.
-- **Proof job and evidence boundary:** Establish that presentation can alter judgment and
-  make the hidden preference in the hypothetical visible. Do not use the hypothetical or
-  classic framing study as proof of chatbot behavior.
+- **Starting question or expectation:** The patient handed a neutral medical problem to
+  an outside adviser.
+- **Event or evidence:** Return to E-13. He asked whether visual disturbance was possible
+  after the procedure. The documented answer supplied possible procedure-related
+  explanations, told him to inform his physician, and ended with reassurance that such
+  disturbances were often temporary. E-04 supplies the broader framing mechanism.
+- **BUT — complication:** “Could this be a normal after-effect?” and “Is it safe to stay
+  home?” are different questions. Finding one possible benign explanation cannot resolve
+  the safety decision.
+- **THEREFORE — consequence or required next step:** Name move one: the user can choose
+  the menu before the model writes. Then ask whether a real assistant will challenge that
+  menu or lean toward the preference inside it.
+- **Selected technique:** Case return, recognition demonstration, possible-answer /
+  safe-decision distinction, and proof handoff.
+- **Loop or payoff:** Partially pay why the decision felt rational; open whether actual
+  models remain inside a user's frame.
+- **Proof job and evidence boundary:** E-13 illustrates the mismatch and E-04 establishes
+  framing in human judgment. Neither proves chatbot sycophancy.
 
-#### Progression beat SP04 — The model leans into the frame
+#### Progression beat SP04 — The answer leans toward the hope inside the prompt
 
 - **Starting question or expectation:** A capable assistant should correct a loaded
   premise rather than reward it.
-- **Event or evidence:** E-03 shows tested assistants shifting toward stated user beliefs,
-  while belief-matching responses were favored in the analyzed preference data. E-11 may
-  supply a supporting prompt-form result if later verified.
-- **BUT — complication:** Model agreement explains the direction of the answer, not why
-  the user's own premise feels newly discovered when it comes back.
-- **THEREFORE — consequence or required next step:** Follow the premise through its
-  transformation into fluent, machine-attributed analysis.
-- **Selected technique:** Expectation/reversal and investigation challenge.
-- **Loop or payoff:** Close the real-model gap from SP02; partially pay the co-production
-  mechanism; transfer the live question to experienced independence.
-- **Proof job and evidence boundary:** Establish sycophantic shifts and a preference-data
-  association in tested settings. Do not claim universality or that preference feedback
-  is the only cause.
+- **Event or evidence:** E-03 shows tested assistants shifting toward users' stated
+  beliefs, including wrong beliefs, while belief-matching answers were favored in the
+  analyzed human-preference data. Return to E-13's documented motive: the patient had
+  considered stroke but hoped for a less serious explanation that would avoid the
+  emergency room.
+- **BUT — complication:** Sycophancy explains why an answer can point toward the user's
+  preference. It does not yet explain why that preference feels like an independent,
+  authoritative assessment when it comes back.
+- **THEREFORE — consequence or required next step:** Follow the premise through the
+  transformation that made the answer feel useful, precise, and clear.
+- **Selected technique:** Expectation reversal, human-goal identification, and
+  investigation challenge.
+- **Loop or payoff:** Close the real-model gap; deepen “I recognize that wish”; transfer
+  the live question from agreement to experienced authority.
+- **Proof job and evidence boundary:** Establish sycophantic shifts and the
+  preference-data association in tested settings. The patient case does not prove those
+  mechanisms, and preference training is not established as their sole cause.
 
-#### Progression beat SP05 — The premise returns without fingerprints
+#### Progression beat SP05 — Precision of language impersonates precision of diagnosis
 
-- **Starting question or expectation:** Reorganization should make an answer clearer, not
-  turn the same premise into another piece of evidence.
-- **Event or evidence:** E-05 supplies processing fluency as a credibility cue; E-06 shows
-  that laypeople sometimes give equivalent algorithmic advice more weight. In the house
-  hypothetical, the preference-loaded premise returns as an orderly framework of
-  benefits, risks, and recommendation.
-- **BUT — complication:** E-02 appeared to show distrust of an AI label, while E-06
-  sometimes shows algorithm appreciation. The scoped resolution is that the populations
-  and tasks differ: source cues can alter evaluation in either direction, and neither
-  reaction guarantees better checking.
-- **THEREFORE — consequence or required next step:** Fluency plus attribution can explain
-  why a premise feels less self-authored, but the story still needs evidence that AI
-  output changes later judgment rather than merely persuading once.
-- **Selected technique:** Recognition demonstration, apparent contradiction with scoped
-  resolution, and proof handoff.
-- **Loop or payoff:** Partially pay “why does it feel independent?” and set up the
-  borrowed-authority synthesis.
-- **Proof job and evidence boundary:** Establish fluency as a truth cue and contextual
-  algorithm appreciation in their tested settings. The application to fluent AI advice
-  remains a bounded synthesis, and the hypothetical remains illustrative.
+- **Starting question or expectation:** Clearer organization should improve
+  comprehension without creating additional evidence.
+- **Event or evidence:** E-13 reports that the earlier medical explanation felt hard to
+  understand while the chatbot answer felt useful, precise, and clear. E-05 establishes
+  processing fluency as a truth cue; E-06 shows contextual algorithm appreciation outside
+  expertise.
+- **BUT — complication:** E-02's experts distrusted an AI label, while E-06's laypeople
+  sometimes weighted algorithmic advice more heavily. The scoped resolution is not
+  “people trust AI,” but that source cues and fluency can change evaluation without
+  guaranteeing better checking.
+- **THEREFORE — consequence or required next step:** Name move three: a user's premise
+  can return better dressed and feel less self-authored. Then ask whether that effect
+  ends with one choice or changes the next judge.
+- **Selected technique:** Case return, apparent contradiction, recognition line, and
+  proof handoff.
+- **Loop or payoff:** Partially pay why the answer felt independent; keep the diagnosis
+  loop open; open the downstream-feedback question.
+- **Proof job and evidence boundary:** Establish the cited effects in their own settings.
+  Applying them to this case is a bounded synthesis, not proof that fluency caused the
+  patient's choice.
 
-#### Progression beat SP06 — The answer changes the next judge
+#### Progression beat SP06 — The answer enters the person making the next decision
 
-- **Starting question or expectation:** Even biased advice should affect only the current
-  choice; the user can approach the next judgment afresh.
-- **Event or evidence:** E-07 shows repeated biased AI feedback amplifying later human
-  bias, while accurate AI feedback improved judgment.
-- **BUT — complication:** The evaluator is no longer outside the system after exposure.
-  The next judgment and prompt can begin from a position the previous output helped move.
-- **THEREFORE — consequence or required next step:** Name the earned borrowed-authority
-  loop: the user lends a premise, the model returns it transformed, and the transformed
-  premise influences what the user supplies next. The goal must be appropriate checking,
-  not reflexive AI rejection.
-- **Selected technique:** Expectation/reversal, consequence escalation, synthesis, and
-  informational reward.
-- **Loop or payoff:** Close the mechanism behind “why can it feel right and independent?”;
-  open “can asking the model to oppose itself break the loop?”
-- **Proof job and evidence boundary:** Establish later-judgment movement in controlled
-  tasks and preserve the accurate-AI improvement result. Do not claim permanence or the
-  complete named loop as a directly tested effect.
+- **Starting question or expectation:** Even persuasive AI advice should affect only the
+  current choice; the person can approach the next judgment afresh.
+- **Event or evidence:** E-07 shows repeated biased AI feedback shifting later human
+  judgments in the same direction, while accurate AI improved judgment. Only now combine
+  the four earned moves and name the borrowed-authority loop.
+- **BUT — complication:** The evaluator is no longer fully outside the system after
+  exposure. A transformed premise can influence the next judgment and return in the next
+  prompt with more weight.
+- **THEREFORE — consequence or required next step:** Reveal E-13's outcome: after another
+  episode he called an ambulance, was admitted to a stroke unit, and received a TIA
+  diagnosis. The goal is neither automatic trust nor automatic rejection, but a procedure
+  that detects when a polished answer has become a borrowed vote.
+- **Selected technique:** Consequence escalation, earned synthesis, factual-loop payoff,
+  and informational reward.
+- **Loop or payoff:** Close “What did doctors find?” and the four-move mechanism; open
+  whether asking the same model to disagree creates a real second opinion.
+- **Proof job and evidence boundary:** E-07 establishes later-judgment movement in
+  controlled tasks, not permanence. E-13 supplies the human consequence but does not
+  prove that the complete loop caused it.
 
-#### Progression beat SP07 — The obvious fix is not yet a second opinion
+#### Progression beat SP07 — A second answer is still not a second opinion
 
-- **Starting question or expectation:** Asking the same AI for the opposite case should
-  turn its first answer into a genuine second opinion.
-- **Event or evidence:** E-08 indicates that deliberate cognitive friction can reduce
-  overreliance; E-09 and E-10 support considering the opposite and simulating failure.
-  E-12 may support independent elicitation and separate disagreement resolution if later
-  verified.
-- **BUT — complication:** Useful friction was disliked in E-08, and an objection generated
-  by the same system is still not an independent evidence route. The tactic can improve
-  inspection without adding another witness.
-- **THEREFORE — consequence or required next step:** Preserve the friction but add what it
-  lacks: a judgment recorded before exposure and a decision-changing fact verified
-  outside the conversation.
-- **Selected technique:** Obstacle/challenge, expectation/reversal, informational reward,
-  and proof handoff.
-- **Loop or payoff:** Partially pay the promised test; close “is same-model disagreement
-  enough?” with a bounded “useful, but not independent.”
-- **Proof job and evidence boundary:** Establish support for deliberate friction,
-  considering the opposite, and premortem procedure. Do not claim that their combination
-  or transfer to personal chat has been validated.
+- **Starting question or expectation:** Asking the same AI to argue the other side should
+  restore independence.
+- **Event or evidence:** E-08 through E-12 support deliberate friction, considering the
+  opposite, premortem, prompt-form changes, and independent elicitation. Return to E-13:
+  when the case authors later asked whether the symptoms could be a stroke, ChatGPT gave
+  a more alarming answer and advised immediate medical attention.
+- **BUT — complication:** The changed prompt proves that the first wording left danger
+  out of view; it does not prove the patient would have acted differently. Same-model
+  opposition can improve inspection while still sharing the same evidence route.
+- **THEREFORE — consequence or required next step:** Preserve the friction, but add what
+  the chat cannot manufacture: a pre-AI judgment, the real decision, and a
+  decision-changing fact verified outside the conversation.
+- **Selected technique:** Obvious-fix reversal, alternate-prompt climax, and final proof
+  handoff.
+- **Loop or payoff:** Close “Would different wording expose the danger?” with the bounded
+  answer “it did in this case”; open the complete procedure and its emergency boundary.
+- **Proof job and evidence boundary:** Do not claim the component methods or their WHP
+  combination guarantee accuracy. In a possible medical emergency, leave the chat and
+  seek qualified evaluation rather than running an elaborate prompt sequence.
 
-#### Progression beat SP08 — Build a real second opinion
+#### Progression beat SP08 — Test the decision, not the reassurance
 
-- **Starting question or expectation:** If another answer is insufficient, what procedure
-  creates a meaningfully independent check?
-- **Event or evidence:** Apply the approved action contract to the recurring house
-  hypothetical: record the current answer and one fact that would change it; expose
-  assumptions; construct the strongest opposing case; assume failure and identify likely
-  causes; require the fact that would change the recommendation and verify it outside the
-  chat; then compare the output with the judgment recorded before exposure.
-- **BUT — complication:** This procedure cannot guarantee truth. Same-model
-  counterarguments remain friction rather than outside evidence, and high-stakes
-  decisions require primary-source or qualified-human verification.
-- **THEREFORE — consequence or required next step:** End with the operational rule:
-  do not count answers; count independent evidence. A second opinion is an independent
-  route to a conclusion that reality can still overturn.
-- **Selected technique:** Viewer application, complete payoff, callback, and final
-  declarative resolution.
-- **Loop or payoff:** Close the Second-Opinion Test promise, the house demonstration, the
-  vote/witness motif, the title question, and the opening distinction between skepticism
-  and checking.
-- **Proof job and evidence boundary:** Deliver the original WHP package as an
-  evidence-informed inspection procedure, not a validated accuracy guarantee. State the
-  medical, legal, financial, irreversible, and otherwise high-stakes escalation rule.
+- **Starting question or expectation:** If another paragraph is insufficient, what makes
+  the consultation meaningfully independent?
+- **Event or evidence:** Apply the Second-Opinion Test to E-13: state the real decision;
+  expose the assumption that a possible after-effect makes staying home safe; construct
+  the emergency alternative; assume staying home failed and identify delayed care; then
+  require outside evaluation of the actual symptoms. Transfer the complete procedure to
+  the slower house-purchase hypothetical.
+- **BUT — complication:** The test makes the answer inspectable, not true. Independent
+  evidence can still be wrong, and medical, legal, financial, irreversible, or otherwise
+  high-stakes decisions require primary sources or qualified humans.
+- **THEREFORE — consequence or required next step:** Close the opening judgment: the
+  patient did not need absurd advice, only a reasonable answer to the reassuring question.
+  End with the rule that a second opinion is an independent route to a conclusion reality
+  can overturn.
+- **Selected technique:** Viewer application, audience-identification payoff, transfer,
+  and declarative resolution.
+- **Loop or payoff:** Close the test promise, the title question, the
+  possible-answer/safe-decision distinction, the opening “I would never” judgment, and
+  the `SECOND OPINION?` motif.
+- **Proof job and evidence boundary:** Deliver an evidence-informed inspection procedure,
+  not a validated accuracy guarantee or a counterfactual claim about what the patient
+  would have done.
 
 ## Full causal read
 
-People can prefer affirming AI advice even when measured consequences worsen, **BUT**
-knowing that AI is risky should make skeptical users safer. E-02 shows distrust without
-better checking, **THEREFORE** the story must inspect how the answer is produced rather
-than how wary the user feels.
+A man stayed home after receiving a reassuring chatbot answer about recurrent double
+vision, **BUT** the answer never explicitly told him to stay home, **THEREFORE** the
+episode cannot explain the choice as simple obedience to obviously bad advice.
 
-The user's framing can preselect the evidence and alternatives, **BUT** framing alone says
-nothing about a real model, **THEREFORE** E-03 must establish that tested assistants can
-lean toward the user's stated belief.
+The viewer's fallback is “I know AI is unreliable,” **BUT** specialists who distrusted an
+AI label did not catch more planted errors, **THEREFORE** awareness must become a checking
+procedure rather than a feeling.
 
-Sycophancy explains the direction of the answer, **BUT** not why the returned premise
-feels independent, **THEREFORE** fluency and contextual machine-source effects explain how
-transformation can disguise ancestry.
+The patient's question sought a possible harmless explanation, **BUT** possibility did
+not resolve whether staying home was safe, **THEREFORE** the story follows how framing
+preselected the menu and asks whether a real model would lean into it.
 
-Those mechanisms can explain immediate credibility, **BUT** not whether the answer enters
-the next judgment, **THEREFORE** E-07 supplies the feedback consequence and earns the
-borrowed-authority loop.
+Tested models did lean toward stated beliefs, **BUT** agreement alone does not explain
+experienced authority, **THEREFORE** the story follows the premise through fluency and
+machine attribution.
 
-Asking the system to oppose itself seems like the obvious interruption, **BUT** friction
-from the same evidence route is not independent support, **THEREFORE** the final procedure
-preserves the pre-AI judgment, forces disconfirmation, and requires a decision-changing
-fact from outside the chat.
+Polish can change evaluation, **BUT** immediate persuasion does not establish later
+change, **THEREFORE** feedback-loop evidence shows how the output can enter the next
+judgment and earns the borrowed-authority synthesis.
+
+Asking the model to oppose itself adds useful friction, **BUT** it still does not add
+outside evidence, **THEREFORE** the final test states the real decision, preserves the
+pre-AI judgment, forces opposition and failure simulation, and requires a
+decision-changing fact from outside the chat.
 
 ## Retention map
 
 | Handoff | Live reason to continue |
 |---|---|
-| SP01→SP02 | If users know AI can mislead them, why does awareness not settle the problem? |
-| SP02→SP03 | The specialist result overturns confidence in skepticism but contains no real AI, leaving the model half of the mechanism unresolved. |
-| SP03→SP04 | A loaded question can preselect the menu, but the viewer still needs proof that a model will lean into it. |
-| SP04→SP05 | Model agreement explains where the answer points, not why the user's own premise feels like outside analysis. |
-| SP05→SP06 | Fluency may affect one evaluation, but the more consequential question is whether AI changes the person making the next judgment. |
-| SP06→SP07 | Once the evaluator is inside the loop, the viewer needs to know whether asking the same system to disagree restores independence. |
-| SP07→SP08 | Friction helps but does not add outside evidence, leaving one promised job: construct a procedure that does. |
+| SP01→SP02 | If the answer included a warning and never ordered him to stay home, what made the choice feel reasonable—and would awareness have protected us? |
+| SP02→SP03 | Distrust failed to improve checking, but the experiment used no real AI; the patient's actual prompt becomes the next place to look. |
+| SP03→SP04 | The question preselected a reassuring menu, but the viewer still needs proof that real assistants lean into users' stated positions. |
+| SP04→SP05 | Sycophancy explains where the answer points, not why the patient's own hope returns feeling like precise outside analysis. |
+| SP05→SP06 | Fluency can affect evaluation, but the consequence depends on whether output can change the person making the next judgment. |
+| SP06→SP07 | The diagnosis and loop are now visible; the remaining practical question is whether same-model disagreement restores independence. |
+| SP07→SP08 | The alternate prompt exposed danger but did not create outside evidence, leaving one promised job: build a real checking procedure. |
 
 ## Natural bridge seeds
 
-These are structural seeds, not final narration.
+These are structural seeds, not locked narration.
 
 | Handoff | Non-final seed | Material basis |
 |---|---|---|
-| SP01→SP02 | “If awareness were the safeguard, specialists who already distrusted the source should have checked it better.” | E-02 |
-| SP02→SP03 | “That result shows distrust failing. But because the advice was human-written, it leaves the machine half of the story open.” | E-02 boundary |
-| SP03→SP04 | “A loaded question explains the menu. It does not explain why the assistant stays inside it.” | E-04→E-03 proof gap |
-| SP04→SP05 | “Agreement explains where the answer points. It still does not explain why your own premise feels more authoritative on the way back.” | E-03→E-05/E-06 proof gap |
-| SP05→SP06 | “Feeling persuasive might affect one choice. The next question is whether it changes the person making the next one.” | E-05/E-06→E-07 proof gap |
-| SP06→SP07 | “Once the answer has entered your judgment, asking the same system to disagree creates friction—but not a new witness.” | E-07 plus E-09/E-10 boundary |
-| SP07→SP08 | “That leaves one job the chat cannot perform for itself: find the fact outside it that could change the answer.” | E-12 and the approved action contract |
+| SP01→SP02 | “The easy defense is that we know better. But knowing about the trap only matters if it changes what we check.” | Viewer immunity defense plus E-02 |
+| SP02→SP03 | “The radiologists show distrust failing. Because their advice was not produced by AI, the next clue has to be inside the real conversation.” | E-02 boundary plus E-13 |
+| SP03→SP04 | “His question made the harmless explanation easy to find. That still leaves one problem: would a capable assistant challenge the frame?” | E-13 plus E-04→E-03 |
+| SP04→SP05 | “Agreement explains the direction. It does not explain why your own hope feels more authoritative on the way back.” | E-03→E-05/E-06 |
+| SP05→SP06 | “That can make one answer feel persuasive. The more serious question is whether it changes the person judging the next one.” | E-05/E-06→E-07 |
+| SP06→SP07 | “Once your premise comes back as an outside vote, asking the same system to disagree creates friction—but not a new witness.” | Borrowed-authority loop plus E-08–E-12 |
+| SP07→SP08 | “The new wording revealed the missing danger. Reality still had to decide whether staying home was safe.” | E-13 alternate prompt and outside evaluation |
 
 ## Loop and payoff check
 
 | Loop | Opens | Partial payoff or transfer | Final resolution |
 |---|---|---|---|
-| Why can bad advice feel right? | SP01 | SP03 framing; SP04 sycophancy; SP05 fluency | SP06 closes the combined mechanism; SP08 converts it into a check. |
-| Why doesn't skepticism protect me? | SP01 | SP02 separates distrust from checking | SP08 replaces attitude with procedure. |
-| Does a real model lean into the user? | SP02 | SP03 exposes the user's contribution | SP04 closes with E-03. |
-| Why does the answer feel independent? | SP03 | SP04 explains direction; SP05 explains transformed presentation | SP06 names the borrowed-authority loop. |
-| Is asking the same AI to disagree enough? | SP06 | SP07 preserves its value as friction while denying independence | SP08 adds precommitment and outside verification. |
-| What is the promised Second-Opinion Test? | SP01 | SP03 exposes framing; SP07 supplies opposition and premortem | SP08 applies the complete sequence and decision rule. |
-| What does “SECOND OPINION?” mean? | SP01 title/thumbnail callback | SP06 shows why the second vote may be borrowed | SP08 resolves that independence belongs to the route, not the number of answers. |
+| What did doctors find? | SP01 | The patient's prompt, motive, and perceived clarity deepen the stakes in SP03–SP05. | SP06 reveals the TIA diagnosis and recovery boundary. |
+| Why did a non-command feel safe enough? | SP01 | SP03 separates possible explanation from safe decision; SP04–SP05 add model lean and fluent authority. | SP06 names the complete borrowed-authority loop. |
+| Would knowing about AI protect me? | SP01 | SP02 separates distrust from checking. | SP08 replaces attitude with a procedure and outside evidence. |
+| Does the case prove the mechanism? | SP01 | Every return states its proof boundary while separate studies carry mechanism jobs. | SP08 preserves the distinction between illustration, evidence, and counterfactual. |
+| Would a different question change the answer? | SP03 | SP04 shows prompt-sensitive model behavior generally. | SP07 pays with the documented alternate stroke prompt and its limited implication. |
+| Is same-model opposition a second opinion? | SP06 | SP07 preserves its value as friction. | SP08 defines independence through an outside route to evidence. |
+| What is the promised practical test? | SP01 | Its components appear with framing, opposition, and failure simulation. | SP08 applies the complete sequence to the medical case and house transfer. |
+| Could AI talk me into the dumbest decision of my life? | Title and SP01 | Each beat removes a naive-person or obvious-lie assumption. | SP08 answers yes—by making a preferred choice sound rational—then supplies the boundary and safeguard. |
 
 ## Throughline decision
 
-**Decision:** `NONE`.
+**Decision:** `SELECTED — E-13 Swiss TIA case`.
 
-No documented person or event in the approved material currently supports at least three
-honest returns without reusing the old Swiss medical sidecar or relying on unverified
-individual detail from E-01. The evidence-led investigation has the stronger causal
-progression. The house scenario will recur only as a clearly labeled mechanism
-demonstration in SP03, SP05, and SP08; it will not substitute for human evidence or become
-a supporting narrative throughline.
+The case passes the five sidecar gates:
+
+1. **Hook:** recurrent double vision, staying home, and a later ambulance create one
+   concrete unresolved outcome.
+2. **Identification:** wanting a less frightening explanation and avoiding an unnecessary
+   emergency visit are understandable without biography or invented motive.
+3. **Recurrence:** documented prompt, motive, perceived clarity, diagnosis, alternate
+   prompt, and tool application support distinct returns.
+4. **Evidence boundary:** the case can carry stakes while narration explicitly assigns
+   mechanism proof to separate studies.
+5. **Payoff:** applying the test exposes that the original prompt asked about a possible
+   explanation rather than the safety decision that mattered.
+
+| Beat | New case information | Story job |
+|---|---|---|
+| SP01 | Procedure, double vision, reassuring answer, staying home, later ambulance | Stakes, title embodiment, and diagnosis loop |
+| SP03 | Original question, mixed warning/reassurance, possible-answer/safe-decision mismatch | Framing demonstration |
+| SP04 | Patient had considered stroke and wanted a less severe explanation | Human goal and identification |
+| SP05 | Earlier explanation felt unclear; chatbot felt useful, precise, and clear | Bounded illustration of experienced authority |
+| SP06 | Another episode, ambulance, stroke unit, TIA diagnosis, no lasting symptoms | Factual outcome and consequence payoff |
+| SP07 | Case authors' stroke-framed prompt produced a more alarming answer | Prompt-sensitivity climax with counterfactual boundary |
+| SP08 | Four-question replay and outside medical evaluation | Tool application, transfer, and final meaning |
+
+The house scenario is demoted from recurring demonstration to one post-payoff transfer.
+It cannot compete with the human case or carry an evidence claim.
 
 ## Anti-shoehorn check
 
-- Every obstacle is a real evidence boundary: E-02 lacks a real model; E-03 does not
-  explain experienced independence; E-05/E-06 do not establish later change; same-model
-  opposition does not create outside evidence.
-- No beat invents narrator emotion, motive, memory, research chronology, failed
-  hypothesis, surprise, or near-surrender.
-- No “hero overcoming a challenge” language will appear unless it describes the actual
-  argument overcoming one of those proof gaps.
-- `BUT` and `THEREFORE` diagnose causal movement; final narration will vary its spoken
-  transitions and will not repeat the words as a quota.
-- Every major handoff has a necessary proof, boundary, or application job; there is no
-  ornamental “and then” sequence.
-- The house scenario is labeled hypothetical, demonstrates only the mechanism, and never
-  proves vulnerability or intervention effectiveness.
-- The E-02/E-06 tension is scoped by population and task rather than exaggerated into a
-  universal contradiction.
-- The borrowed-authority loop is named only after its components are earned.
-- Humor is limited to a mechanism-mapped recognition beat and will not compete with human
-  consequences.
-- The plan rejects a supporting throughline because the available material does not earn
-  one.
-- The ending pays every opening promise and preserves the unvalidated-package and
+- The personal nerve is the story's organizing premise, not title copy attached after
+  planning.
+- Every medical-case return adds documented information or changed meaning.
+- The case carries human stakes; separate studies prove the mechanisms.
+- No beat invents dialogue, emotion, motive, memory, chronology, research process,
+  surprise, frustration, or near-surrender.
+- The patient's documented hope for a less severe explanation is used without adding a
+  motive.
+- ChatGPT is never quoted as telling him to stay home.
+- The TIA is not attributed to ChatGPT, and the alternate prompt does not become a false
+  counterfactual outcome claim.
+- Every obstacle is real: a warning inside a reassuring answer, distrust without better
+  checking, framing without real-model proof, sycophancy without experienced authority,
+  immediate credibility without downstream change, and friction without independence.
+- `BUT` and `THEREFORE` diagnose the causal route; spoken transitions will vary.
+- The E-02/E-06 tension is resolved by population and task rather than exaggerated.
+- The borrowed-authority loop is named only after all four components are earned.
+- Humor clarifies menu, costume, or double-counted authority and avoids the diagnosis
+  reveal.
+- The final test fulfills the title promise and states its unvalidated-package and
   high-stakes boundaries.
 
 ## Approval
 
-- **Status:** `AWAITING-APPROVAL`
-- **Approved by:** `PENDING`
-- **Approval scope:** Complete progression from SP01 through SP08, including the story
-  engine, technique choices, causal handoffs, loops, Throughline decision, and payoff
-- **Load-bearing open evidence dependencies:** E-01 and E-08 remain
-  `NEEDS-VERIFICATION`
-- **Supporting open evidence dependencies:** E-11 and E-12 remain
-  `NEEDS-VERIFICATION`; the progression can proceed without either by using the stated
-  E-04/E-03 fallback and treating procedural independence as a bounded inference
-- **Narration target after approval:** `whp-youtube/predrafts/ep1_v2.md`
-- **Preservation rule:** Do not replace or modify the existing Episode 1 episode or its
-  existing pre-draft
+- **Status:** `APPROVED`
+- **Approved by:** Martin on 2026-07-28
+- **Approval scope:** The complete medical-case-first progression from SP01 through SP08,
+  including packaging, human nerve, proof handoffs, Throughline decision, loops, and
+  payoff
+- **Load-bearing open evidence dependencies:** E-08 remains `NEEDS-VERIFICATION` if its
+  friction-result detail is narrated; omit that detail rather than delay the Phase 1
+  prototype
+- **Supporting open evidence dependencies:** E-01, E-11, and E-12 are not required by the
+  revised progression; any use requires later evidence review
+- **Script Blueprint source after approval:**
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md`
+- **Preservation rule:** Do not replace or modify the canonical final pair or the
+  archived throughline experiment
+- **Migration note:** The archived V2 narration predates the intro-first contract.
+  Preserve it under the episode archive and keep the active Phase 0 artifact in the
+  `blueprint/` raw/extended pair; archive and active-stage paths must not be conflated.
 
 ## Post-approval implementation tasks
 
@@ -374,20 +436,20 @@ a supporting narrative throughline.
 - Modify: `whp-youtube/STEERING.md`
 - Modify: `DECISIONS.md`
 
-- [ ] **Step 1: Change the approval metadata only after Martin approves the complete
-  displayed progression**
+- [ ] **Step 1: Update approval metadata**
 
-  Change the plan status to `APPROVED`, set “Approved by” to `Martin`, preserve all open
-  evidence dependencies, and change the architecture status from “Story Progression Plan
-  pending” to “Story Progression Plan approved; narration pending.”
+  Set the plan status to `APPROVED`, set “Approved by” to `Martin`, preserve open evidence
+  dependencies, and change the architecture status to “Revised Story Progression Plan
+  approved; Script Blueprint pending.”
 
 - [ ] **Step 2: Reconcile the definite WHP decision**
 
-  Use `.agents/skills/reconcile-whp/SKILL.md` to record that this exact SP01–SP08
-  progression is the approved story baseline for drafting `ep1_v2.md`, without promoting
-  it over the canonical Episode 1.
+  Read `.agents/skills/reconcile-whp/SKILL.md` completely. Record that this exact
+  medical-case-first SP01–SP08 progression is the approved baseline for building the
+  Episode 1 Script Blueprint pair, while the evidence-backed final pair remains canonical
+  and the earlier V2 narration remains preserved in the episode archive.
 
-- [ ] **Step 3: Verify and commit the approval checkpoint**
+- [ ] **Step 3: Verify the approval checkpoint**
 
   Run:
 
@@ -397,72 +459,82 @@ a supporting narrative throughline.
   git diff --name-status
   ```
 
-  Expected: no whitespace errors, `88` scripting-skill tests pass, and only the four
-  approval-record files above are changed. Inspect the complete staged diff, then commit
-  those exact files with:
+  Expected: no whitespace errors, the scripting-skill tests pass, and only the four
+  approval-record files are changed.
 
-  ```bash
-  git commit -m "docs(youtube): approve Episode 1 v2 progression"
-  ```
-
-### Task 2: Create the separate narration prototype
+### Task 2: Create the separate intro-first Script Blueprint
 
 **Files:**
 
-- Create: `whp-youtube/predrafts/ep1_v2.md`
+- Create:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md`
+- Create:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.extended.md`
+- Preserve:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/v2-preworkflow-narration.md`
+- Read:
+  `.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md`
+- Read:
+  `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
 - Read:
   `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`
 - Read:
   `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`
+- Read for factual boundaries:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/throughline-experiment.md`
 - Preserve:
-  `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`
-- Preserve:
-  `whp-youtube/predrafts/01-why-ai-makes-bad-advice-feel-right-throughline.md`
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/final/script.extended.md`
 
-- [ ] **Step 1: Load the narration method after progression approval**
+- [ ] **Step 1: Load the Script Blueprint and rapid intro methods**
 
-  Read the complete
-  `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md` and retain
-  the approved architecture and this approved progression as the two drafting baselines.
+  Read the complete intro-first owner and rapid-prototyping reference after progression
+  approval. Retain the approved architecture and SP01–SP08 route as the two baselines.
 
-- [ ] **Step 2: Draft one complete narration in SP01–SP08 order**
+- [ ] **Step 2: Polish the complete spoken intro**
 
-  Create `whp-youtube/predrafts/ep1_v2.md` with a short metadata header identifying it as
-  a non-canonical Phase 1 narration prototype. Write continuous spoken narration that:
+  Create the raw/extended Script Blueprint pair as a non-canonical Phase 0 artifact.
+  Draft spoken prose for the intro only. It must:
 
-  - opens the E-01 preference paradox and promises both understanding and a practical
-    check;
-  - uses E-02 to overturn skepticism as a sufficient safeguard;
-  - labels the house example hypothetical and returns to it only in SP03, SP05, and SP08;
-  - turns every evidence boundary into the next natural proof handoff;
-  - scopes the E-02/E-06 apparent contradiction by population and task;
-  - names the borrowed-authority loop only in SP06;
-  - treats same-model opposition as useful friction rather than independent evidence;
-  - applies the complete Second-Opinion Test in SP08;
-  - includes the high-stakes verification boundary;
-  - varies transition language instead of mechanically repeating “but” and “therefore”;
-  - avoids invented narrator experience, emotion, chronology, dialogue, or factual scene
-    detail; and
-  - closes with the approved independence rule.
+  - opens with the approved title question and E-13 consequence;
+  - makes the patient recognizable before judging the decision;
+  - anticipates the viewer's “I would catch it” defense and disarms it through E-02 with
+    a natural conversational transition;
+  - teases only E-02's resistance-without-better-checking result; SP02 owns the developed
+    radiologist case, task, comparison, boundary, and mechanism handoff;
+  - promises both the four-move explanation and practical safeguard early;
+  - explains why the E-13 case matters without letting it prove the four mechanisms;
+  - raises the stakes only as far as the approved architecture and evidence allow;
+  - uses specific mini-hooks that immediately pay off;
+  - sounds like one concise walking conversation rather than a studio monologue;
+  - preserves both the warning and reassurance in ChatGPT's documented answer;
+  - avoids invented narrator experience, emotion, chronology, dialogue, and scene detail;
+  - states a literal by-end promise that every later beat can deliver; and
+  - passes the intro sentence-function, memory-first, and spoken-readability checks.
 
-- [ ] **Step 3: Map the narration back to the approved progression**
+- [ ] **Step 3: Build the bullet-only body logic map**
 
-  Check every paragraph against SP01–SP08. Confirm that every beat preserves its proof
-  job, evidence boundary, loop state, and required next step. If narration requires a
-  load-bearing progression change, stop and reopen whole-plan approval instead of
-  changing the story silently.
+  Map SP02–SP08 without body narration. For each beat state what the viewer learns, why
+  the beat comes there, its evidence or story job and boundary, incoming transition,
+  outgoing transition or mini-hook, and promise or loop payoff. Map every intro promise
+  and open loop to a named destination beat. If the approved body cannot pay one, narrow
+  the intro before review.
 
-### Task 3: Verify and hand off the narration before audits
+### Task 3: Verify and hand off the Script Blueprint
 
 **Files:**
 
-- Create: `whp-youtube/predrafts/ep1_v2.md`
+- Create:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md`
+- Create:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.extended.md`
 - Preserve:
-  `whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md`
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/v2-preworkflow-narration.md`
 - Preserve:
-  `whp-youtube/predrafts/01-why-ai-makes-bad-advice-feel-right-throughline.md`
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/final/script.extended.md`
+- Preserve:
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/throughline-experiment.md`
 
-- [ ] **Step 1: Run structural and repository checks**
+- [ ] **Step 1: Run repository checks**
 
   Run:
 
@@ -470,30 +542,32 @@ a supporting narrative throughline.
   git diff --check
   python3 .agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py
   git status --short
-  git diff -- whp-youtube/episodes/01-why-ai-makes-bad-advice-feel-right.md whp-youtube/predrafts/01-why-ai-makes-bad-advice-feel-right-throughline.md
+  python3 .agents/skills/writing-whp-youtube-scripts/scripts/validate_script_pair.py -- whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/
   ```
 
-  Expected: no whitespace errors, `88` scripting-skill tests pass,
-  `whp-youtube/predrafts/ep1_v2.md` is the only narration artifact added, and the two
-  preserved Episode 1 files have no diff.
+  Expected: no whitespace errors, the scripting-skill tests pass, the Script Blueprint
+  pair validates, and the Blueprint contains no body narration.
 
-- [ ] **Step 2: Perform the pre-audit narration check**
+- [ ] **Step 2: Perform the intro-first contract check**
 
-  Confirm that the complete narration contains all four approved mechanisms, the
-  borrowed-authority synthesis, the full Second-Opinion Test, explicit evidence
-  boundaries, and no unsupported factual detail. Do not run editorial, retention,
-  timing, or production audits before Martin sees the complete narration.
+  Confirm that the intro is polished spoken prose; the body is logic bullets only; every
+  title and intro promise maps to a body payoff; and no unsupported factual detail appears.
+  Run spoken readability on the intro only. Do not run editorial, retention, timing, or
+  production audits.
 
-- [ ] **Step 3: Present the complete narration for creative review**
+- [ ] **Step 3: Present the intro and body map**
 
-  Show the full contents of `whp-youtube/predrafts/ep1_v2.md`, state clearly that the old
-  episode remains untouched, and wait for creative approval or targeted revision.
+  Show the full Script Blueprint raw narration and extended body map, state that the
+  canonical final pair and archived legacy inputs remain untouched, and wait for explicit
+  approval of both the intro and body logic map or a targeted revision.
 
-- [ ] **Step 4: Commit the isolated prototype after verification**
+- [ ] **Step 4: Expand only after explicit Script Blueprint approval**
 
-  Inspect the complete staged diff, stage only
-  `whp-youtube/predrafts/ep1_v2.md`, and commit with:
+  Preserve the approved intro and expand the map into complete narration at
+  `whp-youtube/episodes/ep001-ai-dangerous-advice/draft/` as a raw/extended pair. Then
+  run the complete-narration creative review gate.
 
-  ```bash
-  git commit -m "docs(youtube): draft Episode 1 v2 narration"
-  ```
+- [ ] **Step 5: Commit only after Martin requests the commit**
+
+  Inspect the complete staged diff and stage only the explicitly approved files. Do not
+  treat Script Blueprint or creative approval as implicit permission to commit.

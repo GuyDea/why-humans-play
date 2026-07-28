@@ -1708,3 +1708,165 @@ established that one detailed owner is necessary to prevent future drift.
 at `docs/superpowers/evidence/2026-07-28-whp-human-nerve-angle-gate.md`. `BRAND.md` remains
 unchanged because this refines YouTube angle-selection workflow rather than umbrella
 doctrine. Episode 1 files remain unchanged.
+
+## 2026-07-28 — Build Episode 1 V2 around the medical decision nerve
+
+**Decision:** Draft `whp-youtube/predrafts/ep1_v2.md` under the title *Could AI Talk You
+Into the Dumbest Decision of Your Life?* from the approved medical-case-first SP01–SP08
+progression. The documented Swiss TIA case carries the personal stakes and recurring
+meaning, while separate studies retain the proof jobs for framing, sycophancy, fluent
+authority, and feedback. The existing Episode 1 remains canonical and untouched.
+
+**Rationale:** Martin approved the specific fear that a calm, intelligent answer can make
+a dangerous preferred choice feel rational, accepted the medical-case-first architecture,
+and then approved the complete progression for drafting. This corrects the earlier
+abstract-study-first drift without turning the case into proof of the broader mechanism or
+making a clickbait promise the evidence cannot fulfill.
+
+**Documents:** `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`,
+`docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`, and this ledger.
+`BRAND.md` remains unchanged because this is one episode's packaging and story route.
+The canonical Episode 1 and the earlier medical-sidecar pre-draft remain unchanged; the
+new V2 narration is still a non-canonical pre-draft until separately promoted.
+
+## 2026-07-28 — Make WHP pre-drafts intro-first
+
+**Decision:** An episode-scale file under `whp-youtube/predrafts/` now contains a polished
+spoken intro and a bullet-only body logic map, not complete body narration. Intro design
+must consider every applicable evidence-earned storytelling and hook method before prose,
+map every opening promise and loop to a named body payoff, and reconcile a read-only
+review from the strongest callable local AI independent of the drafting model. Failure to
+reach an independent reviewer leaves the artifact `REVIEW-BLOCKED`. Complete narration
+moves to `whp-youtube/drafts/` only after Martin explicitly approves both the intro and
+body map.
+
+**Rationale:** The Episode 1 training pass showed that the opening needs disproportionate
+creative effort: immediate personal value, a natural problem-to-case bridge, anticipated
+defense, evidence-backed disarm, early remedy, earned stake escalation, mini-hooks, and
+walking-conversation flow. Drafting the whole episode too early hid weak intro choices and
+encouraged techniques to be added after the structure rather than shaping it. A single
+detailed owner plus regression tests prevents the pre-draft shape, reviewer selection, or
+promise-delivery boundary from drifting across workflow documents.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/predraft-intro-workflow.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`,
+`docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`, and this ledger.
+The RED/GREEN and independent-review record is
+`docs/superpowers/evidence/2026-07-28-whp-intro-first-predraft-gate.md`.
+`BRAND.md` remains unchanged because this is a YouTube drafting-stage workflow decision,
+not umbrella brand doctrine. The existing `predrafts/ep1_v2.md` full narration remains
+preserved and explicitly migration-pending as pre-workflow working material; the new
+Episode 1 Phase 0 artifact will use `predrafts/ep1_v2-intro-first.md`, preventing the
+workflow from overwriting or blessing the legacy narration.
+
+## 2026-07-28 — Retire the mandatory AI review from WHP pre-drafts
+
+**Decision:** Phase 0 no longer requires an independent local-AI review, reviewer record,
+or `REVIEW-BLOCKED` state. Do not call another model for a pre-draft unless Martin
+explicitly requests it for that artifact. The polished intro, bullet-only body logic map,
+deterministic contract checks, and Martin's explicit approval remain the pre-draft gate.
+This decision supersedes only the reviewer requirement in the earlier intro-first
+decision; the intro-first artifact shape and approval boundary remain active.
+
+**Rationale:** The required Opus pass did not catch the rushed, disconnected transitions
+in the Episode 1 intro and added a process step without useful editorial signal. The same
+iteration clarified the actual pacing rule: move through the opening jobs as soon as the
+conversation logically allows, but never faster than the referents and transitions that
+make each next beat feel earned.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/predraft-intro-workflow.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`,
+`docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`,
+`docs/superpowers/evidence/2026-07-28-whp-intro-first-predraft-gate.md`,
+`whp-youtube/predrafts/ep1_v2-intro-first.md`, and this ledger. `BRAND.md` remains
+unchanged because this is a drafting-stage workflow correction, not umbrella brand
+doctrine.
+
+## 2026-07-28 — Put every retention device inside natural conversation
+
+**Decision:** Natural conversational causality is the governing gate for WHP narration;
+story structure, hooks, mini-hooks, loops, and other retention devices remain subordinate
+to it. Mini-hooks may appear in either the intro or body when they truthfully connect the
+current thought to content paid off immediately, but they are never inserted to meet a
+cadence. Longer loops have no fixed count or timing quota: use only trackable,
+evidence-earned questions with exact mapped payoffs, and never withhold prerequisite
+clarity to manufacture suspense.
+
+The rapid drafting reference is the sole detailed owner for line-level natural-package,
+hook, and mini-hook execution. The story-and-hook reference is the sole detailed owner for
+loop selection, tracking, and payoff. The core skill, intro-first workflow, quality rubric,
+and STEERING route to those owners instead of restating their detailed contracts. This
+supersedes the fixed mini-hook and open-loop cadence requirements in the 2026-07-24
+retention-audit decision and the temporary instruction to reserve most mini-hooks for the
+body. It preserves the post-review retention audit, anti-skip intro jobs, intro-first
+workflow, and promise-to-payoff requirement.
+
+**Rationale:** The Episode 1 training pass showed that a script can satisfy every selected
+hook job and still sound like a rushed advertisement when referents or causal transitions
+are removed. It also showed that mini-hooks themselves are not the problem: a specific
+mini-hook can be the most natural conversational bridge. Fixed cadence rules encouraged
+generic curiosity language and made agents optimize device frequency instead of the
+progression of thought. Separating line-level and structural ownership prevents the new
+rule from being copied into conflicting variants later.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/predraft-intro-workflow.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`,
+`whp-youtube/STEERING.md`, `whp-youtube/predrafts/ep1_v2-intro-first.md`,
+`docs/superpowers/evidence/2026-07-28-whp-intro-first-predraft-gate.md`, and this
+ledger. `BRAND.md` remains unchanged because this is YouTube narration workflow doctrine,
+not an umbrella-brand change.
+
+## 2026-07-28 — Store active episode stages as paired artifacts
+
+**Decision:** Every active numbered episode lives under
+`whp-youtube/episodes/epNNN-name/`, with each reached `blueprint/`, `draft/`, or `final/`
+stage represented by a paired `script.raw.md` and `script.extended.md`. The raw file is
+the source of truth for spoken wording, paragraph and beat order, and storytelling
+markup. The extended file mirrors that script exactly, adding grouped purpose annotations
+and the appendix required by its stage. Underline marks main hooks, major loops, and
+central obstacles; italics mark supporting storytelling devices, including mini-hooks;
+bold marks locked wording.
+
+This entry supersedes active pre-draft terminology and loose episode paths. It does not
+rewrite historical decisions, specs, plans, evidence records, or archived artifacts that
+accurately record the workflow in effect when they were created.
+
+**Rationale:** A stable episode-first directory keeps each production stage, its
+annotation view, and its historical inputs together. One raw source of truth prevents
+spoken wording or storytelling markup from drifting between editorial and production
+views, while stage-specific appendices preserve the planning and validation context
+without polluting the narration.
+
+**Documents:** The detailed owner is
+`.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md`. The
+validators are
+`.agents/skills/writing-whp-youtube-scripts/scripts/validate_script_pair.py`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/validate_spoken_readability.py`, and
+`.agents/skills/writing-whp-youtube-scripts/scripts/validate_annotated_script.py`, with
+regressions in
+`.agents/skills/writing-whp-youtube-scripts/scripts/test_skill_package.py`. Episode 1
+uses `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/` for its current Script
+Blueprint pair,
+`whp-youtube/episodes/ep001-ai-dangerous-advice/final/` for its canonical production
+pair, and `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/` for superseded loose
+artifacts. Active routing and baselines live in `whp-youtube/STEERING.md`,
+`docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`, and
+`docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`. The historical
+RED/GREEN record plus later migration note remains at
+`docs/superpowers/evidence/2026-07-28-whp-intro-first-predraft-gate.md`. `BRAND.md`
+remains unchanged because this is a YouTube script-artifact contract, not umbrella-brand
+doctrine.

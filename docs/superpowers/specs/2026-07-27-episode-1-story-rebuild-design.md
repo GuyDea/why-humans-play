@@ -1,9 +1,12 @@
-# Episode 1 Counterfeit-Second-Opinion Rebuild — Design
+# Episode 1 Human-Nerve / Counterfeit-Second-Opinion Rebuild — Design
 
-- **Status:** Architecture approved; Story Progression Plan pending
+- **Status:** Revised Story Progression Plan approved; Script Blueprint pair created
 - **Date:** 2026-07-27
-- **Target:** `Why AI Makes Bad Advice Feel Right`
-- **Narration target:** `whp-youtube/predrafts/ep1_v2.md`
+- **Target:** `Could AI Talk You Into the Dumbest Decision of Your Life?`
+- **Script Blueprint source:** `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md`
+- **Script Blueprint annotations:** `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/script.extended.md`
+- **Canonical production baseline:** `whp-youtube/episodes/ep001-ai-dangerous-advice/final/script.extended.md`
+- **Preserved pre-workflow narration:** `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/v2-preworkflow-narration.md`
 - **Branch:** `episode1-story-rebuild`
 - **Discovery status:** `INCOMPLETE—SEARCH BUDGET REACHED`; Martin accepted deferring
   the listed gaps to the later evidence phase
@@ -15,13 +18,22 @@ Preserve the four underlying mechanisms, the borrowed-authority loop, and the
 Second-Opinion Test, while treating the previous order, examples, evidence sequence,
 throughline, and prose as replaceable.
 
-The story direction is **The Counterfeit Second Opinion**. Its deeper conclusion is that
-skepticism is not the missing safeguard: a second opinion requires an independent route
-to a checkable conclusion, not merely another answer.
+The story direction is **The Counterfeit Second Opinion**, organized around the approved
+human nerve: the fear that a calm, intelligent answer can make the dangerous choice a
+viewer already wants feel rational. Its deeper conclusion is that skepticism is not the
+missing safeguard: a second opinion requires an independent route to a checkable
+conclusion, not merely another answer.
 
-This document freezes the approved intellectual architecture. It does not approve a hook,
-supporting throughline, beat order, transition, joke, or narration. Those decisions belong
-to a separately approved Story Progression Plan.
+The approved human-stakes carrier is the documented Swiss case in which a man sought a
+less frightening explanation for recurrent double vision after a heart procedure, felt
+reassured by ChatGPT, stayed home, and later received a TIA diagnosis. The case may carry
+identification, consequence, and callbacks, but it does not prove the episode's four
+mechanisms. Those proof jobs remain with the separate studies.
+
+This document freezes the revised intellectual architecture. It approves the personal
+nerve, title promise, and medical case as the story's stakes carrier, but not exact hook
+wording, beat order, transitions, jokes, or narration. Those decisions belong to a
+separately approved Story Progression Plan.
 
 ## 1. Concept inventory
 
@@ -87,33 +99,38 @@ work. The scan therefore did not reach two materially different no-new-concept p
 
 - **Viewer:** A thoughtful adult who already knows AI hallucinates and flatters, but still
   uses it to think through work, money, health, housing, or relationship decisions.
-- **Working title:** *Why AI Makes Bad Advice Feel Right*
-- **Thumbnail promise:** A user's opinion enters a chatbot and comes back stamped
+- **Approved title:** *Could AI Talk You Into the Dumbest Decision of Your Life?*
+- **Thumbnail promise:** A reassuring chatbot answer comes back stamped
   **SECOND OPINION?**
-- **Familiar entry point:** “AI can be wrong, so remain skeptical.”
-- **Honest tension:** The dangerous answer may contain no obvious lie. It can be a
-  coherent version of the preference already hidden inside the question.
+- **Specific human nerve:** “A sensible person like me could make a disastrous choice
+  because the answer sounds calm, precise, and close to what I hoped was true.”
+- **Familiar entry point:** “Only a naive person would follow dangerous AI advice. I know
+  AI can be wrong, so I would catch it.”
+- **Honest tension:** The dangerous answer need not be an obvious lie or direct command.
+  It can answer a narrower, reassuring question while leaving the decision that actually
+  matters unresolved.
 
 ## 3. Central question
 
-**Why can AI advice feel like an independent second opinion when the user's first opinion
-helped produce it—and what would make the consultation meaningfully independent?**
+**How can AI make a dangerous choice feel rational without giving obviously stupid
+advice—and what would stop a reassuring answer from being mistaken for a safe decision?**
 
 ## 4. Core answer
 
-AI advice can launder a user's framing through a model sensitive to user approval, return
-it with fluent machine authority, and then anchor later judgment. Skepticism alone does
-not interrupt that dependence, so the safeguard is a procedure that preserves an initial
-judgment, forces disconfirmation, and requires a decision-changing fact from outside the
-chat.
+AI can answer the reassuring question hidden inside a user's prompt, lean toward the
+user's preference, return it with fluent machine authority, and anchor the next judgment.
+The result can feel rational without resolving the real decision, so the safeguard is a
+procedure that exposes the frame, forces disconfirmation, and requires a
+decision-changing fact from outside the chat.
 
 ## 5. Viewer belief shift
 
-- **Before:** “I know AI makes mistakes. If I remain skeptical and ask it to challenge me,
-  I can treat its answer as a useful second opinion.”
-- **After:** “The central question is not whether I feel skeptical. It is whether the
-  answer adds an independent route to evidence or merely transforms the preference already
-  present in my prompt.”
+- **Before:** “Dangerous AI decisions happen to naive people who accept obviously bad
+  answers. If I remain skeptical, I can treat the answer as a useful second opinion.”
+- **After:** “A dangerous decision can arrive as a reasonable answer to the wrong
+  question. The central test is whether the answer resolves the decision that matters and
+  adds an independent route to evidence, rather than merely transforming the preference
+  already present in my prompt.”
 
 ## 6. Insight ladder
 
@@ -121,8 +138,9 @@ chat.
 
 1. **Claim:** Feeling suspicious does not protect a decision unless it changes how the
    answer is checked.
-2. **Why it is surprising:** Experienced specialists can trust AI-labeled material less
-   without detecting more errors.
+2. **Why it is surprising:** The comfortable defense—“I would know better”—can fail even
+   among experienced specialists, who trusted AI-labeled material less without detecting
+   more errors.
 3. **Mechanism:** Source distrust and checking behavior are separable; the recommendation
    can still establish the starting point.
 4. **Case:** `E-02`, the radiologist source-label experiment.
@@ -140,9 +158,12 @@ chat.
 3. **Mechanism:** The prompt selects facts and alternatives; preference-sensitive
    training rewards responses users like; social sycophancy validates the resulting
    perspective.
-4. **Cases:** `E-01`, `E-03`, and `E-04`.
-5. **Human consequence:** “Is quitting reasonable?” can quietly become “Please make
-   quitting sound reasonable.”
+4. **Cases:** `E-01`, `E-03`, and `E-04` establish the mechanism; `E-13` illustrates the
+   difference between asking whether a harmless explanation is possible and deciding
+   whether staying home is safe.
+5. **Human consequence:** A frightening decision can be replaced by a narrower question
+   with a reassuring answer. “Could this be a normal after-effect?” is not the same
+   decision as “Is it safe to stay home?”
 6. **Boundary:** Framing influences rather than determines an answer. Models and prompts
    vary.
 
@@ -153,9 +174,12 @@ chat.
 2. **Why it is surprising:** Better organization can be mistaken for better evidence.
 3. **Mechanism:** Ease of processing is used as a credibility cue; outside familiar
    domains, algorithmic attribution can sometimes increase advice weight.
-4. **Cases:** `E-05` and `E-06`.
-5. **Human consequence:** The user counts the same premise twice, once as intuition and
-   again as polished analysis.
+4. **Cases:** `E-05` and `E-06` establish the supporting effects; `E-13` supplies the
+   bounded real-world contrast between a hard-to-understand medical explanation and an
+   answer the patient described as useful, precise, and clear.
+5. **Human consequence:** The user can mistake precision of language for precision of
+   diagnosis and count the same premise twice, once as hope and again as polished
+   analysis.
 6. **Boundary:** These studies did not test the entire AI-advice chain. Clear advice can
    also be correct and useful.
 
@@ -182,7 +206,9 @@ chat.
 3. **Mechanism:** Record the initial judgment, expose assumptions, construct the opposing
    case, simulate failure, and identify an outside fact capable of changing the
    recommendation.
-4. **Cases:** `E-08` through `E-12`.
+4. **Cases:** `E-08` through `E-12` support the components; `E-13` provides a bounded
+   application because the case authors' stroke-framed prompt exposed a danger the
+   original wording left out.
 5. **Human consequence:** The viewer can distinguish “a better-looking version of my
    view” from evidence that deserves another vote.
 6. **Boundary:** The Second-Opinion Test is an original, unvalidated package. High-stakes
@@ -204,20 +230,22 @@ chat.
 | Cognitive forcing | Insight 5 | Intervention mechanism | Present as deliberate friction; technical label optional. |
 | Considering the opposite | Insight 5 | Supporting intervention | Name to credit the method. |
 | Premortem | Insight 5 | Supporting intervention | Name because the term compresses the exercise. |
+| Possible-answer / safe-decision mismatch | Insights 2 and 5 | Original WHP decision distinction | Demonstrate through `E-13`; keep it in plain language rather than presenting it as an established effect. |
 | Borrowed-authority loop | Whole ladder | Original synthesis | Name only after the viewer has seen every component. |
 
 ## 8. Earned reframe
 
-1. **Conventional explanation:** Bad AI advice is mainly a model-quality problem. A
-   skeptical, AI-literate user should be able to recognize it.
-2. **Hidden assumption:** The answer is treated as an independent input, and the user is
-   assumed to remain an independent evaluator after reading it.
+1. **Conventional explanation:** The dumbest AI-assisted decisions require an obviously
+   false answer and a naive person willing to obey it.
+2. **Hidden assumption:** A dangerous answer will sound dangerous, answer the decision
+   that actually matters, and arrive as an independent input to a still-independent
+   evaluator.
 3. **Mechanism that breaks the assumption:** The prompt frames the evidence; sycophancy
    leans into the frame; fluency hides that dependence; anchoring lets the output influence
    the next judgment.
-4. **Surprising conclusion:** **A second answer is not necessarily a second opinion.
-   Independence belongs to the procedure that produced and checked the answer, not to its
-   confident tone, different wording, or machine source.**
+4. **Surprising conclusion:** **The dumbest decision of your life may arrive as a
+   reasonable answer to the wrong question. A second answer is not necessarily a second
+   opinion; independence belongs to the procedure that produced and checked it.**
 5. **What it predicts:**
    - Reframing the same dilemma can produce materially different recommendations.
    - Users may prefer the response that validates them most.
@@ -246,12 +274,14 @@ chat.
 | **E-10** | [Klein, 2007](https://hbr.org/2007/09/performing-a-project-premortem): support the failure-simulation question. | Establishes the premortem procedure. It does not validate the complete test or promise improved outcomes in every domain. | `PROJECT-KNOWN` | Original prospective-hindsight research. |
 | **E-11** | [Ask, Don't Tell, 2026](https://arxiv.org/abs/2602.23971): direct bridge from prompt form to sycophancy. | Reports that reframing asserted opinions as questions reduces sycophancy. Models, tasks, magnitude, and peer-review status need checking. | `NEEDS-VERIFICATION` | `E-04` plus `E-03`. |
 | **E-12** | [Berger et al., 2026](https://arxiv.org/abs/2603.29866): support independence as procedure. | Across ten existing datasets, independently elicited human and AI judgments with a separate tiebreaker outperformed sequential AI-as-advisor workflows. It is a preprint reanalysis, not a personal-advice trial. | `NEEDS-VERIFICATION` | Use independence as a bounded inference and require outside verification rather than claiming measured efficacy. |
+| **E-13** | [Saenger et al., 2024](https://pmc.ncbi.nlm.nih.gov/articles/PMC11006786/): human-stakes carrier and opening consequence. | A man with recurrent double vision after a heart procedure sought a less severe explanation from ChatGPT, felt relieved, stayed home, and called an ambulance after another episode; clinicians diagnosed a TIA. The report also documents a more alarming answer when the authors later asked whether the symptoms could be a stroke. It establishes a consequential decision route, prompt sensitivity in this case, and delayed reporting—not the four-mechanism synthesis, causation, prevalence, or a claim that ChatGPT ordered him to stay home. | `PROJECT-KNOWN` | No case currently combines the same identification, prompt comparison, consequence, and tool-application jobs as cleanly. |
 
 ### Proof handoff
 
-`E-01: users can prefer consequentially worse affirmation`
+`E-13: a reassuring answer accompanied a consequential decision to stay home`
 
-→ Why doesn't knowing about AI risk protect them?
+→ Is this merely one naive person's mistake, or can informed distrust also fail to
+improve checking?
 
 `E-02: distrust did not improve checking`
 
@@ -271,12 +301,18 @@ chat.
 
 `E-08–E-12: friction, disconfirmation, outside evidence, and procedural independence`.
 
+`E-13` then returns as the bounded application: its alternate prompt demonstrates that a
+different question exposed a different danger, while outside medical evaluation—not
+another paragraph—resolved the real decision.
+
 ## 10. Learning and action contract
 
-- **New understanding:** A second opinion is defined by an independent route to a
-  checkable conclusion, not merely by receiving another answer.
-- **Prior model revised:** Skepticism and a request for criticism are helpful attitudes,
-  but neither creates independent evidence.
+- **New understanding:** A calm, plausible answer can support a dangerous choice when it
+  resolves the reassuring question inside the prompt instead of the decision that
+  matters. A second opinion is defined by an independent route to a checkable conclusion.
+- **Prior model revised:** Obvious falsehood and naive obedience are not required.
+  Skepticism and a request for criticism are helpful attitudes, but neither creates
+  independent evidence.
 - **Concrete response:** Preserve the current judgment before prompting, then run the
   four-question Second-Opinion Test.
 - **Decision sequence:**
@@ -300,11 +336,13 @@ chat.
 
 ### Acceptance test
 
-> Before, I thought skepticism made AI a safe second opinion. Now, I understand that
-> independence comes from the decision process, not the answer's tone. Next time, I will
-> record my judgment, run the four counters, and verify a decision-changing fact outside
-> the chat. I will know it helped when I can identify what evidence, not agreement, would
-> reverse the recommendation.
+> Before, I thought dangerous AI advice would sound obviously wrong and skepticism made
+> AI a safe second opinion. Now, I understand that a reasonable answer can resolve the
+> wrong question, and independence comes from the decision process rather than the
+> answer's tone. Next time, I will state the real decision, record my judgment, run the
+> four counters, and verify a decision-changing fact outside the chat. I will know it
+> helped when I can identify what evidence, not agreement, would reverse the
+> recommendation.
 
 ## 11. Practical payoff
 
@@ -334,19 +372,34 @@ The rebuild deliberately excludes:
 - medical, legal, or financial instructions;
 - a claim that the four-question package has been clinically or experimentally
   validated; and
-- any fixed opening case, throughline, beat order, or hook before Story Progression
-  Planning.
+- treating `E-13` as proof of framing, sycophancy, processing fluency, anchoring, or
+  prevalence; it carries human stakes while separate evidence establishes those
+  mechanisms; and
+- any exact hook wording, beat order, transition, or joke before revised Story
+  Progression Planning.
 
 ## Artifact flow
 
-1. Preserve this architecture as the intellectual baseline.
-2. Build one complete visible Story Progression Plan from it.
+1. Preserve this revised architecture as the intellectual baseline.
+2. Rebuild the complete visible Story Progression Plan around `E-13` as the supporting
+   human throughline and the accepted personal nerve as the retention spine.
 3. Obtain explicit approval of that whole progression.
-4. Write one complete narration prototype from both approved baselines at
-   `whp-youtube/predrafts/ep1_v2.md`; do not replace the existing Episode 1.
-5. Show the narration before editorial, retention, timing, or production audits.
-6. After creative approval, verify the deferred research leads and promote the supported
-   version through the normal evidence and production workflow.
+4. Preserve the pre-workflow full narration under
+   `whp-youtube/episodes/ep001-ai-dangerous-advice/archive/`. Build the intro-first Script
+   Blueprint pair under `whp-youtube/episodes/ep001-ai-dangerous-advice/blueprint/`:
+   polished spoken intro in `script.raw.md`, its annotated mirror and bullet-only body
+   logic map in `script.extended.md`, and explicit promise-to-payoff mapping. Do not draft
+   body narration there or replace the canonical final pair.
+5. Obtain explicit approval of both the intro and body logic map.
+6. Preserve the approved intro and expand the map into complete narration at
+   `whp-youtube/episodes/ep001-ai-dangerous-advice/draft/` as a raw/extended pair; show
+   it before editorial, retention, timing, or production audits.
+7. After creative approval of the complete narration, verify the deferred research leads
+   and promote the supported version through the normal evidence and production workflow.
 
-The existing evidence-backed Episode 1 remains the canonical script until a replacement
+The existing evidence-backed Episode 1 final pair remains canonical until replacement
 narration passes these gates and is explicitly promoted.
+
+The archived V2 full narration predates this Script Blueprint contract. It remains
+preserved historical working material and is not a ready or approved active stage. The
+episode-first stage paths prevent an agent from mistaking it for the active Blueprint.
