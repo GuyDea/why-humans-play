@@ -22,7 +22,7 @@ PURPOSE_RE = re.compile(
     r"^\[(?P<tags>[A-Z0-9 |.-]+) — (?P<explanation>[^\]\r\n]+)\]$"
 )
 EVIDENCE_RE = re.compile(
-    r"[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
+    r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
 
 DRIFT_ERROR = "extended narration does not exactly match raw"
@@ -42,13 +42,19 @@ class PairPaths:
 def resolve_pair(target: Path) -> PairPaths:
     """Resolve a stage or pair-file target and enforce the active-stage layout."""
 
-    target = target.resolve()
-    if target.name in PAIR_NAMES:
-        stage_dir = target.parent
-    elif target.is_file() or target.parent.name in STAGES:
+    is_pair_target = target.name in PAIR_NAMES
+    stage_target = target.parent if is_pair_target else target
+    try:
+        stage_dir = stage_target.resolve()
+    except RuntimeError as exc:
+        raise ValueError(
+            f"cannot resolve script stage {str(stage_target)!r}: symlink loop"
+        ) from exc
+
+    if not is_pair_target and (
+        target.suffix == ".md" or stage_dir.is_file()
+    ):
         raise ValueError(f"invalid pair filename: {target.name}")
-    else:
-        stage_dir = target
 
     stage = stage_dir.name
     episode_id = stage_dir.parent.name
@@ -59,6 +65,9 @@ def resolve_pair(target: Path) -> PairPaths:
 
     raw = stage_dir / RAW_NAME
     extended = stage_dir / EXTENDED_NAME
+    for path in (raw, extended):
+        if path.is_symlink():
+            raise ValueError(f"pair file cannot be a symlink: {path.name}")
     missing = [str(path) for path in (raw, extended) if not path.is_file()]
     if missing:
         raise FileNotFoundError("missing pair file: " + ", ".join(missing))
