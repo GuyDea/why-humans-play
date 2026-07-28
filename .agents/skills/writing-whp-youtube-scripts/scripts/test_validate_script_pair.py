@@ -676,6 +676,83 @@ class ScriptPairTests(unittest.TestCase):
                     [],
                 )
 
+    def test_raw_purity_rejects_html_hidden_after_unclosed_attribute(
+        self,
+    ) -> None:
+        for case, markup in (
+            (
+                "standard element",
+                '<custom title="unfinished <em>hidden</em>',
+            ),
+            (
+                "custom element",
+                '<custom title="unfinished <widget>hidden</widget>',
+            ),
+            (
+                "comment",
+                '<custom title="unfinished <!-- hidden -->',
+            ),
+            (
+                "processing instruction",
+                '<custom title="unfinished <?hidden?>',
+            ),
+            (
+                "declaration",
+                '<custom title="unfinished <!DOCTYPE html>',
+            ),
+            (
+                "CDATA",
+                '<custom title="unfinished <![CDATA[hidden]]>',
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {markup}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_raw_purity_allows_incomplete_html_without_hidden_construct(
+        self,
+    ) -> None:
+        for case, spoken in (
+            (
+                "unclosed double-quoted attribute",
+                '<custom title="unfinished ordinary narration',
+            ),
+            (
+                "unclosed single-quoted attribute",
+                "<custom title='unfinished ordinary narration",
+            ),
+            (
+                "non-tag nested angle text",
+                '<custom title="unfinished <2> ordinary narration',
+            ),
+            (
+                "nonbreaking-space tag separator",
+                "<custom\u00a0data-kind=aside>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
     def test_raw_purity_allows_exact_underline_tags(self) -> None:
         self.assertEqual(self.validation_errors(), [])
 
@@ -736,6 +813,123 @@ class ScriptPairTests(unittest.TestCase):
                         "raw script cannot contain citations or "
                         "Markdown links"
                     ],
+                )
+
+    def test_raw_purity_rejects_commonmark_uri_autolinks(self) -> None:
+        longest_scheme = "a" + "1" * 31
+        for case, autolink in (
+            ("HTTPS URI", "<https://example.com>"),
+            ("empty URI after minimum scheme", "<ab:>"),
+            (
+                "scheme punctuation",
+                "<a+.-9:target>",
+            ),
+            (
+                "maximum-length scheme",
+                f"<{longest_scheme}:target>",
+            ),
+            (
+                "backslash remains inside URI",
+                r"<https://example.com/\[\>",
+            ),
+            (
+                "even-backslash opening angle",
+                r"\\<https://example.com>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {autolink}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
+    def test_raw_purity_rejects_commonmark_email_autolinks(self) -> None:
+        longest_domain_label = "a" * 63
+        for case, autolink in (
+            ("ordinary email", "<source@example.com>"),
+            (
+                "permitted local and domain punctuation",
+                "<foo.!#$%&'+/=?^{}|~-@Bar.baz-bar0.com>",
+            ),
+            ("single-character domain", "<source@x>"),
+            (
+                "maximum-length domain label",
+                f"<source@{longest_domain_label}>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {autolink}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
+    def test_raw_purity_allows_non_autolink_angle_text(self) -> None:
+        overlong_scheme = "a" + "1" * 32
+        overlong_domain_label = "a" * 64
+        for case, spoken in (
+            ("empty angles", "<>"),
+            ("one-character scheme", "<m:abc>"),
+            (
+                "overlong scheme",
+                f"<{overlong_scheme}:target>",
+            ),
+            ("underscore in scheme", "<ab_c:target>"),
+            ("numeric scheme start", "<1a:target>"),
+            ("space in URI", "<ab:has space>"),
+            ("ASCII control in URI", "<ab:has\x01control>"),
+            ("nested angle in URI", "<ab:nested<1>>"),
+            ("no URI separator", "<foo.bar.baz>"),
+            ("empty email local part", "<@example.com>"),
+            ("leading domain hyphen", "<source@-example.com>"),
+            ("trailing domain hyphen", "<source@example-.com>"),
+            ("empty domain label", "<source@example..com>"),
+            (
+                "overlong domain label",
+                f"<source@{overlong_domain_label}>",
+            ),
+            (
+                "backslash in email local part",
+                r"<foo\+@bar.example.com>",
+            ),
+            (
+                "escaped URI opening angle",
+                r"\<https://example.com>",
+            ),
+            (
+                "escaped email opening angle",
+                r"\<source@example.com>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
                 )
 
     def test_raw_purity_rejects_complete_links_across_supported_surfaces(
@@ -1648,6 +1842,38 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             0.5,
             f"raw HTML scan took {elapsed:.3f}s",
+        )
+
+    def test_raw_html_recovery_is_linear_after_unclosed_attribute(
+        self,
+    ) -> None:
+        passage = '> <custom title="' + "<literal " * 20_000
+
+        started = time.perf_counter()
+        has_html = _has_unsupported_html(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_html)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"raw HTML recovery took {elapsed:.3f}s",
+        )
+
+    def test_autolink_scan_is_linear_on_many_incomplete_angles(
+        self,
+    ) -> None:
+        passage = "<not-an-autolink " * 20_000
+
+        started = time.perf_counter()
+        has_citation = _has_raw_citation(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_citation)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"autolink scan took {elapsed:.3f}s",
         )
 
     def test_evidence_removal_keeps_line_endings(self) -> None:

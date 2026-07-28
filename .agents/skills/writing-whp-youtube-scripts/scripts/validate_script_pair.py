@@ -53,6 +53,11 @@ SUPPORTING_STYLE_TAGS = frozenset(
 EVIDENCE_RE = re.compile(
     r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
+EMAIL_AUTOLINK_RE = re.compile(
+    r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@"
+    r"[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+    r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*$"
+)
 REFERENCE_TITLE_CLOSERS = {'"': '"', "'": "'", "(": ")"}
 HTML_LITERAL_BLOCK_TAGS = frozenset(
     {"pre", "script", "style", "textarea"}
@@ -391,6 +396,67 @@ def _reference_definition_tail_is_valid(tail: str) -> bool:
     return _reference_title_is_valid(tail, cursor)
 
 
+def _is_uri_autolink(candidate: str) -> bool:
+    """Return whether candidate is a CommonMark absolute URI."""
+
+    colon = candidate.find(":")
+    if colon == -1:
+        return False
+
+    scheme = candidate[:colon]
+    if (
+        not 2 <= len(scheme) <= 32
+        or not _is_ascii_letter(scheme[0])
+        or any(
+            not (
+                character.isascii()
+                and (
+                    character.isalnum()
+                    or character in "+.-"
+                )
+            )
+            for character in scheme[1:]
+        )
+    ):
+        return False
+
+    return all(
+        ord(character) > 32
+        and ord(character) != 127
+        and character not in "<>"
+        for character in candidate[colon + 1 :]
+    )
+
+
+def _surface_has_autolink(surface: str) -> bool:
+    """Detect URI or email autolinks in one forward surface scan."""
+
+    opener: int | None = None
+    backslashes = 0
+    for index, character in enumerate(surface):
+        if character == "\\":
+            backslashes += 1
+            continue
+
+        escaped = backslashes % 2 == 1
+        backslashes = 0
+        if character == "<":
+            opener = None if escaped else index
+            continue
+        if character != ">" or opener is None:
+            continue
+
+        candidate = surface[opener + 1 : index]
+        if (
+            _is_uri_autolink(candidate)
+            or EMAIL_AUTOLINK_RE.fullmatch(candidate) is not None
+        ):
+            return True
+        opener = None
+
+    return False
+
+
 def _surface_has_raw_citation(
     surface: str,
     *,
@@ -440,7 +506,8 @@ def _has_raw_citation(markdown: str) -> bool:
     """Detect complete citations without crossing paragraph boundaries."""
 
     return any(
-        _surface_has_raw_citation(
+        _surface_has_autolink(surface)
+        or _surface_has_raw_citation(
             surface,
             allow_reference_definition=is_blockquote,
         )
@@ -591,11 +658,15 @@ def _complete_html_tag_scan(
         quote = text[cursor] if text[cursor] in "\"'" else None
         if quote is not None:
             cursor += 1
-            while cursor < len(text) and text[cursor] != quote:
-                cursor += 1
-            if cursor >= len(text):
-                return False, len(text)
-            cursor += 1
+            closing_quote = text.find(quote, cursor)
+            if closing_quote == -1:
+                next_opener = text.find("<", cursor)
+                return False, (
+                    len(text)
+                    if next_opener == -1
+                    else next_opener
+                )
+            cursor = closing_quote + 1
             continue
 
         value_start = cursor
