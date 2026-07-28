@@ -62,7 +62,6 @@ REFERENCE_DEFINITION_TAIL_RE = re.compile(
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
 )
-INDENTED_CODE_RE = re.compile(r"^(?: {4}|\t)")
 ATX_HEADING_RE = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)")
 LIST_MARKER_RE = re.compile(
     r"^ {0,3}(?:[*+-]|\d{1,9}[.)])(?:[ \t]+|$)"
@@ -78,10 +77,6 @@ HORIZONTAL_RULE_RE = re.compile(
     r"(?:_[ \t]*){3,})$"
 )
 TABLE_DELIMITER_CELL_RE = re.compile(r"^:?-{3,}:?$")
-HTML_TAG_RE = re.compile(
-    r"<!--.*?-->|</?[A-Za-z][^>\r\n]*>",
-    re.DOTALL,
-)
 UNDERLINE_TAG_RE = re.compile(r"</?u>")
 STORY_MARKER_RE = re.compile(r"</?u>|\*+")
 ESCAPABLE_STORY_MARKER_RE = re.compile(r"</?u>|\*+|_+")
@@ -226,34 +221,25 @@ def _find_unescaped(text: str, character: str, start: int) -> int:
 
 
 def _has_raw_citation(markdown: str) -> bool:
-    """Detect citation suffixes and footnotes without parsing link labels."""
+    """Detect footnotes and suffixes on balanced, unescaped labels."""
 
-    last_unescaped_close = {")": -1, "]": -1}
+    bracket_openers: list[int] = []
     for index, character in enumerate(markdown):
-        if (
-            character in last_unescaped_close
-            and not _is_escaped(markdown, index)
-        ):
-            last_unescaped_close[character] = index
-
-    for index, character in enumerate(markdown):
-        if character == "[" and not _is_escaped(markdown, index):
-            if (
-                index + 1 < len(markdown)
-                and markdown[index + 1] == "^"
-                and last_unescaped_close["]"] > index + 1
-            ):
-                return True
-        if character != "]" or _is_escaped(markdown, index):
+        if character not in "[]":
             continue
+        if _is_escaped(markdown, index):
+            continue
+        if character == "[":
+            bracket_openers.append(index)
+            continue
+        if character != "]" or not bracket_openers:
+            continue
+
+        opener = bracket_openers.pop()
         if (
-            markdown.startswith("](", index)
-            and last_unescaped_close[")"] > index + 1
-        ):
-            return True
-        if (
-            markdown.startswith("][", index)
-            and last_unescaped_close["]"] > index + 1
+            markdown.startswith("[^", opener)
+            or markdown.startswith("](", index)
+            or markdown.startswith("][", index)
         ):
             return True
     return False
@@ -285,6 +271,35 @@ def _has_escaped_story_marker(markdown: str) -> bool:
         _is_escaped(markdown, match.start())
         for match in ESCAPABLE_STORY_MARKER_RE.finditer(markdown)
     )
+
+
+def _has_unsupported_html(markdown: str) -> bool:
+    """Detect raw HTML forms while allowing only exact underline tags."""
+
+    last_closing_bracket = markdown.rfind(">")
+    cursor = markdown.find("<")
+    while cursor != -1:
+        if markdown.startswith("<u>", cursor):
+            cursor = markdown.find("<", cursor + len("<u>"))
+            continue
+        if markdown.startswith("</u>", cursor):
+            cursor = markdown.find("<", cursor + len("</u>"))
+            continue
+        if markdown.startswith(("<!--", "<?", "<!"), cursor):
+            return True
+
+        name_start = cursor + 1
+        if name_start < len(markdown) and markdown[name_start] == "/":
+            name_start += 1
+        if (
+            name_start < len(markdown)
+            and markdown[name_start].isascii()
+            and markdown[name_start].isalpha()
+            and last_closing_bracket > name_start
+        ):
+            return True
+        cursor = markdown.find("<", cursor + 1)
+    return False
 
 
 def _has_visible_content(markdown: str) -> bool:
@@ -413,6 +428,22 @@ def _is_padded_emphasis(line: str) -> bool:
     return False
 
 
+def _is_indented_code(line: str) -> bool:
+    """Return whether leading whitespace reaches four visual columns."""
+
+    column = 0
+    for character in line:
+        if character == " ":
+            column += 1
+        elif character == "\t":
+            column += 4 - column % 4
+        else:
+            break
+        if column >= 4:
+            return True
+    return False
+
+
 def _unescaped_pipe_positions(line: str) -> list[int]:
     """Return unescaped pipe positions for GFM table checks."""
 
@@ -447,25 +478,14 @@ def _is_gfm_table_delimiter(line: str) -> bool:
     )
 
 
-def _is_gfm_table_row(line: str) -> bool:
-    """Return whether a line uses explicit outer table-row pipes."""
-
-    stripped = line.strip(" \t")
-    pipe_positions = _unescaped_pipe_positions(stripped)
-    return len(pipe_positions) >= 2 and (
-        pipe_positions[0] == 0
-        and pipe_positions[-1] == len(stripped) - 1
-    )
-
-
 def _is_nested_block_line(line: str) -> bool:
     """Return whether one spoken line starts denied block markup."""
 
     if (
-        HORIZONTAL_RULE_RE.fullmatch(line)
+        _is_indented_code(line)
+        or HORIZONTAL_RULE_RE.fullmatch(line)
         or SETEXT_UNDERLINE_RE.fullmatch(line)
         or _is_gfm_table_delimiter(line)
-        or _is_gfm_table_row(line)
         or GFM_ALERT_RE.fullmatch(line)
     ):
         return True
@@ -474,7 +494,6 @@ def _is_nested_block_line(line: str) -> bool:
     return any(
         pattern.match(line) is not None
         for pattern in (
-            INDENTED_CODE_RE,
             ATX_HEADING_RE,
             LIST_MARKER_RE,
             NESTED_QUOTE_RE,
@@ -568,8 +587,7 @@ def _validate_raw(markdown: str) -> list[str]:
             "raw script cannot contain unsupported Markdown markup",
         )
 
-    without_underline = body.replace("<u>", "").replace("</u>", "")
-    if HTML_TAG_RE.search(without_underline):
+    if _has_unsupported_html(body):
         _append_error(
             errors,
             "raw script cannot contain unsupported HTML tags",

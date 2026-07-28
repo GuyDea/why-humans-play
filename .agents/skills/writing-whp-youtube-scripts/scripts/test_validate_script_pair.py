@@ -366,6 +366,47 @@ class ScriptPairTests(unittest.TestCase):
             with self.subTest(case=case):
                 self.assertEqual(self.validation_errors(raw=raw), [expected])
 
+    def test_raw_purity_rejects_all_nonunderline_html_forms(self) -> None:
+        for case, markup in (
+            ("comment", "<!-- hidden -->"),
+            (
+                "multiline comment",
+                "<!-- hidden\n> continued -->",
+            ),
+            ("element", "<em>Hidden emphasis</em>"),
+            (
+                "multiline element",
+                '<em\n> class="aside">Hidden emphasis',
+            ),
+            ("processing instruction", "<?draft value?>"),
+            (
+                "multiline processing instruction",
+                "<?draft\n> value?>",
+            ),
+            ("declaration", "<!DOCTYPE html>"),
+            (
+                "multiline declaration",
+                "<!DOCTYPE\n> html>",
+            ),
+            ("CDATA", "<![CDATA[hidden value]]>"),
+            (
+                "multiline CDATA",
+                "<![CDATA[hidden\n> value]]>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {markup}",
+                )
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_raw_purity_allows_exact_underline_tags(self) -> None:
+        self.assertEqual(self.validation_errors(), [])
+
     def test_raw_purity_rejects_reference_links_and_footnotes(self) -> None:
         for case, citation in (
             (
@@ -386,6 +427,10 @@ class ScriptPairTests(unittest.TestCase):
             (
                 "nested-label reference image",
                 "See ![the [primary] chart][asset].",
+            ),
+            (
+                "even-backslash closing bracket",
+                r"See [the source\\](https://example.com).",
             ),
             ("footnote citation", "This is supported.[^1]"),
             (
@@ -428,6 +473,18 @@ class ScriptPairTests(unittest.TestCase):
             (
                 "escaped closing bracket",
                 r"But [the safer option\](really) worked.",
+            ),
+            (
+                "escaped opening bracket",
+                r"But \[not a link](literally) stayed punctuation.",
+            ),
+            (
+                "unmatched destination suffix",
+                "But ](literally) stayed punctuation.",
+            ),
+            (
+                "unmatched reference suffix",
+                "But ][reference] stayed punctuation.",
             ),
         ):
             with self.subTest(case=case):
@@ -510,12 +567,32 @@ class ScriptPairTests(unittest.TestCase):
             ("horizontal rule", "---"),
             ("spaced asterisk horizontal rule", "* * *"),
             ("indented code", "    hidden_code()"),
+            ("tab-indented code", "\thidden_code()"),
+            (
+                "one space plus tab indented code",
+                " \thidden_code()",
+            ),
+            (
+                "two spaces plus tab indented code",
+                "  \thidden_code()",
+            ),
+            (
+                "three spaces plus tab indented code",
+                "   \thidden_code()",
+            ),
             ("GFM alert", "[!NOTE]"),
-            ("GFM table row", "| Finding | Meaning |"),
             ("GFM table delimiter", "| :--- | ---: |"),
             (
+                "GFM table with outer pipes",
+                "| Finding | Meaning |\n"
+                "> | :--- | ---: |\n"
+                "> | Result | Consequence |",
+            ),
+            (
                 "GFM table without outer pipes",
-                "Finding | Meaning\n> --- | ---",
+                "Finding | Meaning\n"
+                "> --- | ---\n"
+                "> Result | Consequence",
             ),
         ):
             with self.subTest(case=case):
@@ -533,6 +610,43 @@ class ScriptPairTests(unittest.TestCase):
 
     def test_raw_purity_does_not_treat_italic_narration_as_a_list(self) -> None:
         self.assertEqual(self.validation_errors(), [])
+
+    def test_raw_purity_allows_quote_padding_and_subcode_indentation(
+        self,
+    ) -> None:
+        for case, quoted_line in (
+            (
+                "no quote padding",
+                ">Ordinary narration without quote padding.",
+            ),
+            (
+                "single space quote padding",
+                "> Ordinary narration with space quote padding.",
+            ),
+            (
+                "single tab quote padding",
+                ">\tOrdinary narration with tab quote padding.",
+            ),
+            (
+                "three remaining spaces",
+                ">    Ordinary narration below code indentation.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    quoted_line,
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    quoted_line,
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
 
     def test_raw_purity_allows_blocklike_punctuation_inside_sentences(
         self,
@@ -565,6 +679,18 @@ class ScriptPairTests(unittest.TestCase):
             (
                 "trailing pipe punctuation",
                 "The handwritten | mark meant “or” |",
+            ),
+            (
+                "pipe-wrapped sentence",
+                "| This sentence uses | pipes as spoken punctuation |",
+            ),
+            (
+                "standalone pipe row",
+                "| Finding | Meaning |",
+            ),
+            (
+                "multi-pipe sentence",
+                "This sentence | uses pipes | as spoken punctuation.",
             ),
         ):
             with self.subTest(case=case):
