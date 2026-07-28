@@ -13,6 +13,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 
 from validate_script_pair import (
     EVIDENCE_RE,
+    _has_raw_citation,
     _has_nested_block_structure,
     resolve_pair,
     validate_pair,
@@ -367,15 +368,41 @@ class ScriptPairTests(unittest.TestCase):
 
     def test_raw_purity_rejects_reference_links_and_footnotes(self) -> None:
         for case, citation in (
+            (
+                "nested-label inline link",
+                "See [the [primary] source](https://example.com).",
+            ),
+            (
+                "nested-label inline image",
+                "See ![the [primary] chart](https://example.com/chart.png).",
+            ),
             ("full reference link", "See [the source][study]."),
+            (
+                "nested-label reference link",
+                "See [the [primary] source][study].",
+            ),
             ("collapsed reference link", "See [the source][]."),
             ("reference image", "See ![the chart][asset]."),
+            (
+                "nested-label reference image",
+                "See ![the [primary] chart][asset].",
+            ),
             ("footnote citation", "This is supported.[^1]"),
             (
                 "reference definition",
                 "[study]: https://example.com/source",
             ),
             ("footnote definition", "[^1]: The supporting source."),
+            ("bare reference definition", "[study]:"),
+            ("bare footnote definition", "[^1]:"),
+            (
+                "continued reference definition",
+                "[study]:\n> https://example.com/source",
+            ),
+            (
+                "continued footnote definition",
+                "[^1]:\n> Supporting source details.",
+            ),
         ):
             with self.subTest(case=case):
                 raw = RAW.replace(
@@ -391,20 +418,33 @@ class ScriptPairTests(unittest.TestCase):
                 )
 
     def test_raw_purity_allows_ordinary_spoken_bracket_text(self) -> None:
-        spoken = "But I chose [the safer option]."
-        raw = RAW.replace(
-            "But the next result changed the question.",
-            spoken,
-        )
-        extended = EXTENDED.replace(
-            "But the next result changed the question.",
-            spoken,
-        )
+        for case, spoken in (
+            ("ordinary brackets", "But I chose [the safer option]."),
+            ("ordinary parentheses", "But I chose (the safer option)."),
+            (
+                "separate brackets and parentheses",
+                "But [the safer option] (really) worked.",
+            ),
+            (
+                "escaped closing bracket",
+                r"But [the safer option\](really) worked.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
 
-        self.assertEqual(
-            self.validation_errors(raw=raw, extended=extended),
-            [],
-        )
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
 
     def test_raw_purity_does_not_mistake_bracket_colon_prose_for_a_definition(
         self,
@@ -452,12 +492,31 @@ class ScriptPairTests(unittest.TestCase):
             ("asterisk list item", "* Hidden list item"),
             ("numbered list item", "1. Hidden list item"),
             ("task list item", "- [ ] Hidden task"),
+            ("empty dash list item", "-"),
+            ("empty plus list item", "+"),
+            ("empty asterisk list item", "*"),
+            ("empty dot list item", "1."),
+            ("empty parenthesis list item", "1)"),
+            ("spaced empty dash list item", "-   "),
+            ("spaced empty plus list item", "+\t"),
+            ("spaced empty asterisk list item", "*   "),
+            ("spaced empty dot list item", "1.   "),
+            ("spaced empty parenthesis list item", "1)\t"),
             ("nested quote", "> Hidden quote"),
             ("backtick fence", "```python"),
             ("tilde fence", "~~~"),
+            ("setext equals heading", "Hidden heading\n> ==="),
+            ("setext dash heading", "Hidden heading\n> ---"),
             ("horizontal rule", "---"),
             ("spaced asterisk horizontal rule", "* * *"),
             ("indented code", "    hidden_code()"),
+            ("GFM alert", "[!NOTE]"),
+            ("GFM table row", "| Finding | Meaning |"),
+            ("GFM table delimiter", "| :--- | ---: |"),
+            (
+                "GFM table without outer pipes",
+                "Finding | Meaning\n> --- | ---",
+            ),
         ):
             with self.subTest(case=case):
                 raw = RAW.replace(
@@ -474,6 +533,55 @@ class ScriptPairTests(unittest.TestCase):
 
     def test_raw_purity_does_not_treat_italic_narration_as_a_list(self) -> None:
         self.assertEqual(self.validation_errors(), [])
+
+    def test_raw_purity_allows_blocklike_punctuation_inside_sentences(
+        self,
+    ) -> None:
+        for case, spoken in (
+            (
+                "equals",
+                "The result was A === B, not a hidden heading.",
+            ),
+            (
+                "dashes",
+                "The score moved from 3-2 -- then stopped.",
+            ),
+            (
+                "list punctuation",
+                "I could choose - this, + that, or 1. neither.",
+            ),
+            (
+                "alert text",
+                "I wrote [!NOTE] in the margin.",
+            ),
+            (
+                "pipes",
+                "The choice | consequence | still felt personal.",
+            ),
+            (
+                "leading pipe punctuation",
+                "| meant “or” | in the handwritten note.",
+            ),
+            (
+                "trailing pipe punctuation",
+                "The handwritten | mark meant “or” |",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
 
     def test_raw_purity_allows_ordinary_spoken_brackets_and_punctuation(self) -> None:
         spoken = "Could [this] happen—to player_one (really)?"
@@ -590,6 +698,68 @@ class ScriptPairTests(unittest.TestCase):
                     },
                 )
                 self.assertEqual(len(errors), 2)
+
+    def test_raw_purity_rejects_escaped_story_markers(self) -> None:
+        unsupported_error = (
+            "raw script cannot contain unsupported Markdown markup"
+        )
+        cases = (
+            (
+                "escaped italics",
+                RAW.replace(
+                    "*But the next result changed the question.*",
+                    r"\*But the next result changed the question.\*",
+                ),
+                EXTENDED.replace(
+                    "*But the next result changed the question.*",
+                    r"\*But the next result changed the question.\*",
+                ),
+                [
+                    unsupported_error,
+                    "MINI-HOOK passage must be italic and not underlined",
+                ],
+            ),
+            (
+                "escaped underline",
+                RAW.replace(
+                    "<u>**Could this happen to you?**</u>",
+                    r"\<u>**Could this happen to you?**\</u>",
+                ),
+                EXTENDED.replace(
+                    "<u>**Could this happen to you?**</u>",
+                    r"\<u>**Could this happen to you?**\</u>",
+                ),
+                [
+                    unsupported_error,
+                    "main-story tag requires an underlined passage",
+                ],
+            ),
+            (
+                "escaped underscores",
+                RAW.replace(
+                    "<u>**Could this happen to you?**</u>",
+                    r"\_Could this happen to you?\_",
+                ),
+                EXTENDED.replace(
+                    "<u>**Could this happen to you?**</u>",
+                    r"\_Could this happen to you?\_",
+                ),
+                [
+                    unsupported_error,
+                    "main-story tag requires an underlined passage",
+                    "LOCKED WORDING requires a bold passage",
+                ],
+            ),
+        )
+        for case, raw, extended, expected in cases:
+            with self.subTest(case=case):
+                self.assertEqual(
+                    self.validation_errors(
+                        raw=raw,
+                        extended=extended,
+                    ),
+                    expected,
+                )
 
     def test_storytelling_markup_ignores_evidence_url_punctuation(self) -> None:
         extended = EXTENDED.replace(
@@ -845,6 +1015,20 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             0.5,
             f"nested markup scan took {elapsed:.3f}s",
+        )
+
+    def test_citation_scan_is_linear_on_incomplete_suffixes(self) -> None:
+        passage = "](" * 200_000
+
+        started = time.perf_counter()
+        has_citation = _has_raw_citation(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_citation)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"citation scan took {elapsed:.3f}s",
         )
 
     def test_evidence_removal_keeps_line_endings(self) -> None:

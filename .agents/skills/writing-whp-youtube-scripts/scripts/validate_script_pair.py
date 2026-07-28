@@ -53,13 +53,8 @@ SUPPORTING_STYLE_TAGS = frozenset(
 EVIDENCE_RE = re.compile(
     r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
-MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]\r\n]*\]\([^)\r\n]*\)")
-REFERENCE_LINK_RE = re.compile(
-    r"!?\[[^\]\r\n]+\]\[[^\]\r\n]*\]"
-)
-FOOTNOTE_RE = re.compile(r"\[\^[^\]\r\n]+\]")
-REFERENCE_DEFINITION_RE = re.compile(
-    r"^[ \t]{0,3}\[[^\]\r\n]+\]:[ \t]*"
+REFERENCE_DEFINITION_TAIL_RE = re.compile(
+    r"^[ \t]*"
     r"(?:<[^>\r\n]+>|\S+)"
     r"(?:[ \t]+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?"
     r"[ \t]*$"
@@ -67,29 +62,29 @@ REFERENCE_DEFINITION_RE = re.compile(
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
 )
-NESTED_BLOCK_RE = re.compile(
-    r"^(?:"
-    r" {4}|\t|"
-    r" {0,3}(?:"
-    r"#{1,6}(?:[ \t]+|$)|"
-    r"[*+-][ \t]+|"
-    r"\d{1,9}[.)][ \t]+|"
-    r">|"
-    r"`{3,}|"
-    r"~{3,}"
-    r")"
-    r")"
+INDENTED_CODE_RE = re.compile(r"^(?: {4}|\t)")
+ATX_HEADING_RE = re.compile(r"^ {0,3}#{1,6}(?:[ \t]+|$)")
+LIST_MARKER_RE = re.compile(
+    r"^ {0,3}(?:[*+-]|\d{1,9}[.)])(?:[ \t]+|$)"
+)
+NESTED_QUOTE_RE = re.compile(r"^ {0,3}>")
+FENCE_RE = re.compile(r"^ {0,3}(?:`{3,}|~{3,})")
+SETEXT_UNDERLINE_RE = re.compile(r"^ {0,3}(?:=+|-+)[ \t]*$")
+GFM_ALERT_RE = re.compile(
+    r"^ {0,3}\[!(?:NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][ \t]*$"
 )
 HORIZONTAL_RULE_RE = re.compile(
     r"^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|"
     r"(?:_[ \t]*){3,})$"
 )
+TABLE_DELIMITER_CELL_RE = re.compile(r"^:?-{3,}:?$")
 HTML_TAG_RE = re.compile(
     r"<!--.*?-->|</?[A-Za-z][^>\r\n]*>",
     re.DOTALL,
 )
 UNDERLINE_TAG_RE = re.compile(r"</?u>")
 STORY_MARKER_RE = re.compile(r"</?u>|\*+")
+ESCAPABLE_STORY_MARKER_RE = re.compile(r"</?u>|\*+|_+")
 
 DRIFT_ERROR = "extended narration does not exactly match raw"
 
@@ -210,6 +205,88 @@ def _blockquote_spoken(line: str) -> str:
     return spoken
 
 
+def _is_escaped(text: str, index: int) -> bool:
+    """Return whether the character at index has odd backslash parity."""
+
+    backslashes = 0
+    cursor = index - 1
+    while cursor >= 0 and text[cursor] == "\\":
+        backslashes += 1
+        cursor -= 1
+    return backslashes % 2 == 1
+
+
+def _find_unescaped(text: str, character: str, start: int) -> int:
+    """Return the next unescaped character position, or -1."""
+
+    cursor = text.find(character, start)
+    while cursor != -1 and _is_escaped(text, cursor):
+        cursor = text.find(character, cursor + 1)
+    return cursor
+
+
+def _has_raw_citation(markdown: str) -> bool:
+    """Detect citation suffixes and footnotes without parsing link labels."""
+
+    last_unescaped_close = {")": -1, "]": -1}
+    for index, character in enumerate(markdown):
+        if (
+            character in last_unescaped_close
+            and not _is_escaped(markdown, index)
+        ):
+            last_unescaped_close[character] = index
+
+    for index, character in enumerate(markdown):
+        if character == "[" and not _is_escaped(markdown, index):
+            if (
+                index + 1 < len(markdown)
+                and markdown[index + 1] == "^"
+                and last_unescaped_close["]"] > index + 1
+            ):
+                return True
+        if character != "]" or _is_escaped(markdown, index):
+            continue
+        if (
+            markdown.startswith("](", index)
+            and last_unescaped_close[")"] > index + 1
+        ):
+            return True
+        if (
+            markdown.startswith("][", index)
+            and last_unescaped_close["]"] > index + 1
+        ):
+            return True
+    return False
+
+
+def _starts_reference_definition(line: str) -> bool:
+    """Detect a reference marker plus an empty or valid destination tail."""
+
+    content_start = len(line) - len(line.lstrip(" \t"))
+    if content_start > 3 or not line.startswith("[", content_start):
+        return False
+
+    closing = _find_unescaped(line, "]", content_start + 1)
+    while closing != -1:
+        if closing + 1 < len(line) and line[closing + 1] == ":":
+            tail = line[closing + 2 :]
+            return (
+                not tail.strip(" \t")
+                or REFERENCE_DEFINITION_TAIL_RE.fullmatch(tail) is not None
+            )
+        closing = _find_unescaped(line, "]", closing + 1)
+    return False
+
+
+def _has_escaped_story_marker(markdown: str) -> bool:
+    """Return whether raw uses a backslash-escaped story delimiter."""
+
+    return any(
+        _is_escaped(markdown, match.start())
+        for match in ESCAPABLE_STORY_MARKER_RE.finditer(markdown)
+    )
+
+
 def _has_visible_content(markdown: str) -> bool:
     """Return whether markup encloses non-whitespace spoken content."""
 
@@ -229,6 +306,8 @@ def _storytelling_markup(spoken: str) -> StorytellingMarkup:
     bold = False
     marker_stack: list[tuple[str, int, int]] = []
     for match in STORY_MARKER_RE.finditer(surface):
+        if _is_escaped(surface, match.start()):
+            continue
         marker = match.group()
         if marker == "<u>":
             if any(kind == "underline" for kind, _, _ in marker_stack):
@@ -334,17 +413,83 @@ def _is_padded_emphasis(line: str) -> bool:
     return False
 
 
+def _unescaped_pipe_positions(line: str) -> list[int]:
+    """Return unescaped pipe positions for GFM table checks."""
+
+    return [
+        index
+        for index, character in enumerate(line)
+        if character == "|" and not _is_escaped(line, index)
+    ]
+
+
+def _is_gfm_table_delimiter(line: str) -> bool:
+    """Return whether a line is a GFM table delimiter row."""
+
+    stripped = line.strip(" \t")
+    pipe_positions = _unescaped_pipe_positions(stripped)
+    if not pipe_positions:
+        return False
+
+    cells: list[str] = []
+    cell_start = 0
+    for position in pipe_positions:
+        cells.append(stripped[cell_start:position].strip(" \t"))
+        cell_start = position + 1
+    cells.append(stripped[cell_start:].strip(" \t"))
+    if pipe_positions[0] == 0:
+        cells = cells[1:]
+    if pipe_positions[-1] == len(stripped) - 1:
+        cells = cells[:-1]
+    return bool(cells) and all(
+        TABLE_DELIMITER_CELL_RE.fullmatch(cell) is not None
+        for cell in cells
+    )
+
+
+def _is_gfm_table_row(line: str) -> bool:
+    """Return whether a line uses explicit outer table-row pipes."""
+
+    stripped = line.strip(" \t")
+    pipe_positions = _unescaped_pipe_positions(stripped)
+    return len(pipe_positions) >= 2 and (
+        pipe_positions[0] == 0
+        and pipe_positions[-1] == len(stripped) - 1
+    )
+
+
+def _is_nested_block_line(line: str) -> bool:
+    """Return whether one spoken line starts denied block markup."""
+
+    if (
+        HORIZONTAL_RULE_RE.fullmatch(line)
+        or SETEXT_UNDERLINE_RE.fullmatch(line)
+        or _is_gfm_table_delimiter(line)
+        or _is_gfm_table_row(line)
+        or GFM_ALERT_RE.fullmatch(line)
+    ):
+        return True
+    if _is_padded_emphasis(line):
+        return False
+    return any(
+        pattern.match(line) is not None
+        for pattern in (
+            INDENTED_CODE_RE,
+            ATX_HEADING_RE,
+            LIST_MARKER_RE,
+            NESTED_QUOTE_RE,
+            FENCE_RE,
+        )
+    )
+
+
 def _has_nested_block_structure(passage: str) -> bool:
     """Return whether quoted content starts a nested Markdown block."""
 
-    for line in passage.splitlines():
-        if HORIZONTAL_RULE_RE.fullmatch(line):
-            return True
-        if _is_padded_emphasis(line):
-            continue
-        if NESTED_BLOCK_RE.match(line):
-            return True
-    return False
+    return any(
+        _is_nested_block_line(line)
+        for line in passage.splitlines()
+    )
 
 
 def _validate_raw(markdown: str) -> list[str]:
@@ -405,24 +550,19 @@ def _validate_raw(markdown: str) -> list[str]:
 
     without_evidence = EVIDENCE_RE.sub("", body)
     has_reference_definition = any(
-        REFERENCE_DEFINITION_RE.fullmatch(
-            _blockquote_spoken(line)
-            if line.startswith(">")
-            else line
-        )
+        _starts_reference_definition(_blockquote_spoken(line))
         for line in body_lines
+        if line.startswith(">")
     )
-    if (
-        MARKDOWN_LINK_RE.search(without_evidence)
-        or REFERENCE_LINK_RE.search(without_evidence)
-        or FOOTNOTE_RE.search(without_evidence)
-        or has_reference_definition
-    ):
+    if _has_raw_citation(without_evidence) or has_reference_definition:
         _append_error(
             errors,
             "raw script cannot contain citations or Markdown links",
         )
-    if UNSUPPORTED_MARKDOWN_RE.search(body):
+    if (
+        UNSUPPORTED_MARKDOWN_RE.search(body)
+        or _has_escaped_story_marker(body)
+    ):
         _append_error(
             errors,
             "raw script cannot contain unsupported Markdown markup",
@@ -436,17 +576,22 @@ def _validate_raw(markdown: str) -> list[str]:
         )
 
     raw_passages = _raw_blockquote_passages(body)
-    if any(
+    nested_structure = [
         _has_nested_block_structure(passage)
         for passage in raw_passages
-    ):
+    ]
+    if any(nested_structure):
         _append_error(
             errors,
             "raw script cannot contain unsupported Markdown markup",
         )
 
-    for passage in raw_passages:
-        if _has_nested_block_structure(passage):
+    for passage, is_nested in zip(
+        raw_passages,
+        nested_structure,
+        strict=True,
+    ):
+        if is_nested:
             continue
         if _storytelling_markup(passage).malformed:
             _append_error(
