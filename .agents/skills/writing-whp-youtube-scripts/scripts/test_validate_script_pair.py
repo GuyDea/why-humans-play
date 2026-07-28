@@ -14,6 +14,7 @@ sys.path.insert(0, str(SCRIPT_DIR))
 from validate_script_pair import (
     EVIDENCE_RE,
     _has_raw_citation,
+    _has_unsupported_html,
     _has_nested_block_structure,
     resolve_pair,
     validate_pair,
@@ -588,6 +589,10 @@ class ScriptPairTests(unittest.TestCase):
                 "multiline element",
                 '<em\n> class="aside">Hidden emphasis',
             ),
+            (
+                "custom element",
+                'Literal <custom data-kind="aside">markup</custom>.',
+            ),
             ("processing instruction", "<?draft value?>"),
             (
                 "multiline processing instruction",
@@ -612,6 +617,63 @@ class ScriptPairTests(unittest.TestCase):
                 self.assertEqual(
                     self.validation_errors(raw=raw),
                     ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_raw_purity_rejects_incomplete_commonmark_html_block_starts(
+        self,
+    ) -> None:
+        for case, markup in (
+            ("script end boundary", "<script"),
+            ("uppercase pre space boundary", "<PRE "),
+            ("mixed-case style tab boundary", "<StYlE\t"),
+            ("mixed-case textarea end boundary", "<TeXtArEa"),
+            ("mixed-case div end boundary", "<DiV"),
+            ("uppercase div space boundary", "<DIV "),
+            ("lowercase div tab boundary", "<div\t"),
+            ("mixed-case closing div end boundary", "</dIv"),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {markup}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_raw_purity_allows_incomplete_inline_tags_before_narration(
+        self,
+    ) -> None:
+        for case, spoken in (
+            (
+                "custom tag",
+                "<custom\n> Later narration.",
+            ),
+            (
+                "inline tag",
+                "<em\n> Later narration.",
+            ),
+            (
+                "type-one name without its boundary",
+                "<scripture\n> Later narration.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
                 )
 
     def test_raw_purity_allows_exact_underline_tags(self) -> None:
@@ -1572,6 +1634,20 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             0.5,
             f"citation scan took {elapsed:.3f}s",
+        )
+
+    def test_raw_html_scan_is_linear_on_many_incomplete_tags(self) -> None:
+        passage = "> " + "<custom " * 20_000
+
+        started = time.perf_counter()
+        has_html = _has_unsupported_html(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_html)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"raw HTML scan took {elapsed:.3f}s",
         )
 
     def test_evidence_removal_keeps_line_endings(self) -> None:

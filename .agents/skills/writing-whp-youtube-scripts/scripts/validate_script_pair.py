@@ -54,6 +54,19 @@ EVIDENCE_RE = re.compile(
     r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
 REFERENCE_TITLE_CLOSERS = {'"': '"', "'": "'", "(": ")"}
+HTML_LITERAL_BLOCK_TAGS = frozenset(
+    {"pre", "script", "style", "textarea"}
+)
+HTML_BLOCK_TAGS = frozenset(
+    """
+    address article aside base basefont blockquote body caption center col
+    colgroup dd details dialog dir div dl dt fieldset figcaption figure
+    footer form frame frameset h1 h2 h3 h4 h5 h6 head header hr html
+    iframe legend li link main menu menuitem nav noframes ol optgroup
+    option p param search section source summary table tbody td tfoot th
+    thead title tr track ul
+    """.split()
+)
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
 )
@@ -444,32 +457,191 @@ def _has_escaped_story_marker(markdown: str) -> bool:
     )
 
 
+def _is_ascii_letter(character: str) -> bool:
+    """Return whether character is an ASCII letter."""
+
+    return character.isascii() and character.isalpha()
+
+
+def _line_starts_commonmark_html_block(line: str) -> bool:
+    """Detect incomplete-capable CommonMark HTML block starts on one line."""
+
+    cursor = 0
+    while cursor < min(3, len(line)) and line[cursor] == " ":
+        cursor += 1
+    if cursor >= len(line) or line[cursor] != "<":
+        return False
+
+    cursor += 1
+    closing = cursor < len(line) and line[cursor] == "/"
+    if closing:
+        cursor += 1
+    name_start = cursor
+    while (
+        cursor < len(line)
+        and line[cursor].isascii()
+        and (line[cursor].isalnum() or line[cursor] == "-")
+    ):
+        cursor += 1
+    if cursor == name_start or not _is_ascii_letter(line[name_start]):
+        return False
+
+    name = line[name_start:cursor].lower()
+    if (
+        not closing
+        and name in HTML_LITERAL_BLOCK_TAGS
+        and (
+            cursor == len(line)
+            or line[cursor] in " \t>"
+        )
+    ):
+        return True
+    if name not in HTML_BLOCK_TAGS:
+        return False
+    return (
+        cursor == len(line)
+        or line[cursor] in " \t>"
+        or line.startswith("/>", cursor)
+    )
+
+
+def _skip_html_space(text: str, start: int) -> int:
+    """Return the next index after CommonMark tag whitespace."""
+
+    cursor = start
+    while cursor < len(text) and text[cursor] in " \t\n":
+        cursor += 1
+    return cursor
+
+
+def _html_scan_resume(text: str, cursor: int, start: int) -> int:
+    """Advance a failed tag scan without skipping a new angle opener."""
+
+    if cursor < len(text) and text[cursor] == "<":
+        return cursor
+    return max(start + 1, min(cursor + 1, len(text)))
+
+
+def _complete_html_tag_scan(
+    text: str,
+    start: int,
+) -> tuple[bool, int]:
+    """Parse one CommonMark open or closing tag in a forward-only scan."""
+
+    cursor = start + 1
+    closing = cursor < len(text) and text[cursor] == "/"
+    if closing:
+        cursor += 1
+    if cursor >= len(text) or not _is_ascii_letter(text[cursor]):
+        return False, start + 1
+
+    cursor += 1
+    while (
+        cursor < len(text)
+        and text[cursor].isascii()
+        and (text[cursor].isalnum() or text[cursor] == "-")
+    ):
+        cursor += 1
+
+    if closing:
+        cursor = _skip_html_space(text, cursor)
+        if cursor < len(text) and text[cursor] == ">":
+            return True, cursor + 1
+        return False, _html_scan_resume(text, cursor, start)
+
+    while cursor < len(text):
+        whitespace_start = cursor
+        cursor = _skip_html_space(text, cursor)
+        if cursor >= len(text):
+            return False, len(text)
+        if text[cursor] == ">":
+            return True, cursor + 1
+        if text.startswith("/>", cursor):
+            return True, cursor + 2
+        if cursor == whitespace_start:
+            return False, _html_scan_resume(text, cursor, start)
+
+        character = text[cursor]
+        if not (
+            _is_ascii_letter(character)
+            or character in "_:"
+        ):
+            return False, _html_scan_resume(text, cursor, start)
+        cursor += 1
+        while cursor < len(text):
+            character = text[cursor]
+            if (
+                character.isascii()
+                and (
+                    character.isalnum()
+                    or character in "_.:-"
+                )
+            ):
+                cursor += 1
+                continue
+            break
+
+        equals = _skip_html_space(text, cursor)
+        if equals >= len(text) or text[equals] != "=":
+            continue
+
+        cursor = _skip_html_space(text, equals + 1)
+        if cursor >= len(text):
+            return False, len(text)
+        quote = text[cursor] if text[cursor] in "\"'" else None
+        if quote is not None:
+            cursor += 1
+            while cursor < len(text) and text[cursor] != quote:
+                cursor += 1
+            if cursor >= len(text):
+                return False, len(text)
+            cursor += 1
+            continue
+
+        value_start = cursor
+        while (
+            cursor < len(text)
+            and text[cursor] not in " \t\n\"'=<>`"
+        ):
+            cursor += 1
+        if cursor == value_start:
+            return False, _html_scan_resume(text, cursor, start)
+
+    return False, len(text)
+
+
+def _surface_has_complete_html_tag(surface: str) -> bool:
+    """Detect complete raw HTML tags on one bounded Markdown surface."""
+
+    cursor = surface.find("<")
+    while cursor != -1:
+        if surface.startswith("<u>", cursor):
+            cursor = surface.find("<", cursor + len("<u>"))
+            continue
+        if surface.startswith("</u>", cursor):
+            cursor = surface.find("<", cursor + len("</u>"))
+            continue
+        if surface.startswith(("<!--", "<?", "<!"), cursor):
+            return True
+
+        complete, resume = _complete_html_tag_scan(surface, cursor)
+        if complete:
+            return True
+        cursor = surface.find("<", resume)
+    return False
+
+
 def _has_unsupported_html(markdown: str) -> bool:
     """Detect raw HTML forms while allowing only exact underline tags."""
 
-    last_closing_bracket = markdown.rfind(">")
-    cursor = markdown.find("<")
-    while cursor != -1:
-        if markdown.startswith("<u>", cursor):
-            cursor = markdown.find("<", cursor + len("<u>"))
-            continue
-        if markdown.startswith("</u>", cursor):
-            cursor = markdown.find("<", cursor + len("</u>"))
-            continue
-        if markdown.startswith(("<!--", "<?", "<!"), cursor):
-            return True
-
-        name_start = cursor + 1
-        if name_start < len(markdown) and markdown[name_start] == "/":
-            name_start += 1
-        if (
-            name_start < len(markdown)
-            and markdown[name_start].isascii()
-            and markdown[name_start].isalpha()
-            and last_closing_bracket > name_start
+    for surface, _ in _citation_surfaces(markdown):
+        if any(
+            _line_starts_commonmark_html_block(line)
+            for line in surface.split("\n")
         ):
             return True
-        cursor = markdown.find("<", cursor + 1)
+        if _surface_has_complete_html_tag(surface):
+            return True
     return False
 
 
