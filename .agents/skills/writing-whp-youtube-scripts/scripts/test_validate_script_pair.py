@@ -364,6 +364,54 @@ class ScriptPairTests(unittest.TestCase):
                     ],
                 )
 
+    def test_raw_purity_rejects_definitions_before_quoted_narration(
+        self,
+    ) -> None:
+        for case, definition_and_narration in (
+            (
+                "same-line destination",
+                "[study]: https://example.com/source\n"
+                "> This is narration.",
+            ),
+            (
+                "soft-wrapped label",
+                "[study\n"
+                "> source]: https://example.com/source\n"
+                "> This is narration.",
+            ),
+            (
+                "continued destination",
+                "[study\n"
+                "> source]:\n"
+                "> https://example.com/source\n"
+                "> This is narration.",
+            ),
+            (
+                "same-line optional title",
+                '[study]: https://example.com/source "Study title"\n'
+                "> This is narration.",
+            ),
+            (
+                "continued optional title",
+                "[study]: https://example.com/source\n"
+                '> "Study title"\n'
+                "> This is narration.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {definition_and_narration}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
     def test_raw_purity_requires_exactly_one_h1_title(self) -> None:
         raw_variants = {
             "missing": RAW.replace("# Episode\n\n", "", 1),
@@ -649,6 +697,16 @@ class ScriptPairTests(unittest.TestCase):
             (
                 "paragraph-start bracketed speech without colon",
                 "[the safer option] was still mine.",
+            ),
+            (
+                "multiline paragraph-start colon prose",
+                "[speech]: This is ordinary narration.\n"
+                "> It remains spoken punctuation.",
+            ),
+            (
+                "URL-shaped colon prose with trailing speech",
+                "[speech]: https://example.com/source was only an example.\n"
+                "> It remains spoken punctuation.",
             ),
         ):
             with self.subTest(case=case):

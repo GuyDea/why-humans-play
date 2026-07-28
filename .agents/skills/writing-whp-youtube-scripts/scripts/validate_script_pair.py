@@ -271,12 +271,25 @@ def _balanced_delimiter_pairs(
 
 
 def _reference_definition_tail_is_valid(tail: str) -> bool:
-    """Validate a same-line or soft-wrapped reference destination tail."""
+    """Validate only the bounded lines that can contain a definition."""
 
-    normalized = tail.replace("\n", " ")
+    line_end = tail.find("\n")
+    first_line = tail if line_end == -1 else tail[:line_end]
+    if first_line.strip(" \t"):
+        return REFERENCE_DEFINITION_TAIL_RE.fullmatch(first_line) is not None
+    if line_end == -1:
+        return True
+
+    continued_start = line_end + 1
+    continued_end = tail.find("\n", continued_start)
+    continued_line = (
+        tail[continued_start:]
+        if continued_end == -1
+        else tail[continued_start:continued_end]
+    )
     return (
-        not normalized.strip(" \t")
-        or REFERENCE_DEFINITION_TAIL_RE.fullmatch(normalized) is not None
+        REFERENCE_DEFINITION_TAIL_RE.fullmatch(continued_line)
+        is not None
     )
 
 
