@@ -54,8 +54,35 @@ EVIDENCE_RE = re.compile(
     r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
 MARKDOWN_LINK_RE = re.compile(r"!?\[[^\]\r\n]*\]\([^)\r\n]*\)")
+REFERENCE_LINK_RE = re.compile(
+    r"!?\[[^\]\r\n]+\]\[[^\]\r\n]*\]"
+)
+FOOTNOTE_RE = re.compile(r"\[\^[^\]\r\n]+\]")
+REFERENCE_DEFINITION_RE = re.compile(
+    r"^[ \t]{0,3}\[[^\]\r\n]+\]:[ \t]*"
+    r"(?:<[^>\r\n]+>|\S+)"
+    r"(?:[ \t]+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?"
+    r"[ \t]*$"
+)
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
+)
+NESTED_BLOCK_RE = re.compile(
+    r"^(?:"
+    r" {4}|\t|"
+    r" {0,3}(?:"
+    r"#{1,6}(?:[ \t]+|$)|"
+    r"[*+-][ \t]+|"
+    r"\d{1,9}[.)][ \t]+|"
+    r">|"
+    r"`{3,}|"
+    r"~{3,}"
+    r")"
+    r")"
+)
+HORIZONTAL_RULE_RE = re.compile(
+    r"^ {0,3}(?:(?:\*[ \t]*){3,}|(?:-[ \t]*){3,}|"
+    r"(?:_[ \t]*){3,})$"
 )
 HTML_TAG_RE = re.compile(
     r"<!--.*?-->|</?[A-Za-z][^>\r\n]*>",
@@ -209,8 +236,17 @@ def _storytelling_markup(spoken: str) -> StorytellingMarkup:
             marker_stack.append(("underline", 0, match.end()))
             continue
         if marker == "</u>":
-            if not marker_stack or marker_stack[-1][0] != "underline":
+            if not marker_stack:
                 malformed = True
+                continue
+            if marker_stack[-1][0] != "underline":
+                malformed = True
+                while (
+                    marker_stack
+                    and marker_stack[-1][0] != "underline"
+                ):
+                    marker_stack.pop()
+            if not marker_stack:
                 continue
             _, _, content_start = marker_stack.pop()
             content = surface[content_start : match.start()]
@@ -224,9 +260,18 @@ def _storytelling_markup(spoken: str) -> StorytellingMarkup:
         if marker_width not in {1, 2, 3}:
             malformed = True
             continue
+        can_open = (
+            match.end() < len(surface)
+            and not surface[match.end()].isspace()
+        )
+        can_close = (
+            match.start() > 0
+            and not surface[match.start() - 1].isspace()
+        )
         if (
             marker_stack
             and marker_stack[-1][:2] == ("emphasis", marker_width)
+            and can_close
         ):
             _, _, content_start = marker_stack.pop()
             content = surface[content_start : match.start()]
@@ -240,12 +285,14 @@ def _storytelling_markup(spoken: str) -> StorytellingMarkup:
         elif any(
             kind == "emphasis" and width == marker_width
             for kind, width, _ in marker_stack
-        ):
+        ) and can_close:
             malformed = True
-        else:
+        elif can_open:
             marker_stack.append(
                 ("emphasis", marker_width, match.end())
             )
+        else:
+            malformed = True
     if marker_stack:
         malformed = True
 
@@ -267,6 +314,37 @@ def _raw_blockquote_passages(markdown: str) -> list[str]:
     if current:
         passages.append("\n".join(current))
     return passages
+
+
+def _is_padded_emphasis(line: str) -> bool:
+    """Return whether matching markers have inner boundary whitespace."""
+
+    for width in (3, 2, 1):
+        marker = "*" * width
+        if (
+            len(line) > 2 * width
+            and line.startswith(marker)
+            and line.endswith(marker)
+            and (
+                line[width] in " \t"
+                or line[-width - 1] in " \t"
+            )
+        ):
+            return True
+    return False
+
+
+def _has_nested_block_structure(passage: str) -> bool:
+    """Return whether quoted content starts a nested Markdown block."""
+
+    for line in passage.splitlines():
+        if HORIZONTAL_RULE_RE.fullmatch(line):
+            return True
+        if _is_padded_emphasis(line):
+            continue
+        if NESTED_BLOCK_RE.match(line):
+            return True
+    return False
 
 
 def _validate_raw(markdown: str) -> list[str]:
@@ -326,7 +404,20 @@ def _validate_raw(markdown: str) -> list[str]:
         )
 
     without_evidence = EVIDENCE_RE.sub("", body)
-    if MARKDOWN_LINK_RE.search(without_evidence):
+    has_reference_definition = any(
+        REFERENCE_DEFINITION_RE.fullmatch(
+            _blockquote_spoken(line)
+            if line.startswith(">")
+            else line
+        )
+        for line in body_lines
+    )
+    if (
+        MARKDOWN_LINK_RE.search(without_evidence)
+        or REFERENCE_LINK_RE.search(without_evidence)
+        or FOOTNOTE_RE.search(without_evidence)
+        or has_reference_definition
+    ):
         _append_error(
             errors,
             "raw script cannot contain citations or Markdown links",
@@ -344,7 +435,19 @@ def _validate_raw(markdown: str) -> list[str]:
             "raw script cannot contain unsupported HTML tags",
         )
 
-    for passage in _raw_blockquote_passages(body):
+    raw_passages = _raw_blockquote_passages(body)
+    if any(
+        _has_nested_block_structure(passage)
+        for passage in raw_passages
+    ):
+        _append_error(
+            errors,
+            "raw script cannot contain unsupported Markdown markup",
+        )
+
+    for passage in raw_passages:
+        if _has_nested_block_structure(passage):
+            continue
         if _storytelling_markup(passage).malformed:
             _append_error(
                 errors,

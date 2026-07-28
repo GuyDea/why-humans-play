@@ -11,7 +11,12 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(SCRIPT_DIR))
 
-from validate_script_pair import EVIDENCE_RE, resolve_pair, validate_pair
+from validate_script_pair import (
+    EVIDENCE_RE,
+    _has_nested_block_structure,
+    resolve_pair,
+    validate_pair,
+)
 
 
 RAW = """# Episode
@@ -360,6 +365,66 @@ class ScriptPairTests(unittest.TestCase):
             with self.subTest(case=case):
                 self.assertEqual(self.validation_errors(raw=raw), [expected])
 
+    def test_raw_purity_rejects_reference_links_and_footnotes(self) -> None:
+        for case, citation in (
+            ("full reference link", "See [the source][study]."),
+            ("collapsed reference link", "See [the source][]."),
+            ("reference image", "See ![the chart][asset]."),
+            ("footnote citation", "This is supported.[^1]"),
+            (
+                "reference definition",
+                "[study]: https://example.com/source",
+            ),
+            ("footnote definition", "[^1]: The supporting source."),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {citation}",
+                )
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
+    def test_raw_purity_allows_ordinary_spoken_bracket_text(self) -> None:
+        spoken = "But I chose [the safer option]."
+        raw = RAW.replace(
+            "But the next result changed the question.",
+            spoken,
+        )
+        extended = EXTENDED.replace(
+            "But the next result changed the question.",
+            spoken,
+        )
+
+        self.assertEqual(
+            self.validation_errors(raw=raw, extended=extended),
+            [],
+        )
+
+    def test_raw_purity_does_not_mistake_bracket_colon_prose_for_a_definition(
+        self,
+    ) -> None:
+        spoken = "[the safer option]: I chose it."
+        raw = RAW.replace(
+            "> *But the next result changed the question.*",
+            f"> {spoken}",
+        )
+        extended = EXTENDED.replace(
+            "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+            "> *But the next result changed the question.*",
+            f"> {spoken}",
+        )
+
+        self.assertEqual(
+            self.validation_errors(raw=raw, extended=extended),
+            [],
+        )
+
     def test_raw_purity_rejects_other_markdown_presentation_markup(self) -> None:
         for case, replacement in (
             ("underscore emphasis", "_Could this happen to you?_"),
@@ -378,6 +443,37 @@ class ScriptPairTests(unittest.TestCase):
                         "Markdown markup"
                     ],
                 )
+
+    def test_raw_purity_rejects_nested_markdown_block_structures(self) -> None:
+        for case, nested_block in (
+            ("ATX heading", "# Hidden heading"),
+            ("dash list item", "- Hidden list item"),
+            ("plus list item", "+ Hidden list item"),
+            ("asterisk list item", "* Hidden list item"),
+            ("numbered list item", "1. Hidden list item"),
+            ("task list item", "- [ ] Hidden task"),
+            ("nested quote", "> Hidden quote"),
+            ("backtick fence", "```python"),
+            ("tilde fence", "~~~"),
+            ("horizontal rule", "---"),
+            ("spaced asterisk horizontal rule", "* * *"),
+            ("indented code", "    hidden_code()"),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {nested_block}",
+                )
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain unsupported "
+                        "Markdown markup"
+                    ],
+                )
+
+    def test_raw_purity_does_not_treat_italic_narration_as_a_list(self) -> None:
+        self.assertEqual(self.validation_errors(), [])
 
     def test_raw_purity_allows_ordinary_spoken_brackets_and_punctuation(self) -> None:
         spoken = "Could [this] happen—to player_one (really)?"
@@ -412,6 +508,7 @@ class ScriptPairTests(unittest.TestCase):
         )
 
         for case, raw, extended in (
+            ("tight single and double markers", RAW, EXTENDED),
             ("inline", inline_raw, inline_extended),
             ("triple", triple_raw, triple_extended),
         ):
@@ -431,6 +528,10 @@ class ScriptPairTests(unittest.TestCase):
                 "*But the next result changed the question.*",
                 "*But the next result changed the question.",
             ),
+            "empty italics": RAW.replace(
+                "*But the next result changed the question.*",
+                "* *",
+            ),
             "crossed underline and bold": RAW.replace(
                 "<u>**Could this happen to you?**</u>",
                 "<u>**Could this happen to you?</u>**",
@@ -442,6 +543,53 @@ class ScriptPairTests(unittest.TestCase):
                     self.validation_errors(raw=raw),
                     ["malformed or empty storytelling markup"],
                 )
+
+    def test_storytelling_markup_requires_nonwhitespace_flanking(self) -> None:
+        padded_italic_raw = RAW.replace(
+            "*But the next result changed the question.*",
+            "* malformed italic *",
+        )
+        padded_italic_extended = EXTENDED.replace(
+            "*But the next result changed the question.*",
+            "* malformed italic *",
+        )
+        padded_bold_raw = RAW.replace(
+            "<u>**Could this happen to you?**</u>",
+            "<u>** malformed bold **</u>",
+        )
+        padded_bold_extended = EXTENDED.replace(
+            "<u>**Could this happen to you?**</u>",
+            "<u>** malformed bold **</u>",
+        )
+
+        cases = (
+            (
+                "padded italic",
+                padded_italic_raw,
+                padded_italic_extended,
+                "MINI-HOOK passage must be italic and not underlined",
+            ),
+            (
+                "padded bold",
+                padded_bold_raw,
+                padded_bold_extended,
+                "LOCKED WORDING requires a bold passage",
+            ),
+        )
+        for case, raw, extended, mapping_error in cases:
+            with self.subTest(case=case):
+                errors = self.validation_errors(
+                    raw=raw,
+                    extended=extended,
+                )
+                self.assertEqual(
+                    set(errors),
+                    {
+                        "malformed or empty storytelling markup",
+                        mapping_error,
+                    },
+                )
+                self.assertEqual(len(errors), 2)
 
     def test_storytelling_markup_ignores_evidence_url_punctuation(self) -> None:
         extended = EXTENDED.replace(
@@ -683,6 +831,20 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             1.0,
             f"evidence scan took {elapsed:.3f}s for 50,000 spaces",
+        )
+
+    def test_nested_markup_scan_is_linear_on_a_long_list_line(self) -> None:
+        passage = "*" + " " * 20_000 + "not-emphasis"
+
+        started = time.perf_counter()
+        is_nested = _has_nested_block_structure(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertTrue(is_nested)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"nested markup scan took {elapsed:.3f}s",
         )
 
     def test_evidence_removal_keeps_line_endings(self) -> None:
