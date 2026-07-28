@@ -1,6 +1,6 @@
 # WHP Paired Script Artifacts and Episode Folders
 
-- **Status:** DESIGN-APPROVED — AWAITING WRITTEN-SPEC REVIEW
+- **Status:** APPROVED
 - **Date:** 2026-07-28
 - **Branch:** `episode1-story-rebuild`
 - **Scope:** WHP episode organization and script artifacts at blueprint, draft, and final
