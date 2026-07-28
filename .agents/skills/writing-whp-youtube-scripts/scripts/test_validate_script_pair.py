@@ -1,0 +1,261 @@
+from __future__ import annotations
+
+import json
+import subprocess
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR))
+
+from validate_script_pair import resolve_pair, validate_pair
+
+
+RAW = """# Episode
+
+## 1. Opening
+
+> <u>**Could this happen to you?**</u>
+
+> *But the next result changed the question.*
+"""
+
+EXTENDED = """# Episode
+
+## 1. Opening
+
+[MAIN HOOK | LOCKED WORDING — Opens the central personal-risk question.]
+
+> <u>**Could this happen to you?**</u>
+
+[MINI-HOOK — Turns the opening into the next evidence need.]
+
+> *But the next result changed the question.*
+
+## Appendix
+
+### Blueprint metadata
+
+- **Status:** BLUEPRINT
+
+### Factual boundary and unresolved dependencies
+
+- No unresolved dependency changes the opening promise.
+
+### Intro design record
+
+The opening asks the central question.
+
+### Body logic map
+
+- Beat 02 develops the evidence.
+
+### Promise and loop payoff map
+
+- L-01 pays in Beat 02.
+
+### Approval state
+
+- Awaiting blueprint approval.
+"""
+
+DRIFT_ERROR = "extended narration does not exactly match raw"
+
+
+class ScriptPairTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.tempdir = tempfile.TemporaryDirectory()
+
+    def tearDown(self) -> None:
+        self.tempdir.cleanup()
+
+    def make_pair(
+        self,
+        raw: str = RAW,
+        extended: str = EXTENDED,
+        *,
+        stage: str = "blueprint",
+    ) -> Path:
+        stage_dir = (
+            Path(self.tempdir.name)
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-example"
+            / stage
+        )
+        stage_dir.mkdir(parents=True)
+        (stage_dir / "script.raw.md").write_text(raw, encoding="utf-8")
+        (stage_dir / "script.extended.md").write_text(
+            extended,
+            encoding="utf-8",
+        )
+        return stage_dir
+
+    def run_cli(
+        self,
+        target: Path,
+        *flags: str,
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [
+                sys.executable,
+                str(SCRIPT_DIR / "validate_script_pair.py"),
+                *flags,
+                str(target),
+            ],
+            cwd=self.tempdir.name,
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=5,
+        )
+
+    def test_resolves_either_file_or_stage_directory(self) -> None:
+        stage_dir = self.make_pair()
+        for target in (
+            stage_dir,
+            stage_dir / "script.raw.md",
+            stage_dir / "script.extended.md",
+        ):
+            with self.subTest(target=target):
+                pair = resolve_pair(target)
+                self.assertEqual(pair.stage, "blueprint")
+                self.assertEqual(pair.episode_id, "ep001-example")
+
+    def test_rejects_invalid_episode_stage_and_filename(self) -> None:
+        invalid = (
+            Path(self.tempdir.name)
+            / "whp-youtube"
+            / "episodes"
+            / "episode-1-example"
+            / "blueprint",
+            Path(self.tempdir.name)
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-example"
+            / "predraft",
+            Path(self.tempdir.name)
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-example"
+            / "blueprint"
+            / "other.md",
+        )
+        for target in invalid:
+            with self.subTest(target=target):
+                with self.assertRaises(ValueError):
+                    resolve_pair(target)
+
+    def test_reports_either_missing_pair_half(self) -> None:
+        stage_dir = self.make_pair()
+        contents = {
+            "script.raw.md": RAW,
+            "script.extended.md": EXTENDED,
+        }
+        for filename in contents:
+            with self.subTest(filename=filename):
+                path = stage_dir / filename
+                path.unlink()
+                with self.assertRaises(FileNotFoundError):
+                    resolve_pair(stage_dir)
+                path.write_text(contents[filename], encoding="utf-8")
+
+    def test_rejects_extra_entries_in_an_active_stage(self) -> None:
+        stage_dir = self.make_pair()
+        (stage_dir / "notes.md").write_text("No sidecars.", encoding="utf-8")
+
+        with self.assertRaises(ValueError):
+            resolve_pair(stage_dir)
+
+    def test_accepts_annotations_and_evidence_without_narration_drift(self) -> None:
+        stage_dir = self.make_pair(
+            extended=EXTENDED.replace(
+                "Could this happen to you?",
+                "Could this happen to you? [F-001](https://example.com)",
+            )
+        )
+
+        self.assertEqual(validate_pair(resolve_pair(stage_dir)), [])
+
+    def test_reports_spoken_or_formatting_drift(self) -> None:
+        stage_dir = self.make_pair(
+            extended=EXTENDED.replace("next result", "later result")
+        )
+
+        self.assertEqual(validate_pair(resolve_pair(stage_dir)), [DRIFT_ERROR])
+
+    def test_reports_paragraph_spacing_drift(self) -> None:
+        stage_dir = self.make_pair(
+            extended=EXTENDED.replace(
+                "> *But the next result",
+                "\n> *But the next result",
+            )
+        )
+
+        self.assertEqual(validate_pair(resolve_pair(stage_dir)), [DRIFT_ERROR])
+
+    def test_cli_accepts_stage_or_either_pair_file(self) -> None:
+        stage_dir = self.make_pair()
+        for target in (
+            stage_dir,
+            stage_dir / "script.raw.md",
+            stage_dir / "script.extended.md",
+        ):
+            with self.subTest(target=target):
+                result = self.run_cli(target)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(
+                    result.stdout,
+                    "PASS: script pair is exactly synchronized\n",
+                )
+
+    def test_cli_json_accepts_separator_before_target(self) -> None:
+        stage_dir = self.make_pair()
+
+        result = self.run_cli(stage_dir / "script.raw.md", "--json", "--")
+
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {"ok": True, "errors": []},
+        )
+
+    def test_cli_validation_errors_return_1(self) -> None:
+        stage_dir = self.make_pair(
+            extended=EXTENDED.replace("next result", "later result")
+        )
+
+        result = self.run_cli(stage_dir, "--json")
+
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(
+            json.loads(result.stdout),
+            {
+                "ok": False,
+                "errors": [{"message": DRIFT_ERROR, "line": None}],
+            },
+        )
+
+    def test_cli_invalid_or_unreadable_input_returns_2(self) -> None:
+        target = (
+            Path(self.tempdir.name)
+            / "whp-youtube"
+            / "episodes"
+            / "ep001-example"
+            / "blueprint"
+        )
+
+        result = self.run_cli(target, "--json")
+
+        self.assertEqual(result.returncode, 2, result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertFalse(payload["ok"])
+        self.assertEqual(len(payload["errors"]), 1)
+        self.assertIn("cannot validate input", payload["errors"][0]["message"])
+        self.assertIsNone(payload["errors"][0]["line"])
+
+
+if __name__ == "__main__":
+    unittest.main()
