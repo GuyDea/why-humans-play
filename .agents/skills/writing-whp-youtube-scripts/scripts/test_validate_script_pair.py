@@ -412,6 +412,133 @@ class ScriptPairTests(unittest.TestCase):
                     ],
                 )
 
+    def test_raw_purity_rejects_multiline_reference_titles(
+        self,
+    ) -> None:
+        for case, definition in (
+            (
+                "double-quoted title",
+                '[study]: /source "A long\n> title"',
+            ),
+            (
+                "single-quoted title",
+                "[study]: /source 'A long\n> title'",
+            ),
+            (
+                "parenthesized title",
+                "[study]: /source (A long\n> title)",
+            ),
+            (
+                "wrapped label",
+                '[study\n> source]: /source "A long\n> title"',
+            ),
+            (
+                "continued destination and title",
+                '[study]:\n> /source "A long\n> title"',
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {definition}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
+    def test_raw_purity_rejects_escaped_reference_title_delimiters(
+        self,
+    ) -> None:
+        for case, definition in (
+            (
+                "double-quoted same-line title",
+                r'[study]: /source "A \"quoted\" title"',
+            ),
+            (
+                "single-quoted same-line title",
+                r"[study]: /source 'A \'quoted\' title'",
+            ),
+            (
+                "parenthesized same-line title",
+                r"[study]: /source (A \) literal title)",
+            ),
+            (
+                "double-quoted multiline title",
+                r'[study]: /source "A \"quoted'
+                "\n"
+                r'> title\" here"',
+            ),
+            (
+                "single-quoted multiline title",
+                r"[study]: /source 'A \'quoted"
+                "\n"
+                r"> title\' here'",
+            ),
+            (
+                "parenthesized multiline title",
+                r"[study]: /source (A \) literal"
+                "\n"
+                r"> title\) here)",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {definition}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
+    def test_raw_purity_rejects_multiline_definitions_before_narration(
+        self,
+    ) -> None:
+        for case, definition_and_narration in (
+            (
+                "same-line destination",
+                '[study]: /source "A long\n'
+                '> title"\n'
+                "> This is ordinary narration.",
+            ),
+            (
+                "wrapped label",
+                '[study\n'
+                '> source]: /source "A long\n'
+                '> title"\n'
+                "> This is ordinary narration.",
+            ),
+            (
+                "continued destination",
+                "[study]:\n"
+                '> /source "A long\n'
+                '> title"\n'
+                "> This is ordinary narration.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {definition_and_narration}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    [
+                        "raw script cannot contain citations or "
+                        "Markdown links"
+                    ],
+                )
+
     def test_raw_purity_requires_exactly_one_h1_title(self) -> None:
         raw_variants = {
             "missing": RAW.replace("# Episode\n\n", "", 1),
@@ -707,6 +834,67 @@ class ScriptPairTests(unittest.TestCase):
                 "URL-shaped colon prose with trailing speech",
                 "[speech]: https://example.com/source was only an example.\n"
                 "> It remains spoken punctuation.",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
+    def test_raw_purity_allows_invalid_reference_title_shapes(
+        self,
+    ) -> None:
+        for case, spoken in (
+            (
+                "unterminated double-quoted title",
+                '[speech]: /source "unfinished',
+            ),
+            (
+                "unterminated single-quoted title",
+                "[speech]: /source 'unfinished",
+            ),
+            (
+                "unterminated parenthesized title",
+                "[speech]: /source (unfinished",
+            ),
+            (
+                "unterminated multiline double-quoted title",
+                '[speech]: /source "unfinished\n> title',
+            ),
+            (
+                "unterminated multiline single-quoted title",
+                "[speech]: /source 'unfinished\n> title",
+            ),
+            (
+                "unterminated multiline parenthesized title",
+                "[speech]: /source (unfinished\n> title",
+            ),
+            (
+                "unescaped nested double quote",
+                '[speech]: /source "outer "inner" title"',
+            ),
+            (
+                "unescaped nested single quote",
+                "[speech]: /source 'outer 'inner' title'",
+            ),
+            (
+                "unescaped nested parenthesis",
+                "[speech]: /source (outer (inner) title)",
+            ),
+            (
+                "title split by a blank quoted paragraph",
+                '[speech]: /source "open\n>\n> close"',
             ),
         ):
             with self.subTest(case=case):

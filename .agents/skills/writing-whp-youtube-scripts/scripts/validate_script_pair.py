@@ -53,12 +53,7 @@ SUPPORTING_STYLE_TAGS = frozenset(
 EVIDENCE_RE = re.compile(
     r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
 )
-REFERENCE_DEFINITION_TAIL_RE = re.compile(
-    r"^[ \t]*"
-    r"(?:<[^>\r\n]+>|\S+)"
-    r"(?:[ \t]+(?:\"[^\"]*\"|'[^']*'|\([^)]*\)))?"
-    r"[ \t]*$"
-)
+REFERENCE_TITLE_CLOSERS = {'"': '"', "'": "'", "(": ")"}
 UNSUPPORTED_MARKDOWN_RE = re.compile(
     r"`|~~|(?<!\w)_{1,3}(?=\S)|(?<=\S)_{1,3}(?!\w)"
 )
@@ -270,27 +265,117 @@ def _balanced_delimiter_pairs(
     return bracket_pairs, parenthesis_pairs
 
 
+def _skip_horizontal_space(text: str, start: int) -> int:
+    """Return the first index at or after start that is not a space or tab."""
+
+    cursor = start
+    while cursor < len(text) and text[cursor] in " \t":
+        cursor += 1
+    return cursor
+
+
+def _reference_destination_end(tail: str, start: int) -> int | None:
+    """Return the end of one CommonMark link destination, if complete."""
+
+    if start >= len(tail):
+        return None
+
+    if tail[start] == "<":
+        cursor = start + 1
+        escaped = False
+        while cursor < len(tail):
+            character = tail[cursor]
+            if character == "\n" or ord(character) < 32:
+                return None
+            if escaped:
+                escaped = False
+            elif character == "\\":
+                escaped = True
+            elif character == "<":
+                return None
+            elif character == ">":
+                return cursor + 1
+            cursor += 1
+        return None
+
+    cursor = start
+    parenthesis_depth = 0
+    escaped = False
+    while cursor < len(tail):
+        character = tail[cursor]
+        if character in " \t\n":
+            break
+        if ord(character) < 32 or ord(character) == 127:
+            return None
+        if escaped:
+            escaped = False
+        elif character == "\\":
+            escaped = True
+        elif character == "(":
+            parenthesis_depth += 1
+        elif character == ")":
+            if parenthesis_depth == 0:
+                return None
+            parenthesis_depth -= 1
+        cursor += 1
+
+    if cursor == start or parenthesis_depth:
+        return None
+    return cursor
+
+
+def _reference_title_is_valid(tail: str, start: int) -> bool:
+    """Consume one escape-aware title through its definition-ending line."""
+
+    opener = tail[start]
+    closer = REFERENCE_TITLE_CLOSERS[opener]
+    cursor = start + 1
+    escaped = False
+
+    while cursor < len(tail):
+        character = tail[cursor]
+        if escaped:
+            escaped = False
+        elif character == "\\":
+            escaped = True
+        elif opener == "(" and character == "(":
+            return False
+        elif character == closer:
+            cursor = _skip_horizontal_space(tail, cursor + 1)
+            return cursor == len(tail) or tail[cursor] == "\n"
+        cursor += 1
+
+    return False
+
+
 def _reference_definition_tail_is_valid(tail: str) -> bool:
-    """Validate only the bounded lines that can contain a definition."""
+    """Parse one bounded definition tail without consuming later narration."""
 
-    line_end = tail.find("\n")
-    first_line = tail if line_end == -1 else tail[:line_end]
-    if first_line.strip(" \t"):
-        return REFERENCE_DEFINITION_TAIL_RE.fullmatch(first_line) is not None
-    if line_end == -1:
+    cursor = _skip_horizontal_space(tail, 0)
+    if cursor == len(tail):
+        # Raw rejects even a bare reference-definition marker.
         return True
+    if tail[cursor] == "\n":
+        cursor = _skip_horizontal_space(tail, cursor + 1)
+        if cursor == len(tail):
+            return True
+        if tail[cursor] == "\n":
+            return False
 
-    continued_start = line_end + 1
-    continued_end = tail.find("\n", continued_start)
-    continued_line = (
-        tail[continued_start:]
-        if continued_end == -1
-        else tail[continued_start:continued_end]
-    )
-    return (
-        REFERENCE_DEFINITION_TAIL_RE.fullmatch(continued_line)
-        is not None
-    )
+    destination_end = _reference_destination_end(tail, cursor)
+    if destination_end is None:
+        return False
+    if destination_end == len(tail) or tail[destination_end] == "\n":
+        return True
+    if tail[destination_end] not in " \t":
+        return False
+
+    cursor = _skip_horizontal_space(tail, destination_end)
+    if cursor == len(tail) or tail[cursor] == "\n":
+        return True
+    if tail[cursor] not in REFERENCE_TITLE_CLOSERS:
+        return False
+    return _reference_title_is_valid(tail, cursor)
 
 
 def _surface_has_raw_citation(
