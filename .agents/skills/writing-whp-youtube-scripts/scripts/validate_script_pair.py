@@ -581,9 +581,29 @@ def _skip_html_space(text: str, start: int) -> int:
     return cursor
 
 
-def _html_scan_resume(text: str, cursor: int, start: int) -> int:
-    """Advance a failed tag scan without skipping a new angle opener."""
+def _next_unescaped_html_opener(
+    text: str,
+    start: int,
+    stop: int,
+) -> int | None:
+    """Return the next Markdown-active opening angle in a bounded range."""
 
+    cursor = text.find("<", start, stop)
+    while cursor != -1 and _is_escaped(text, cursor):
+        cursor = text.find("<", cursor + 1, stop)
+    return None if cursor == -1 else cursor
+
+
+def _html_scan_resume(
+    text: str,
+    cursor: int,
+    start: int,
+    inner_opener: int | None = None,
+) -> int:
+    """Advance a failed tag scan without losing an inner angle opener."""
+
+    if inner_opener is not None:
+        return inner_opener
     if cursor < len(text) and text[cursor] == "<":
         return cursor
     return max(start + 1, min(cursor + 1, len(text)))
@@ -610,6 +630,7 @@ def _complete_html_tag_scan(
     ):
         cursor += 1
 
+    inner_opener: int | None = None
     if closing:
         cursor = _skip_html_space(text, cursor)
         if cursor < len(text) and text[cursor] == ">":
@@ -620,20 +641,20 @@ def _complete_html_tag_scan(
         whitespace_start = cursor
         cursor = _skip_html_space(text, cursor)
         if cursor >= len(text):
-            return False, len(text)
+            return False, _html_scan_resume(text, cursor, start, inner_opener)
         if text[cursor] == ">":
             return True, cursor + 1
         if text.startswith("/>", cursor):
             return True, cursor + 2
         if cursor == whitespace_start:
-            return False, _html_scan_resume(text, cursor, start)
+            return False, _html_scan_resume(text, cursor, start, inner_opener)
 
         character = text[cursor]
         if not (
             _is_ascii_letter(character)
             or character in "_:"
         ):
-            return False, _html_scan_resume(text, cursor, start)
+            return False, _html_scan_resume(text, cursor, start, inner_opener)
         cursor += 1
         while cursor < len(text):
             character = text[cursor]
@@ -654,17 +675,26 @@ def _complete_html_tag_scan(
 
         cursor = _skip_html_space(text, equals + 1)
         if cursor >= len(text):
-            return False, len(text)
+            return False, _html_scan_resume(text, cursor, start, inner_opener)
         quote = text[cursor] if text[cursor] in "\"'" else None
         if quote is not None:
             cursor += 1
             closing_quote = text.find(quote, cursor)
+            quote_stop = (
+                len(text)
+                if closing_quote == -1
+                else closing_quote
+            )
+            quoted_opener = _next_unescaped_html_opener(
+                text,
+                cursor,
+                quote_stop,
+            )
+            if inner_opener is None and quoted_opener is not None:
+                inner_opener = quoted_opener
             if closing_quote == -1:
-                next_opener = text.find("<", cursor)
-                return False, (
-                    len(text)
-                    if next_opener == -1
-                    else next_opener
+                return False, _html_scan_resume(
+                    text, len(text), start, inner_opener
                 )
             cursor = closing_quote + 1
             continue
@@ -676,21 +706,29 @@ def _complete_html_tag_scan(
         ):
             cursor += 1
         if cursor == value_start:
-            return False, _html_scan_resume(text, cursor, start)
+            return False, _html_scan_resume(text, cursor, start, inner_opener)
 
-    return False, len(text)
+    return False, _html_scan_resume(text, cursor, start, inner_opener)
 
 
 def _surface_has_complete_html_tag(surface: str) -> bool:
     """Detect complete raw HTML tags on one bounded Markdown surface."""
 
-    cursor = surface.find("<")
-    while cursor != -1:
+    cursor = _next_unescaped_html_opener(surface, 0, len(surface))
+    while cursor is not None:
         if surface.startswith("<u>", cursor):
-            cursor = surface.find("<", cursor + len("<u>"))
+            cursor = _next_unescaped_html_opener(
+                surface,
+                cursor + len("<u>"),
+                len(surface),
+            )
             continue
         if surface.startswith("</u>", cursor):
-            cursor = surface.find("<", cursor + len("</u>"))
+            cursor = _next_unescaped_html_opener(
+                surface,
+                cursor + len("</u>"),
+                len(surface),
+            )
             continue
         if surface.startswith(("<!--", "<?", "<!"), cursor):
             return True
@@ -698,7 +736,11 @@ def _surface_has_complete_html_tag(surface: str) -> bool:
         complete, resume = _complete_html_tag_scan(surface, cursor)
         if complete:
             return True
-        cursor = surface.find("<", resume)
+        cursor = _next_unescaped_html_opener(
+            surface,
+            resume,
+            len(surface),
+        )
     return False
 
 

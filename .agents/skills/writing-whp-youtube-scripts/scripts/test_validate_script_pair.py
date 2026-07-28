@@ -716,6 +716,84 @@ class ScriptPairTests(unittest.TestCase):
                     ["raw script cannot contain unsupported HTML tags"],
                 )
 
+    def test_raw_purity_rejects_html_hidden_in_closed_attribute_of_malformed_tag(
+        self,
+    ) -> None:
+        for case, markup in (
+            (
+                "double-quoted standard tag before EOF",
+                '<custom title="<em>hidden</em>"',
+            ),
+            (
+                "single-quoted custom tag before EOF",
+                "<custom title='<widget>hidden</widget>'",
+            ),
+            (
+                "comment before adjacent punctuation",
+                '<custom title="<!-- hidden -->"!',
+            ),
+            (
+                "processing instruction before invalid attribute start",
+                "<custom title='<?hidden?>' 9bad>",
+            ),
+            (
+                "declaration before stray equals",
+                '<custom title="<!DOCTYPE html>" =broken>',
+            ),
+            (
+                "CDATA before invalid attribute punctuation",
+                "<custom title='<![CDATA[hidden]]>' !broken>",
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {markup}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw),
+                    ["raw script cannot contain unsupported HTML tags"],
+                )
+
+    def test_raw_purity_preserves_closed_attribute_recovery_controls(
+        self,
+    ) -> None:
+        valid_outer = RAW.replace(
+            "> *But the next result changed the question.*",
+            '> <custom title="<2 ordinary>">',
+        )
+        self.assertEqual(
+            self.validation_errors(raw=valid_outer),
+            ["raw script cannot contain unsupported HTML tags"],
+        )
+
+        for case, spoken in (
+            (
+                "malformed outer with ordinary angle text",
+                '<custom title="<2 ordinary>"!',
+            ),
+            (
+                "escaped inner opening angle",
+                r'<custom title="\<em>"!',
+            ),
+        ):
+            with self.subTest(case=case):
+                raw = RAW.replace(
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+                extended = EXTENDED.replace(
+                    "[MINI-HOOK — Turns the opening into the next evidence need.]\n\n"
+                    "> *But the next result changed the question.*",
+                    f"> {spoken}",
+                )
+
+                self.assertEqual(
+                    self.validation_errors(raw=raw, extended=extended),
+                    [],
+                )
+
     def test_raw_purity_allows_incomplete_html_without_hidden_construct(
         self,
     ) -> None:
@@ -1858,6 +1936,26 @@ class ScriptPairTests(unittest.TestCase):
             elapsed,
             0.5,
             f"raw HTML recovery took {elapsed:.3f}s",
+        )
+
+    def test_raw_html_recovery_is_linear_for_nested_malformed_candidates(
+        self,
+    ) -> None:
+        passage = (
+            "> <outer title='"
+            + '<nested title="<2>"! ' * 20_000
+            + "'!"
+        )
+
+        started = time.perf_counter()
+        has_html = _has_unsupported_html(passage)
+        elapsed = time.perf_counter() - started
+
+        self.assertFalse(has_html)
+        self.assertLess(
+            elapsed,
+            0.5,
+            f"nested raw HTML recovery took {elapsed:.3f}s",
         )
 
     def test_autolink_scan_is_linear_on_many_incomplete_angles(
