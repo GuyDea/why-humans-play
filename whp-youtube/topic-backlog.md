@@ -2,8 +2,8 @@
 
 - **Status:** active working material, adopted 2026-07-29. Ranked by hook ceiling ×
   evidence strength × WHP fit; ranking is advisory, selection is Martin's.
-- **Current front-runner for the open EP2 slot (not yet selected):** #4 *Why you didn't
-  study*.
+- **Selected for EP2 (2026-07-29):** #4 *Why you didn't study* — now in the episode
+  pipeline; remaining candidates stay ranked for later slots.
 - Every proof case below is a verified source lead at ideation depth; full claim
   verification remains Final-stage work under the writing skill.
 - Hook lines are rubric-tested sketches (viewer-in-sentence, unclosable gap, edge
@@ -42,7 +42,7 @@
 - **Hook sketch:** "There's a video game hospitals have used on car-crash victims. On
   purpose."
 
-### 4. Why you didn't study — FRONT-RUNNER
+### 4. Why you didn't study — SELECTED (EP2, 2026-07-29)
 - **Nerve:** everyone remembers not preparing for something that mattered and never
   understanding why.
 - **Gap:** the viewer's model has no answer for deliberate self-sabotage; the mundane

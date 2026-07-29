@@ -52,12 +52,11 @@ accepted current launch sequence, dated launch research, and historical episode 
    even when it follows every rule*), which remains retired from the sequence; its
    research and drafts stay in git history and dated planning documents for possible
    future re-ranking.
-2. **EP2 — slot open (2026-07-29).** The earlier accepted premise (*What job interviews
-   actually test*) was rejected as too weak for the target audience, and a developed
-   sports-betting premise was parked at Martin's request
-   ([parked architecture](drafts/parked-betting-on-you-architecture.md)). The live
-   candidate shortlist is [`topic-backlog.md`](topic-backlog.md); current front-runner,
-   not yet selected: *Why you didn't study* (self-handicapping).
+2. **EP2 — Why you didn't study (selected 2026-07-29).** Decode self-handicapping —
+   losing the stated game on purpose to win the identity game — anchored in Berglas &
+   Jones 1978. Selected from [`topic-backlog.md`](topic-backlog.md) after the earlier
+   interviews premise was rejected and a developed sports-betting premise was parked
+   ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support.
 4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a

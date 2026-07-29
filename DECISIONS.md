@@ -1916,3 +1916,15 @@ self-handicapping candidate as the one he liked most.
 **Documents:** `whp-youtube/topic-backlog.md` (new), `whp-youtube/STEERING.md` (EP2
 entry points at the backlog and front-runner), `BRAND.md` (sequence note points at the
 backlog).
+
+## 2026-07-29 — EP2 selected: Why you didn't study (self-handicapping)
+
+**Decision:** *Why you didn't study* (self-handicapping, anchored in Berglas & Jones
+1978) is selected as EP2 and enters the episode pipeline at the Architecture stage.
+
+**Rationale:** Martin's explicit selection from the adopted ten-candidate backlog; it
+was already the recorded front-runner. The Architecture run doubles as the field test
+for the proposed mine-and-kill-test connection process before any skill amendment.
+
+**Documents:** `whp-youtube/STEERING.md` (EP2 entry), `whp-youtube/topic-backlog.md`
+(candidate marked selected).
