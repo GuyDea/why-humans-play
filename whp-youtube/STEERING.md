@@ -160,7 +160,7 @@ recreating it.
   `blueprint/script.extended.md` carries its annotated mirror and bullet-only body logic
   map, never drafted body narration. Design the intro from every applicable,
   evidence-earned hook method and map every opening promise to a body payoff. No
-  independent AI review is required during Phase 0 unless Martin explicitly requests one
+  independent AI review is required during the Blueprint stage unless Martin explicitly requests one
   for the current artifact. Follow
   [the paired-script owner](../.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md)
   for paths, views, validation, and promotion, and
@@ -434,7 +434,7 @@ millions on junk science).
   human–technology intersections qualify through their incentive structure, not through
   forced play framing.
 - **Steelman, then cite.** Name the researcher, the study, the mechanism.
-- **Keep facts traceable inside the production script.** In Phase 2, map every factual
+- **Keep facts traceable inside the production script.** In the Final stage, map every factual
   narration sentence or separable factual clause to an `F-###` claim entry in the matching
   appendix beat that quotes the supported wording. In the evidence-backed production
   version, append a clickable `[F-###](Original URL)` review indicator immediately after

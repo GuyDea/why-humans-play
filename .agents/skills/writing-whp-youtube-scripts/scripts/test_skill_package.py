@@ -231,7 +231,7 @@ class SkillPackageTests(unittest.TestCase):
             "one polished spoken intro",
             "one bullet-only body logic map",
             "Do not draft body narration in a Script Blueprint.",
-            "No independent AI review is required during Phase 0",
+            "No independent AI review is required during this stage",
         ):
             with self.subTest(required=required):
                 self.assertIn(required, normalized)
@@ -259,7 +259,7 @@ class SkillPackageTests(unittest.TestCase):
             "Promise or loop payoff",
             "consider the complete applicable technique inventory",
             "evidence-earned",
-            "No independent AI review is required during Phase 0",
+            "No independent AI review is required during this stage",
         )
         for phrase in required:
             with self.subTest(phrase=phrase):
@@ -865,7 +865,7 @@ class SkillPackageTests(unittest.TestCase):
     def test_rapid_mode_is_the_default_and_skips_production_overhead(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         contracts = (
-            "Default to Phase 1 for ideas, openings, hooks, rough drafts, short "
+            "Default to this mode for ideas, openings, hooks, rough drafts, short "
             "narration, humor or voice passes, and scoped refinement.",
             "Return the requested artifact directly.",
             "Outside the bounded architecture concept-discovery scan and the targeted "
@@ -926,8 +926,8 @@ class SkillPackageTests(unittest.TestCase):
 
         required = (
             "central-progression work",
-            "Phase 0 stops first at architecture and then at the Story Progression Plan",
-            "Scoped Script Blueprint work returns directly until it crosses that same trigger",
+            "Reach this stage only with both the architecture and the Story Progression Plan approved.",
+            "Scoped Blueprint work returns directly until it crosses the central-progression trigger",
             "return one visible Story Progression Plan and stop",
             "directly instructs you to build the Script Blueprint from that displayed complete plan",
             "If no visible approved plan is supplied, treat the progression as unapproved",
@@ -1021,7 +1021,7 @@ class SkillPackageTests(unittest.TestCase):
             sources["rapid"],
         )
         self.assertIn(
-            "Planning creates no additional Phase 1 research exception.",
+            "Planning creates no additional scoped-mode research exception.",
             normalized["rapid"],
         )
         workflow = normalized["steering"].split(
@@ -1487,7 +1487,7 @@ class SkillPackageTests(unittest.TestCase):
 
         gate = (
             "Before presenting a new or thesis-level architecture, run a bounded "
-            "primary-source concept-discovery scan even in Phase 1."
+            "primary-source concept-discovery scan even in scoped mode."
         )
         for source_name in ("skill", "architecture", "rapid"):
             with self.subTest(source=source_name, contract="discovery-gate"):
@@ -2730,7 +2730,7 @@ class SkillPackageTests(unittest.TestCase):
 
         for contract in (
             "Spoken readability is mandatory before returning the Script Blueprint "
-            "intro, draft narration, or Phase 2 narration. Run it on each stage's "
+            "intro, draft narration, or final narration. Run it on each stage's "
             "`script.raw.md`.",
             "Use 25 spoken words as a hard ceiling. Send every 21–25-word line "
             "through first-hearing review, and reject shorter lines when actor, "
@@ -3091,7 +3091,7 @@ class SkillPackageTests(unittest.TestCase):
             research,
         )
         self.assertIn(
-            "Do not add these source markers to Phase 1 prototypes unless Martin "
+            "Do not add evidence source markers to scoped prototypes unless Martin "
             "explicitly asks.",
             skill,
         )
@@ -3351,7 +3351,7 @@ class SkillPackageTests(unittest.TestCase):
     def test_creative_approval_gate_precedes_production(self) -> None:
         skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
         gate = (
-            "Remain in Phase 1 until Martin explicitly approves the premise, voice, "
+            "Remain in the Draft stage until Martin explicitly approves the premise, voice, "
             "hook, story direction, and complete narration or directly requests "
             "evidence-backed finalization."
         )
@@ -3363,7 +3363,7 @@ class SkillPackageTests(unittest.TestCase):
         self.assertIn(preserve, skill)
         self.assertLess(
             skill.index(gate),
-            skill.index("## Phase 2 — Evidence and production"),
+            skill.index("## Final stage — evidence and production"),
         )
 
     def test_complete_narration_precedes_editorial_and_timing_audits(self) -> None:
@@ -3483,12 +3483,12 @@ class SkillPackageTests(unittest.TestCase):
             .split()
         )
         self.assertIn(
-            "Use this three-candidate comparison only in Phase 2 or when Martin "
+            "Use this three-candidate comparison only in the Final stage or when Martin "
             "explicitly requests opening options or a scored comparison.",
             story,
         )
         self.assertIn(
-            "In Phase 1, generate the single requested opening unless Martin asks for "
+            "Otherwise generate the single requested opening unless Martin asks for "
             "alternatives.",
             story,
         )
@@ -3590,16 +3590,19 @@ class SkillPackageTests(unittest.TestCase):
             and not target.startswith("#")
             and target != "Original URL"
         ]
+        # Document order follows the episode pipeline: scoped work, architecture,
+        # progression, blueprint, draft, then final-stage routing.
         expected = [
             "../choosing-whp-video-topic/references/research-method.md",
+            "references/rapid-prototyping.md",
+            "references/script-architecture.md",
+            "references/story-and-hook-method.md",
+            "references/rapid-prototyping.md",
+            "references/story-and-hook-method.md",
             "references/script-artifact-pair.md",
             "references/script-blueprint-workflow.md",
             "references/rapid-prototyping.md",
-            "references/script-architecture.md",
             "references/rapid-prototyping.md",
-            "references/rapid-prototyping.md",
-            "references/story-and-hook-method.md",
-            "references/story-and-hook-method.md",
             "references/rapid-prototyping.md",
             "references/research-and-rights.md",
             "references/annotated-script-format.md",
@@ -3793,7 +3796,7 @@ class SkillPackageTests(unittest.TestCase):
         )
         plan_gated_record = (
             "After metadata, add this transparent story-structure record for every "
-            "`FULL-SCRIPT` entering Phase 2 through the plan gate:"
+            "`FULL-SCRIPT` entering the Final stage through the plan gate:"
         )
         with self.subTest(integration="audit record is plan gated"):
             self.assertFalse(

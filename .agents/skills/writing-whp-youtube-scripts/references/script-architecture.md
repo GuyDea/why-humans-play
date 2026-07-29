@@ -40,7 +40,7 @@ requested change materially alters the episode's central message.
 ## Discover the concept field
 
 Before presenting a new or thesis-level architecture, run a bounded primary-source
-concept-discovery scan even in Phase 1. Inventory first and distill second. The scan prevents
+concept-discovery scan even in scoped mode. Inventory first and distill second. The scan prevents
 a familiar concept recalled early from crowding out a more precise mechanism, consequence,
 or practical method discovered later.
 
@@ -88,7 +88,7 @@ Distinguish established terms from original labels or novel synthesis. Never giv
 original phrase the borrowed authority of a named scientific effect. A concept-discovery
 source establishes that a named concept exists and what it means; it does not verify every
 episode claim or example. Full claim wording, factual cases, dates, causal claims, and
-production evidence remain Phase 2 work.
+production evidence remain Final-stage work.
 
 If research is unavailable or Martin explicitly requests an offline pass, label the map
 `INCOMPLETE—DISCOVERY NOT RUN`; never present recall as a complete map. Such an artifact is

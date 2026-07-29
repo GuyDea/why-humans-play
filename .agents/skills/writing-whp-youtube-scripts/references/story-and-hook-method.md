@@ -32,7 +32,7 @@ approved.
 
 If planning exposes a flat insight ladder, missing proof job, or other load-bearing
 architecture defect, return to architecture approval. Do not manufacture story tension
-around a weak payload. Planning creates no new Phase 1 research exception.
+around a weak payload. Planning creates no new scoped-mode research exception.
 
 When Martin asks for alternatives, return compact options containing only Story engine,
 technique deltas, and Beat-progression blocks. After he chooses, expand the selected option
@@ -188,9 +188,9 @@ sequence, evidence interpretation, and wording.
 
 ## Compare and score three opening candidates
 
-Use this three-candidate comparison only in Phase 2 or when Martin explicitly requests
-opening options or a scored comparison. In Phase 1, generate the single requested opening
-unless Martin asks for alternatives.
+Use this three-candidate comparison only in the Final stage or when Martin explicitly
+requests opening options or a scored comparison. Otherwise generate the single requested
+opening unless Martin asks for alternatives.
 
 Generate exactly three credible candidates before choosing the opening. Use a
 micro-story, direct demonstration, question, explanation, or evidence reveal as the

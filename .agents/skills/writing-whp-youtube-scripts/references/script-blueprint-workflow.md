@@ -94,7 +94,7 @@ gate.
 
 ## Keep the approval gate human
 
-No independent AI review is required during Phase 0. Do not invoke another model or add a
+No independent AI review is required during this stage. Do not invoke another model or add a
 reviewer record unless Martin explicitly requests one for the current artifact. Contract
 checks establish Script Blueprint readiness; only Martin's explicit approval advances the
 intro and body logic map.

@@ -43,9 +43,9 @@ change the requested artifact.
 
 **Central-progression work** means a request that would set or materially change the causal
 route from the opening tension, through the insight ladder, to the final payoff. Use this
-same trigger in every phase.
+same trigger in every stage.
 
-Honor the requested scope before choosing a phase:
+Honor the requested scope before choosing a stage:
 
 - **Generate:** return one requested architecture, structure, opening, passage, or narration,
   routed through the applicable approval gate.
@@ -54,69 +54,46 @@ Honor the requested scope before choosing a phase:
   and narrative job.
 - **Generate alternatives:** return distinct labeled choices without changing or choosing
   among them.
-- **Promote:** after explicit creative approval, preserve the voice baseline and enter
-  Phase 2.
+- **Promote:** after explicit creative approval, preserve the voice baseline and advance to
+  the next stage.
 
-Use the visible topic brief, artifact or selection, surrounding context, requested operation,
-and creative status. Do not make an operation depend on invisible chat history.
+Use the visible topic brief, artifact or selection, requested operation, and creative status.
+Do not make an operation depend on invisible chat history.
 
-## Phase 0 — Script Blueprint
+## The episode pipeline
 
-An episode-scale Script Blueprint lives in
-`whp-youtube/episodes/epNNN-stable-name/blueprint/` as
-`blueprint/script.raw.md` and `blueprint/script.extended.md`. Follow
-[the script artifact pair](references/script-artifact-pair.md) for the episode path,
-paired views, markup, validation, and promotion contract, then follow
-[the Script Blueprint workflow](references/script-blueprint-workflow.md) for the exact
-stage contents and approval gate.
+Episode-scale work moves through five named stages in this order. Each stage ends at a human
+approval gate, and each gate authorizes only the next stage. Stage names match the episode
+directories under `whp-youtube/episodes/epNNN-stable-name/`.
 
-A Script Blueprint is not a rough full script. Its raw view contains one polished spoken
-intro. Its extended view mirrors that intro and owns one bullet-only body logic map in its
-appendix. Do not draft body narration in a Script Blueprint.
+```dot
+digraph episode_pipeline {
+    rankdir=LR; node [shape=box];
+    Architecture -> Progression -> Blueprint -> Draft -> Final [label="approved"];
+}
+```
 
-For a new episode, thesis-level rethink, or other central-progression work, Phase 0 stops
-first at architecture and then at the Story Progression Plan. Scoped Script Blueprint work
-returns directly until it crosses that same trigger. Once both artifacts are approved,
-design and polish the intro before expanding any body prose. A Script Blueprint is a
-visible creative baseline, not a definite WHP decision; advancement remains the
-reconcilable decision.
+| Stage | Produces | Gate that ends it |
+|---|---|---|
+| Architecture | The episode's intellectual payload | Architecture approval |
+| Progression | The causal route from tension to payoff | Story progression approval |
+| Blueprint | `blueprint/` — one polished intro plus a bullet-only body logic map | Blueprint approval |
+| Draft | `draft/` — one complete narration | Creative approval |
+| Final | `final/` — evidence-backed, production-annotated episode | Readiness review |
 
-- Run the spoken-readability and walking-conversation checks on
-  `blueprint/script.raw.md` only.
-  Do not run body word counts, timing or cut ledgers, editorial, retention, production
-  audits, final-format validation, or production scaffolding unless Martin asks for that
-  specific work by name. Validate the pair as the pair owner requires.
-- Treat Script Blueprint edits as exploratory; do not reconcile or ledger them. Validated
-  promotion into `draft/` is the decision.
-- The factual boundary applies unchanged: use supplied or project-known facts, never
-  invent specificity, and label hypotheticals. The architecture approval gate also
-  applies unchanged for a new episode or thesis-level rethink.
-- No independent AI review is required during Phase 0. Do not call another model or add a
-  reviewer record unless Martin explicitly requests that review for the current artifact.
+Enter at the earliest stage the request has not yet approved. A new episode or thesis-level
+rethink starts at Architecture. Scoped work on existing material stays where it is unless it
+crosses the central-progression trigger, which reopens Progression.
 
-When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
-no-teleprompter Script Blueprint, run the memory-first delivery pass before returning it.
-This is a focused delivery check, not a production audit. Follow
-[the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+Work that is not episode-scale — an idea, an opening, a hook, a short passage, a humor or
+voice pass, a scoped refinement — does not enter the pipeline at all. Use
+[scoped and rapid work](#scoped-and-rapid-work) instead.
 
-Advance only after Martin explicitly approves both the polished intro and body logic map.
-Preserve the approved raw intro, expand the body logic map into complete narration in
-`whp-youtube/episodes/epNNN-stable-name/draft/script.raw.md`, build the matching
-`draft/script.extended.md`, validate the pair, run the full spoken-readability gate on raw,
-and reconcile that promotion as one definite decision. The resulting draft returns to
-normal Phase 1 handling; Phase 2 still requires the separate creative approval gate.
+## Scoped and rapid work
 
-## Phase 1 — Rapid prototype
-
-Default to Phase 1 for ideas, openings, hooks, rough drafts, short narration, humor or voice
-passes, and scoped refinement. For a script under an episode's `blueprint/`, Phase 0
-applies instead.
-
-For episode-scale work advancing from Phase 0, preserve the approved intro and use the
-approved body logic map to write one complete narration in the episode's `draft/` pair.
-Draft narration changes begin in `draft/script.raw.md`; keep annotations and the stage
-appendix in `draft/script.extended.md`. Do not quietly redesign the intro or causal route
-while expanding the body.
+Default to this mode for ideas, openings, hooks, rough drafts, short narration, humor or
+voice passes, and scoped refinement. For a script under an episode's stage directory, the
+matching pipeline stage applies instead.
 
 Return the requested artifact directly. Outside the bounded architecture
 concept-discovery scan and the targeted viewer-vulnerability proof-case lookup below, do
@@ -129,37 +106,6 @@ Use supplied facts and facts already available in current project materials. Nev
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
 factual boundary, and internal quality check.
-
-Before presenting a new or thesis-level architecture, run a bounded primary-source
-concept-discovery scan even in Phase 1. Inventory explanatory mechanisms, consequences,
-named laws or effects, interventions, and countermeasures before deciding which concepts
-belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
-the full production workflow. Use the discovery source only to establish the concept and
-its meaning; defer episode-claim and example verification to Phase 2.
-
-For a new episode or a thesis-level rethink, produce and refine the script architecture
-before writing any opening or narration. Put the sourced concept inventory first in the
-artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
-until Martin explicitly approves it. Approval of a topic, title, isolated insight, or
-earlier script does not approve the architecture.
-Use [the script architecture method](references/script-architecture.md) for that stage.
-
-Once Martin approves the architecture, return one visible Story Progression Plan and stop.
-Do not order beats or draft narration until Martin explicitly approves the complete plan or
-directly instructs you to build the Script Blueprint from that displayed complete plan.
-Preserve the approved architecture as the intellectual baseline and the approved
-progression as the story baseline. Scoped work on existing narration does not rebuild
-either artifact unless it changes the central message or crosses the central-progression
-trigger.
-
-An architecture cannot be approved unless it contains both a non-obvious understanding
-and a concrete, evidence-bounded viewer response with an observable result. Check the
-complete transformation explicitly: `Before, I thought X. Now, I understand Y. Next time,
-I will do Z. I will know it helped when I observe W.` Preserve that approved
-learning-and-action contract when drafting the opening promise, explanation, viewer
-application, and final lesson.
-A complete-episode promise must name both the understanding the viewer will gain and the
-concrete response they will be able to use.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
@@ -181,6 +127,87 @@ attributed inner states, and place a literal remedy before detailed case exposit
 invent the narrator's research process or chronology. Follow
 [the rapid drafting method](references/rapid-prototyping.md) for the exact anti-skip
 sequence, proof interpretation, and line-level execution.
+
+Do not add evidence source markers to scoped prototypes unless Martin explicitly asks.
+
+## Architecture stage
+
+For a new episode or a thesis-level rethink, produce and refine the script architecture
+before writing any opening or narration. Put the sourced concept inventory first in the
+artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
+until Martin explicitly approves it.
+Use [the script architecture method](references/script-architecture.md) for this stage.
+
+Before presenting a new or thesis-level architecture, run a bounded primary-source
+concept-discovery scan even in scoped mode. Inventory explanatory mechanisms, consequences,
+named laws or effects, interventions, and countermeasures before deciding which concepts
+belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
+the full production workflow. Use the discovery source only to establish the concept and
+its meaning; defer episode-claim and example verification to the final stage.
+
+An architecture cannot be approved unless it contains both a non-obvious understanding
+and a concrete, evidence-bounded viewer response with an observable result. Check the
+complete transformation explicitly: `Before, I thought X. Now, I understand Y. Next time,
+I will do Z. I will know it helped when I observe W.` Preserve that approved
+learning-and-action contract when drafting the opening promise, explanation, viewer
+application, and final lesson.
+A complete-episode promise must name both the understanding the viewer will gain and the
+concrete response they will be able to use.
+
+### Architecture approval gate
+
+For episode-scale work without an approved architecture, return only the architecture
+artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
+Positive feedback on one insight, example, phenomenon, or reframe does not approve the
+complete architecture. Approval of a topic, title, isolated insight, or earlier script does
+not approve the architecture.
+
+Do not present an architecture as approval-ready until its concept-discovery scan is
+complete. If source access is unavailable or Martin explicitly requests an offline pass,
+mark the inventory provisional exactly as required by the architecture method and surface
+the resulting omission risk.
+
+Do not approve a familiar summary with generic advice attached. The non-obvious
+understanding must revise the viewer's prior model, and the response must name a relevant
+situation, a concrete decision rule or sequence, an observable result, a real boundary,
+and at least one transfer case.
+
+Architecture approval authorizes story planning, not beat ordering or narration. Preserve
+the approved architecture as the intellectual baseline while planning.
+
+## Story progression stage
+
+Once Martin approves the architecture, return one visible Story Progression Plan and stop.
+Do not order beats or draft narration until Martin explicitly approves the complete plan or
+directly instructs you to build the Script Blueprint from that displayed complete plan.
+Preserve the approved architecture as the intellectual baseline and the approved
+progression as the story baseline. Scoped work on existing narration does not rebuild
+either artifact unless it changes the central message or crosses the central-progression
+trigger.
+
+For the detailed progression schema and structural story rules, follow the story and hook
+method. Route: [the story and hook method](references/story-and-hook-method.md).
+
+### Story progression approval gate
+
+For central-progression work with an approved architecture but no approved progression,
+return only the complete Story Progression Plan and wait. Positive feedback on one
+obstacle, transition, case, technique, or loop does not approve the whole artifact.
+
+Explicit approval—or a direct instruction to build the Script Blueprint from that displayed
+complete plan—records that plan as `APPROVED` by Martin and authorizes the polished intro
+and bullet-only body logic map only. It does not authorize body narration or approve the
+complete narration or direction. When Martin requests a targeted revision, change only the
+addressed progression beat or field and name every downstream causal consequence instead
+of silently rewriting later beats. Return the complete revised plan with
+`AWAITING-APPROVAL` and `PENDING`, then stop. Prior approval does not carry across a
+progression revision. Re-entry requires renewed whole-plan approval or a direct
+instruction to build the Script Blueprint from that newly displayed complete revised
+plan; the revision request itself does not count as renewed approval.
+
+Keep the approved plan visible as supplied context. If no visible approved plan is
+supplied, treat the progression as unapproved. Story-progression approval precedes and does
+not replace creative approval of the complete narration and direction.
 
 ### Preserve the approved progression while drafting
 
@@ -211,10 +238,82 @@ Always-loaded invariants:
   and route loop selection and payoff through
   [the structural loop owner](references/story-and-hook-method.md#plan-loops-without-withholding-clarity).
 
-For Phase 1 line-level case narration, spoken compression, hook, humor, and factual-boundary
-application, follow the rapid method linked above. For the detailed progression schema and
-structural story rules, follow the story and hook method. Route:
-[the story and hook method](references/story-and-hook-method.md).
+## Blueprint stage
+
+An episode-scale Script Blueprint lives in
+`whp-youtube/episodes/epNNN-stable-name/blueprint/` as
+`blueprint/script.raw.md` and `blueprint/script.extended.md`. Follow
+[the script artifact pair](references/script-artifact-pair.md) for the episode path,
+paired views, markup, validation, and promotion contract, then follow
+[the Script Blueprint workflow](references/script-blueprint-workflow.md) for the exact
+stage contents and approval gate.
+
+A Script Blueprint is not a rough full script. Its raw view contains one polished spoken
+intro. Its extended view mirrors that intro and owns one bullet-only body logic map in its
+appendix. Do not draft body narration in a Script Blueprint.
+
+Reach this stage only with both the architecture and the Story Progression Plan approved.
+Scoped Blueprint work returns directly until it crosses the central-progression trigger,
+which reopens the earlier stage. Design and polish the intro before expanding any body
+prose. A Script Blueprint is a visible creative baseline, not a definite WHP decision;
+advancement remains the reconcilable decision.
+
+- Run the spoken-readability and walking-conversation checks on
+  `blueprint/script.raw.md` only.
+  Do not run body word counts, timing or cut ledgers, editorial, retention, production
+  audits, final-format validation, or production scaffolding unless Martin asks for that
+  specific work by name. Validate the pair as the pair owner requires.
+- Treat Script Blueprint edits as exploratory; do not reconcile or ledger them. Validated
+  promotion into `draft/` is the decision.
+- The factual boundary applies unchanged: use supplied or project-known facts, never
+  invent specificity, and label hypotheticals. The architecture approval gate also
+  applies unchanged for a new episode or thesis-level rethink.
+- No independent AI review is required during this stage. Do not call another model or add
+  a reviewer record unless Martin explicitly requests that review for the current artifact.
+
+When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
+no-teleprompter Script Blueprint, run the memory-first delivery pass before returning it.
+This is a focused delivery check, not a production audit. Follow
+[the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+
+### Blueprint approval gate
+
+Advance only after Martin explicitly approves both the polished intro and body logic map.
+Preserve the approved raw intro, expand the body logic map into complete narration in
+`whp-youtube/episodes/epNNN-stable-name/draft/script.raw.md`, build the matching
+`draft/script.extended.md`, validate the pair, run the full spoken-readability gate on raw,
+and reconcile that promotion as one definite decision.
+
+## Draft stage
+
+For episode-scale work advancing from the Blueprint stage, preserve the approved intro and
+use the approved body logic map to write one complete narration in the episode's `draft/`
+pair. Draft narration changes begin in `draft/script.raw.md`; keep annotations and the stage
+appendix in `draft/script.extended.md`. Do not quietly redesign the intro or causal route
+while expanding the body.
+
+Do not write narration as a way to discover what the episode means. For line-level case
+narration, spoken compression, hook, humor, and factual-boundary application, follow
+[the rapid drafting method](references/rapid-prototyping.md).
+
+When the request is for a complete script, follow the full-script review order below.
+Complete and show Martin the whole narration before running any editorial, retention, or
+timing audit. Treat timing as a post-draft diagnostic, not a drafting gate. Report audit
+concerns and tradeoffs separately before rewriting the narration; never silently cut
+context to satisfy an audit.
+
+### Creative approval gate
+
+Remain in the Draft stage until Martin explicitly approves the premise, voice, hook, story
+direction, and complete narration or directly requests evidence-backed finalization.
+Positive feedback on one line or passage does not approve the complete narration.
+
+Preserve the approved prototype as the voice baseline; research may narrow claims but must
+not silently replace its structure or personality.
+
+## Delivery requirements for every narration
+
+These apply to the Blueprint intro, the Draft narration, and the Final narration alike.
 
 ### Mark locked lines for memory delivery
 
@@ -233,7 +332,7 @@ been selected.
 ### Enforce spoken readability before delivery
 
 Spoken readability is mandatory before returning the Script Blueprint intro, draft
-narration, or Phase 2 narration. Run it on each stage's `script.raw.md`. Use 25 spoken
+narration, or final narration. Run it on each stage's `script.raw.md`. Use 25 spoken
 words as a hard ceiling. Send every 21–25-word line through first-hearing review, and
 reject shorter lines when actor, action, relationship, or consequence remains unclear.
 Preserve evidence boundaries and personality during every rewrite.
@@ -251,65 +350,7 @@ Rewrite every `FAIL`. Read every `REVIEW` aloud; use `--reviewed` only after a
 21–25-word line is clear, never to waive difficulty. Apply the same semantic gate to
 chat-only narration before returning it.
 
-When the request is for a complete script, follow the full-script review order below.
-Complete and show Martin the whole narration before running any editorial, retention, or
-timing audit. Treat timing as a post-draft
-diagnostic, not a drafting gate. Report audit concerns and tradeoffs separately before
-rewriting the narration; never silently cut context to satisfy an audit.
-
-Do not add these source markers to Phase 1 prototypes unless Martin explicitly asks.
-
-## Architecture approval gate
-
-For episode-scale work without an approved architecture, return only the architecture
-artifact and wait. Refine it at the field level until Martin explicitly approves the whole.
-Positive feedback on one insight, example, phenomenon, or reframe does not approve the
-complete architecture.
-
-Do not present an architecture as approval-ready until its concept-discovery scan is
-complete. If source access is unavailable or Martin explicitly requests an offline pass,
-mark the inventory provisional exactly as required by the architecture method and surface
-the resulting omission risk.
-
-Do not approve a familiar summary with generic advice attached. The non-obvious
-understanding must revise the viewer's prior model, and the response must name a relevant
-situation, a concrete decision rule or sequence, an observable result, a real boundary,
-and at least one transfer case.
-
-Architecture approval authorizes story planning, not beat ordering or narration. Preserve
-the approved architecture as the intellectual baseline while planning.
-
-## Story progression approval gate
-
-For central-progression work with an approved architecture but no approved progression,
-return only the complete Story Progression Plan and wait. Positive feedback on one
-obstacle, transition, case, technique, or loop does not approve the whole artifact.
-
-Explicit approval—or a direct instruction to build the Script Blueprint from that displayed
-complete plan—records that plan as `APPROVED` by Martin and authorizes the polished intro
-and bullet-only body logic map only. It does not authorize body narration or approve the
-complete narration or direction. When Martin requests a targeted revision, change only the
-addressed progression beat or field and name every downstream causal consequence instead
-of silently rewriting later beats. Return the complete revised plan with
-`AWAITING-APPROVAL` and `PENDING`, then stop. Prior approval does not carry across a
-progression revision. Re-entry requires renewed whole-plan approval or a direct
-instruction to build the Script Blueprint from that newly displayed complete revised
-plan; the revision request itself does not count as renewed approval.
-
-Keep the approved plan visible as supplied context. If no visible approved plan is
-supplied, treat the progression as unapproved. Story-progression approval precedes and does
-not replace creative approval of the complete narration and direction.
-
-## Creative approval gate
-
-Remain in Phase 1 until Martin explicitly approves the premise, voice, hook, story
-direction, and complete narration or directly requests evidence-backed finalization.
-Positive feedback on one line or passage does not approve the complete narration.
-
-Preserve the approved prototype as the voice baseline; research may narrow claims but must
-not silently replace its structure or personality.
-
-## Phase 2 — Evidence and production
+## Final stage — evidence and production
 
 For evidence-backed finalization, promote the approved draft into
 `whp-youtube/episodes/epNNN-stable-name/final/` without overwriting the draft pair:
@@ -403,7 +444,7 @@ For evidence-backed finalization, promote the approved draft into
   [the annotated script format](references/annotated-script-format.md).
 - Use [the annotated script template](assets/annotated-script-template.md) as a worked shape,
   never as preverified episode content.
-- During the final Phase 2 editorial pass, read
+- During the final editorial pass, read
   [the quality rubric](references/quality-rubric.md).
 - For a **Distill session lessons** operation — and only for that operation — read
   [the lesson distillation method](references/lesson-distillation.md).

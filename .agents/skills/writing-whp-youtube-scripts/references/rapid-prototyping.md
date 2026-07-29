@@ -17,7 +17,7 @@ Missing nonessential fields do not block a useful architecture or prototype. Ask
 when a missing choice would materially change the requested artifact.
 
 Before presenting a new or thesis-level architecture, run a bounded primary-source
-concept-discovery scan even in Phase 1. This is the required exception to rapid mode's
+concept-discovery scan even in scoped mode. This is the required exception to rapid mode's
 usual research deferral: inventory relevant explanatory concepts and practical
 countermeasures before selecting the episode's thesis. Put the sourced inventory first,
 then distill the smaller phenomenon map used by the argument. Obey the method's fixed batch
@@ -104,7 +104,7 @@ the polished intro and body logic map.
 Preserve the Story engine, causal chain, selected moves, evidence boundaries, loops, and
 payoffs while finding natural spoken phrasing. If a requested change crosses the
 central-progression trigger, reopen the plan instead of silently restructuring the draft.
-Planning creates no additional Phase 1 research exception.
+Planning creates no additional scoped-mode research exception.
 
 Do not write narration as a way to discover what the episode means. Treat examples, stories,
 humor, and hooks as the delivery system for an approved payload, not as substitutes for that
@@ -203,7 +203,7 @@ Use either flexible spine:
   Treat softer equivalents—such as “knowing the label does not make the effect obvious”—as
   the same material claim, not as harmless commentary. First check supplied and
   project-known facts. If they contain no matching case, run one focused primary-source
-  proof-case lookup; this is the allowed exception to ordinary Phase 1 research deferral.
+  proof-case lookup; this is the allowed exception to ordinary scoped-mode research deferral.
   No matching observed case means no anti-immunity claim: use the allowed targeted
   proof-case lookup, narrow the relevance, or return the evidence gap instead of drafting
   around it. A short runtime, retention pressure, or a request for narration-only output
@@ -756,4 +756,4 @@ Keep this audit internal unless Martin asks to see it.
 - Ending a complete narration on an unanswered question instead of its lesson.
 - Replacing accepted copy outside the selected scope.
 - Mistaking approval of one line for approval of the creative direction.
-- Dragging assignment contracts, ledgers, visual plans, or validator output into Phase 1.
+- Dragging assignment contracts, ledgers, visual plans, or validator output into scoped work.

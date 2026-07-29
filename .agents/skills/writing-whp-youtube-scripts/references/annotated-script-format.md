@@ -185,7 +185,7 @@ is in scope. This record is enforced by the format, template, and package tests;
 structural validator does not check it.
 
 After metadata, add this transparent story-structure record for every `FULL-SCRIPT`
-entering Phase 2 through the plan gate:
+entering the Final stage through the plan gate:
 
 ```markdown
 ### Narrative throughline audit
