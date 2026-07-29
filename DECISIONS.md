@@ -1928,3 +1928,21 @@ for the proposed mine-and-kill-test connection process before any skill amendmen
 
 **Documents:** `whp-youtube/STEERING.md` (EP2 entry), `whp-youtube/topic-backlog.md`
 (candidate marked selected).
+
+## 2026-07-29 — EP002 Script Blueprint approved and promoted to draft
+
+**Decision:** Martin approved the ep002 Script Blueprint (polished intro and body
+logic map, including two promise-line revisions into actionable sharing voice), and
+the blueprint was promoted into the episode's validated `draft/` pair with the intro's
+spoken wording preserved verbatim and the approved SP01–SP07 route expanded into a
+complete seven-beat narration.
+
+**Rationale:** Explicit approval at the Blueprint gate ("ok, looks good - you can
+continue") after two requested promise-line refinements; promotion is the pipeline's
+reconcilable decision for blueprint work.
+
+**Documents:** `whp-youtube/episodes/ep002-why-you-didnt-study/blueprint/` (approved
+pair, preserved as review snapshot), `whp-youtube/episodes/ep002-why-you-didnt-study/draft/`
+(new validated pair; readability gate passed with no unresolved items),
+`whp-youtube/STEERING.md` (EP2 entry updated with working state). Creative approval of
+the complete narration remains pending and is not implied by this promotion.
