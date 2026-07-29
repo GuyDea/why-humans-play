@@ -67,8 +67,9 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
   response rather than offering only a tool or only an explanation. Any load-bearing
   claim that informed or expert viewers remain
   vulnerable is earned with a documented observed case involving the claimed population.
-  When an immunity defense is predictable, full credit requires the five-move anti-skip
-  sequence and places the remedy promise before detailed case exposition.
+  When an immunity defense is predictable, full credit requires
+  [the five-move anti-skip sequence](rapid-prototyping.md#use-the-five-move-anti-skip-intro)
+  and places the remedy promise before detailed case exposition.
   Full credit requires the finished script to preserve the approved situation, decision
   rule or sequence, observable result, boundary, and transfer case.
 
@@ -289,36 +290,18 @@ dimension.
 
 ### `RECORD-READY`
 
-Require the `EDITORIAL-DRAFT` gate and all of the following:
+Require the `EDITORIAL-DRAFT` gate, this rubric's score requirements, and every
+requirement in the
+[record-ready gate](annotated-script-format.md#record-ready-gate), which owns the
+approval, evidence, rights, personal-input, and asset conditions. This rubric adds only:
 
-- renewed final approval by an authorized human editor after evidence, rights, and
-  production dependencies are closed;
-- complete readiness under
-  [Annotated Script Format](annotated-script-format.md#record-ready-gate);
-- completed evidence and rights review;
-- substantive human confirmation that each planned Creative Commons use is
-  compatible with its license terms;
-- no `REJECTED` claims;
-- no uncertainty voiced without the qualification required by its status;
-- no `INPUT-REQUESTED` personal block or unresolved input marker;
-- no blocked required asset; and
-- no failed, missing, or unusable fallback for a required visual.
+- no dimension scored 0 after re-scoring the revised script; and
+- an honest unresolved-issue list carried forward from the audit passes.
 
-Treat these as two distinct approval moments. The first accepts narration and story
-direction for `EDITORIAL-DRAFT` while unresolved work remains documented. The second
-rechecks the final script only after evidence, rights, and production dependencies
-are closed; never carry the earlier approval forward automatically.
-
-A versioned `CC-*` status records a license, not clearance of the planned use. If NC
-conflicts with monetized or commercial use, or SA/attribution obligations cannot be
-met, change the treatment or require a usable fallback. Treat crop, excerpt, overlay,
-animation, and similar modification under an ND license as mandatory human-review
-triggers. When the planned treatment constitutes or may constitute Adapted Material
-under the applicable ND license, prohibit `RECORD-READY` unless permission or a
-non-adapted compliant treatment or usable fallback exists. Treat this as substantive
-human review beyond structural validation. Refer license interpretation to an
-authorized rights reviewer or counsel; this rubric does not provide legal advice and
-the validator does not decide compatibility.
+License compatibility is decided by
+[the research and rights method](research-and-rights.md#use-rights-statuses-exactly), not
+here and not by the validator. Refer interpretation to an authorized rights reviewer or
+counsel; this rubric does not provide legal advice.
 
 Treat human approval and substantive review as requirements, not score bonuses. A
 total score never overrides a hard gate. A validator pass never promotes readiness;
@@ -365,35 +348,13 @@ chains under the status thresholds, and require stable source-native locators.
    rightsholder, exact terms, intended changes, status, and fallback. When personal
    media is in scope, review it separately for ownership, releases, depicted works,
    privacy, component rights, and an ownable fallback.
-8. **Complete references:** Open the `Original URL`. Open every cross-check and scan
-   for conflicting origin, date, chronology, causality, or scope wording, even when it
-   supports another subclaim. Record each material conflict in `Contradictions` and
-   explain how it changes or bounds status or wording. In each evidence record, require
-   one named outcome for the `Original URL` and every listed `Cross-checks` source,
-   using exactly:
-
-   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
-   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
-
-   Permit a no-conflict finding only inside a named `COMPLETE` outcome after a full
-   source-wide scan; `none found`, `all sources agree`, and similar blanket summaries
-   do not substitute for per-source accounting. Every discovered material conflict
-   must appear in that source's outcome with its wording or status consequence. Any
-   material `Original URL` or cross-check marked `INCOMPLETE` keeps the conflict review
-   unresolved and forbids a no-conflict assertion. For dependent evidence chains,
-   record the dependence and re-evaluate under the existing status thresholds: use
-   `VERIFIED` only when the primary or authoritative source type can establish the exact
-   claim and no unresolved credible conflict remains; use `REPORTED` when one
-   identifiable plausible account remains; and retain `CORROBORATED` only with another
-   genuinely independent chain. A material credible conflict takes precedence over
-   `VERIFIED`: narrow and resolve the wording, use `DISPUTED`, or omit the claim; never
-   retain `VERIFIED` while that conflict remains. If narrated subclaims do not all meet
-   the normal threshold for the same status, split the compound claim into separate
-   evidence records. Assign `CORROBORATED` only when every narrated subclaim
-   independently meets the `CORROBORATED` threshold. Require stable source-native
-   locators rather than browser-rendered or search-result line numbers, then check
-   claim and asset IDs, required fields, URLs, access dates, attribution copy, and
-   unresolved material.
+8. **Complete references:** Run
+   [the reverse claim audit](research-and-rights.md#run-the-reverse-claim-audit) in full;
+   it owns the per-source `COMPLETE`/`INCOMPLETE` outcome strings, the dependent-chain
+   status re-evaluation, and the source-native locator rule. Then check claim and asset
+   IDs, required fields, URLs, access dates, attribution copy, and unresolved material.
+   Score the result: an unresolved conflict, a missing per-source outcome, or a status
+   the chain cannot support is a dimension-7 deficiency.
 9. **Accessibility:** Check captions, descriptive transcript notes, text density,
    contrast, color independence, pacing, and narration of essential relationships.
 10. **Retention pacing:** Run this pass only after Martin has reviewed the complete

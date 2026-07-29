@@ -225,16 +225,9 @@ Match the case's population, behavior, mechanism, and outcome to the narration. 
 that people followed wrong AI advice does not by itself prove sycophancy. Use such a case
 only to establish susceptibility, state that boundary aloud, and introduce separate
 evidence for the conversational mechanism.
-Connect the two proof jobs as
-`case → exact takeaway → why it matters here → remaining question → next evidence`.
-Do not let the boundary become a dead-end disclaimer: the first case must positively earn
-one part of the argument, and its limit must open the question the next evidence answers.
-Lead with the positive takeaway; never begin the bridge with “this study did not…” or an
-equivalent disclaimer. Use the limitation only after the viewer knows why the case belongs.
-Voice the logical link in plain words: say what the last case established, what it could
-not establish, and why the next evidence answers that open part. Do not pivot between two
-pieces of evidence with a bare connective — “So:” plus a new question is not a transition.
-If the narration never states how the two ideas connect, the transition fails.
+Connect the two proof jobs with the evidence-bridge rule in
+[Build every story across the complete script](#build-every-story-across-the-complete-script),
+which owns that sequence and its disclaimer boundary.
 
 ## Build every story across the complete script
 

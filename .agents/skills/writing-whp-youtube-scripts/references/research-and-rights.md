@@ -40,18 +40,11 @@ rights findings.
 6. Assign one confidence status before drafting narration.
 7. Use only the approved wording or a weaker formulation.
 
-Map every factual narration sentence or separable factual clause to at least one `F-###` ID
-in the matching appendix beat's `#### Claims` section. A single ID may cover multiple nearby statements only
-when its evidence record supports each one. Jokes, opinions, transitions, and clearly
-signaled hypotheticals do not need invented source markers.
-
-Append a visible `[F-###](Original URL)` indicator immediately after every mapped factual
-narration sentence or separable factual clause. Treat inline evidence indicators as review
-annotations, not spoken words; exclude them from narration extraction, word count, table
-reads, and teleprompter output. Each indicator must use the mapped record's stable ID and
-exact `Original URL`. Repeat the indicator when the same record supports another materially
-separate factual sentence. Do not create indicators for jokes, opinions, transitions,
-clearly labeled hypotheticals, or guidance that makes no empirical efficacy claim.
+Map every factual narration sentence or separable factual clause to at least one `F-###` ID,
+and mark it in narration, exactly as
+[the annotated script format](annotated-script-format.md#numbered-narration-only-beats)
+requires. That file owns the claim-mapping and inline-indicator contract; this method owns
+only which evidence earns the mapping.
 
 Record the precise page, table, figure, section, paragraph, or timestamp where
 available, and check chronology separately when comparing retellings.
@@ -144,19 +137,10 @@ and target match the evidence record's stable ID and exact `Original URL`.
 2. Open the `Original URL` and review its full relevant scope. Open every
    `Cross-checks` source and scan it for material wording that conflicts on origin,
    date, chronology, causality, or scope, even when that source supports a different
-   subclaim. Record every discovered material conflict in `Contradictions` and explain
-   how it changes or bounds the status or wording. Within that existing field, name
-   every source and use exactly one of these outcomes per source:
-
-   - `{source} — COMPLETE — [coverage or source-native locator checked; concrete material support/conflict findings; consequence for wording/status]`
-   - `{source} — INCOMPLETE — [reason; portions/locators checked; unresolved consequence]`
-
-   A `COMPLETE` outcome may say that no material conflict was found only after the
-   complete source-wide scan. Blanket statements such as `none found` or `all sources
-   agree` do not replace named per-source outcomes. Every material conflict discovered
-   anywhere in a source must appear in its outcome with the consequence for narration
-   wording or status. Any material `Original URL` or cross-check marked `INCOMPLETE`
-   keeps the conflict review unresolved and forbids a no-conflict assertion.
+   subclaim. Record every discovered material conflict in `Contradictions`, using the
+   per-source outcome strings and no-conflict rule owned by
+   [the annotated script format](annotated-script-format.md#evidence-records), and explain
+   how each conflict changes or bounds the status or wording.
 3. For `CORROBORATED`, trace whether the sources have genuinely independent evidence
    chains. If they converge on the same originating investigation, record the
    dependence and re-evaluate the claim under the existing status thresholds: use
@@ -223,17 +207,9 @@ a third-party image. Choose authentic evidence, original footage, an owned diagr
 a sourced example, a clearly attributed reenactment, on-camera demonstration,
 restrained text, or intentionally no added visual.
 
-Create a claim card for the sentence and an asset card for every external visual.
-Populate the exact fields required by
-[Annotated Script Format](annotated-script-format.md#evidence-and-asset-records). In
-particular:
-
-- Put the exact claim, origin, author/source, date, locator, scope, cross-checks,
-  contradictions, status, caveat, and approved wording on the claim card.
-- Put the original asset page, direct production file when known,
-  creator/rightsholder, rights basis, license/version, commercial and adaptation
-  terms, planned changes, attribution, intended beat, access date, and status on the
-  asset card.
+Create a claim card for the sentence and an asset card for every external visual, using
+the exact fields required by
+[Annotated Script Format](annotated-script-format.md#evidence-and-asset-records).
 
 Never infer permission from a credit, public availability, a search thumbnail, the
 word `free`, the phrase `royalty-free`, or “from Google.” Record the original asset

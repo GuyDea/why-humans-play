@@ -316,8 +316,6 @@ not complicate what the viewer will learn.
 For a complete episode, make that promise reflect both halves of the approved contract:
 the new understanding and the concrete response the viewer will be able to use. Keep the
 wording concise; do not recite the full method before the episode has earned it.
-A complete-episode promise must name both the understanding the viewer will gain and the
-concrete response they will be able to use.
 
 When the promise asks an AI to help audit its own answer, describe the questions as a way to
 surface gaps or help check the result, not as proof that the answer is correct. Preserve that

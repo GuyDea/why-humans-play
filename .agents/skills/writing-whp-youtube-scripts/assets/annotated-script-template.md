@@ -14,13 +14,13 @@
 [DISARM — Uses the researchers' bounded criteria before drawing the larger conclusion.]
 
 > The researchers said this met their operational play criteria. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013) That
-> does not tell us what a bee feels [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)—but makes the detour hard to dismiss.
+> does not tell us what a bee feels—but makes the detour hard to dismiss.
 
 [APPLICATION — Converts the bounded finding into an observation the viewer can use.]
 
 > Next time an animal seems to play, look for repetition, choice, and no immediate
 > reward. Those clues can sharpen the question; they cannot reveal the animal's inner
-> experience. [F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)
+> experience.
 
 ## Appendix
 
@@ -45,7 +45,7 @@
 
 ### Approved story progression
 
-- **Status:** APPROVED
+- **Plan status:** APPROVED
 - **Approved by:** Martin
 - **Story engine:** A bee's unrewarded detour raises the play question, BUT subjective experience remains unknowable, THEREFORE the episode pays off with observable criteria and an explicit boundary.
 - **Full causal read:** The direct route predicts reward-seeking, BUT some bees repeatedly detour to roll balls without food, THEREFORE the behavior is tested against operational play criteria, BUT behavior cannot reveal inner experience, THEREFORE the viewer gets a bounded observation method.
@@ -66,7 +66,7 @@
 
 ### Narrative throughline audit
 
-- **Status:** NONE
+- **Throughline status:** NONE
 - **Throughline:** No supporting narrative throughline is used in this one-beat example.
 - **Audience connection:** The bee's voluntary detour supplies the immediate point of recognition without opening a separate human story.
 - **Opening hook / loop:** The single beat asks whether the behavior meets operational play criteria and answers it in place.
@@ -74,12 +74,6 @@
 - **Payoff:** The evidence-bounded interpretation closes inside the same beat.
 - **Beat map:** None — this worked template demonstrates a direct one-beat evidence route.
 - **Absence reason:** A recurring sidecar cannot earn three distinct returns or a separate payoff in a thirty-second script.
-
-### Template note
-
-This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,
-replace its assignment-specific content, and independently recheck every live source,
-locator, license, and claim before production.
 
 ### Beat 01 — The detour
 - **Time:** 00:00–00:30
@@ -90,33 +84,13 @@ locator, license, and claim before production.
 Turns a laboratory choice into the episode's central question without inventing a
 bee's motives.
 
-#### Personal input
-
-- **ID:** PI-001
-- **Decision:** INPUT-REQUESTED
-- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.
-- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.
-- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?
-- **Bridge in:** A real encounter can make that abstract question concrete.
-- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.
-- **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
-- **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
-
-#### Viewer application
-
-- **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
-- **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
-- **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
-- **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
-- **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
-
 #### Claims
 
 - `F-001` — Supports narration: “In a 2022 experiment, bumblebees had an unobstructed
   path to food. Some detoured into an object area, contacted wooden balls, and rolled them
   repeatedly without a food reward. The researchers said this met their operational play
-  criteria. That does not tell us what a bee feels. Those clues can sharpen the question;
-  they cannot reveal the animal's inner experience.” — `VERIFIED`.
+  criteria.” — `VERIFIED`. The following interpretation and viewer-application lines make
+  no separate empirical claim and carry no indicator.
 
 #### Visual
 
@@ -144,18 +118,56 @@ bee's motives.
 
 - `A-001` — Experimental-layout figure (`CC-BY-4.0`).
 
+#### Personal input
+
+- **ID:** PI-001
+- **Decision:** INPUT-REQUESTED
+- **Story purpose:** If Martin has a truthful relevant memory, use it to surface an initial interpretation and let the evidence—not the anecdote—revise the viewer's intuition.
+- **Primary prompt:** Do you remember a specific animal behavior you first interpreted one way and later reconsidered as possible play? If not, say so.
+- **Follow-up prompts:** If a moment comes to mind: what did you see; what did you initially think it was; did your interpretation change; which detail do you recall clearly?
+- **Bridge in:** A real encounter can make that abstract question concrete.
+- **Bridge out:** But a personal reaction is not evidence, so the experiment has to do the real work.
+- **Personal visuals:** Presenter on camera with a wooden ball; an owned notebook sketch after checking depicted works and private information. Do not use a personal photo without a separate rights and privacy review.
+- **Omit when:** Omit if Martin has no specific, truthful memory that changes the viewer's route into the evidence.
+
+#### Viewer application
+
+- **Insight:** Play criteria describe observable behavior without proving an animal's subjective experience.
+- **Try:** When an animal appears to play, check the behavior against the stated criteria before assigning a feeling.
+- **Observe:** Notice repetition, voluntariness, and the absence of an immediate external reward.
+- **Boundary:** Observation cannot establish what the animal consciously feels or whether every repeated action is play.
+- **Larger benefit:** This separates useful curiosity from a confident story the evidence cannot support.
+
 ### Shorts plan
 
-- **Beat:** 01
-- **Nugget:** Bumblebees rolled wooden balls they were never fed for — meeting the
-  study's own criteria for play.
-- **Short hook:** "Scientists gave bees a toy. The bees kept coming back to it."
-- **Cut boundaries:** Start at the detour reveal, end on the no-reward line; re-record
-  the opening sentence so the Short does not depend on the long-form setup.
+1. **Beat:** 01
+   - **Nugget:** Bumblebees rolled wooden balls they were never fed for.
+   - **Short hook:** "Scientists gave bees a toy. The bees kept coming back to it."
+   - **Cut boundaries:** Start at the detour reveal, end on the no-reward line; re-record
+     the opening sentence so the Short does not depend on the long-form setup.
+2. **Beat:** 01
+   - **Nugget:** The behavior met the researchers' own written criteria for play — a
+     checklist an insect was not supposed to satisfy.
+   - **Short hook:** "There is an official scientific checklist for play. A bee passed it."
+   - **Cut boundaries:** Start at the criteria line, end before the interpretation
+     boundary; add one spoken sentence naming the experiment so the criteria have a
+     referent.
+3. **Beat:** 01
+   - **Nugget:** Meeting every observable criterion for play still cannot tell you what
+     the animal feels.
+   - **Short hook:** "We can prove a bee plays. We cannot prove it has fun."
+   - **Cut boundaries:** Start at the boundary line, end on the viewer application;
+     re-record the opening so the limit lands before the evidence it limits.
 
 ### Editorial audit
 
 - Not run in the worked template. Complete narration review comes first.
+
+### Template note
+
+This is a worked one-beat example, not a reusable factual conclusion. Copy its structure,
+replace its assignment-specific content, and independently recheck every live source,
+locator, license, and claim before production.
 
 ### References and source materials
 

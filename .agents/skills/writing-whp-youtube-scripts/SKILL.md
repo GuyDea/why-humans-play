@@ -192,9 +192,9 @@ load-bearing choice.
 Always-loaded invariants:
 
 - Use only story moves the real material earns. Never invent a roadblock, contradiction,
-  emotion, motive, chronology, failed hypothesis, research event, or near-surrender. Never
-  invent factual scene details such as dialogue, weather, motives, thoughts, chronology, or
-  sensory detail.
+  emotion, motive, chronology, failed hypothesis, research event, or near-surrender. The
+  no-invention rule under [Production non-negotiables](#production-non-negotiables)
+  applies from the first draft onward, not only in production.
 - But / Therefore diagnoses causal movement; it is not a literal-word or per-beat quota.
 - Keep adjacent proof jobs distinct and make the remaining question create the next
   evidence need.

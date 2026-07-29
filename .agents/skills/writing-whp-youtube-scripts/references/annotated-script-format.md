@@ -6,11 +6,12 @@
 - [Document layers](#document-layers)
 - [Numbered narration-only beats](#numbered-narration-only-beats)
 - [Beat-matched production appendix](#beat-matched-production-appendix)
-- [Approved story progression](#approved-story-progression)
 - [Personal input and viewer application](#personal-input-and-viewer-application)
 - [Stable IDs](#stable-ids)
 - [Evidence and asset records](#evidence-and-asset-records)
 - [End-reference sections](#end-reference-sections)
+- [Shorts plan](#shorts-plan)
+- [Optional appendix sections](#optional-appendix-sections)
 - [Readiness states](#readiness-states)
 - [Record-ready gate](#record-ready-gate)
 - [Narration-only extraction](#narration-only-extraction)
@@ -150,7 +151,7 @@ When the scope below requires it, add this compact record immediately after meta
 ```markdown
 ### Approved story progression
 
-- **Status:** APPROVED
+- **Plan status:** APPROVED
 - **Approved by:** Martin
 - **Story engine:** One sentence describing the opening-to-payoff route.
 - **Full causal read:** A compact end-to-end `BUT` / `THEREFORE` diagnostic.
@@ -170,14 +171,18 @@ When the scope below requires it, add this compact record immediately after meta
 - **Proof job and evidence boundary:** What the beat proves and where it stops.
 ```
 
+Only `Status` in `### Script metadata` records document readiness. Every other status-like
+field states what it governs — `Plan status`, `Throughline status`, and the `Status` inside
+an `F-###` or `A-###` record — so no two vocabularies share a label.
+
 Populate the Narrative throughline audit from the approved plan's Throughline decision;
-do not make Phase 2 choose a second throughline. A `TARGETED-ARTIFACT` includes or updates
-the progression record only when its assigned scope sets or changes central progression.
-Require the record for a `FULL-SCRIPT` entering Phase 2 through the new gate. Do not
-fabricate or backfill a plan for a legacy script unless its central progression is being
-set or changed; the rubric evaluates intrinsic causality when no plan is in scope.
-The format, template, and package tests own this record in this refinement; structural
-validator scope is unchanged.
+do not make production choose a second throughline. A `TARGETED-ARTIFACT` includes or
+updates the progression record only when its assigned scope sets or changes central
+progression. Require the record for a `FULL-SCRIPT` entering production with an approved
+progression. Do not fabricate or backfill a plan for a legacy script unless its central
+progression is being set or changed; the rubric evaluates intrinsic causality when no plan
+is in scope. This record is enforced by the format, template, and package tests; the
+structural validator does not check it.
 
 After metadata, add this transparent story-structure record for every `FULL-SCRIPT`
 entering Phase 2 through the plan gate:
@@ -185,7 +190,7 @@ entering Phase 2 through the plan gate:
 ```markdown
 ### Narrative throughline audit
 
-- **Status:** FOUND
+- **Throughline status:** FOUND
 - **Throughline:** The person, situation, or documented case that runs beside the argument.
 - **Audience connection:** Why the target viewer recognizes the goal, temptation, or stakes.
 - **Opening hook / loop:** The exact unresolved turn opened near the beginning.
@@ -239,8 +244,10 @@ What changes for the viewer and which promise or question this serves.
 - `A-001` — Intended use and rights status.
 ```
 
-Keep all seven level-four production subsections, even when a subsection records an
-intentional choice to use no additional element. Narration exists only in the numbered
+Keep all seven level-four production subsections in the order listed above, even when a
+subsection records an intentional choice to use no additional element. Place the optional
+`#### Personal input` and `#### Viewer application` blocks after `#### Assets`, so the
+required production record of a beat always reads in one fixed order. Narration exists only in the numbered
 beat layer and is not repeated in the appendix. Under `Motion / edit`, include either a
 non-empty `**Animation purpose:**` field or an explicit `No animation — ...`
 explanation. State what motion clarifies; do not use animation as an unsupported
@@ -254,8 +261,8 @@ them. Do not assign source markers to jokes, opinions, transitions, or clearly s
 hypotheticals merely to make the section look complete. This semantic coverage remains a
 human audit; the structural validator does not prove it.
 
-Place each required or optional structured block in the beat where it performs its
-narrative job. Use these exact schemas:
+Place each optional structured block in the beat where it performs its narrative job, at
+that beat's fixed position above. Use these exact schemas:
 
 ```markdown
 #### Personal input
@@ -452,6 +459,17 @@ the main video. While drafting narration, write these candidate lines as complet
 thoughts in isolation so they lift cleanly. For a `TARGETED-ARTIFACT`, include the
 section only when the assignment asks for it.
 
+## Optional appendix sections
+
+Two further level-three sections may appear after the beat entries. Neither is required,
+and the structural validator does not check either:
+
+- `### Editorial audit` — the rubric pass results for this version, or an explicit
+  statement that the audit has not run yet. Place it after `### Shorts plan`.
+- `### Template note` — worked-example provenance only. Use it in a template or sample
+  document to say that the content is illustrative and must be replaced; never add it to
+  a real episode.
+
 ## Readiness states
 
 Use exactly one of these header states:
@@ -460,12 +478,10 @@ Use exactly one of these header states:
   under investigation, or while authentic personal input is still requested.
 - `EDITORIAL-DRAFT`: Use after the narration and story direction receive editorial
   approval, with no `INPUT-REQUESTED` personal block or unresolved input marker,
-  while clearly recording any remaining evidence, rights, or production work.
-- `RECORD-READY`: Use only after the gate below is satisfied. Require complete
-  evidence records, no rejected or unqualified unverified claims, and either a usable
-  treatment or an explicit production fallback for every required visual. Require no
-  `INPUT-REQUESTED` personal block or unresolved input marker. Keep a reference-only
-  asset only when it is not required for the planned final cut.
+  while clearly recording any remaining evidence, rights, or production work. The
+  [quality rubric](quality-rubric.md#editorial-draft) owns the score threshold and the
+  protected dimensions this state also requires.
+- `RECORD-READY`: Use only after the gate below is satisfied.
 - `PICTURE-LOCKED`: Treat this state as outside v1; do not use this format workflow to
   certify it.
 
@@ -475,10 +491,31 @@ document completeness.
 
 ## Record-ready gate
 
-`RECORD-READY` requires human editorial approval plus complete evidence and rights
-review, a resolved personal-input decision, and no unresolved input marker. A passing
-validator is necessary but never sufficient. Do not self-promote a draft merely
-because its structure passes.
+This gate is the single owner of every `RECORD-READY` requirement except the rubric's
+score threshold and protected dimensions, which the
+[quality rubric](quality-rubric.md#record-ready) owns. Satisfy both. Require:
+
+- the `EDITORIAL-DRAFT` state and its requirements;
+- renewed final approval by an authorized human editor, given after evidence, rights,
+  and production dependencies are closed — never the earlier narration approval carried
+  forward;
+- completed evidence and rights review, with one complete record for every referenced
+  claim and asset;
+- substantive human confirmation that each planned Creative Commons use is compatible
+  with its license terms, resolving every blocking conflict named by
+  [the research and rights method](research-and-rights.md#use-rights-statuses-exactly);
+- no `REJECTED` claim, and no uncertainty voiced without the qualification its status
+  requires;
+- a resolved personal-input decision with no `INPUT-REQUESTED` block and no unresolved
+  input marker;
+- a usable treatment or an explicit production fallback for every required visual, and
+  no blocked required asset; and
+- a reference-only asset kept only when the planned final cut does not require it.
+
+Treat the two approval moments as distinct: the first accepts narration and story
+direction for `EDITORIAL-DRAFT` while unresolved work remains documented; the second
+rechecks the final script after dependencies close. A passing validator is necessary but
+never sufficient. Do not self-promote a draft merely because its structure passes.
 
 ## Narration-only extraction
 

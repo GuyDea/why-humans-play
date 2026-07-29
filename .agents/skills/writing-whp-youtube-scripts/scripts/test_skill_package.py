@@ -708,8 +708,10 @@ class SkillPackageTests(unittest.TestCase):
             "Open every `Cross-checks` source and scan it for material wording that "
             "conflicts on origin, date, chronology, causality, or scope, even when "
             "that source supports a different subclaim. Record every discovered "
-            "material conflict in `Contradictions` and explain how it changes or "
-            "bounds the status or wording.",
+            "material conflict in `Contradictions`, using the per-source outcome "
+            "strings and no-conflict rule owned by [the annotated script format]"
+            "(annotated-script-format.md#evidence-records), and explain how each "
+            "conflict changes or bounds the status or wording.",
             "For `CORROBORATED`, trace whether the sources have genuinely independent "
             "evidence chains. If they converge on the same originating investigation, "
             "record the dependence and re-evaluate the claim under the existing status "
@@ -738,18 +740,22 @@ class SkillPackageTests(unittest.TestCase):
         with self.subTest(contract="rubric-reminder"):
             self.assertIn(rubric_reminder, rubric)
 
-        rubric_reference_fragments = (
-            "Open every cross-check and scan for conflicting origin, date, chronology, "
-            "causality, or scope wording, even when it supports another subclaim.",
-            "Record each material conflict in `Contradictions` and explain how it "
-            "changes or bounds status or wording.",
-            "A material credible conflict takes precedence over `VERIFIED`: narrow "
-            "and resolve the wording, use `DISPUTED`, or omit the claim; never retain "
-            "`VERIFIED` while that conflict remains.",
-        )
-        for fragment in rubric_reference_fragments:
-            with self.subTest(contract="rubric-reference-pass", fragment=fragment):
-                self.assertIn(fragment, rubric)
+        # The research method owns the audit procedure; the rubric routes to it and
+        # scores the result instead of restating the steps.
+        with self.subTest(contract="rubric-delegates"):
+            self.assertIn(
+                "[the reverse claim audit]"
+                "(research-and-rights.md#run-the-reverse-claim-audit) in full; it owns "
+                "the per-source `COMPLETE`/`INCOMPLETE` outcome strings, the "
+                "dependent-chain status re-evaluation, and the source-native locator "
+                "rule.",
+                rubric,
+            )
+        with self.subTest(contract="rubric-does-not-restate"):
+            self.assertNotIn(
+                "use `REPORTED` when one identifiable plausible account remains",
+                rubric,
+            )
 
     def test_source_audit_syntax_and_compound_split_rule_are_consistent(self) -> None:
         sources = {
@@ -771,15 +777,22 @@ class SkillPackageTests(unittest.TestCase):
             "Any material `Original URL` or cross-check marked `INCOMPLETE` keeps the "
             "conflict review unresolved and forbids a no-conflict assertion."
         )
-        for source_name, source_text in sources.items():
+        # The format owns the outcome strings; every other file routes to it, so the
+        # three copies that previously drifted now cannot.
+        for syntax in outcome_syntax:
+            with self.subTest(source="format", contract=syntax):
+                self.assertIn(syntax, sources["format"])
+        with self.subTest(source="format", contract="incomplete-blocks"):
+            self.assertIn(unresolved_rule, sources["format"])
+        for source_name in ("research", "rubric"):
             for syntax in outcome_syntax:
-                with self.subTest(source=source_name, contract=syntax):
-                    self.assertIn(syntax, source_text)
-            with self.subTest(source=source_name, contract="incomplete-blocks"):
-                self.assertIn(unresolved_rule, source_text)
+                with self.subTest(source=source_name, contract="delegates-syntax"):
+                    self.assertNotIn(syntax, sources[source_name])
+        for source_name, source_text in sources.items():
             with self.subTest(source=source_name, contract="one-syntax-only"):
                 self.assertNotIn("Conflict scan incomplete —", source_text)
 
+        # The research method owns the compound-claim thresholds.
         split_rule = (
             "If narrated subclaims do not all meet the normal threshold for the same "
             "status, split the compound claim into separate evidence records."
@@ -788,11 +801,13 @@ class SkillPackageTests(unittest.TestCase):
             "Assign `CORROBORATED` only when every narrated subclaim independently "
             "meets the `CORROBORATED` threshold."
         )
+        with self.subTest(source="research", contract="split-compound"):
+            self.assertIn(split_rule, sources["research"])
+        with self.subTest(source="research", contract="corroborated-compound"):
+            self.assertIn(corroborated_rule, sources["research"])
+        with self.subTest(source="rubric", contract="delegates-compound"):
+            self.assertNotIn(split_rule, sources["rubric"])
         for source_name in ("research", "rubric"):
-            with self.subTest(source=source_name, contract="split-compound"):
-                self.assertIn(split_rule, sources[source_name])
-            with self.subTest(source=source_name, contract="corroborated-compound"):
-                self.assertIn(corroborated_rule, sources[source_name])
             with self.subTest(source=source_name, contract="no-weakest-status"):
                 self.assertNotIn(
                     "assign the whole record the weakest applicable status",
@@ -1235,7 +1250,7 @@ class SkillPackageTests(unittest.TestCase):
 
         record_fields = (
             "### Approved story progression",
-            "**Status:** APPROVED",
+            "**Plan status:** APPROVED",
             "**Approved by:** Martin",
             "**Story engine:**",
             "**Full causal read:**",
@@ -2043,8 +2058,10 @@ class SkillPackageTests(unittest.TestCase):
             rubric,
         )
         self.assertIn(
-            "When an immunity defense is predictable, full credit requires the "
-            "five-move anti-skip sequence and places the remedy promise before "
+            "When an immunity defense is predictable, full credit requires [the "
+            "five-move anti-skip sequence]"
+            "(rapid-prototyping.md#use-the-five-move-anti-skip-intro) and places the "
+            "remedy promise before "
             "detailed case exposition.",
             rubric,
         )
@@ -2906,9 +2923,20 @@ class SkillPackageTests(unittest.TestCase):
             "viewer will gain and the concrete response they will be able to use."
         )
 
-        for source_name, source_text in sources.items():
+        # The story method owns the promise contract; SKILL.md and STEERING.md repeat
+        # it as always-loaded gates. The rapid method states the same requirement in
+        # its own drafting words rather than a third verbatim copy.
+        for source_name in ("skill", "story", "steering"):
             with self.subTest(source=source_name):
-                self.assertIn(contract, source_text)
+                self.assertIn(contract, sources[source_name])
+        with self.subTest(source="rapid"):
+            self.assertIn(
+                "make that promise reflect both halves of the approved contract: the "
+                "new understanding and the concrete response the viewer will be able "
+                "to use.",
+                sources["rapid"],
+            )
+            self.assertNotIn(contract, sources["rapid"])
 
     def test_case_selection_prefers_western_audience_proximity_after_proof_fit(
         self,
@@ -3053,8 +3081,15 @@ class SkillPackageTests(unittest.TestCase):
             "section."
         )
         self.assertIn(contract, skill)
-        self.assertIn(contract, research)
         self.assertIn(contract, format_text)
+        # The format owns the mapping contract; the research method routes to it.
+        self.assertIn(
+            "exactly as [the annotated script format]"
+            "(annotated-script-format.md#numbered-narration-only-beats) requires. That "
+            "file owns the claim-mapping and inline-indicator contract; this method "
+            "owns only which evidence earns the mapping.",
+            research,
+        )
         self.assertIn(
             "Do not add these source markers to Phase 1 prototypes unless Martin "
             "explicitly asks.",
@@ -3070,14 +3105,18 @@ class SkillPackageTests(unittest.TestCase):
             "unobstructed path to food.",
             template,
         )
+        # The worked Claims entry quotes only the factual sentences it supports and
+        # stops at the criteria result; interpretation and viewer-application lines
+        # make no empirical claim, so they are named as unmapped instead of quoted.
         self.assertIn(
-            "That does not tell us what a bee feels",
+            "The researchers said this met their operational play criteria.” — "
+            "`VERIFIED`. The following interpretation and viewer-application lines "
+            "make no separate empirical claim and carry no indicator.",
             template,
         )
-        self.assertIn(
-            "they cannot reveal the animal's inner experience",
-            template,
-        )
+        claims_quote = template.split("Supports narration: “", 1)[1].split("” —", 1)[0]
+        self.assertNotIn("That does not tell us what a bee feels", claims_quote)
+        self.assertNotIn("they cannot reveal the animal's inner experience", claims_quote)
 
     def test_phase_two_factual_claims_have_clickable_inline_source_indicators(
         self,
@@ -3107,11 +3146,13 @@ class SkillPackageTests(unittest.TestCase):
             "exclude them from narration extraction, word count, table reads, and "
             "teleprompter output."
         )
-        for source_name in ("skill", "research", "format"):
+        for source_name in ("skill", "format"):
             with self.subTest(source=source_name, contract="core"):
                 self.assertIn(core_contract, sources[source_name])
             with self.subTest(source=source_name, contract="non-spoken"):
                 self.assertIn(non_spoken_contract, sources[source_name])
+        with self.subTest(source="research", contract="delegates"):
+            self.assertNotIn(core_contract, sources["research"])
         marker = "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)"
         template_narration = sources["template"].split(
             "## 1. The detour\n", 1
@@ -3128,14 +3169,20 @@ class SkillPackageTests(unittest.TestCase):
             f"them repeatedly without a food reward. {marker}",
             "The researchers said this met their operational play criteria. "
             f"{marker}",
-            f"That does not tell us what a bee feels {marker}—but",
-            "Those clues can sharpen the question; they cannot reveal the animal's "
-            f"inner experience. {marker}",
         )
         for placement in required_placements:
             with self.subTest(template_placement=placement):
                 self.assertIn(placement, worked_narration)
-        self.assertEqual(worked_narration.count(marker), 5)
+        # Only the three factual sentences carry indicators: the interpretation clause
+        # and the viewer-application lines make no empirical efficacy claim.
+        forbidden_placements = (
+            f"That does not tell us what a bee feels {marker}",
+            f"inner experience. {marker}",
+        )
+        for placement in forbidden_placements:
+            with self.subTest(template_forbidden=placement):
+                self.assertNotIn(placement, worked_narration)
+        self.assertEqual(worked_narration.count(marker), 3)
 
     def test_rapid_hook_supports_an_honest_question_first_entry(self) -> None:
         rapid = " ".join(
@@ -4070,6 +4117,60 @@ class SkillPackageTests(unittest.TestCase):
             CLAUDE_LINK.resolve(strict=True),
             SKILL_ROOT.resolve(strict=True),
         )
+
+
+class StatusVocabularyOwnershipTests(unittest.TestCase):
+    """Guard the vocabularies that previously drifted between files."""
+
+    def test_claim_statuses_match_the_validator(self) -> None:
+        import validate_annotated_script as validator
+
+        format_text = FORMAT_MD.read_text(encoding="utf-8")
+        research = (SKILL_ROOT / "references/research-and-rights.md").read_text(
+            encoding="utf-8"
+        )
+
+        for status in validator.CLAIM_STATUSES:
+            with self.subTest(status=status):
+                self.assertIn(f"`{status}`", format_text)
+                self.assertIn(f"`{status}`", research)
+
+    def test_asset_statuses_match_the_validator(self) -> None:
+        import validate_annotated_script as validator
+
+        format_text = FORMAT_MD.read_text(encoding="utf-8")
+        research = (SKILL_ROOT / "references/research-and-rights.md").read_text(
+            encoding="utf-8"
+        )
+
+        for status in validator.FIXED_ASSET_STATUSES:
+            with self.subTest(status=status):
+                self.assertIn(f"`{status}`", format_text)
+                self.assertIn(f"`{status}`", research)
+
+    def test_readiness_states_match_the_validator(self) -> None:
+        import validate_annotated_script as validator
+
+        format_text = FORMAT_MD.read_text(encoding="utf-8")
+
+        for state in validator.READINESS_STATES:
+            with self.subTest(state=state):
+                self.assertIn(f"`{state}`", format_text)
+
+    def test_only_metadata_uses_the_bare_status_label(self) -> None:
+        for path in (FORMAT_MD, TEMPLATE_MD):
+            with self.subTest(document=path.name):
+                text = path.read_text(encoding="utf-8")
+                progression = text.split("### Approved story progression", 1)[1].split(
+                    "###", 1
+                )[0]
+                throughline = text.split("### Narrative throughline audit", 1)[1].split(
+                    "###", 1
+                )[0]
+                self.assertIn("**Plan status:**", progression)
+                self.assertNotIn("**Status:**", progression)
+                self.assertIn("**Throughline status:**", throughline)
+                self.assertNotIn("**Status:**", throughline)
 
 
 if __name__ == "__main__":
