@@ -63,8 +63,10 @@ Do not make an operation depend on invisible chat history.
 ## The episode pipeline
 
 Episode-scale work moves through five named stages in this order. Each stage ends at a human
-approval gate, and each gate authorizes only the next stage. Stage names match the episode
-directories under `whp-youtube/episodes/epNNN-stable-name/`.
+approval gate, and each gate authorizes only the next stage. The last three stages are named
+after the directories they write under `whp-youtube/episodes/epNNN-stable-name/`; the
+Architecture and Progression artifacts are returned in the conversation and are not stored
+as episode files unless Martin asks for one.
 
 ```dot
 digraph episode_pipeline {
@@ -87,7 +89,10 @@ crosses the central-progression trigger, which reopens Progression.
 
 Work that is not episode-scale — an idea, an opening, a hook, a short passage, a humor or
 voice pass, a scoped refinement — does not enter the pipeline at all. Use
-[scoped and rapid work](#scoped-and-rapid-work) instead.
+[scoped and rapid work](#scoped-and-rapid-work) instead. An episode enters a stage when its
+architecture is approved, not when its files appear: an opening requested for an episode
+with an approved architecture belongs to that episode's next stage and takes its gate, while
+a standalone opening for no particular episode is scoped work.
 
 ## Scoped and rapid work
 
@@ -281,10 +286,8 @@ This is a focused delivery check, not a production audit. Follow
 ### Blueprint approval gate
 
 Advance only after Martin explicitly approves both the polished intro and body logic map.
-Preserve the approved raw intro, expand the body logic map into complete narration in
-`whp-youtube/episodes/epNNN-stable-name/draft/script.raw.md`, build the matching
-`draft/script.extended.md`, validate the pair, run the full spoken-readability gate on raw,
-and reconcile that promotion as one definite decision.
+That approval authorizes the Draft stage below and nothing further. Reconcile the promotion
+into `draft/` as one definite decision.
 
 ## Draft stage
 
@@ -350,7 +353,9 @@ python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"
 
 Rewrite every `FAIL`. Read every `REVIEW` aloud; use `--reviewed` only after a
 21–25-word line is clear, never to waive difficulty. Apply the same semantic gate to
-chat-only narration before returning it.
+chat-only narration before returning it, counting words the way the checker does: a word is
+a run of letters or digits, hyphens and apostrophes keep a word whole, and a standalone dash
+or bracket is not a word.
 
 ## Final stage — evidence and production
 
@@ -405,9 +410,10 @@ For evidence-backed finalization, promote the approved draft into
   chronology, or sensory detail.
 - Let confidence control narration. Omit rejected claims. Use an unverified example only
   when it is attributed, explicitly caveated, and non-load-bearing.
-- Do not use a theory, analogy, anecdote, or hypothetical as proof that a material
-  vulnerability affects real people. Require direct observed evidence for the claimed
-  population and outcome, or narrow or remove the claim.
+- The material-vulnerability evidence rule under
+  [Scoped and rapid work](#scoped-and-rapid-work) applies unchanged in production: no
+  theory, analogy, anecdote, or hypothetical may stand as proof that a vulnerability
+  affects real people.
 - For incentive-failure examples, show the intended goal, the measure or target, the changed
   behavior, the number that improved, and the damaged goal and human cost. Direct humor at
   the mechanism or institution, then say plainly what got worse and who paid.

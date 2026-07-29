@@ -20,9 +20,10 @@ Before presenting a new or thesis-level architecture, run a bounded primary-sour
 concept-discovery scan even in scoped mode. This is the required exception to rapid mode's
 usual research deferral: inventory relevant explanatory concepts and practical
 countermeasures before selecting the episode's thesis. Put the sourced inventory first,
-then distill the smaller phenomenon map used by the argument. Obey the method's fixed batch
-budget and parallelize independent searches. If the scan cannot run or reaches its budget
-with an unresolved lead, use the architecture method's exact incomplete label and treat the
+then distill the smaller phenomenon map used by the argument. Obey the fixed batch budget in
+[the architecture method's discovery section](script-architecture.md#discover-the-concept-field)
+and parallelize independent searches. If the scan cannot run or reaches its budget
+with an unresolved lead, use that method's exact incomplete label and treat the
 result as provisional.
 
 Do not depend on hidden conversational state. Work from the supplied topic brief, artifact
