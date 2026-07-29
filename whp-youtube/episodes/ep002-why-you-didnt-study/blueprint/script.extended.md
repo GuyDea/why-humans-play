@@ -34,11 +34,11 @@
 >
 > That is the real question of this video. Because you have made the same move. Just without a laboratory watching.
 
-[PROMISE | LOCKED WORDING — Names both halves of the approved contract: the hidden-game understanding, plus the in-the-act catch and the replacement rule; payoffs mapped to SP03, SP07 (two-ledger check) and SP06–SP07 (rule).]
+[PROMISE | LOCKED WORDING — Names both halves of the approved contract: the hidden-game understanding, plus the visibility check and the replacement rule, in sharing voice; payoffs mapped to SP03, SP07 (two-ledger check) and SP06–SP07 (rule).]
 
 > **By the end of this video, you'll know the hidden game behind your worst nights of not preparing.**
 >
-> **And you'll be able to catch yourself in the act, with one rule for what to do instead.**
+> **And I'll show you the one check that makes it visible, and the rule to use instead.**
 
 ## Appendix
 
@@ -202,7 +202,7 @@
 - **L-04 (where did the reflex come from, SP04):** paid SP05 within stated bounds.
 - **L-05 (what do I do, SP05):** principle SP06, application SP07.
 - **Promise 1 (the hidden game):** paid SP03 and carried through SP04.
-- **Promise 2 (catch it in the act + the replacement rule):** the catch is the
+- **Promise 2 (the visibility check + the rule to use instead):** the check is the
   two-ledger check paid in SP07; the rule is paid SP06–SP07.
 - **"You have made the same move" (intro):** paid SP04.
 

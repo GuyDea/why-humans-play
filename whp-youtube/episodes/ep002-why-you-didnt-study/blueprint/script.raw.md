@@ -26,4 +26,4 @@
 
 > **By the end of this video, you'll know the hidden game behind your worst nights of not preparing.**
 >
-> **And you'll be able to catch yourself in the act, with one rule for what to do instead.**
+> **And I'll show you the one check that makes it visible, and the rule to use instead.**
