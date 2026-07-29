@@ -196,7 +196,7 @@ VALID_DOCUMENT = """# Why Bees Roll Balls
 - **Version:** 0.2
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 00:30
-- **Word count:** 80
+- **Word count:** 81
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy
@@ -425,8 +425,8 @@ TWO_BEAT_DOCUMENT = replace_exact(
 )
 TWO_BEAT_DOCUMENT = replace_exact(
     TWO_BEAT_DOCUMENT,
-    "- **Word count:** 80",
-    "- **Word count:** 160",
+    "- **Word count:** 81",
+    "- **Word count:** 162",
 )
 
 
@@ -498,9 +498,9 @@ class ValidatorTests(unittest.TestCase):
         self.assertIn(LIMITATION_SENTENCE, result.stdout)
 
     def test_fixture_narration_count_matches_metadata(self) -> None:
-        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 81)
         self.assertIn("- **Target runtime:** 00:30", HEADER_BLOCK)
-        self.assertIn("- **Word count:** 80", HEADER_BLOCK)
+        self.assertIn("- **Word count:** 81", HEADER_BLOCK)
         self.assertIn("_Time: 00:00–00:30 · Target: ~80 words_", BEAT_BLOCK)
 
     def test_valid_research_draft_passes(self) -> None:
@@ -946,7 +946,7 @@ class ValidatorTests(unittest.TestCase):
         narration = extract_narration(VALID_DOCUMENT)
         self.assertNotIn("PI-001", narration)
         self.assertNotIn("<!--", narration)
-        self.assertEqual(count_narration_words(VALID_DOCUMENT), 80)
+        self.assertEqual(count_narration_words(VALID_DOCUMENT), 81)
 
     def test_inline_evidence_indicator_is_excluded_from_narration_and_word_count(
         self,
@@ -954,7 +954,7 @@ class ValidatorTests(unittest.TestCase):
         narration = validator.extract_narration(VALID_DOCUMENT)
         self.assertNotIn("[F-001]", narration)
         self.assertNotIn("10.1016/j.anbehav.2022.08.013", narration)
-        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 80)
+        self.assertEqual(validator.count_narration_words(VALID_DOCUMENT), 81)
 
     def test_inline_evidence_indicator_between_words_preserves_word_boundary(
         self,
@@ -1026,10 +1026,11 @@ class ValidatorTests(unittest.TestCase):
                     expected_count=1,
                 )
                 if context == "markdown-image":
+                    actual_count = validator.count_narration_words(document)
                     document = replace_exact(
                         document,
-                        "- **Word count:** 80",
                         "- **Word count:** 81",
+                        f"- **Word count:** {actual_count}",
                     )
                 self.assert_error(document, missing_indicator)
                 self.assertIn(lookalike, validator.extract_narration(document))
@@ -1060,7 +1061,7 @@ class ValidatorTests(unittest.TestCase):
                 actual_count = validator.count_narration_words(document)
                 document = replace_exact(
                     document,
-                    "- **Word count:** 80",
+                    "- **Word count:** 81",
                     f"- **Word count:** {actual_count}",
                 )
                 errors = validate_document(document)
@@ -1278,7 +1279,7 @@ class ValidatorTests(unittest.TestCase):
                 self.assertNotIn("hidden fenced words", narration)
                 self.assertEqual(narration.split(), expected.split())
             with self.subTest(fence=fence, contract="word-count"):
-                self.assertEqual(validator.count_narration_words(document), 80)
+                self.assertEqual(validator.count_narration_words(document), 81)
 
     def test_commonmark_indented_blockquotes_are_spoken_narration(self) -> None:
         expected = validator.extract_narration(COMPLETED_DOCUMENT)
@@ -1289,14 +1290,14 @@ class ValidatorTests(unittest.TestCase):
                     spaces,
                 )
                 self.assertEqual(validator.extract_narration(document), expected)
-                self.assertEqual(validator.count_narration_words(document), 80)
+                self.assertEqual(validator.count_narration_words(document), 81)
                 self.assertEqual(validate_document(document), [])
 
     def test_four_space_indentation_is_not_spoken_blockquote_copy(self) -> None:
         document = indent_narration_blockquotes(COMPLETED_DOCUMENT, 4)
         document = replace_exact(
             document,
-            "- **Word count:** 80",
+            "- **Word count:** 81",
             "- **Word count:** 0",
         )
         self.assertEqual(validator.extract_narration(document), "")
@@ -1326,16 +1327,16 @@ class ValidatorTests(unittest.TestCase):
         self.assert_error(
             replace_exact(
                 VALID_DOCUMENT,
-                "- **Word count:** 80",
+                "- **Word count:** 81",
                 "- **Word count:** 79",
             ),
-            "does not match extracted narration count 80",
+            "does not match extracted narration count 81",
         )
         self.assert_error(
             replace_exact(
                 VALID_DOCUMENT,
-                "- **Word count:** 80",
-                "- **Word count:** about 80",
+                "- **Word count:** 81",
+                "- **Word count:** about 81",
             ),
             "Word count must be a non-negative integer",
         )
@@ -1343,7 +1344,7 @@ class ValidatorTests(unittest.TestCase):
     def test_extremely_long_numeric_word_count_returns_an_error(self) -> None:
         document = replace_exact(
             COMPLETED_DOCUMENT,
-            "- **Word count:** 80",
+            "- **Word count:** 81",
             "- **Word count:** " + "9" * 5000,
         )
         try:
@@ -1355,7 +1356,7 @@ class ValidatorTests(unittest.TestCase):
             )
         self.assertTrue(
             any(
-                "does not match extracted narration count 80" in error
+                "does not match extracted narration count 81" in error
                 for error in errors
             ),
             errors,
@@ -2080,6 +2081,37 @@ class ValidatorTests(unittest.TestCase):
             result = self.run_cli(path, cwd, "--json", "--")
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue(json.loads(result.stdout)["ok"])
+
+
+class SharedNarrationSemanticsTests(unittest.TestCase):
+    def test_word_count_ignores_standalone_punctuation_tokens(self) -> None:
+        self.assertEqual(
+            validator.count_narration_words(
+                "## Beat 01 — Test\n\n"
+                "### Narration\n"
+                "> Stress — the quiet kind — hurts.\n"
+            ),
+            5,
+        )
+
+    def test_malformed_indicator_url_is_recognized_and_flagged(self) -> None:
+        document = VALID_DOCUMENT.replace(
+            "[F-001](https://doi.org/10.1016/j.anbehav.2022.08.013)",
+            "[F-001](not-a-url)",
+            1,
+        )
+
+        errors = validate_document(document)
+
+        self.assertTrue(
+            any("does not match its Original URL" in error for error in errors)
+        )
+        self.assertFalse(
+            any("no inline evidence indicator" in error for error in errors)
+        )
+        self.assertFalse(
+            any("Word count metadata" in error for error in errors)
+        )
 
 
 if __name__ == "__main__":

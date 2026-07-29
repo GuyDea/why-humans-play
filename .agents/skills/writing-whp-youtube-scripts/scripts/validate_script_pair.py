@@ -10,6 +10,10 @@ import json
 from pathlib import Path
 import re
 
+from script_markup import (
+    APPENDIX_HEADING_RE as SHARED_APPENDIX_HEADING_RE,
+    EVIDENCE_INDICATOR_PATTERN,
+)
 from validate_annotated_script import validate_document
 
 
@@ -22,7 +26,7 @@ APPENDIX_SPLIT_RE = re.compile(
     r"(?:\r\n|\r|\n)## Appendix[ \t]*(?:(?:\r\n|\r|\n)|$)"
 )
 MARKDOWN_LINE_ENDING_RE = re.compile(r"\r\n|\r|\n")
-APPENDIX_HEADING_RE = re.compile(r"^## Appendix[ \t]*$")
+APPENDIX_HEADING_RE = SHARED_APPENDIX_HEADING_RE
 H1_RE = re.compile(r"^# (?=\S).+$")
 BEAT_HEADING_RE = re.compile(r"^## (?=\S).+$")
 PURPOSE_CANDIDATE_RE = re.compile(
@@ -55,7 +59,7 @@ SUPPORTING_STYLE_TAGS = frozenset(
     {"MINI-HOOK", "TRANSITION", "REVERSAL", "AHA"}
 )
 EVIDENCE_RE = re.compile(
-    r"(?<![ \t])[ \t]*\[F-\d{3}\]\([^)\r\n]+\)"
+    rf"(?<![ \t])[ \t]*{EVIDENCE_INDICATOR_PATTERN}"
 )
 EMAIL_AUTOLINK_RE = re.compile(
     r"^[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@"
@@ -1554,16 +1558,6 @@ def _appendix_body(markdown: str) -> str:
     return "\n".join(lines[appendix_index + 1 :])
 
 
-def _without_purpose_annotations(markdown: str) -> str:
-    """Strip standalone purpose lines while preserving evidence indicators."""
-
-    return "".join(
-        line
-        for line in _markdown_lines(markdown, keepends=True)
-        if PURPOSE_CANDIDATE_RE.fullmatch(line.rstrip("\r\n")) is None
-    )
-
-
 def _validate_stage_appendix(markdown: str, stage: str) -> list[str]:
     """Validate the exact stage appendix or delegate the final schema."""
 
@@ -1577,9 +1571,7 @@ def _validate_stage_appendix(markdown: str, stage: str) -> list[str]:
     if stage == "final":
         return [
             f"final appendix: {error}"
-            for error in validate_document(
-                _without_purpose_annotations(markdown)
-            )
+            for error in validate_document(markdown)
         ]
 
     status, required_headings = STAGE_APPENDIX_CONTRACTS[stage]

@@ -8,25 +8,25 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Sequence
 
+from script_markup import (
+    APPENDIX_HEADING_RE,
+    EVIDENCE_INDICATOR_PATTERN,
+    WORD_RE,
+)
+
 
 HARD_MAX_WORDS = 25
 REVIEW_MIN_WORDS = 21
 STRUCTURAL_GRADE_FLOOR = 12.0
 
-APPENDIX_RE = re.compile(r"^##\s+Appendix\b", re.IGNORECASE)
 BLOCKQUOTE_RE = re.compile(r"^\s*>\s?(.*)$")
-EVIDENCE_LINK_RE = re.compile(
-    r"\s*\[F-\d{3}\]\(\s*[^)]+\s*\)",
-    re.IGNORECASE,
-)
-EVIDENCE_MARKER_RE = re.compile(r"\s*\[?F-\d{3}\]?", re.IGNORECASE)
+EVIDENCE_LINK_RE = re.compile(r"\s*" + EVIDENCE_INDICATOR_PATTERN)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
 MARKDOWN_LINK_RE = re.compile(r"\[([^\]]+)\]\([^)]+\)")
 BARE_URL_RE = re.compile(r"https?://\S+", re.IGNORECASE)
 STORYTELLING_MARKUP_RE = re.compile(
     r"</?u>|(?<!\*)\*{1,3}(?!\*)"
 )
-WORD_RE = re.compile(r"[^\W_]+(?:[’'-][^\W_]+)*", re.UNICODE)
 SENTENCE_END_RE = re.compile(r"[.!?]+[”\"’']*(?=\s+|$)")
 RELATIONSHIP_RE = re.compile(
     r"\b(?:but|because|although|though|whereas|unless|until|while|which|who|"
@@ -58,6 +58,10 @@ COMMON_ABBREVIATIONS = {
     "st",
     "vs",
 }
+TERMINAL_ABBREVIATIONS = {
+    "approx",
+    "etc",
+}
 
 
 @dataclass(frozen=True)
@@ -81,7 +85,6 @@ class ReadabilityFinding:
 def _strip_non_spoken_annotations(text: str) -> str:
     text = HTML_COMMENT_RE.sub("", text)
     text = EVIDENCE_LINK_RE.sub("", text)
-    text = EVIDENCE_MARKER_RE.sub("", text)
     text = MARKDOWN_LINK_RE.sub(r"\1", text)
     text = BARE_URL_RE.sub("", text)
     text = STORYTELLING_MARKUP_RE.sub("", text)
@@ -101,6 +104,9 @@ def _looks_like_abbreviation(text: str, end: int) -> bool:
     normalized = token.lower()
     if normalized in COMMON_ABBREVIATIONS:
         return True
+    if normalized in TERMINAL_ABBREVIATIONS:
+        remainder = text[end:].lstrip()
+        return bool(remainder) and remainder[0].islower()
     if len(token) == 1 and token.isalpha():
         return True
     return bool(re.fullmatch(r"(?:[A-Za-z]\.)+[A-Za-z]?", token))
@@ -156,7 +162,7 @@ def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
             current_line = 0
 
     for line_number, raw_line in enumerate(markdown.splitlines(), start=1):
-        if APPENDIX_RE.match(raw_line):
+        if APPENDIX_HEADING_RE.fullmatch(raw_line):
             flush()
             break
 

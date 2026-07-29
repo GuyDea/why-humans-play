@@ -272,7 +272,7 @@
 - **Version:** 2.2 — three investigation-challenge bridges added (moves two, three, and four; no new factual claims beyond F-009 callbacks)
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 13:45
-- **Word count:** 2703
+- **Word count:** 2778
 - **Audience:** Curious adults who use conversational AI for advice or decisions
 - **Episode mode:** AI–human interaction (hidden-game lens)
 - **Title:** Why AI Makes Bad Advice Feel Right

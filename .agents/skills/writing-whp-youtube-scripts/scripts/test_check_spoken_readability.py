@@ -27,9 +27,11 @@ Metadata does not count.
 
         sentences = extract_spoken_sentences(markdown)
 
+        # Only the canonical [F-###](URL) indicator is an annotation; a bare
+        # F-### token is spoken text, exactly as the validators count it.
         self.assertEqual(
             [sentence.text for sentence in sentences],
-            ["A short factual sentence.", "Another spoken sentence."],
+            ["A short factual sentence.", "Another spoken sentence.", "F-002"],
         )
 
     def test_locked_line_bolding_is_stripped_before_the_word_count(self) -> None:
@@ -310,6 +312,59 @@ Metadata does not count.
 
         self.assertEqual(result, 2)
         self.assertIn("No spoken narration found", stderr.getvalue())
+
+
+class NarrationMarkupBoundaryTests(unittest.TestCase):
+    def test_prose_nouns_resembling_evidence_ids_are_not_corrupted(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> The F-150 pickup and shelf-101 rack carried the gear.\n"
+        )
+
+        self.assertEqual(
+            [sentence.text for sentence in sentences],
+            ["The F-150 pickup and shelf-101 rack carried the gear."],
+        )
+
+    def test_lowercase_evidence_link_is_spoken_link_text(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> A short sentence. [f-001](https://example.com/source)\n"
+        )
+
+        self.assertIn(
+            "f-001",
+            " ".join(sentence.text for sentence in sentences),
+        )
+
+    def test_scanning_stops_only_at_the_exact_appendix_heading(self) -> None:
+        long_sentence = " ".join(["word"] * 26) + "."
+        markdown = f"## Appendix — the hidden game\n\n> {long_sentence}\n"
+
+        findings = analyze_markdown(markdown)
+
+        self.assertEqual([finding.level for finding in findings], ["fail"])
+
+
+class SentenceBoundaryAbbreviationTests(unittest.TestCase):
+    def test_terminal_abbreviation_before_lowercase_does_not_split(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> They tested boats, cars, etc. and then kept talking calmly.\n"
+        )
+
+        self.assertEqual(len(sentences), 1)
+
+    def test_terminal_abbreviation_before_capital_still_splits(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> It worked, etc. Then everything changed.\n"
+        )
+
+        self.assertEqual(len(sentences), 2)
+
+    def test_title_abbreviation_before_capitalized_name_does_not_split(
+        self,
+    ) -> None:
+        sentences = extract_spoken_sentences("> Dr. Smith agreed to help.\n")
+
+        self.assertEqual(len(sentences), 1)
 
 
 if __name__ == "__main__":

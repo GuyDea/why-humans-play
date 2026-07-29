@@ -30,7 +30,7 @@
 - **Version:** 0.4
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** 00:30
-- **Word count:** 80
+- **Word count:** 83
 - **Audience:** Curious adults
 - **Episode mode:** Why We Play
 - **Title:** The Bee That Chose a Toy

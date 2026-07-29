@@ -22,6 +22,7 @@ from validate_script_pair import (
     resolve_pair,
     validate_pair,
 )
+from validate_annotated_script import validate_document
 
 
 RAW = """# Episode
@@ -204,6 +205,33 @@ class ScriptPairTests(unittest.TestCase):
         )
         raw = _extended_sync_surface(extended)
         return self.make_pair(raw=raw, extended=extended, stage="final")
+
+    def test_final_delegation_matches_direct_document_validation(self) -> None:
+        extended = TEMPLATE_PATH.read_text(encoding="utf-8")
+        extended = extended.replace(
+            "- **Decision:** INPUT-REQUESTED",
+            "- **Decision:** COMPLETED",
+            1,
+        ).replace(
+            "> <!-- PI-001: Martin input -->\n",
+            "",
+            1,
+        )
+        raw = _extended_sync_surface(extended)
+        extended = extended.replace("## Appendix\n", "## Appendix\n\n[TODO]\n", 1)
+
+        direct_errors = validate_document(extended)
+        self.assertTrue(direct_errors)
+
+        stage_dir = self.make_pair(raw=raw, extended=extended, stage="final")
+        pair_errors = validate_pair(resolve_pair(stage_dir))
+        delegated = {
+            error[len("final appendix: ") :]
+            for error in pair_errors
+            if error.startswith("final appendix: ")
+        }
+
+        self.assertEqual(delegated, set(direct_errors))
 
     def test_resolves_either_file_or_stage_directory(self) -> None:
         stage_dir = self.make_pair()

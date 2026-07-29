@@ -9,6 +9,13 @@ from dataclasses import dataclass
 from pathlib import Path
 import re
 
+from script_markup import (
+    APPENDIX_HEADING_RE,
+    EVIDENCE_ID_PATTERN,
+    EVIDENCE_URL_PATTERN,
+    count_words,
+)
+
 
 READINESS_STATES = {
     "RESEARCH-DRAFT",
@@ -132,8 +139,8 @@ REFERENCES_HEADING_RE = re.compile(
 )
 REFERENCE_ID_RE = re.compile(r"`([FA]-\d{3})`")
 INLINE_EVIDENCE_LINK_RE = re.compile(
-    r"(?<!!)\[(?P<record_id>F-\d{3})\]"
-    r"\((?P<url>https?://[^)\s]+)\)"
+    rf"(?<!!)\[(?P<record_id>{EVIDENCE_ID_PATTERN})\]"
+    rf"\((?P<url>{EVIDENCE_URL_PATTERN})\)"
 )
 RECORD_HEADING_RE = re.compile(r"^#### ([FA]-\d{3})(?:\s|$)", re.MULTILINE)
 LEVEL_THREE_HEADING_RE = re.compile(
@@ -151,7 +158,6 @@ FENCE_LINE_RE = re.compile(
     r"^[ ]{0,3}(?P<quote>>[ \t]?[ ]{0,3})?"
     r"(?P<fence>`{3,}|~{3,})(?P<rest>.*)$"
 )
-APPENDIX_HEADING_RE = re.compile(r"^## Appendix[ \t]*$", re.MULTILINE)
 NUMBERED_BEAT_HEADING_RE = re.compile(
     r"^## ([1-9]\d*)\. ([^\r\n]+?)[ \t]*$", re.MULTILINE
 )
@@ -681,9 +687,9 @@ def extract_narration(text: str) -> str:
 
 
 def count_narration_words(text: str) -> int:
-    """Count whitespace-delimited spoken words after narration extraction."""
+    """Count spoken words after narration extraction."""
 
-    return len(extract_narration(text).split())
+    return count_words(extract_narration(text))
 
 
 def _without_purpose_annotations(text: str) -> str:
@@ -1018,7 +1024,7 @@ def _validate_word_count(
     if re.fullmatch(r"\d+", stated) is None:
         errors.append("Word count must be a non-negative integer.")
         return
-    actual = len(_extract_narration_from_masked(masked_text).split())
+    actual = count_words(_extract_narration_from_masked(masked_text))
     normalized_stated = stated.lstrip("0") or "0"
     if normalized_stated != str(actual):
         errors.append(
