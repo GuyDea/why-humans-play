@@ -621,7 +621,13 @@ supplies them.
 
 ## Rapid quality check
 
-Before returning rapid work, check internally:
+Run this in three moments rather than as one wall at the end. The gate questions decide
+whether you may draft at all; the drafting questions shape each line as you write it; the
+sweep runs once on the finished text, before you return it.
+
+### Before drafting — gates
+
+Answer these first. A `no` means stop and return the missing artifact instead of drafting.
 
 - For a new or thesis-level architecture, did the bounded concept-discovery scan cover both
   explanations and interventions, show sources and exclusions, and reach its saturation
@@ -633,22 +639,17 @@ Before returning rapid work, check internally:
   Martin's direct instruction to build the Script Blueprint from that displayed complete
   plan before polishing the intro or mapping the body, and that the artifact preserves
   its causal chain.
-- Does the prototype deliver the approved core answer, insight ladder, and earned reframe
-  without adding a competing thesis?
-- Does it teach the approved new understanding before asking the viewer to use the
-  concrete response?
-- Do the opening promise, viewer application, and final lesson preserve the approved
-  decision rule or sequence, observable result, and boundary?
+
+### While drafting — line-level
+
+Hold these while writing. Each one changes the sentence in front of you.
+
 - Does the first sentence feel like a concrete event or irresistible proposition?
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
 - Do the first two spoken sentences each carry one idea in plain syntax?
 - Does a research-event opening use the known year and institution without inventing a
   location or affiliation?
-- Can a first-hearing listener explain the intended goal, visible proxy, shortcut, and
-  absurd outcome without asking why the score improved?
-- If the episode claims persistence, does one compact current echo show the same bounded
-  mechanism without becoming a second opening or a universal claim?
 - Are technical setup labels and mechanism detail held until after the hook?
 - Does the opening contain a sharp comic or surprising turn?
 - Use a first-person narrator reaction or direct-address check-in only when the approved
@@ -670,8 +671,6 @@ Before returning rapid work, check internally:
 - Does every transition between evidence pieces say in plain words what the last case
   established, what it left open, and why the next evidence answers it — no bare “So:”
   pivots?
-- Where the approved plan uses an investigation challenge, does the prose preserve its
-  evidence gap, scoped resolution, varied phrasing, and reserved placement?
 - Is every already-mainstream term acknowledged as familiar rather than unveiled as news,
   and is no term revealed that the script's own earlier lines already used?
 - Does each named concept follow the explanation grammar—term as promise (or
@@ -679,6 +678,28 @@ Before returning rapid work, check internally:
   application?
 - When narration claims people say, ask, or type something, does it voice at least one
   verbatim example in that exact form?
+- Does the narration sound like a smart friend discovering the logic with the viewer
+  rather than a paper abstract or disclaimer?
+- Is each standalone punchline one short sentence with its explanation kept outside it?
+- Is the by-end promise literal, specific, and free of jokes or metaphors?
+- Would the copy sound natural aloud?
+
+### After the draft — verification sweep
+
+Run once over the finished text.
+
+- Does the prototype deliver the approved core answer, insight ladder, and earned reframe
+  without adding a competing thesis?
+- Does it teach the approved new understanding before asking the viewer to use the
+  concrete response?
+- Do the opening promise, viewer application, and final lesson preserve the approved
+  decision rule or sequence, observable result, and boundary?
+- Can a first-hearing listener explain the intended goal, visible proxy, shortcut, and
+  absurd outcome without asking why the score improved?
+- If the episode claims persistence, does one compact current echo show the same bounded
+  mechanism without becoming a second opening or a universal claim?
+- Where the approved plan uses an investigation challenge, does the prose preserve its
+  evidence gap, scoped resolution, varied phrasing, and reserved placement?
 - In a complete narration, do the selected loops preserve clarity and deliver their
   approved named payoffs?
 - Does the episode make its rule-system legible — players, real goal, scored proxy,
@@ -697,11 +718,7 @@ Before returning rapid work, check internally:
   the episode's exact mechanism?
 - Does each adjacent case state its exact takeaway and why it matters, then leave one
   specific question for the next evidence to answer?
-- Does the narration sound like a smart friend discovering the logic with the viewer
-  rather than a paper abstract or disclaimer?
-- Is each standalone punchline one short sentence with its explanation kept outside it?
 - Does it promise what the viewer will gain by the end?
-- Is the by-end promise literal, specific, and free of jokes or metaphors?
 - Does each substantial abstraction receive a concrete example?
 - Does each substantial point prefer a documented case, or clearly label a hypothetical when
   no suitable verified case is available?
@@ -710,7 +727,6 @@ Before returning rapid work, check internally:
 - When a compact verified tidbit would deepen the concept, is it brief and connected to the
   next thought rather than decorative trivia?
 - Does the AI–human or game–human connection appear early enough?
-- Would the copy sound natural aloud?
 - Did any factual specificity get invented?
 - Did the response stay inside the requested scope?
 

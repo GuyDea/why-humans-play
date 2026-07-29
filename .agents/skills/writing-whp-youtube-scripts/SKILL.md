@@ -105,7 +105,9 @@ that work. Episode-stage pairs still require pair validation before review.
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
-factual boundary, and internal quality check.
+factual boundary, and internal quality check. That method's quality check runs in three
+moments — gates before drafting, line-level questions while writing, and one sweep over the
+finished text — so carry only the current moment's questions.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable

@@ -443,7 +443,10 @@ Every `FULL-SCRIPT` episode appendix contains one `### Shorts plan` section plac
 after the last beat entry and before any editorial-audit or issue-ledger material.
 Plan the Shorts while the long-form exists as beats, not after production.
 
-List three to five golden-nugget candidates. Each entry names:
+List three to five golden-nugget candidates; the structural validator counts the
+`**Short hook:**` fields and rejects a section outside that range. The fields are fixed;
+their line layout is not — one numbered line per candidate and nested bullets both pass.
+Each entry names:
 
 - **Beat:** the narration beat the nugget lifts from.
 - **Nugget:** the self-contained thought — a clean statistic, one-line paradox, single
@@ -552,6 +555,7 @@ indicators are stripped from narration extraction and structurally match the sam
 `Claims` IDs and each evidence record's `Original URL`; every appendix beat contains all
 required production subsections; deliverable-specific personal-input and viewer-application
 blocks have the required cardinality, fields, decision vocabulary, and marker lifecycle;
+a Shorts plan section carries three to five candidates;
 stated word count matches extracted narration; motion notes state an animation purpose or
 explicitly decline animation; referenced fact and asset IDs have exactly one record; records
 contain their required fields; required URLs and status values have valid forms; and a

@@ -170,6 +170,10 @@ PURPOSE_ANNOTATION_LINE_RE = re.compile(
     r"^[ \t]*\[[A-Z0-9][A-Z0-9 .|\-]*"
     r" — \S(?:[^\]\r\n]*\S)?\][ \t]*$"
 )
+SHORTS_PLAN_HEADING_RE = re.compile(r"^### Shorts plan[ \t]*$", re.MULTILINE)
+SHORTS_CANDIDATE_RE = re.compile(r"\*\*Short hook:\*\*")
+SHORTS_PLAN_MIN_CANDIDATES = 3
+SHORTS_PLAN_MAX_CANDIDATES = 5
 
 
 @dataclass(frozen=True)
@@ -534,6 +538,8 @@ def _normalize_appendix_document(text: str) -> tuple[str, list[str]]:
             + _promote_appendix_headings(production_body).strip()
             + "\n"
         )
+
+    _validate_shorts_plan(masked_appendix, errors)
 
     metadata = metadata_blocks[0].strip() if metadata_blocks else ""
     references = (
@@ -1010,6 +1016,28 @@ def _validate_personal_and_application_blocks(
             body,
             VIEWER_APPLICATION_FIELDS,
             errors,
+        )
+
+
+def _validate_shorts_plan(appendix_text: str, errors: list[str]) -> None:
+    """Count Shorts candidates when the appendix plans them.
+
+    The section is optional — a TARGETED-ARTIFACT includes it only on request — but a
+    section that exists must carry the three-to-five candidates the format requires.
+    """
+
+    heading = SHORTS_PLAN_HEADING_RE.search(appendix_text)
+    if heading is None:
+        return
+
+    remainder = appendix_text[heading.end() :]
+    next_section = APPENDIX_LEVEL_THREE_RE.search(remainder)
+    body = remainder[: next_section.start()] if next_section else remainder
+    count = len(SHORTS_CANDIDATE_RE.findall(body))
+    if not SHORTS_PLAN_MIN_CANDIDATES <= count <= SHORTS_PLAN_MAX_CANDIDATES:
+        errors.append(
+            "Shorts plan requires three to five golden-nugget candidates, each with a "
+            f"**Short hook:** field; found {count}."
         )
 
 

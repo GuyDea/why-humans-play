@@ -2083,6 +2083,68 @@ class ValidatorTests(unittest.TestCase):
         self.assertTrue(json.loads(result.stdout)["ok"])
 
 
+class ShortsPlanTests(unittest.TestCase):
+    """The format requires three to five candidates; the validator now counts them."""
+
+    def _with_shorts(self, candidates: int) -> str:
+        entries = "\n".join(
+            f"{index}. **Beat:** 01\n"
+            f"   - **Nugget:** Standalone thought {index}.\n"
+            f"   - **Short hook:** Opening line {index}.\n"
+            f"   - **Cut boundaries:** Start and end for lift {index}."
+            for index in range(1, candidates + 1)
+        )
+        section = "### Shorts plan\n\n" + entries + "\n\n"
+        return APPENDIX_DOCUMENT.replace(
+            "### References and source materials",
+            section + "### References and source materials",
+            1,
+        )
+
+    def test_three_candidates_pass(self) -> None:
+        self.assertEqual(validate_document(self._with_shorts(3)), [])
+
+    def test_five_candidates_pass(self) -> None:
+        self.assertEqual(validate_document(self._with_shorts(5)), [])
+
+    def test_two_candidates_fail(self) -> None:
+        errors = validate_document(self._with_shorts(2))
+        self.assertTrue(
+            any("Shorts plan requires three to five" in error for error in errors),
+            errors,
+        )
+
+    def test_six_candidates_fail(self) -> None:
+        errors = validate_document(self._with_shorts(6))
+        self.assertTrue(
+            any("Shorts plan requires three to five" in error for error in errors),
+            errors,
+        )
+
+    def test_inline_field_layout_counts_the_same(self) -> None:
+        # The format fixes the fields, not their line layout; ep001 puts all four on
+        # one numbered line while the template nests them as bullets.
+        entries = "\n".join(
+            f"{index}. **Beat:** 01 — **Nugget:** Thought {index}. "
+            f"**Short hook:** Line {index}. **Cut boundaries:** Start to end."
+            for index in range(1, 4)
+        )
+        document = APPENDIX_DOCUMENT.replace(
+            "### References and source materials",
+            f"### Shorts plan\n\n{entries}\n\n### References and source materials",
+            1,
+        )
+        self.assertEqual(validate_document(document), [])
+
+    def test_targeted_artifact_may_omit_the_section(self) -> None:
+        targeted = APPENDIX_DOCUMENT.replace(
+            "- **Deliverable:** FULL-SCRIPT",
+            "- **Deliverable:** TARGETED-ARTIFACT",
+            1,
+        )
+        self.assertNotIn("Shorts plan", "".join(validate_document(targeted)))
+
+
 class SharedNarrationSemanticsTests(unittest.TestCase):
     def test_word_count_ignores_standalone_punctuation_tokens(self) -> None:
         self.assertEqual(
