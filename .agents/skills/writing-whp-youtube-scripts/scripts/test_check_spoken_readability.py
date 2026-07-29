@@ -359,6 +359,34 @@ class SentenceBoundaryAbbreviationTests(unittest.TestCase):
 
         self.assertEqual(len(sentences), 2)
 
+    def test_terminal_abbreviation_before_digit_does_not_split(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> They measured approx. 10 boats near the dock.\n"
+        )
+
+        self.assertEqual(len(sentences), 1)
+
+    def test_terminal_abbreviation_before_currency_does_not_split(self) -> None:
+        sentences = extract_spoken_sentences(
+            "> The repair cost approx. $40 in parts.\n"
+        )
+
+        self.assertEqual(len(sentences), 1)
+
+    def test_split_around_terminal_abbreviation_cannot_hide_a_long_sentence(
+        self,
+    ) -> None:
+        long_sentence = (
+            "> The survey team recorded approx. 30 separate readings across the "
+            "northern ridge before sunset and then confirmed every single anomaly "
+            "against the previous printed chart of the whole region.\n"
+        )
+
+        findings = analyze_markdown(long_sentence)
+
+        self.assertEqual(len(findings), 1)
+        self.assertEqual(findings[0].level, "fail")
+
     def test_title_abbreviation_before_capitalized_name_does_not_split(
         self,
     ) -> None:

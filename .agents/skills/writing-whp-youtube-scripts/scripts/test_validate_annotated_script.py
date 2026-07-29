@@ -2121,6 +2121,25 @@ class ShortsPlanTests(unittest.TestCase):
             errors,
         )
 
+    def test_duplicate_sections_fail(self) -> None:
+        duplicated = APPENDIX_DOCUMENT.replace(
+            "### References and source materials",
+            "### Shorts plan\n\n"
+            "1. **Beat:** 01\n"
+            "   - **Nugget:** Extra thought.\n"
+            "   - **Short hook:** Extra line.\n"
+            "   - **Cut boundaries:** Start to end.\n\n"
+            "### References and source materials",
+            1,
+        )
+
+        errors = validate_document(duplicated)
+
+        self.assertTrue(
+            any("at most one Shorts plan" in error for error in errors),
+            errors,
+        )
+
     def test_three_candidates_pass(self) -> None:
         self.assertEqual(validate_document(self._with_shorts(3)), [])
 
@@ -2149,7 +2168,7 @@ class ShortsPlanTests(unittest.TestCase):
             f"**Short hook:** Line {index}. **Cut boundaries:** Start to end."
             for index in range(1, 4)
         )
-        document = APPENDIX_DOCUMENT.replace(
+        document = self._without_shorts().replace(
             "### References and source materials",
             f"### Shorts plan\n\n{entries}\n\n### References and source materials",
             1,

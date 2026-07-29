@@ -1027,8 +1027,8 @@ def _validate_shorts_plan(appendix_text: str, errors: list[str]) -> None:
     candidates the format requires.
     """
 
-    heading = SHORTS_PLAN_HEADING_RE.search(appendix_text)
-    if heading is None:
+    headings = list(SHORTS_PLAN_HEADING_RE.finditer(appendix_text))
+    if not headings:
         deliverable = re.search(
             r"^[ \t]*-[ \t]+\*\*Deliverable:\*\*[ \t]*(\S+)",
             appendix_text,
@@ -1040,8 +1040,14 @@ def _validate_shorts_plan(appendix_text: str, errors: list[str]) -> None:
                 "five golden-nugget candidates."
             )
         return
+    if len(headings) > 1:
+        errors.append(
+            "Appendix requires at most one Shorts plan section; "
+            f"found {len(headings)}."
+        )
+        return
 
-    remainder = appendix_text[heading.end() :]
+    remainder = appendix_text[headings[0].end() :]
     next_section = APPENDIX_LEVEL_THREE_RE.search(remainder)
     body = remainder[: next_section.start()] if next_section else remainder
     count = len(SHORTS_CANDIDATE_RE.findall(body))

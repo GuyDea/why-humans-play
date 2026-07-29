@@ -106,7 +106,10 @@ def _looks_like_abbreviation(text: str, end: int) -> bool:
         return True
     if normalized in TERMINAL_ABBREVIATIONS:
         remainder = text[end:].lstrip()
-        return bool(remainder) and remainder[0].islower()
+        if not remainder:
+            return False
+        first = remainder[0]
+        return first.islower() or first.isdigit() or first in "$€£"
     if len(token) == 1 and token.isalpha():
         return True
     return bool(re.fullmatch(r"(?:[A-Za-z]\.)+[A-Za-z]?", token))

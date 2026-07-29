@@ -557,7 +557,8 @@ indicators are stripped from narration extraction and structurally match the sam
 `Claims` IDs and each evidence record's `Original URL`; every appendix beat contains all
 required production subsections; deliverable-specific personal-input and viewer-application
 blocks have the required cardinality, fields, decision vocabulary, and marker lifecycle;
-a Shorts plan section carries three to five candidates;
+a FULL-SCRIPT appendix contains exactly one Shorts plan section, no appendix contains
+more than one, and the section carries three to five candidates;
 stated word count matches extracted narration; motion notes state an animation purpose or
 explicitly decline animation; referenced fact and asset IDs have exactly one record; records
 contain their required fields; required URLs and status values have valid forms; and a
