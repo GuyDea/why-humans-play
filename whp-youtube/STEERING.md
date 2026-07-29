@@ -52,15 +52,19 @@ accepted current launch sequence, dated launch research, and historical episode 
    even when it follows every rule*), which remains retired from the sequence; its
    research and drafts stay in git history and dated planning documents for possible
    future re-ranking.
-2. **EP2 — What job interviews actually test.** Decode hiring as a signaling game and
-   distinguish evidence of job performance from performance inside the interview.
+2. **EP2 — slot open (2026-07-29).** The earlier accepted premise (*What job interviews
+   actually test*) was rejected as too weak for the target audience, and a developed
+   sports-betting premise was parked at Martin's request
+   ([parked architecture](drafts/parked-betting-on-you-architecture.md)). The live
+   candidate shortlist is [`topic-backlog.md`](topic-backlog.md); current front-runner,
+   not yet selected: *Why you didn't study* (self-handicapping).
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support.
 4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a
    credibility frame for an evidence audit, never as promotion or proof.
 
 This breadth-first sequence is deliberate: the first four episodes establish WHP's range
-across AI and incentives, a hidden institutional game, an explicit game, and the science
+across AI and incentives, a second hidden-game episode, an explicit game, and the science
 of playful cognitive training. Current evidence and packaging still require verification
 inside each episode assignment; the sequence is direction, not a performance guarantee.
 

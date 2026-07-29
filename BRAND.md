@@ -192,8 +192,9 @@ Brand work must not displace active app-launch priorities.
   proxy goals shaping human behavior. Its selected opening uses OpenAI's 2016 CoastRunners
   agent as a vivid early warning and a 2025 coding-agent test exploit as a compact current
   echo of the same score-versus-goal failure. The accepted launch sequence then moves
-  through job-interview signaling, chess and cognitive transfer, and an honest brain-games
-  audit.
+  through a second hidden-game episode now being selected from
+  [`whp-youtube/topic-backlog.md`](whp-youtube/topic-backlog.md), chess and cognitive
+  transfer, and an honest brain-games audit.
 - **The "evolutionary paradox of play" script becomes a *Why We Play* candidate**, not the
   pilot — preserved at
   [`whp-youtube/drafts/evolutionary-paradox-of-play.md`](whp-youtube/drafts/evolutionary-paradox-of-play.md).
