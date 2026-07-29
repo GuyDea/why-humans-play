@@ -26,4 +26,4 @@
 
 > **By the end of this video, you'll know the hidden game behind your worst nights of not preparing.**
 >
-> **And you'll have one rule that separates protecting yourself from sabotaging yourself.**
+> **And you'll be able to catch yourself in the act, with one rule for what to do instead.**
