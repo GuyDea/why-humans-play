@@ -17,7 +17,8 @@ EVIDENCE_INDICATOR_PATTERN = (
     rf"\[{EVIDENCE_ID_PATTERN}\]\({EVIDENCE_URL_PATTERN}\)"
 )
 
-APPENDIX_HEADING_RE = re.compile(r"^## Appendix[ \t]*$", re.MULTILINE)
+APPENDIX_HEADING_PATTERN = r"## Appendix[ \t]*"
+APPENDIX_HEADING_RE = re.compile(rf"^{APPENDIX_HEADING_PATTERN}$", re.MULTILINE)
 
 WORD_RE = re.compile(r"[^\W_]+(?:[’'-][^\W_]+)*", re.UNICODE)
 

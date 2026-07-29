@@ -786,7 +786,9 @@ class SkillPackageTests(unittest.TestCase):
             self.assertIn(unresolved_rule, sources["format"])
         for source_name in ("research", "rubric"):
             for syntax in outcome_syntax:
-                with self.subTest(source=source_name, contract="delegates-syntax"):
+                with self.subTest(
+                    source=source_name, contract="delegates-syntax", syntax=syntax
+                ):
                     self.assertNotIn(syntax, sources[source_name])
         for source_name, source_text in sources.items():
             with self.subTest(source=source_name, contract="one-syntax-only"):

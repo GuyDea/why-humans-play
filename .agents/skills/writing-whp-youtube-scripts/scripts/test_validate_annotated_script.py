@@ -454,6 +454,14 @@ def make_appendix_document() -> str:
         "- **Time:** 00:00–00:30\n"
         "- **Target:** ~80 words\n\n"
         + appendix_beat.strip()
+        + "\n\n### Shorts plan\n\n"
+        + "\n".join(
+            f"{index}. **Beat:** 01\n"
+            f"   - **Nugget:** Standalone thought {index}.\n"
+            f"   - **Short hook:** Opening line {index}.\n"
+            f"   - **Cut boundaries:** Start and end for lift {index}."
+            for index in (1, 2, 3)
+        )
         + "\n\n### References and source materials\n\n"
         + references.strip()
         + "\n"
@@ -2084,7 +2092,12 @@ class ValidatorTests(unittest.TestCase):
 
 
 class ShortsPlanTests(unittest.TestCase):
-    """The format requires three to five candidates; the validator now counts them."""
+    """A FULL-SCRIPT appendix must plan three to five Shorts candidates."""
+
+    SHORTS_SECTION_RE = re.compile(r"### Shorts plan\n.*?(?=### )", re.S)
+
+    def _without_shorts(self, document: str = None) -> str:
+        return self.SHORTS_SECTION_RE.sub("", document or APPENDIX_DOCUMENT, 1)
 
     def _with_shorts(self, candidates: int) -> str:
         entries = "\n".join(
@@ -2095,10 +2108,17 @@ class ShortsPlanTests(unittest.TestCase):
             for index in range(1, candidates + 1)
         )
         section = "### Shorts plan\n\n" + entries + "\n\n"
-        return APPENDIX_DOCUMENT.replace(
+        return self._without_shorts().replace(
             "### References and source materials",
             section + "### References and source materials",
             1,
+        )
+
+    def test_full_script_requires_the_section(self) -> None:
+        errors = validate_document(self._without_shorts())
+        self.assertTrue(
+            any("Shorts plan" in error for error in errors),
+            errors,
         )
 
     def test_three_candidates_pass(self) -> None:
@@ -2137,7 +2157,7 @@ class ShortsPlanTests(unittest.TestCase):
         self.assertEqual(validate_document(document), [])
 
     def test_targeted_artifact_may_omit_the_section(self) -> None:
-        targeted = APPENDIX_DOCUMENT.replace(
+        targeted = self._without_shorts().replace(
             "- **Deliverable:** FULL-SCRIPT",
             "- **Deliverable:** TARGETED-ARTIFACT",
             1,

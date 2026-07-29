@@ -27,11 +27,11 @@ synchronization, storytelling markup, purpose annotations, and stage promotion.
 `final/script.extended.md` mirrors that raw narration exactly, then adds purpose
 annotations, inline evidence indicators, and the production appendix defined here.
 
-Validate the raw/extended pair first. Pair validation removes standalone purpose
-annotation lines only for the final appendix structural check, preserves inline evidence,
-and delegates that annotation-free extended view to the annotated-script validator. This
-keeps raw authoritative while retaining one review and production view that cannot silently
-drift from it.
+Validate the raw/extended pair first. For a final pair, pair validation delegates the
+complete extended document to the annotated-script validator, which itself sets aside
+standalone purpose annotations before the appendix and preserves inline evidence — so the
+pair-side check and a direct validator run always agree. This keeps raw authoritative
+while retaining one review and production view that cannot silently drift from it.
 
 ## Document layers
 
@@ -257,8 +257,9 @@ Map every factual narration sentence or separable factual clause to at least one
 in the matching appendix beat's `#### Claims` section. Quote the supported narration wording
 in each claim entry so the source mapping stays visible outside the spoken narration. One
 entry may quote multiple nearby statements only when its evidence record supports all of
-them. Do not assign source markers to jokes, opinions, transitions, or clearly signaled
-hypotheticals merely to make the section look complete. This semantic coverage remains a
+them. Do not assign source markers to jokes, opinions, transitions, clearly signaled
+hypotheticals, or guidance that makes no empirical efficacy claim, merely to make the
+section look complete. This semantic coverage remains a
 human audit; the structural validator does not prove it.
 
 Place each optional structured block in the beat where it performs its narrative job, at
@@ -324,8 +325,9 @@ review task.
 
 Personal-input markers are annotations, not spoken copy. Exclude them from table-read
 and teleprompter extraction and from `Word count`. Set `Word count` to the exact number
-of whitespace-delimited spoken words remaining after narration extraction and marker
-removal.
+of spoken words remaining after narration extraction and marker removal, counted the way
+the validator counts: a word is a run of letters or digits, hyphens and apostrophes keep
+a word whole, and a standalone dash or other punctuation token is not a word.
 
 ## Stable IDs
 
@@ -533,12 +535,12 @@ only the extracted spoken words after those review annotations are removed when 
 ## Validation
 
 Validate the raw/extended pair first through the mandatory command owned by
-[Script Artifact Pair](script-artifact-pair.md). For a final pair, that validator applies
-this complete appendix schema after removing standalone purpose annotations and without
-removing inline evidence.
+[Script Artifact Pair](script-artifact-pair.md). For a final pair, that validator
+delegates the complete extended document to this appendix schema; purpose annotations are
+set aside by the schema itself and inline evidence is preserved.
 
-The annotated-script validator remains the lower-level structural engine. When diagnosing
-an annotation-free final extended projection, follow this lower-level procedure.
+The annotated-script validator remains the lower-level structural engine. To diagnose a
+final extended document directly, follow this lower-level procedure.
 Resolve the target script path to an absolute path at runtime before changing to the skill directory. Resolve the skill directory from
 the loaded `SKILL.md`, change to it, and run:
 

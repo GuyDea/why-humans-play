@@ -1020,14 +1020,25 @@ def _validate_personal_and_application_blocks(
 
 
 def _validate_shorts_plan(appendix_text: str, errors: list[str]) -> None:
-    """Count Shorts candidates when the appendix plans them.
+    """Enforce the format's Shorts-plan contract on the appendix.
 
-    The section is optional — a TARGETED-ARTIFACT includes it only on request — but a
-    section that exists must carry the three-to-five candidates the format requires.
+    Every FULL-SCRIPT appendix must contain the section; a TARGETED-ARTIFACT includes
+    it only on request. Wherever the section exists, it must carry the three-to-five
+    candidates the format requires.
     """
 
     heading = SHORTS_PLAN_HEADING_RE.search(appendix_text)
     if heading is None:
+        deliverable = re.search(
+            r"^[ \t]*-[ \t]+\*\*Deliverable:\*\*[ \t]*(\S+)",
+            appendix_text,
+            re.MULTILINE,
+        )
+        if deliverable is not None and deliverable.group(1) == "FULL-SCRIPT":
+            errors.append(
+                "FULL-SCRIPT appendix requires one Shorts plan section with three to "
+                "five golden-nugget candidates."
+            )
         return
 
     remainder = appendix_text[heading.end() :]

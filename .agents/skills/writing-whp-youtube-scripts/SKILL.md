@@ -57,8 +57,8 @@ Honor the requested scope before choosing a stage:
 - **Promote:** after explicit creative approval, preserve the voice baseline and advance to
   the next stage.
 
-Use the visible topic brief, artifact or selection, requested operation, and creative status.
-Do not make an operation depend on invisible chat history.
+Use the visible topic brief, artifact or selection, surrounding context, requested
+operation, and creative status. Do not make an operation depend on invisible chat history.
 
 ## The episode pipeline
 
@@ -81,7 +81,7 @@ digraph episode_pipeline {
 | Progression | The causal route from tension to payoff | Story progression approval |
 | Blueprint | `blueprint/` — one polished intro plus a bullet-only body logic map | Blueprint approval |
 | Draft | `draft/` — one complete narration | Creative approval |
-| Final | `final/` — evidence-backed, production-annotated episode | Readiness review |
+| Final | `final/` — evidence-backed, production-annotated episode | [Readiness review](#validation-and-completion) |
 
 Enter at the earliest stage the request has not yet approved. A new episode or thesis-level
 rethink starts at Architecture. Scoped work on existing material stays where it is unless it

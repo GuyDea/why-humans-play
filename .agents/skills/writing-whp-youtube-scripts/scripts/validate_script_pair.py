@@ -11,6 +11,7 @@ from pathlib import Path
 import re
 
 from script_markup import (
+    APPENDIX_HEADING_PATTERN,
     APPENDIX_HEADING_RE as SHARED_APPENDIX_HEADING_RE,
     EVIDENCE_INDICATOR_PATTERN,
 )
@@ -23,7 +24,7 @@ RAW_NAME = "script.raw.md"
 EXTENDED_NAME = "script.extended.md"
 PAIR_NAMES = {RAW_NAME, EXTENDED_NAME}
 APPENDIX_SPLIT_RE = re.compile(
-    r"(?:\r\n|\r|\n)## Appendix[ \t]*(?:(?:\r\n|\r|\n)|$)"
+    rf"(?:\r\n|\r|\n){APPENDIX_HEADING_PATTERN}(?:(?:\r\n|\r|\n)|$)"
 )
 MARKDOWN_LINE_ENDING_RE = re.compile(r"\r\n|\r|\n")
 APPENDIX_HEADING_RE = SHARED_APPENDIX_HEADING_RE
