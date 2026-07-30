@@ -65,8 +65,8 @@
 
 > **And they caught exactly as many planted mistakes as the other group.**
 
-> **Their distrust was like a goalkeeper who watches the shot come in — and never
-> dives.**
+> Their distrust was like a goalkeeper who watches the shot come in — and never
+> dives.
 >
 > **Distrust is a feeling. Checking is a behavior.** In that experiment, the feeling
 > showed up alone.
@@ -154,8 +154,8 @@
 > So here is counter-question two. Ask the AI: **"What is the strongest case against
 > the option I seem to prefer?"**
 >
-> It adapts a debiasing technique called considering the opposite. In tests, it cut
-> bias more than simply asking people to be fair.
+> It adapts a debiasing technique called considering the opposite. In two experiments
+> on social judgment, it cut bias more than simply asking people to be fair.
 >
 > The case against your preference might be boring. But your favorite answer finally
 > has a competitor.
@@ -248,9 +248,6 @@
 
 > I call this the borrowed-authority loop. **You lend the AI your premise, and it comes
 > back looking like independent evidence.**
->
-> The machine didn't give him a second opinion. **It gave his first opinion a software
-> update.**
 
 > <u>And now you know enough to hear the ending properly. The double vision came back.
 > He called an ambulance. A stroke unit took him in.</u>
@@ -262,7 +259,10 @@
 
 > And the boundary, clearly: nobody can prove the chat caused his delay, and ChatGPT
 > did not cause the TIA. What the case documents is the route — a reassuring answer, an
-> evening at home, an ambulance later than it could have been.
+> evening at home, and then the ambulance.
+
+> The machine didn't give him a second opinion. **It gave his first opinion a software
+> update.**
 
 > So here is counter-question four, the only one that leaves the loop entirely. Ask the
 > AI: **"What fact would change your recommendation, and where can I verify it outside
@@ -354,8 +354,8 @@
 > He was never naive. He didn't need bad advice — only a reasonable answer to the
 > reassuring question. That's all any of us need.
 
-> **A second opinion is an independent route to a conclusion that reality can still
-> overturn.**
+> Because a real second opinion is an independent route to the evidence — a route that
+> reality can still overturn.
 
 > <u>**Fluent agreement is not a second opinion — especially when your first opinion
 > wrote the prompt.**</u>

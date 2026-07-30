@@ -91,8 +91,8 @@
 
 [AHA | LOCKED WORDING — Goalkeeper image and the feeling-versus-behavior lesson.]
 
-> **Their distrust was like a goalkeeper who watches the shot come in — and never
-> dives.**
+> Their distrust was like a goalkeeper who watches the shot come in — and never
+> dives.
 >
 > **Distrust is a feeling. Checking is a behavior.** In that experiment, the feeling
 > showed up alone.
@@ -212,8 +212,8 @@
 > So here is counter-question two. Ask the AI: **"What is the strongest case against
 > the option I seem to prefer?"**
 >
-> It adapts a debiasing technique called considering the opposite. In tests, it cut
-> bias more than simply asking people to be fair.
+> It adapts a debiasing technique called considering the opposite. In two experiments
+> on social judgment, it cut bias more than simply asking people to be fair.
 >
 > The case against your preference might be boring. But your favorite answer finally
 > has a competitor.
@@ -334,13 +334,10 @@
 > machine's calm. And then it sat in his head — the anchor every following thought had
 > to argue with.
 
-[AHA | LOCKED WORDING — Names the borrowed-authority loop and its software-update corollary.]
+[AHA | LOCKED WORDING — Names the borrowed-authority loop.]
 
 > I call this the borrowed-authority loop. **You lend the AI your premise, and it comes
 > back looking like independent evidence.**
->
-> The machine didn't give him a second opinion. **It gave his first opinion a software
-> update.**
 
 [LOOP PAYOFF L-04 — Pays the ambulance loop: stroke unit, TIA, warning shot, kind ending.]
 
@@ -356,7 +353,12 @@
 
 > And the boundary, clearly: nobody can prove the chat caused his delay, and ChatGPT
 > did not cause the TIA. What the case documents is the route — a reassuring answer, an
-> evening at home, an ambulance later than it could have been.
+> evening at home, and then the ambulance.
+
+[AHA | LOCKED WORDING — Software-update punchline, landing after the reveal.]
+
+> The machine didn't give him a second opinion. **It gave his first opinion a software
+> update.**
 
 [APPLICATION | LOCKED WORDING — Counter-question four: the outside-verifiable fact.]
 
@@ -488,10 +490,10 @@
 > He was never naive. He didn't need bad advice — only a reasonable answer to the
 > reassuring question. That's all any of us need.
 
-[LOCKED WORDING — The retell rule.]
+[AHA — The independent-route rule spoken plainly before the final line.]
 
-> **A second opinion is an independent route to a conclusion that reality can still
-> overturn.**
+> Because a real second opinion is an independent route to the evidence — a route that
+> reality can still overturn.
 
 [LOOP PAYOFF L-01 | FINAL PAYOFF | LOCKED WORDING — Final locked line paying the title loop.]
 
