@@ -23,15 +23,15 @@ baseline. Consult before drafting; update at each episode's promotion into `draf
 | Second-Opinion Test | Four counter-questions that make an AI answer inspectable: assumptions accepted, strongest case against, failure premortem, outside-verifiable fact. Original, unvalidated package. | ep001 | The four questions as scripted in ep001 | Active |
 | Possible-answer / safe-decision distinction | A plausible answer to a narrower reassuring question does not resolve the decision that matters. | ep001 | "A possible explanation is not a safety decision." | Active |
 | Distrust–checking gap | Suspicion is an attitude; checking is a behavior; the first does not produce the second. | ep001 | "Distrust is a feeling. Checking is a behavior." | Active |
-| Switched quests | Self-handicapping reframed: abandoning the stated main quest to protect the identity side quest. | ep002 | "You didn't stop playing the game. You just switched quests." | Active (draft) |
-| Pandocrin | The Berglas & Jones fictional slowing drug; shorthand for a chosen self-handicap. | ep002 | — | Active (draft) |
+| Switched quests | Self-handicapping reframed: abandoning the stated main quest to protect the identity side quest. | ep002 | "You didn't stop playing the game. You just switched quests." | Active |
+| Pandocrin | The Berglas & Jones fictional slowing drug; shorthand for a chosen self-handicap. | ep002 | — | Active |
 
 ## Opening-shape ledger
 
 | Episode | Route | Felt-entry moves used | Withheld object | Notes |
 |---|---|---|---|---|
 | ep001 | Question-first → shared-behavior case entry | Documented-motive entry, praised enemy, isolated cost line, dismissal preemption | The unasked question (paid at alternate-prompt beat) | Felt-entry doctrine's first application |
-| ep002 (draft) | Question-first → viewer memory scene → felt-choice simulation | Memory scene, awareness beat, felt-choice simulation, weld line | The exact praise sentence (paid at Mueller–Dweck beat) | Population-study route |
+| ep002 | Question-first → viewer memory scene → felt-choice simulation | Memory scene, awareness beat, felt-choice simulation, weld line | The exact praise sentence (paid at Mueller–Dweck beat) | Population-study route; applied to blueprint+draft 2026-07-30 |
 
 ## Assumed-knowledge baseline
 

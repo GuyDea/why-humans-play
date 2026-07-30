@@ -2,115 +2,130 @@
 
 ## 1. The night you didn't study
 
-[MAIN HOOK | LOOP OPEN L-01 | LOCKED WORDING — Opens the title question on the viewer's own remembered night; beat 7 must answer it.]
+[MAIN HOOK | LOOP OPEN L-01 | LOCKED WORDING — Opens the title question on the viewer's own remembered night; the final beat must answer it.]
 
 > <u>**Why didn't you study for the thing you actually wanted to pass?**</u>
+
+[OBSTACLE — The felt-entry memory scene: the viewer's own night, closed by the awareness beat that laziness cannot explain, and the pre-announced excuse the accounting beat will reinterpret.]
+
+> You know the night. Exam tomorrow — one that actually matters. And at nine, your room
+> suddenly needs cleaning.
 >
-> I always had the same answer for myself. I was lazy.
-
-[DEFENSE — The viewer's laziness dismissal voiced as the narrator's own former answer; stance wording pending Martin's confirmation.]
-
-> Maybe yours sounds different. Not disciplined enough. Not built for deadlines.
-
-[OBSTACLE | LOOP OPEN L-02 — The success-trigger tease the laziness model cannot produce; the case is developed in beat 2.]
-
-> <u>But an experiment from 1978 makes that answer collapse.</u>
+> By midnight you're reorganizing files you'll never open.
 >
-> It caught people sabotaging themselves at the strangest possible moment.
+> <u>Some part of you watched that whole evening happen. You knew. You kept
+> cleaning.</u>
 >
-> Right after being told they had succeeded.
+> And the next morning, you told everyone: "I barely even prepared."
 
-> They were given a choice before their next test. Most of the men picked the option that would make them worse.
+[DEFENSE — Voices the laziness dismissal as the narrator's own confirmed former answer, generalized without blaming the viewer.]
+
+> I always had one word for those nights: lazy. Maybe yours is "undisciplined." Same
+> shelf, different label.
+
+[LOOP OPEN L-02 — Opens the mechanism loop: an experiment that caught the midnight move live, promising the shelf-collapse explanation the accounting beat names.]
+
+> <u>Then a 1978 experiment collapsed the whole shelf. It caught people making the same
+> midnight move — with scientists watching.</u>
+
+[TRANSITION — Felt-choice simulation: the viewer takes the chair, hears the rigged result, and does the gut math before any number is revealed.]
+
+> Students took what looked like an intelligence test. For half of them, the puzzles
+> were rigged — mostly unsolvable. Then everyone heard the same result: *you did really
+> well.*
 >
-> Not the strugglers. The winners.
-
-[REVERSAL — The model break in one spoken punch.]
-
-> *Laziness cannot explain choosing to lose on purpose.*
-
-[TRANSITION — Converts the lab tease into the viewer's stake before the promise.]
-
-> So what were those people protecting?
+> Now sit in that chair, because this is where it gets uncomfortable. You just aced a
+> test you know you mostly guessed on. And there's a second test coming.
 >
-> That is the real question of this video. Because you have made the same move. Just without a laboratory watching.
-
-[PROMISE | LOCKED WORDING — Both halves of the approved contract in sharing voice; paid at beat 3 (hidden game) and beats 6–7 (check and rule).]
-
-> **By the end of this video, you'll know the hidden game behind your worst nights of not preparing.**
+> The researchers offer you two drugs. One supposedly sharpens your thinking. One slows
+> it down.
 >
-> **And I'll show you the one check that makes it visible, and the rule to use instead.**
+> Easy choice, right? But do the math the way your gut is already doing it. Stay sharp
+> and fail the retest — only one explanation left: you. Take the slowing drug, and you
+> cannot lose. Fail? The drug did it. Pass anyway? You're a legend.
+
+[OBSTACLE | LOCKED WORDING — The observed result confirms the felt pull at scale; male-only boundary carried inline, contrast and drug name reserved for the pill beat.]
+
+> <u>Feel the pull? Hold onto it. Because in that chair, among the men whose success
+> was a mystery to them, **seventy percent chose the slowing drug.**</u>
+
+[DISARM — Defeats the laziness explanation with the case's own logic and concedes the move's rationality: the praised-enemy turn.]
+
+> And laziness can't explain that — nobody is too lazy to not take a drug. This was a
+> move. Honestly, a smart one. If the retest goes wrong, the drug takes the blame. The
+> story that you're brilliant survives untouched.
+
+[LOOP PAYOFF L-01 — The weld line: partially pays the night question by making the cleaning the pill without the vial; final close stays with the last beat.]
+
+> <u>Your midnight cleaning is the same choice without the vial.</u> Fail tomorrow? You
+> barely prepared — it wasn't a fair test of you. Pass anyway? Legend.
+
+[PROMISE | LOCKED WORDING — Names both halves of the approved contract: the hidden-game understanding, plus the visibility check and the replacement rule; payoffs mapped to SP03, SP06–SP07.]
+
+> **By the end of this video, you'll know the hidden game behind your worst nights of
+> not preparing.**
+>
+> **And I'll show you the one check that makes it visible, and the rule to use
+> instead.**
+
+[MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence of praise changing which games children chose.]
+
+> *Because this move gets installed early. There's an experiment where one sentence of
+> praise changed which games ten-year-olds chose to play.*
+
+[LOOP OPEN L-03 — Closes the intro on the nameable withheld object: the exact praise sentence, paid by the seed beat, made personal by the someone-you-love turn.]
+
+> <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>
 
 ## 2. The pill
 
-[TRANSITION — Pays the intro tease by entering the case immediately.]
+[TRANSITION — Pays the who-ran-it details: names, Pandocrin, real choice without a real drug.]
 
-> So here is what actually happened in that lab.
+> That seventy percent deserves its full story — because the details make it worse.
 >
-> In 1978, psychologists Steven Berglas and Edward Jones brought students in for what looked like an intelligence test.
+> The experiment was run by psychologists Steven Berglas and Edward Jones. And the
+> slowing drug they offered had a name: Pandocrin.
 >
-> Everyone got a set of puzzles. But there were two groups.
->
-> One group got puzzles you could actually solve. The other group got puzzles that mostly had no solution at all.
+> Pandocrin wasn't real. Nobody swallowed anything. But the choice was real.
 
-> Then came the twist. Everyone heard the same result. You did really well.
->
-> Now put yourself in the second group. You just aced a test you know you mostly guessed on.
->
-> That feeling has a shape. Praise on the outside. A question mark on the inside.
+[REVERSAL — The 13% contrast: sabotage follows a specific feeling, not a trait.]
 
-> Then the researchers made an offer. Before the next round, you can try one of two drugs we're studying.
+> And here's the contrast that matters. Among the men whose success was earned — real
+> answers on solvable puzzles — only thirteen percent reached for it.
 >
-> One supposedly makes your thinking sharper. The other makes it worse.
->
-> The slowing drug had a name: Pandocrin. It wasn't real. Nobody swallowed anything. But the choice was real.
+> Sabotage wasn't a personality trait in that room. It followed one specific feeling:
+> praise on the outside, a question mark on the inside.
 
-[OBSTACLE | LOCKED WORDING — The 70/13 reversal that laziness cannot produce; the male-only boundary is voiced in the next passage.]
+[TRANSITION — Women-null boundary held in full; the result stays about the men in that room.]
 
-> Among the men who had earned their success on solvable puzzles, thirteen percent reached for Pandocrin.
->
-> <u>**Among the men whose success was a mystery to them, seventy percent did.**</u>
->
-> Seven out of ten winners picked the thing that would make them worse.
+> The women in the study didn't show the pattern — forty percent versus twenty-six, too
+> close to mean anything. So hold that boundary. This result is about the men in that
+> room.
 
-> The women in the study didn't show this pattern. Forty percent versus twenty-six. Too close to mean anything.
->
-> So hold that boundary. This result is about the men in that room.
+[MINI-HOOK — Direction line: winning armed the trap; bookkeeping promised next.]
 
-[MINI-HOOK — Outgoing bridge: winning armed the trap; the bookkeeping is promised next.]
-
-> *And notice the direction. Losing made sense. It was the winning that armed the trap.*
+> *And notice the direction. Losing made sense. It was the winning that armed the
+> trap.*
 >
 > The reason is bookkeeping.
 
 ## 3. The accounting
 
-[TRANSITION — Enters the mechanism through the case's own protagonist.]
+[AHA — Names self-handicapping and its definition.]
 
-> Look at the choice through the eyes of the guy who picked the slow pill.
+> Psychologists have a name for the move you felt in that chair. Self-handicapping.
 >
-> Tomorrow there is a second test. His last score says brilliant. He knows the score is hollow.
->
-> If he stays sober and fails, only one explanation is left. Him.
+> You place a real obstacle on your own track, because the obstacle protects the story
+> about your talent.
 
-[AHA | LOCKED WORDING — The attribution accounting in one exchange; the punchline is delivered word-perfect.]
+[AHA | LOCKED WORDING — The attribution accounting in one locked line.]
 
-> But with the pill, failure comes with a built-in excuse.
->
-> And if he somehow wins anyway? Imagine passing while drugged. Legend.
->
-> Failure gets blamed on the pill. Success gets upgraded to superhuman.
->
 > **Heads, the story wins. Tails, the story ties.**
 
-[AHA — The term arrives only after the story has earned it.]
+[TRANSITION — The two-quests frame: outcome quest versus story quest.]
 
-> Psychologists have a name for this move. Self-handicapping.
->
-> You place a real obstacle on your own track, because the obstacle protects the story about your talent.
-
-> And notice what that means. This is not weakness. It is strategy.
->
-> You are running two quests at once.
+> And notice what that means. This is not weakness. It is strategy. You are running two
+> quests at once.
 >
 > The main quest is the outcome. Pass the exam. Finish the project. Get the job.
 >
@@ -118,147 +133,160 @@
 >
 > The pill abandons the main quest to protect the side quest.
 
-[LOOP PAYOFF L-02 | LOCKED WORDING — The two-games reveal; pays promise-1 and answers why a win arms the trap.]
+[LOOP PAYOFF L-02 | LOCKED WORDING — Pays the mechanism loop with the canon switched-quests line.]
 
 > <u>**You didn't stop playing the game. You just switched quests.**</u>
 
-[TRANSITION — The public-choice clue seeds the audience ledger used in beat 4.]
+[TRANSITION — Public-choice follow-up reinterprets the intro's pre-announced morning excuse.]
 
-> One more clue from that research tradition. A follow-up study found the effect got stronger when the choice was public.
+> One more clue from that research tradition. The effect got stronger when the choice
+> was public.
 >
-> The handicap is not only for you. It is for the audience.
-
-[MINI-HOOK — Opens the your-version question the next beat pays.]
-
-> *Which raises the obvious problem. Nobody has ever handed you a pill before an exam.*
+> The handicap is not only for you. It is for the audience. Remember your morning line
+> — "I barely even prepared," said to the whole room?
 >
-> So what does your version look like?
+> The excuse was pre-announced. The story survives whatever happens next.
+
+[MINI-HOOK — Opens the cost question for the your-version beat.]
+
+> *Which leaves a question with a price tag. If the vial is a metaphor, what does your
+> version actually cost?*
 
 ## 4. Your version
 
-[TRANSITION — Pays the your-version question with the recognition catalogue.]
-
-> Your version doesn't come in a vial. It looks responsible.
->
-> The night before the exam, your room suddenly needs cleaning.
->
-> The presentation is tomorrow, and tonight becomes the night you reorganize every file you own.
->
-> Or the classic. Staying up late doing nothing in particular, so tomorrow has a reason attached.
+[TRANSITION — Everyone's Pandocrin: procrastination as the everyday flavor.]
 
 > Everyone's Pandocrin looks different. The most popular flavor is putting things off.
 >
 > And researchers ran the numbers on that one.
 
+[TRANSITION — The 1997 semester study; the pill-pays-first tease inside.]
+
 > In 1997, Dianne Tice and Roy Baumeister followed students through a whole semester.
 >
-> Early in the term, the procrastinators were doing great. Less stress than everyone else. Even fewer illnesses.
+> Early in the term, the procrastinators were doing great. Less stress than everyone
+> else. Even fewer illnesses.
 >
-[AHA — The reinforcement twist: the short-term relief is real, which is why the move survives.]
-
 > *The pill pays first. That is the trap inside the trap.*
 
-> By the end of the term, everything reversed. More stress. More illness. Lower grades on every assignment.
->
-> And overall, they ended the semester sicker.
->
-> Two small classroom studies, so hold the exact numbers loosely. But the shape is the point.
+[REVERSAL — The late bill: stress, illness, grades; small-samples boundary voiced.]
 
-> A bigger study followed people month by month in 2023. The chronic procrastinators were never the relaxed ones.
+> By the end of the term, everything reversed. More stress. More illness. Lower grades
+> on every assignment.
 >
-> More stressed at every single measurement.
->
-> The relief is real. But it is borrowed. One calm evening, repaid with interest all semester.
+> Two small classroom studies, so hold the exact numbers loosely. But the shape is the
+> point.
 
-> And some of us don't even build the obstacle. We just announce it.
->
-> "I barely prepared." Said loudly, to the whole room, before the test starts.
->
-> That is the side quest again, performed for an audience. If everyone heard the excuse in advance, the story survives whatever happens next.
+[TRANSITION — The 2023 monthly correction: the relief is borrowed.]
 
-> There is even a competitive version. Telling everyone you're terrible right before you play. Pool players are famous for it.
+> A bigger study followed people month by month in 2023. The chronic procrastinators
+> were never the relaxed ones. More stressed at every single measurement.
 >
-> It has its own name — sandbagging. But that one is a bluff about your ability, not a real obstacle. Different move.
+> The relief is real. But it is borrowed. One calm evening, repaid with interest all
+> semester.
 
-[MINI-HOOK — Opens the origin question the next beat pays.]
+[TRANSITION — Sandbagging distinguished in one passage: a bluff, not an obstacle.]
 
-> *Which leaves the real question. A move this costly and this automatic had to be learned somewhere.*
+> There's even a competitive version. You tell everyone you're terrible right before
+> you play. Pool players are famous for it. It has a name, sandbagging.
+>
+> But that one is a bluff about your ability, not a real obstacle. Different move.
+
+[MINI-HOOK — Opens the origin question: the move had to be learned somewhere.]
+
+> *Which leaves the real question. A move this costly and this automatic had to be
+> learned somewhere.*
 >
 > And researchers actually watched the training happen.
 
 ## 5. The seed
 
-[TRANSITION — The training, observed: one compliment as the planting moment.]
+[TRANSITION — The 1998 praise experiment setup.]
 
 > In 1998, Claudia Mueller and Carol Dweck worked with ten- and eleven-year-olds.
 >
 > Each kid solved puzzles and then heard one of two compliments.
+
+[LOOP PAYOFF L-03 — Pays the withheld object: the exact praise sentence, named as promised.]
+
+> <u>Half heard: you must be smart at this. Half heard: you must have worked hard.</u>
 >
-> Half heard: you must be smart at this.
->
-> Half heard: you must have worked hard.
->
-> One sentence of difference.
+> One sentence of difference. And that first one is the sentence I promised you.
+
+[REVERSAL — Task choice splits by compliment: 92 versus 67 percent.]
 
 > Then every kid chose their next task.
 >
-> Of the kids praised for working hard, ninety-two percent picked the harder challenge. The one you could learn from.
+> Of the kids praised for working hard, ninety-two percent picked the harder challenge.
+> The one you could learn from.
 >
-> Of the kids praised for being smart, sixty-seven percent picked the task they would look good on.
->
-> The one that could not threaten the label.
+> Of the kids praised for being smart, sixty-seven percent picked the task they would
+> look good on. The one that could not threaten the label.
+
+[TRANSITION — The hard round collapse among smart-label kids.]
 
 > Then came a genuinely hard round. And the smart-label kids fell apart.
 >
 > Less persistence. Less enjoyment. Worse scores than they had before.
 
-[AHA | LOCKED WORDING — The 38% score-inflation result; its one-study boundary is voiced two beats later in the honesty passage.]
+[REVERSAL | LOCKED WORDING — The lying result, locked; harmonized spoken fractions.]
 
-> One more part of the study. The kids wrote a note about the puzzles to a child in another school. A stranger they would never meet. The note included their score.
+> One more part of the study. The kids wrote a note about the puzzles to a child in
+> another school — a stranger — and the note included their score.
 >
-> Among the kids praised for effort, about one in eight made their score look better than it was.
+> Among the kids praised for effort, about one in eight made their score look better
+> than it was.
 >
-> **Among the kids praised for being smart, thirty-eight percent lied.**
+> **Among the kids praised for being smart, nearly four in ten lied.**
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
+[AHA — One compliment hands over a side quest.]
+
 > One compliment handed them a side quest. Protect the label, whatever it costs.
 
-[DISARM — The genuine replication complication, voiced honestly before a skeptic can raise it.]
+[TRANSITION — Consolidated evidence boundary: endpoints real, Beijing bridge live, replication disputed, wiring an inference.]
 
-> Now, before you ask whether praise really causes the full adult pattern — fair question. Here is what's solid and what isn't.
+> Now, before you ask whether praise really causes the full adult pattern — fair
+> question. Here's what's solid.
 >
-> A 2018 experiment in Beijing randomized the same two compliments before a real retest.
+> The endpoints are real experiments. A Beijing experiment even caught the handicap
+> live. Kids praised for ability practiced less before a real retest.
 >
-> The kids praised for ability practiced less during the break. The handicap, live, in children.
+> But a large 2019 replication of the praise studies mostly came up empty. And the
+> original authors dispute how it was run.
 >
-> But a large 2019 replication of the praise studies mostly came up empty.
->
-> And the original authors dispute how that replication was run.
->
-> So the honest version: the endpoints are real experiments. The wiring between childhood and your worst nights is an inference. Scientists are still mapping it.
+> So the honest version: the wiring between childhood and your worst nights is an
+> inference. Scientists are still mapping it.
+
+[AHA — What the bounded evidence still establishes: the stake exists.]
 
 > Which is exactly enough for us. The stake exists. Compliments can plant it.
 >
-> And somewhere along the way, a protected story started to feel safer than a tested one.
+> And somewhere along the way, a protected story started to feel safer than a tested
+> one.
 
-[MINI-HOOK — Opens the remedy question and sets up the inversion.]
+[MINI-HOOK — Opens the remedy question and promises the inversion.]
 
-> *So if the story is the problem, is the fix just more confidence? Believe in yourself harder?*
+> *So if the story is the problem, is the fix just more confidence? Believe in yourself
+> harder?*
 >
 > The strategy that actually works looks like the exact opposite.
 
 ## 6. The twin
 
-[TRANSITION | REVERSAL — The twin strategy that inverts the expected confidence fix.]
+[TRANSITION — Defensive pessimists introduced with the same low bar.]
 
 > Meet the defensive pessimists.
 >
 > Psychologist Julie Norem has studied them for decades.
 >
-> Before a big performance, they do the same thing self-handicappers do. They set their expectations low. Painfully low.
+> Before a big performance, they do the same thing self-handicappers do. They set their
+> expectations low. Painfully low.
 >
 > This talk is going to be a disaster.
+
+[REVERSAL — The difference: permission to stop versus a to-do list.]
 
 > But watch what happens next, because it is the whole difference.
 >
@@ -266,49 +294,56 @@
 >
 > The defensive pessimist uses it as a to-do list.
 >
-> They imagine everything that could go wrong. Then they prepare for each item, one by one.
+> They imagine everything that could go wrong. Then they prepare for each item, one by
+> one.
 >
 > The anxiety doesn't get argued with. It gets put to work.
+
+[TRANSITION — The performance result: the strategy beats self-handicapping.]
 
 > And it works. In studies, this strategy beats self-handicapping.
 >
 > Same anxious people, clearly better performance.
 
-[REVERSAL | LOCKED WORDING — The forced-optimism inversion; the bounded punchline is delivered word-perfect.]
+[REVERSAL | LOCKED WORDING — Forced optimism harms; the locked inversion line.]
 
 > Here is the twist that should end every pep talk.
 >
-> When researchers pushed these people to think positive — relax, you'll do great — they performed worse.
+> When researchers pushed these people to think positive — relax, you'll do great —
+> they performed worse.
 >
 > **For them, optimism was the handicap.**
 
-> One honest cost. Living like this is not free. Defensive pessimists feel worse while it works.
+[TRANSITION — The mood-tax honest cost.]
+
+> One honest cost. Living like this is not free. Defensive pessimists feel worse while
+> it works.
 >
 > Mood pays a tax, even when performance doesn't.
 
+[AHA | LOCKED WORDING — The dividing line: expectations that feed versus replace the work.]
+
 > So the dividing line was never the low expectations.
 >
-[AHA | LOCKED WORDING — The dividing-line principle; the application follows in beat 7.]
-
-> **Low expectations that feed the work protect you. Low expectations that replace the work sabotage you.**
+> **Low expectations that feed the work protect you. Low expectations that replace the
+> work sabotage you.**
 >
 > Now let's turn that into something you can carry.
 
 ## 7. The two quests
 
-[TRANSITION — Stakes for acting now: the compounding spiral.]
+[TRANSITION — The compounding spiral: why the check matters now.]
 
 > First, why carrying it matters.
 >
-> The pill compounds. A study that tracked self-handicappers over time found the habit and the misery feeding each other.
+> The pill compounds. A study that tracked self-handicappers over time found the habit
+> and the misery feeding each other.
 >
 > More handicapping, worse adjustment. Worse adjustment, more handicapping.
 >
-> Substance use creeping up. Satisfaction with your own competence drifting down. Even the motivation for the job itself, draining away.
->
 > The insurance gets more expensive every year you hold the policy.
 
-[APPLICATION | LOCKED WORDING — The two-ledger check; pays the promise's visibility half.]
+[APPLICATION | LOCKED WORDING — The two-question check anchored to the recognizable moment.]
 
 > So here is the check. Two questions, in the moment.
 >
@@ -318,37 +353,43 @@
 >
 > **Which quest is this move serving? The outcome, or the story?**
 >
-> And the second question. If I fail now, what does the excuse buy me — and who exactly is the audience?
+> And the second question. If I fail now, what does the excuse buy me — and who exactly
+> is the audience?
 >
 > Sometimes the audience is a whole room. Sometimes it is just you.
 
-[APPLICATION | LOCKED WORDING — The replacement rule; pays the promise's second half.]
+[APPLICATION | LOCKED WORDING — The rule: lower the expectations, never the preparation.]
 
 > Then the rule.
 >
 > **Lower the expectations, never the preparation.**
 >
-> Tell yourself the talk might flop. Say it out loud if you need to. The defensive pessimists just proved that can help.
+> Tell yourself the talk might flop. Say it out loud if you need to. The defensive
+> pessimists just proved that can help.
 >
 > But the slides still get finished. The pages still get read.
 >
 > Expect little. Prepare anyway. That is the whole swap.
 
-[TRANSITION — Boundaries: the clinical signpost and the science limits, spoken plainly.]
+[APPLICATION — Clinical signpost and evidence boundaries restated once.]
 
-> Where this stops. If avoidance is running your whole life, that is not a strategy problem.
+> Where this stops. If avoidance is running your whole life, that is not a strategy
+> problem.
 >
-> If it looks like depression, or anxiety that nothing here touches, a video is not the tool.
+> If it looks like depression, or anxiety that nothing here touches, a video is not the
+> tool. That deserves real support.
 >
-> That deserves real support.
->
-> And remember what the science does and doesn't say. The pill result is men in one lab. The childhood wiring is still being mapped.
+> And remember what the science does and doesn't say. The pill result is men in one
+> lab. The childhood wiring is still being mapped.
+
+[APPLICATION — Transfers: the race, the date, the pitch alibi.]
 
 > But the pattern, once you see it, shows up everywhere.
 >
-> The race you skipped training for. The date you went into "not really trying." The pitch deck finished at four in the morning, so the pitch would have an alibi.
+> The race you skipped training for. The date you went into "not really trying." The
+> pitch deck finished at four in the morning, so the pitch would have an alibi.
 
-[APPLICATION — The parenting transfer: process praise over ability praise (dispute voiced in beat 5), and the reinterpretation of the night-before shutdown.]
+[APPLICATION — Parenting swap bounded to the praise evidence.]
 
 > And if you have kids, this changes what a compliment is.
 >
@@ -358,23 +399,25 @@
 >
 > One hands them a plan. The other hands them a label to defend.
 >
-> And when your kid suddenly doesn't care the night before a test, you know what that might be now.
->
-> Not laziness. A small person protecting a label somebody handed them.
+> And when your kid suddenly doesn't care the night before a test, you know what that
+> might be now. Not laziness. A small person protecting a label somebody handed them.
 
-[APPLICATION — The anti-pep-talk for anxious planners, drawn from the defensive-pessimism evidence: worry into checklist, not forced optimism.]
+[APPLICATION — Anti-pep-talk application bounded to the defensive-pessimism result.]
 
 > One more, for the people you love.
 >
-> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be great.
+> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
+> great.
 >
-> For anxious planners, the research says that is exactly backwards. Forced optimism made them worse.
+> For anxious planners, the research says that is exactly backwards. Forced optimism
+> made them worse.
 >
-> Ask the defensive pessimist's question instead. What is the first thing that could go wrong?
+> Ask the defensive pessimist's question instead. What is the first thing that could go
+> wrong? Then help them make the list.
 >
-> Then help them make the list. You stop being a cheerleader and become useful.
+> You stop being a cheerleader and become useful.
 
-[FINAL PAYOFF | LOOP PAYOFF L-01 | LOCKED WORDING — Closes the title question with the earned answer and the quest callback.]
+[AHA — Closes the opening night: insurance, not laziness.]
 
 > So. The night you didn't study.
 >
@@ -383,8 +426,11 @@
 > Failure with an excuse felt survivable. Failure without one felt like a verdict.
 >
 > But the story you're protecting only stays safe while it stays untested.
->
-> <u>**Test the story. Lower the expectations if you must — never the preparation. That is how you finish both quests.**</u>
+
+[LOOP PAYOFF L-01 | FINAL PAYOFF | LOCKED WORDING — Final locked lesson closing the title question and both quests.]
+
+> <u>**Test the story. Lower the expectations if you must — never the preparation. That
+> is how you finish both quests.**</u>
 
 ## Appendix
 
@@ -392,65 +438,72 @@
 
 - **Status:** DRAFT
 - **Episode:** ep002-why-you-didnt-study
-- **Stage created:** 2026-07-29
+- **Stage created:** 2026-07-29; felt-entry and script-economy revision 2026-07-30
+  under Martin's apply-the-updated-skill instruction.
 - **Working title:** Why You Didn't Study (final packaging choice pending Martin)
 - **Approved baselines:** EP002 architecture and Story Progression Plan SP01–SP07
-  (approved in conversation 2026-07-29); Script Blueprint pair approved 2026-07-29 and
-  promoted; the blueprint intro's spoken wording is preserved verbatim in beat 1.
+  (approved 2026-07-29) with the 2026-07-30 felt-entry rebalance recorded in the
+  Blueprint appendix; the revised blueprint intro's spoken wording is preserved
+  verbatim in beat 1.
+- **Word count:** ~1,920 spoken words (~12 minutes at a natural pace).
+- **Canon:** Uses canon concepts switched quests and Pandocrin; opening shape
+  registered in `whp-youtube/canon.md` (felt-choice simulation route, distinct from
+  ep001 per STEERING Law 7).
 
 ### Story progression and payoff audit
 
-- Beat 1 = SP01 (intro, preserved). Beat 2 = SP02. Beat 3 = SP03. Beat 4 = SP04.
-  Beat 5 = SP05. Beat 6 = SP06. Beat 7 = SP07. No beats added, removed, or reordered;
-  the approved causal route is unchanged.
-- L-01 (title question): opened beat 1, closed beat 7. L-02 (why would a win do this):
-  opened beat 1, developed beat 2, paid beat 3. The your-version, origin, and remedy
-  questions open and pay across beats 3→4, 4→5, and 5→6–7 as mini-hook bridges.
-- Promise 1 (the hidden game) paid beat 3; promise 2 (the check and the rule) paid
-  beats 6–7; the intro's "you have made the same move" paid beat 4.
-- Selected techniques realized as planned: dismissal disarm (beat 1), expectation
-  reversals (beats 2 and 6), term-as-promise for self-handicapping (beat 3), recognition
-  catalogue (beat 4), single scoped investigation challenge (beat 5), pill callbacks
-  (beats 4 and 7). Throughline: NONE, as approved.
+- Beat 1 = SP01 performing the felt-entry intro, which now develops the E-01 choice as
+  a felt-choice simulation, pre-pays the everyday weld, and voices the morning excuse.
+  Beats 2–7 = SP02–SP07 with rebalanced jobs: SP02 contrast-and-boundary (no
+  re-narration of the chair), SP03 naming plus the morning-line reinterpretation, SP04
+  cost ledger. No beats added or reordered.
+- L-01 (title question and the remembered night): opened beat 1, partially paid by the
+  intro weld, closed beat 7. L-02 (mechanism): opened beat 1, developed beat 2, paid
+  beat 3 (switched-quests line). L-03 (the exact praise sentence): opened at the intro
+  close, paid beat 5. L-04 (what do I do): opened beat 5, principle beat 6, application
+  beat 7. Cost question beats 3→4; origin question beats 4→5.
+- Script-economy pass: felt-choice gut math replaces SP03 re-derivation; highlight
+  density one locked line per beat-half; the praise-dispute boundary consolidated into
+  one beat-5 block; spoken fractions harmonized (one in eight versus nearly four in
+  ten).
 
 ### Evidence boundaries
 
-- Beat 2: E-01 only — 1978, two groups (solvable vs mostly unsolvable), identical
-  success feedback, Pandocrin choice, 70% vs 13% among men, women 40/26 null (voiced),
-  drug never ingested (voiced). Institution omitted: not verified.
+- Beat 1: E-01 — rigged puzzles, identical success feedback, drug choice before a
+  retest, 70% among men (male boundary inline); E-03 tease bounded to task choice.
+  The memory scene is the viewer's own second-person hypothetical, not a factual claim.
+- Beat 2: E-01 — Pandocrin, nobody-swallowed-anything, 13% contrast, women 40/26 null
+  voiced. Institution omitted: not verified.
 - Beat 3: E-01 mechanism reading plus E-02 (public-choice follow-up, kept modest);
-  "two ledgers" and "identity game" are the episode's lens, not scientific terms.
-- Beat 4: E-06 (1997, named authors, early-relief/late-cost, small-samples voiced),
-  E-07 (2023 correction voiced), E-09 (sandbagging distinguished in one passage).
-- Beat 5: E-03 (92/67 task choice, post-failure collapse, 38 vs ~13 score inflation,
-  stranger-recipient voiced), E-04 (Beijing 2018, less practice), E-05 implicit only;
-  Li & Bates dispute and inference status voiced in narration.
-- Beat 6: E-10 (DP performs better than self-handicapping; forced optimism harms;
-  mood cost voiced).
+  "side quest" is the episode's lens, not a scientific term.
+- Beat 4: E-06 (1997, named authors, early-relief/late-cost, small samples voiced),
+  E-07 (2023 correction), E-09 (sandbagging distinguished).
+- Beat 5: E-03 (92/67 task choice, post-failure collapse, one-in-eight versus
+  nearly-four-in-ten score inflation, stranger recipient), E-04 (Beijing, less
+  practice), dispute and inference status voiced in one consolidated block.
+- Beat 6: E-10 (performs better; forced optimism harms; mood cost voiced).
 - Beat 7: E-08 (spiral, abstract-level — flagged), E-10/E-11 (rule kept modest),
-  clinical signpost and male-only/lab boundaries restated; parenting application
-  bounded to E-03/E-04 with the dispute referenced; anti-pep-talk application bounded
-  to E-10 (forced optimism harmed defensive pessimists).
+  clinical signpost and male-only/lab boundaries restated once; parenting application
+  bounded to E-03/E-04 with the dispute referenced; anti-pep-talk bounded to E-10.
 - Open dependencies for Final: E-08 (abstract only), E-02 (secondhand), E-11
   (lead-level); full claim-wording verification for all rows.
 
 ### Spoken-readability result
 
-- PASSED 2026-07-29 — check_spoken_readability.py on draft/script.raw.md: 255 spoken
-  sentences, 0 failures, 0 unresolved review items (three dense lines and one
-  over-limit line were split during drafting; the review-band replication sentence was
-  split rather than waived).
+- PASSED 2026-07-30 — check_spoken_readability.py on draft/script.raw.md after the
+  felt-entry rewrite; review items were read aloud and confirmed (the 70% result line
+  and locked question wording).
 
 ### Personal-input decision
 
-- UNRESOLVED — candidate slots: the beat-1 stance line ("I always had the same answer
-  for myself. I was lazy.") and an optional beat-4 personal example of Martin's own
-  night-before move. Decision (INPUT-REQUESTED / COMPLETED / OMIT) belongs to the
-  Final stage; nothing in this draft invents Martin's experience, and both stance
-  lines require his confirmation at creative review.
+- UNRESOLVED — the beat-1 stance line ("I always had one word for those nights:
+  lazy.") is Martin's confirmed former answer (2026-07-30 review); an optional beat-4
+  personal example remains a candidate slot. Formal decision (INPUT-REQUESTED /
+  COMPLETED / OMIT) belongs to the Final stage; nothing in this draft invents
+  Martin's experience.
 
 ### Creative-approval state
 
-- **Status:** AWAITING-APPROVAL
-- **Approved by:** PENDING
-- **Scope:** complete narration, premise, voice, hook, and story direction as one piece.
+- Awaiting the cold-viewer retention evaluation report and Martin's explicit creative
+  approval of the complete narration. Produced 2026-07-30 under Martin's standing
+  instruction to apply the updated skill to ep002.
