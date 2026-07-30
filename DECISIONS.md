@@ -1970,3 +1970,40 @@ Control-versus-treatment probes support the naming rule at single-rep depth.
 `scripts/test_skill_package.py` (guard pins). The larger enhancement backlog
 (competitive intro variants, adversarial gate review, simulated table read, prediction
 register) remains proposed and unfielded.
+
+## 2026-07-30 — Popularity-review amendments: first-sentence gate, blueprint packaging, retell sentence
+
+**Decision:** The writing-whp-youtube-scripts skill adopts the three prioritized
+findings of the 2026-07-30 popularity review: (1) the four-test first-sentence gate
+(T1 viewer in the sentence with the presumed-failure cap, T2 unclosable gap, T3 edge
+placement, T4 in-sentence stakes; any 0 on T1–T3 kills the line), owned by the story
+method and applied to intro first sentences, Shorts hooks, and title candidates;
+(2) packaging as a first-class Blueprint artifact — a required `### Packaging`
+appendix section enforced by the pair validator, fifteen to twenty gate-scored title
+candidates, at least two thumbnail routes, the show/tell non-repetition rule, and the
+honest-gap rule, with STEERING Law 1 routing to the new owner; (3) the earned reframe
+must state a retell sentence — the one conversational sentence a viewer would say to
+a friend — carried into narration as a locked line.
+
+**Rationale:** Martin prioritized review findings 1, 2, and 4 for adoption. The gate
+was co-developed with him during EP2 selection, where it retro-predicted every hook he
+killed and scored ep001's proven opener a calibration 8; a fresh-context probe showed
+the control agent shipping a line dead at T2/T3 while every treatment candidate
+survived. Packaging had doctrine (STEERING Law 1) but no pipeline owner: EP2's title
+candidates existed only voluntarily and neither live episode had thumbnail concepts.
+Shareability was scored at topic selection but designed for nowhere; ep002's
+"switched quests" locked line is the field case of a retell sentence, and the probe's
+control reframe buried its retellable phrasing while the treatment produced a labeled
+one-breath line.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/` — `SKILL.md` (still 480
+lines), `references/story-and-hook-method.md`, `references/rapid-prototyping.md`,
+`references/script-blueprint-workflow.md`, `references/script-artifact-pair.md`,
+`references/script-architecture.md`, `scripts/validate_script_pair.py` (blueprint
+contract), guard pins in `scripts/test_skill_package.py`, and contract tests in
+`scripts/test_validate_script_pair.py`; `whp-youtube/STEERING.md` (Law 1 routing
+line); both existing blueprint pairs reshaped to the new contract without content
+change (`ep001` records its candidate set as honestly open; `ep002`'s candidates
+moved under `### Packaging`). Review findings 3 (post-publish readback), 5 (sequel
+handoff), and 6 (running the topic skill's demand machinery before architecture)
+remain proposed and unadopted.
