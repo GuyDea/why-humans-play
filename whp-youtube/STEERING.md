@@ -19,26 +19,18 @@ accepted current launch sequence, dated launch research, and historical episode 
 
 ## Current launch sequence — accepted 2026-07-21
 
-> **Episode 1 working state (2026-07-28):**
-> The episode-first directory
-> [`episodes/ep001-ai-dangerous-advice/`](episodes/ep001-ai-dangerous-advice/)
-> now holds the active rebuild and the preserved production baseline. Its
-> [`blueprint/script.raw.md`](episodes/ep001-ai-dangerous-advice/blueprint/script.raw.md)
-> is the source of truth for the intro-first Script Blueprint, with the annotated mirror
-> at
-> [`blueprint/script.extended.md`](episodes/ep001-ai-dangerous-advice/blueprint/script.extended.md).
-> The existing evidence-backed narration remains canonical in the
-> [`final` pair](episodes/ep001-ai-dangerous-advice/final/script.extended.md) while the
-> rebuild advances through later approval gates. The rebuild's
-> [approved architecture](../docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md)
-> and [approved medical-case-first Story Progression Plan](../docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md)
-> organize the accepted personal nerve—fear that a calm, intelligent answer can make a
-> dangerous preferred choice feel rational—around the documented Swiss TIA case. The case
-> carries human stakes and recurring meaning while separate studies prove the four
-> mechanisms. No replacement narration is canonical until it receives the later approvals
-> and promotion. The former loose working files are preserved under
-> [`archive/`](episodes/ep001-ai-dangerous-advice/archive/) as historical inputs, not
-> active stages.
+> **Episode 1 working state (2026-07-30):**
+> The medical-case-first rebuild completed the full pipeline under Martin's direction:
+> felt-entry Blueprint, economy-passed Draft (two cold-viewer evaluation rounds), and
+> the promoted [`final` pair](episodes/ep001-ai-dangerous-advice/final/script.extended.md)
+> — an annotated production pair with inline F-indicators mapped to eight verified
+> records and a completed three-layer adversarial claim verification (30/35 claims
+> SUPPORTED; five overstatements corrected in narration). The retired v1 four-moves
+> final is preserved under
+> [`archive/`](episodes/ep001-ai-dangerous-advice/archive/) as
+> `v1-final-four-moves.*` with historical labels. Status remains EDITORIAL-DRAFT:
+> Martin's review, the post-review audit battery, packaging choice, and production
+> assets are open (see the final appendix issue ledger).
 
 1. **EP1 — Could AI talk you into the dumbest decision of your life?** The approved
    rebuild treats framing, sycophantic agreement, fluent machine authority, and anchoring
@@ -47,7 +39,7 @@ accepted current launch sequence, dated launch research, and historical episode 
    “Could this be harmless?” may not resolve “Is this safe?” The preserved
    Second-Opinion Test serves the deeper rule that another answer counts only when the
    process adds an independent route to checkable evidence.
-   The final pair remains the canonical production artifact during the rebuild. This
+   The rebuilt final pair is the canonical production artifact (2026-07-30). This
    episode replaced the earlier reward-hacking concept (*Why AI cheats
    even when it follows every rule*), which remains retired from the sequence; its
    research and drafts stay in git history and dated planning documents for possible

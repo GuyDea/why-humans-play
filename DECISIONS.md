@@ -2107,3 +2107,25 @@ at the draft gate; the complete sentence-level sweep needs Final's claim mapping
 (new `## Adversarial claim verification`), `SKILL.md` (three gate hooks; disclosure
 limit 490 → 500 in `scripts/test_skill_package.py`),
 `.claude/agents/whp-claim-verifier.md` (new).
+
+## 2026-07-30 — Episode pipeline runs: ep001 promoted to final, ep002 through draft
+
+**Decision:** Under Martin's blueprint-to-final and apply-the-updated-skill
+instructions, ep001 advanced through the full pipeline: felt-entry Blueprint,
+economy-passed Draft refined by two cold-viewer evaluation rounds with Martin's
+dispositions, and promotion to a verified annotated final pair (the v1 four-moves
+final archived with historical labels). Ep002's Blueprint and Draft were rebuilt under
+the same doctrine (felt-choice simulation intro, rebalanced body, one evaluation round
+applied); its final stage is in progress pending the Layer-3 verification wave. Both
+episodes' load-bearing rows passed Layer-1 adversarial verification; ep001's Layer-3
+sweep completed with 30/35 claims SUPPORTED and five narration corrections.
+
+**Rationale:** Martin directed each stage advancement in conversation (2026-07-30) and
+merged the doctrine and episode work to main. Gate artifacts, evaluation reports, and
+verification verdicts are recorded in the stage appendices and issue ledgers.
+
+**Documents:** `whp-youtube/episodes/ep001-ai-dangerous-advice/` (blueprint, draft,
+final, archive), `whp-youtube/episodes/ep002-why-you-didnt-study/` (blueprint, draft),
+`whp-youtube/STEERING.md` (Episode 1 working state), `whp-youtube/canon.md`,
+guard pins in `scripts/test_skill_package.py`. Ep002 final promotion will be ledgered
+when its verification wave completes.
