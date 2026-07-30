@@ -2158,3 +2158,33 @@ checks, and outlier-pattern mining is the standard packaging validation loop. Th
 **Documents:** `whp-youtube/STEERING.md` (Law 1 accepted-direction bullet),
 `docs/research/2026-07-30-packaging-ctr-research.md` + artifacts (new, this branch).
 Skill design not yet approved — only these scope parameters are settled.
+
+## 2026-07-30 — Package-as-unit packaging doctrine; scripting-skill packaging revision
+
+**Decision:** Martin corrected the packaging-skill design with "the title and the
+thumbnail must go together — that's the first rule," settling that the unit of all WHP
+packaging work is the package: one title and one thumbnail concept conceived, scored,
+and selected together, never as separate stages. He then directed a fresh
+expert-perspective revision of `writing-whp-youtube-scripts`, explicitly unbound by
+legacy rules. Applied: the blueprint packaging contract now generates 15–20 package
+candidates (grounded in supplied competitor/outlier patterns), scores each as a unit
+(feed-adapted title gate with T2/T3 unchanged and T1 decoupled from literal
+second-person phrasing, ~60/40-character truncation limits, one-glance thumbnail read
+in light and dark feeds, pair complementarity), and selects three winning packages as
+the Test & Compare trio; the first-sentence gate no longer scores titles as bare first
+sentences; STEERING Law 1 cascades to package units and adds per-surface own-baseline
+CTR calibration and the watch-time-per-impression objective.
+
+**Rationale:** Viewers only ever meet title and thumbnail together in the feed;
+generating halves separately produces orphans no counterpart can complete (Martin's
+rule; 2026-07-30 packaging research: "write title and thumbnail together, as one
+two-part sentence"). Gate adaptation follows the research's evidence grading:
+second-person "you" is null in the pre-registered Upworthy analysis while first-person
+singular is positive, and truncation limits are well-triangulated. The revision's
+specific wording awaits Martin's content review; the doctrine itself is settled.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md`
+(packaging section rewritten), `references/story-and-hook-method.md` (gate scope),
+`scripts/test_skill_package.py` (pins updated; 115 tests green),
+`whp-youtube/STEERING.md` (Law 1 cascade). Episode blueprint packaging records
+(ep001/ep002) remain historical artifacts of the prior contract.
