@@ -114,18 +114,19 @@
 
 [TRANSITION — Case return with new information: the documented question he typed, against the decision question.]
 
-> Here's what he actually asked: whether his double vision could be connected to the
-> heart procedure.
+> Here's what he actually typed: "Is it possible to have visual disturbance after
+> catheter ablation?" — the heart procedure he'd had.
 >
-> It's a real question. Polite, specific, medically sensible.
+> It's a real question. Polite, specific, medically sensible. And notice: it doesn't
+> even say "I". It asks whether something is possible — in general.
 >
 > And it is not the question his life depended on. That one was: is it safe to stay
 > home with these symptoms?
 
 [TRANSITION — The comforting answer available to the narrower question.]
 
-> "Could this be connected to the procedure?" has a comforting answer available — yes,
-> possibly, often temporary.
+> And "is it possible?" has a comforting answer available — yes, possibly, often
+> temporary.
 
 [AHA | LOCKED WORDING — The possible-answer/safe-decision distinction, locked.]
 
