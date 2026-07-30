@@ -503,6 +503,22 @@ exact sentence, an unasked question, a specific number — over an abstract esca
 Deliver the story and withhold the mechanism: a loop stays honest when the narrative
 is complete and only the explanation is owed.
 
+A locked tease requires a payoff of equal weight and matching register. The withheld
+object's payoff gets its own beat: the object delivered alone, locked wording, and the
+tease's emotional hook landing at the payoff. An aside cannot pay a promise made in
+locked wording. When the promised object is study wording, deliver the verbatim
+evidence and then its everyday translation, and attach the promise to the translation
+the viewer will recognize. Pay the object only after its power is demonstrated: it may
+appear earlier as plain, unmarked fact when the evidence needs it, but the
+acknowledgment and the tease's personal turn land after the demonstration, at maximum
+earned significance, with any honesty boundary immediately following. Identification
+before demonstration spends the emotional turn on an inert object.
+
+Give every recurring callback object a distinctive coined name at its first appearance
+— the goalkeeper, the winner's chair — never a bare common noun. The test: the name
+alone could title a chapter or hook a Short. If a later beat needs a locating clause
+to revive the referent, the name is too weak; rename it rather than annotating it.
+
 Pay each loop off explicitly in narration or unmistakable visual treatment. When a
 partial answer opens a new question, distinguish the paid portion from the new loop.
 Audit the opening loop separately and ensure the final payoff answers the question

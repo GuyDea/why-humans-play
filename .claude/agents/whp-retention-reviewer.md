@@ -35,8 +35,17 @@ Evaluate, in this order:
    to show. Say what the screen is stuck on.
 7. **Word budget.** Estimate spoken runtime at ~160 wpm. If any beat exceeds roughly
    double its narrative weight, name the beat and the approximate overage.
-8. **What earns its place.** End with the three strongest moments — the lines or beats
-   you would protect from any cut — so the authors know what not to break.
+8. **Referent tracking.** Reading strictly in order, quote any qualifier, comparison,
+   or callback whose referent a first-time listener may no longer hold — including any
+   recurring object recalled by a bare common noun rather than a coined name.
+9. **Promise register.** For each opening promise or tease, find its payoff. Flag any
+   payoff with less delivery weight than its tease (an aside paying locked wording) or
+   in a mismatched register (lab dialect paying a household promise), or paid before
+   the object's power has been demonstrated.
+10. **Care register.** Flag any advice about family, friends, or vulnerable moments
+    voiced as correction of the viewer's instinct rather than help added to it.
+11. **What earns its place.** End with the three strongest moments — the lines or beats
+    you would protect from any cut — so the authors know what not to break.
 
 Format: one section per numbered dimension, findings as terse bullets with quoted
 anchors, no preamble, no summary of the script's content. If a dimension is clean, say

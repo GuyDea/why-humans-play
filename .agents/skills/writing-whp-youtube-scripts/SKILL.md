@@ -316,7 +316,8 @@ Before presenting a complete draft narration for creative approval, dispatch the
 fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
-direction. It re-runs during the final audit battery. Run the Layer 2 consistency
+direction. It re-runs during the final audit battery. A finding flagged by two
+independent evaluator runs is adopted by default; keeping it requires Martin's overrule. Run the Layer 2 consistency
 check of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
 on the same draft: every narration number, name, and attribution against its evidence
 row.
@@ -364,6 +365,9 @@ directory, and run:
 ```bash
 python3 scripts/check_spoken_readability.py -- "<resolved-script-path>"
 ```
+
+The checker is not the gate's end: Martin's read-aloud remains the irreplaceable referent
+check — a line pointing at something the listener no longer holds fails delivery.
 
 Rewrite every `FAIL`. Read every `REVIEW` aloud; use `--reviewed` only after a
 21–25-word line is clear, never to waive difficulty. Apply the same semantic gate to

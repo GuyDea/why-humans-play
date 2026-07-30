@@ -24,8 +24,9 @@
 > were rigged — mostly unsolvable. Then everyone heard the same result: *you did really
 > well.*
 >
-> Now sit in that chair, because this is where it gets uncomfortable. You just aced a
-> test you know you mostly guessed on. And there's a second test coming.
+> Now sit down in the winner's chair, because this is where it gets uncomfortable.
+> You just aced a test you know you mostly guessed on. And there's a second test
+> coming.
 >
 > The researchers offer you two drugs. One supposedly sharpens your thinking. One slows
 > it down.
@@ -50,8 +51,8 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-> *Because this move gets installed early. In one experiment, a single sentence of
-> praise changed what ten-year-olds chose to attempt next.*
+> *Because there's a fight in psychology over whether one sentence of praise can set
+> this move off in a ten-year-old.*
 
 > <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>
 
@@ -80,7 +81,8 @@
 
 ## 3. The accounting
 
-> Psychologists have a name for the move you felt in that chair. Self-handicapping.
+> Psychologists have a name for the move you felt in the winner's chair.
+> Self-handicapping.
 >
 > You place a real obstacle on your own track, because the obstacle protects the story
 > about your talent.
@@ -145,12 +147,10 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-> Half of the praised kids heard one sentence: <u>**you must be smart at this.**</u>
+> Half heard: **you must be smart at this.** The other half: **you must have worked
+> hard.**
 >
-> That's it. That's the sentence I promised you at the start. The one you've probably
-> said to someone you love.
->
-> The other half heard: you must have worked hard. One sentence of difference.
+> One sentence of difference.
 
 > Then every kid chose their next task.
 >
@@ -174,19 +174,33 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> Now, before you ask whether praise really causes the full adult pattern — fair
-> question. The endpoints are real experiments. A Beijing experiment even caught the
-> handicap live. After a failure, kids praised for ability simply put less time in.
+> <u>And that first sentence — the smart one — is the sentence I promised you at the
+> start.</u>
 >
-> But a large 2019 replication of the praise studies mostly came up empty. And the
-> original authors dispute how it was run.
+> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+> Or: you're so talented.
 >
-> So the honest version: whether one compliment wires your worst nights is an
-> inference. Scientists are still fighting about it.
+> <u>**The one you've probably said to someone you love.**</u>
 
-> But the pull itself — you felt that in the chair. And however the stake gets
-> planted, somewhere along the way a protected story started to feel safer than a
-> tested one.
+> Now, one honesty check — because these studies have a challenger.
+>
+> In 2019, a much bigger rerun found almost nothing. I dug into the fight that
+> followed.
+>
+> My take: the rerun's failure round was too easy. In the original, failing kids
+> solved one or two problems out of ten. In the rerun, nearly five.
+>
+> Without real failure, there's no label to protect. So the rerun tells us little
+> either way — though some scientists read it differently.
+>
+> Which leaves the famous praise studies standing. But standing alone — never properly
+> re-tested. So hold the children's version loosely.
+
+> What doesn't depend on any of it: the winner's chair. Grown men, one unexplained
+> success, seventy percent reaching for the vial.
+>
+> However you got your label, somewhere along the way a protected story started to
+> feel safer than a tested one.
 
 > *So if the story is the problem, is the fix just more confidence? Believe in yourself
 > harder?*
@@ -220,12 +234,15 @@
 >
 > Same anxious people, better performance.
 
-> Here is the twist that should end every pep talk.
+> Then comes the twist — the one to handle with care.
 >
-> When researchers pushed these people to think positive — relax, you'll do great —
-> they performed worse.
+> Researchers tried nudging these people toward positive thinking. Relax. You'll do
+> great. They performed worse.
 >
 > **For them, optimism was the handicap.**
+>
+> For them. Not for everyone. In this one anxious, list-making kind of mind, the worry
+> is load-bearing — take it away, and the preparation goes with it.
 
 > One honest cost. Living like this is not free. Defensive pessimists feel worse while
 > it works.
@@ -285,7 +302,8 @@
 >
 > The praise studies have their disputes — but the safe swap costs nothing.
 >
-> Praise the working, not the being. You worked hard on this. Not: you are so smart.
+> Praise the working, not the being. You worked hard on this. Not: you are so smart,
+> or so talented.
 >
 > One hands them a plan. The other hands them a label to defend.
 >
@@ -294,16 +312,18 @@
 
 > One more, for the people you love.
 >
-> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
-> great.
+> When someone you love spirals before their big day, the instinct is to cheer them
+> up. Relax. You'll be great. That instinct is love — keep it.
 >
-> For anxious planners, Norem's research says that is exactly backwards. Forced
-> optimism made them worse.
+> But if your person is one of these anxious planners, cheering can accidentally take
+> their tool away. Norem's research found forced optimism made them do worse, not
+> better.
 >
-> Ask the defensive pessimist's question instead. What is the first thing that could go
-> wrong? Then help them make the list.
+> So try something gentler than it sounds. Don't argue with the worry. Sit down in it
+> with them, and ask: what's the first thing that could go wrong?
 >
-> You stop being a cheerleader and become useful.
+> Then help them make the list. You're not feeding the fear. You're helping them put
+> it to work — the same move that steadies them.
 
 > So. The night you didn't study.
 >

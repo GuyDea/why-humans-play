@@ -2238,3 +2238,47 @@ prediction.
 production items listed: WHP mark compositing, Martin reshoot for package 3, chat
 paraphrase re-verification). Blueprint Packaging record left unchanged as the
 pre-skill historical baseline. No steering doctrine change.
+
+## 2026-07-30 — Review-round doctrine: nine rules from Martin's final read
+
+**Decision:** Encode the lessons of Martin's ep002 final review as doctrine:
+verification fixes are drafts (orphan-referent and plain-speech re-entry);
+payoff-weight and register matching for locked teases; coined names for recurring
+callback objects (the bare-noun diagnostic); the contested-findings owner with the
+presenter-ruling path (one-premise coherence, checkable narrated basis, disagreement
+boundary); the care register for advice touching loved ones; the two-strikes
+evaluator-adoption default; the presenter read-aloud stated as the irreplaceable
+referent check; and three new cold-viewer dimensions (referent tracking, promise
+register, care register).
+
+**Rationale:** Every rule generalizes a defect Martin caught that all automated layers
+passed: statistician-speak referencing unnarrated baselines, a locked tease paid by an
+aside in lab dialect, an incoherent split verdict using contested data's magnitudes, a
+bare-noun callback that lost its referent, and relationship advice voiced as
+correction. The catches were all referent- and register-class failures — the class the
+presenter's read uniquely detects — so the read-aloud gate is now doctrine, not
+ceremony.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (two-strikes
+default; read-aloud referent line; stays at the 500-line cap),
+`references/rapid-prototyping.md` (verification-fixes-are-drafts; care register),
+`references/story-and-hook-method.md` (payoff weight and register; coined callbacks),
+`references/research-and-rights.md` (new `## Contested findings` with the
+presenter-ruling path), `.claude/agents/whp-retention-reviewer.md` (dimensions 8–10).
+
+## 2026-07-30 — Demonstrate-then-implicate payoff timing
+
+**Decision:** Withheld-object payoffs land only after the object's power is
+demonstrated; the object may appear earlier as plain unmarked fact, but the
+acknowledgment and the tease's personal turn fire at maximum earned significance, with
+the honesty boundary immediately following. Applied to ep002's promised-sentence beat
+(acknowledgment moved after the lying reveal) and encoded in the story owner's payoff
+rules and the cold-viewer's promise-register dimension.
+
+**Rationale:** Martin's catch: the someone-you-love turn fired while the sentence was
+still inert, wasting the emotional payoff the demonstration would have earned.
+Completes the tease-payoff doctrine's third axis — weight, register, and now timing.
+
+**Documents:** `references/story-and-hook-method.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-why-you-didnt-study/final/` pair.
