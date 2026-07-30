@@ -81,10 +81,10 @@
 
 [TRANSITION — Pays the who-ran-it details: names, Pandocrin, real choice without a real drug.]
 
-> That seventy percent deserves its full story — because the details make it worse.
+> A few details from that lab make the seventy percent worse.
 >
-> The experiment was run by psychologists Steven Berglas and Edward Jones. And the
-> slowing drug they offered had a name: Pandocrin.
+> The psychologists — Steven Berglas and Edward Jones — gave the slowing drug a name:
+> Pandocrin.
 >
 > Pandocrin wasn't real. Nobody swallowed anything. But the choice was real.
 
@@ -98,9 +98,8 @@
 
 [TRANSITION — Women-null boundary held in full; the result stays about the men in that room.]
 
-> The women in the study didn't show the pattern — forty percent versus twenty-six, too
-> close to mean anything. So hold that boundary. This result is about the men in that
-> room.
+> The women in the study didn't show the pattern, so this result stays about the men in
+> that room.
 
 [MINI-HOOK — Direction line: winning armed the trap; bookkeeping promised next.]
 
@@ -124,12 +123,10 @@
 
 [TRANSITION — The two-quests frame: outcome quest versus story quest.]
 
-> And notice what that means. This is not weakness. It is strategy. You are running two
-> quests at once.
+> And that makes it strategy, not weakness. You are running two quests at once.
 >
-> The main quest is the outcome. Pass the exam. Finish the project. Get the job.
->
-> And next to it runs a side quest. Protect the story that you are smart.
+> The main quest is the outcome — pass the exam, finish the project, get the job. The
+> side quest is protecting the story that you are smart.
 >
 > The pill abandons the main quest to protect the side quest.
 
@@ -158,7 +155,7 @@
 
 > Everyone's Pandocrin looks different. The most popular flavor is putting things off.
 >
-> And researchers ran the numbers on that one.
+> Not every delay is this move. But researchers ran the numbers on the ones that are.
 
 [TRANSITION — The 1997 semester study; the pill-pays-first tease inside.]
 
@@ -182,8 +179,7 @@
 > A bigger study followed people month by month in 2023. The chronic procrastinators
 > were never the relaxed ones. More stressed at every single measurement.
 >
-> The relief is real. But it is borrowed. One calm evening, repaid with interest all
-> semester.
+> One calm evening, repaid with interest all semester.
 
 [TRANSITION — Sandbagging distinguished in one passage: a bluff, not an obstacle.]
 
@@ -241,16 +237,10 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-[AHA — One compliment hands over a side quest.]
-
-> One compliment handed them a side quest. Protect the label, whatever it costs.
-
 [TRANSITION — Consolidated evidence boundary: endpoints real, Beijing bridge live, replication disputed, wiring an inference.]
 
 > Now, before you ask whether praise really causes the full adult pattern — fair
-> question. Here's what's solid.
->
-> The endpoints are real experiments. A Beijing experiment even caught the handicap
+> question. The endpoints are real experiments. A Beijing experiment even caught the handicap
 > live. Kids praised for ability practiced less before a real retest.
 >
 > But a large 2019 replication of the praise studies mostly came up empty. And the
@@ -301,7 +291,7 @@
 
 [TRANSITION — The performance result: the strategy beats self-handicapping.]
 
-> And it works. In studies, this strategy beats self-handicapping.
+> And it works. In Norem's studies, this strategy beats self-handicapping.
 >
 > Same anxious people, clearly better performance.
 
@@ -339,8 +329,6 @@
 > The pill compounds. A study that tracked self-handicappers over time found the habit
 > and the misery feeding each other.
 >
-> More handicapping, worse adjustment. Worse adjustment, more handicapping.
->
 > The insurance gets more expensive every year you hold the policy.
 
 [APPLICATION | LOCKED WORDING — The two-question check anchored to the recognizable moment.]
@@ -368,19 +356,14 @@
 > pessimists just proved that can help.
 >
 > But the slides still get finished. The pages still get read.
->
-> Expect little. Prepare anyway. That is the whole swap.
 
-[APPLICATION — Clinical signpost and evidence boundaries restated once.]
+[APPLICATION — Clinical signpost: where the video is not the tool.]
 
 > Where this stops. If avoidance is running your whole life, that is not a strategy
 > problem.
 >
 > If it looks like depression, or anxiety that nothing here touches, a video is not the
 > tool. That deserves real support.
->
-> And remember what the science does and doesn't say. The pill result is men in one
-> lab. The childhood wiring is still being mapped.
 
 [APPLICATION — Transfers: the race, the date, the pitch alibi.]
 
@@ -393,7 +376,7 @@
 
 > And if you have kids, this changes what a compliment is.
 >
-> The praise studies have their disputes. But the safe swap costs nothing.
+> The praise studies have their disputes — but the safe swap costs nothing.
 >
 > Praise the working, not the being. You worked hard on this. Not: you are so smart.
 >
@@ -409,8 +392,8 @@
 > When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
 > great.
 >
-> For anxious planners, the research says that is exactly backwards. Forced optimism
-> made them worse.
+> For anxious planners, Norem's research says that is exactly backwards. Forced
+> optimism made them worse.
 >
 > Ask the defensive pessimist's question instead. What is the first thing that could go
 > wrong? Then help them make the list.
@@ -445,7 +428,7 @@
   (approved 2026-07-29) with the 2026-07-30 felt-entry rebalance recorded in the
   Blueprint appendix; the revised blueprint intro's spoken wording is preserved
   verbatim in beat 1.
-- **Word count:** ~1,920 spoken words (~12 minutes at a natural pace).
+- **Word count:** ~1,835 spoken words (~11.5 minutes at a natural pace).
 - **Canon:** Uses canon concepts switched quests and Pandocrin; opening shape
   registered in `whp-youtube/canon.md` (felt-choice simulation route, distinct from
   ep001 per STEERING Law 7).
@@ -465,7 +448,13 @@
 - Script-economy pass: felt-choice gut math replaces SP03 re-derivation; highlight
   density one locked line per beat-half; the praise-dispute boundary consolidated into
   one beat-5 block; spoken fractions harmonized (one in eight versus nearly four in
-  ten).
+  ten). Cold-viewer evaluation (2026-07-30) applied per Martin's direction: S2/S3
+  restatement stacks compressed, women-null boundary kept at its stat in one sentence,
+  the weld grounded ("Not every delay is this move"), rule and pay-later restatements
+  deduplicated, S7's science-limits recap removed (each boundary now voiced once at
+  its claim), Norem attributions named; the collapse-into-one-honesty-beat and
+  fold-S2-into-intro verdicts were declined to keep boundaries adjacent to their
+  claims.
 
 ### Evidence boundaries
 

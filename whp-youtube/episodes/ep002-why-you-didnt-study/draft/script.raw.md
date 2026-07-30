@@ -57,10 +57,10 @@
 
 ## 2. The pill
 
-> That seventy percent deserves its full story — because the details make it worse.
+> A few details from that lab make the seventy percent worse.
 >
-> The experiment was run by psychologists Steven Berglas and Edward Jones. And the
-> slowing drug they offered had a name: Pandocrin.
+> The psychologists — Steven Berglas and Edward Jones — gave the slowing drug a name:
+> Pandocrin.
 >
 > Pandocrin wasn't real. Nobody swallowed anything. But the choice was real.
 
@@ -70,9 +70,8 @@
 > Sabotage wasn't a personality trait in that room. It followed one specific feeling:
 > praise on the outside, a question mark on the inside.
 
-> The women in the study didn't show the pattern — forty percent versus twenty-six, too
-> close to mean anything. So hold that boundary. This result is about the men in that
-> room.
+> The women in the study didn't show the pattern, so this result stays about the men in
+> that room.
 
 > *And notice the direction. Losing made sense. It was the winning that armed the
 > trap.*
@@ -88,12 +87,10 @@
 
 > **Heads, the story wins. Tails, the story ties.**
 
-> And notice what that means. This is not weakness. It is strategy. You are running two
-> quests at once.
+> And that makes it strategy, not weakness. You are running two quests at once.
 >
-> The main quest is the outcome. Pass the exam. Finish the project. Get the job.
->
-> And next to it runs a side quest. Protect the story that you are smart.
+> The main quest is the outcome — pass the exam, finish the project, get the job. The
+> side quest is protecting the story that you are smart.
 >
 > The pill abandons the main quest to protect the side quest.
 
@@ -114,7 +111,7 @@
 
 > Everyone's Pandocrin looks different. The most popular flavor is putting things off.
 >
-> And researchers ran the numbers on that one.
+> Not every delay is this move. But researchers ran the numbers on the ones that are.
 
 > In 1997, Dianne Tice and Roy Baumeister followed students through a whole semester.
 >
@@ -132,8 +129,7 @@
 > A bigger study followed people month by month in 2023. The chronic procrastinators
 > were never the relaxed ones. More stressed at every single measurement.
 >
-> The relief is real. But it is borrowed. One calm evening, repaid with interest all
-> semester.
+> One calm evening, repaid with interest all semester.
 
 > There's even a competitive version. You tell everyone you're terrible right before
 > you play. Pool players are famous for it. It has a name, sandbagging.
@@ -177,12 +173,8 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> One compliment handed them a side quest. Protect the label, whatever it costs.
-
 > Now, before you ask whether praise really causes the full adult pattern — fair
-> question. Here's what's solid.
->
-> The endpoints are real experiments. A Beijing experiment even caught the handicap
+> question. The endpoints are real experiments. A Beijing experiment even caught the handicap
 > live. Kids praised for ability practiced less before a real retest.
 >
 > But a large 2019 replication of the praise studies mostly came up empty. And the
@@ -223,7 +215,7 @@
 >
 > The anxiety doesn't get argued with. It gets put to work.
 
-> And it works. In studies, this strategy beats self-handicapping.
+> And it works. In Norem's studies, this strategy beats self-handicapping.
 >
 > Same anxious people, clearly better performance.
 
@@ -253,8 +245,6 @@
 > The pill compounds. A study that tracked self-handicappers over time found the habit
 > and the misery feeding each other.
 >
-> More handicapping, worse adjustment. Worse adjustment, more handicapping.
->
 > The insurance gets more expensive every year you hold the policy.
 
 > So here is the check. Two questions, in the moment.
@@ -278,17 +268,12 @@
 > pessimists just proved that can help.
 >
 > But the slides still get finished. The pages still get read.
->
-> Expect little. Prepare anyway. That is the whole swap.
 
 > Where this stops. If avoidance is running your whole life, that is not a strategy
 > problem.
 >
 > If it looks like depression, or anxiety that nothing here touches, a video is not the
 > tool. That deserves real support.
->
-> And remember what the science does and doesn't say. The pill result is men in one
-> lab. The childhood wiring is still being mapped.
 
 > But the pattern, once you see it, shows up everywhere.
 >
@@ -297,7 +282,7 @@
 
 > And if you have kids, this changes what a compliment is.
 >
-> The praise studies have their disputes. But the safe swap costs nothing.
+> The praise studies have their disputes — but the safe swap costs nothing.
 >
 > Praise the working, not the being. You worked hard on this. Not: you are so smart.
 >
@@ -311,8 +296,8 @@
 > When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
 > great.
 >
-> For anxious planners, the research says that is exactly backwards. Forced optimism
-> made them worse.
+> For anxious planners, Norem's research says that is exactly backwards. Forced
+> optimism made them worse.
 >
 > Ask the defensive pessimist's question instead. What is the first thing that could go
 > wrong? Then help them make the list.
