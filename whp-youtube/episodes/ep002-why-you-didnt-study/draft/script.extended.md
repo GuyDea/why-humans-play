@@ -70,8 +70,8 @@
 
 [MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence of praise changing which games children chose.]
 
-> *Because this move gets installed early. There's an experiment where one sentence of
-> praise changed which games ten-year-olds chose to play.*
+> *Because this move gets installed early. In one experiment, a single sentence of
+> praise changed what ten-year-olds chose to attempt next.*
 
 [LOOP OPEN L-03 — Closes the intro on the nameable withheld object: the exact praise sentence, paid by the seed beat, made personal by the someone-you-love turn.]
 
@@ -176,10 +176,13 @@
 
 [TRANSITION — The 2023 monthly correction: the relief is borrowed.]
 
-> A bigger study followed people month by month in 2023. The chronic procrastinators
-> were never the relaxed ones. More stressed at every single measurement.
+> A bigger study from 2023 followed thousands of students across a year, checking in
+> every three months.
 >
-> One calm evening, repaid with interest all semester.
+> The procrastinators ended the year more stressed. That held even after accounting
+> for how stressed they started.
+>
+> One calm evening, repaid with interest.
 
 [TRANSITION — Sandbagging distinguished in one passage: a bluff, not an obstacle.]
 
@@ -201,7 +204,7 @@
 
 > In 1998, Claudia Mueller and Carol Dweck worked with ten- and eleven-year-olds.
 >
-> Each kid solved puzzles and then heard one of two compliments.
+> Each kid solved puzzles. The praised kids then heard one of two compliments.
 
 [LOOP PAYOFF L-03 — Pays the withheld object: the exact praise sentence, named as promised.]
 
@@ -228,7 +231,7 @@
 [REVERSAL | LOCKED WORDING — The lying result, locked; harmonized spoken fractions.]
 
 > One more part of the study. The kids wrote a note about the puzzles to a child in
-> another school — a stranger — and the note included their score.
+> another state — a stranger — and the note included their score.
 >
 > Among the kids praised for effort, about one in eight made their score look better
 > than it was.
@@ -240,8 +243,8 @@
 [TRANSITION — Consolidated evidence boundary: endpoints real, Beijing bridge live, replication disputed, wiring an inference.]
 
 > Now, before you ask whether praise really causes the full adult pattern — fair
-> question. The endpoints are real experiments. A Beijing experiment even caught the handicap
-> live. Kids praised for ability practiced less before a real retest.
+> question. The endpoints are real experiments. A Beijing experiment even caught the
+> handicap live. After a failure, kids praised for ability simply put less time in.
 >
 > But a large 2019 replication of the praise studies mostly came up empty. And the
 > original authors dispute how it was run.
@@ -291,9 +294,10 @@
 
 [TRANSITION — The performance result: the strategy beats self-handicapping.]
 
-> And it works. In Norem's studies, this strategy beats self-handicapping.
+> And it works. In studies comparing the two strategies, defensive pessimism comes out
+> ahead of self-handicapping.
 >
-> Same anxious people, clearly better performance.
+> Same anxious people, better performance.
 
 [REVERSAL | LOCKED WORDING — Forced optimism harms; the locked inversion line.]
 
@@ -329,7 +333,7 @@
 > The pill compounds. A study that tracked self-handicappers over time found the habit
 > and the misery feeding each other.
 >
-> The insurance gets more expensive every year you hold the policy.
+> The insurance premiums pile up for as long as you hold the policy.
 
 [APPLICATION | LOCKED WORDING — The two-question check anchored to the recognizable moment.]
 

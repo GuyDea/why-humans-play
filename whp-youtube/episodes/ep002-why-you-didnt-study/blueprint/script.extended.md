@@ -70,8 +70,8 @@
 
 [MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence of praise changing which games children chose.]
 
-> *Because this move gets installed early. There's an experiment where one sentence of
-> praise changed which games ten-year-olds chose to play.*
+> *Because this move gets installed early. In one experiment, a single sentence of
+> praise changed what ten-year-olds chose to attempt next.*
 
 [LOOP OPEN L-03 — Closes the intro on the nameable withheld object: the exact praise sentence, paid by the seed beat, made personal by the someone-you-love turn.]
 

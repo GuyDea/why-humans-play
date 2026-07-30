@@ -50,7 +50,7 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-> *Because this move gets installed early. There's an experiment where one sentence of
-> praise changed which games ten-year-olds chose to play.*
+> *Because this move gets installed early. In one experiment, a single sentence of
+> praise changed what ten-year-olds chose to attempt next.*
 
 > <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>

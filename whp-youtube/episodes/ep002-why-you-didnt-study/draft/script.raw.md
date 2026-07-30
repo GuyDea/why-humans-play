@@ -50,8 +50,8 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-> *Because this move gets installed early. There's an experiment where one sentence of
-> praise changed which games ten-year-olds chose to play.*
+> *Because this move gets installed early. In one experiment, a single sentence of
+> praise changed what ten-year-olds chose to attempt next.*
 
 > <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>
 
@@ -126,10 +126,13 @@
 > Two small classroom studies, so hold the exact numbers loosely. But the shape is the
 > point.
 
-> A bigger study followed people month by month in 2023. The chronic procrastinators
-> were never the relaxed ones. More stressed at every single measurement.
+> A bigger study from 2023 followed thousands of students across a year, checking in
+> every three months.
 >
-> One calm evening, repaid with interest all semester.
+> The procrastinators ended the year more stressed. That held even after accounting
+> for how stressed they started.
+>
+> One calm evening, repaid with interest.
 
 > There's even a competitive version. You tell everyone you're terrible right before
 > you play. Pool players are famous for it. It has a name, sandbagging.
@@ -145,7 +148,7 @@
 
 > In 1998, Claudia Mueller and Carol Dweck worked with ten- and eleven-year-olds.
 >
-> Each kid solved puzzles and then heard one of two compliments.
+> Each kid solved puzzles. The praised kids then heard one of two compliments.
 
 > <u>Half heard: you must be smart at this. Half heard: you must have worked hard.</u>
 >
@@ -164,7 +167,7 @@
 > Less persistence. Less enjoyment. Worse scores than they had before.
 
 > One more part of the study. The kids wrote a note about the puzzles to a child in
-> another school — a stranger — and the note included their score.
+> another state — a stranger — and the note included their score.
 >
 > Among the kids praised for effort, about one in eight made their score look better
 > than it was.
@@ -174,8 +177,8 @@
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
 > Now, before you ask whether praise really causes the full adult pattern — fair
-> question. The endpoints are real experiments. A Beijing experiment even caught the handicap
-> live. Kids praised for ability practiced less before a real retest.
+> question. The endpoints are real experiments. A Beijing experiment even caught the
+> handicap live. After a failure, kids praised for ability simply put less time in.
 >
 > But a large 2019 replication of the praise studies mostly came up empty. And the
 > original authors dispute how it was run.
@@ -215,9 +218,10 @@
 >
 > The anxiety doesn't get argued with. It gets put to work.
 
-> And it works. In Norem's studies, this strategy beats self-handicapping.
+> And it works. In studies comparing the two strategies, defensive pessimism comes out
+> ahead of self-handicapping.
 >
-> Same anxious people, clearly better performance.
+> Same anxious people, better performance.
 
 > Here is the twist that should end every pep talk.
 >
@@ -245,7 +249,7 @@
 > The pill compounds. A study that tracked self-handicappers over time found the habit
 > and the misery feeding each other.
 >
-> The insurance gets more expensive every year you hold the policy.
+> The insurance premiums pile up for as long as you hold the policy.
 
 > So here is the check. Two questions, in the moment.
 >
