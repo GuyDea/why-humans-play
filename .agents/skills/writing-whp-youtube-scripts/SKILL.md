@@ -89,9 +89,8 @@ crosses the central-progression trigger, which reopens Progression.
 Work that is not episode-scale — an idea, an opening, a hook, a short passage, a humor or
 voice pass, a scoped refinement — does not enter the pipeline at all. Use
 [scoped and rapid work](#scoped-and-rapid-work) instead. An episode enters a stage when its
-architecture is approved, not when its files appear: an opening requested for an episode
-with an approved architecture belongs to that episode's next stage and takes its gate, while
-a standalone opening for no particular episode is scoped work.
+architecture is approved, not when its files appear: an opening for an episode with an
+approved architecture takes that episode's next gate; a standalone opening is scoped work.
 
 ## Scoped and rapid work
 
@@ -388,7 +387,8 @@ For evidence-backed finalization, promote the approved draft into
    `insight → try → observe → boundary → larger benefit`. Keep the try no stronger than
    its evidence. Voice all five elements in narration—the insight; the low-risk action,
    observation, or reflection; the observable signal; the boundary; and the larger
-   benefit—not only in the structured block.
+   benefit—not only in the structured block. Then widen the application with up to
+   three adjacent-audience transfers that existing evidence rows already support.
 7. Complete `final/script.raw.md` for spoken delivery, pass the spoken-readability
    delivery gate on raw, and show it to Martin before auditing it. Read it aloud and revise
    for speech without imposing a runtime cut first.

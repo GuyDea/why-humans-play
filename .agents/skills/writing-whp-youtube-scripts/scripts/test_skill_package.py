@@ -4168,6 +4168,31 @@ class SkillAmendmentTests(unittest.TestCase):
         )
 
 
+    def test_application_widening_pass_is_owned_and_bounded(self) -> None:
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+
+        self.assertIn("After the primary application lands, widen it.", story)
+        self.assertIn(
+            "Admit at most three; each must map to a named evidence row, voice its "
+            "own boundary, and require no new unverified claim.",
+            story,
+        )
+        self.assertIn(
+            "A transfer that needs fresh evidence is a new episode, not an ending.",
+            story,
+        )
+        self.assertIn(
+            "Then widen the application with up to three adjacent-audience transfers "
+            "that existing evidence rows already support.",
+            skill,
+        )
+
+
 class StatusVocabularyOwnershipTests(unittest.TestCase):
     """Guard the vocabularies that previously drifted between files."""
 

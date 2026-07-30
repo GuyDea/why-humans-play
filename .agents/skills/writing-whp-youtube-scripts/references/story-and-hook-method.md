@@ -517,6 +517,14 @@ the available moves and notice which incentive becomes salient. That cannot diag
 your motive or prove the rule caused the choice; it can help you see the game before
 deciding how to play it.”
 
+After the primary application lands, widen it. Sweep the adjacent audiences — the
+parent, the partner, the colleague, the person watching someone else struggle — for
+transfers the existing evidence rows already support. Admit at most three; each must
+map to a named evidence row, voice its own boundary, and require no new unverified
+claim. The widening question is literal: who else in this viewer's life can use what
+the episode just proved, and which row proves it for them? A transfer that needs
+fresh evidence is a new episode, not an ending.
+
 Reject endings such as “be more mindful,” “use this knowledge,” or “try it yourself.”
 Narration—not only the structured block—must voice all five application elements: the
 insight; the action, observation, or reflection to try; the observable signal; the
