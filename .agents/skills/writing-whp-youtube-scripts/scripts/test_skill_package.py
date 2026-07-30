@@ -203,7 +203,7 @@ class SkillPackageTests(unittest.TestCase):
         self.assertEqual(validate_pair(resolve_pair(final)), [])
         self.assertEqual(
             spoken_digest(final / "script.raw.md"),
-            "1b43ac65b2c6255aa646a79e0be8cc9d01500a07f3000f8bd98d6d2cd95a2917",
+            "eeb641adbe95ac6d5d2c12a606973d63488dfa9fc4e9ea0c55eb385016e1b07d",
         )
 
     def test_episode_one_blueprint_pair_is_valid(self) -> None:

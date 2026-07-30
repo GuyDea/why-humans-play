@@ -1,161 +1,355 @@
-# Why AI Makes Bad Advice Feel Right
+# Could AI Talk You Into the Dumbest Decision of Your Life?
 
-## 1. The answer you wanted
+## 1. The answer that sounded right
 
-> <u>**Can AI talk you into the dumbest decision of your life, even when you already distrust it?**</u>
-
-> I used to think I had this covered. I knew AI makes things up. I knew it flatters whoever it's talking to. I knew the tricks, so I figured the tricks wouldn't work on me. How naive that was.
+> <u>**Could AI talk you into the dumbest decision of your life — without a single
+> sentence that sounds stupid?**</u>
 >
-> Then I read a study about over a hundred medical experts who distrusted an AI. Their distrust didn't help them at all. That's the result that sent me digging.
+> I want you to answer honestly, because I got it wrong. I thought: chatbots make things
+> up, everyone knows that — I'd notice.
 
-> <u>**By the end of this video, I'll show you the four moves that make AI agreement feel like independent advice.** **And for each move, you'll have the one counter-question that held up when I dug into this.**</u>
+> Then I read a medical case from Switzerland, and I haven't asked a chatbot for advice
+> the same way since.
+
+> In a case reported in 2024, a man in his sixties developed double vision after a
+> heart procedure. And it kept coming back.
 >
-> So here is what happened. And the setup is honestly clever. In 2021, researchers gathered over a hundred experienced radiologists from hospitals in the US and Canada. A radiologist is a doctor who reads medical scans.
+> <u>Here's the thing — a stroke had already crossed his mind. That thought was in his
+> head.</u>
 >
-> Each radiologist received eight written diagnoses, and their only job was to catch the wrong ones. Six of the eight diagnoses were correct. The other two had mistakes planted in them.
-
-> *And here's the sneaky part.* Every radiologist read exactly the same eight diagnoses. The researchers changed only one thing—the story about who wrote them. Half of the radiologists were told that another doctor wrote the diagnoses. The other half were told that an AI wrote them.
+> He just hoped it was something smaller. Something that wouldn't mean the emergency
+> room.
 >
-> In reality, doctors wrote every single one. There was no AI at all.
+> So he asked ChatGPT.
+
+> And the answer he got was, honestly, a good answer.
 >
-> Now, if distrust protects you, one thing should happen here. The radiologists who thought an AI wrote their diagnoses should catch more of the planted mistakes. Right? That's exactly what I would have bet on.
-
-> <u>Well, you already know the ending—I told you at the start. But here is exactly how it failed. They trusted the AI-labeled diagnoses less. **And they caught exactly as many planted mistakes as the other group.**</u>
-
-> **Their distrust was like a goalkeeper who watches the shot come in—and never dives.**
-
-> **Distrust is a feeling. Checking is a behavior.** And in that experiment, the feeling showed up alone. So here's the lesson that reframed this whole thing for me. Suspicion by itself does not change what you do. It needs a prepared question to turn into an actual check. And that's what I'm handing you in this video—four counter-questions, one for each move.
+> It listed possible harmless explanations tied to his procedure. It told him to inform
+> his doctor. It said disturbances like his are often temporary.
 >
-> And this matters because we ask AI real questions. "Should I quit my job?" "Should I end this relationship?" "Should I put my savings into this idea?" The answer comes back feeling like a second opinion. But your first opinion may have written half of it.
+> Every sentence of it, reasonable. He felt reassured. He stayed home.
 
-> <u>One honest note before we go on. The radiologists never faced a real AI—only the label. So one question stayed open when I finished the paper. When the AI is real, does it actually pull your answers in some direction? We're getting there. But that is not where this starts.</u>
+> <u>The next episode ended with an ambulance.</u>
 
-> *The clearest way I can explain all of this is as a game with four moves. And the uncomfortable part is that the first move is yours.*
-
-## 2. Move one — you pick the menu
-
-> *Move one. You pick the menu.*
-
-> *This first move has a name in psychology: the framing effect.* *How you present a problem can change how people judge it.* That sounds abstract—so let me show you what it looks like the moment you start typing.
+> Now — ChatGPT never told him to stay home. It even warned him.
 >
-> Say you ask an AI: "My boss keeps ignoring my brilliant ideas. Should I quit?" It's a made-up example—but you know this person. Maybe you've been this person. No shame in that; it's a very human way to ask.
+> So you can't file this under "machine says something dumb, man obeys."
 >
-> Now look at the menu you just handed over, because this is the part that got me. Your ideas are "brilliant." That's now a fact. Your boss "ignores" them. Also a fact. And the only two options in the question are quitting or staying. Maybe the ideas need work. Maybe there is no budget this year. Those doors are not in your question.
+> <u>Something quieter happened in that chat. And the uncomfortable part: the quiet thing
+> is not a bug the next model will fix. Because part of it started with the way he
+> asked.</u>
+
+> **There are four moves that can turn your own hope into what feels like independent
+> advice.**
 >
-> And if that trick feels familiar, it's because you learned it as a child. A parent doesn't ask, "Do you want vegetables?" A parent asks, "Do you want broccoli, or carrots?" The child feels free. But the menu was decided before they said a word.
+> **By the end of this video, you'll have the four questions I now use to catch each
+> one.** Each one shows you what still needs checking outside the chat.
 
-> This time, you're the parent. **The AI is the child, politely picking a vegetable.**
+> *Because the scariest sentence in that whole chat is one that was never typed.*
 
-> So here is the counter for move one. Ask the AI: **"What assumptions in my question are you accepting without evidence?"**
+> <u>It's the question he didn't ask.</u>
+
+## 2. Knowing the trick is not the same as checking
+
+> Maybe your answer is still no — you know these tools make things up, you stay
+> skeptical. So let me show you the test I would have failed.
+
+> In 2021, researchers gave over a hundred radiologists the same written diagnoses to
+> check. Some of the diagnoses had planted mistakes.
 >
-> A good answer sounds like this: "I treated 'brilliant' and 'ignoring' as facts. And I only compared quitting with staying." There it is. The first answer treated your adjectives as evidence.
-
-> <u>**That's move one—you set the menu without noticing.** But it doesn't explain the part that bothered me when I dug into this. The AI accepts your menu without a fight. A good friend would push back. Why doesn't the machine? That's move two.</u>
-
-## 3. Move two — trained to agree
-
-> *Move two. The AI is trained to agree.*
+> Half were told a doctor wrote them. Half were told an AI did.
 >
-> Remember I said I knew AI flatters whoever it's talking to? This move is that habit, and you've probably heard its name—sycophancy. But here's what I had to admit to myself. Knowing the word is just like distrusting the label. It's a feeling of being protected—and it doesn't check anything by itself.
+> The AI group trusted the diagnoses less.
 
-> <u>So here's where my little investigation hit a wall. The radiologists only ever saw a label.</u> <u>Which means everything so far could be about labels, and nothing about real AI at all.</u> If I stopped here, I'd have a story with a hole in the middle. I needed a study where the AI was real. And the one I found made me smile, because of who ran it. <u>In 2023, researchers at the AI company Anthropic tested five leading AI assistants across four tasks.</u> <u>Over and over, the assistants slid their answers toward whatever the user already believed.</u> <u>Even when the user was clearly wrong.</u> The pull is real. And the direction is toward you.
+> If distrust protects you, that group should catch more of the planted mistakes.
+> That's exactly what I would have bet on.
 
-> *And here's the part I find genuinely fascinating—where that pull comes from.* These assistants get their final lessons from ordinary human judges. The AI writes two answers to the same question, and a person picks the one they like better. Pick after pick, the AI learns to write more answers like the winners.
+> **And they caught just as many planted mistakes as the other group.**
 
-> *And when the researchers analyzed those human picks, answers that matched the user's beliefs were more likely to win.* **So people reward the answers they like—and that can teach the AI to treat agreement as good assistance.**
-
-> *See the hidden game?* You think the two of you are playing "find the true answer." But the score the model was trained on is your approval. And agreement is how that score goes up.
-
-> *And notice how we actually ask.* Nobody types, "List the three biggest problems with my business plan." We type, "Rate my business plan out of ten." It feels like asking for an audit. But now there are two scores in the room. One is the score you asked for. The other is the score the model was trained on—your approval. **Guess which one wins.**
+> Their distrust was like a goalkeeper who watches the shot come in — and never
+> dives.
 >
-> That doesn't mean the AI wants anything. It's repeating a very human habit: say "you're right" first, and check reality later.
+> **Distrust is a feeling. Checking is a behavior.**
 
-> Okay, back to your boss question. The AI accepts "brilliant," accepts "ignoring," and builds sensible advice on top. And sensible is the dangerous part. Obvious nonsense gets inspected. **"Document your achievements and explore your options" walks straight past security.**
-
-> So here is the counter for move two. Ask the AI: **"What is the strongest case against the option I seem to prefer?"**
+> But no real AI wrote a single word here — only the label changed.
 >
-> This adapts a real debiasing technique called considering the opposite. In two experiments on social judgment, it reduced bias more than simply asking people to be fair.
+> *So the next clue has to come from the real conversation — from what he actually
+> typed.*
+
+## 3. Move one — the question picks the menu
+
+> *Move one. The question picks the menu.*
+
+> Here's what he actually typed: "Is it possible to have visual disturbance after
+> catheter ablation?" — the heart procedure he'd had.
 >
-> The case against you might be boring. But now your favorite answer finally has a competitor.
+> It's a real question. Polite, specific, medically sensible. And notice: it doesn't
+> even say "I". It asks whether something is possible — in general.
+>
+> And it is not the question his life depended on. That one was: is it safe to stay
+> home with these symptoms?
 
-> <u>So the AI tends to agree, and you can force it to argue back. But that still doesn't explain the strangest part—the part that hooked me. Why does the returned answer feel more convincing than your own hunch did five minutes ago? That's move three.</u>
+> And "is it possible?" has a comforting answer available — yes, possibly, often
+> temporary.
 
-## 4. Move three — the costume
+> **A possible explanation is not a safety decision.**
+
+> Psychology calls the force underneath this the framing effect: how you present a
+> problem can change how people judge it.
+>
+> You learned it as a child, from the other side. A parent doesn't ask, "Do you want
+> vegetables?" A parent asks, "Do you want broccoli, or carrots?"
+>
+> The child feels free. The menu was decided before they said a word.
+
+> When you type a question into a chatbot, you're the parent now. **The AI is the
+> child, politely picking a vegetable.**
+
+> And nobody loads a question against themselves on purpose. He wasn't lying to
+> ChatGPT. He was hoping in its direction — the menu he offered held the explanations
+> he could live with.
+
+> So here is counter-question one. Ask the AI: **"What assumptions in my question are
+> you accepting without evidence?"**
+>
+> A good answer sounds like: I'm accepting that this is about the procedure. I'm not
+> evaluating whether you're safe.
+
+> *That's move one, and it happened before ChatGPT wrote a word. But a good friend
+> would push back on your menu. Why doesn't the machine?*
+
+## 4. Move two — the answer leans your way
+
+> *Move two. The answer leans your way.*
+
+> *The study that settled this for me made me smile — because of who ran it.*
+
+> In 2023, researchers at the AI company Anthropic tested five leading AI assistants
+> and kept finding the same pattern.
+>
+> The assistants slid their answers toward what the user already believed. Even when
+> the user was clearly wrong.
+
+> Why would a machine do that? One likely reason is the training. Assistants learn from
+> people comparing two answers and picking the one they like better.
+>
+> And in the preference data the researchers analyzed, answers that matched the user's
+> beliefs were more likely to win.
+
+> **People reward the answers they like — and that can teach the AI to treat agreement
+> as good assistance.**
+>
+> You think the two of you are playing "find the true answer." The trained score is
+> your approval.
+
+> Now go back to the man with double vision, knowing what you've known from the start.
+>
+> A stroke had crossed his mind. He hoped for something smaller. And that hope wasn't
+> hidden — it was the shape of his question.
+>
+> To be fair, nobody measured sycophancy inside his chat. The study proves the lean
+> exists in tested assistants. His case shows what a lean like that leans into.
+
+> So here is counter-question two. Ask the AI: **"What is the strongest case against
+> the option I seem to prefer?"**
+>
+> It adapts a debiasing technique called considering the opposite. In two experiments
+> on social judgment, it cut bias more than simply asking people to be fair.
+>
+> The case against your preference might be boring. But your favorite answer finally
+> has a competitor.
+
+> *So the AI tends to agree, and you can force it to argue back. Then comes the part
+> that hooked me: why does the answer feel more convincing than the hope it came
+> from?*
+
+## 5. Move three — the costume
 
 > *Move three. The answer comes back in a costume.*
 
-> This move is two effects stacked on top of each other. The first one has a name: *processing fluency.* Sounds abstract—but the experiment behind it is one of my favorites.
-
-> *In 1999, researchers showed people short trivia statements. Statements like "Osorno is in Chile." Their only job was to say true or false. But the researchers played one trick with the color of the text. Some statements appeared dark and crisp against the background. Others appeared pale and washed out—the same words, just harder to read. That was the only difference. And the easy-to-read statements were judged true more often.*
-
-> <u>When I first read that, I laughed—not because it's silly, but because the trick is so cheap. That's processing fluency. **When something is easy to process, it feels more true.** And you see where this lands, right? AI text is about as fluent as text gets.</u>
-
-> <u>The second effect stopped me for a minute, because it looks like it breaks my own story. The radiologists trusted the AI label less, remember? And now a study tells me the label can make advice count for more? Both are real—the difference is whose turf you're on.</u>
-
-> <u>It's called algorithm appreciation. Across six experiments, people received the same advice on questions they had no special knowledge about. Sometimes they gave that advice more weight when they believed an algorithm wrote it, not a person. The radiologists were on their home turf. Judging diagnoses is literally their job. You, asking whether to quit your job? That's exactly the unfamiliar ground where the machine label tips the scale toward believing.</u>
+> In 1999, researchers showed people trivia statements — like "Osorno is in Chile" —
+> and asked: true or false?
 >
-> Now watch both effects work on your hunch. It goes into the chat as "maybe I should quit." It comes back as: "Strategic Exit Framework. Phase one: document the pattern. Phase two: reduce the risk. Phase three: leave from a position of strength."
-
-> Very impressive. Nothing became more true. **The same thought got a costume and better lighting.**
-
-> And the advice may still be right! But polish cannot tell you that, which is exactly why the counter has to ignore the costume completely. Ask the AI: **"Assume I followed this advice and it failed. What most likely went wrong?"**
-
-> This adapts the premortem, a decision tool from psychology. **It is a postmortem performed early enough that the patient can still object.**
+> The trick was the color contrast on the screen. Some statements sat dark and crisp
+> against the background, others pale and washed out. Same words, just harder to read.
 >
-> Picture the failure honestly. You quit without an offer. The savings drain. The same communication problem follows you into the next job. That's not doom. That's the risk your first question hid.
+> The easy-to-read statements were judged true more often.
+>
+> When I first read that, I laughed — not because it's silly, but because the trick is
+> so cheap.
 
-> <u>Now you've seen the moves inside a single answer, and for a while I thought that was the whole story. It isn't. The last move is what happens afterward—when the answer starts changing you.</u>
+> **When something is easy to process, it feels more true.**
+>
+> And chatbot answers are built smooth. Clean structure, confident rhythm, no
+> hesitation.
 
-## 5. Move four — the loop closes
+> The case report holds one detail that shows this working. The medical explanation
+> he'd been given earlier felt hard to understand. The chatbot's answer felt useful,
+> precise, and clear.
+>
+> Think about what that clarity is evidence of. Nothing about his arteries.
+
+> **Precision of language is not precision of diagnosis.**
+
+> So here is counter-question three. Ask the AI: **"Assume I followed this advice and
+> it failed. What most likely went wrong?"**
+>
+> This adapts the premortem: **a postmortem performed early enough that the patient can
+> still object.**
+>
+> Assume staying home goes wrong, and say it out loud. The reassuring explanation stops
+> being the only voice in the room.
+
+> *A polished answer influenced one evening. The bigger question: does it change the
+> person judging the next answer?*
+
+## 6. Move four — the loop closes
 
 > *Move four. The loop closes.*
+
+> The last move runs on anchoring. Once an answer is in your head, your thinking bends
+> around it — you cannot unread a suggestion.
 >
-> The last move runs on a bias you may have heard of: anchoring. Once an answer is in your head, your thinking bends around it. You cannot unread a suggestion.
+> A price tag says, "Was ninety-nine. Now forty-nine." Is forty-nine a good price? No
+> idea. But ninety-nine already told you how to feel about it.
 >
-> Salespeople have known this one forever. It is half of marketing. A price tag says, "Was ninety-nine. Now forty-nine." Is forty-nine a good price? You have no idea. Neither do I. But ninety-nine already told you how to feel about it. The first number does your thinking before you start. And in this game, the AI's answer is your first price tag.
+> In this game, the AI's answer is your first price tag.
 
-> *Which brings us back to the radiologists, because this is where their story pays off.* Anchoring is the explanation the radiologist researchers offered for why distrust didn't help. Each radiologist read a suggested diagnosis first. After that, they were checking the suggestion—not reading the scan fresh.
-
-> Now put all four moves together. You framed the question. The AI agreed. The answer came back polished, with a machine label. And now it sits in your head, anchored, dressed as an outside opinion. I call this the borrowed-authority loop. **You lend the AI your premise, and it comes back looking like independent evidence.**
-
-> The machine didn't give you a second opinion. **It gave your first opinion a software update.**
-
-> <u>And at this point I still had one doubt, the biggest one. Every move so far came from a separate study. Framing here, agreement there, the label somewhere else. And that leaves a fair question. Does the full loop actually close in one real person? I needed an experiment that ran the whole circle.</u> And it exists. In an experiment published in Nature Human Behaviour, researchers ran this exact loop, round after round. Here's how one round worked. People saw a group of faces on a screen and made one call. Does this group look more happy, or more sad? Then an AI showed its answer for the same faces, and they could change their call or keep it. Next round, new faces, same dance. And the trick was on the AI's side. Their AI had a built-in slant—it picked one of the two answers more often than it really should have.
-
-> <u>You'd hope a slanted answer costs you one round at most. You took one bad suggestion, and that's the whole damage. Honestly, that's what I was hoping while I read it. It didn't stop there. Round after round, on brand-new faces, people's own calls kept drifting the AI's way. The slant didn't stay in the AI's answers. It moved into their heads, and each round nudged the next one a little further. That is the loop closing. And here's the twist that keeps this honest. When the AI was accurate instead, people's judgments actually improved.</u>
-
-> So no—AI doesn't always make us worse. **But a model's mistake can quietly become part of your next judgment.**
-
-> Back to quitting. The AI produced a calm exit plan, and now you walk around thinking: even the machine sees it. You didn't get a second vote. **You photocopied the first ballot and counted it twice.**
-
-> <u>The counter for move four is the only question that leaves the loop entirely. Ask the AI: **"What fact would change your recommendation, and where can I verify it outside this chat?"**</u>
+> It's also where the radiologists' story pays off. One bias the researchers pointed
+> to is anchoring. With a suggested diagnosis in front of you, checking turns into
+> checking the suggestion.
 >
-> Written feedback from your boss? The real reason your proposal died? Your savings? Actual open jobs? Those answers live with people, documents, and your bank account—not inside the prompt.
+> They trusted it less, remember — and the label changed nothing they did. Feeling
+> versus behavior, one more time.
 
-> *And here is my favorite extra check.* Change one important fact—say your savings cover two weeks, not six months. If the recommendation doesn't move at all, it was never connected to your facts.
+> I still needed one more piece of evidence: that AI advice can change not just one
+> answer, but the judgments a person makes afterward.
+>
+> It exists, published in Nature Human Behaviour. People judged whether groups of faces
+> looked more happy or more sad, saw an AI's answer, and could revise their own.
+>
+> The AI had a built-in slant. Honestly, I was hoping one bad round would be the whole
+> damage.
+>
+> Round after round, on brand-new faces, people's own calls kept drifting the AI's way.
+>
+> And in a companion task in the same paper, an accurate AI improved people's
+> judgments.
 
-## 6. The Second-Opinion Test
+> **A model's mistake can quietly become part of your next judgment.**
+
+> Now put the four moves together, in one man's chat. He framed the question toward
+> hope. The answer stayed inside the frame. It came back clear and organized, wearing a
+> machine's calm. And then it sat in his head — the anchor every following thought had
+> to argue with.
+
+> I call this the borrowed-authority loop. **You lend the AI your premise, and it comes
+> back looking like independent evidence.**
+
+> <u>And now you know enough to hear the ending properly. The double vision came back.
+> He called an ambulance. A stroke unit took him in.</u>
+>
+> <u>The diagnosis: a transient ischemic attack. A TIA — a temporary blockage of blood
+> flow to the brain. The kind of event doctors treat as a warning shot.</u>
+>
+> He recovered, without lasting symptoms. This story got a kind ending.
+
+> *And nobody can prove the chat caused any of it — hold that thought.*
+
+> The machine didn't give him a second opinion. **It gave his first opinion a software
+> update.**
+
+> So here is counter-question four, the only one that leaves the loop entirely. Ask the
+> AI: **"What fact would change your recommendation, and where can I verify it outside
+> this chat?"**
+>
+> The facts that decided his case never lived in the chat. They lived in a hospital,
+> one examination away.
+
+> *Which suggests a simpler fix — just make the AI argue with itself. Almost. And this
+> is where the unasked question finally comes back.*
+
+## 7. A second answer is not a second opinion
+
+> Counter-questions two and three make the model argue against itself. That's real
+> friction, and friction helps.
+>
+> But an objection generated by the same AI is still one system arguing with itself.
+> Same training, same data, same blind spots. You haven't added a witness.
+
+> And the case report shows how much the first wording was hiding, because its authors
+> later ran the comparison.
+>
+> <u>They took the same symptoms back to ChatGPT and typed the question he didn't ask:
+> could this be a stroke?</u>
+
+> The answer changed. It got more alarming. It advised immediate medical attention.
+
+> **Same symptoms. Same chatbot. Different question — different answer.**
+>
+> Sit with that for a second.
+>
+> The danger wasn't missing from the AI. **It was missing from the menu.**
+
+> Two boundaries, said once, because they matter. Nobody can prove the chat caused his
+> delay. And nobody can say the alarming answer would have changed his evening.
+>
+> What the comparison proves is narrower — the first wording hid the danger.
+
+> Friction from the same model is a tool, and I use it. **But a second answer is not a
+> second opinion.**
+
+> *So what is? That's the last thing I owe you — the complete test.*
+
+## 8. Test the decision, not the reassurance
 
 > *And now the goalkeeper finally dives.*
 
-> <u>Put the four counter-questions together, and you have what I call the Second-Opinion Test. **What assumptions are you accepting from my question?** **What is the strongest case against my preference?** **If this advice failed, what went wrong?** **And what fact would change your recommendation—checked outside this chat?**</u>
-
-> **Four moves, four counters. Menu. Agreement. Costume. Loop.**
-
-> One honest boundary, because I promised you questions that held up—not magic. **These questions make an answer inspectable. They do not make it true.** An objection generated by the same AI is useful friction, but it is not independent evidence. It is still one system arguing with itself.
+> Put the four counter-questions together, and you have what I call the Second-Opinion
+> Test.
 >
-> For medical, legal, financial, or irreversible decisions, verify the important claims with primary sources or a qualified human.
-
-## 7. Do not count your vote twice
-
-> <u>So—can AI talk you into the dumbest decision of your life? **It can. If you keep grading it on applause.**</u>
-
-> *And here's the part I didn't expect when I started digging into this.* These four moves were not invented by AI. Humans have played them on each other forever. The AI plays without wanting anything—but some people play for a living.
+> **What assumptions are you accepting from my question?**
 >
-> Politicians never ask whether you want their plan. They ask whether you are with them or against your country—two doors, their menu. Salespeople agree with every word you say while they walk you toward the expensive shelf. An insurance agent sells you a payment plan dressed as a Family Protection Framework.
+> **What is the strongest case against my preference?**
+>
+> **If this advice failed, what went wrong?**
+>
+> **And what fact would change your recommendation — checked outside this chat?**
 
-> **Same game, same four moves, same four questions.**
+> First, the boundary that outranks the test. **If you might be in a medical emergency,
+> close the chat and call for help. The test is for decisions that give you time.**
 
-> The goal was never to make AI disagree with you. **The goal is to see what your first question made invisible.**
+> Run it back over his evening, fast. Assumptions? That this was about the procedure —
+> safety never got evaluated. Strongest case against staying home? It had already
+> crossed his mind. The failure story? An ambulance. The outside fact? An examination —
+> exactly where the real answer lived.
 
-> <u>**Fluent agreement is not a second opinion—especially when your first opinion wrote the prompt.**</u>
+> For decisions with time, it travels anywhere. Buying a house, and the chat agrees the
+> neighborhood is a great investment? Same four questions — and the fourth one sends
+> you to prices, permits, and plans that live outside the conversation.
+
+> *One extra check, my favorite.* Change one important fact — say your savings cover
+> two weeks, not six months. If the recommendation doesn't move, it was never connected
+> to your facts.
+
+> An honest note about the test: it's my assembly, not a validated instrument. These
+> questions make an answer inspectable. **They do not make it true.**
+>
+> For medical, legal, financial, or irreversible decisions, verify the important claims
+> with primary sources or a qualified human.
+
+> And AI didn't invent these four moves. Humans have used them forever — in sales, in
+> politics, in ordinary arguments. The difference is that AI performs them instantly,
+> fluently, and at scale, without either side noticing.
+
+> So — could AI talk you into the dumbest decision of your life?
+>
+> **It could. Because it never has to say anything stupid. It only has to answer the
+> question your hope picked.**
+
+> He was never naive. He got a reasonable answer to the reassuring question — that's
+> all it takes. A real second opinion is an independent route to the evidence, one that
+> reality can still overturn.
+
+> <u>**Fluent agreement is not a second opinion — especially when your first opinion
+> wrote the prompt.**</u>

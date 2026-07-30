@@ -76,8 +76,8 @@
 
 [TRANSITION — Compressed label experiment: identical diagnoses, planted mistakes, changed byline.]
 
-> In 2021, researchers gave over a hundred experienced radiologists the same written
-> diagnoses to check. Some of the diagnoses had planted mistakes.
+> In 2021, researchers gave over a hundred radiologists the same written diagnoses to
+> check. Some of the diagnoses had planted mistakes.
 >
 > Half were told a doctor wrote them. Half were told an AI did.
 >
@@ -238,8 +238,8 @@
 > In 1999, researchers showed people trivia statements — like "Osorno is in Chile" —
 > and asked: true or false?
 >
-> The trick was the print. Some statements were dark and crisp, others pale and washed
-> out. Same words, just harder to read.
+> The trick was the color contrast on the screen. Some statements sat dark and crisp
+> against the background, others pale and washed out. Same words, just harder to read.
 >
 > The easy-to-read statements were judged true more often.
 >
@@ -299,13 +299,12 @@
 
 [TRANSITION — Radiologist callback: anchoring as the researchers' offered explanation, resolving label-distrust versus influence through the feeling-versus-behavior lesson.]
 
-> It's also where the radiologists' story pays off. Anchoring is the explanation the
-> researchers offered for why distrust didn't help. Each radiologist read a suggested
-> diagnosis first. After that, they were checking the suggestion — not reading the scan
-> fresh.
+> It's also where the radiologists' story pays off. One bias the researchers pointed
+> to is anchoring. With a suggested diagnosis in front of you, checking turns into
+> checking the suggestion.
 >
-> They trusted it less, remember — and it steered them anyway. Feeling versus behavior,
-> one more time.
+> They trusted it less, remember — and the label changed nothing they did. Feeling
+> versus behavior, one more time.
 
 [TRANSITION — Feedback-loop evidence bounded to later-judgment change.]
 
@@ -318,8 +317,10 @@
 > The AI had a built-in slant. Honestly, I was hoping one bad round would be the whole
 > damage.
 >
-> Round after round, on brand-new faces, people's own calls kept drifting the AI's way
-> — while an accurate AI improved them.
+> Round after round, on brand-new faces, people's own calls kept drifting the AI's way.
+>
+> And in a companion task in the same paper, an accurate AI improved people's
+> judgments.
 
 [AHA | LOCKED WORDING — The drift lesson.]
 
