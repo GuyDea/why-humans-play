@@ -2133,3 +2133,28 @@ wave completed — 24/30 claims SUPPORTED, six overstatements corrected in narra
 another-state detail, Beijing measure) — and ep002 was promoted to a verified final
 pair with ten evidence records; STEERING's Episode 2 working state updated. Both
 episodes now stand at EDITORIAL-DRAFT with open items in their issue ledgers.
+
+## 2026-07-30 — Standalone packaging skill accepted with settled scope parameters
+
+**Decision:** Martin accepted building a new standalone packaging skill that owns WHP
+title+thumbnail generation and evaluation, with five settled parameters: (1) it is a
+standalone skill, not an extension of `writing-whp-youtube-scripts`; (2) generated
+thumbnail proposals are capped at 3 thematic concepts, each rendered 5× from the same
+prompt (15 renders total); (3) per-topic competitor/outlier packaging research (what
+similar videos exist and which packaging won) is a pipeline stage; (4) post-publish
+packaging doctrine (per-surface CTR reading, Test & Compare, repackaging) is in scope;
+(5) evaluation rigor is not limited by setup cost — include whatever is necessary
+(e.g., saliency scoring). Work proceeds on a new branch (`feat/packaging-skill`).
+
+**Rationale:** Martin initiated the skill citing packaging's outsized share of video
+success and asked for thorough research first; the four-sweep research synthesis
+(committed this branch) grounds the scope: honest CTR is the platform's actual
+objective (watch-time per impression), no credible pre-publish CTR predictor exists so
+evaluation must combine heuristic gates, simulated cold-viewer panels, and feed-context
+checks, and outlier-pattern mining is the standard packaging validation loop. The
+3-concept cap aligns with YouTube Test & Compare's 3-variant limit; Martin set the
+5-renders-per-prompt shape.
+
+**Documents:** `whp-youtube/STEERING.md` (Law 1 accepted-direction bullet),
+`docs/research/2026-07-30-packaging-ctr-research.md` + artifacts (new, this branch).
+Skill design not yet approved — only these scope parameters are settled.

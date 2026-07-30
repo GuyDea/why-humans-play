@@ -141,6 +141,14 @@ recreating it.
   the blueprint appendix's `### Packaging` section before any body narration exists.
   Detailed workflow:
   [the Script Blueprint packaging owner](../.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md#design-the-packaging-with-the-intro).
+- **Accepted 2026-07-30: a dedicated standalone packaging skill will own title+thumbnail
+  generation and evaluation** (design in progress; blueprint routing updates when it
+  lands). Settled parameters: per-topic competitor/outlier packaging research is a
+  pipeline stage; generated thumbnail proposals are capped at **3 thematic concepts,
+  each rendered 5× from the same prompt** (15 renders total); post-publish packaging
+  doctrine (per-surface CTR reading, Test & Compare, repackaging) is in the skill's
+  scope; evaluation rigor is not limited by setup cost. Research basis:
+  [`docs/research/2026-07-30-packaging-ctr-research.md`](../docs/research/2026-07-30-packaging-ctr-research.md).
 - **Educational content averages ~4.5% CTR.** `[reported]` If a live video sits
   consistently under ~2% CTR, the packaging is failing — swap the thumbnail/title,
   don't wait.
