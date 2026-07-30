@@ -2127,5 +2127,9 @@ verification verdicts are recorded in the stage appendices and issue ledgers.
 **Documents:** `whp-youtube/episodes/ep001-ai-dangerous-advice/` (blueprint, draft,
 final, archive), `whp-youtube/episodes/ep002-why-you-didnt-study/` (blueprint, draft),
 `whp-youtube/STEERING.md` (Episode 1 working state), `whp-youtube/canon.md`,
-guard pins in `scripts/test_skill_package.py`. Ep002 final promotion will be ledgered
-when its verification wave completes.
+guard pins in `scripts/test_skill_package.py`. Amendment (same day): ep002's Layer-3
+wave completed — 24/30 claims SUPPORTED, six overstatements corrected in narration
+(2023-study design, DP-comparison attribution, compounding, praised-kids restriction,
+another-state detail, Beijing measure) — and ep002 was promoted to a verified final
+pair with ten evidence records; STEERING's Episode 2 working state updated. Both
+episodes now stand at EDITORIAL-DRAFT with open items in their issue ledgers.

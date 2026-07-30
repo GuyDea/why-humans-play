@@ -49,11 +49,15 @@ accepted current launch sequence, dated launch research, and historical episode 
    Jones 1978. Selected from [`topic-backlog.md`](topic-backlog.md) after the earlier
    interviews premise was rejected and a developed sports-betting premise was parked
    ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
-   Working state: architecture and story progression approved in conversation; the
-   [approved Blueprint pair](episodes/ep002-why-you-didnt-study/blueprint/script.raw.md)
-   was promoted 2026-07-29 into the validated
-   [draft pair](episodes/ep002-why-you-didnt-study/draft/script.raw.md), which awaits
-   Martin's creative approval of the complete narration.
+   Working state (2026-07-30): rebuilt under the felt-entry and script-economy
+   doctrine (felt-choice simulation intro), refined by cold-viewer evaluation, and
+   promoted through the verified
+   [final pair](episodes/ep002-why-you-didnt-study/final/script.extended.md) with
+   ten evidence records and completed three-layer adversarial verification (34/40
+   claims SUPPORTED across both layers; six overstatements corrected). Status
+   EDITORIAL-DRAFT: Martin's review, the audit battery, three open editorial items
+   from the second evaluation round, packaging choice, and production assets remain
+   open (see the final appendix issue ledger).
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support.
 4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a
