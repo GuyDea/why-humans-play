@@ -257,7 +257,9 @@ Martin reshoot (same framing/lighting/expression as `W3_v2`); verify W1/W2 chat
 paraphrases once more against the case report's logged wording at Final-stage claim
 mapping.
 
-**Martin's choice:** `final choice pending`
+**Martin's choice (2026-07-30):** run all three as the Test & Compare A/B trio — no
+single pre-publish primary; YouTube's watch-share test decides. Ranking above stands
+as the recorded prediction to calibrate against the live result.
 
 ## Post-publish log
 

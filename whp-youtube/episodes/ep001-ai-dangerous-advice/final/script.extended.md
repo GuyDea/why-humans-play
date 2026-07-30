@@ -503,8 +503,17 @@
 - **Word count:** 2265
 - **Audience:** Curious adults who use conversational AI for advice or decisions
 - **Episode mode:** AI–human interaction (hidden-game lens)
-- **Title:** Could AI Talk You Into the Dumbest Decision of Your Life? (final packaging choice pending Martin; 17 gate-scored candidates in the blueprint Packaging record)
-- **Thumbnail promise:** Three routes recorded in the blueprint Packaging record (face-led "IT AGREED.", pure-concept "SOUNDED FINE", brand-anchor "SECOND OPINION?"); Test & Compare trio recommended.
+- **Title:** Decided 2026-07-30 — published as a Test & Compare A/B trio of packages
+  (Martin's direction; no single pre-publish primary): (1) "He Asked ChatGPT the
+  Wrong Question. So Would You." with the SAME-SYMPTOMS split-chat thumbnail;
+  (2) "ChatGPT Doesn't Lie to You. It Does Something Worse." with the ALL-TRUE
+  bleeding-bubble thumbnail; (3) "Could AI Talk You Into the Dumbest Decision of
+  Your Life?" with the SOUNDED-FINE face-led thumbnail. Full working set, panel
+  evidence, and renders: [`../packaging/record.md`](../packaging/record.md). The
+  earlier blueprint Packaging record (17 title candidates, three routes) is the
+  pre-skill historical baseline.
+- **Thumbnail promise:** Per package above; every packaged question is beat-mapped
+  in the packaging record's honesty check (B1–B8).
 - **Viewer promise:** Understand the four moves that can turn your own hope into what feels like independent advice, and leave with the four counter-questions that show what still needs checking outside the chat.
 - **Useful viewer change:** Stop treating fluent agreement as a second opinion; run the Second-Opinion Test before acting on consequential AI advice, and leave the chat entirely for possible emergencies.
 - **Central question:** Could AI talk you into the dumbest decision of your life without saying anything obviously stupid?
@@ -847,7 +856,12 @@ Original WHP card design; no third-party assets.
 
 1. **Layer-3 adversarial verification — COMPLETE 2026-07-30.** Four verifier runs (F-009; F-001+F-003; F-004+F-007+F-008; F-006) plus the Layer-1 F-010 run: 30 of 35 claims SUPPORTED, five OVERSTATED, zero UNSUPPORTED. All five overstatements corrected in narration the same day (event dating; fluency medium; accurate-AI task attribution; radiologist experience level; anchoring voiced as one hedged bias without the reading-order detail).
 2. **Post-review audits — PENDING.** Story, personal-authenticity, evidence, fact, rights, visual, animation, application-boundary, accessibility, timing, retention (including the cold-viewer re-run), and format audits run after Martin reviews this deliverable.
-3. **Packaging — OPEN.** 17 gate-scored title candidates and three thumbnail routes recorded in the blueprint; final choice is Martin's.
+3. **Packaging — DECIDED 2026-07-30 (production items open).** Martin directed the
+   full trio as a Test & Compare A/B at publish; packages, panel evidence, and
+   renders in `../packaging/record.md`. Open production items: composite the real
+   WHP mark into finals; reshoot package 3's face-led thumbnail with Martin
+   (W3_v2 framing/lighting/expression); re-verify the two chat paraphrases against
+   the case report's logged wording during the rights/asset pass.
 4. **Anchoring primary source — OPEN (low priority).** Tversky & Kahneman 1974 remains unopened (publisher 403, 2026-07-25); narration voices anchoring as a recognized bias and attributes the study-specific reading to the F-009 authors' hedged discussion.
 5. **Production assets — NOT STARTED.** All visuals specified as original WHP material; nothing sourced or cleared yet.
 

@@ -2213,3 +2213,28 @@ production use.
 `.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md`
 (routing), `whp-youtube/STEERING.md` (Law 1 bullet names the landed skill),
 `docs/superpowers/specs/2026-07-30-packaging-skill-design.md` (new).
+
+## 2026-07-30 — ep001 publishes with the full packaging trio as a Test & Compare A/B
+
+**Decision:** Ep001 ships all three evaluated packages as the YouTube Test & Compare
+A/B trio — (1) "He Asked ChatGPT the Wrong Question. So Would You." / SAME-SYMPTOMS
+split-chat; (2) "ChatGPT Doesn't Lie to You. It Does Something Worse." / ALL-TRUE
+bleeding bubble; (3) "Could AI Talk You Into the Dumbest Decision of Your Life?" /
+SOUNDED-FINE face-led — with no single pre-publish primary; the live watch-share
+test decides.
+
+**Rationale:** Martin's direction after the packaging-whp-videos shakedown run:
+sweep (two-agent competitor/outlier research), 18 package candidates scored as
+units, 15 renders, feed mockups among real competitor thumbnails, a seven-persona
+cold-viewer panel (trio packages 1–2 at 7/7 stop and click; the original third
+package failed 0/7 on topic anchoring and was revised into package 3 per the
+package-unit rule), honesty checks passed with beat mappings, and DeepGaze saliency
+confirming focal hierarchies. The recorded ranking stands as the calibration
+prediction.
+
+**Documents:** `whp-youtube/episodes/ep001-ai-dangerous-advice/packaging/record.md`
+(choice recorded), `whp-youtube/episodes/ep001-ai-dangerous-advice/final/script.extended.md`
+(assignment-contract Title/Thumbnail fields and issue-ledger item 3 updated; open
+production items listed: WHP mark compositing, Martin reshoot for package 3, chat
+paraphrase re-verification). Blueprint Packaging record left unchanged as the
+pre-skill historical baseline. No steering doctrine change.
