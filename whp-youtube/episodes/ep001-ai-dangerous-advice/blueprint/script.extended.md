@@ -123,6 +123,14 @@
   obviously stupid.
 - **By-end value:** The viewer will understand the four moves that create a counterfeit
   second opinion and gain four questions that expose what still requires outside evidence.
+
+### Packaging
+
+- **Working titles in play:** blueprint H1 "Could AI Talk You Into the Dumbest Decision
+  of Your Life?"; final pair H1 "Why AI Makes Bad Advice Feel Right".
+- Title candidates and thumbnail concepts were not generated for this episode's blueprint;
+  the stage predates the required `### Packaging` section (added 2026-07-30). The
+  packaging-law candidate set and thumbnail routes remain open work before publish.
 - **Selected intro jobs and techniques:**
   - an early anti-skip progression whose connective logic stays audible: the opening
     question creates the narrator's defense, the defense creates the need for a

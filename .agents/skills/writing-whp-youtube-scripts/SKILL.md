@@ -256,8 +256,9 @@ paired views, markup, validation, and promotion contract, then follow
 stage contents and approval gate.
 
 A Script Blueprint is not a rough full script. Its raw view contains one polished spoken
-intro. Its extended view mirrors that intro and owns one bullet-only body logic map in its
-appendix. Do not draft body narration in a Script Blueprint.
+intro. Its extended view mirrors that intro and owns one bullet-only body logic map and
+the episode's packaging record in its appendix. Do not draft body narration in a Script
+Blueprint.
 
 Reach this stage only with both the architecture and the Story Progression Plan approved.
 Scoped Blueprint work returns directly until it crosses the central-progression trigger,
@@ -265,11 +266,10 @@ which reopens the earlier stage. Design and polish the intro before expanding an
 prose. A Script Blueprint is a visible creative baseline, not a definite WHP decision;
 advancement remains the reconcilable decision.
 
-- Run the spoken-readability and walking-conversation checks on
-  `blueprint/script.raw.md` only.
-  Do not run body word counts, timing or cut ledgers, editorial, retention, production
-  audits, final-format validation, or production scaffolding unless Martin asks for that
-  specific work by name. Validate the pair as the pair owner requires.
+- Run the spoken-readability and walking-conversation checks on `blueprint/script.raw.md`
+  only. Do not run body word counts, timing or cut ledgers, editorial, retention,
+  production audits, final-format validation, or production scaffolding unless Martin
+  asks for that specific work by name. Validate the pair as the pair owner requires.
 - Treat Script Blueprint edits as exploratory; do not reconcile or ledger them. Validated
   promotion into `draft/` is the decision.
 - The factual boundary applies unchanged: use supplied or project-known facts, never

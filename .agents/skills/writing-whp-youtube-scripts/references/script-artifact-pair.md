@@ -104,8 +104,8 @@ non-spoken material and never repeats narration.
 ### BLUEPRINT
 
 Include stage metadata, approved baselines, the factual boundary and unresolved
-dependencies, the intro design record, a bullet-only body logic map, promise and loop
-payoff destinations, and the approval state.
+dependencies, the intro design record, the packaging record, a bullet-only body logic
+map, promise and loop payoff destinations, and the approval state.
 
 ### DRAFT
 

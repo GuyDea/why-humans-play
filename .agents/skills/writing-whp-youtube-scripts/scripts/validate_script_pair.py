@@ -118,6 +118,7 @@ STAGE_APPENDIX_CONTRACTS = {
             "### Blueprint metadata",
             "### Factual boundary and unresolved dependencies",
             "### Intro design record",
+            "### Packaging",
             "### Body logic map",
             "### Promise and loop payoff map",
             "### Approval state",

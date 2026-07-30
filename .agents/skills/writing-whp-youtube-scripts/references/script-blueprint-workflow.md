@@ -86,6 +86,30 @@ Run a sentence-function pass before handoff. Every intro sentence must hook, gro
 connect, disarm, escalate, promise, or pay off. Cut sentences that only repeat tone or
 delay value.
 
+## Design the packaging with the intro
+
+Packaging is decided at the Blueprint stage, before any body narration exists —
+STEERING's packaging law calls packaging the product, and the blueprint gate is its
+last honest checkpoint. Record the work in the appendix's `### Packaging` section.
+
+- Write fifteen to twenty title candidates and never ship the first one. Score every
+  title candidate with the story owner's
+  [first-sentence gate](story-and-hook-method.md#gate-the-first-sentence) — a title is
+  a first sentence read in the feed — and record each score with its dead tests named.
+- Propose at least two distinct thumbnail routes — face-led, pure-concept,
+  brand-anchor, or pattern-reveal — with one concrete concept each: the visual, an
+  overlay of one to three words, and what a viewer reads at phone size in one glance.
+- The thumbnail shows the tension; the title tells it; they must not repeat each
+  other.
+- Every question the packaging opens must be answered in the video. A package the
+  episode cannot honestly pay is clickbait and fails the gate, exactly as an unmapped
+  intro promise does.
+- Recommend a Test & Compare trio: the three thumbnail concepts worth testing against
+  each other when the episode publishes.
+- The final title and thumbnail choice is Martin's. The record may carry
+  `final choice pending` through the gate, but the candidates and concepts may not be
+  empty.
+
 ## Bind every promise to delivery
 
 Every promise, question, and open loop in the intro must point to a named payoff in the

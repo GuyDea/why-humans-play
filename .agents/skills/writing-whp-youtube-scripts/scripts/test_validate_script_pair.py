@@ -60,6 +60,11 @@ EXTENDED = """# Episode
 
 The opening asks the central question.
 
+### Packaging
+
+- **Working title:** Example working title.
+- Title candidates and thumbnail concepts recorded; final choice pending.
+
 ### Body logic map
 
 - Beat 02 develops the evidence.
@@ -412,6 +417,7 @@ class ScriptPairTests(unittest.TestCase):
             "### Blueprint metadata",
             "### Factual boundary and unresolved dependencies",
             "### Intro design record",
+            "### Packaging",
             "### Body logic map",
             "### Promise and loop payoff map",
             "### Approval state",

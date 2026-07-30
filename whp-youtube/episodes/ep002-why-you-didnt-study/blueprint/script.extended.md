@@ -48,16 +48,6 @@
 - **Episode:** ep002-why-you-didnt-study
 - **Stage created:** 2026-07-29
 - **Working title:** Why You Didn't Study
-- **Title candidates (packaging law; final choice pending Martin):** Why You Didn't
-  Study · Why You Sabotage Yourself On Purpose · The Night Before It Mattered, You
-  Chose to Lose · Self-Sabotage Is a Skill · Why Winners Sabotage Themselves · The
-  Experiment That Explains Your Worst Nights · You Weren't Lazy. You Were Playing a
-  Different Game · Why Success Makes You Sabotage Yourself · The Hidden Game Behind
-  Procrastination · Choosing to Fail Feels Safer Than Trying · What the Pill Experiment
-  Says About You · Why You Clean Your Room Instead of Studying · The Real Reason You
-  Didn't Prepare · Sabotage Is Insurance · Your Excuse Was the Point
-- **Thumbnail direction:** the choice made visible — a hand picking the vial marked
-  SLOWER over the one marked SHARPER.
 - **Approved baselines:** EP002 architecture (approved in conversation 2026-07-29) and
   EP002 Story Progression Plan SP01–SP07 (approved in conversation 2026-07-29).
 
@@ -91,6 +81,21 @@
   loop about the childhood origin — rejected as intro overload, the origin lands
   stronger as SP04's outgoing question; naming "self-handicapping" in the intro —
   rejected because the term is earned by the story in SP03 (term-as-promise).
+
+### Packaging
+
+- **Title candidates (packaging law; final choice pending Martin):** Why You Didn't
+  Study · Why You Sabotage Yourself On Purpose · The Night Before It Mattered, You
+  Chose to Lose · Self-Sabotage Is a Skill · Why Winners Sabotage Themselves · The
+  Experiment That Explains Your Worst Nights · You Weren't Lazy. You Were Playing a
+  Different Game · Why Success Makes You Sabotage Yourself · The Hidden Game Behind
+  Procrastination · Choosing to Fail Feels Safer Than Trying · What the Pill Experiment
+  Says About You · Why You Clean Your Room Instead of Studying · The Real Reason You
+  Didn't Prepare · Sabotage Is Insurance · Your Excuse Was the Point
+- **Thumbnail direction:** the choice made visible — a hand picking the vial marked
+  SLOWER over the one marked SHARPER.
+- Recorded before this stage's contract required a `### Packaging` section; moved here
+  unchanged when the section became required (2026-07-30).
 
 ### Body logic map
 

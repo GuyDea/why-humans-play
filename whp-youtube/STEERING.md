@@ -140,6 +140,11 @@ recreating it.
   underperform no matter how good the video is. `[reported]`
 - **Write 15–20 candidate titles per video. Never ship the first one.** Packaging
   iteration is the single highest-leverage activity on this channel.
+- **The stage that owns this law is the Script Blueprint.** Title candidates are scored
+  with the first-sentence gate, thumbnail routes are proposed, and both are recorded in
+  the blueprint appendix's `### Packaging` section before any body narration exists.
+  Detailed workflow:
+  [the Script Blueprint packaging owner](../.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md#design-the-packaging-with-the-intro).
 - **Educational content averages ~4.5% CTR.** `[reported]` If a live video sits
   consistently under ~2% CTR, the packaging is failing — swap the thumbnail/title,
   don't wait.

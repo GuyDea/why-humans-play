@@ -4265,6 +4265,53 @@ class SkillAmendmentTests(unittest.TestCase):
         )
 
 
+    def test_packaging_is_owned_by_the_blueprint_stage(self) -> None:
+        workflow = " ".join(
+            (SKILL_ROOT / "references/script-blueprint-workflow.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        pair_owner = " ".join(
+            (SKILL_ROOT / "references/script-artifact-pair.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+
+        self.assertIn("## Design the packaging with the intro", workflow)
+        self.assertIn(
+            "Write fifteen to twenty title candidates and never ship the first "
+            "one.",
+            workflow,
+        )
+        self.assertIn(
+            "Score every title candidate with the story owner's",
+            workflow,
+        )
+        self.assertIn(
+            "The thumbnail shows the tension; the title tells it; they must not "
+            "repeat each other.",
+            workflow,
+        )
+        self.assertIn(
+            "at least two distinct thumbnail routes",
+            workflow,
+        )
+        self.assertIn(
+            "Every question the packaging opens must be answered in the video.",
+            workflow,
+        )
+        self.assertIn("the packaging record", pair_owner)
+        self.assertIn("the episode's packaging record in its appendix", skill)
+
+        import validate_script_pair as pair_validator
+
+        _, blueprint_headings = pair_validator.STAGE_APPENDIX_CONTRACTS[
+            "blueprint"
+        ]
+        self.assertIn("### Packaging", blueprint_headings)
+
+
 class StatusVocabularyOwnershipTests(unittest.TestCase):
     """Guard the vocabularies that previously drifted between files."""
 
