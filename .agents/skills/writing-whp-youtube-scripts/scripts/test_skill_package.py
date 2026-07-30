@@ -4222,6 +4222,49 @@ class SkillAmendmentTests(unittest.TestCase):
         )
 
 
+    def test_first_sentence_gate_is_owned_by_the_story_method(self) -> None:
+        story = " ".join(
+            (SKILL_ROOT / "references/story-and-hook-method.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        blueprint = " ".join(
+            (SKILL_ROOT / "references/script-blueprint-workflow.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        self.assertIn("## Gate the first sentence", story)
+        self.assertIn("**T1 — Viewer in the sentence.**", story)
+        self.assertIn("**T2 — Unclosable gap.**", story)
+        self.assertIn("**T3 — Edge placement.**", story)
+        self.assertIn(
+            "**T4 — Stakes and certainty inside the sentence.**", story
+        )
+        self.assertIn("A presumed failure state caps T1 at 1", story)
+        self.assertIn(
+            "Any 0 on T1–T3 kills the line regardless of total; those are flaws "
+            "of the question itself.",
+            story,
+        )
+        self.assertIn("a title is a first sentence read in the feed", story)
+        self.assertIn(
+            "a line that fails the gate is replaced, not reworded around its "
+            "dead test",
+            story,
+        )
+        self.assertIn("Does the first sentence pass the story owner's", rapid)
+        self.assertIn(
+            "The raw intro's first sentence must survive the story owner's",
+            blueprint,
+        )
+
+
 class StatusVocabularyOwnershipTests(unittest.TestCase):
     """Guard the vocabularies that previously drifted between files."""
 

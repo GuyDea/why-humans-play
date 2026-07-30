@@ -664,7 +664,9 @@ Answer these first. A `no` means stop and return the missing artifact instead of
 
 Hold these while writing. Each one changes the sentence in front of you.
 
-- Does the first sentence feel like a concrete event or irresistible proposition?
+- Does the first sentence pass the story owner's
+  [first-sentence gate](story-and-hook-method.md#gate-the-first-sentence) — viewer in
+  the sentence, unclosable gap, edge placement, unhedged stakes?
 - If the opening starts with a question, can the episode answer it, and does the concrete
   event follow immediately?
 - Do the first two spoken sentences each carry one idea in plain syntax?

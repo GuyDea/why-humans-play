@@ -48,8 +48,10 @@ answer these editorial questions:
 - **Outgoing transition or mini-hook**
 - **Promise or loop payoff**
 
-The raw intro must already pass the rapid method's natural-transition, walking-vlog,
-sentence-function, and spoken-readability checks.
+The raw intro's first sentence must survive the story owner's
+[first-sentence gate](story-and-hook-method.md#gate-the-first-sentence) before polish.
+The complete intro must already pass the rapid method's natural-transition,
+walking-vlog, sentence-function, and spoken-readability checks.
 
 Do not add body dialogue, polished body paragraphs, body jokes, or presenter-ready body
 prose. Those belong to the later complete-draft stage.

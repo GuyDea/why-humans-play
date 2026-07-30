@@ -4,6 +4,7 @@
 
 - [Plan story progression before beats](#plan-story-progression-before-beats)
 - [Start with the promise and payoff](#start-with-the-promise-and-payoff)
+- [Gate the first sentence](#gate-the-first-sentence)
 - [Compare and score three opening candidates](#compare-and-score-three-opening-candidates)
 - [Build every story across the complete script](#build-every-story-across-the-complete-script)
 - [Score the opening candidates](#score-the-opening-candidates)
@@ -186,11 +187,43 @@ history. For exact execution, follow
 Story planning owns anti-skip selection and remedy placement; rapid drafting owns the
 sequence, evidence interpretation, and wording.
 
+## Gate the first sentence
+
+Score the first spoken sentence separately from the opening it starts. The gate has
+four tests, each scored 0–2 (0 = fails, 1 = partial, 2 = clean), for a total of 8:
+
+- **T1 — Viewer in the sentence.** The sentence holds the viewer's own life and a
+  still-live stake. A system-question, a hypothetical, or a purely past-tense stake
+  scores 0. A presumed failure state caps T1 at 1: a line that casts the viewer as
+  currently losing shrinks the audience to the people losing right now and mildly
+  insults everyone else.
+- **T2 — Unclosable gap.** The viewer's existing model must return nothing when they
+  reach for an answer. A gap they can close in two seconds scores 0.
+- **T3 — Edge placement.** The sentence uses what the viewer already believes as the
+  setup it then breaks. Confirming a belief they already hold scores 0; attacking a
+  belief they do not hold scores 0.
+- **T4 — Stakes and certainty inside the sentence.** The cost or win is visible
+  inside the sentence itself, with no hedges. A "probably" scores 0.
+
+Any 0 on T1–T3 kills the line regardless of total; those are flaws of the question
+itself. A weak T4 alone is survivable, because wording can be fixed without changing
+the question.
+
+Apply the gate to every surface the viewer meets first: the first spoken sentence of
+an episode intro, each Shorts candidate's opening hook, and every title candidate —
+a title is a first sentence read in the feed. Score before polishing, and treat the
+disqualifier literally: a line that fails the gate is replaced, not reworded around
+its dead test.
+
 ## Compare and score three opening candidates
 
 Use this three-candidate comparison only in the Final stage or when Martin explicitly
 requests opening options or a scored comparison. Otherwise generate the single requested
 opening unless Martin asks for alternatives.
+
+Run [the first-sentence gate](#gate-the-first-sentence) on each candidate's opening
+line before scoring the card below; a candidate whose first sentence dies at the gate
+is rewritten or replaced before it competes.
 
 Generate exactly three credible candidates before choosing the opening. Use a
 micro-story, direct demonstration, question, explanation, or evidence reveal as the
@@ -577,6 +610,7 @@ explanation.
 
 Reject or rewrite an opening that contains any of these red flags:
 
+- a first sentence that dies at [the first-sentence gate](#gate-the-first-sentence);
 - a trivia dump before the central question;
 - a delayed title, thumbnail, or viewer promise;
 - a problem-led immunity defense whose remedy promise arrives only after the detailed
