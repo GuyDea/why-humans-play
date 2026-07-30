@@ -51,10 +51,8 @@
 
 ## 2. Knowing the trick is not the same as checking
 
-> Maybe your answer to my question is still no. Maybe you're thinking: I know these
-> tools make things up. I stay skeptical. That's my protection.
->
-> I'm not going to argue with you. I'm going to show you the test I would have failed.
+> Maybe your answer is still no — you know these tools make things up, you stay
+> skeptical. So let me show you the test I would have failed.
 
 > In 2021, researchers gave 138 experienced radiologists the same written diagnoses to
 > check. Some of the diagnoses had planted mistakes.
@@ -63,16 +61,14 @@
 >
 > The AI group trusted the diagnoses less.
 
-> **And they caught exactly as many planted mistakes as the other group.**
+> **And they caught just as many planted mistakes as the other group.**
 
 > Their distrust was like a goalkeeper who watches the shot come in — and never
 > dives.
 >
-> **Distrust is a feeling. Checking is a behavior.** In that experiment, the feeling
-> showed up alone.
+> **Distrust is a feeling. Checking is a behavior.**
 
-> But this study can't finish the story. No real AI wrote a single word — only the
-> label changed.
+> But no real AI wrote a single word here — only the label changed.
 >
 > *So the next clue has to come from the real conversation — from what he actually
 > typed.*
@@ -91,9 +87,6 @@
 
 > "Could this be connected to the procedure?" has a comforting answer available — yes,
 > possibly, often temporary.
->
-> That answer can be completely reasonable and still leave the safety question
-> untouched.
 
 > **A possible explanation is not a safety decision.**
 
@@ -128,8 +121,8 @@
 > In 2023, researchers at the AI company Anthropic tested five leading AI assistants
 > and kept finding the same pattern.
 >
-> The assistants slid their answers toward whatever the user already believed. Even
-> when the user was clearly wrong.
+> The assistants slid their answers toward what the user already believed. Even when
+> the user was clearly wrong.
 
 > Why would a machine do that? One likely reason is the training. Assistants learn from
 > people comparing two answers and picking the one they like better.
@@ -187,8 +180,6 @@
 > Think about what that clarity is evidence of. Nothing about his arteries.
 
 > **Precision of language is not precision of diagnosis.**
->
-> His own hope went in, and it came back organized, articulate — in costume.
 
 > So here is counter-question three. Ask the AI: **"Assume I followed this advice and
 > it failed. What most likely went wrong?"**
@@ -282,6 +273,8 @@
 
 > **Same symptoms. Same chatbot. Different question — different answer.**
 >
+> Sit with that for a second.
+>
 > The danger wasn't missing from the AI. **It was missing from the menu.**
 
 > Two boundaries, said once, because they matter. Nobody can prove the chat caused his
@@ -308,8 +301,6 @@
 > **If this advice failed, what went wrong?**
 >
 > **And what fact would change your recommendation — checked outside this chat?**
-
-> **Four moves, four counters. Menu. Agreement. Costume. Loop.**
 
 > First, the boundary that outranks the test. **If you might be in a medical emergency,
 > close the chat and call for help. The test is for decisions that give you time.**
@@ -342,10 +333,8 @@
 > **It could. Because it never has to say anything stupid. It only has to answer the
 > question your hope picked.**
 
-> He was never naive. He didn't need bad advice — only a reasonable answer to the
-> reassuring question. That's all any of us need.
-
-> Because a real second opinion is an independent route to the evidence — a route that
+> He was never naive. He got a reasonable answer to the reassuring question — that's
+> all it takes. A real second opinion is an independent route to the evidence, one that
 > reality can still overturn.
 
 > <u>**Fluent agreement is not a second opinion — especially when your first opinion

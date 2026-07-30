@@ -71,10 +71,8 @@
 
 [DEFENSE — Voices the viewer's remaining immunity claim so evidence can test it.]
 
-> Maybe your answer to my question is still no. Maybe you're thinking: I know these
-> tools make things up. I stay skeptical. That's my protection.
->
-> I'm not going to argue with you. I'm going to show you the test I would have failed.
+> Maybe your answer is still no — you know these tools make things up, you stay
+> skeptical. So let me show you the test I would have failed.
 
 [TRANSITION — Compressed label experiment: identical diagnoses, planted mistakes, changed byline.]
 
@@ -87,20 +85,18 @@
 
 [REVERSAL | LOCKED WORDING — The distrust–checking result in one locked line.]
 
-> **And they caught exactly as many planted mistakes as the other group.**
+> **And they caught just as many planted mistakes as the other group.**
 
 [AHA | LOCKED WORDING — Goalkeeper image and the feeling-versus-behavior lesson.]
 
 > Their distrust was like a goalkeeper who watches the shot come in — and never
 > dives.
 >
-> **Distrust is a feeling. Checking is a behavior.** In that experiment, the feeling
-> showed up alone.
+> **Distrust is a feeling. Checking is a behavior.**
 
 [MINI-HOOK — No-real-model boundary hands the investigation to the actual chat.]
 
-> But this study can't finish the story. No real AI wrote a single word — only the
-> label changed.
+> But no real AI wrote a single word here — only the label changed.
 >
 > *So the next clue has to come from the real conversation — from what he actually
 > typed.*
@@ -125,9 +121,6 @@
 
 > "Could this be connected to the procedure?" has a comforting answer available — yes,
 > possibly, often temporary.
->
-> That answer can be completely reasonable and still leave the safety question
-> untouched.
 
 [AHA | LOCKED WORDING — The possible-answer/safe-decision distinction, locked.]
 
@@ -178,8 +171,8 @@
 > In 2023, researchers at the AI company Anthropic tested five leading AI assistants
 > and kept finding the same pattern.
 >
-> The assistants slid their answers toward whatever the user already believed. Even
-> when the user was clearly wrong.
+> The assistants slid their answers toward what the user already believed. Even when
+> the user was clearly wrong.
 
 [TRANSITION — Training explanation voiced as one likely reason, separated from the effect.]
 
@@ -254,11 +247,9 @@
 >
 > Think about what that clarity is evidence of. Nothing about his arteries.
 
-[AHA | LOCKED WORDING — Precision-of-language lesson; costume image kept plain.]
+[AHA | LOCKED WORDING — Precision-of-language lesson.]
 
 > **Precision of language is not precision of diagnosis.**
->
-> His own hope went in, and it came back organized, articulate — in costume.
 
 [APPLICATION | LOCKED WORDING — Counter-question three, credited to the premortem.]
 
@@ -388,6 +379,8 @@
 
 > **Same symptoms. Same chatbot. Different question — different answer.**
 >
+> Sit with that for a second.
+>
 > The danger wasn't missing from the AI. **It was missing from the menu.**
 
 [TRANSITION — The consolidated boundary moment: causation and counterfactual voiced once, scope stated narrowly.]
@@ -424,10 +417,6 @@
 > **If this advice failed, what went wrong?**
 >
 > **And what fact would change your recommendation — checked outside this chat?**
-
-[LOCKED WORDING — Mnemonic pairing of moves and counters.]
-
-> **Four moves, four counters. Menu. Agreement. Costume. Loop.**
 
 [APPLICATION | LOCKED WORDING — Emergency boundary that outranks the test.]
 
@@ -474,14 +463,10 @@
 > **It could. Because it never has to say anything stupid. It only has to answer the
 > question your hope picked.**
 
-[AHA — Closes the opening judgment: no naivety required.]
+[AHA — Closes the opening judgment and states the independent-route rule plainly.]
 
-> He was never naive. He didn't need bad advice — only a reasonable answer to the
-> reassuring question. That's all any of us need.
-
-[AHA — The independent-route rule spoken plainly before the final line.]
-
-> Because a real second opinion is an independent route to the evidence — a route that
+> He was never naive. He got a reasonable answer to the reassuring question — that's
+> all it takes. A real second opinion is an independent route to the evidence, one that
 > reality can still overturn.
 
 [LOOP PAYOFF L-01 | FINAL PAYOFF | LOCKED WORDING — Final locked line paying the title loop.]
@@ -496,7 +481,7 @@
 - **Status:** DRAFT
 - **Deliverable:** Complete Episode 1 draft narration (felt-entry rebuild, script-economy pass, 2026-07-30).
 - **Approved baselines:** Architecture `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`; Story Progression `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md` (APPROVED 2026-07-28) with the felt-entry rebalance recorded in the Blueprint appendix; Blueprint pair promoted 2026-07-30 under Martin's direct blueprint-to-final instruction.
-- **Word count:** ~2,210 spoken words (~13.8 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules, the cold-viewer evaluation cuts, and the E-06 removal.
+- **Word count:** ~2,150 spoken words (~13.4 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules, the cold-viewer evaluation cuts, and the E-06 removal.
 - **Canon:** Uses canon concepts borrowed-authority loop, Second-Opinion Test, possible-answer/safe-decision distinction, distrust–checking gap; opening shape registered in `whp-youtube/canon.md`.
 
 ### Story progression and payoff audit
@@ -505,7 +490,7 @@
 - L-01 (title question) opens in the intro, pays beats 6–8 and the final line. L-02 (quiet mechanism) opens in the intro, pays progressively beats 3–6. L-03 (unasked question) opens at the intro close, pays in beat 7's documented stroke-framed prompt. L-04 (ambulance/outcome) opens at the intro cost line, pays in beat 6's TIA reveal.
 - Four-move explanation delivered beats 3–6; four counter-questions delivered beats 3–6 and assembled with boundaries in beats 7–8; SP04's case return is a reinterpretation beat (changed meaning) per the rebalance.
 - Retention economy: radiologist retell compressed to result-bearing details; training explanation voiced as one likely reason; feedback-loop claim bounded to later-judgment change; human-persuader ending compressed to the scale contrast.
-- Cold-viewer evaluation (2026-07-30) applied with Martin's disposition: E-06 algorithm appreciation cut from beat 5 (progression amendment — the label-distrust versus influence contrast now resolves at beat 6 through E-02's own anchoring explanation and the feeling-versus-behavior callback); case boundaries consolidated into one beat-7 moment with a one-clause mini-loop in beat 6; adjacent punchlines thinned; two claim-smell lines repaired.
+- Cold-viewer evaluation (2026-07-30) applied with Martin's disposition: E-06 algorithm appreciation cut from beat 5 (progression amendment — the label-distrust versus influence contrast now resolves at beat 6 through E-02's own anchoring explanation and the feeling-versus-behavior callback); case boundaries consolidated into one beat-7 moment with a one-clause mini-loop in beat 6; adjacent punchlines thinned; two claim-smell lines repaired. Second evaluation round (2026-07-30) applied per Martin's delegation: beat-2 setup compressed, three restatements cut, "exactly"/"whatever" accuracy softenings, beat-7 peak lines separated, beat-8 mnemonic recap and doubled codas consolidated; the beat-2 dissolution verdict was declined to preserve the approved anti-immunity placement and its bridge chain.
 
 ### Evidence boundaries
 
