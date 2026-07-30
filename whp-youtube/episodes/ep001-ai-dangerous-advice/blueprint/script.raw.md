@@ -2,64 +2,49 @@
 
 ## Intro
 
-> <u>**Could AI talk you into the dumbest decision of your life without saying anything
-> obviously stupid?**</u>
+> <u>**Could AI talk you into the dumbest decision of your life — without a single
+> sentence that sounds stupid?**</u>
 >
-> When I first asked myself that, my answer was no.
+> I want you to answer honestly, because I got it wrong. I thought: chatbots make things
+> up, everyone knows that — I'd notice.
 
-> Chatbots hallucinate, so surely I would notice.
+> Then I read a medical case from Switzerland, and I haven't asked a chatbot for advice
+> the same way since.
 
-> <u>But then a medical case from Switzerland made that answer much less comfortable.</u>
+> In 2024, a man in his sixties developed double vision after a heart procedure. And it
+> kept coming back.
 >
-> In 2024, a man developed double vision after a heart procedure.
+> <u>Here's the thing — a stroke had already crossed his mind. That thought was in his
+> head.</u>
 >
-> He asked ChatGPT, got both a warning and reassurance—and stayed home.
+> He just hoped it was something smaller. Something that wouldn't mean the emergency
+> room.
 >
-> That left me with a much harder question.
+> So he asked ChatGPT.
 
-> <u>How can an answer sound responsible and still support a dangerous choice?</u>
+> And the answer he got was, honestly, a good answer.
 >
-> That is what I want to work through with you.
-
-> **There are four moves that can make reassurance feel like independent advice.**
-
-> **And once we see those moves, four questions can reveal what still needs checking
-> outside the chat.**
-
-> *And here is why this case stuck with me.*
-
-> *ChatGPT did tell him to contact his doctor.*
-
-> *But it also said the problem could be temporary.*
+> It listed possible harmless explanations tied to his procedure. It told him to inform
+> his doctor. It said disturbances like his are often temporary.
 >
-> It never told him to stay home.
+> Every sentence of it, reasonable. He felt reassured. He stayed home.
+
+> <u>The next episode ended with an ambulance.</u>
+
+> Now — ChatGPT never told him to stay home. It even warned him.
 >
-> The reassuring explanation was simply there.
+> So you can't file this under "machine says something dumb, man obeys."
 >
-> At first, this sounds like a simple lesson: don’t trust AI too much.
+> <u>Something quieter happened in that chat. And the uncomfortable part: the quiet thing
+> is not a bug the next model will fix. Because part of it started with the way he
+> asked.</u>
+
+> **There are four moves that can turn your own hope into what feels like independent
+> advice.**
 >
-> But a 2021 study with experienced radiologists makes that explanation harder.
+> **By the end of this video, you'll have the four questions I now use to catch each
+> one.** Each one shows you what still needs checking outside the chat.
 
-> <u>When the advice carried an AI label, they trusted it less.</u>
+> *Because the scariest sentence in that whole chat is one that was never typed.*
 
-> <u>But they caught no more planted errors.</u>
-
-> *Their suspicion changed.*
-
-> *Their checking did not.*
->
-> So the problem is not simply trust.
-
-> *And that matters because a better model cannot remove our part of the process.*
-
-> *We still frame the question.*
-
-> *We still make the next judgment.*
-
-> *As the answers get more convincing, that human part may become harder to notice.*
->
-> To see where it starts, we need to look more closely at the radiologist study.
->
-> No AI wrote the advice.
-
-> <u>**So if the model did nothing, what exactly failed?**</u>
+> <u>It's the question he didn't ask.</u>
