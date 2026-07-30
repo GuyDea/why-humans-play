@@ -242,6 +242,12 @@ first paragraph of a generic explainer, deepen it before scripting.
 Unique does not mean unsupported. Label a novel synthesis as an inference and keep it no
 stronger than the facts and mechanisms beneath it.
 
+State the reframe's retell sentence: the single conversational sentence a viewer would
+actually say to a friend to pass the insight on. Plain spoken words, no jargon, one
+breath, and it must carry the reframe on its own with no setup. If no honest sentence
+survives that test, the reframe is not yet sharp enough to script. The drafted
+narration carries the retell sentence — or its approved evolution — as a locked line.
+
 ### Real-world evidence map
 
 Assign every row a stable ID in `E-##` form (`E-01`, `E-02`, and so on). Preserve an ID

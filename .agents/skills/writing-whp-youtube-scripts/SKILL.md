@@ -324,15 +324,15 @@ These apply to the Blueprint intro, the Draft narration, and the Final narration
 
 Martin delivers from memory while walking — there is no teleprompter on a walk. In a
 complete script, mark **locked lines** bold inside the blockquote: the opening question,
-the learning promise, each beat's punchline and exact-lesson line, and any sentence whose
-evidence-bounded wording a paraphrase could break. Deliver locked lines word-perfect and
-keep them memorizable — a handful per beat, each a single sentence. Everything unmarked
-is flexible tissue: Martin may say it his own way, because the written line fixes the
-meaning, facts, locked story nouns, and evidence boundary, not the exact words. Apply the
-pair owner's markup and synchronization contract after selecting these lines. Strip markup
-from word counts and readability checks. Mark locked lines in complete draft or final
-narration; for a Script Blueprint, mark only intro wording whose exact delivery has already
-been selected.
+the learning promise, the reframe's retell sentence, each beat's punchline and
+exact-lesson line, and any sentence whose evidence-bounded wording a paraphrase could
+break. Deliver locked lines word-perfect and keep them memorizable — a handful per beat,
+each a single sentence. Everything unmarked is flexible tissue: Martin may say it his own
+way, because the written line fixes the meaning, facts, locked story nouns, and evidence
+boundary, not the exact words. Apply the pair owner's markup and synchronization contract
+after selecting these lines. Strip markup from word counts and readability checks. Mark
+locked lines in complete draft or final narration; for a Script Blueprint, mark only intro
+wording whose exact delivery has already been selected.
 
 ### Enforce spoken readability before delivery
 

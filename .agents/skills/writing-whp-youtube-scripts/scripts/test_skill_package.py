@@ -4125,7 +4125,8 @@ class SkillPackageTests(unittest.TestCase):
 
 
 class SkillAmendmentTests(unittest.TestCase):
-    """Guard the field-tested amendments: kill-testing, widening, naming."""
+    """Guard the field-tested amendments: kill-testing, widening, naming,
+    the first-sentence gate, blueprint packaging, and the retell sentence."""
 
     def test_architecture_owns_the_mine_and_kill_test_procedure(self) -> None:
         architecture = " ".join(
@@ -4310,6 +4311,37 @@ class SkillAmendmentTests(unittest.TestCase):
             "blueprint"
         ]
         self.assertIn("### Packaging", blueprint_headings)
+
+
+    def test_earned_reframe_requires_a_retell_sentence(self) -> None:
+        architecture = " ".join(
+            (SKILL_ROOT / "references/script-architecture.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+
+        self.assertIn("State the reframe's retell sentence:", architecture)
+        self.assertIn(
+            "the single conversational sentence a viewer would actually say "
+            "to a friend to pass the insight on",
+            architecture,
+        )
+        self.assertIn(
+            "If no honest sentence survives that test, the reframe is not "
+            "yet sharp enough to script.",
+            architecture,
+        )
+        self.assertIn(
+            "carries the retell sentence — or its approved evolution — as a "
+            "locked line",
+            architecture,
+        )
+        self.assertIn(
+            "the reframe's retell sentence, each beat's punchline and "
+            "exact-lesson line",
+            skill,
+        )
 
 
 class StatusVocabularyOwnershipTests(unittest.TestCase):
