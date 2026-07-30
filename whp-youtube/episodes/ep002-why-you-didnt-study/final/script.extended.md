@@ -201,12 +201,14 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-[LOOP PAYOFF L-03 | LOCKED WORDING — Pays the withheld object with its own beat: the exact praise sentence delivered word-perfect, with the someone-you-love callback landing at the payoff.]
+[LOOP PAYOFF L-03 | LOCKED WORDING — Pays the withheld object with its own beat: the verbatim lab sentence, its household translation, and the someone-you-love promise attached to the version the viewer actually said.]
 
 > Half of the praised kids heard one sentence: <u>**you must be smart at this.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)</u>
 >
-> That's it. That's the sentence I promised you at the start. The one you've probably
-> said to someone you love.
+> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+>
+> That's the sentence I promised you at the start. The one you've probably said to
+> someone you love.
 >
 > The other half heard: you must have worked hard. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf) One sentence of difference.
 
@@ -435,7 +437,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~12:20
-- **Word count:** 1948
+- **Word count:** 1962
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)

@@ -149,8 +149,10 @@
 
 > Half of the praised kids heard one sentence: <u>**you must be smart at this.**</u>
 >
-> That's it. That's the sentence I promised you at the start. The one you've probably
-> said to someone you love.
+> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+>
+> That's the sentence I promised you at the start. The one you've probably said to
+> someone you love.
 >
 > The other half heard: you must have worked hard. One sentence of difference.
 
