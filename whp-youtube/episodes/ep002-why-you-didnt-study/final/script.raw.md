@@ -50,8 +50,8 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-> *Because this move doesn't need years of practice. In one experiment, one sentence
-> of praise was enough to set it off in ten-year-olds.*
+> *Because there's a fight in psychology over whether one sentence of praise can set
+> this move off in a ten-year-old.*
 
 > <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>
 
@@ -174,24 +174,26 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> Now, two honest boundaries.
+> Now — here's where I have to show you a fight.
 >
-> A Beijing experiment saw the move live. After a failure, kids praised for ability
-> simply put less time in.
+> That was 1998. In 2019, a much bigger study reran the praise experiments — over six
+> hundred kids. And mostly, nothing moved.
 >
-> But a large 2019 replication of the praise studies mostly came up empty. And the
-> original authors dispute how it was run. Scientists are still fighting about how
-> strong these praise effects are.
+> The original team fired back: the rerun was broken — the kids never really failed,
+> so there was nothing to protect. Scientists are still in that fight today.
 
-> And nobody — nobody — can trace your worst nights back to one compliment in fourth
-> grade. That is not what these experiments show.
+> One separate, smaller experiment in Beijing did catch the move live. After a
+> failure, kids praised for ability simply put less time in.
 >
-> What they do show is quick and sharp. In those rooms, protecting a label didn't take
-> years of training. One sentence was enough — within the hour.
+> So hold the children's version loosely. If the original studies are right, the move
+> starts young and starts cheap — one sentence, within the hour. If the skeptics are
+> right, the kids' version is smaller than it looked.
 
-> However you got yours, somewhere along the way a protected story started to feel
-> safer than a tested one. The pull, at least, you already know. You felt it in the
-> chair.
+> But notice what doesn't depend on this fight. The chair. Grown men, one unexplained
+> success, seventy percent reaching for the vial.
+>
+> However you got your label, somewhere along the way a protected story started to
+> feel safer than a tested one.
 
 > *So if the story is the problem, is the fix just more confidence? Believe in yourself
 > harder?*

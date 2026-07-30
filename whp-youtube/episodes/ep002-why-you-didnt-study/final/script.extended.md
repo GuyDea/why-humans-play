@@ -68,10 +68,10 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-[MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence being enough to set the move off, with no developmental claim.]
+[MINI-HOOK — Seeds the origin tease as the live scientific fight over one sentence of praise.]
 
-> *Because this move doesn't need years of practice. In one experiment, one sentence
-> of praise was enough to set it off in ten-year-olds.*
+> *Because there's a fight in psychology over whether one sentence of praise can set
+> this move off in a ten-year-old.*
 
 [LOOP OPEN L-03 — Closes the intro on the nameable withheld object: the exact praise sentence, paid by the seed beat, made personal by the someone-you-love turn.]
 
@@ -236,30 +236,32 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-[TRANSITION — Consolidated evidence boundary: the Beijing result, the disputed replication, and the strength question voiced plainly.]
+[TRANSITION — The replication fight: the 2019 nulls and the original team's rebuttal, given equal narrative weight.]
 
-> Now, two honest boundaries.
+> Now — here's where I have to show you a fight.
 >
-> A Beijing experiment saw the move live. After a failure, kids praised for ability
-> simply put less time in. [F-004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/)
+> That was 1998. In 2019, a much bigger study reran the praise experiments — over six
+> hundred kids. And mostly, nothing moved. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha)
 >
-> But a large 2019 replication of the praise studies mostly came up empty. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) And the
-> original authors dispute how it was run. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) Scientists are still fighting about how
-> strong these praise effects are.
+> The original team fired back: the rerun was broken — the kids never really failed,
+> so there was nothing to protect. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) Scientists are still in that fight today.
 
-[AHA — Scopes the seed honestly: no childhood-to-adult tracing claimed; in those rooms, one sentence was enough within the hour.]
+[TRANSITION — The separate Beijing result and the conditional children's takeaway, held loosely.]
 
-> And nobody — nobody — can trace your worst nights back to one compliment in fourth
-> grade. That is not what these experiments show.
+> One separate, smaller experiment in Beijing did catch the move live. After a
+> failure, kids praised for ability simply put less time in. [F-004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/)
 >
-> What they do show is quick and sharp. In those rooms, protecting a label didn't take
-> years of training. One sentence was enough — within the hour. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)
+> So hold the children's version loosely. If the original studies are right, the move
+> starts young and starts cheap — one sentence, within the hour. If the skeptics are
+> right, the kids' version is smaller than it looked.
 
-[TRANSITION — The however-you-got-yours closer, welded back to the chair's undisputed pull.]
+[AHA — Lands the load on the undisputed chair and closes with the however-you-got-your-label line.]
 
-> However you got yours, somewhere along the way a protected story started to feel
-> safer than a tested one. The pull, at least, you already know. You felt it in the
-> chair.
+> But notice what doesn't depend on this fight. The chair. Grown men, one unexplained
+> success, seventy percent reaching for the vial. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
+>
+> However you got your label, somewhere along the way a protected story started to
+> feel safer than a tested one.
 
 [MINI-HOOK — Opens the remedy question and promises the inversion.]
 
@@ -433,8 +435,8 @@
 - **Status:** EDITORIAL-DRAFT
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
-- **Target runtime:** ~12:10
-- **Word count:** 1949
+- **Target runtime:** ~12:20
+- **Word count:** 1969
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
@@ -625,13 +627,14 @@ Original WHP graphics; no third-party assets.
 
 #### Story function
 
-SP05: pays the exact-sentence loop with the verbatim praise wordings, the task-choice split, the collapse, the lying result, the Beijing behavioral bridge, and the consolidated replication boundary ending on what remains established.
+SP05: pays the exact-sentence loop with the verbatim praise wordings, the task-choice split, the collapse, the lying result, the Beijing behavioral bridge, and the replication fight given equal weight, the conditional children's takeaway, and the load landed on the undisputed chair.
 
 #### Claims
 
 - `F-003` — Supports narration: Mueller and Dweck 1998, ten- and eleven-year-olds, the two verbatim praise sentences to praised kids, 92 versus 67 percent task choice, post-failure collapse (persistence, enjoyment, scores below baseline), and the score-inflation note to a stranger in another state (about one in eight versus nearly four in ten, the paper's own word "lied"). — `VERIFIED`.
 - `F-004` — Supports narration: the Beijing experiment; ability-praised kids put less time into the problems after a failure. — `VERIFIED`.
 - `F-005` — Supports narration: the large 2019 replication mostly came up empty and the original research team disputes how it was run. — `VERIFIED` (see record for the Dweck–Yeager commentary nuance).
+- `F-001` — Supports narration: the chair callback — men, unexplained success, seventy percent reaching for the vial. — `VERIFIED`.
 
 #### Visual
 
