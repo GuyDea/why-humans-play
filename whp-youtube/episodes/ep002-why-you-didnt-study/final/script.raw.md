@@ -174,23 +174,22 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> Now — here's where I have to show you a fight.
+> Now, one honesty check — because these studies have a challenger.
 >
-> That was 1998. In 2019, a much bigger study reran the praise experiments — over six
-> hundred kids. And mostly, nothing moved.
+> In 2019, a much bigger rerun found almost nothing. I dug into the fight that
+> followed.
 >
-> The original team fired back: the rerun was broken — the kids never really failed,
-> so there was nothing to protect. Scientists are still in that fight today.
+> My take: the rerun's failure round was too easy. In the original, failing kids
+> solved one or two problems out of ten. In the rerun, nearly five.
+>
+> Without real failure, there's no label to protect. So the rerun tells us little
+> either way — though some scientists read it differently.
+>
+> Which leaves the famous praise studies standing. But standing alone — never properly
+> re-tested. So hold the children's version loosely.
 
-> One separate, smaller experiment in Beijing did catch the move live. After a
-> failure, kids praised for ability simply put less time in.
->
-> So hold the children's version loosely. If the original studies are right, the move
-> starts young and starts cheap — one sentence, within the hour. If the skeptics are
-> right, the kids' version is smaller than it looked.
-
-> But notice what doesn't depend on this fight. The chair. Grown men, one unexplained
-> success, seventy percent reaching for the vial.
+> What doesn't depend on any of it: the chair you sat in at the start. Grown men, one
+> unexplained success, seventy percent reaching for the vial.
 >
 > However you got your label, somewhere along the way a protected story started to
 > feel safer than a tested one.

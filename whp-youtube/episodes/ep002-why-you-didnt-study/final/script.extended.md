@@ -236,29 +236,26 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-[TRANSITION — The replication fight: the 2019 nulls and the original team's rebuttal, given equal narrative weight.]
+[TRANSITION — The honesty check: the 2019 rerun and Martin's confirmed on-camera ruling, grounded in the checkable failure-trial score pair.]
 
-> Now — here's where I have to show you a fight.
+> Now, one honesty check — because these studies have a challenger.
 >
-> That was 1998. In 2019, a much bigger study reran the praise experiments — over six
-> hundred kids. And mostly, nothing moved. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha)
+> In 2019, a much bigger rerun found almost nothing. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) I dug into the fight that
+> followed.
 >
-> The original team fired back: the rerun was broken — the kids never really failed,
-> so there was nothing to protect. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) Scientists are still in that fight today.
-
-[TRANSITION — The separate Beijing result and the conditional children's takeaway, held loosely.]
-
-> One separate, smaller experiment in Beijing did catch the move live. After a
-> failure, kids praised for ability simply put less time in. [F-004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/)
+> My take: the rerun's failure round was too easy. In the original, failing kids
+> solved one or two problems out of ten. In the rerun, nearly five. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha)
 >
-> So hold the children's version loosely. If the original studies are right, the move
-> starts young and starts cheap — one sentence, within the hour. If the skeptics are
-> right, the kids' version is smaller than it looked.
+> Without real failure, there's no label to protect. So the rerun tells us little
+> either way — though some scientists read it differently.
+>
+> Which leaves the famous praise studies standing. But standing alone — never properly
+> re-tested. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) So hold the children's version loosely.
 
-[AHA — Lands the load on the undisputed chair and closes with the however-you-got-your-label line.]
+[AHA — Lands the load on the undisputed chair, named self-locating for late joiners, and closes with the however-you-got-your-label line.]
 
-> But notice what doesn't depend on this fight. The chair. Grown men, one unexplained
-> success, seventy percent reaching for the vial. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
+> What doesn't depend on any of it: the chair you sat in at the start. Grown men, one
+> unexplained success, seventy percent reaching for the vial. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
 >
 > However you got your label, somewhere along the way a protected story started to
 > feel safer than a tested one.
@@ -436,7 +433,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~12:20
-- **Word count:** 1969
+- **Word count:** 1950
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
@@ -446,7 +443,7 @@
 - **Central question:** Why didn't you study for the thing you actually wanted to pass?
 - **Thesis:** Self-handicapping trades the outcome quest for the identity quest — an excuse installed in advance protects the story about your talent; the fix is not confidence but expectations that feed the work.
 - **Payoff:** The two-question check and the lower-expectations-never-preparation rule, closed over the opening night.
-- **Evidence review:** Ten evidence records map all external factual narration; Layer-1 (E-01, 10/10 SUPPORTED) and Layer-3 adversarial verification completed 2026-07-30 with seven narration corrections applied (2023-study design, DP-comparison attribution, compounding claim, praised-kids restriction, another-state detail, Beijing measure, intro tease bounding).
+- **Evidence review:** Nine evidence records map all external factual narration (Xing 2018 retired from narration, held in project evidence); Layer-1 (E-01, 10/10 SUPPORTED) and Layer-3 adversarial verification completed 2026-07-30 with seven narration corrections applied (2023-study design, DP-comparison attribution, compounding claim, praised-kids restriction, another-state detail, Beijing measure, intro tease bounding).
 - **Rights review:** All planned visuals are original WHP diagrams, typography, presenter footage, or owned props; quoted praise sentences are short factual wording from the published study.
 
 ### Assignment contract
@@ -627,13 +624,12 @@ Original WHP graphics; no third-party assets.
 
 #### Story function
 
-SP05: pays the exact-sentence loop with the verbatim praise wordings, the task-choice split, the collapse, the lying result, the Beijing behavioral bridge, and the replication fight given equal weight, the conditional children's takeaway, and the load landed on the undisputed chair.
+SP05: pays the exact-sentence loop with the verbatim praise wordings, the task-choice split, the collapse, the lying result, the Beijing behavioral bridge, and Martin's confirmed ruling on the replication fight (checkable score pair, bounded by the disagreement line), the standing-alone status of the originals, and the load landed on the chair.
 
 #### Claims
 
 - `F-003` — Supports narration: Mueller and Dweck 1998, ten- and eleven-year-olds, the two verbatim praise sentences to praised kids, 92 versus 67 percent task choice, post-failure collapse (persistence, enjoyment, scores below baseline), and the score-inflation note to a stranger in another state (about one in eight versus nearly four in ten, the paper's own word "lied"). — `VERIFIED`.
-- `F-004` — Supports narration: the Beijing experiment; ability-praised kids put less time into the problems after a failure. — `VERIFIED`.
-- `F-005` — Supports narration: the large 2019 replication mostly came up empty and the original research team disputes how it was run. — `VERIFIED` (see record for the Dweck–Yeager commentary nuance).
+- `F-005` — Supports narration: the 2019 rerun's near-null results, the failure-trial score pair (one-or-two versus nearly five out of ten), the never-properly-re-tested status, and the bounded ruling. — `VERIFIED`.
 - `F-001` — Supports narration: the chair callback — men, unexplained success, seventy percent reaching for the vial. — `VERIFIED`.
 
 #### Visual
@@ -805,37 +801,21 @@ Original WHP card design; no third-party assets.
 - **Caveat:** "Harder challenge" is the learning-goal option's honest gloss; kids never received the chosen problems; keep fractions as spoken ("about one in eight" / "nearly four in ten").
 - **Approved wording:** The Beat 05 narration as scripted.
 
-##### F-004 — Xing et al. 2018: the behavioral handicap in Beijing
-
-- **Exact claim:** Xing, Gao, Jiang, Archer & Liu (2018, *Frontiers in Psychology* 9:1883): 103 fifth graders at two Beijing public elementary schools randomized to ability praise, effort praise, or no praise; after failure feedback, ability-praised children spent significantly less time on the subsequent (untimed) problem set — the study's index of behavioral self-handicapping — and improved significantly less than effort-praised children.
-- **Original URL:** https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/
-- **Source / author:** Xing et al., *Frontiers in Psychology*
-- **Date:** 2018
-- **Locator:** Methods (time-on-task index); Results
-- **Accessed:** 2026-07-30 (adversarial verifier, full text)
-- **Scope:** Time on the post-failure set; no practice phase or framed retest existed.
-- **Cross-checks:** None needed; open-access full text read.
-- **Contradictions:** None found.
-- **Adversarial verification:** Layer-3 2026-07-30 — study confirmed; the "practiced less before a retest" description was OVERSTATED and corrected to "put less time in after a failure."
-- **Status:** VERIFIED
-- **Caveat:** Describe the measure as time invested after failure, never as practice or retest behavior.
-- **Approved wording:** "A Beijing experiment even caught the handicap live. After a failure, kids praised for ability simply put less time in."
-
 ##### F-005 — Li & Bates 2019 and the replication dispute
 
-- **Exact claim:** Li & Bates (2019, *JEP: General* 148(9), 1640–1655; n=624 Chinese children aged 9–13, 429 randomized to praise) found no significant praise effects on the original motivation and attribution measures in Study 1 (mean p = .48; sole positive: post-failure performance) and null results in Studies 2–3, with one significant reverse-direction effect. Dweck and Yeager published a commentary ("A Simple Re-Analysis Overturns a 'Failure to Replicate'…") disputing the replication's procedures and analyses.
+- **Exact claim:** Li & Bates (2019, *JEP: General* 148(9); three studies, n=624 Chinese children aged 9–13) found the praise manipulation moved almost none of the original measures (Study 1 motivation/attribution mean p = .48; Studies 2–3 null; one reverse-direction effect), with one reduced-magnitude performance effect in Study 1 (p = .049). Dweck & Yeager's commentary (26 pp, authors' OSF project; condensed in Yeager & Dweck 2021, *American Psychologist*) argues the failure manipulation failed its check — the replication's failure-trial mean was 4.68/10 versus 1.60/10 in the original, with 89% of children above chance — and that pooling the data recovers a significant effect (p = .041). Li & Bates pre-empted the failure objection in the paper (failure operationalized as feedback; children "often distressed") and never formally replied to the commentary. No adversarially agreed re-run with a verified failure trial exists.
 - **Original URL:** https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha
-- **Source / author:** Li & Bates, *Journal of Experimental Psychology: General*; Dweck & Yeager commentary (PsyArXiv/ResearchGate listing)
-- **Date:** 2019
-- **Locator:** Abstract (portal record); commentary listing
-- **Accessed:** 2026-07-30 (adversarial verifier; commentary verified via listing and summaries, not full text)
-- **Scope:** The dispute involves Dweck (original senior author) with Yeager, not Mueller; narration's "the original authors dispute" is a plural gloss.
-- **Cross-checks:** SERN summary of the commentary.
-- **Contradictions:** This record is the contradiction record for F-003; narration voices it.
-- **Adversarial verification:** Layer-3 2026-07-30 — SUPPORTED with the naming nuance noted.
+- **Source / author:** Li & Bates, *JEP: General*; Dweck & Yeager commentary (OSF: https://osf.io/w8msn/); Yeager & Dweck 2021, *American Psychologist*
+- **Date:** 2019; commentary 2019; condensed 2021
+- **Locator:** Li & Bates full accepted manuscript (Trial designs, Results, Limitations); commentary full text (failure-trial comparison, pooled and specification-curve analyses); AmP 2021 manuscript
+- **Accessed:** 2026-07-30 — full texts of both sides read via deep-read briefing; local copies archived in the session scratchpad
+- **Scope:** The narrated score pair (one-or-two versus nearly five out of ten) is the commentary's comparison of failure-trial means; "never properly re-tested" reflects the absence of an adversarial re-run; the sides operationalize "failure" oppositely (objective score versus delivered feedback) and do not engage each other's definition.
+- **Cross-checks:** Li & Bates 2020 (*Intelligence*, the unfalsifiability argument); *Scientific American* coverage; venue asymmetry noted (peer-reviewed paper versus preprint commentary).
+- **Contradictions:** This record carries the live dispute for F-003; the narration voices it as Martin's bounded ruling.
+- **Adversarial verification:** Layer-3 2026-07-30 (listing-level), then full-text deep-read of both sides the same day; narration rebuilt on the primary documents.
 - **Status:** VERIFIED
-- **Caveat:** Keep "mostly came up empty" and the dispute as an open scientific question; the inference label on childhood-to-adult wiring stays in narration.
-- **Approved wording:** The Beat 05 boundary block as scripted.
+- **Caveat:** The ruling ("the rerun's failure round was too easy") is Martin's confirmed editorial judgment (2026-07-30), bounded on-air by "some scientists read it differently"; keep "standing alone — never properly re-tested"; do not narrate the pooled re-analysis as an effect-size estimate — under the too-soft-failure premise the data cannot cap the true magnitude.
+- **Approved wording:** The Beat 05 honesty-check block as scripted.
 
 ##### F-006 — Tice & Baumeister 1997: procrastination's costs and benefits
 
@@ -928,6 +908,7 @@ Original WHP card design; no third-party assets.
 - **The weld ("your midnight cleaning is the same choice without the vial"):** Editorial bridge from lab to life; the cost evidence (F-006, F-007) supports the everyday reading without proving every delay is a handicap — narration says so.
 - **Childhood-to-adult wiring:** Explicitly labeled an inference in narration; endpoints experimental (F-003, F-004), replication dispute voiced (F-005).
 - **Pandocrin as canon shorthand:** WHP usage; the drug name itself is the study's.
+- **Xing et al. 2018 (Beijing):** verified behavioral result held in project evidence but no longer narrated after the honesty-check compression; available for future use.
 - No disputed factual claim is used as settled narration.
 
 #### Attribution copy
