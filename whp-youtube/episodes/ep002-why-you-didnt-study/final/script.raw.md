@@ -24,8 +24,9 @@
 > were rigged — mostly unsolvable. Then everyone heard the same result: *you did really
 > well.*
 >
-> Now sit in that chair, because this is where it gets uncomfortable. You just aced a
-> test you know you mostly guessed on. And there's a second test coming.
+> Now sit down in the winner's chair, because this is where it gets uncomfortable.
+> You just aced a test you know you mostly guessed on. And there's a second test
+> coming.
 >
 > The researchers offer you two drugs. One supposedly sharpens your thinking. One slows
 > it down.
@@ -80,7 +81,8 @@
 
 ## 3. The accounting
 
-> Psychologists have a name for the move you felt in that chair. Self-handicapping.
+> Psychologists have a name for the move you felt in the winner's chair.
+> Self-handicapping.
 >
 > You place a real obstacle on your own track, because the obstacle protects the story
 > about your talent.
@@ -188,8 +190,8 @@
 > Which leaves the famous praise studies standing. But standing alone — never properly
 > re-tested. So hold the children's version loosely.
 
-> What doesn't depend on any of it: the chair you sat in at the start. Grown men, one
-> unexplained success, seventy percent reaching for the vial.
+> What doesn't depend on any of it: the winner's chair. Grown men, one unexplained
+> success, seventy percent reaching for the vial.
 >
 > However you got your label, somewhere along the way a protected story started to
 > feel safer than a tested one.

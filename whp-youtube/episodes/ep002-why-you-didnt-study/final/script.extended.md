@@ -34,8 +34,9 @@
 > were rigged — mostly unsolvable. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/) Then everyone heard the same result: *you did really
 > well.* [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
 >
-> Now sit in that chair, because this is where it gets uncomfortable. You just aced a
-> test you know you mostly guessed on. And there's a second test coming.
+> Now sit down in the winner's chair, because this is where it gets uncomfortable.
+> You just aced a test you know you mostly guessed on. And there's a second test
+> coming.
 >
 > The researchers offer you two drugs. One supposedly sharpens your thinking. One slows
 > it down. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
@@ -112,7 +113,8 @@
 
 [AHA — Names self-handicapping and its definition.]
 
-> Psychologists have a name for the move you felt in that chair. Self-handicapping.
+> Psychologists have a name for the move you felt in the winner's chair.
+> Self-handicapping.
 >
 > You place a real obstacle on your own track, because the obstacle protects the story
 > about your talent.
@@ -252,10 +254,10 @@
 > Which leaves the famous praise studies standing. But standing alone — never properly
 > re-tested. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) So hold the children's version loosely.
 
-[AHA — Lands the load on the undisputed chair, named self-locating for late joiners, and closes with the however-you-got-your-label line.]
+[AHA — Lands the load on the winner's chair, recalled by its coined name, and closes with the however-you-got-your-label line.]
 
-> What doesn't depend on any of it: the chair you sat in at the start. Grown men, one
-> unexplained success, seventy percent reaching for the vial. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
+> What doesn't depend on any of it: the winner's chair. Grown men, one unexplained
+> success, seventy percent reaching for the vial. [F-001](https://pubmed.ncbi.nlm.nih.gov/650387/)
 >
 > However you got your label, somewhere along the way a protected story started to
 > feel safer than a tested one.
@@ -433,7 +435,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~12:20
-- **Word count:** 1950
+- **Word count:** 1948
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
@@ -495,7 +497,7 @@ Felt-choice intro performing SP01: title question, viewer memory scene with the 
 
 #### Visual
 
-Presenter cold open; the memory scene as sparse night-room vignettes (original footage); the chair simulation as a first-person desk shot with the two vials; the seventy-percent reveal as a stark counter.
+Presenter cold open; the memory scene as sparse night-room vignettes (original footage); the winner's-chair simulation as a first-person desk shot with the two vials; the seventy-percent reveal as a stark counter.
 
 #### Motion / edit
 
