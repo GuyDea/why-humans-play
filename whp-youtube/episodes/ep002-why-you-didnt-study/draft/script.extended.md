@@ -108,19 +108,19 @@
 >
 > You place a real obstacle on your own track, because the obstacle protects the story about your talent.
 
-> And notice what that means. This is not weakness. It is accounting.
+> And notice what that means. This is not weakness. It is strategy.
 >
-> There are two ledgers.
+> You are running two quests at once.
 >
-> One ledger counts outcomes. Did you pass. Did you finish. Did you get the job.
+> The main quest is the outcome. Pass the exam. Finish the project. Get the job.
 >
-> The other ledger counts the story. Are you still, officially, smart.
+> And next to it runs a side quest. Protect the story that you are smart.
 >
-> The pill wrecks the outcome ledger to protect the story ledger.
+> The pill abandons the main quest to protect the side quest.
 
 [LOOP PAYOFF L-02 | LOCKED WORDING — The two-games reveal; pays promise-1 and answers why a win arms the trap.]
 
-> <u>**You didn't stop playing the game. You switched which game you were playing.**</u>
+> <u>**You didn't stop playing the game. You just switched quests.**</u>
 
 [TRANSITION — The public-choice clue seeds the audience ledger used in beat 4.]
 
@@ -174,7 +174,7 @@
 >
 > "I barely prepared." Said loudly, to the whole room, before the test starts.
 >
-> That is the audience ledger again. If everyone heard the excuse in advance, the story survives whatever happens next.
+> That is the side quest again, performed for an audience. If everyone heard the excuse in advance, the story survives whatever happens next.
 
 > There is even a competitive version. Telling everyone you're terrible right before you play. Pool players are famous for it.
 >
@@ -222,7 +222,7 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> One compliment built a ledger. The ledger needed defending.
+> One compliment handed them a side quest. Protect the label, whatever it costs.
 
 [DISARM — The genuine replication complication, voiced honestly before a skeptic can raise it.]
 
@@ -294,7 +294,7 @@
 >
 > Now let's turn that into something you can carry.
 
-## 7. The two ledgers
+## 7. The two quests
 
 [TRANSITION — Stakes for acting now: the compounding spiral.]
 
@@ -316,7 +316,7 @@
 >
 > When it arrives before something that matters, stop and ask:
 >
-> **Which ledger is this move for? The outcome, or the story?**
+> **Which quest is this move serving? The outcome, or the story?**
 >
 > And the second question. If I fail now, what does the excuse buy me — and who exactly is the audience?
 >
@@ -348,7 +348,33 @@
 >
 > The race you skipped training for. The date you went into "not really trying." The pitch deck finished at four in the morning, so the pitch would have an alibi.
 
-[FINAL PAYOFF | LOOP PAYOFF L-01 | LOCKED WORDING — Closes the title question with the earned answer and the ledger callback.]
+[APPLICATION — The parenting transfer: process praise over ability praise (dispute voiced in beat 5), and the reinterpretation of the night-before shutdown.]
+
+> And if you have kids, this changes what a compliment is.
+>
+> The praise studies have their disputes. But the safe swap costs nothing.
+>
+> Praise the working, not the being. You worked hard on this. Not: you are so smart.
+>
+> One hands them a plan. The other hands them a label to defend.
+>
+> And when your kid suddenly doesn't care the night before a test, you know what that might be now.
+>
+> Not laziness. A small person protecting a label somebody handed them.
+
+[APPLICATION — The anti-pep-talk for anxious planners, drawn from the defensive-pessimism evidence: worry into checklist, not forced optimism.]
+
+> One more, for the people you love.
+>
+> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be great.
+>
+> For anxious planners, the research says that is exactly backwards. Forced optimism made them worse.
+>
+> Ask the defensive pessimist's question instead. What is the first thing that could go wrong?
+>
+> Then help them make the list. You stop being a cheerleader and become useful.
+
+[FINAL PAYOFF | LOOP PAYOFF L-01 | LOCKED WORDING — Closes the title question with the earned answer and the quest callback.]
 
 > So. The night you didn't study.
 >
@@ -358,7 +384,7 @@
 >
 > But the story you're protecting only stays safe while it stays untested.
 >
-> <u>**Test the story. Lower the expectations if you must — never the preparation. That is how both ledgers win.**</u>
+> <u>**Test the story. Lower the expectations if you must — never the preparation. That is how you finish both quests.**</u>
 
 ## Appendix
 
@@ -402,7 +428,9 @@
 - Beat 6: E-10 (DP performs better than self-handicapping; forced optimism harms;
   mood cost voiced).
 - Beat 7: E-08 (spiral, abstract-level — flagged), E-10/E-11 (rule kept modest),
-  clinical signpost and male-only/lab boundaries restated.
+  clinical signpost and male-only/lab boundaries restated; parenting application
+  bounded to E-03/E-04 with the dispute referenced; anti-pep-talk application bounded
+  to E-10 (forced optimism harmed defensive pessimists).
 - Open dependencies for Final: E-08 (abstract only), E-02 (secondhand), E-11
   (lead-level); full claim-wording verification for all rows.
 

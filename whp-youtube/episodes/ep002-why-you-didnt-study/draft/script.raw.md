@@ -84,17 +84,17 @@
 >
 > You place a real obstacle on your own track, because the obstacle protects the story about your talent.
 
-> And notice what that means. This is not weakness. It is accounting.
+> And notice what that means. This is not weakness. It is strategy.
 >
-> There are two ledgers.
+> You are running two quests at once.
 >
-> One ledger counts outcomes. Did you pass. Did you finish. Did you get the job.
+> The main quest is the outcome. Pass the exam. Finish the project. Get the job.
 >
-> The other ledger counts the story. Are you still, officially, smart.
+> And next to it runs a side quest. Protect the story that you are smart.
 >
-> The pill wrecks the outcome ledger to protect the story ledger.
+> The pill abandons the main quest to protect the side quest.
 
-> <u>**You didn't stop playing the game. You switched which game you were playing.**</u>
+> <u>**You didn't stop playing the game. You just switched quests.**</u>
 
 > One more clue from that research tradition. A follow-up study found the effect got stronger when the choice was public.
 >
@@ -140,7 +140,7 @@
 >
 > "I barely prepared." Said loudly, to the whole room, before the test starts.
 >
-> That is the audience ledger again. If everyone heard the excuse in advance, the story survives whatever happens next.
+> That is the side quest again, performed for an audience. If everyone heard the excuse in advance, the story survives whatever happens next.
 
 > There is even a competitive version. Telling everyone you're terrible right before you play. Pool players are famous for it.
 >
@@ -182,7 +182,7 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> One compliment built a ledger. The ledger needed defending.
+> One compliment handed them a side quest. Protect the label, whatever it costs.
 
 > Now, before you ask whether praise really causes the full adult pattern — fair question. Here is what's solid and what isn't.
 >
@@ -244,7 +244,7 @@
 >
 > Now let's turn that into something you can carry.
 
-## 7. The two ledgers
+## 7. The two quests
 
 > First, why carrying it matters.
 >
@@ -262,7 +262,7 @@
 >
 > When it arrives before something that matters, stop and ask:
 >
-> **Which ledger is this move for? The outcome, or the story?**
+> **Which quest is this move serving? The outcome, or the story?**
 >
 > And the second question. If I fail now, what does the excuse buy me — and who exactly is the audience?
 >
@@ -290,6 +290,28 @@
 >
 > The race you skipped training for. The date you went into "not really trying." The pitch deck finished at four in the morning, so the pitch would have an alibi.
 
+> And if you have kids, this changes what a compliment is.
+>
+> The praise studies have their disputes. But the safe swap costs nothing.
+>
+> Praise the working, not the being. You worked hard on this. Not: you are so smart.
+>
+> One hands them a plan. The other hands them a label to defend.
+>
+> And when your kid suddenly doesn't care the night before a test, you know what that might be now.
+>
+> Not laziness. A small person protecting a label somebody handed them.
+
+> One more, for the people you love.
+>
+> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be great.
+>
+> For anxious planners, the research says that is exactly backwards. Forced optimism made them worse.
+>
+> Ask the defensive pessimist's question instead. What is the first thing that could go wrong?
+>
+> Then help them make the list. You stop being a cheerleader and become useful.
+
 > So. The night you didn't study.
 >
 > You weren't lazy. You were buying insurance.
@@ -298,4 +320,4 @@
 >
 > But the story you're protecting only stays safe while it stays untested.
 >
-> <u>**Test the story. Lower the expectations if you must — never the preparation. That is how both ledgers win.**</u>
+> <u>**Test the story. Lower the expectations if you must — never the preparation. That is how you finish both quests.**</u>
