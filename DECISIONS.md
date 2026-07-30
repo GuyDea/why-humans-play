@@ -1946,3 +1946,27 @@ pair, preserved as review snapshot), `whp-youtube/episodes/ep002-why-you-didnt-s
 (new validated pair; readability gate passed with no unresolved items),
 `whp-youtube/STEERING.md` (EP2 entry updated with working state). Creative approval of
 the complete narration remains pending and is not implied by this promotion.
+
+## 2026-07-30 — Three field-tested writing-skill amendments adopted
+
+**Decision:** The writing-whp-youtube-scripts skill gains three amendments, each
+adopted only after a documented field baseline and treatment: (1) a mine-and-kill-test
+connection procedure in the architecture stage (six connection shapes, refute-by-default
+panels on primary sources, immediate bridge verification, required killed-connections
+register); (2) an application-widening pass after the primary viewer application
+(adjacent-audience transfers, capped at three, each mapped to an existing evidence row);
+(3) a concept-naming rule (three-plus ontological categories, game-native ontology
+first, vernacular pass, one deliberate frame-breaker, warm over mechanical).
+
+**Rationale:** Martin judged the earlier proposals proven by the EP002 run: the
+kill-test pass killed or corrected six sub-claims and found a stronger bridge study
+against the parked betting architecture as baseline; the widened EP002 ending produced
+two applications already supported by existing evidence rows; and the ledger-to-quest
+naming exchange exposed the single-category search failure the naming rule corrects.
+Control-versus-treatment probes support the naming rule at single-rep depth.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`,
+`references/story-and-hook-method.md`, `references/rapid-prototyping.md`, `SKILL.md`,
+`scripts/test_skill_package.py` (guard pins). The larger enhancement backlog
+(competitive intro variants, adversarial gate review, simulated table read, prediction
+register) remains proposed and unfielded.
