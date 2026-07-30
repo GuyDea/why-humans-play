@@ -257,6 +257,13 @@ Every drafted or reused passage passes four economy checks:
   reason ("one likely reason", "may help produce"). Do not fuse them into a single
   clean rule, and do not present one factor as the whole explanation of a
   cross-population difference.
+- **Process is not reaction.** Cut narrator process bookkeeping — search logistics, "I
+  needed a study," inventories of what remains to prove. Keep the narrator's felt
+  reaction — the bet, the smile, the laugh, the discomfort — budgeted at roughly one
+  per beat, placed where the viewer's own reaction needs modeling, and always Martin's
+  confirmed stance, never invented emotion. An economy pass that strips every personal
+  reaction has cut voice, not fat: a beat with zero reaction reads as narration, not
+  conversation.
 
 While drafting each beat, know what is on screen. Flag any stretch longer than roughly
 thirty spoken seconds with nothing concrete to show — no scene change, diagram,
