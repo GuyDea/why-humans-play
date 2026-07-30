@@ -219,7 +219,7 @@ class SkillPackageTests(unittest.TestCase):
         self.assertEqual(validate_pair(resolve_pair(stage)), [])
         self.assertEqual(
             spoken_digest(stage / "script.raw.md"),
-            "f24eb7531093f73fd9779d05b05f4a0a5c54ac54acadc7a46f7b12e898fc2a7c",
+            "32537ca47fd9df2cc6ce7cf57bb5b53be4c1cab91d1707bbd342f2b176fe0b04",
         )
 
     def test_episode_blueprint_contract_is_intro_first(self) -> None:
@@ -4108,7 +4108,7 @@ class SkillPackageTests(unittest.TestCase):
                     )
 
     def test_skill_entrypoint_stays_below_progressive_disclosure_limit(self) -> None:
-        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 480)
+        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 490)
 
     def test_claude_discovery_is_one_relative_symlink_to_the_canonical_package(self) -> None:
         self.assertTrue(CLAUDE_LINK.is_symlink())

@@ -307,6 +307,15 @@ timing audit. Treat timing as a post-draft diagnostic, not a drafting gate. Repo
 concerns and tradeoffs separately before rewriting the narration; never silently cut
 context to satisfy an audit.
 
+### Cold-viewer retention evaluation
+
+Before presenting a complete draft narration for creative approval, dispatch the
+`whp-retention-reviewer` brief (`.claude/agents/whp-retention-reviewer.md`) as a
+fresh-context reviewer given only the draft `script.raw.md` — never baselines,
+appendices, approvals, or the drafting rationale — returning findings without
+rewriting. Report the findings alongside the draft and apply them only with Martin's
+direction. It re-runs during the final audit battery.
+
 ### Creative approval gate
 
 Remain in the Draft stage until Martin explicitly approves the premise, voice, hook, story
@@ -401,7 +410,8 @@ For evidence-backed finalization, promote the approved draft into
    planned while the long-form exists as beats rather than after production.
 9. After Martin reviews the complete narration, run separate story, personal-authenticity,
    evidence, fact, rights, visual, animation, application-boundary, accessibility, timing,
-   retention, and format audits. Report concerns and tradeoffs before proposing any rewrite,
+   retention, and format audits. The retention audit includes a re-run of the cold-viewer
+   retention evaluation on the final raw narration. Report concerns and tradeoffs before proposing any rewrite,
    then validate the pair and run the annotated-script validator on the final extended
    document.
 

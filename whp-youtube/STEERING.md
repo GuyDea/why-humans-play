@@ -542,6 +542,27 @@ theory + brain training* into one thesis about **intelligence**. That synthesis 
 - **Curiosity Code** — "7 Brain Exercises to Sharpen Your Mind" 3.9M on a then-tiny channel.
   *Lesson:* the brain-improvement audience exists at multi-million scale for no-name channels.
 
+## Law 7 — The channel compounds: canon, variety, and readback
+
+Adopted 2026-07-30. Individual episodes are built by the
+`writing-whp-youtube-scripts` skill; this law owns what accumulates between them.
+
+- **Canon.** Named WHP concepts, opening shapes, and the audience assumed-knowledge
+  baseline live in [`canon.md`](canon.md). Episodes reuse canon names instead of
+  coining synonyms, register new concepts at `draft/` promotion, and never re-explain
+  what the baseline says the viewer already knows. Recurring named tools are brand
+  equity; synonym drift destroys it.
+- **Variety.** At the Blueprint stage, check the canon's opening-shape ledger and vary
+  at least one axis (route, felt-entry moves, withheld-object type) from the previous
+  episode. A subscriber who can predict the intro's shape has been taught to skip it.
+- **Post-publish readback.** After each episode publishes, run a readback as its own
+  operation: retention curve mapped against the episode's beat map (the predicted drop
+  points become testable), CTR against the packaging gate scores, and a
+  delivered-versus-scripted comparison of Martin's actual narration to feed the voice
+  doctrine. Findings are distilled into the skill or this file — a readback that
+  changes no doctrine records why. This adopts the previously unadopted finding-3
+  readback proposal (`DECISIONS.md`, 2026-07-30).
+
 ---
 
 # PART 3 — Historical Episode 1 proposal

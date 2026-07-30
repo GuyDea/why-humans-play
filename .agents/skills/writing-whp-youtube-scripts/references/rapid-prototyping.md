@@ -235,6 +235,41 @@ with these wording moves, each used at most once per intro:
 Vary each move's wording across episodes; a repeated felt-entry phrasing becomes a tic
 and a template a returning viewer can predict.
 
+### Spend details and highlights on the viewer
+
+Every drafted or reused passage passes four economy checks:
+
+- **Viewer-need test.** Narrate a factual detail only when it changes what the viewer
+  feels, decides, or checks. A study's bookkeeping — participant counts, task
+  inventories, group arithmetic — stays in the evidence record unless the number itself
+  is the story. When the viewer has already understood the result, stop explaining the
+  method.
+- **Reused wording is re-auditioned.** Approved wording protects claims, not length.
+  A passage carried from an earlier approved script re-enters through the viewer-need
+  test and the density budget below; prior approval is never an exemption from
+  compression.
+- **Highlight-density budget.** Budget roughly one quotable or locked line per
+  beat-half, with ordinary connective language between highlights. When two punchlines
+  land adjacent, cut or flatten one — a highlight next to a highlight is a cut, not a
+  polish. Every sentence competing to be remembered means none is.
+- **Claim shape.** When a study's narration involves an explanation, voice two
+  separated claims: the observed effect, then the proposed explanation as one possible
+  reason ("one likely reason", "may help produce"). Do not fuse them into a single
+  clean rule, and do not present one factor as the whole explanation of a
+  cross-population difference.
+
+While drafting each beat, know what is on screen. Flag any stretch longer than roughly
+thirty spoken seconds with nothing concrete to show — no scene change, diagram,
+on-screen text, demonstration, or prop — and rework the narration or record the visual
+intent in the stage appendix before promotion. A stretch that cannot name its picture
+usually reads as a lecture.
+
+Before naming a new concept, check the channel canon
+(`whp-youtube/canon.md`): reuse an existing canon name instead of coining a synonym,
+and register any newly coined episode concept there at promotion. Calibrate
+explanations against the canon's assumed-knowledge baseline — do not spend narration
+explaining what that baseline says the viewer already knows.
+
 ## Apply the approved progression while drafting
 
 > Derived from the structural story owner:

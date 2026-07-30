@@ -2042,3 +2042,41 @@ gains sibling diagnostics; loop planning gains the nameable withheld object);
 `whp-youtube/STEERING.md` deliberately unchanged — episode craft doctrine lives in the
 skill. The drafted ep1 and ep2 intro variants themselves remain unmerged conversation
 proposals awaiting Martin's call.
+
+## 2026-07-30 — Channel-compounding doctrine and cold-viewer evaluation
+
+**Decision:** Adopt five script-economy rules and a channel-compounding layer after an
+independent ChatGPT evaluation of the retired ep001 final surfaced retention problems
+the pipeline had not caught: (1) a viewer-need test for factual detail with mandatory
+re-audition of reused approved wording; (2) a highlight-density budget of roughly one
+quotable line per beat-half with adjacent punchlines cut, not polished; (3) claim-shape
+hygiene separating observed effects from explanations voiced as one possible reason;
+(4) a draft-stage visual-anchor check flagging 30-second stretches with nothing to
+show; (5) a mandatory cold-viewer retention evaluation — the new
+`whp-retention-reviewer` agent, fresh context, raw script only, findings only — before
+the draft creative gate and again in the final audit battery. Channel layer: STEERING
+Law 7 establishes `whp-youtube/canon.md` (concept canon with locked wording,
+opening-shape variety ledger, assumed-knowledge baseline) and adopts the post-publish
+readback (retention vs beat map, CTR vs gate scores, delivered-vs-scripted voice
+comparison), converting the previously unadopted finding-3 proposal into standing law.
+
+**Rationale:** The independent evaluation caught bloat (the radiologist retell's
+bookkeeping), punchline saturation, and three overclaims that the pipeline's
+structural, factual, and readability gates all passed, and that the author-context
+self-checks did not flag because reused approved wording was treated as settled. The
+evaluator's advantage was structural independence — no access to the authors'
+justifications — which the new agent reproduces by construction. Martin confirmed the
+radiologist-bloat diagnosis independently and asked for the channel-level view; the
+canon, variety ledger, baseline, and readback address how single-episode optimization
+fails to compound into a brand.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (cold-viewer
+evaluation gate before creative approval; retention-audit re-run),
+`references/rapid-prototyping.md` (new `### Spend details and highlights on the
+viewer`), `references/script-blueprint-workflow.md` (opening-shape variety check),
+`.claude/agents/whp-retention-reviewer.md` (new), `whp-youtube/canon.md` (new),
+`whp-youtube/STEERING.md` (new Law 7);
+`scripts/test_skill_package.py` (blueprint spoken-digest pin updated for the felt-entry
+rebuild; SKILL.md progressive-disclosure limit deliberately raised 480 → 490 lines to
+hold the new mandatory gate). The ep001 draft pair regeneration under these
+rules is in progress and remains exploratory until validated promotion.

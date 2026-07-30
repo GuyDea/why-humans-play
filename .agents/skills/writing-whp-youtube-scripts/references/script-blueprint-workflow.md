@@ -58,7 +58,9 @@ prose. Those belong to the later complete-draft stage.
 
 ## Design the intro before writing it
 
-Do not draft a generic opening and decorate it afterward. Before prose, consider the
+Do not draft a generic opening and decorate it afterward. Before prose, check the
+channel canon's opening-shape ledger (`whp-youtube/canon.md`, STEERING Law 7) and vary
+at least one axis from the previous episode's intro shape. Then consider the
 complete applicable technique inventory in the approved Story Progression Plan and its
 two method owners. Select every evidence-earned, non-conflicting move that materially
 strengthens immediate viewer value; do not treat techniques as a quota.
