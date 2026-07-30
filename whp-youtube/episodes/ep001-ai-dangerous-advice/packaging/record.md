@@ -141,11 +141,121 @@ the natural manual-swap fallback.
 
 ## Evaluation
 
-*(pending: renders → lint → panel → honesty check → saliency)*
+### Renders and lint
+
+15/15 renders succeeded (`renders/`, contact sheet at `mockups/contact_sheet.png`).
+Chosen variants (judged at 160×90 first, full size second):
+
+- **W1 → `W1_v4`** — bubble on a pedestal of pooling red; "ALL TRUE." crisp;
+  grayscale hierarchy holds. Chat text resolves only at feed size (~360px), like the
+  niche's receipt thumbnails — acceptable; the bubble shape + overlay carry the
+  glance. Rejected: v1/v2 flat shadow, v3 weaker red mass, v5 cluttered lighting.
+- **W2 → `W2_v3`** — most legible of the row: big "SAME SYMPTOMS", both quoted
+  answers readable small, red-rimmed stroke phone. Ground is a lighter charcoal than
+  brief — kept: it separates from the dark feed (contrarian-bright works, and it
+  still reads on light UI). Rejected: v2 strong-but-darker (best alternate), v1/v4/v5
+  small text.
+- **W3 → `W3_v2`** — best expression (closed-mouth tightened brow, no shock face),
+  "SOUNDED FINE" reads at 160×90. Rejected: v1 too dark, v3 dim text, v4/v5 good
+  alternates with slightly stagier faces.
+
+Feed mockups (light+dark, among the 8 real competitor thumbnails): `mockups/W1..W3/`.
+Lint: all three pass elements ≤3, overlay ≤3 words, no title-word repetition, no
+bottom-right occupancy, grayscale check. W1 at-limit title length (52ch ✓); P01-style
+60ch avoided.
+
+### Cold-viewer panel (7 personas, fresh-context, dark feed, judged among competitors)
+
+| Persona | W1 stop/click | W2 stop/click | W3 stop/click |
+|---|---|---|---|
+| Curious generalist (29) | Y / Y | Y / Y | soft-Y / **N** |
+| Science regular (41, Veritasium diet) | Y / Y | Y / Y | **N / N** |
+| Casual scroller (24) | Y / Y | Y / Y | **N / N** |
+| Clickbait skeptic (35, journalist) | Y / hesitant-Y | Y / Y ("easiest yes on the feed") | **N / N** |
+| Non-native (31, B1-B2) | Y / Y | Y / probably-Y | **N / N** |
+| Lives-the-problem (54, asks ChatGPT everything) | Y / Y | Y / Y | **N / N** |
+| Returning WHP subscriber (38) | Y / Y | Y / Y ("exactly what I subscribed for") | weak-Y / **N** |
+| **Totals** | **7/7 stop · 7/7 click** (2 conditional) | **7/7 stop · 7/7 click** | **2/7 weak stop · 0/7 click** |
+
+**Recurring signals.** W2: the split-chat is read as a *falsifiable claim*, "shows
+the mechanism before the click"; wins even with the skeptic and the brand-protective
+subscriber. Non-native flag: "So Would You." costs a re-read at B1–B2. Two personas
+expect "the right way to ask" (episode delivers: four counter-questions) and one
+expects systematic repetition (episode's boundary is voiced in-narration). W1: the
+receipt is the identification device — the lives-the-problem persona stopped because
+the chat question "is word-for-word the kind of thing I type"; the withheld-noun
+title is "earned back" by the thumbnail's concrete claim, but two personas warn the
+payoff must be a *named* mechanism, not a vibe. Blood-pool read as "laying it on
+thick" by one persona. W3: unanimous failure, same diagnosis everywhere — **no topic
+anchor**: aphorism title + generic man-with-phone could be "crypto, a divorce,
+anything"; the subscriber flags it as *off-brand for a rigorous channel*. This
+independently reproduces the sweep's anti-pattern (vague self-help framing) and its
+cross-cutting device (winners name the product).
+
+### Honesty check (expected payoff vs delivered beat)
+
+- **W1 — PASS.** Expected: true-but-harmful answer, real case, the "worse" thing
+  named. Delivered: B1 (the case; "every sentence reasonable… it even warned him"),
+  B3–B6 (the four moves), B6 names the mechanism (borrowed-authority loop: "you lend
+  the AI your premise, and it comes back looking like independent evidence"). "ALL
+  TRUE." is literally sourced — the thumbnail answer paraphrases the case report's
+  logged reply. Condition honored: the payoff is a named mechanism.
+- **W2 — PASS.** Expected: same symptoms, two questions, opposite answers, real
+  person, how to ask right, "so would you" justified. Delivered: B7 (the case
+  authors' actual re-run — "Same symptoms. Same chatbot. Different question —
+  different answer."), B3 (the menu), B2 (informed radiologists prove the
+  so-would-you claim), B8 (the four counter-questions). One persona's hope for
+  systematic repetition exceeds the single documented comparison — the episode voices
+  that boundary aloud ("nobody can prove…"), which is the honest ceiling.
+- **W3 — MOOT (package failed panel).** No dishonesty — the episode does deliver
+  "dumb decisions sound reasonable" — but 0/7 clicks makes the honesty question
+  academic.
+
+### Saliency (DeepGaze IIE, uniform centerbias, 640px)
+
+- **W1_v4:** centroid (0.44, 0.50), top-decile 10% — gaze mass sits on the two chat
+  bubbles, secondary pull to "ALL TRUE." Exactly the intended hierarchy.
+- **W2_v3:** centroid (0.48, 0.40) — mass on "SAME SYMPTOMS" and both question
+  bubbles, strongest on "Could this be a stroke?" The mechanism words win attention.
+- **W3_v2:** centroid (0.65, 0.27) — mass on the face/eyes region with pull toward
+  "SOUNDED FINE." As designed.
+
+Heatmaps: `mockups/W{1,2,3}_v*_saliency.png`. Instrument note: predicts gaze, not
+clicks; used here to confirm focal hierarchy only.
 
 ## Trio recommendation
 
-*(pending evaluation)*
+The rendered W3 package fails the cold-viewer panel on topic-anchoring (0/7 clicks).
+Per the package-unit rule the fix is a package revision, not a half-swap patch:
+**W3R** pairs the successful face-led render (`W3_v2`, "SOUNDED FINE") with the
+baseline champion title **"Could AI Talk You Into the Dumbest Decision of Your
+Life?" (P05)** — the title now anchors AI (fixing the unanimous failure), the
+question form gains the concrete face-led moment, no word overlap, and the strongest
+old-gate title re-enters the trio inside a corrected package.
+
+1. **W2 — "He Asked ChatGPT the Wrong Question. So Would You." + `W2_v3`.**
+   7/7 stop, 7/7 click including the skeptic and the subscriber; the thumbnail is
+   the episode's own evidence; honesty PASS. *Live signal that would prove this
+   wrong: high CTR with early retention collapse at B1–B2 (viewers wanting only the
+   two-screenshot trick), or browse CTR materially below W1's in Test & Compare.*
+2. **W1 — "ChatGPT Doesn't Lie to You. It Does Something Worse." + `W1_v4`.**
+   7/7 stop, 7/7 click (2 conditional on the payoff being named — it is); the
+   strongest scroll-stop image of the three. *Prove-wrong signal: satisfaction
+   signals (likes/comments) lagging W2's, indicating the tease cost trust.*
+3. **W3R — "Could AI Talk You Into the Dumbest Decision of Your Life?" + `W3_v2`.**
+   Untested as a pair (title from the pre-skill baseline, render panel-tested on its
+   visual only); carried as the trio's face-led diversity arm and the direct A/B of
+   the old champion title inside a corrected package. *Prove-wrong signal: if it
+   wins the trio, the face-led route becomes the channel default and the panel's
+   question-title caution is recalibrated.*
+
+Retired: P04's title half ("The Dumbest Decision of Your Life Will Sound
+Reasonable") — panel-failed for topic anchoring; kept in candidates as evidence.
+
+**Production notes before ship:** composite the real WHP mark; W3R requires the
+Martin reshoot (same framing/lighting/expression as `W3_v2`); verify W1/W2 chat
+paraphrases once more against the case report's logged wording at Final-stage claim
+mapping.
 
 **Martin's choice:** `final choice pending`
 
