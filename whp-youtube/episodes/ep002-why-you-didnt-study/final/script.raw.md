@@ -129,15 +129,10 @@
 > A bigger study from 2023 followed thousands of students across a year, checking in
 > every three months.
 >
-> The procrastinators ended the year more stressed. That held even after accounting
-> for how stressed they started.
+> The procrastinators ended the year more stressed. And no — they didn't just start
+> out that way.
 >
 > One calm evening, repaid with interest.
-
-> There's even a competitive version. You tell everyone you're terrible right before
-> you play. Pool players are famous for it. It has a name, sandbagging.
->
-> But that one is a bluff about your ability, not a real obstacle. Different move.
 
 > *Which leaves the real question. A move this costly and this automatic had to be
 > learned somewhere.*
@@ -150,9 +145,12 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-> <u>Half heard: you must be smart at this. Half heard: you must have worked hard.</u>
+> Half of the praised kids heard one sentence: <u>**you must be smart at this.**</u>
 >
-> One sentence of difference. And that first one is the sentence I promised you.
+> That's it. That's the sentence I promised you at the start. The one you've probably
+> said to someone you love.
+>
+> The other half heard: you must have worked hard. One sentence of difference.
 
 > Then every kid chose their next task.
 >
@@ -183,13 +181,12 @@
 > But a large 2019 replication of the praise studies mostly came up empty. And the
 > original authors dispute how it was run.
 >
-> So the honest version: the wiring between childhood and your worst nights is an
-> inference. Scientists are still mapping it.
+> So the honest version: whether one compliment wires your worst nights is an
+> inference. Scientists are still fighting about it.
 
-> Which is exactly enough for us. The stake exists. Compliments can plant it.
->
-> And somewhere along the way, a protected story started to feel safer than a tested
-> one.
+> But the pull itself — you felt that in the chair. And however the stake gets
+> planted, somewhere along the way a protected story started to feel safer than a
+> tested one.
 
 > *So if the story is the problem, is the fix just more confidence? Believe in yourself
 > harder?*

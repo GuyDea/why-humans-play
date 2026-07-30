@@ -179,17 +179,10 @@
 > A bigger study from 2023 followed thousands of students across a year, checking in
 > every three months. [F-007](https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2800006)
 >
-> The procrastinators ended the year more stressed. That held even after accounting
-> for how stressed they started. [F-007](https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2800006)
+> The procrastinators ended the year more stressed. And no — they didn't just start
+> out that way. [F-007](https://jamanetwork.com/journals/jamanetworkopen/fullarticle/2800006)
 >
 > One calm evening, repaid with interest.
-
-[TRANSITION — Sandbagging distinguished in one passage: a bluff, not an obstacle.]
-
-> There's even a competitive version. You tell everyone you're terrible right before
-> you play. Pool players are famous for it. It has a name, sandbagging.
->
-> But that one is a bluff about your ability, not a real obstacle. Different move.
 
 [MINI-HOOK — Opens the origin question: the move had to be learned somewhere.]
 
@@ -206,11 +199,14 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-[LOOP PAYOFF L-03 — Pays the withheld object: the exact praise sentence, named as promised.]
+[LOOP PAYOFF L-03 | LOCKED WORDING — Pays the withheld object with its own beat: the exact praise sentence delivered word-perfect, with the someone-you-love callback landing at the payoff.]
 
-> <u>Half heard: you must be smart at this. Half heard: you must have worked hard. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)</u>
+> Half of the praised kids heard one sentence: <u>**you must be smart at this.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)</u>
 >
-> One sentence of difference. And that first one is the sentence I promised you.
+> That's it. That's the sentence I promised you at the start. The one you've probably
+> said to someone you love.
+>
+> The other half heard: you must have worked hard. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf) One sentence of difference.
 
 [REVERSAL — Task choice splits by compliment: 92 versus 67 percent.]
 
@@ -249,15 +245,14 @@
 > But a large 2019 replication of the praise studies mostly came up empty. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) And the
 > original authors dispute how it was run. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha)
 >
-> So the honest version: the wiring between childhood and your worst nights is an
-> inference. Scientists are still mapping it.
+> So the honest version: whether one compliment wires your worst nights is an
+> inference. Scientists are still fighting about it.
 
-[AHA — What the bounded evidence still establishes: the stake exists.]
+[AHA — Rests the takeaway on the undisputed pull from the chair; the planting stays an open question.]
 
-> Which is exactly enough for us. The stake exists. Compliments can plant it.
->
-> And somewhere along the way, a protected story started to feel safer than a tested
-> one.
+> But the pull itself — you felt that in the chair. And however the stake gets
+> planted, somewhere along the way a protected story started to feel safer than a
+> tested one.
 
 [MINI-HOOK — Opens the remedy question and promises the inversion.]
 
@@ -427,7 +422,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~11:30
-- **Word count:** 1872
+- **Word count:** 1851
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
@@ -579,11 +574,11 @@ Original WHP diagrams; no third-party assets.
 ### Beat 04 — Your version
 
 - **Time:** 04:50–06:10
-- **Target:** ~205 words
+- **Target:** ~160 words
 
 #### Story function
 
-SP04: the everyday cost ledger — semester-scale relief-then-bill, the year-scale correction, the sandbagging distinction, and the origin mini-hook.
+SP04: the everyday cost ledger — semester-scale relief-then-bill, the year-scale correction, and the origin mini-hook.
 
 #### Claims
 
@@ -614,7 +609,7 @@ Original WHP graphics; no third-party assets.
 ### Beat 05 — The seed
 
 - **Time:** 06:10–08:25
-- **Target:** ~350 words
+- **Target:** ~370 words
 
 #### Story function
 
@@ -737,7 +732,7 @@ Original WHP card design; no third-party assets.
 
 1. **Layer-3 adversarial verification — COMPLETE 2026-07-30.** Three verifier runs plus the Layer-1 E-01 run: 24 of 30 claims SUPPORTED, six OVERSTATED, zero UNSUPPORTED. All six overstatements corrected in narration the same day (2023-study design and framing; DP-comparison attribution; compounding claim; praised-kids restriction; another-state detail; Beijing measure). One incidental correction: the intro tease bounded to task choice.
 2. **Post-review audits — PENDING.** The full audit battery, including the cold-viewer re-run, follows Martin's review of this deliverable.
-3. **Open editorial items awaiting Martin (from the second cold-viewer round):** the Section-7 structure call (keep / collapse with parenting as a Short / middle path), the sandbagging cut, and the third telling of the drug's payoff logic in the intro. Narration currently keeps all three as scripted.
+3. **Open editorial items awaiting Martin (from the second cold-viewer round):** the Section-7 structure call (keep / collapse with parenting as a Short / middle path) and the third telling of the drug's payoff logic in the intro. The sandbagging cut was applied at Martin's review (2026-07-30), along with the promised-sentence payoff rebuild, the plain-language baseline-control line, and the retreat from the compliments-can-plant-it claim to the undisputed pull.
 4. **Kolditz & Arkin primary access — OPEN (low priority).** F-002 verified via converging author-secondary accounts (the Higgins–Snyder–Berglas monograph); the primary is paywalled. Narration understates the finding (the effect largely disappeared in private), which is the safe direction.
 5. **Norem originals access — NOTED.** The 1986/1993 primaries are paywalled; A-claims verified against Norem's own 2008 peer-reviewed review and Elliot & Church full text.
 6. **Packaging — OPEN.** 15 title candidates and one thumbnail direction in the blueprint; final choice is Martin's.
