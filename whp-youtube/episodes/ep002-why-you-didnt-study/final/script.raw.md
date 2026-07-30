@@ -50,8 +50,8 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-> *Because this move gets installed early. In one experiment, a single sentence of
-> praise changed what ten-year-olds chose to attempt next.*
+> *Because this move doesn't need years of practice. In one experiment, one sentence
+> of praise was enough to set it off in ten-year-olds.*
 
 > <u>I'll show you the exact sentence. You've probably said it to someone you love.</u>
 
@@ -174,19 +174,24 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-> Now, before you ask whether praise really causes the full adult pattern — fair
-> question. The endpoints are real experiments. A Beijing experiment even caught the
-> handicap live. After a failure, kids praised for ability simply put less time in.
+> Now, two honest boundaries.
+>
+> A Beijing experiment saw the move live. After a failure, kids praised for ability
+> simply put less time in.
 >
 > But a large 2019 replication of the praise studies mostly came up empty. And the
-> original authors dispute how it was run.
->
-> So the honest version: whether one compliment wires your worst nights is an
-> inference. Scientists are still fighting about it.
+> original authors dispute how it was run. Scientists are still fighting about how
+> strong these praise effects are.
 
-> But the pull itself — you felt that in the chair. And however the stake gets
-> planted, somewhere along the way a protected story started to feel safer than a
-> tested one.
+> And nobody — nobody — can trace your worst nights back to one compliment in fourth
+> grade. That is not what these experiments show.
+>
+> What they do show is quick and sharp. In those rooms, protecting a label didn't take
+> years of training. One sentence was enough — within the hour.
+
+> However you got yours, somewhere along the way a protected story started to feel
+> safer than a tested one. The pull, at least, you already know. You felt it in the
+> chair.
 
 > *So if the story is the problem, is the fix just more confidence? Believe in yourself
 > harder?*
@@ -220,12 +225,15 @@
 >
 > Same anxious people, better performance.
 
-> Here is the twist that should end every pep talk.
+> Then comes the twist — the one to handle with care.
 >
-> When researchers pushed these people to think positive — relax, you'll do great —
-> they performed worse.
+> When researchers nudged these people toward thinking positive — relax, you'll do
+> great — they performed worse.
 >
 > **For them, optimism was the handicap.**
+>
+> For them. Not for everyone. In this one anxious, list-making kind of mind, the worry
+> is load-bearing — take it away, and the preparation goes with it.
 
 > One honest cost. Living like this is not free. Defensive pessimists feel worse while
 > it works.
@@ -294,16 +302,18 @@
 
 > One more, for the people you love.
 >
-> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
-> great.
+> When someone you love spirals before their big day, the instinct is to cheer them
+> up. Relax. You'll be great. That instinct is love — keep it.
 >
-> For anxious planners, Norem's research says that is exactly backwards. Forced
-> optimism made them worse.
+> But if your person is one of these anxious planners, cheering can accidentally take
+> their tool away. Norem's research found forced optimism made them do worse, not
+> better.
 >
-> Ask the defensive pessimist's question instead. What is the first thing that could go
-> wrong? Then help them make the list.
+> So try something gentler than it sounds. Don't argue with the worry. Sit down in it
+> with them, and ask: what's the first thing that could go wrong?
 >
-> You stop being a cheerleader and become useful.
+> Then help them make the list. You're not feeding the fear. You're helping them put
+> it to work — the same move that steadies them.
 
 > So. The night you didn't study.
 >

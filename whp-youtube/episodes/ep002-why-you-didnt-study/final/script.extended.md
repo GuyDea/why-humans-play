@@ -68,10 +68,10 @@
 > **And I'll show you the one check that makes it visible, and the rule to use
 > instead.**
 
-[MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence of praise changing which games children chose.]
+[MINI-HOOK — Seeds the origin tease inside the evidence boundary: one sentence being enough to set the move off, with no developmental claim.]
 
-> *Because this move gets installed early. In one experiment, a single sentence of
-> praise changed what ten-year-olds chose to attempt next.*
+> *Because this move doesn't need years of practice. In one experiment, one sentence
+> of praise was enough to set it off in ten-year-olds.*
 
 [LOOP OPEN L-03 — Closes the intro on the nameable withheld object: the exact praise sentence, paid by the seed beat, made personal by the someone-you-love turn.]
 
@@ -236,23 +236,30 @@
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
 
-[TRANSITION — Consolidated evidence boundary: endpoints real, Beijing bridge live, replication disputed, wiring an inference.]
+[TRANSITION — Consolidated evidence boundary: the Beijing result, the disputed replication, and the strength question voiced plainly.]
 
-> Now, before you ask whether praise really causes the full adult pattern — fair
-> question. The endpoints are real experiments. A Beijing experiment even caught the
-> handicap live. After a failure, kids praised for ability simply put less time in. [F-004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/)
+> Now, two honest boundaries.
+>
+> A Beijing experiment saw the move live. After a failure, kids praised for ability
+> simply put less time in. [F-004](https://pmc.ncbi.nlm.nih.gov/articles/PMC6176062/)
 >
 > But a large 2019 replication of the praise studies mostly came up empty. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) And the
-> original authors dispute how it was run. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha)
+> original authors dispute how it was run. [F-005](https://www.research.ed.ac.uk/en/publications/you-cant-change-your-basic-ability-but-you-work-at-things-and-tha) Scientists are still fighting about how
+> strong these praise effects are.
+
+[AHA — Scopes the seed honestly: no childhood-to-adult tracing claimed; in those rooms, one sentence was enough within the hour.]
+
+> And nobody — nobody — can trace your worst nights back to one compliment in fourth
+> grade. That is not what these experiments show.
 >
-> So the honest version: whether one compliment wires your worst nights is an
-> inference. Scientists are still fighting about it.
+> What they do show is quick and sharp. In those rooms, protecting a label didn't take
+> years of training. One sentence was enough — within the hour. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)
 
-[AHA — Rests the takeaway on the undisputed pull from the chair; the planting stays an open question.]
+[TRANSITION — The however-you-got-yours closer, welded back to the chair's undisputed pull.]
 
-> But the pull itself — you felt that in the chair. And however the stake gets
-> planted, somewhere along the way a protected story started to feel safer than a
-> tested one.
+> However you got yours, somewhere along the way a protected story started to feel
+> safer than a tested one. The pull, at least, you already know. You felt it in the
+> chair.
 
 [MINI-HOOK — Opens the remedy question and promises the inversion.]
 
@@ -296,12 +303,15 @@
 
 [REVERSAL | LOCKED WORDING — Forced optimism harms; the locked inversion line.]
 
-> Here is the twist that should end every pep talk.
+> Then comes the twist — the one to handle with care.
 >
-> When researchers pushed these people to think positive — relax, you'll do great —
-> they performed worse. [F-009](https://doi.org/10.1111/j.1751-9004.2007.00053.x)
+> When researchers nudged these people toward thinking positive — relax, you'll do
+> great — they performed worse. [F-009](https://doi.org/10.1111/j.1751-9004.2007.00053.x)
 >
 > **For them, optimism was the handicap.**
+>
+> For them. Not for everyone. In this one anxious, list-making kind of mind, the worry
+> is load-bearing — take it away, and the preparation goes with it.
 
 [TRANSITION — The mood-tax honest cost.]
 
@@ -384,20 +394,22 @@
 > And when your kid suddenly doesn't care the night before a test, you know what that
 > might be now. Not laziness. A small person protecting a label somebody handed them.
 
-[APPLICATION — Anti-pep-talk application bounded to the defensive-pessimism result.]
+[APPLICATION — The loved-ones application voiced gently: honor the cheering instinct, scope the exception to anxious planners, offer the list as help.]
 
 > One more, for the people you love.
 >
-> When someone spirals before their big day, the instinct is to cheer. Relax. You'll be
-> great.
+> When someone you love spirals before their big day, the instinct is to cheer them
+> up. Relax. You'll be great. That instinct is love — keep it.
 >
-> For anxious planners, Norem's research says that is exactly backwards. Forced
-> optimism made them worse. [F-009](https://doi.org/10.1111/j.1751-9004.2007.00053.x)
+> But if your person is one of these anxious planners, cheering can accidentally take
+> their tool away. Norem's research found forced optimism made them do worse, not
+> better. [F-009](https://doi.org/10.1111/j.1751-9004.2007.00053.x)
 >
-> Ask the defensive pessimist's question instead. What is the first thing that could go
-> wrong? Then help them make the list.
+> So try something gentler than it sounds. Don't argue with the worry. Sit down in it
+> with them, and ask: what's the first thing that could go wrong?
 >
-> You stop being a cheerleader and become useful.
+> Then help them make the list. You're not feeding the fear. You're helping them put
+> it to work — the same move that steadies them.
 
 [AHA — Closes the opening night: insurance, not laziness.]
 
@@ -421,8 +433,8 @@
 - **Status:** EDITORIAL-DRAFT
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
-- **Target runtime:** ~11:30
-- **Word count:** 1851
+- **Target runtime:** ~12:10
+- **Word count:** 1949
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
