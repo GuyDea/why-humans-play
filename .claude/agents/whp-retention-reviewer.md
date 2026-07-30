@@ -40,7 +40,8 @@ Evaluate, in this order:
    recurring object recalled by a bare common noun rather than a coined name.
 9. **Promise register.** For each opening promise or tease, find its payoff. Flag any
    payoff with less delivery weight than its tease (an aside paying locked wording) or
-   in a mismatched register (lab dialect paying a household promise).
+   in a mismatched register (lab dialect paying a household promise), or paid before
+   the object's power has been demonstrated.
 10. **Care register.** Flag any advice about family, friends, or vulnerable moments
     voiced as correction of the viewer's instinct rather than help added to it.
 11. **What earns its place.** End with the three strongest moments — the lines or beats

@@ -147,15 +147,10 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-> Half of the praised kids heard one sentence: <u>**you must be smart at this.**</u>
+> Half heard: **you must be smart at this.** The other half: **you must have worked
+> hard.**
 >
-> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
-> Or: you're so talented.
->
-> That's the sentence I promised you at the start. The one you've probably said to
-> someone you love.
->
-> The other half heard: you must have worked hard. One sentence of difference.
+> One sentence of difference.
 
 > Then every kid chose their next task.
 >
@@ -178,6 +173,14 @@
 > **Among the kids praised for being smart, nearly four in ten lied.**
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
+
+> <u>And that first sentence — the smart one — is the sentence I promised you at the
+> start.</u>
+>
+> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+> Or: you're so talented.
+>
+> <u>**The one you've probably said to someone you love.**</u>
 
 > Now, one honesty check — because these studies have a challenger.
 >

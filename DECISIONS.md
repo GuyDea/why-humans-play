@@ -2160,3 +2160,20 @@ default; read-aloud referent line; stays at the 500-line cap),
 `references/story-and-hook-method.md` (payoff weight and register; coined callbacks),
 `references/research-and-rights.md` (new `## Contested findings` with the
 presenter-ruling path), `.claude/agents/whp-retention-reviewer.md` (dimensions 8–10).
+
+## 2026-07-30 — Demonstrate-then-implicate payoff timing
+
+**Decision:** Withheld-object payoffs land only after the object's power is
+demonstrated; the object may appear earlier as plain unmarked fact, but the
+acknowledgment and the tease's personal turn fire at maximum earned significance, with
+the honesty boundary immediately following. Applied to ep002's promised-sentence beat
+(acknowledgment moved after the lying reveal) and encoded in the story owner's payoff
+rules and the cold-viewer's promise-register dimension.
+
+**Rationale:** Martin's catch: the someone-you-love turn fired while the sentence was
+still inert, wasting the emotional payoff the demonstration would have earned.
+Completes the tease-payoff doctrine's third axis — weight, register, and now timing.
+
+**Documents:** `references/story-and-hook-method.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-why-you-didnt-study/final/` pair.

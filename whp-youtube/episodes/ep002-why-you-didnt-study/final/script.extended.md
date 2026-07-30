@@ -201,17 +201,12 @@
 >
 > Each kid solved puzzles. The praised kids then heard one of two compliments.
 
-[LOOP PAYOFF L-03 | LOCKED WORDING — Pays the withheld object with its own beat: the verbatim lab sentence, its household translation, and the someone-you-love promise attached to the version the viewer actually said.]
+[TRANSITION | LOCKED WORDING — The two verbatim praise wordings, presented unmarked; the promised object hides in plain sight until its power is shown.]
 
-> Half of the praised kids heard one sentence: <u>**you must be smart at this.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)</u>
+> Half heard: **you must be smart at this.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf) The other half: **you must have worked
+> hard.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)
 >
-> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
-> Or: you're so talented.
->
-> That's the sentence I promised you at the start. The one you've probably said to
-> someone you love.
->
-> The other half heard: you must have worked hard. [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf) One sentence of difference.
+> One sentence of difference.
 
 [REVERSAL — Task choice splits by compliment: 92 versus 67 percent.]
 
@@ -240,6 +235,16 @@
 > **Among the kids praised for being smart, nearly four in ten lied.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)
 >
 > Ten-year-olds, lying to a stranger, to protect a word an adult had handed them.
+
+[LOOP PAYOFF L-03 | LOCKED WORDING — Pays the withheld object at maximum demonstrated power: identification, household translation, and the someone-you-love turn land after the lying reveal, with the honesty check immediately following.]
+
+> <u>And that first sentence — the smart one — is the sentence I promised you at the
+> start.</u>
+>
+> That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+> Or: you're so talented.
+>
+> <u>**The one you've probably said to someone you love.**</u>
 
 [TRANSITION — The honesty check: the 2019 rerun and Martin's confirmed on-camera ruling, grounded in the checkable failure-trial score pair.]
 
@@ -439,7 +444,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~12:20
-- **Word count:** 1969
+- **Word count:** 1971
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
