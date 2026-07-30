@@ -2080,3 +2080,30 @@ viewer`), `references/script-blueprint-workflow.md` (opening-shape variety check
 rebuild; SKILL.md progressive-disclosure limit deliberately raised 480 → 490 lines to
 hold the new mandatory gate). The ep001 draft pair regeneration under these
 rules is in progress and remains exploratory until validated promotion.
+
+## 2026-07-30 — Adversarial claim verification in three layers
+
+**Decision:** Add adversarial claim verification to the episode pipeline in three
+cumulative layers owned by the research-and-rights method: Layer 1 verifies every
+load-bearing evidence row (throughline case, central statistic, climax result) before
+story-progression approval, so structure is never built on an unverified fact; Layer 2
+runs a mechanical narration-versus-evidence-row consistency check (numbers, names,
+attributions, reworded approved wording) at the draft creative gate; Layer 3 runs the
+full per-record source sweep at Final before any audit sign-off, with OVERSTATED and
+UNSUPPORTED sentences narrowed or cut and CANNOT-VERIFY results ledgered. Verification
+runs through the new `whp-claim-verifier` agent brief: fresh context, claims and source
+citation only, instructed to refute, verdicts quoted from the source.
+
+**Rationale:** Martin asked whether separate agents validate evidence after an outside
+consultation flagged the cost of a single study hallucination; the honest audit showed
+strong records but single-author verification, structural-only validators, and ep001's
+central case (E-13) riding on an architecture summary never fresh-read in this
+pipeline. Layer placement answers Martin's staging question: a load-bearing fact wrong
+at Final collapses an episode, so load-bearing rows verify before progression
+approval; paraphrase drift enters during compression passes, so consistency checks run
+at the draft gate; the complete sentence-level sweep needs Final's claim mapping.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/research-and-rights.md`
+(new `## Adversarial claim verification`), `SKILL.md` (three gate hooks; disclosure
+limit 490 → 500 in `scripts/test_skill_package.py`),
+`.claude/agents/whp-claim-verifier.md` (new).

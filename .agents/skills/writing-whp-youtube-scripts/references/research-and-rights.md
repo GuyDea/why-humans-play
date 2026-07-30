@@ -330,3 +330,31 @@ rights honesty for a lower-priority fact.
 - [Wikimedia Commons — Reusing content outside Wikimedia](https://commons.wikimedia.org/wiki/Commons:Reusing_content_outside_Wikimedia/en)
 - [YouTube Help — Fair use on YouTube](https://support.google.com/youtube/answer/9783148?hl=en)
 - [U.S. Copyright Office — Fair Use Index](https://www.copyright.gov/fair-use/)
+
+## Adversarial claim verification
+
+Three layers, each placed where its facts become load-bearing. Verification agents are
+independent by construction: a fresh-context agent receives only the claims under test
+and the source citation or URL — never the project's evidence records, approved
+wording, or rationale — and is instructed to refute, classifying every claim
+SUPPORTED, OVERSTATED, UNSUPPORTED, or CANNOT-VERIFY with the supporting source
+passage quoted. Use the `whp-claim-verifier` brief
+(`.claude/agents/whp-claim-verifier.md`).
+
+- **Layer 1 — before story-progression approval.** Every load-bearing row — the
+  throughline case, the central statistic, the climax result, anything a beat's
+  reversal depends on — passes adversarial verification before the progression is
+  approved. A row that fails is narrowed or the structure is not built on it. This
+  layer exists because a load-bearing fact discovered wrong at Final collapses the
+  episode, not a sentence.
+- **Layer 2 — at the draft creative gate.** A mechanical consistency check: every
+  number, percentage, year, name, and attribution in narration must match its evidence
+  row, and reworded or compressed passages are re-checked against the row's approved
+  wording. This catches paraphrase drift where it happens — during compression passes.
+- **Layer 3 — at Final, before any audit sign-off.** The full sweep: per-record
+  fresh-context agents fetch the original source and classify every mapped narration
+  sentence. OVERSTATED and UNSUPPORTED sentences are narrowed or cut; CANNOT-VERIFY
+  results are recorded in the issue ledger, never silently passed.
+
+A claim that survives Layer 1 can still die at Layer 3 — the layers are cumulative,
+not alternative. No layer's pass is inferred from an earlier layer's.

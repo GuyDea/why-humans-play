@@ -198,7 +198,9 @@ method. Route: [the story and hook method](references/story-and-hook-method.md).
 ### Story progression approval gate
 
 For central-progression work with an approved architecture but no approved progression,
-return only the complete Story Progression Plan and wait. Positive feedback on one
+return only the complete Story Progression Plan and wait. Load-bearing evidence rows
+must pass Layer 1 of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
+before the plan is presented as approvable. Positive feedback on one
 obstacle, transition, case, technique, or loop does not approve the whole artifact.
 
 Explicit approval—or a direct instruction to build the Script Blueprint from that displayed
@@ -314,7 +316,10 @@ Before presenting a complete draft narration for creative approval, dispatch the
 fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
-direction. It re-runs during the final audit battery.
+direction. It re-runs during the final audit battery. Run the Layer 2 consistency
+check of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
+on the same draft: every narration number, name, and attribution against its evidence
+row.
 
 ### Creative approval gate
 
@@ -375,7 +380,8 @@ For evidence-backed finalization, promote the approved draft into
    `Deliverable`, `Useful viewer change`, scope, runtime, constraints, and payoff.
 2. Extract the material claims from the approved prototype. Build the evidence packet,
    assign confidence to every material claim, and approve only wording its evidence
-   supports. Narrow or remove unsupported wording while preserving the approved voice. Map
+   supports. Run Layer 3 of the adversarial claim-verification sweep before any audit
+   sign-off. Narrow or remove unsupported wording while preserving the approved voice. Map
    every factual narration sentence or separable factual clause to at least one `F-###` ID
    in the matching appendix beat's `#### Claims` section. Append a visible
    `[F-###](Original URL)` indicator immediately after every mapped factual narration

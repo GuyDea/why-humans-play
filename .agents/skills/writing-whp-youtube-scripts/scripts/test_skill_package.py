@@ -4108,7 +4108,7 @@ class SkillPackageTests(unittest.TestCase):
                     )
 
     def test_skill_entrypoint_stays_below_progressive_disclosure_limit(self) -> None:
-        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 490)
+        self.assertLessEqual(len(SKILL_MD.read_text(encoding="utf-8").splitlines()), 500)
 
     def test_claude_discovery_is_one_relative_symlink_to_the_canonical_package(self) -> None:
         self.assertTrue(CLAUDE_LINK.is_symlink())
