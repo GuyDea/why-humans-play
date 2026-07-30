@@ -209,11 +209,13 @@ Any 0 on T1–T3 kills the line regardless of total; those are flaws of the ques
 itself. A weak T4 alone is survivable, because wording can be fixed without changing
 the question.
 
-Apply the gate to every surface the viewer meets first: the first spoken sentence of
-an episode intro, each Shorts candidate's opening hook, and every title candidate —
-a title is a first sentence read in the feed. Score before polishing, and treat the
-disqualifier literally: a line that fails the gate is replaced, not reworded around
-its dead test.
+Apply the gate to every spoken surface the viewer meets first: the first spoken
+sentence of an episode intro and each Shorts candidate's opening hook. A title is not
+heard alone — it is read in the feed next to its thumbnail — so score title halves
+with [the blueprint owner's feed-adapted packaging gate](script-blueprint-workflow.md#design-the-packaging-with-the-intro),
+which keeps T2 and T3 unchanged, adapts T1 to feed reading, and adds feed
+constraints. Score before polishing, and treat the disqualifier literally: a line
+that fails the gate is replaced, not reworded around its dead test.
 
 ## Compare and score three opening candidates
 

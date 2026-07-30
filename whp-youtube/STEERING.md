@@ -134,12 +134,17 @@ recreating it.
 - **Decide the title and thumbnail BEFORE scripting.** If the idea can't be expressed
   in a title + a thumbnail a viewer reads in one glance (1–3 visual elements), it will
   underperform no matter how good the video is. `[reported]`
-- **Write 15–20 candidate titles per video. Never ship the first one.** Packaging
+- **The package is the unit: one title and one thumbnail concept conceived together**
+  as two halves of a single promise — the thumbnail shows the tension, the title tells
+  it, and neither is generated, scored, or chosen alone, because the viewer only ever
+  meets them together in the feed.
+- **Write 15–20 candidate packages per video. Never ship the first one.** Packaging
   iteration is the single highest-leverage activity on this channel.
-- **The stage that owns this law is the Script Blueprint.** Title candidates are scored
-  with the first-sentence gate, thumbnail routes are proposed, and both are recorded in
-  the blueprint appendix's `### Packaging` section before any body narration exists.
-  Detailed workflow:
+- **The stage that owns this law is the Script Blueprint.** Package candidates are
+  scored as units — title half through the feed-adapted gate, thumbnail half through
+  the one-glance phone-size read, the pair through complementarity — and three winning
+  packages are recorded in the blueprint appendix's `### Packaging` section before any
+  body narration exists. Detailed workflow:
   [the Script Blueprint packaging owner](../.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md#design-the-packaging-with-the-intro).
 - **Accepted 2026-07-30: a dedicated standalone packaging skill will own title+thumbnail
   generation and evaluation** (design in progress; blueprint routing updates when it
@@ -150,8 +155,13 @@ recreating it.
   scope; evaluation rigor is not limited by setup cost. Research basis:
   [`docs/research/2026-07-30-packaging-ctr-research.md`](../docs/research/2026-07-30-packaging-ctr-research.md).
 - **Educational content averages ~4.5% CTR.** `[reported]` If a live video sits
-  consistently under ~2% CTR, the packaging is failing — swap the thumbnail/title,
-  don't wait.
+  consistently under ~2% CTR, the packaging is failing — swap the package, don't wait.
+  Judge CTR only per traffic source against the channel's own baseline, jointly with
+  watch time: half of all videos land between 2% and 10% `[verified — YouTube official]`,
+  small-channel CTR runs deceptively high on warm impressions, and falling CTR with
+  rising impressions is often growth, not failure. YouTube's ranker and its native
+  Test & Compare tool optimize watch-time per impression, not raw clicks — honest
+  packaging is the winning strategy, not a constraint on it. `[verified]`
 - **The winning shape is "familiar yet unexpected":** sit inside the niche's
   conventions, then add one twist that opens a curiosity gap. `[reported]`
 - **Proven title formulas** (adapt, don't invent from scratch) `[reported]`:

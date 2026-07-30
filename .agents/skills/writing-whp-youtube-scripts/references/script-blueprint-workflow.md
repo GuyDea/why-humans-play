@@ -94,23 +94,41 @@ Packaging is decided at the Blueprint stage, before any body narration exists �
 STEERING's packaging law calls packaging the product, and the blueprint gate is its
 last honest checkpoint. Record the work in the appendix's `### Packaging` section.
 
-- Write fifteen to twenty title candidates and never ship the first one. Score every
-  title candidate with the story owner's
-  [first-sentence gate](story-and-hook-method.md#gate-the-first-sentence) — a title is
-  a first sentence read in the feed — and record each score with its dead tests named.
-- Propose at least two distinct thumbnail routes — face-led, pure-concept,
-  brand-anchor, or pattern-reveal — with one concrete concept each: the visual, an
-  overlay of one to three words, and what a viewer reads at phone size in one glance.
-- The thumbnail shows the tension; the title tells it; they must not repeat each
-  other.
+- **The unit of packaging is the package**: one title and one thumbnail concept
+  conceived together as the two halves of a single promise. The thumbnail shows the
+  tension; the title tells it; they must not repeat each other; together they open
+  exactly one question. Never generate, score, or select a title without its thumbnail
+  half or a thumbnail without its title half — the viewer only ever meets them
+  together in the feed.
+- Write fifteen to twenty package candidates and never ship the first one. When a
+  packaging-patterns brief from competitor and outlier research is supplied, ground
+  candidate structures in its clustered patterns; remix structures, never copy
+  surfaces.
+- Score each package as a unit and record each score with its dead tests named:
+  - **Title half — the feed-adapted gate.** The story owner's
+    [first-sentence gate](story-and-hook-method.md#gate-the-first-sentence) applies
+    with T2 (unclosable gap) and T3 (edge placement) unchanged. T1 adapts to the feed:
+    the stake must be one the target viewer recognizes as their own, but literal
+    second-person phrasing is not required and earns no extra credit — a first-person
+    narrator title may carry the stake. T4 applies unchanged. Keep the title specific
+    but incomplete: a title that fully answers itself kills the click, and a vague one
+    never earns it.
+  - **Title half — feed constraints.** At most ~60 characters with the decisive words
+    in the first ~40; the mobile feed truncates the rest.
+  - **Thumbnail half — the one-glance read.** State the route (face-led, pure-concept,
+    brand-anchor, or pattern-reveal), the visual, an overlay of one to three words
+    that never repeats the title, and what a viewer reads at phone size in one glance,
+    in both the light and dark feed.
+  - **The pair — complementarity.** Each half must carry weight the other cannot;
+    a pair whose halves restate each other fails.
+- Select **three winning packages** spanning distinct thumbnail routes. These three
+  are the Test & Compare trio for publish; YouTube decides such tests by watch-time
+  share, not raw clicks, so an honest package is also the winning strategy.
 - Every question the packaging opens must be answered in the video. A package the
   episode cannot honestly pay is clickbait and fails the gate, exactly as an unmapped
   intro promise does.
-- Recommend a Test & Compare trio: the three thumbnail concepts worth testing against
-  each other when the episode publishes.
-- The final title and thumbnail choice is Martin's. The record may carry
-  `final choice pending` through the gate, but the candidates and concepts may not be
-  empty.
+- The final package choice is Martin's. The record may carry `final choice pending`
+  through the gate, but the candidates and winning packages may not be empty.
 
 ## Bind every promise to delivery
 

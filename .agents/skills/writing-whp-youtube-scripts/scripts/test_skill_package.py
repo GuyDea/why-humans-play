@@ -4255,7 +4255,11 @@ class SkillAmendmentTests(unittest.TestCase):
             "of the question itself.",
             story,
         )
-        self.assertIn("a title is a first sentence read in the feed", story)
+        self.assertIn(
+            "A title is not heard alone — it is read in the feed next to its "
+            "thumbnail",
+            story,
+        )
         self.assertIn(
             "a line that fails the gate is replaced, not reworded around its "
             "dead test",
@@ -4283,21 +4287,25 @@ class SkillAmendmentTests(unittest.TestCase):
 
         self.assertIn("## Design the packaging with the intro", workflow)
         self.assertIn(
-            "Write fifteen to twenty title candidates and never ship the first "
+            "The unit of packaging is the package",
+            workflow,
+        )
+        self.assertIn(
+            "Write fifteen to twenty package candidates and never ship the first "
             "one.",
             workflow,
         )
         self.assertIn(
-            "Score every title candidate with the story owner's",
+            "Score each package as a unit",
             workflow,
         )
         self.assertIn(
             "The thumbnail shows the tension; the title tells it; they must not "
-            "repeat each other.",
+            "repeat each other;",
             workflow,
         )
         self.assertIn(
-            "at least two distinct thumbnail routes",
+            "Select **three winning packages** spanning distinct thumbnail routes.",
             workflow,
         )
         self.assertIn(
