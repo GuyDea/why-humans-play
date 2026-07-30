@@ -1870,3 +1870,79 @@ RED/GREEN record plus later migration note remains at
 `docs/superpowers/evidence/2026-07-28-whp-intro-first-predraft-gate.md`. `BRAND.md`
 remains unchanged because this is a YouTube script-artifact contract, not umbrella-brand
 doctrine.
+
+## 2026-07-29 — EP2 job-interviews premise rejected; slot reopened
+
+**Decision:** The accepted launch sequence's EP2 episode (*What job interviews actually
+test*) is rejected and the EP2 slot reopened.
+
+**Rationale:** During hook development Martin judged the premise too weak and vague for
+the target audience: the intended viewers already hold the settled cynical model
+("interviews are theater"), so the episode's reversal carried no unclosable curiosity
+gap. The session also produced a four-test first-sentence rubric (viewer in the
+sentence; unclosable gap; edge placement against the held belief; in-sentence stakes,
+no hedges) that the premise's best openings failed.
+
+**Documents:** `whp-youtube/STEERING.md` (launch sequence EP2 entry), `BRAND.md`
+(downstream sequence note). Historical research and proposals remain unchanged as
+historical inputs.
+
+## 2026-07-29 — Sports-betting episode parked with architecture preserved
+
+**Decision:** The developed premise *The book that bets on you* (sportsbook as sorting
+machine) is parked at Martin's request; its complete unapproved Architecture artifact is
+preserved at `whp-youtube/drafts/parked-betting-on-you-architecture.md`.
+
+**Rationale:** Martin liked the premise but identified the topic as personally
+sensitive; parked rather than rejected so the material stays available for future
+re-ranking.
+
+**Documents:** `whp-youtube/drafts/parked-betting-on-you-architecture.md` (new, parked),
+`whp-youtube/STEERING.md` (EP2 entry notes the parking), `whp-youtube/topic-backlog.md`
+(listed under recently closed).
+
+## 2026-07-29 — Ten-candidate topic backlog adopted; self-handicapping front-runner
+
+**Decision:** A ten-candidate topic backlog is adopted as active working material at
+`whp-youtube/topic-backlog.md`; *Why you didn't study* (self-handicapping, Berglas &
+Jones 1978) is recorded as the front-runner for the open EP2 slot, explicitly not yet
+selected.
+
+**Rationale:** Candidates were developed under the four-test hook rubric with verified
+proof-case source leads (search-verified at ideation depth; full verification remains
+Final-stage work). Martin accepted the whole list ("I like them all") and named the
+self-handicapping candidate as the one he liked most.
+
+**Documents:** `whp-youtube/topic-backlog.md` (new), `whp-youtube/STEERING.md` (EP2
+entry points at the backlog and front-runner), `BRAND.md` (sequence note points at the
+backlog).
+
+## 2026-07-29 — EP2 selected: Why you didn't study (self-handicapping)
+
+**Decision:** *Why you didn't study* (self-handicapping, anchored in Berglas & Jones
+1978) is selected as EP2 and enters the episode pipeline at the Architecture stage.
+
+**Rationale:** Martin's explicit selection from the adopted ten-candidate backlog; it
+was already the recorded front-runner. The Architecture run doubles as the field test
+for the proposed mine-and-kill-test connection process before any skill amendment.
+
+**Documents:** `whp-youtube/STEERING.md` (EP2 entry), `whp-youtube/topic-backlog.md`
+(candidate marked selected).
+
+## 2026-07-29 — EP002 Script Blueprint approved and promoted to draft
+
+**Decision:** Martin approved the ep002 Script Blueprint (polished intro and body
+logic map, including two promise-line revisions into actionable sharing voice), and
+the blueprint was promoted into the episode's validated `draft/` pair with the intro's
+spoken wording preserved verbatim and the approved SP01–SP07 route expanded into a
+complete seven-beat narration.
+
+**Rationale:** Explicit approval at the Blueprint gate ("ok, looks good - you can
+continue") after two requested promise-line refinements; promotion is the pipeline's
+reconcilable decision for blueprint work.
+
+**Documents:** `whp-youtube/episodes/ep002-why-you-didnt-study/blueprint/` (approved
+pair, preserved as review snapshot), `whp-youtube/episodes/ep002-why-you-didnt-study/draft/`
+(new validated pair; readability gate passed with no unresolved items),
+`whp-youtube/STEERING.md` (EP2 entry updated with working state). Creative approval of
+the complete narration remains pending and is not implied by this promotion.
