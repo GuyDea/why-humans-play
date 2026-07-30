@@ -74,7 +74,7 @@
 - **Status:** BLUEPRINT
 - **Role:** Current Episode 1 intro-first Script Blueprint (felt-entry revision, 2026-07-30).
 - **Architecture baseline:** `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`
-- **Story baseline:** Approved medical-case-first SP01–SP08 progression in `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`, with the felt-entry rebalance recorded below: the documented stroke-consideration motive moves from the SP04 case return into the intro per the skill's voltage-ranking rule, and SP04's return becomes a reinterpretation beat.
+- **Story baseline:** Approved medical-case-first SP01–SP08 progression in `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md`, with two recorded amendments: the felt-entry rebalance (the documented stroke-consideration motive moves from the SP04 case return into the intro per the skill's voltage-ranking rule, and SP04's return becomes a reinterpretation beat), and the 2026-07-30 E-06 removal from SP05 (cold-viewer evaluation, approved by Martin; contrast resolution moved to SP06's anchoring callback).
 - **Doctrine baseline:** Felt-entry intro doctrine adopted 2026-07-30 (`DECISIONS.md`), applied as: shared-behavior identification route (viewers have asked chatbots about symptoms), documented-motive case entry, praised-enemy concession, isolated cost line, dismissal preemption, and a nameable withheld object.
 - **Preservation rule:** Keep the canonical Episode 1 final pair accessible until its migration into the rebuilt final pair and archive is complete.
 
@@ -233,16 +233,17 @@ everything below remains logic-only until Martin approves both the intro and thi
 
 #### SP05 — Precision of language impersonates precision of diagnosis
 
-- **What the viewer learns:** Clear presentation can become a credibility cue, and a
-  machine-source label can sometimes affect advice weight. Precision of language is not
-  precision of diagnosis.
+- **What the viewer learns:** Clear presentation can become a credibility cue.
+  Precision of language is not precision of diagnosis.
 - **Why this beat comes here:** Once the direction of the answer is explained, the next
   job is explaining why that direction can feel independently authoritative.
 - **Evidence or story job and boundary:** E-05 establishes processing fluency in its own
-  setting; E-06 establishes contextual algorithm appreciation; E-13 only illustrates what
-  felt clear to the patient (new case information: the earlier medical explanation felt
-  hard to understand; the chatbot answer felt useful, precise, and clear). Resolve E-02
-  versus E-06 by population and task, not a universal trust claim.
+  setting; E-13 only illustrates what felt clear to the patient (new case information:
+  the earlier medical explanation felt hard to understand; the chatbot answer felt
+  useful, precise, and clear). Amendment 2026-07-30 (cold-viewer evaluation, approved by
+  Martin): E-06 algorithm appreciation is cut from narration; the label-distrust versus
+  influence contrast resolves at SP06 through E-02's own anchoring explanation and the
+  feeling-versus-behavior callback.
 - **Incoming transition:** Sycophancy explains agreement, but not the transformation that
   makes agreement feel newly discovered.
 - **Outgoing transition or mini-hook:** A polished answer may influence one choice. The

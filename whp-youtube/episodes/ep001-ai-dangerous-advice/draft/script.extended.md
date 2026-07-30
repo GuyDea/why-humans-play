@@ -246,19 +246,6 @@
 > And chatbot answers are built smooth. Clean structure, confident rhythm, no
 > hesitation.
 
-[TRANSITION — Apparent contradiction with beat 2 resolved as one probable difference, not a rule.]
-
-> Here's the part that looks like it breaks my own story. The radiologists trusted the
-> AI label less — and now a study says the label can add weight?
->
-> Across six experiments, people read the same advice under different labels. On
-> questions outside their own knowledge, some gave it more weight when they believed an
-> algorithm wrote it.
->
-> One difference is probably expertise. The radiologists were judging their own
-> specialty. The label seems to add weight where people are less sure of their own
-> judgment. Like a man alone with strange symptoms and a search box.
-
 [TRANSITION — Case return with new information: unclear earlier explanation versus clear chatbot answer.]
 
 > The case report holds one detail that shows this working. The medical explanation
@@ -305,12 +292,15 @@
 >
 > In this game, the AI's answer is your first price tag.
 
-[TRANSITION — Radiologist callback: anchoring as the researchers' offered explanation.]
+[TRANSITION — Radiologist callback: anchoring as the researchers' offered explanation, resolving label-distrust versus influence through the feeling-versus-behavior lesson.]
 
 > It's also where the radiologists' story pays off. Anchoring is the explanation the
 > researchers offered for why distrust didn't help. Each radiologist read a suggested
 > diagnosis first. After that, they were checking the suggestion — not reading the scan
 > fresh.
+>
+> They trusted it less, remember — and it steered them anyway. Feeling versus behavior,
+> one more time.
 
 [TRANSITION — Feedback-loop evidence bounded to later-judgment change.]
 
@@ -349,11 +339,9 @@
 >
 > He recovered, without lasting symptoms. This story got a kind ending.
 
-[TRANSITION — Causation boundary: no claim the chat caused the delay or the TIA.]
+[MINI-HOOK | TRANSITION — Causation boundary compressed to one clause that opens the consolidated-boundary handoff.]
 
-> And the boundary, clearly: nobody can prove the chat caused his delay, and ChatGPT
-> did not cause the TIA. What the case documents is the route — a reassuring answer, an
-> evening at home, and then the ambulance.
+> *And nobody can prove the chat caused any of it — hold that thought.*
 
 [AHA | LOCKED WORDING — Software-update punchline, landing after the reveal.]
 
@@ -402,11 +390,12 @@
 >
 > The danger wasn't missing from the AI. **It was missing from the menu.**
 
-[TRANSITION — Counterfactual boundary: the comparison cannot replay his evening.]
+[TRANSITION — The consolidated boundary moment: causation and counterfactual voiced once, scope stated narrowly.]
 
-> One boundary, one more time: nobody can say he would have acted differently with the
-> alarming answer. The comparison proves the wording hid danger. It cannot replay his
-> evening.
+> Two boundaries, said once, because they matter. Nobody can prove the chat caused his
+> delay. And nobody can say the alarming answer would have changed his evening.
+>
+> What the comparison proves is narrower — the first wording hid the danger.
 
 [AHA | LOCKED WORDING — Second-answer-not-second-opinion lesson.]
 
@@ -507,7 +496,7 @@
 - **Status:** DRAFT
 - **Deliverable:** Complete Episode 1 draft narration (felt-entry rebuild, script-economy pass, 2026-07-30).
 - **Approved baselines:** Architecture `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`; Story Progression `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md` (APPROVED 2026-07-28) with the felt-entry rebalance recorded in the Blueprint appendix; Blueprint pair promoted 2026-07-30 under Martin's direct blueprint-to-final instruction.
-- **Word count:** ~2,050 spoken words (~13 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules.
+- **Word count:** ~2,210 spoken words (~13.8 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules, the cold-viewer evaluation cuts, and the E-06 removal.
 - **Canon:** Uses canon concepts borrowed-authority loop, Second-Opinion Test, possible-answer/safe-decision distinction, distrust–checking gap; opening shape registered in `whp-youtube/canon.md`.
 
 ### Story progression and payoff audit
@@ -516,11 +505,12 @@
 - L-01 (title question) opens in the intro, pays beats 6–8 and the final line. L-02 (quiet mechanism) opens in the intro, pays progressively beats 3–6. L-03 (unasked question) opens at the intro close, pays in beat 7's documented stroke-framed prompt. L-04 (ambulance/outcome) opens at the intro cost line, pays in beat 6's TIA reveal.
 - Four-move explanation delivered beats 3–6; four counter-questions delivered beats 3–6 and assembled with boundaries in beats 7–8; SP04's case return is a reinterpretation beat (changed meaning) per the rebalance.
 - Retention economy: radiologist retell compressed to result-bearing details; training explanation voiced as one likely reason; feedback-loop claim bounded to later-judgment change; human-persuader ending compressed to the scale contrast.
+- Cold-viewer evaluation (2026-07-30) applied with Martin's disposition: E-06 algorithm appreciation cut from beat 5 (progression amendment — the label-distrust versus influence contrast now resolves at beat 6 through E-02's own anchoring explanation and the feeling-versus-behavior callback); case boundaries consolidated into one beat-7 moment with a one-clause mini-loop in beat 6; adjacent punchlines thinned; two claim-smell lines repaired.
 
 ### Evidence boundaries
 
 - E-13 (Saenger et al. 2024 case report, `PROJECT-KNOWN`) carries stakes, prompt sensitivity, and outcome; narration claims no causation, no prevalence, and no counterfactual. Diagnosis revealed only at beat 6; alternate stroke-framed prompt bounded to "proves the wording hid danger in this case."
-- E-02 radiologists: label study, human-written advice, no real model — stated in beat 2. E-03 sycophancy: tested assistants and analyzed preference data; training voiced as one likely reason. E-05 fluency and E-06 algorithm appreciation: own settings; expertise voiced as one probable difference. E-07 feedback loops: controlled tasks, later-judgment change only.
+- E-02 radiologists: label study, human-written advice, no real model — stated in beat 2. E-03 sycophancy: tested assistants and analyzed preference data; training voiced as one likely reason. E-05 fluency: own setting; chatbot smoothness stated as description. E-06 algorithm appreciation: removed from narration 2026-07-30 (progression amendment); retained in project evidence only. E-07 feedback loops: controlled tasks, later-judgment change only.
 - Open verification dependencies: E-13 primary-source verification (PMC11006786) and its F-record are due at the Final stage; E-08/E-11/E-12 remain unnarrated per the progression plan.
 
 ### Spoken-readability result

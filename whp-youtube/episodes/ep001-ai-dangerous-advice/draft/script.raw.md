@@ -180,17 +180,6 @@
 > And chatbot answers are built smooth. Clean structure, confident rhythm, no
 > hesitation.
 
-> Here's the part that looks like it breaks my own story. The radiologists trusted the
-> AI label less — and now a study says the label can add weight?
->
-> Across six experiments, people read the same advice under different labels. On
-> questions outside their own knowledge, some gave it more weight when they believed an
-> algorithm wrote it.
->
-> One difference is probably expertise. The radiologists were judging their own
-> specialty. The label seems to add weight where people are less sure of their own
-> judgment. Like a man alone with strange symptoms and a search box.
-
 > The case report holds one detail that shows this working. The medical explanation
 > he'd been given earlier felt hard to understand. The chatbot's answer felt useful,
 > precise, and clear.
@@ -229,6 +218,9 @@
 > researchers offered for why distrust didn't help. Each radiologist read a suggested
 > diagnosis first. After that, they were checking the suggestion — not reading the scan
 > fresh.
+>
+> They trusted it less, remember — and it steered them anyway. Feeling versus behavior,
+> one more time.
 
 > I still needed one more piece of evidence: that AI advice can change not just one
 > answer, but the judgments a person makes afterward.
@@ -257,9 +249,7 @@
 >
 > He recovered, without lasting symptoms. This story got a kind ending.
 
-> And the boundary, clearly: nobody can prove the chat caused his delay, and ChatGPT
-> did not cause the TIA. What the case documents is the route — a reassuring answer, an
-> evening at home, and then the ambulance.
+> *And nobody can prove the chat caused any of it — hold that thought.*
 
 > The machine didn't give him a second opinion. **It gave his first opinion a software
 > update.**
@@ -294,9 +284,10 @@
 >
 > The danger wasn't missing from the AI. **It was missing from the menu.**
 
-> One boundary, one more time: nobody can say he would have acted differently with the
-> alarming answer. The comparison proves the wording hid danger. It cannot replay his
-> evening.
+> Two boundaries, said once, because they matter. Nobody can prove the chat caused his
+> delay. And nobody can say the alarming answer would have changed his evening.
+>
+> What the comparison proves is narrower — the first wording hid the danger.
 
 > Friction from the same model is a tool, and I use it. **But a second answer is not a
 > second opinion.**
