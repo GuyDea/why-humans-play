@@ -65,8 +65,7 @@ operation, and creative status. Do not make an operation depend on invisible cha
 Episode-scale work moves through five named stages in this order. Each stage ends at a human
 approval gate, and each gate authorizes only the next stage. The last three stages are named
 after the directories they write under `whp-youtube/episodes/epNNN-stable-name/`; the
-Architecture and Progression artifacts are returned in the conversation and are not stored
-as episode files unless Martin asks for one.
+Architecture and Progression artifacts are returned in the conversation, not as files.
 
 ```dot
 digraph episode_pipeline {
@@ -150,7 +149,9 @@ concept-discovery scan even in scoped mode. Inventory explanatory mechanisms, co
 named laws or effects, interventions, and countermeasures before deciding which concepts
 belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
 the full production workflow. Use the discovery source only to establish the concept and
-its meaning; defer episode-claim and example verification to the final stage.
+its meaning; defer episode-claim and example verification to the final stage. Then mine candidate
+connections from the inventory and kill-test them adversarially; build the reframe only
+from survivors, with bridges verified and kills registered.
 
 An architecture cannot be approved unless it contains both a non-obvious understanding
 and a concrete, evidence-bounded viewer response with an observable result. Check the

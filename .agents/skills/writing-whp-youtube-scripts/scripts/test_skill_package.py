@@ -4124,6 +4124,50 @@ class SkillPackageTests(unittest.TestCase):
         )
 
 
+class SkillAmendmentTests(unittest.TestCase):
+    """Guard the field-tested amendments: kill-testing, widening, naming."""
+
+    def test_architecture_owns_the_mine_and_kill_test_procedure(self) -> None:
+        architecture = " ".join(
+            (SKILL_ROOT / "references/script-architecture.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+        skill = " ".join(SKILL_MD.read_text(encoding="utf-8").split())
+
+        self.assertIn("## Mine and kill-test connections", architecture)
+        self.assertIn(
+            "The earned reframe is built from a surviving connection, never the "
+            "reverse.",
+            architecture,
+        )
+        self.assertIn(
+            "independent adversarial refuters whose default verdict is refuted",
+            architecture,
+        )
+        self.assertIn(
+            "Record every killed or corrected candidate in the killed-connections "
+            "register with its cause of death",
+            architecture,
+        )
+        self.assertIn(
+            "Verify the surviving connections' load-bearing bridges against primary "
+            "sources immediately, not at the final stage",
+            architecture,
+        )
+        self.assertIn(
+            "Do not present an architecture whose reframe has no kill-tested "
+            "connection behind it.",
+            architecture,
+        )
+        self.assertIn(
+            "Then mine candidate connections from the inventory and kill-test them "
+            "adversarially; build the reframe only from survivors, with bridges "
+            "verified and kills registered.",
+            skill,
+        )
+
+
 class StatusVocabularyOwnershipTests(unittest.TestCase):
     """Guard the vocabularies that previously drifted between files."""
 

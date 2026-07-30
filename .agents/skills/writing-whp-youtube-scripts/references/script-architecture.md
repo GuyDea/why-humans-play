@@ -5,6 +5,7 @@
 - [Purpose](#purpose)
 - [Route episode-scale work](#route-episode-scale-work)
 - [Discover the concept field](#discover-the-concept-field)
+- [Mine and kill-test connections](#mine-and-kill-test-connections)
 - [Architecture artifact](#architecture-artifact)
 - [Refine the architecture](#refine-the-architecture)
 - [Approve the architecture](#approve-the-architecture)
@@ -95,6 +96,37 @@ If research is unavailable or Martin explicitly requests an offline pass, label 
 useful as provisional thinking, but it is not approval-ready until the scan runs or Martin
 explicitly accepts the omission risk.
 
+## Mine and kill-test connections
+
+The earned reframe is built from a surviving connection, never the reverse. After the
+concept inventory exists, mine candidate connections from it and try to kill them
+before any storyline forms.
+
+Mine by shape, with each pass blind to the others. The recurring honest shapes:
+
+- **Inversion** — the thing believed protective is the vector.
+- **Confession** — the system's own records admit the mechanism.
+- **Natural experiment** — reality accidentally ran the control condition.
+- **Same mechanism, alien domain** — documented in both places, never analogized.
+- **Load-bearing number** — one verified figure that reorganizes the model.
+- **Convergence** — independent literatures predicting the same behavior.
+
+Write every candidate as a falsifiable statement plus its named bridge: the specific
+fact that must be true for the connection to be honest. Then submit each candidate to
+independent adversarial refuters whose default verdict is refuted, who must open
+primary sources, and whose job is the disanalogy, the duller rival explanation, and
+the population or mechanism mismatch. A majority-refuted candidate dies.
+
+Verify the surviving connections' load-bearing bridges against primary sources
+immediately, not at the final stage; an unpluggable bridge kills the connection the
+day it is proposed. Record every killed or corrected candidate in the
+killed-connections register with its cause of death — killed connections are zombies
+that otherwise creep back into drafts as harmless transitions.
+
+The panel guarantees honesty, not taste: rank survivors by surprise and evidence
+strength, and let Martin's judgment pick among them. A run that mines nothing
+first-rate is a cheap early verdict on the topic, not a failure of the method.
+
 ## Architecture artifact
 
 Return the following fields in this order. Use compact prose and tables where they make
@@ -114,6 +146,18 @@ the thesis hardens. Include:
 
 The inventory is deliberately broader than the eventual episode. Keep useful exclusions
 visible; they show that a tempting term was considered rather than forgotten.
+
+### Mined connections and killed register
+
+Show the connection work directly after the inventory:
+
+- every mined candidate with its shape, falsifiable statement, named bridge, and
+  kill-panel verdict;
+- the killed-connections register, each entry with its cause of death; and
+- the bridge-verification status of every surviving load-bearing connection.
+
+Build the earned reframe below from a surviving connection. Do not present an
+architecture whose reframe has no kill-tested connection behind it.
 
 ### Package and audience
 
@@ -277,6 +321,9 @@ Review the architecture without drafting around its weaknesses:
 
 - Is the concept inventory first, sourced, complete across explanation and intervention
   buckets, and searched to the stated saturation rule?
+- Was every reframe-bearing connection mined from the inventory, kill-tested by
+  refuters with primary sources, and its bridge verified — with killed candidates
+  registered?
 - Does every candidate have an explicit include-or-exclude decision, and are original
   syntheses clearly distinguished from established terms?
 - Can the core answer explain the whole episode without examples or jokes?
@@ -336,6 +383,8 @@ answer, insight ladder, earned reframe, practical payoff, or final lesson.
 - Proceeding from architecture approval directly to beats or narration without the Story
   Progression Plan.
 - Producing a generic topic summary with no earned reframe.
+- Building the reframe first and recruiting evidence toward it afterward.
+- Letting a killed connection reappear in prose as a transition or aside.
 - Repairing a flat insight ladder with manufactured story tension instead of reopening
   architecture.
 - Producing a surprising reframe with no concrete viewer response.
