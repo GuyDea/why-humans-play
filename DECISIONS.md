@@ -2188,3 +2188,28 @@ specific wording awaits Martin's content review; the doctrine itself is settled.
 `scripts/test_skill_package.py` (pins updated; 115 tests green),
 `whp-youtube/STEERING.md` (Law 1 cascade). Episode blueprint packaging records
 (ep001/ep002) remain historical artifacts of the prior contract.
+
+## 2026-07-30 — packaging-whp-videos skill landed
+
+**Decision:** Under Martin's direct build instruction, the standalone
+`packaging-whp-videos` skill landed at `.agents/skills/packaging-whp-videos/` with
+the settled scope: outlier packaging sweep with a patterns-brief contract; 15–20
+package candidates scored as units; 3 winners on distinct routes rendered 5× each;
+evaluation in three layers (mechanical lint with contact sheets and light/dark feed
+mockups among real competitor thumbnails, a seven-persona cold-viewer panel whose
+expected-payoff answers drive the honesty check, DeepGaze IIE saliency); post-publish
+doctrine; and a per-episode packaging record under
+`whp-youtube/episodes/epNNN-stable-name/packaging/`. The blueprint workflow's
+packaging section and STEERING Law 1 route to it. Scripts validated against the
+tracked EP1 renders; both skill test suites green (115 + 10).
+
+**Rationale:** Design approved in conversation (see the two 2026-07-30 entries above
+and `docs/superpowers/specs/2026-07-30-packaging-skill-design.md`). Behavioral
+dry-run against ep002's hand-made packaging remains recommended before first
+production use.
+
+**Documents:** `.agents/skills/packaging-whp-videos/` (new),
+`.claude/skills/packaging-whp-videos` (symlink),
+`.agents/skills/writing-whp-youtube-scripts/references/script-blueprint-workflow.md`
+(routing), `whp-youtube/STEERING.md` (Law 1 bullet names the landed skill),
+`docs/superpowers/specs/2026-07-30-packaging-skill-design.md` (new).
