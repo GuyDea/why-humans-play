@@ -150,6 +150,7 @@
 > Half of the praised kids heard one sentence: <u>**you must be smart at this.**</u>
 >
 > That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+> Or: you're so talented.
 >
 > That's the sentence I promised you at the start. The one you've probably said to
 > someone you love.
@@ -298,7 +299,8 @@
 >
 > The praise studies have their disputes — but the safe swap costs nothing.
 >
-> Praise the working, not the being. You worked hard on this. Not: you are so smart.
+> Praise the working, not the being. You worked hard on this. Not: you are so smart,
+> or so talented.
 >
 > One hands them a plan. The other hands them a label to defend.
 >

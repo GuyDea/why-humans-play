@@ -206,6 +206,7 @@
 > Half of the praised kids heard one sentence: <u>**you must be smart at this.** [F-003](https://www.columbia.edu/cu/psychology/courses/3615/Readings/Mueller_Dweck.pdf)</u>
 >
 > That's the lab's stiff way of saying it. At home, it sounds like: you're so smart.
+> Or: you're so talented.
 >
 > That's the sentence I promised you at the start. The one you've probably said to
 > someone you love.
@@ -390,7 +391,8 @@
 >
 > The praise studies have their disputes — but the safe swap costs nothing.
 >
-> Praise the working, not the being. You worked hard on this. Not: you are so smart.
+> Praise the working, not the being. You worked hard on this. Not: you are so smart,
+> or so talented.
 >
 > One hands them a plan. The other hands them a label to defend.
 >
@@ -437,7 +439,7 @@
 - **Version:** 2.0 — felt-choice intro and script-economy rebuild with three-layer claim verification; supersedes the 2026-07-29 draft narration.
 - **Deliverable:** FULL-SCRIPT
 - **Target runtime:** ~12:20
-- **Word count:** 1962
+- **Word count:** 1969
 - **Audience:** Curious adults who recognize the night-before-it-mattered sabotage pattern
 - **Episode mode:** Hidden games in ordinary life (self-handicapping)
 - **Title:** Why You Didn't Study (final packaging choice pending Martin; 15 candidates in the blueprint Packaging record)
