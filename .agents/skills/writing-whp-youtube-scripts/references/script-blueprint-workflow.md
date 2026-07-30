@@ -92,7 +92,11 @@ delay value.
 
 Packaging is decided at the Blueprint stage, before any body narration exists —
 STEERING's packaging law calls packaging the product, and the blueprint gate is its
-last honest checkpoint. Record the work in the appendix's `### Packaging` section.
+last honest checkpoint. Record the gate summary in the appendix's `### Packaging`
+section. The standalone `packaging-whp-videos` skill owns the deep machinery —
+competitor/outlier packaging research, package generation and scoring, thumbnail
+rendering, and evaluation — and writes the full working set to the episode's
+`packaging/` directory; invoke it for that work and summarize its outcome here.
 
 - **The unit of packaging is the package**: one title and one thumbnail concept
   conceived together as the two halves of a single promise. The thumbnail shows the
