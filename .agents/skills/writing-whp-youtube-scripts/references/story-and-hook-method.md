@@ -241,6 +241,24 @@ Create this compact card for each candidate:
 - **Visual anchor:** The concrete evidence, asset candidate, demonstration, or graphic.
 - **Payoff connection:** How the opening creates a need for the final answer.
 
+Before carding candidates, rank the featured case's documented facts by emotional
+voltage — how strongly a viewer recognizes their own life in the fact — and give the
+intro first claim on the highest-voltage fact even when the progression plan currently
+assigns it to a later beat. Prefer a documented motive or inner state over event
+chronology as the case entry. Moving later-beat material into the intro is a
+story-progression change, never a drop-in swap: rebalance the affected case returns in
+the same pass so each still adds new information.
+
+Choose the identification route with one test: have viewers literally done what the
+case's person did? If yes, enter through the person and let the shared behavior carry
+identification. If not, plan a second-person reconstruction of the case's dilemma so
+the viewer can feel the tempting option before the observed result is revealed. When
+the featured evidence is a population study with no identifiable person, plan the
+emotional entry as a second-person memory scene built from the script's own
+recognition examples, placed before the study and closed with a weld line that makes
+the study explain the scene. Entry wording belongs to
+[the rapid method's felt-entry moves](rapid-prototyping.md#make-the-case-entry-felt).
+
 Before scoring a factual hook, apply
 [the rapid method's first-hearing hook check](rapid-prototyping.md#build-the-complete-hook).
 That section owns causal legibility, the replacement threshold, and the humor boundary.
@@ -358,6 +376,17 @@ Do not let the total conceal a fatal flaw. Reject any candidate that depends on 
 rejected claim, invented scene detail, or a loop the script cannot explicitly pay
 off.
 
+When the standard tie-break cannot separate same-episode candidates, or when a
+structurally compliant intro still reads flat, compare the siblings on three
+diagnostic dimensions: shoes (can the viewer inhabit the case, through shared behavior
+or a felt dilemma simulation), voltage placement (does the intro hold the case's
+highest-voltage documented fact), and weld (does one explicit line make the evidence
+explain the viewer's scene). These dimensions compare sibling candidates from the same
+episode only and produce no absolute score. They filter and rank drafts; they never
+generate them, and optimizing wording to satisfy them produces the template drift the
+tic rule forbids. Once episodes publish, recalibrate every scoring criterion against
+observed retention and delete any that fails to predict it.
+
 ## Build scenes without invention
 
 Use this sequence when a factual scene is the strongest opening or beat:
@@ -467,7 +496,10 @@ preserve curiosity without obscuring the current argument.
 Write every open loop as a specific unresolved question, contradiction, comparison,
 or promised test. Name the beat where it will be paid off. Do not rely on vague
 phrases such as “but it gets stranger” unless the next beat states exactly what
-changes.
+changes. For the intro's final line, prefer a withheld object the viewer can name — an
+exact sentence, an unasked question, a specific number — over an abstract escalation.
+Deliver the story and withhold the mechanism: a loop stays honest when the narrative
+is complete and only the explanation is owed.
 
 Pay each loop off explicitly in narration or unmistakable visual treatment. When a
 partial answer opens a new question, distinguish the paid portion from the new loop.

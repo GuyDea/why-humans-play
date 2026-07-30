@@ -213,6 +213,28 @@ Use either flexible spine:
   establishes susceptibility to an adjacent behavior rather than the episode's exact
   mechanism, say so and introduce separate evidence for that mechanism.
 
+### Make the case entry felt
+
+Execute the planned case entry (route selection belongs to
+[the story owner's opening-candidate method](story-and-hook-method.md#compare-and-score-three-opening-candidates))
+with these wording moves, each used at most once per intro:
+
+- Voice a second-person dilemma reconstruction as an invitation (“now sit in that
+  chair”), never as the participants' attributed thoughts, and reveal the observed
+  result only after the viewer could feel the pull it measures.
+- Concede the genuine quality of the thing being warned about when the evidence
+  supports the concession; a reasonable answer that still went wrong out-threatens any
+  strawman.
+- Give the consequence the shortest sentence in the intro, standing alone in its own
+  beat, without adjectives.
+- Immediately after the story, voice and defeat the viewer's easiest dismissal using
+  the case's own logic, not a lecture.
+- Weld a viewer memory scene to the evidence with one explicit line that makes the
+  evidence explain the scene.
+
+Vary each move's wording across episodes; a repeated felt-entry phrasing becomes a tic
+and a template a returning viewer can predict.
+
 ## Apply the approved progression while drafting
 
 > Derived from the structural story owner:

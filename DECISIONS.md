@@ -2007,3 +2007,38 @@ change (`ep001` records its candidate set as honestly open; `ep002`'s candidates
 moved under `### Packaging`). Review findings 3 (post-publish readback), 5 (sequel
 handoff), and 6 (running the topic skill's demand machinery before architecture)
 remain proposed and unadopted.
+
+## 2026-07-30 — Felt-entry intro doctrine and sibling diagnostics
+
+**Decision:** Adopt the felt-entry intro doctrine from the ep1/ep2 intro iterations:
+rank the featured case's documented facts by emotional voltage and give the intro
+first claim on the highest-voltage fact, preferring a documented motive or inner
+state over event chronology; choose the identification route by whether viewers have
+literally done what the case's person did (shared-behavior entry through the person)
+or not (second-person felt-choice simulation revealing the observed result only after
+the viewer could feel the pull), with a memory-scene-plus-weld-line entry when the
+evidence is a population study; execute entries with bounded wording moves (dilemma
+invitation, praised-enemy concession, isolated cost line, dismissal preemption, weld
+line) used at most once per intro and reworded across episodes; end intros on a
+withheld object the viewer can name; and use the new shoes / voltage placement / weld
+dimensions only as same-episode sibling diagnostics after the standard tie-break —
+filters and rankers, never generators, to be recalibrated against observed retention
+once episodes publish.
+
+**Rationale:** The ep1 three-candidate scored comparison showed the existing gate and
+rubric filter and adjudicate correctly but cannot distinguish structurally identical
+intros; each intro version Martin accepted (ep1 free-swing, both ep2 revisions) came
+from a nameable felt-entry move his reactions identified — documented-motive entry,
+viewer memory scene, felt-choice simulation. Martin asked for systematic application
+kept surgical against maintainability drift, so planning rules landed with the story
+owner, wording moves with the rapid drafting owner, and scoring additions are
+diagnostic-only with the tic rule extended to felt-entry phrasing.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md`
+(opening-candidate method gains voltage ranking and route selection; candidate scoring
+gains sibling diagnostics; loop planning gains the nameable withheld object);
+`.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md` (new
+`### Make the case entry felt` wording subsection closing the hook builder).
+`whp-youtube/STEERING.md` deliberately unchanged — episode craft doctrine lives in the
+skill. The drafted ep1 and ep2 intro variants themselves remain unmerged conversation
+proposals awaiting Martin's call.
