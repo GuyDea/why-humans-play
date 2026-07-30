@@ -515,6 +515,25 @@ natural aloud; a fragment may omit only words recoverable from the immediately p
 sentence. Read the draft aloud when the scope warrants it, but do not burden the response
 with a visible audit.
 
+### Name concepts in the audience's game vocabulary
+
+When the episode needs its own label for a concept — the recurring image the narration
+will lean on — do not run a synonym search around the first candidate. The surrounding
+sentences are negotiable; only the meaning, the honesty, and the speakability are fixed.
+
+- Generate candidates from at least three different ontological categories — a record,
+  a pursuit, a place, a role, a resource — before comparing any. One category means no
+  search happened.
+- Enumerate WHP's home ontology first: the parts of a game. Quest and side quest,
+  level, score, move, rule, achievement. A game-native term keeps the brand lens
+  literal, and the audience arrives pre-taught.
+- Run a vernacular pass: what do people already call this in their own lives? A term
+  with living usage lands without teaching.
+- Force one candidate that breaks the incumbent's sentence frame on purpose; the best
+  term often fails the constraints the old term created.
+- Prefer the human, warm term over the mechanical, precise one whenever the meaning
+  survives. "Ledger" lost to "quest" for exactly this reason.
+
 ### Run the memory-first walking-vlog pass
 
 When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or

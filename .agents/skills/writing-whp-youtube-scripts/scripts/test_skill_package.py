@@ -4193,6 +4193,35 @@ class SkillAmendmentTests(unittest.TestCase):
         )
 
 
+    def test_concept_naming_rule_is_owned_by_the_rapid_method(self) -> None:
+        rapid = " ".join(
+            (SKILL_ROOT / "references/rapid-prototyping.md")
+            .read_text(encoding="utf-8")
+            .split()
+        )
+
+        self.assertIn("### Name concepts in the audience's game vocabulary", rapid)
+        self.assertIn(
+            "Generate candidates from at least three different ontological "
+            "categories",
+            rapid,
+        )
+        self.assertIn(
+            "Enumerate WHP's home ontology first: the parts of a game.",
+            rapid,
+        )
+        self.assertIn(
+            "Force one candidate that breaks the incumbent's sentence frame on "
+            "purpose",
+            rapid,
+        )
+        self.assertIn(
+            "Prefer the human, warm term over the mechanical, precise one whenever "
+            "the meaning survives.",
+            rapid,
+        )
+
+
 class StatusVocabularyOwnershipTests(unittest.TestCase):
     """Guard the vocabularies that previously drifted between files."""
 
