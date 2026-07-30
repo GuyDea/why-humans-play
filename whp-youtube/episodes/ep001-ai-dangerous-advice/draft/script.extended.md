@@ -76,12 +76,17 @@
 
 [TRANSITION — Compressed label experiment: identical diagnoses, planted mistakes, changed byline.]
 
-> In 2021, researchers gave 138 experienced radiologists the same written diagnoses to
-> check. Some of the diagnoses had planted mistakes.
+> In 2021, researchers gave over a hundred experienced radiologists the same written
+> diagnoses to check. Some of the diagnoses had planted mistakes.
 >
 > Half were told a doctor wrote them. Half were told an AI did.
 >
 > The AI group trusted the diagnoses less.
+
+[TRANSITION — States the expected outcome and the narrator's confirmed bet so the reversal lands in contrast.]
+
+> If distrust protects you, that group should catch more of the planted mistakes.
+> That's exactly what I would have bet on.
 
 [REVERSAL | LOCKED WORDING — The distrust–checking result in one locked line.]
 
@@ -166,6 +171,10 @@
 
 > *Move two. The answer leans your way.*
 
+[MINI-HOOK — The narrator's confirmed reaction seeds who-ran-it curiosity before the study is named.]
+
+> *The study that settled this for me made me smile — because of who ran it.*
+
 [TRANSITION — Tested assistants lean toward stated beliefs; effect claim only.]
 
 > In 2023, researchers at the AI company Anthropic tested five leading AI assistants
@@ -213,8 +222,9 @@
 
 [MINI-HOOK — Move-two wrap; opens the why-more-convincing question.]
 
-> *So the AI tends to agree, and you can force it to argue back. Then why does the
-> answer feel more convincing than the hope it came from?*
+> *So the AI tends to agree, and you can force it to argue back. Then comes the part
+> that hooked me: why does the answer feel more convincing than the hope it came
+> from?*
 
 ## 5. Move three — the costume
 
@@ -231,6 +241,9 @@
 > out. Same words, just harder to read.
 >
 > The easy-to-read statements were judged true more often.
+>
+> When I first read that, I laughed — not because it's silly, but because the trick is
+> so cheap.
 
 [AHA | LOCKED WORDING — Fluency lesson; chatbot smoothness stated as description, not proof.]
 
@@ -301,8 +314,11 @@
 > It exists, published in Nature Human Behaviour. People judged whether groups of faces
 > looked more happy or more sad, saw an AI's answer, and could revise their own.
 >
-> The AI had a built-in slant. And round after round, on brand-new faces, people's own
-> calls kept drifting the AI's way — while an accurate AI improved them.
+> The AI had a built-in slant. Honestly, I was hoping one bad round would be the whole
+> damage.
+>
+> Round after round, on brand-new faces, people's own calls kept drifting the AI's way
+> — while an accurate AI improved them.
 
 [AHA | LOCKED WORDING — The drift lesson.]
 
@@ -481,7 +497,7 @@
 - **Status:** DRAFT
 - **Deliverable:** Complete Episode 1 draft narration (felt-entry rebuild, script-economy pass, 2026-07-30).
 - **Approved baselines:** Architecture `docs/superpowers/specs/2026-07-27-episode-1-story-rebuild-design.md`; Story Progression `docs/superpowers/plans/2026-07-27-episode-1-v2-story-progression.md` (APPROVED 2026-07-28) with the felt-entry rebalance recorded in the Blueprint appendix; Blueprint pair promoted 2026-07-30 under Martin's direct blueprint-to-final instruction.
-- **Word count:** ~2,150 spoken words (~13.4 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules, the cold-viewer evaluation cuts, and the E-06 removal.
+- **Word count:** ~2,220 spoken words (~13.9 minutes at a natural pace); reduced from the pre-economy draft's ~2,450 under the viewer-need and highlight-density rules, the cold-viewer evaluation cuts, and the E-06 removal.
 - **Canon:** Uses canon concepts borrowed-authority loop, Second-Opinion Test, possible-answer/safe-decision distinction, distrust–checking gap; opening shape registered in `whp-youtube/canon.md`.
 
 ### Story progression and payoff audit
@@ -490,7 +506,7 @@
 - L-01 (title question) opens in the intro, pays beats 6–8 and the final line. L-02 (quiet mechanism) opens in the intro, pays progressively beats 3–6. L-03 (unasked question) opens at the intro close, pays in beat 7's documented stroke-framed prompt. L-04 (ambulance/outcome) opens at the intro cost line, pays in beat 6's TIA reveal.
 - Four-move explanation delivered beats 3–6; four counter-questions delivered beats 3–6 and assembled with boundaries in beats 7–8; SP04's case return is a reinterpretation beat (changed meaning) per the rebalance.
 - Retention economy: radiologist retell compressed to result-bearing details; training explanation voiced as one likely reason; feedback-loop claim bounded to later-judgment change; human-persuader ending compressed to the scale contrast.
-- Cold-viewer evaluation (2026-07-30) applied with Martin's disposition: E-06 algorithm appreciation cut from beat 5 (progression amendment — the label-distrust versus influence contrast now resolves at beat 6 through E-02's own anchoring explanation and the feeling-versus-behavior callback); case boundaries consolidated into one beat-7 moment with a one-clause mini-loop in beat 6; adjacent punchlines thinned; two claim-smell lines repaired. Second evaluation round (2026-07-30) applied per Martin's delegation: beat-2 setup compressed, three restatements cut, "exactly"/"whatever" accuracy softenings, beat-7 peak lines separated, beat-8 mnemonic recap and doubled codas consolidated; the beat-2 dissolution verdict was declined to preserve the approved anti-immunity placement and its bridge chain.
+- Cold-viewer evaluation (2026-07-30) applied with Martin's disposition: E-06 algorithm appreciation cut from beat 5 (progression amendment — the label-distrust versus influence contrast now resolves at beat 6 through E-02's own anchoring explanation and the feeling-versus-behavior callback); case boundaries consolidated into one beat-7 moment with a one-clause mini-loop in beat 6; adjacent punchlines thinned; two claim-smell lines repaired. Second evaluation round (2026-07-30) applied per Martin's delegation: beat-2 setup compressed, three restatements cut, "exactly"/"whatever" accuracy softenings, beat-7 peak lines separated, beat-8 mnemonic recap and doubled codas consolidated; the beat-2 dissolution verdict was declined to preserve the approved anti-immunity placement and its bridge chain. Voice restoration (2026-07-30, Martin's catch): five v1-confirmed narrator reactions reinstated (the bet, the smile, the hooked-me bridge, the laugh, the one-round hope) under the new process-is-not-reaction rule; the exact participant count compressed to "over a hundred" per the viewer-need rule.
 
 ### Evidence boundaries
 
@@ -500,7 +516,7 @@
 
 ### Spoken-readability result
 
-- `check_spoken_readability.py` passed 2026-07-30: 252 spoken sentences, no unresolved items. Reviewed items: the 138-participant count (matches the F-009 approved wording), the four counter-questions (locked verbatim by design), and one 23-word boundary line read aloud for first-hearing clarity.
+- `check_spoken_readability.py` passed 2026-07-30: 252 spoken sentences, no unresolved items. Reviewed items: the four counter-questions (locked verbatim by design) and boundary lines read aloud for first-hearing clarity. The exact 138 count was replaced with "over a hundred" per the viewer-need rule (2026-07-30); the precise figure stays in the F-009 evidence record.
 
 ### Personal-input decision
 

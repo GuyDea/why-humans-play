@@ -54,12 +54,15 @@
 > Maybe your answer is still no — you know these tools make things up, you stay
 > skeptical. So let me show you the test I would have failed.
 
-> In 2021, researchers gave 138 experienced radiologists the same written diagnoses to
-> check. Some of the diagnoses had planted mistakes.
+> In 2021, researchers gave over a hundred experienced radiologists the same written
+> diagnoses to check. Some of the diagnoses had planted mistakes.
 >
 > Half were told a doctor wrote them. Half were told an AI did.
 >
 > The AI group trusted the diagnoses less.
+
+> If distrust protects you, that group should catch more of the planted mistakes.
+> That's exactly what I would have bet on.
 
 > **And they caught just as many planted mistakes as the other group.**
 
@@ -118,6 +121,8 @@
 
 > *Move two. The answer leans your way.*
 
+> *The study that settled this for me made me smile — because of who ran it.*
+
 > In 2023, researchers at the AI company Anthropic tested five leading AI assistants
 > and kept finding the same pattern.
 >
@@ -153,8 +158,9 @@
 > The case against your preference might be boring. But your favorite answer finally
 > has a competitor.
 
-> *So the AI tends to agree, and you can force it to argue back. Then why does the
-> answer feel more convincing than the hope it came from?*
+> *So the AI tends to agree, and you can force it to argue back. Then comes the part
+> that hooked me: why does the answer feel more convincing than the hope it came
+> from?*
 
 ## 5. Move three — the costume
 
@@ -167,6 +173,9 @@
 > out. Same words, just harder to read.
 >
 > The easy-to-read statements were judged true more often.
+>
+> When I first read that, I laughed — not because it's silly, but because the trick is
+> so cheap.
 
 > **When something is easy to process, it feels more true.**
 >
@@ -219,8 +228,11 @@
 > It exists, published in Nature Human Behaviour. People judged whether groups of faces
 > looked more happy or more sad, saw an AI's answer, and could revise their own.
 >
-> The AI had a built-in slant. And round after round, on brand-new faces, people's own
-> calls kept drifting the AI's way — while an accurate AI improved them.
+> The AI had a built-in slant. Honestly, I was hoping one bad round would be the whole
+> damage.
+>
+> Round after round, on brand-new faces, people's own calls kept drifting the AI's way
+> — while an accurate AI improved them.
 
 > **A model's mistake can quietly become part of your next judgment.**
 
