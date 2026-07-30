@@ -227,8 +227,8 @@
 
 > Then comes the twist — the one to handle with care.
 >
-> When researchers nudged these people toward thinking positive — relax, you'll do
-> great — they performed worse.
+> Researchers tried nudging these people toward positive thinking. Relax. You'll do
+> great. They performed worse.
 >
 > **For them, optimism was the handicap.**
 >
