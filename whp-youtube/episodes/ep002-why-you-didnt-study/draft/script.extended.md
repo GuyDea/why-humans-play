@@ -476,6 +476,9 @@
   bounded to E-03/E-04 with the dispute referenced; anti-pep-talk bounded to E-10.
 - Open dependencies for Final: E-08 (abstract only), E-02 (secondhand), E-11
   (lead-level); full claim-wording verification for all rows.
+- Layer-1 adversarial verification (2026-07-30): E-01 10/10 SUPPORTED; 1978 is the
+  publication year and 70/13 are Experiment-1 males-only figures — narration already
+  compliant on both.
 
 ### Spoken-readability result
 

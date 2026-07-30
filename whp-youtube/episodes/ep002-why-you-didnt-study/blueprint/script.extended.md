@@ -109,6 +109,11 @@
   for SP02.
 - Load-bearing rows read against primary sources 2026-07-29: E-01, E-03, E-04, E-06,
   E-07, E-10. Weak rows to close no later than Final: E-08, E-02, E-11.
+- Layer-1 adversarial verification (2026-07-30, `whp-claim-verifier`): E-01 passed 10/10
+  SUPPORTED against the PubMed abstract and Berglas's parallel CPDD proceedings text.
+  Precision notes: 1978 is the publication year; the 70%/13% figures are Experiment 1,
+  males only (narration already restricts to men); the women-null 40-versus-26 numbers
+  are collapsed across public/private cells (no longer narrated).
 - Narrator stance lines confirmed by Martin 2026-07-30 in review: "I always had one
   word for those nights: lazy."
 - Full claim-wording verification remains Final-stage work.
