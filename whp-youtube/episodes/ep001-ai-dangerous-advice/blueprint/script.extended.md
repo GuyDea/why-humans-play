@@ -17,8 +17,8 @@
 
 [OBSTACLE — Enters the documented case through its highest-voltage fact: the patient had already considered stroke and hoped for a smaller explanation. Voltage-ranked entry per the felt-entry doctrine; motive is documented, not invented.]
 
-> In 2024, a man in his sixties developed double vision after a heart procedure. And it
-> kept coming back.
+> In a case reported in 2024, a man in his sixties developed double vision after a
+> heart procedure. And it kept coming back.
 >
 > <u>Here's the thing — a stroke had already crossed his mind. That thought was in his
 > head.</u>

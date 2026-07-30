@@ -219,7 +219,7 @@ class SkillPackageTests(unittest.TestCase):
         self.assertEqual(validate_pair(resolve_pair(stage)), [])
         self.assertEqual(
             spoken_digest(stage / "script.raw.md"),
-            "32537ca47fd9df2cc6ce7cf57bb5b53be4c1cab91d1707bbd342f2b176fe0b04",
+            "2aab7032779db2d5c94ee24379588902c4c9d8804830840e1b0a00d5958ce2a1",
         )
 
     def test_episode_blueprint_contract_is_intro_first(self) -> None:

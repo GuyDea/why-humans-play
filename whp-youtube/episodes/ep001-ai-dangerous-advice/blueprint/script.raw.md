@@ -11,8 +11,8 @@
 > Then I read a medical case from Switzerland, and I haven't asked a chatbot for advice
 > the same way since.
 
-> In 2024, a man in his sixties developed double vision after a heart procedure. And it
-> kept coming back.
+> In a case reported in 2024, a man in his sixties developed double vision after a
+> heart procedure. And it kept coming back.
 >
 > <u>Here's the thing — a stroke had already crossed his mind. That thought was in his
 > head.</u>
