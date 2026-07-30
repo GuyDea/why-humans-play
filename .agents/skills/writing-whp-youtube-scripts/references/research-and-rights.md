@@ -358,3 +358,21 @@ passage quoted. Use the `whp-claim-verifier` brief
 
 A claim that survives Layer 1 can still die at Layer 3 — the layers are cumulative,
 not alternative. No layer's pass is inferred from an earlier layer's.
+
+
+## Contested findings
+
+When a load-bearing result carries a failed replication or a live dispute, choose one
+of three treatments, never a fourth: make the fight the narration (both sides at their
+strongest, takeaways as conditionals, the beat's load landed on undisputed material);
+demote the material below load-bearing; or cut it. Never narrate a contested result
+behind technically-true scoping — past tense, "in those rooms," "the original study
+found" — that a first-time listener will hear as settled. A wording only a lawyer
+would defend is a defect, not a defense.
+
+A presenter ruling is the honest fourth path: Martin may judge the dispute on camera
+when the judgment is genuinely his, formed from a full-text briefing of both sides.
+A ruling rides one premise — it cannot declare a test broken and then use the broken
+data's magnitudes as evidence — narrates its checkable basis (the number a viewer
+could verify), and carries the disagreement boundary aloud ("some scientists read it
+differently").

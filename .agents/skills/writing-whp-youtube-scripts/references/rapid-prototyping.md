@@ -257,6 +257,17 @@ Every drafted or reused passage passes four economy checks:
   reason ("one likely reason", "may help produce"). Do not fuse them into a single
   clean rule, and do not present one factor as the whole explanation of a
   cross-population difference.
+- **Verification fixes are drafts, not wording.** A correction that makes a claim
+  source-accurate re-enters through the viewer-need and plain-speech tests before it
+  lands. Every qualifying clause must refer to something already narrated — a
+  covariate, baseline, or condition the viewer never heard about gets a plain-speech
+  rendering ("and no — they didn't just start out that way") or dies. Accuracy that
+  costs comprehension is not yet a fix.
+- **Care register.** Advice touching family, friends, or vulnerable moments honors the
+  loving instinct before correcting it ("that instinct is love — keep it"), scopes the
+  exception exactly to the studied population, and offers the alternative as help
+  added, never behavior revoked. Harshness toward love is a defect even when the
+  science behind the correction is right.
 - **Process is not reaction.** Cut narrator process bookkeeping — search logistics, "I
   needed a study," inventories of what remains to prove. Keep the narrator's felt
   reaction — the bet, the smile, the laugh, the discomfort — budgeted at roughly one
