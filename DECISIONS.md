@@ -2282,3 +2282,43 @@ Completes the tease-payoff doctrine's third axis — weight, register, and now t
 **Documents:** `references/story-and-hook-method.md`,
 `.claude/agents/whp-retention-reviewer.md`,
 `whp-youtube/episodes/ep002-why-you-didnt-study/final/` pair.
+
+## 2026-07-31 — Thesis-level verification guardrails from the ep002 post-mortem
+
+**Decision:** Adopt four guardrails against mechanism-first thesis overclaim: (1) a
+phenomenon-first coverage check — when an episode explains a common human behavior,
+topic selection and the architecture concept scan must consult the phenomenon's own
+field-level causal map (searched by the behavior's name, not the mechanism's) and
+state what share of the recognizable moment the chosen mechanism owns; (2) a
+mandatory architecture coverage-and-rivals record in which every strong rival
+explanation — always including the viewer's most likely true self-explanation — is
+explicitly beaten, bounded, or absorbed; (3) Layer 0 of adversarial claim
+verification, a fresh-context phenomenon-expert verifier that attacks the thesis
+frame before architecture approval; and (4) a universal-verdict scoping rule — a
+locked second-person diagnosis requires dominant-account support from the coverage
+record, and ledger-marked editorial bridges may not appear in locked universal
+wording.
+
+**Rationale:** The ep002 post-mortem: the episode was selected mechanism-first
+(self-handicapping) and welded to the most universal recognizable moment (the night
+you didn't study), whose dominant scientific account is task aversiveness and mood
+repair (Steel 2007; Sirois & Pychyl 2013) — a literature the pipeline cited for costs
+but never consulted for causes. All three verification layers audit claim fidelity,
+so 34/40 claims verified while the composition overclaimed; the vulnerability was
+recorded in the episode's own "Unverified or disputed material" ledger but no gate
+was required to consume it. A viewer-conversation, not a gate, caught the error.
+
+**Documents:** `.agents/skills/choosing-whp-video-topic/references/research-method.md`
+(coverage check in mechanism-fit and handoff),
+`.agents/skills/writing-whp-youtube-scripts/references/script-architecture.md`
+(causal-map discovery bucket, Coverage and rival explanations artifact section,
+refine/approve gates, common mistakes),
+`.agents/skills/writing-whp-youtube-scripts/references/research-and-rights.md`
+(Layer 0; four-layer contract),
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md` (Layer 0 in the architecture
+approval gate; Scope every universal verdict),
+`.claude/agents/whp-claim-verifier.md` (contract pointer),
+`whp-youtube/STEERING.md` (step-1 scan buckets and step-2 architecture contents kept
+in sync with the owner). Historical three-layer references in episode appendices and
+prior ledger entries record what actually ran and are unchanged. The ep002 final pair
+is unchanged by this entry; its rework is a separate pending decision.

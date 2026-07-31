@@ -339,7 +339,8 @@ and the source citation or URL — never the project's evidence records, approve
 wording, or rationale — and is instructed to refute, classifying every claim
 SUPPORTED, OVERSTATED, UNSUPPORTED, or CANNOT-VERIFY with the supporting source
 passage quoted. Use the `whp-claim-verifier` brief
-(`.claude/agents/whp-claim-verifier.md`).
+(`.claude/agents/whp-claim-verifier.md`) for Layers 1–3; Layer 0 briefs its verifier
+differently, as described in its entry below.
 
 - **Layer 0 — before architecture approval, when the episode explains a common human
   behavior.** One fresh-context verifier is briefed as a hostile expert in the

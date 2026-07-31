@@ -313,10 +313,12 @@ Use this order for WHP scripts:
 
 1. Before shaping the thesis, run a bounded concept-discovery scan using primary or
    authoritative sources. State the topic's mechanism and search vocabulary, then inventory
-   core mechanisms; human cognitive and social biases; AI- or system-specific behaviors;
-   named laws, rules, paradoxes, and effects; authority, trust, and anthropomorphism
-   effects; interventions, debiasing tools, decision methods, and countermeasures; and
-   tempting but imprecise near-neighbors. Record each candidate's meaning, source, role,
+   core mechanisms; the phenomenon's field-level causal map when the episode explains a
+   common human behavior (meta-analyses, reviews, and consensus accounts searched by the
+   behavior's name, not the mechanism's); human cognitive and social biases; AI- or
+   system-specific behaviors; named laws, rules, paradoxes, and effects; authority, trust,
+   and anthropomorphism effects; interventions, debiasing tools, decision methods, and
+   countermeasures; and tempting but imprecise near-neighbors. Record each candidate's meaning, source, role,
    established or original status, and reason to include or exclude it. Search with
    materially different problem, consequence, and remedy queries until two new passes add
    no decision-relevant concept. Batch independent work and cap discovery at three broad
@@ -328,7 +330,11 @@ Use this order for WHP scripts:
 2. Put that exact sourced concept inventory at the start of one script architecture from
    the selected topic before writing an opening,
    beat outline, joke, transition, or narration. State the central question and core
-   answer, the viewer's before-and-after belief, a three-to-five-step insight ladder,
+   answer, the coverage-and-rivals record when the episode explains a common human
+   behavior (the phenomenon's dominant account, the share of the recognizable moment the
+   chosen mechanism owns, and each strong rival explicitly beaten, bounded, or absorbed —
+   verified from outside by Layer 0 of adversarial claim verification), the viewer's
+   before-and-after belief, a three-to-five-step insight ladder,
    the relevant phenomenon and paradox map, the earned reframe, real-world proof cases,
    learning-and-action contract, practical payoff, final lesson, and scope boundary.
 3. Refine that architecture with Martin and obtain explicit approval of the complete

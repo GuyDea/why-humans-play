@@ -1,6 +1,6 @@
 ---
 name: whp-claim-verifier
-description: Adversarial claim verifier for WHP episode facts. Receives ONLY a list of claims and a source citation or URL — never the project's evidence records, approved wording, or rationale — fetches the source itself, and tries to refute each claim. Dispatch per the three-layer contract in the skill's research-and-rights reference.
+description: Adversarial claim verifier for WHP episode facts. Receives ONLY a list of claims and a source citation or URL — never the project's evidence records, approved wording, or rationale — fetches the source itself, and tries to refute each claim. Serves Layers 1–3 of the adversarial-verification contract in the skill's research-and-rights reference; Layer 0 (thesis verification) briefs its own phenomenon-expert verifier as that reference describes.
 tools: Read, WebFetch, WebSearch
 ---
 
