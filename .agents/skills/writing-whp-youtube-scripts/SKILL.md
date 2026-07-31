@@ -174,6 +174,12 @@ complete. If source access is unavailable or Martin explicitly requests an offli
 mark the inventory provisional exactly as required by the architecture method and surface
 the resulting omission risk.
 
+When the episode explains a common human behavior, an architecture is also not
+approval-ready until Layer 0 of
+[adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
+has run against its central question, core answer, and earned reframe, and the
+architecture's coverage-and-rivals record answers every challenge it raised.
+
 Do not approve a familiar summary with generic advice attached. The non-obvious
 understanding must revise the viewer's prior model, and the response must name a relevant
 situation, a concrete decision rule or sequence, an observable result, a real boundary,
@@ -348,6 +354,18 @@ boundary, not the exact words. Apply the pair owner's markup and synchronization
 after selecting these lines. Strip markup from word counts and readability checks. Mark
 locked lines in complete draft or final narration; for a Script Blueprint, mark only intro
 wording whose exact delivery has already been selected.
+
+### Scope every universal verdict
+
+A locked line that diagnoses the viewer's own case universally in the second person
+("you weren't X — you were Y") is a coverage claim, not a stylistic choice. Use one only
+when the architecture's coverage-and-rivals record shows the mechanism is the
+phenomenon's dominant account; otherwise write the verdict conditionally or name the
+covered case aloud. Material the episode's own appendix marks as an editorial bridge or
+lists under `Unverified or disputed material` may not appear in locked universal wording
+anywhere in the script. A ledger caveat or a single hedge line elsewhere does not
+license a universal verdict: the wording that carries the diagnosis carries the
+boundary.
 
 ### Enforce spoken readability before delivery
 

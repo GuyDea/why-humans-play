@@ -333,13 +333,25 @@ rights honesty for a lower-priority fact.
 
 ## Adversarial claim verification
 
-Three layers, each placed where its facts become load-bearing. Verification agents are
+Four layers, each placed where its facts become load-bearing. Verification agents are
 independent by construction: a fresh-context agent receives only the claims under test
 and the source citation or URL — never the project's evidence records, approved
 wording, or rationale — and is instructed to refute, classifying every claim
 SUPPORTED, OVERSTATED, UNSUPPORTED, or CANNOT-VERIFY with the supporting source
 passage quoted. Use the `whp-claim-verifier` brief
 (`.claude/agents/whp-claim-verifier.md`).
+
+- **Layer 0 — before architecture approval, when the episode explains a common human
+  behavior.** One fresh-context verifier is briefed as a hostile expert in the
+  *phenomenon* the episode explains — not the chosen mechanism — receives only the
+  central question, core answer, and earned reframe, and answers one question: is this
+  the field's standard account of that behavior, and if not, what is? It must search
+  the phenomenon's own literature (meta-analyses, reviews, consensus sources found by
+  the behavior's name) and name the dominant account and strongest rivals. Its verdict
+  feeds the architecture's coverage-and-rivals record; an unanswered challenge blocks
+  architecture approval. This layer attacks the frame where Layers 1–3 attack the
+  sentences — it exists because every sentence can verify while the composition
+  overclaims.
 
 - **Layer 1 — before story-progression approval.** Every load-bearing row — the
   throughline case, the central statistic, the climax result, anything a beat's

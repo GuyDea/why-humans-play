@@ -234,6 +234,16 @@ mechanism to recognizable consequence. An interesting mechanism that merely touc
 subject fails. Use the mechanism as the explanation of a supported human problem or shared
 tension, not as a substitute for one.
 
+When the angle explains a common human behavior, also run the **coverage check** before
+handoff: search the phenomenon's own field-level causal map — meta-analyses, systematic
+reviews, and consensus accounts found by the behavior's name, not the chosen mechanism's —
+and record what share of the recognizable moment the mechanism plausibly owns, alongside
+the strongest rival explanations, always including the viewer's most likely true
+self-explanation. A mechanism that owns a minority of the moment may still carry the
+episode, but the handoff must say so, and the working title and opening promise must not
+diagnose the whole moment with it. Fidelity of individual claims cannot substitute for
+this check: every sentence can verify while the composition overclaims.
+
 Draft one honest working title and one literal opening promise for each advancing angle.
 This is a fidelity check, not the later three-direction packaging stress test. Name the
 object and personal tension plainly; reject vague referents, generic relevance, and titles
@@ -254,8 +264,9 @@ promise.
 
 Hand off the exact subject and angle, selected human nerve, intended viewer, lived moment
 and human stake, audience-language and breadth evidence, mechanism and evidence boundary,
-working title and opening promise, earned understanding, usable response, caveats, and
-unresolved verification. The handoff must bound both the payoff and its limits. Scripting
+the coverage-check finding with its rival explanations where the angle explains a common
+behavior, working title and opening promise, earned understanding, usable response,
+caveats, and unresolved verification. The handoff must bound both the payoff and its limits. Scripting
 may develop the approved promise but must not silently broaden it or rerun nerve selection.
 
 ### Test the opening proof case

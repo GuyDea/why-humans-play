@@ -46,10 +46,15 @@ a familiar concept recalled early from crowding out a more precise mechanism, co
 or practical method discovered later.
 
 Start by stating the topic's mechanism in plain language. Build query vocabulary from the
-topic's plain-language mechanism, synonyms, causes, consequences, and possible remedies.
-Search every one of these buckets:
+topic's plain-language mechanism, synonyms, causes, consequences, and possible remedies —
+and, when the episode explains a common human behavior, from the behavior's own plain
+name, so the scan reaches the phenomenon's literature and not only the chosen
+mechanism's. Search every one of these buckets:
 
 - core mechanisms;
+- the phenomenon's field-level causal map, when the episode explains a common human
+  behavior: the meta-analyses, systematic reviews, and consensus accounts of that
+  behavior, searched by the behavior's name rather than the mechanism's;
 - human cognitive and social biases;
 - AI- or system-specific behaviors;
 - named laws, rules, paradoxes, and effects;
@@ -174,6 +179,30 @@ lesson can answer it.
 
 Answer the central question in one sentence. State the causal mechanism, not merely the
 topic or preferred advice.
+
+### Coverage and rival explanations
+
+Required whenever the episode explains a common human behavior; write `NOT APPLICABLE`
+with one line of justification otherwise. From the concept inventory's field-level
+causal map, record:
+
+- the phenomenon's dominant scientific account or accounts, with sources found by the
+  behavior's name, not the mechanism's;
+- what share of the recognizable moment the chosen mechanism plausibly owns, stated
+  from evidence rather than asserted;
+- the strongest rival explanations for the viewer's moment — always including the
+  viewer's most likely true self-explanation — and, for each, whether the episode
+  **beats** it (shows it wrong), **bounds** it (states honestly which cases the thesis
+  owns), or **absorbs** it (integrates it into the thesis); and
+- the resulting scope of diagnosis: what the episode may honestly tell the viewer
+  their own moment was.
+
+A rival that is the phenomenon's dominant account cannot be handled by omission or by a
+single hedge line. If the honest answer to the central question is an explanation the
+episode does not cover, this gate fails: change the thesis, widen it to absorb the
+rival, or narrow the central question until question and answer match. Layer 0 of
+[adversarial claim verification](research-and-rights.md#adversarial-claim-verification)
+tests this record from outside; its unanswered challenges block approval.
 
 ### Viewer belief shift
 
@@ -327,6 +356,10 @@ Review the architecture without drafting around its weaknesses:
 
 - Is the concept inventory first, sourced, complete across explanation and intervention
   buckets, and searched to the stated saturation rule?
+- When the episode explains a common human behavior, does the coverage record state the
+  phenomenon's dominant account from its own literature, and does the thesis beat,
+  bound, or absorb every strong rival — including the viewer's most likely true
+  self-explanation?
 - Was every reframe-bearing connection mined from the inventory, kill-tested by
   refuters with primary sources, and its bridge verified — with killed candidates
   registered?
@@ -363,6 +396,10 @@ Reject the architecture when either half of the learning-and-action contract is 
 A novel idea with no usable response is incomplete; an actionable checklist with no new
 understanding is generic self-help rather than a WHP payload.
 
+Reject an architecture that explains a common human behavior when its
+coverage-and-rivals record is missing, when Layer 0 thesis verification has not run,
+or when a Layer 0 challenge remains unanswered.
+
 Reject an architecture presented as complete when its concept inventory is absent,
 recall-only, unsourced, omits the intervention and countermeasure bucket, or hides
 near-neighbor exclusions. An offline provisional map may be refined, but it is not
@@ -390,6 +427,13 @@ answer, insight ladder, earned reframe, practical payoff, or final lesson.
   Progression Plan.
 - Producing a generic topic summary with no earned reframe.
 - Building the reframe first and recruiting evidence toward it afterward.
+- Choosing a mechanism first and welding it to the most universal recognizable moment
+  without checking what share of that moment the mechanism owns.
+- Reading the absence of contradiction in the mechanism's own literature as evidence
+  that the mechanism is the phenomenon's central account — parallel literatures do not
+  cite each other as rivals.
+- Discharging a thesis-scope problem with a ledger caveat and a single hedge line while
+  locked wording stays universal.
 - Letting a killed connection reappear in prose as a transition or aside.
 - Repairing a flat insight ladder with manufactured story tension instead of reopening
   architecture.
