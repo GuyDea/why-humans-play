@@ -44,20 +44,27 @@ accepted current launch sequence, dated launch research, and historical episode 
    even when it follows every rule*), which remains retired from the sequence; its
    research and drafts stay in git history and dated planning documents for possible
    future re-ranking.
-2. **EP2 — Why you didn't study (selected 2026-07-29).** Decode self-handicapping —
-   losing the stated game on purpose to win the identity game — anchored in Berglas &
-   Jones 1978. Selected from [`topic-backlog.md`](topic-backlog.md) after the earlier
-   interviews premise was rejected and a developed sports-betting premise was parked
+2. **EP2 — Why you can game for hours but can't study for ten minutes (thesis
+   rebuilt 2026-08-01).** Decode task aversiveness as motivational structure: what
+   games supply (chosen goals, immediate feedback, calibrated difficulty, surviving
+   progress) and studying strips, with boredom reframed as the attention system's
+   cost signal rather than a character defect. Selected through a full angle
+   ideation (2026-07-31: audience-language, mechanism, and competitive scans) after
+   the prior self-handicapping thesis failed its post-mortem coverage check — task
+   aversion and mood repair, not identity insurance, is the dominant scientific
+   account of the viewer's night (Steel 2007), and the private-delay case sat
+   outside the mechanism's own evidence boundary (Kolditz & Arkin 1982). That
+   failure produced the 2026-07-31 thesis-verification guardrails (see
+   `DECISIONS.md`); this rebuild is their first episode.
+   Working state (2026-08-01): Architecture stage in progress under the guardrails
+   (coverage-and-rivals record plus Layer 0 required before approval). The verified
+   self-handicapping episode ("Why You Didn't Study") is preserved intact at
+   [`episodes/ep002-why-you-didnt-study/`](episodes/ep002-why-you-didnt-study/) —
+   its evidence records remain reusable — and returns to
+   [`topic-backlog.md`](topic-backlog.md) re-scoped to its honest boundary
+   (self-sabotage after unexplained success, with an audience). The earlier
+   interviews premise remains rejected and the sports-betting premise parked
    ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
-   Working state (2026-07-30): rebuilt under the felt-entry and script-economy
-   doctrine (felt-choice simulation intro), refined by cold-viewer evaluation, and
-   promoted through the verified
-   [final pair](episodes/ep002-why-you-didnt-study/final/script.extended.md) with
-   ten evidence records and completed three-layer adversarial verification (34/40
-   claims SUPPORTED across both layers; six overstatements corrected). Status
-   EDITORIAL-DRAFT: Martin's review, the audit battery, three open editorial items
-   from the second evaluation round, packaging choice, and production assets remain
-   open (see the final appendix issue ledger).
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support.
 4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a

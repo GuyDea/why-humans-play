@@ -2322,3 +2322,31 @@ approval gate; Scope every universal verdict),
 in sync with the owner). Historical three-layer references in episode appendices and
 prior ledger entries record what actually ran and are unchanged. The ep002 final pair
 is unchanged by this entry; its rework is a separate pending decision.
+
+## 2026-08-01 — EP2 thesis replaced: games-versus-studying task aversion
+
+**Decision:** Rebuild EP2 from scratch on the Angle A thesis — "why you can game for
+hours but can't study for ten minutes," decoding task aversiveness as motivational
+structure (chosen goals, immediate feedback, calibrated difficulty, surviving
+progress) with boredom as the attention system's cost signal — entering the pipeline
+at Architecture under the 2026-07-31 guardrails. The verified self-handicapping
+episode is preserved intact under `episodes/ep002-why-you-didnt-study/` and its
+backlog candidate returns to the pool re-scoped to its honest evidence boundary
+(self-sabotage after unexplained success, with an audience).
+
+**Rationale:** Martin's real-world conversation surfaced the deliberate-delay
+objection; the post-mortem coverage research confirmed task aversion and mood repair
+as the phenomenon's dominant account (Steel 2007: task aversiveness r=.40 vs
+intention r=-.03) and found the private-delay case outside self-handicapping's own
+boundary. The 2026-07-31 angle ideation (audience-language, mechanism, and
+competitive scans) found the games-versus-studying comparison to be the strongest
+open lane: a mass first-person question with no large general-audience owner, live
+small-channel breakouts nearby, and an intro whose paradox is the viewer's own lived
+behavior. Martin selected Angle A over the pressure-audit, laziness-demolition, and
+manufactured-aversion alternatives on intro strength.
+
+**Documents:** `whp-youtube/STEERING.md` (launch-sequence EP2 entry),
+`whp-youtube/topic-backlog.md` (candidate #4 returned and re-scoped). The
+`episodes/ep002-why-you-didnt-study/` final pair is deliberately unchanged — its
+directory-level disposition (archive naming, new stable name for the rebuilt EP2)
+is decided at the rebuild's Blueprint stage.
