@@ -2350,3 +2350,22 @@ manufactured-aversion alternatives on intro strength.
 `episodes/ep002-why-you-didnt-study/` final pair is deliberately unchanged — its
 directory-level disposition (archive naming, new stable name for the rebuilt EP2)
 is decided at the rebuild's Blueprint stage.
+
+## 2026-08-01 — EP2 rebuild: blueprint approved and promoted to draft
+
+**Decision:** The games-vs-studying Script Blueprint (polished contrast-pair intro,
+body logic map SP02–SP08, packaging trio W1–W3 pending the packaging-skill run) is
+approved and promoted into `whp-youtube/episodes/ep002-games-vs-studying/draft/` as a
+complete validated narration. Canon updated: "Attention's price tag," "The two
+nights," and "The price audit" registered; the retired self-handicapping ep002
+concepts and opening shape marked parked with their backlogged episode; the new
+opening shape recorded.
+
+**Rationale:** Sequential gate approvals by Martin on 2026-08-01 (architecture,
+progression, blueprint, promotion instruction "move it to draft"). First episode
+built end-to-end under the 2026-07-31 thesis-verification guardrails.
+
+**Documents:** `whp-youtube/episodes/ep002-games-vs-studying/{blueprint,draft}/`,
+`whp-youtube/canon.md`, `whp-youtube/STEERING.md` (EP2 working-state note). Draft
+remains AWAITING creative approval; cold-viewer evaluation and the ~12-minute
+timing diagnostic are before Martin.

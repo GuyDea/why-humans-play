@@ -167,6 +167,6 @@ Scoring shorthand per package: title half (T1f/T2/T3/T4 per feed-adapted gate, â
 
 ### Approval state
 
-- **Status:** AWAITING-APPROVAL
-- **Approved by:** PENDING
+- **Status:** APPROVED
+- **Approved by:** Martin, 2026-08-01 ("sounds great, move it to draft")
 - **Scope on approval:** polished intro + body logic map only; authorizes the Draft stage, not body narration approval.

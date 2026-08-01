@@ -56,8 +56,11 @@ accepted current launch sequence, dated launch research, and historical episode 
    outside the mechanism's own evidence boundary (Kolditz & Arkin 1982). That
    failure produced the 2026-07-31 thesis-verification guardrails (see
    `DECISIONS.md`); this rebuild is their first episode.
-   Working state (2026-08-01): Architecture stage in progress under the guardrails
-   (coverage-and-rivals record plus Layer 0 required before approval). The verified
+   Working state (2026-08-01, evening): Architecture approved (Layer 0 verdict
+   FRAME-PARTIAL, five corrections adopted; kill panel 2 killed / 6 bounded);
+   Story Progression approved (Layer 1: 14/15 SUPPORTED, one corrected); Blueprint
+   approved and promoted; the draft/ pair is written and validated, awaiting the
+   cold-viewer evaluation report and Martin's creative review. The verified
    self-handicapping episode ("Why You Didn't Study") is preserved intact at
    [`episodes/ep002-why-you-didnt-study/`](episodes/ep002-why-you-didnt-study/) —
    its evidence records remain reusable — and returns to
