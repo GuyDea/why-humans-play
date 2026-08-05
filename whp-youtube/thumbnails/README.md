@@ -1,3 +1,7 @@
+> **Rebrand note (2026-08-05):** the brand accent changed from red `#aa0a0a` to green
+> `#309420`. Concepts and renders below predate the rebrand; re-render any reused
+> concept with the green accent (red-bar descriptions read as green-bar now).
+
 # Episode 1 — Title & Thumbnail Prototypes
 
 Working set for **EP1: the evolutionary paradox of play**. Prototypes generated with
