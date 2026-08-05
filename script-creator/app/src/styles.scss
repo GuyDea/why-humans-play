@@ -2,7 +2,7 @@
   --whp-ink: #323232;
   --whp-ground: #f8f8f8;
   --whp-surface: #ffffff;
-  --whp-accent: #aa0a0a;
+  --whp-accent: #309420;
   --whp-panel: color-mix(in srgb, var(--whp-ink) 3%, var(--whp-ground));
   --whp-line: color-mix(in srgb, var(--whp-ink) 16%, var(--whp-ground));
   --whp-muted: color-mix(in srgb, var(--whp-ink) 68%, var(--whp-ground));
@@ -1218,7 +1218,7 @@ app-welcome-page .skill-pointers code {
 
 .help-mode-hint {
   margin-top: 0.35rem;
-  color: #aa0a0a;
+  color: #309420;
   font-size: 0.72rem;
   font-weight: 600;
 }
@@ -1252,7 +1252,7 @@ app-welcome-page .skill-pointers code {
   padding: 0;
   border: 0;
   background: none;
-  color: #aa0a0a;
+  color: #309420;
   font: inherit;
   font-size: 0.76rem;
   font-weight: 600;
@@ -1359,7 +1359,7 @@ app-welcome-page .skill-pointers code {
 }
 
 .help-target--selected {
-  outline: 2px solid #aa0a0a;
+  outline: 2px solid #309420;
 }
 
 .help-target-cue {
@@ -1370,10 +1370,10 @@ app-welcome-page .skill-pointers code {
   width: 20px;
   height: 20px;
   padding: 0;
-  border: 1px solid #aa0a0a;
+  border: 1px solid #309420;
   border-radius: 50%;
   background: #f8f8f8;
-  color: #aa0a0a;
+  color: #309420;
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
@@ -1382,7 +1382,7 @@ app-welcome-page .skill-pointers code {
 
 .help-target-cue:hover,
 .help-target-cue:focus-visible {
-  background: #aa0a0a;
+  background: #309420;
   color: #f8f8f8;
 }
 

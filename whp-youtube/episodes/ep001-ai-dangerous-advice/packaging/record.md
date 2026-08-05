@@ -1,3 +1,8 @@
+> **Rebrand note (2026-08-05):** the brand accent changed from red `#aa0a0a` to green
+> `#309420` after this record's renders were produced. The winning designs' red
+> elements (shadow pool, rimmed phone, question marks) must be re-rendered in the
+> green accent before publish; creative descriptions below are preserved as decided.
+
 # Packaging Record — ep001 ai-dangerous-advice
 
 Run: 2026-07-30, full pre-publish pass (sweep → generate → render → evaluate).

@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Script Studio">
   <!--
     Script Studio favicon — Why Humans Play.
-    Three lines of a script (off-white) cut by the WHP red editorial slash
-    on a charcoal tile. Palette: ink #323232, ground #f8f8f8, accent #aa0a0a.
+    Three lines of a script (off-white) cut by the WHP green editorial slash
+    on a charcoal tile. Palette: ink #323232, ground #f8f8f8, accent #309420.
   -->
   <defs>
     <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
@@ -17,6 +17,6 @@
     <line x1="16" y1="32" x2="49" y2="32"/>
     <line x1="16" y1="43" x2="34" y2="43"/>
   </g>
-  <!-- the WHP red editorial slash: the cut that turns writing into a studio -->
-  <line x1="15" y1="51" x2="51" y2="14" stroke="#aa0a0a" stroke-width="7" stroke-linecap="round"/>
+  <!-- the WHP green editorial slash: the cut that turns writing into a studio -->
+  <line x1="15" y1="51" x2="51" y2="14" stroke="#309420" stroke-width="7" stroke-linecap="round"/>
 </svg>

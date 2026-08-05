@@ -2483,3 +2483,30 @@ architecture preserves the bet and surfaces retypes),
 progress checklist and `WHP_PROGRESS/4` transport are deliberately unchanged — the
 new requirements live inside already-listed checklist steps. Published and committed
 episodes are not retroactively typed.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (adoption
+posture; locked-lines protocol), `references/research-and-rights.md` (Gate
+precedence section; Layer 0 provisional path; contents index),
+`references/script-architecture.md` (approval-gate mirror),
+`.agents/skills/reconcile-whp/SKILL.md` (commit-precedence line).
+
+## 2026-08-05 — Rebrand: accent red → accent green
+
+**Decision:** The WHP brand accent changes from red `#aa0a0a` to green `#309420`
+across every surface. Martin performed the SVG rebrand (logo bar, wordmark fills);
+this reconciliation propagates it: brand docs (`CLAUDE.md` palette and asset
+descriptions), STEERING's permanent thumbnail rules (green caption line,
+accent-green element), the packaging skill's palette doctrine
+(`thumbnail-production.md`), the script-creator app accent (`styles.scss` ×7,
+`styles.spec.ts`, `favicon.svg`), regenerated binaries (`whp-logo.png` 1600²,
+`whp-title.png` 3000×1000, `apple-touch-icon.png`, `favicon.ico` 16+32 — pixel-
+verified green, no red remnants), and thumbnail concept JSON render inputs (pilot
+and ep001). Red-era creative records keep their prose with rebrand notes: the
+parked pilot thumbnails README and ep001's packaging record (whose winning renders
+must be re-rendered green before publish).
+
+**Rationale:** Martin: "we did the rebrand from the red to green." The green SVGs
+reached main 2026-08-05 (initially swept into an unrelated commit; ratified here).
+
+**Documents:** as listed; historical research artifacts, superseded plans, and prior
+ledger entries keep period wording.

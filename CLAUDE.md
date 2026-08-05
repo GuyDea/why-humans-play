@@ -37,11 +37,11 @@ grounded and avoid "woo" / consciousness drift.
 Located in [`whp-branding/`](whp-branding/):
 
 - `whp-logo.svg` / `.png` — a side-view brain built from vertical bars with a
-  single red bar cutting through the middle.
-- `whp-title.svg` / `.png` — wordmark: **WHY** and **PLAY** (red, vertical)
+  single green bar cutting through the middle.
+- `whp-title.svg` / `.png` — wordmark: **WHY** and **PLAY** (green, vertical)
   intersecting the shared word **HUMANS** (charcoal, horizontal), crossword-style.
-- Palette: charcoal `#323232`–`#3b3b3b`, accent red `#aa0a0a`, off-white ground
-  `#f8f8f8`.
+- Palette: charcoal `#323232`–`#3b3b3b`, accent green `#309420`, off-white ground
+  `#f8f8f8`. *(Rebranded from accent red `#aa0a0a`, 2026-08-05.)*
 
 ## YouTube
 

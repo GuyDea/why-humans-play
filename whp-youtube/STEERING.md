@@ -623,7 +623,7 @@ theory + brain training* into one thesis about **intelligence**. That synthesis 
 **Breakout precedents to study** (all recent, all started small) `[scraped 2026-07-13]`:
 - **Alastair** (@whoisalastair) — psych/philosophy essays, launched Mar 2024, now 208K
   subs; "the psychology of playing safe" 2.3M. *Lesson:* one repeated theme + a distinctive
-  minimal thumbnail system (cream ground, one red caption line) until the algorithm finds
+  minimal thumbnail system (cream ground, one green caption line) until the algorithm finds
   the audience.
 - **Blank Rascal** — "Game Theory is the Cheat Code to Life" 1.5M (~18× subs). *Lesson:*
   proven topic + life-stakes framing + strong visual identity.
@@ -774,8 +774,8 @@ Keep it to 1–3 elements, readable in a millisecond (Law 1). Test 2–3.
 
 - **A — The paradox visual:** a playful animal (otter/crow/puppy) on one side, a stark
   brain or a red "DELETED / ✕" motif on the other. Big 2–3 word overlay: **"USELESS?"** or
-  **"DELETE THIS?"**. High contrast, WHP palette (charcoal ground, one accent-red element —
-  matches the brand's single red bar).
+  **"DELETE THIS?"**. High contrast, WHP palette (charcoal ground, one accent-green element —
+  matches the brand's single green bar; rebranded from red 2026-08-05).
 - **B — Face + tension (best for a presenter channel):** Martin, genuine curious/skeptical
   expression, looking at a brain or a game piece; overlay a single word ("WHY?" / "WASTE").
   Faces lift CTR; a real, non-exaggerated expression fits the rigor brand.
@@ -783,7 +783,7 @@ Keep it to 1–3 elements, readable in a millisecond (Law 1). Test 2–3.
   human ✓) with the pattern half-revealed. Curiosity-gap visual; strong for the biology angle.
 
 Lock the brand thumbnail system early (like Alastair did): consistent ground colour, one
-red accent, one bold face or icon, ≤3 words. Reuse it every episode so the channel becomes
+green accent, one bold face or icon, ≤3 words. Reuse it every episode so the channel becomes
 recognisable in the feed.
 
 ## Shorts cut plan (plan these into the script — Law 4)

@@ -13,7 +13,7 @@ describe('Script Studio styling contract', () => {
   it('defines the exact WHP-adjacent palette as shared tokens', () => {
     expect(styles).toMatch(/--whp-ink:\s*#323232;/u);
     expect(styles).toMatch(/--whp-ground:\s*#f8f8f8;/u);
-    expect(styles).toMatch(/--whp-accent:\s*#aa0a0a;/u);
+    expect(styles).toMatch(/--whp-accent:\s*#309420;/u);
   });
 
   it('keeps narration readable at an approximately 68ch measure', () => {
