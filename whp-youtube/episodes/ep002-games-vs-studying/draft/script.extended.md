@@ -14,7 +14,7 @@
 
 > Maybe someone has even said it to you: "If you can game all night, you could study if you really tried." Maybe you say it to yourself.
 >
-> There are three ready verdicts for those nights — you're lazy, you're addicted, or your attention is broken.
+> People reach for one of three accusations on those nights. You're lazy. You're addicted. Or your attention is broken.
 
 [MINI-HOOK — Holds the ADHD frame early; paid at the SP02 traits aside and the SP05 exchange-rate block.]
 
@@ -22,7 +22,7 @@
 
 [LOOP OPEN L-02 — The withheld number (intention null); pays at SP02.]
 
-> <u>Back to those three verdicts — because researchers have tested all three, and all three fell apart. The laziness verdict falls to a single number. I'll show it to you.</u>
+> <u>Back to those three accusations — because researchers have tested all three, and all three fell apart. The laziness accusation falls to a single number. I'll show it to you.</u>
 
 [PROMISE | LOCKED WORDING — The two-half learning contract, bounded to the intervention evidence ("try tonight," not "fix").]
 
@@ -38,7 +38,7 @@
 
 [TRANSITION — Sets up the demolition against the named 2007 meta-analysis; Steel introduced before use.]
 
-> So let's line up the three verdicts and check their paperwork.
+> So let's line up the three accusations and check their paperwork.
 >
 > In 2007, a psychologist named Piers Steel pooled almost seven hundred results on putting things off. It's still the biggest map of that territory ever built.
 
@@ -50,7 +50,7 @@
 
 [LOOP PAYOFF L-02 | LOCKED WORDING — Pays the withheld number with its plain meaning; the episode's first verdict-kill.]
 
-> <u>**Here is what that number means: people who delay intend to work just as hard as the people who don't.**</u> You didn't plan less. You planned the same — and paid more.
+> <u>**Here is what that number means: people who delay intend to work just as hard as the people who don't.**</u> You didn't plan less. You planned the same. The difference lives somewhere else.
 
 [TRANSITION — The intelligence null (.03, K=14) in one breath.]
 
@@ -60,7 +60,7 @@
 
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
-> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leaders, Michael Inzlicht, read the results and publicly stopped believing the theory he'd spent years defending. That's how badly the tank failed.
 >
 > Honestly, this one stung. I'd explained half my life with that tank.
 
@@ -70,7 +70,7 @@
 
 [TRANSITION — Closes the demolition and opens the model question SP03 answers.]
 
-> The tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
+> The tank was a metaphor, and the metaphor is gone. Which leaves the real question. What is that wall you hit at minute ten?
 
 ## 3. The price tag
 
@@ -78,23 +78,23 @@
 
 > Here's the model that's replacing the tank. And I'll say it straight — this is the current best explanation, not settled law.
 >
-> The feeling of effort is a price. When focusing feels expensive, your brain is running a live cost-benefit check. Is this task worth more than everything else you could be doing right now?
+> Think of your attention as something your brain sells, one minute at a time. Every activity within reach is a buyer. And every buyer bids in feelings — interest, progress, relief, fun. The feeling of effort is your brain telling you the current buyer's offer is too low.
 >
-> Boredom isn't your engine failing. Boredom is a bid.
+> Boredom isn't your engine failing. Boredom is your brain hearing a better bid.
 
 [TRANSITION — The shock study as the alarm's demonstration; the cell-size caveat repositioned after the 190-presses topper per the directed cold-viewer revision; one compact beat by scope boundary.]
 
-> And that bid has real teeth. In 2014, researchers at the University of Virginia asked people to sit alone and just think for fifteen minutes. No phone. No task.
+> And this auction has real teeth. In 2014, researchers at the University of Virginia asked people to sit alone and just think for fifteen minutes. No phone. No task.
 >
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
 > Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
 >
-> I laughed at that man — for about a second. Then I remembered my phone.
+> I laughed at that man — for about a second. Then I remembered my phone. My shock button just has apps on it.
 
 [AHA — Lands the beat's lesson in the price vocabulary.]
 
-> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
+> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts taking bids from anything else in the room.
 
 [MINI-HOOK — Opens the payment-list question SP04 answers.]
 
@@ -138,9 +138,9 @@
 
 [AHA — The effort-paradox seal: contrafreeloading with the cat exception as the beat's earned joke; closes on the product line.]
 
-> I build brain games for a living, and I would still have bet on difficulty. I'd have lost.
+> I learned this one building my own brain-training app, Apexwit. I would have bet everything on difficulty. I'd have lost.
 >
-> You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat.
+> You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat. Science lists the cat as an unexplained exception. Every cat owner can explain it.
 >
 > You crave chosen difficulty. And games sell chosen difficulty as a product.
 
@@ -156,7 +156,7 @@
 
 [AHA | LOCKED WORDING — The exams paradox scoped to the composite-vs-component nuance; the locked tell line.]
 
-> And exams? Exams got the highest concentration of anything in school. And nearly the lowest enjoyment.
+> And exams? Exams got the highest concentration of any classroom activity they measured. And nearly the lowest enjoyment.
 >
 > That's the tell. **Pressure can buy your concentration. It can't buy your engagement.**
 
@@ -164,7 +164,7 @@
 
 > Which brings in the second half of the bill. For tasks that measure you, the price isn't paid in boredom anymore. It's paid in fear.
 >
-> In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping a feeling works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
+> In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping that fear works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
 >
 > I didn't expect fear on that bill. But it explains the nights that boredom never could.
 
@@ -174,15 +174,15 @@
 
 [TRANSITION — Grades in one bounded pass: comments beat grades on motivation and achievement (meta), the failed comments-only rollout conceded, and the self-versus-work rule stated as the narrower honest lesson.]
 
-> One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too. Though one school that dropped grades for a whole year saw it backfire, so the honest rule is narrower.
+> One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too.
 >
-> Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
+> That doesn't mean grades must go — one school dropped them for a whole year, and things got worse. The lesson is narrower, and more useful. Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
 
 [TRANSITION — Pays the intro's ADHD holding line: exchange-rate boundary, hyperfocus construct flagged young, the pricing-machine reframe — and the explicit adjudication of verdict three (broken attention).]
 
-> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
+> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. You may have heard its famous flip side — "hyperfocus," the hours-long lock onto one interesting thing. That label is younger and looser than it sounds, so hold it gently.
 >
-> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third verdict — your attention was never broken. It was expensive.
+> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third accusation — your attention was never broken. It was expensive.
 
 ## 6. The flip works both ways
 
@@ -194,7 +194,7 @@
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
 >
-> Which resizes the second verdict, addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
+> Which resizes the second accusation — addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
 
 [REVERSAL — Flip direction one: the undermining experiments scoped aloud to already-loved activities (never aimed at studying); the contract line carries the mechanism.]
 
@@ -214,19 +214,29 @@
 
 > **So the frame decides. And a frame can be chosen.**
 
+[MINI-HOOK — Martin's no-half-wink rule applied: the two neighbor topics (loot-box psychology; the monetized-hobby contract) explicitly deferred to their own future episodes with a comments CTA.]
+
+> *Both of those are whole videos of their own — the casino mechanics, and what contracts do to the things you love. Tell me in the comments if you want them.*
+
 ## 7. The renegotiation
 
-[APPLICATION | LOCKED WORDING — The four-question price audit; each question paired with its matching lever at evidence-honest strength.]
+[APPLICATION | LOCKED WORDING — The carryable rule opens the application: upgrade the deal, not the discipline.]
 
-> Here is your four-question check — the price audit. The next time a task repels you, don't ask what's wrong with you. Ask what's missing from the deal.
+> Here is what to do with all of this. It starts with one rule.
 >
-> **Question one. Did I choose this challenge, and is it the right size?** If it was dumped on you, add one real choice back — the order, the method, the first problem.
+> **When a task repels you, don't upgrade your discipline. Upgrade the deal.**
+
+[APPLICATION | LOCKED WORDING — The compressed price audit: four question-to-imperative pairs; the delayed-feedback answer is self-grading (Martin's review note).]
+
+> Then run the price audit — four quick questions, four quick fixes.
 >
-> **Question two. Where is my feedback?** If the work only answers you in two weeks, build a faster reply. Check answers per problem, not per evening.
+> **Did I choose this?** If not, choose one piece of it — the order, the method, the first problem.
 >
-> **Question three. Does my progress survive anywhere I can see it?** Keep a visible count, and cross things off where crossed-off things stay.
+> **Where is my reply?** If the answer is two weeks away, grade yourself as you go — check each problem the moment you finish it.
 >
-> **Question four. Is this bill boredom — or fear?** Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
+> **Does my progress survive?** Make it visible. Cross things off where crossed-off things stay.
+>
+> **Is this boredom — or fear?** Boredom needs better pay. Fear needs a smaller bet — one page, one problem, failure made cheap. The way games do it.
 
 [APPLICATION — The anointed tonight-move (situation modification) paying the promise's "one move" exactly, with its student-experiment evidence, one mechanism-mapped joke, and the observable signal (the starting gap shrinks).]
 
@@ -279,7 +289,7 @@
 - **Status:** DRAFT
 - **Date:** 2026-08-01
 - **Deliverable:** FULL-SCRIPT
-- **Word count (spoken):** ~2,060 after the directed revision (≈12 minutes at 160 wpm). The cold-viewer restructure traded SP07 tail fat for the verdict adjudications and the anointed-move block, so runtime is roughly unchanged — and under the revised Law 3 (max 20 minutes; the story sizes the episode; adopted 2026-08-05), ~12 minutes needs no compression unless a stretch fails to earn its time. Former compression candidates kept for reference only: the SP04 proximity tidbits, the SP05 grades passage, the SP02 Inzlicht sentence.
+- **Word count (spoken):** ~2,245 after the 2026-08-06 brace-sweep merge (≈13–14 minutes spoken) — inside the revised Law 3 ceiling (max 20 minutes; the story sizes the episode).
 - **Working title:** Why You Can Game for 6 Hours but Can't Study for 10 Minutes (packaging trio W1–W3 recorded in the blueprint appendix; final choice pending Martin).
 
 ### Story progression and payoff audit
@@ -287,7 +297,7 @@
 - SP01–SP08 realized in order from the approved progression; no load-bearing deviation. The approved intro is preserved verbatim from the approved blueprint.
 - Loops: L-01 opened SP01 → partially paid SP03–SP05 → closed SP08. L-02 opened SP01 → paid SP02. L-03 opened SP01 → paid SP04 after the payment-list demonstration (tease-payoff doctrine). ADHD holding line opened SP01 → paid SP02 (traits aside) and SP05 (exchange-rate block). Promise half 1 paid SP03–SP05; half 2 paid SP07. No unpaid loop; no decorative loop added.
 - Both-directions symmetry (SP06) preserved as the application's authority; final close is declarative, no trailing question.
-- **Locked-line register (per the 2026-08-05 lock protocol; every line passed the spoken-readability gate before locking):** the title question (SP01); the two promise sentences (SP01); the L-02 payoff ("Here is what that number means…", SP02); the L-03 payoff ("But when players chose their level…", SP04); "Pressure can buy your concentration. It can't buy your engagement." (SP05); "So the frame decides. And a frame can be chosen." (SP06); the four price-audit question stems (SP07); the retell sentence and the final lesson (SP08). A gate failure on any of these reopens its lock by name at Martin's desk; none may be silently rewritten.
+- **Locked-line register (per the 2026-08-05 lock protocol; every line passed the spoken-readability gate before locking):** the title question (SP01); the two promise sentences (SP01); the L-02 payoff ("Here is what that number means…", SP02); the L-03 payoff ("But when players chose their level…", SP04); "Pressure can buy your concentration. It can't buy your engagement." (SP05); "So the frame decides. And a frame can be chosen." (SP06); the deal-over-discipline rule and the four compressed audit stems (SP07; old stems' locks reopened and re-closed at Martin's 2026-08-06 brace-sweep merge); the retell sentence and the final lesson (SP08). A gate failure on any of these reopens its lock by name at Martin's desk; none may be silently rewritten.
 
 ### Evidence boundaries
 
@@ -305,7 +315,7 @@
 
 - **Decision:** INPUT-REQUESTED for events; persona-license reactions in use (doctrine adopted 2026-08-05, see DECISIONS.md). Four performed reactions were added under the license — the tank sting (SP02), the laugh-then-phone turn (SP03), the builder's bet (SP04: true credential, no app name, performed bet), and the unexpected-fear line (SP05). Each claims stance only, carries no evidential weight, and is Martin's to reword or veto at the creative gate.
 - **Slot A — SP01 verdict line.** Primary prompt: on your own game-versus-study nights, which of the three verdicts did you reach for — lazy, addicted, or broken? Follow-ups: a specific night you remember; what you tried the next day; what you believed the games were doing to you. Bridge in: the verdict lineup. Bridge out: "Then researchers pooled…" Personal visuals: none needed. Omit when: no truthful single label existed.
-- **Slot B — SP04 builder line.** Primary prompt: as someone who builds brain-training games, what do you deliberately build into a level so people stay — and did you recognize the four payments? Follow-ups: one concrete design decision; one thing school gets wrong that you'd never ship. Bridge in: "payment four." Bridge out: the Lomas result. Personal visuals: Apexwit screen only if separately cleared. Omit when: the line would read as product promotion (Law 5 boundary).
+- **Slot B — SP04 builder line: COMPLETED (2026-08-06).** Martin directed the line as his own learning from building Apexwit; narrated once at the choice reveal, named without call-to-action (Law 5 credibility frame, not promotion).
 
 ### Creative-approval state
 
@@ -314,4 +324,5 @@
 - **Layer 2 mechanical consistency check:** completed 2026-08-01; four wordings corrected (Lomas persistence metric held to "most motivating"; undermining tasks as "activity they already loved"; utility-value dosage claim removed; flow condition's skill half restored).
 - **Directed revision (2026-08-05, Martin: "do the option 1"):** applied the recommended set — SP07 tail restructured (~460→~360 words: one anointed tonight-move paying the promise's "one move," observable-signal line added, decay warning compressed to the megastudy line, deadline-replication debunk cut with its advice, clinical signpost kept, single chore transfer kept; kid and hobby transfers moved to Shorts/description material); all three intro verdicts now explicitly adjudicated (lazy at SP02, addicted at SP06, broken attention at SP05); referent debts fixed (flip, pricing curve, paint metaphor, discipline callback re-named at SP08); small-study caveats repositioned after their toppers (shock, Lego); absolutes softened ("finally got its biggest test," "almost never," "can do"); care-register kid line removed with its transfer; the two closers separated by one plain beat with the price-tag lesson as the final word. Not adopted, with reasons on record: cutting the grades walk-back and gamification concession (contested-findings honesty), the intro's approved wording (blueprint baseline), and the "sliver"/traits sentences (kill-panel-mandated bounds).
 - **Full-review findings applied (2026-08-05, Martin's direction):** the intro's ADHD-aside resume seam rebuilt (referent re-named, false chronology and all-three-from-the-pool attribution removed — Martin's catch); gaming-disorder "rare" replaced with "the tail, not the norm"; the feedback rule attributed as interpretation ("seems to be"); the Layer-0 rational-core concession restored ("modest… studying's rewards really are far away; no trick fully closes that gap"); the larger-benefit element restored ("once you can read price tags, you'll start seeing them everywhere"); a second aside seam cleaned at the SP02 close (bare "So" dropped). Provenance: this seam class produced the aside-resume rule and the mechanical seam detector (see DECISIONS.md 2026-08-05).
+- **Brace-comment sweep (2026-08-06, first run of the inline review channel):** 15 Martin comments processed, all applied per his merge — the three-accusations rename (folk-belief framing made audible), the attention-market transaction rewrite (seller, buyers, currency assigned before "bid" recurs), the Inzlicht evidence-weight rationale, joke connective repairs (shock-button line; cat-owner topper), the Apexwit credential (PI slot B), the grades-takeaway reframe, hyperfocus name preparation, SP06's explicit two-topic deferral with comments CTA (no-half-wink rule), and the SP07 rule-first compression (deal-over-discipline rule; question-to-imperative pairs; self-grading answer for delayed feedback). Braces stripped; pair, readability, and seam gates re-run.
 - **Cold-viewer retention evaluation:** completed 2026-08-01 (single run — under the 2026-08-05 adoption posture, findings are presented adopted-unless-overruled but nothing applies before Martin's gate response; no two-strike exists, since a second strike requires substantially the same finding on substantially the same passage in another run). Headline findings: (1) verdict — cut SP07 by ~40%, ending shortly after Question Four with one anointed tonight-move; (2) two of the three intro verdicts (addicted, broken attention) are never explicitly adjudicated; (3) promise diffusion — "one evidence-backed move" pays as four unanointed moves; (4) referent debts ("the flip," "pricing curve," "paint wears off," discipline callback unre-named); (5) claim-smell list (absolutes: "Games never make that mistake," "tested properly," universalized shock line, vague "beat students told to try harder"); (6) mid-scene caveat placements deflate the shock and Lego reveals; (7) S8's two adjacent closers dilute each other; (8) care-register flip on the kid line; protected moments — the shock scene, the Sisyphus scene, the choice reveal + cat beat. Full report in the session record; findings await Martin's ruling at this gate.

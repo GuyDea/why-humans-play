@@ -8,11 +8,11 @@
 
 > Maybe someone has even said it to you: "If you can game all night, you could study if you really tried." Maybe you say it to yourself.
 >
-> There are three ready verdicts for those nights — you're lazy, you're addicted, or your attention is broken.
+> People reach for one of three accusations on those nights. You're lazy. You're addicted. Or your attention is broken.
 
 > *If your word is ADHD, hold that thought. It's part of this story, and it gets its honest place.*
 
-> <u>Back to those three verdicts — because researchers have tested all three, and all three fell apart. The laziness verdict falls to a single number. I'll show it to you.</u>
+> <u>Back to those three accusations — because researchers have tested all three, and all three fell apart. The laziness accusation falls to a single number. I'll show it to you.</u>
 
 > **By the end of this video, you'll know what actually stops you at minute ten — and it isn't weak will.**
 >
@@ -22,7 +22,7 @@
 
 ## 2. The lineup
 
-> So let's line up the three verdicts and check their paperwork.
+> So let's line up the three accusations and check their paperwork.
 >
 > In 2007, a psychologist named Piers Steel pooled almost seven hundred results on putting things off. It's still the biggest map of that territory ever built.
 
@@ -30,37 +30,37 @@
 >
 > Basically zero.
 
-> <u>**Here is what that number means: people who delay intend to work just as hard as the people who don't.**</u> You didn't plan less. You planned the same — and paid more.
+> <u>**Here is what that number means: people who delay intend to work just as hard as the people who don't.**</u> You didn't plan less. You planned the same. The difference lives somewhere else.
 
 > Intelligence? Also nothing. Point zero three.
 
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
-> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leaders, Michael Inzlicht, read the results and publicly stopped believing the theory he'd spent years defending. That's how badly the tank failed.
 >
 > Honestly, this one stung. I'd explained half my life with that tank.
 
 > *To be fair, some traits do matter. Highly disciplined people put things off far less. Hold that thought too. It comes back at the end.*
 
-> The tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
+> The tank was a metaphor, and the metaphor is gone. Which leaves the real question. What is that wall you hit at minute ten?
 
 ## 3. The price tag
 
 > Here's the model that's replacing the tank. And I'll say it straight — this is the current best explanation, not settled law.
 >
-> The feeling of effort is a price. When focusing feels expensive, your brain is running a live cost-benefit check. Is this task worth more than everything else you could be doing right now?
+> Think of your attention as something your brain sells, one minute at a time. Every activity within reach is a buyer. And every buyer bids in feelings — interest, progress, relief, fun. The feeling of effort is your brain telling you the current buyer's offer is too low.
 >
-> Boredom isn't your engine failing. Boredom is a bid.
+> Boredom isn't your engine failing. Boredom is your brain hearing a better bid.
 
-> And that bid has real teeth. In 2014, researchers at the University of Virginia asked people to sit alone and just think for fifteen minutes. No phone. No task.
+> And this auction has real teeth. In 2014, researchers at the University of Virginia asked people to sit alone and just think for fifteen minutes. No phone. No task.
 >
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
 > Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
 >
-> I laughed at that man — for about a second. Then I remembered my phone.
+> I laughed at that man — for about a second. Then I remembered my phone. My shock button just has apps on it.
 
-> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
+> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts taking bids from anything else in the room.
 
 > *So if attention has a price, the next question writes itself. What exactly do games pay?*
 
@@ -88,9 +88,9 @@
 
 > <u>**But when players chose their level, moderate challenge became the most motivating. The ingredient was never difficulty. It was choice.**</u>
 
-> I build brain games for a living, and I would still have bet on difficulty. I'd have lost.
+> I learned this one building my own brain-training app, Apexwit. I would have bet everything on difficulty. I'd have lost.
 >
-> You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat.
+> You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat. Science lists the cat as an unexplained exception. Every cat owner can explain it.
 >
 > You crave chosen difficulty. And games sell chosen difficulty as a product.
 
@@ -102,25 +102,25 @@
 >
 > Engagement bottomed out during lectures and videos — the moments school runs on. It peaked when challenge and skill were both high — and when students felt in control of the work.
 
-> And exams? Exams got the highest concentration of anything in school. And nearly the lowest enjoyment.
+> And exams? Exams got the highest concentration of any classroom activity they measured. And nearly the lowest enjoyment.
 >
 > That's the tell. **Pressure can buy your concentration. It can't buy your engagement.**
 
 > Which brings in the second half of the bill. For tasks that measure you, the price isn't paid in boredom anymore. It's paid in fear.
 >
-> In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping a feeling works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
+> In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping that fear works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
 >
 > I didn't expect fear on that bill. But it explains the nights that boredom never could.
 
 > Now notice what games did with failure. They made it free. You die, you respawn, and nobody updates your permanent record.
 
-> One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too. Though one school that dropped grades for a whole year saw it backfire, so the honest rule is narrower.
+> One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too.
 >
-> Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
+> That doesn't mean grades must go — one school dropped them for a whole year, and things got worse. The lesson is narrower, and more useful. Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
 
-> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
+> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. You may have heard its famous flip side — "hyperfocus," the hours-long lock onto one interesting thing. That label is younger and looser than it sounds, so hold it gently.
 >
-> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third verdict — your attention was never broken. It was expensive.
+> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third accusation — your attention was never broken. It was expensive.
 
 ## 6. The flip works both ways
 
@@ -130,7 +130,7 @@
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
 >
-> Which resizes the second verdict, addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
+> Which resizes the second accusation — addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
 
 > Second, the same price change runs in reverse — from play toward chore. Take a thing you love, staple a contract to it, and watch the price change.
 >
@@ -142,17 +142,23 @@
 
 > **So the frame decides. And a frame can be chosen.**
 
+> *Both of those are whole videos of their own — the casino mechanics, and what contracts do to the things you love. Tell me in the comments if you want them.*
+
 ## 7. The renegotiation
 
-> Here is your four-question check — the price audit. The next time a task repels you, don't ask what's wrong with you. Ask what's missing from the deal.
+> Here is what to do with all of this. It starts with one rule.
 >
-> **Question one. Did I choose this challenge, and is it the right size?** If it was dumped on you, add one real choice back — the order, the method, the first problem.
+> **When a task repels you, don't upgrade your discipline. Upgrade the deal.**
+
+> Then run the price audit — four quick questions, four quick fixes.
 >
-> **Question two. Where is my feedback?** If the work only answers you in two weeks, build a faster reply. Check answers per problem, not per evening.
+> **Did I choose this?** If not, choose one piece of it — the order, the method, the first problem.
 >
-> **Question three. Does my progress survive anywhere I can see it?** Keep a visible count, and cross things off where crossed-off things stay.
+> **Where is my reply?** If the answer is two weeks away, grade yourself as you go — check each problem the moment you finish it.
 >
-> **Question four. Is this bill boredom — or fear?** Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
+> **Does my progress survive?** Make it visible. Cross things off where crossed-off things stay.
+>
+> **Is this boredom — or fear?** Boredom needs better pay. Fear needs a smaller bet — one page, one problem, failure made cheap. The way games do it.
 
 > And the one move to try tonight is the simplest one on record. Before you sit down, take the competing option out of the room entirely.
 >

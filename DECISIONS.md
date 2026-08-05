@@ -2526,3 +2526,28 @@ drafts in the IDE, extending the earlier inline-proposal workflow.
 
 **Documents:** `.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md`
 (practice owner), `scripts/validate_script_pair.py` (+ regression test).
+
+## 2026-08-06 — First brace-sweep merge: clarity rules and ep002 revision
+
+**Decision:** Two drafting rules adopted from Martin's first inline brace review of
+the ep002 draft: (1) **core-model clarity** — a central model's roles (who acts, on
+what, with what currency, which direction) are assigned in plain words before any of
+its metaphor vocabulary travels alone; (2) **never half-wink** — every named idea is
+explained to the size of its introduction or explicitly deferred aloud as its own
+future video, optionally with a comments CTA. Both live in the rapid drafting owner
+with a matching cold-viewer check. All 15 review comments applied to the draft,
+including the three-accusations rename, the attention-market transaction rewrite, the
+SP06 two-topic deferral, the SP07 rule-first compression ("When a task repels you,
+don't upgrade your discipline. Upgrade the deal."), and the Apexwit credential line
+(personal-input slot B completed by Martin's direction).
+
+**Rationale:** Martin's review found the recurring defect class was referent debt —
+terms and implications arriving before the viewer holds their meaning — plus two
+half-explained neighbor topics and a diffuse ending. The seam detector's flag on the
+first fix placement (deferral orphaning the frame line's "So") validated the gate
+stack in the same session.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (both files; locked-line
+register, PI record, and sweep record updated; ~2,245 spoken words).

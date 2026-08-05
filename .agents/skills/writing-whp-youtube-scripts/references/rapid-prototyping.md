@@ -463,6 +463,19 @@ opens with acknowledgment instead of a promise. It is the default, not a straitj
 beat with no established term, or where the name itself is the earned punchline, may
 demonstrate first and name after.
 
+Assign the core model's roles before its vocabulary. When the episode's central model
+or metaphor enters, name every role in plain words first — who acts, on what, with
+what currency, in which direction the exchange runs. Only after that assignment may
+the metaphor's vocabulary (the bid, the price, the tank) travel alone. A core model
+whose transaction cannot be answered in one breath — who pays whom, with what, for
+what — is not yet explained, and a metaphor term that appears before its role exists
+is a defect, not foreshadowing.
+
+Never half-wink a topic. Every named idea is explained to the size of its
+introduction, or explicitly deferred aloud — "a whole video of its own," optionally
+with a call for comments — before the narration moves on. A concept introduced and
+neither explained nor deferred reads as a wink the viewer cannot cash.
+
 Check audience familiarity before naming any concept. When a term is already mainstream
 for the target audience — research current awareness rather than assuming — acknowledge
 the familiarity (“you've probably heard this called sycophancy”) and add something beyond

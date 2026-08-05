@@ -27,7 +27,10 @@ Evaluate, in this order:
    anywhere a 60-second stretch has none. The healthy budget is roughly one per
    beat-half with ordinary speech between.
 4. **Concept load.** Flag any passage introducing more than two new concepts, named
-   effects, or mechanisms inside ~30 spoken seconds — the lecture signal.
+   effects, or mechanisms inside ~30 spoken seconds — the lecture signal. Also quote
+   any central-model vocabulary used before its roles are assigned (who pays whom,
+   with what, for what), and any named idea that is introduced but neither explained
+   nor explicitly deferred to its own future video.
 5. **Claim smell.** As a skeptical layperson: quote any sentence that sounds bigger
    than the evidence shown on screen ("this exact loop", "the difference is X", "as Y
    as it gets"), and any place a proposed explanation is voiced as a settled rule.
