@@ -1,2 +1,5 @@
 .superpowers/
 __pycache__/
+
+# session worktrees are never tracked
+.claude/worktrees/
