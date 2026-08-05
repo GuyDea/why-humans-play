@@ -116,7 +116,7 @@ Use this compact row shape; create separate rows for materially different angles
 
 ```text
 # | WHP lane or signal seed | subject | source/seed | exact angle
-intended viewer | Audience pain or shared tension | recognizable moment | human stake or cost, where applicable
+intended viewer | primary script goal | Audience pain or shared tension | recognizable moment | human stake or cost, where applicable
 all-six gate results + concise rejection reason | disposition
 ```
 
@@ -165,8 +165,11 @@ This is seven records per finalist. Keep each rationale to one clause plus stabl
 pointers; do not repeat source details. Use `none` when no cap/boundary applies or no evidence is
 reused. When one ledger row supports more than one criterion, state the distinct question it answers
 in each record so double counting is auditable. The score/grade in each record must match the
-shortlist cell. After the records, one concise finalist-level synthesis may name the decisive support
-and overall largest uncertainty, but it cannot replace any criterion record.
+shortlist cell. Immediately after each finalist's records, state in one line its declared primary
+script goal, qualifying artifact, and provisional transformation contract; mark any of these
+`unavailable` rather than inventing them. After the records, one concise finalist-level synthesis may
+name the decisive support and overall largest uncertainty, but it cannot replace any criterion
+record.
 
 For an incomplete result, include only the responsibly supported, gate-passing finalists that
 actually exist. If none exist, state `No responsibly supported, gate-passing finalists`, emit no
@@ -189,8 +192,10 @@ surprise/tension | visual promise | delivered payoff | survives honestly?
 ```
 
 Mark `survives honestly?` as `yes` or `no`, explain a `no` briefly, and visibly identify the
-strongest surviving direction for each finalist. Synonym swaps and cosmetic thumbnail changes do
-not count as different directions. For the unavailable-record exception below, use `unavailable`
+strongest surviving direction for each finalist. Every direction makes its finalist's declared
+primary script-goal bet; if the surviving directions revealed a mistype, state the retype and the
+gate-rerun result. Synonym swaps and cosmetic thumbnail changes do not count as different
+directions. For the unavailable-record exception below, use `unavailable`
 instead of inferring a direction-level survival result or strongest direction.
 
 When fewer than three responsibly supported, gate-passing finalists exist, test three directions
@@ -251,6 +256,7 @@ Use a compact field/value table or equally scannable labeled blocks. Include eve
 | Working logline | One sentence serving the whole episode |
 | Intended viewer | A concrete viewer beyond existing followers |
 | Audience pain or shared tension | The specific recognizable problem, mystery, desire, or tension that makes the intended viewer care, including the lived moment and human cost where applicable |
+| Primary script goal | The declared goal type — emotional impact, expectation subversion, or new-understanding lens — with its qualifying artifact and the provisional transformation contract |
 | Why now | Classify as evergreen, growth, seasonal, or news-driven and explain the timing |
 | Familiar entry point and central tension | What earns recognition and opens the question |
 | Game/play mechanism | The mechanism central to the angle |
@@ -348,6 +354,7 @@ table, row, source, or calculation pointer for every check.
 | 10 | Exactly one final topic selected only with at least two responsibly supported winner-eligible finalists; otherwise exact no-winner wording and any sole supported finalist are shown |  |  |
 | 11 | Runner-up loss explained directly |  |  |
 | 12 | No fabricated observation, guarantee, or unsupported load-bearing claim |  |  |
+| 13 | One primary script goal declared per advancing angle; qualifying artifact and provisional transformation contract recorded for every winner-eligible finalist |  |  |
 
 Item 7 is `yes` only when all seven numeric criterion values for every listed finalist are present,
 their records match, and every total can be recomputed. Missing component values require

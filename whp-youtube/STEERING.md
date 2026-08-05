@@ -124,6 +124,45 @@ The detailed discovery, specificity, evidence, and promise-fidelity gates live o
 Topic selection applies that method; scripting consumes its approved handoff rather than
 recreating it.
 
+### Type every episode by one primary script goal
+
+Adopted 2026-08-05. Every episode makes exactly one declared primary bet — its
+**primary script goal** — chosen at topic selection from exactly three types:
+
+- **Emotional impact** — the episode is built to move the viewer through a specific,
+  evidence-supported human nerve. Qualifying artifact: the selected nerve and the felt
+  moment the episode earns.
+- **Expectation subversion** — the episode is built to overturn a belief the intended
+  viewer demonstrably holds. Qualifying artifact: the documented prior belief, with
+  evidence that it is commonly held, and the evidence-backed reversal.
+- **New-understanding lens** — the episode is built to hand the viewer a new
+  explanatory model. Qualifying artifact: the one-sentence lens the viewer could
+  retell, plus a provisional transformation contract.
+
+One strict primary per episode; no declared secondary. A finished episode still lands
+emotionally, still surprises, and still leaves understanding behind — the primary goal
+types the bet the package and opening are built around, not the episode's total
+content.
+
+Why strict single-typing:
+
+- **The package can carry one promise.** A title/thumbnail pair communicates one
+  tension in one glance (Law 1); a package promising subversion and emotion and a new
+  lens at once communicates none of them.
+- **Attribution.** With one declared goal per episode, every publish is a clean
+  experiment: per-goal CTR and retention comparisons stay readable and steer later
+  topic selection. Stacked goals destroy that signal.
+- **Deliberate variety.** Early on, alternating bet types maps the audience faster
+  than blended episodes; topic selection uses goal variety as a portfolio tiebreaker,
+  never as a score override.
+
+The declaration, per-type qualifying-artifact requirements, and the finalist
+transformation-contract check live in
+[the primary-script-goal owner](../.agents/skills/choosing-whp-video-topic/references/research-method.md#declare-the-primary-script-goal).
+The topic brief carries the declared goal into scripting; architecture and packaging
+preserve it, and the winning package must make that goal's bet. Emotional force never
+lowers the evidence bar (see the nerve rule above).
+
 ## Law 1 — Packaging is the product
 
 - **The idea sets the ceiling; execution only decides whether you reach it.** `[reported]`
@@ -138,6 +177,9 @@ recreating it.
   as two halves of a single promise — the thumbnail shows the tension, the title tells
   it, and neither is generated, scored, or chosen alone, because the viewer only ever
   meets them together in the feed.
+- **The package makes the episode's declared primary script-goal bet.** One promise,
+  one bet: candidate packages vary the entry point, tension, and visual, never the
+  goal type they promise (see the primary script goal rule above).
 - **Write 15–20 candidate packages per video. Never ship the first one.** Packaging
   iteration is the single highest-leverage activity on this channel.
 - **The stage that owns this law is the Script Blueprint.** Package candidates are
@@ -581,7 +623,9 @@ Adopted 2026-07-30. Individual episodes are built by the
   operation: retention curve mapped against the episode's beat map (the predicted drop
   points become testable), CTR against the packaging gate scores, and a
   delivered-versus-scripted comparison of Martin's actual narration to feed the voice
-  doctrine. Findings are distilled into the skill or this file — a readback that
+  doctrine. Record each result against the episode's declared primary script goal so
+  the per-goal performance comparison accumulates across episodes and feeds topic
+  selection. Findings are distilled into the skill or this file — a readback that
   changes no doctrine records why. This adopts the previously unadopted finding-3
   readback proposal (`DECISIONS.md`, 2026-07-30).
 
