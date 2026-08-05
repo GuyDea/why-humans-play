@@ -103,6 +103,28 @@ of exact delivery, and only Martin closes it again.
 Mark the smallest complete passage that performs the named job. Do not style ordinary
 connective prose merely to make the page look active.
 
+## Martin's inline review comments
+
+Martin reviews a stage by writing comments in curly braces directly inside the
+narration — `{this feels slow}`, `{do we have a source for this?}`, `{cut?}` — usually
+in `script.raw.md`. Braces are a review channel, never spoken narration.
+
+Processing contract, in order:
+
+1. Sweep the file and answer every comment in conversation — quote the comment, explain
+   or react, and state the proposed disposition (apply, propose alternative, or push
+   back with the reason).
+2. Apply what the comment clearly directs; where it asks a question or the response
+   changes locked wording, evidence-bounded wording, or the approved progression, the
+   matching gate rules apply unchanged (a comment on a locked line reopens its lock; a
+   comment against mandated wording converts per gate precedence).
+3. Remove the braces once processed — the comment's disposition is recorded in the
+   conversation and, when material, in the stage appendix.
+4. Re-run pair validation and the readability gate after the sweep.
+
+The pair validator fails fast on any remaining `{…}` so an unprocessed comment can
+never reach approval, promotion, word counts, or the teleprompter surface.
+
 ## Stage appendices
 
 Every extended file ends with exactly one literal `## Appendix`. The appendix owns

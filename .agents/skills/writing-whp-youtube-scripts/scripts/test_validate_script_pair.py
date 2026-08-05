@@ -211,6 +211,23 @@ class ScriptPairTests(unittest.TestCase):
         raw = _extended_sync_surface(extended)
         return self.make_pair(raw=raw, extended=extended, stage="final")
 
+    def test_unprocessed_review_comment_blocks_validation(self) -> None:
+        from validate_script_pair import REVIEW_COMMENT_ERROR, validate_pair
+        with tempfile.TemporaryDirectory() as tmp:
+            stage = Path(tmp) / "ep999-brace-test" / "blueprint"
+            stage.mkdir(parents=True)
+            (stage / "script.raw.md").write_text(
+                "# T\n\n> Spoken line. {Martin: this feels slow}\n",
+                encoding="utf-8",
+            )
+            (stage / "script.extended.md").write_text(
+                "# T\n\n> Spoken line. {Martin: this feels slow}\n\n## Appendix\n",
+                encoding="utf-8",
+            )
+            from validate_script_pair import resolve_pair
+            errors = validate_pair(resolve_pair(stage))
+            self.assertEqual(errors, [REVIEW_COMMENT_ERROR])
+
     def test_final_delegation_matches_direct_document_validation(self) -> None:
         extended = TEMPLATE_PATH.read_text(encoding="utf-8")
         extended = extended.replace(

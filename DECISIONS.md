@@ -2511,3 +2511,18 @@ architecture preserves the bet and surfaces retypes),
 progress checklist and `WHP_PROGRESS/4` transport are deliberately unchanged — the
 new requirements live inside already-listed checklist steps. Published and committed
 episodes are not retroactively typed.
+
+## 2026-08-05 — Inline brace comments: Martin's in-script review channel
+
+**Decision:** Martin may write review comments in curly braces (`{…}`) directly inside
+a stage's narration; the assistant sweeps them, answers each in conversation with a
+disposition, applies or contests under the existing gate rules (locks reopen; mandated
+wording follows gate precedence), removes the braces, and re-runs validation. The pair
+validator now fails fast on any remaining non-empty `{…}` so an unprocessed comment
+cannot reach approval or production surfaces.
+
+**Rationale:** Martin's request for a lightweight in-context review loop while reading
+drafts in the IDE, extending the earlier inline-proposal workflow.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md`
+(practice owner), `scripts/validate_script_pair.py` (+ regression test).
