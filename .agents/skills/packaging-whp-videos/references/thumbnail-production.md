@@ -14,7 +14,7 @@ Turn the three winning packages into rendered thumbnails: brief → prompt → 5
 - **Overlay:** 0–3 words, never words from the title.
 - **Brand:** charcoal `#323232`–`#3b3b3b`, accent green `#309420`, off-white `#f8f8f8`;
   charcoal grounds need a bright rim or off-white mass for dark-mode separation;
-  accent red as accent, never dominant field.
+  accent green as accent, never dominant field.
 - **References:** 3–5 outlier thumbnails from the patterns brief (structure
   inspiration, not copying) and any prior WHP renders for series consistency.
 
