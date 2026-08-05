@@ -23,15 +23,19 @@ baseline. Consult before drafting; update at each episode's promotion into `draf
 | Second-Opinion Test | Four counter-questions that make an AI answer inspectable: assumptions accepted, strongest case against, failure premortem, outside-verifiable fact. Original, unvalidated package. | ep001 | The four questions as scripted in ep001 | Active |
 | Possible-answer / safe-decision distinction | A plausible answer to a narrower reassuring question does not resolve the decision that matters. | ep001 | "A possible explanation is not a safety decision." | Active |
 | Distrust–checking gap | Suspicion is an attitude; checking is a behavior; the first does not produce the second. | ep001 | "Distrust is a feeling. Checking is a behavior." | Active |
-| Switched quests | Self-handicapping reframed: abandoning the stated main quest to protect the identity side quest. | ep002 | "You didn't stop playing the game. You just switched quests." | Active |
-| Pandocrin | The Berglas & Jones fictional slowing drug; shorthand for a chosen self-handicap. | ep002 | — | Active |
+| Switched quests | Self-handicapping reframed: abandoning the stated main quest to protect the identity side quest. | ep002 (retired thesis; episode returned to backlog 2026-08-01) | "You didn't stop playing the game. You just switched quests." | Parked with its episode |
+| Pandocrin | The Berglas & Jones fictional slowing drug; shorthand for a chosen self-handicap. | ep002 (retired thesis; episode returned to backlog 2026-08-01) | — | Parked with its episode |
+| Attention's price tag | Felt effort and boredom reframed as the brain's live cost-benefit signal — the leading post-willpower-tank model, argued on air as current-best, never settled fact. | ep002 (games-vs-studying rebuild) | "Your focus isn't broken — games just pay attention's price, and studying usually doesn't." | Active |
+| The two nights | The viewer's paired memories — the six-hour game night and the ten-minute study collapse — the episode's recurring anchor scene. | ep002 (games-vs-studying rebuild) | — | Active |
+| The price audit | The four-question check at the moment of task aversion: chose the challenge? feedback where? progress survives? boredom — or fear? | ep002 (games-vs-studying rebuild) | The four questions as scripted | Active |
 
 ## Opening-shape ledger
 
 | Episode | Route | Felt-entry moves used | Withheld object | Notes |
 |---|---|---|---|---|
 | ep001 | Question-first → shared-behavior case entry | Documented-motive entry, praised enemy, isolated cost line, dismissal preemption | The unasked question (paid at alternate-prompt beat) | Felt-entry doctrine's first application |
-| ep002 | Question-first → viewer memory scene → felt-choice simulation | Memory scene, awareness beat, felt-choice simulation, weld line | The exact praise sentence (paid at Mueller–Dweck beat) | Population-study route; applied to blueprint+draft 2026-07-30 |
+| ep002 (retired self-handicapping final) | Question-first → viewer memory scene → felt-choice simulation | Memory scene, awareness beat, felt-choice simulation, weld line | The exact praise sentence (paid at Mueller–Dweck beat) | Episode returned to backlog 2026-08-01; shape stays in the ledger for variety checks |
+| ep002 (games-vs-studying rebuild) | Question-first → contrast-pair (two viewer memories side by side) | Contrast pair, family-argument recognition, verdict lineup, ADHD holding line | The hidden ingredient (choice, paid at the assigned-vs-chosen reveal) plus the withheld number (intention null) | Draft promoted 2026-08-01; varies route and withheld-object axes from both prior shapes |
 
 ## Assumed-knowledge baseline
 

@@ -44,20 +44,30 @@ accepted current launch sequence, dated launch research, and historical episode 
    even when it follows every rule*), which remains retired from the sequence; its
    research and drafts stay in git history and dated planning documents for possible
    future re-ranking.
-2. **EP2 — Why you didn't study (selected 2026-07-29).** Decode self-handicapping —
-   losing the stated game on purpose to win the identity game — anchored in Berglas &
-   Jones 1978. Selected from [`topic-backlog.md`](topic-backlog.md) after the earlier
-   interviews premise was rejected and a developed sports-betting premise was parked
+2. **EP2 — Why you can game for hours but can't study for ten minutes (thesis
+   rebuilt 2026-08-01).** Decode task aversiveness as motivational structure: what
+   games supply (chosen goals, immediate feedback, calibrated difficulty, surviving
+   progress) and studying strips, with boredom reframed as the attention system's
+   cost signal rather than a character defect. Selected through a full angle
+   ideation (2026-07-31: audience-language, mechanism, and competitive scans) after
+   the prior self-handicapping thesis failed its post-mortem coverage check — task
+   aversion and mood repair, not identity insurance, is the dominant scientific
+   account of the viewer's night (Steel 2007), and the private-delay case sat
+   outside the mechanism's own evidence boundary (Kolditz & Arkin 1982). That
+   failure produced the 2026-07-31 thesis-verification guardrails (see
+   `DECISIONS.md`); this rebuild is their first episode.
+   Working state (2026-08-01, evening): Architecture approved (Layer 0 verdict
+   FRAME-PARTIAL, five corrections adopted; kill panel 2 killed / 6 bounded);
+   Story Progression approved (Layer 1: 14/15 SUPPORTED, one corrected); Blueprint
+   approved and promoted; the draft/ pair is written and validated, awaiting the
+   cold-viewer evaluation report and Martin's creative review. The verified
+   self-handicapping episode ("Why You Didn't Study") is preserved intact at
+   [`episodes/ep002-why-you-didnt-study/`](episodes/ep002-why-you-didnt-study/) —
+   its evidence records remain reusable — and returns to
+   [`topic-backlog.md`](topic-backlog.md) re-scoped to its honest boundary
+   (self-sabotage after unexplained success, with an audience). The earlier
+   interviews premise remains rejected and the sports-betting premise parked
    ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
-   Working state (2026-07-30): rebuilt under the felt-entry and script-economy
-   doctrine (felt-choice simulation intro), refined by cold-viewer evaluation, and
-   promoted through the verified
-   [final pair](episodes/ep002-why-you-didnt-study/final/script.extended.md) with
-   ten evidence records and completed three-layer adversarial verification (34/40
-   claims SUPPORTED across both layers; six overstatements corrected). Status
-   EDITORIAL-DRAFT: Martin's review, the audit battery, three open editorial items
-   from the second evaluation round, packaging choice, and production assets remain
-   open (see the final appendix issue ledger).
 3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support.
 4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a
@@ -421,9 +431,17 @@ when that feature receives its own design; do not scaffold placeholder app code 
 
 ## Law 3 — Duration and retention pacing
 
-- **Target 6–10 minutes for early episodes.** The 5–10 min band shows the highest
-  average retention of any length (~31.5%). `[reported]` Don't pad to hit some imagined
-  "long-form" length; a tight 7 minutes beats a soft 15.
+- **Every video runs at most 20 minutes — and inside that ceiling, time never sizes
+  the episode; the story does.** *(Adopted 2026-08-05, replacing the earlier 6–10
+  minute early-episode band.)* A great story is told at the length its causal chain,
+  evidence boundaries, and payoff genuinely earn; timing pressure never cuts setup,
+  referents, caveats, or connective tissue. The flip side stays in force: length must
+  be **earned** — the 5–10 min band still shows the highest average retention of any
+  length (~31.5%) `[reported]`, so every minute past ten has to survive the retention
+  pass on its own merit. Don't pad to hit some imagined "long-form" length; a tight
+  7 minutes still beats a soft 15 — but a genuinely earned 18 beats an amputated 9.
+  Exceeding 20 minutes is exceptional and requires Martin's explicit per-episode
+  ruling that the story earns it.
 - **Use the fewest open loops that sustain a clear progression.** A partial answer may
   create the next question, but a completed thought does not need decorative suspense.
   Loop selection and payoff follow the structural loop owner linked in Law 2.

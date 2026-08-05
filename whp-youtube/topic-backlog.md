@@ -2,8 +2,11 @@
 
 - **Status:** active working material, adopted 2026-07-29. Ranked by hook ceiling ×
   evidence strength × WHP fit; ranking is advisory, selection is Martin's.
-- **Selected for EP2 (2026-07-29):** #4 *Why you didn't study* — now in the episode
-  pipeline; remaining candidates stay ranked for later slots.
+- **Selected for EP2 (2026-07-29):** #4 *Why you didn't study* — superseded 2026-08-01:
+  the self-handicapping thesis failed the post-mortem coverage check and EP2 was
+  re-selected as the games-versus-studying task-aversion angle (see `STEERING.md`
+  launch sequence and `DECISIONS.md`). Candidate #4 returns to the pool below,
+  re-scoped to its honest evidence boundary.
 - Every proof case below is a verified source lead at ideation depth; full claim
   verification remains Final-stage work under the writing skill.
 - Hook lines are rubric-tested sketches (viewer-in-sentence, unclosable gap, edge
@@ -42,7 +45,15 @@
 - **Hook sketch:** "There's a video game hospitals have used on car-crash victims. On
   purpose."
 
-### 4. Why you didn't study — SELECTED (EP2, 2026-07-29)
+### 4. Why you didn't study — RETURNED TO POOL, RE-SCOPED (2026-08-01)
+
+> Was EP2 (selected 2026-07-29); superseded when the coverage check showed
+> self-handicapping owns a minority of the "night you didn't study" moment. The
+> verified final pair survives at `episodes/ep002-why-you-didnt-study/final/` with
+> ten reusable evidence records. Honest re-scope for any future slot: self-sabotage
+> **after unexplained success and with an audience** (Berglas & Jones 1978 male-only
+> lab result; effect largely disappears in private, Kolditz & Arkin 1982) — not a
+> universal diagnosis of procrastination. The nerve below predates that re-scope.
 - **Nerve:** everyone remembers not preparing for something that mattered and never
   understanding why.
 - **Gap:** the viewer's model has no answer for deliberate self-sabotage; the mundane
