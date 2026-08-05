@@ -19,8 +19,9 @@ This skill serves several caller-invoked operations. The caller supplies the ope
 - **Ideate subjects/angles** — run the bounded audience-language and subject-to-angle scan
   in [the subject-to-angle owner](references/research-method.md#subject-to-angle-development)
   for each promising raw subject, then return diverse candidate subjects and exact angle
-  proposals only; do not gate, score, package, read the episode backlog, collect the full
-  signal set, or pick a winner.
+  proposals only — each proposal typed with one declared primary script goal and its
+  qualifying artifact per that owner; do not gate, score, package, read the episode
+  backlog, collect the full signal set, or pick a winner.
 - **Quick gate-check** — judge only the single supplied idea against the six named hard gates in "Apply hard gates at angle level", using only `BRAND.md` and `whp-youtube/STEERING.md` as doctrine. Read nothing else, run no signal scan, generate no alternatives, and do not score or package. Return the caller-supplied structured shape (an overall status, an overall verdict, the six gate verdicts with one-line reasons, and an optional guardrail note). The output schema is always supplied by the caller — never search for, reconstruct, or reverse-engineer it.
 - **Package test** — test the supplied title/thumbnail directions only.
 - **Topic-brief handoff (preview)** — prepare the handoff for an already-selected topic.
@@ -142,13 +143,13 @@ Apply the exact 100-point weights and anchors in `references/research-method.md`
 
 If an actual numeric criterion value is absent or unavailable, record it as `not scored/unknown`, never as zero, and do not compute a total from missing components. Preserve a supplied aggregate only as explicitly supplied; it does not verify missing component arithmetic.
 
-For each of the top three finalists, create three materially distinct title/thumbnail package promises. Test who each attracts, what is familiar and surprising, the open tension and visual promise, and whether the video can honestly deliver the promised payoff. Reject bait whose attracted audience would not be satisfied by the episode.
+For each of the top three finalists, create three materially distinct title/thumbnail package promises. Every promise makes the finalist's declared primary script-goal bet; directions vary the entry point, tension, and visual, never the bet (the research method owns the mistype signal and retype rule). Test who each attracts, what is familiar and surprising, the open tension and visual promise, and whether the video can honestly deliver the promised payoff. Reject bait whose attracted audience would not be satisfied by the episode.
 
 Do not invent package contents when a supplied decision state says only that an honest package exists. If a completed package-test count is known but row contents are absent, preserve the known package-test row count with placeholders such as `Recorded direction 1 — details unavailable`. Mark every unsupplied package field as `unavailable`; retain a supplied aggregate survival fact without mapping it to a direction, and do not infer which placeholder survived. Only create new package contents when the task asks for package development from available facts, and never present them as evidence of an earlier test.
 
 ## Decide
 
-Select exactly one final topic only when at least two responsibly supported, gate-passing, winner-eligible finalists remain. Lead with the exact topic and angle, strongest package direction, and confidence. Explain why it is the best next episode now, which evidence is decisive, why it can reach beyond current followers, and why it is recognizably WHP.
+Select exactly one final topic only when at least two responsibly supported, gate-passing, winner-eligible finalists remain. Winner eligibility also requires the finalist's declared primary script goal with its qualifying artifact and a stated provisional transformation contract, both owned by the research method. Lead with the exact topic and angle, strongest package direction, and confidence. Explain why it is the best next episode now, which evidence is decisive, why it can reach beyond current followers, and why it is recognizably WHP.
 
 If two or more supported finalists remain tied after package rescoring, select one provisional winner and name the smallest decisive test that could reverse it. If fewer than two supported finalists remain, return an incomplete result with the exact line `**Winner:** No winner responsibly supportable`. When exactly one supported finalist exists, identify it separately as the supported finalist, but do not promote it to winner without a responsibly supported comparison. Never invent a runner-up to force a decision.
 

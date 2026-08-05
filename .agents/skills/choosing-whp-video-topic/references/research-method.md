@@ -203,6 +203,8 @@ stake, evidence spine, or payoff—not merely the title wording. For each angle,
 - the tension, puzzle, or misconception;
 - the recognizable human stake;
 - the earned payoff or reframe;
+- the declared primary script goal with its qualifying artifact (see
+  [Declare the primary script goal](#declare-the-primary-script-goal));
 - the likely evidence backbone; and
 - the intended viewer beyond existing followers.
 
@@ -224,6 +226,36 @@ familiar game, event, person, institution, or trend
 
 A weak angle does not automatically disqualify its subject. Reframe it through a different
 tension, stake, or evidence path, then apply all six hard gates again to the new angle.
+
+### Declare the primary script goal
+
+Type every advancing angle with exactly one **primary script goal** — the single bet its
+package and opening will be built around. The canonical taxonomy is doctrine in
+`whp-youtube/STEERING.md` ("Type every episode by one primary script goal"); this section
+owns its application. The three types and their qualifying artifacts:
+
+- **Emotional impact** — bet: the viewer is moved. Artifact: the selected
+  evidence-supported nerve and the felt moment the episode earns. The nerve-selection
+  rules above bind unchanged; emotional force never lowers the evidence bar.
+- **Expectation subversion** — bet: a belief the viewer holds is overturned. Artifact:
+  the exact prior belief, stated the way the intended viewer would say it, with
+  independent evidence that this viewer commonly holds it, plus the evidence-backed
+  reversal. A "misconception" nobody demonstrably holds fails the artifact requirement.
+- **New-understanding lens** — bet: the viewer leaves with a new explanatory model.
+  Artifact: the one-sentence lens the viewer could retell afterward.
+
+Declare one primary and no secondary. The episode will still do the other two as craft;
+the declaration types the package bet, not the total content. Record the goal and its
+artifact with the angle. An angle whose artifact cannot be produced is not disqualified as
+a subject; retype or reframe it, then rerun all six hard gates on the result.
+
+For every deep-research finalist, also record a **provisional transformation contract** in
+the architecture gate's form: `Before, I thought X. Now, I understand Y. Next time, I
+will do Z. I will know it helped when I observe W.` This is a stated draft, not verified
+research — it is not kill-tested and binds nothing downstream. Its job is survivability:
+a finalist that cannot state even a provisional contract is likely to fail the script
+architecture gate later and is **not winner-eligible** until it can. Hand the contract
+forward for architecture to verify, narrow, or replace.
 
 ### Prove mechanism and promise fit
 
@@ -262,11 +294,12 @@ If either direction fails, narrow the title and opening promise, change the mech
 reject the angle. Never preserve a strong click by handing scripting an undeliverable
 promise.
 
-Hand off the exact subject and angle, selected human nerve, intended viewer, lived moment
-and human stake, audience-language and breadth evidence, mechanism and evidence boundary,
-the coverage-check finding with its rival explanations where the angle explains a common
-behavior, working title and opening promise, earned understanding, usable response,
-caveats, and unresolved verification. The handoff must bound both the payoff and its limits. Scripting
+Hand off the exact subject and angle, selected human nerve, declared primary script goal
+with its qualifying artifact and provisional transformation contract, intended viewer,
+lived moment and human stake, audience-language and breadth evidence, mechanism and
+evidence boundary, the coverage-check finding with its rival explanations where the angle
+explains a common behavior, working title and opening promise, earned understanding,
+usable response, caveats, and unresolved verification. The handoff must bound both the payoff and its limits. Scripting
 may develop the approved promise but must not silently broaden it or rerun nerve selection.
 
 ### Test the opening proof case
@@ -326,6 +359,8 @@ Deeply research only the finalists. Seek independent evidence for:
 - a first-hearing causal spine for the opening proof case and, when relevant, a current echo;
 - comparable relative breakouts within valid cohorts;
 - audience language, recurring questions, and misconceptions;
+- the declared primary script goal's qualifying artifact (for a subversion-led angle,
+  independent evidence that the intended viewer commonly holds the prior belief);
 - multiple honest packaging directions;
 - factual support, contradictory evidence, and necessary caveats;
 - production needs, access, visuals, expertise, and timing; and
@@ -433,6 +468,13 @@ For every direction, state:
 
 Reject bait that would attract a materially different audience from the episode's real thesis or leave the intended viewer unsatisfied. The most clickable promise is ineligible if the central evidence cannot honestly deliver it.
 
+Every direction for a finalist makes that finalist's declared primary script-goal bet: a
+subversion-led package promises the overturn, an emotion-led package promises the felt
+stake, a lens-led package promises the new explanation. Directions vary the entry point,
+tension, and visual, never the bet. If a finalist's strongest honest directions keep
+landing on a different goal's bet, treat that as evidence the angle is mistyped: retype
+the primary goal, rerun all six hard gates, and only then rescore.
+
 For each top-three finalist, also write a one-sentence **earned reframe** and at least **two plausible follow-up episodes**. Use series potential only as a tiebreaker and coherence check; it cannot rescue weaker reach evidence, failed gates, or an undeliverable package.
 
 After stress testing, rescore packaging and satisfaction using each finalist's strongest honest direction, then rerank the finalists. If package development changes the thesis, intended audience, evidence path, or payoff, rerun all six hard gates before scoring it. A finalist with no viable honest package is ineligible to win.
@@ -447,7 +489,7 @@ Assign confidence as `high`, `medium`, or `low` from evidence convergence and av
 
 Timestamp volatile data, display conflicts, and reduce confidence when evidence depends on personalized results, a small comparable cohort, third-party estimates, or uncertain audience transfer. Do not inflate confidence because a candidate has the highest score.
 
-When two or more gate-passing, responsibly supported finalists remain tied after package rescoring, choose one **provisional winner** and name the smallest decisive test or missing datum that could reverse the decision, such as a targeted audience poll, a broader comparable cohort, a factual-source check, or a package test.
+When two or more gate-passing, responsibly supported finalists remain tied after package rescoring, choose one **provisional winner** and name the smallest decisive test or missing datum that could reverse the decision, such as a targeted audience poll, a broader comparable cohort, a factual-source check, or a package test. When the tie is otherwise unresolved, prefer the finalist whose primary script goal varies from the most recent published and committed episodes; like series potential, goal variety is a tiebreaker and coherence check only, never a score override.
 
 When fewer than two responsibly supported, gate-passing, winner-eligible finalists remain, return an incomplete, reduced-confidence research result and list the evidence needed to finish the decision. Use `**Winner:** No winner responsibly supportable`; if exactly one supported finalist remains, identify it separately without promoting it to winner. Do not manufacture a comparison candidate. This is different from a supported tie among two or more viable finalists.
 

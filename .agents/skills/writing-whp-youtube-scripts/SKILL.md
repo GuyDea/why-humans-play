@@ -7,13 +7,11 @@ description: "Use when ideating, drafting, reviewing, or revising Why Humans Pla
 
 ## Overview
 
-Use one skill for rapid creative development and evidence-backed production. For
-episode-scale work, approve the intellectual architecture, then approve the story
-progression, then approve an intro-first Script Blueprint, then expand and approve the
-complete narration. Enter production only after that separate creative approval. Put the
-viewer promise and honest inquiry before retention tricks.
-
-Do not use this skill for unrelated ads, social posts, or general marketing copy.
+Use one skill for rapid creative development and evidence-backed production. Episode-scale
+work approves the intellectual architecture, story progression, intro-first Script
+Blueprint, and complete narration in that order, and enters production only after that
+separate creative approval. Put the viewer promise and honest inquiry before retention
+tricks. Do not use this skill for unrelated ads, social posts, or general marketing copy.
 
 ## Required project context
 
@@ -34,8 +32,9 @@ its [subject-to-angle development method](../choosing-whp-video-topic/references
 Preserve a supplied or approved angle without reopening selection.
 
 Use a supplied selected topic brief as the handoff from topic selection. Do not rerun topic
-ideation unless Martin explicitly asks. Carry forward the available audience, packaging
-promise, tension, by-end promise, payoff, factual anchors, and unknowns. Missing nonessential
+ideation unless Martin explicitly asks. Carry forward the available audience, declared
+primary script goal with its provisional transformation contract, packaging promise,
+tension, by-end promise, payoff, factual anchors, and unknowns. Missing nonessential
 fields must not block a useful prototype; ask only when a missing choice would materially
 change the requested artifact.
 
@@ -57,22 +56,14 @@ Honor the requested scope before choosing a stage:
 - **Promote:** after explicit creative approval, preserve the voice baseline and advance to
   the next stage.
 
-Use the visible topic brief, artifact or selection, surrounding context, requested
-operation, and creative status. Do not make an operation depend on invisible chat history.
+Use the visible topic brief, artifact or selection, surrounding context, requested operation, and creative status — never invisible chat history.
 
 ## The episode pipeline
 
-Episode-scale work moves through five named stages in this order. Each stage ends at a human
-approval gate, and each gate authorizes only the next stage. The last three stages are named
+Episode-scale work moves through five named stages in this order; each stage ends at a
+human approval gate that authorizes only the next stage. The last three stages are named
 after the directories they write under `whp-youtube/episodes/epNNN-stable-name/`; the
 Architecture and Progression artifacts are returned in the conversation, not as files.
-
-```dot
-digraph episode_pipeline {
-    rankdir=LR; node [shape=box];
-    Architecture -> Progression -> Blueprint -> Draft -> Final [label="approved"];
-}
-```
 
 | Stage | Produces | Gate that ends it |
 |---|---|---|
@@ -87,8 +78,8 @@ rethink starts at Architecture. Scoped work on existing material stays where it 
 crosses the central-progression trigger, which reopens Progression.
 
 Work that is not episode-scale — an idea, an opening, a hook, a short passage, a humor or
-voice pass, a scoped refinement — does not enter the pipeline at all. Use
-[scoped and rapid work](#scoped-and-rapid-work) instead. An episode enters a stage when its
+voice pass, a scoped refinement — uses [scoped and rapid work](#scoped-and-rapid-work)
+instead of entering the pipeline. An episode enters a stage when its
 architecture is approved, not when its files appear: an opening for an episode with an
 approved architecture takes that episode's next gate; a standalone opening is scoped work.
 
@@ -108,9 +99,9 @@ that work. Episode-stage pairs still require pair validation before review.
 Use supplied facts and facts already available in current project materials. Never invent
 specificity to make a draft sound authoritative. Preserve accepted language and revise only
 the requested scope. Follow the rapid method for the hook, humor, examples, spoken rhythm,
-factual boundary, and internal quality check. That method's quality check runs in three
-moments — gates before drafting, line-level questions while writing, and one sweep over the
-finished text — so carry only the current moment's questions.
+factual boundary, and internal quality check; that check runs in three moments — gates
+before drafting, line-level questions while writing, one sweep over the finished text — so
+carry only the current moment's questions.
 
 Prefer a documented real-world case for each substantial point and make its damaged goal
 and human cost explicit. When the available factual boundary does not contain a suitable
@@ -121,18 +112,17 @@ cannot prove that the mechanism affects real people. Treat any statement or impl
 that knowledge, intelligence, expertise, training, or skepticism fails to protect someone
 as a material vulnerability claim, even when phrased as a modest observation, question, or
 transition. When the opening makes that claim, require a documented observed case involving
-the claimed population. First use supplied or project-known facts; if none exist, run one
-targeted primary-source proof-case lookup. If no matching case is found, narrow or omit the
+the claimed population — supplied or project-known facts first, then one targeted
+primary-source proof-case lookup — and if no matching case is found, narrow or omit the
 claim rather than drafting around the gap. Match the case's population, behavior,
 mechanism, and outcome to the narration; state any gap and use separate evidence for the
-episode mechanism rather than allowing one adjacent finding to imply both.
-For a problem-led opening where the viewer may claim immunity, use concise anti-skip doctrine.
-Keep the narrator stance inside the persona license (stance is free; events,
-memories, and chronology need Martin), ground the disarm in observed behavior rather
-than attributed inner states, and place a literal remedy before detailed case exposition. Never
-invent the narrator's research process or chronology. Follow
-[the rapid drafting method](references/rapid-prototyping.md) for the exact anti-skip
-sequence, proof interpretation, and line-level execution.
+episode mechanism, so one adjacent finding cannot imply both.
+For a problem-led opening where the viewer may claim immunity, use concise anti-skip
+doctrine. Keep the narrator stance inside the persona license (stance is free; events,
+memories, and chronology need Martin), ground the disarm in observed behavior rather than
+attributed inner states, and place a literal remedy before detailed case exposition.
+Never invent the narrator's research process or chronology. Follow
+[the rapid drafting method](references/rapid-prototyping.md) for the exact anti-skip sequence, proof interpretation, and line-level execution.
 
 Do not add evidence source markers to scoped prototypes unless Martin explicitly asks.
 
@@ -141,15 +131,14 @@ Do not add evidence source markers to scoped prototypes unless Martin explicitly
 For a new episode or a thesis-level rethink, produce and refine the script architecture
 before writing any opening or narration. Put the sourced concept inventory first in the
 artifact. Stop after returning the architecture. Do not draft the hook, beats, or narration
-until Martin explicitly approves it.
-Use [the script architecture method](references/script-architecture.md) for this stage.
+until Martin explicitly approves it. Use
+[the script architecture method](references/script-architecture.md) for this stage.
 
 Before presenting a new or thesis-level architecture, run a bounded primary-source
 concept-discovery scan even in scoped mode. Inventory explanatory mechanisms, consequences,
-named laws or effects, interventions, and countermeasures before deciding which concepts
-belong in the episode. Use the method's fixed search-batch budget so discovery cannot absorb
-the full production workflow. Use the discovery source only to establish the concept and
-its meaning; defer episode-claim and example verification to the final stage. Then mine candidate
+named laws or effects, interventions, and countermeasures within the method's fixed
+search-batch budget; discovery establishes each concept and its meaning, while
+episode-claim and example verification stays in the final stage. Then mine candidate
 connections from the inventory and kill-test them adversarially; build the reframe only
 from survivors, with bridges verified and kills registered.
 
@@ -162,6 +151,12 @@ application, and final lesson.
 A complete-episode promise must name both the understanding the viewer will gain and the
 concrete response they will be able to use.
 
+When the topic brief declares a primary script goal, preserve it as the episode's single
+declared bet: build the opening promise around it, and treat the brief's provisional
+transformation contract as a draft to verify, narrow, or replace. If the episode's real
+strength lies in a different goal, surface the retype to Martin instead of silently
+changing the bet.
+
 ### Architecture approval gate
 
 For episode-scale work without an approved architecture, return only the architecture
@@ -171,9 +166,8 @@ complete architecture. Approval of a topic, title, isolated insight, or earlier 
 not approve the architecture.
 
 Do not present an architecture as approval-ready until its concept-discovery scan is
-complete. If source access is unavailable or Martin explicitly requests an offline pass,
-mark the inventory provisional exactly as required by the architecture method and surface
-the resulting omission risk.
+complete. If source access is unavailable or Martin requests an offline pass, mark the
+inventory provisional as the architecture method requires and surface the omission risk.
 
 When the episode explains a common human behavior, an architecture is also not
 approval-ready until Layer 0 of
@@ -237,18 +231,15 @@ Always-loaded invariants:
 - Use only story moves the real material earns. Never invent a roadblock, contradiction,
   motive, chronology, failed hypothesis, research event, or near-surrender; performed
   no-event narrator reactions follow the rapid voice owner's persona license. The
-  no-invention rule under [Production non-negotiables](#production-non-negotiables)
-  applies from the first draft onward, not only in production.
+  no-invention rule under [Production non-negotiables](#production-non-negotiables) applies from the first draft onward.
 - But / Therefore diagnoses causal movement; it is not a literal-word or per-beat quota.
-- Keep adjacent proof jobs distinct and make the remaining question create the next
-  evidence need.
+- Keep adjacent proof jobs distinct; the remaining question creates the next evidence need.
 - Prefer a well-supported Western case when one can perform the same proof job clearly.
   Use the strongest non-Western case when no Western candidate passes the evidence,
   causal-fit, consequence, and spoken-clarity gates.
 - The argument remains the spine. A supporting narrative throughline is optional and never
   substitutes for mechanism evidence.
-- Apply selected humor, callbacks, loops, and payoffs without turning the approved plan into
-  formulaic phrasing.
+- Apply selected humor, callbacks, loops, and payoffs without formulaic phrasing.
 - Keep every story device subordinate to conversational causality. Route line-level hooks
   and mini-hooks through
   [the rapid natural-package owner](references/rapid-prototyping.md#keep-story-devices-inside-the-conversation),
@@ -257,9 +248,8 @@ Always-loaded invariants:
 
 ## Blueprint stage
 
-An episode-scale Script Blueprint lives in
-`whp-youtube/episodes/epNNN-stable-name/blueprint/` as
-`blueprint/script.raw.md` and `blueprint/script.extended.md`. Follow
+An episode-scale Script Blueprint lives in `whp-youtube/episodes/epNNN-stable-name/blueprint/`
+as `blueprint/script.raw.md` and `blueprint/script.extended.md`. Follow
 [the script artifact pair](references/script-artifact-pair.md) for the episode path,
 paired views, markup, validation, and promotion contract, then follow
 [the Script Blueprint workflow](references/script-blueprint-workflow.md) for the exact
@@ -273,7 +263,7 @@ Blueprint.
 Reach this stage only with both the architecture and the Story Progression Plan approved.
 Scoped Blueprint work returns directly until it crosses the central-progression trigger,
 which reopens the earlier stage. Design and polish the intro before expanding any body
-prose. A Script Blueprint is a visible creative baseline, not a definite WHP decision;
+prose. A Script Blueprint is a visible creative baseline, not a definite WHP decision —
 advancement remains the reconcilable decision.
 
 - Run the spoken-readability and walking-conversation checks on `blueprint/script.raw.md`
@@ -282,16 +272,15 @@ advancement remains the reconcilable decision.
   asks for that specific work by name. Validate the pair as the pair owner requires.
 - Treat Script Blueprint edits as exploratory; do not reconcile or ledger them. Validated
   promotion into `draft/` is the decision.
-- The factual boundary applies unchanged: use supplied or project-known facts, never
-  invent specificity, and label hypotheticals. The architecture approval gate also
-  applies unchanged for a new episode or thesis-level rethink.
-- No independent AI review is required during this stage. Do not call another model or add
-  a reviewer record unless Martin explicitly requests that review for the current artifact.
+- The factual boundary applies unchanged — supplied or project-known facts, no invented
+  specificity, labeled hypotheticals — and so does the architecture approval gate for a
+  new episode or thesis-level rethink.
+- No independent AI review is required during this stage; do not call another model or add
+  a reviewer record unless Martin explicitly requests it for the current artifact.
 
 When Martin explicitly requests a walking-vlog, walk-and-talk, from-memory, or
 no-teleprompter Script Blueprint, run the memory-first delivery pass before returning it.
-This is a focused delivery check, not a production audit. Follow
-[the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
+This is a focused delivery check, not a production audit. Follow [the rapid memory-first owner](references/rapid-prototyping.md#run-the-memory-first-walking-vlog-pass).
 
 ### Blueprint approval gate
 
@@ -303,13 +292,12 @@ into `draft/` as one definite decision.
 
 For episode-scale work advancing from the Blueprint stage, preserve the approved intro and
 use the approved body logic map to write one complete narration in the episode's `draft/`
-pair. Draft narration changes begin in `draft/script.raw.md`; keep annotations and the stage
-appendix in `draft/script.extended.md`. Do not quietly redesign the intro or causal route
-while expanding the body.
+pair, without quietly redesigning the intro or causal route while expanding the body.
+Draft narration changes begin in `draft/script.raw.md`; keep annotations and the stage
+appendix in `draft/script.extended.md`.
 
 Do not write narration as a way to discover what the episode means. For line-level case
-narration, spoken compression, hook, humor, and factual-boundary application, follow
-[the rapid drafting method](references/rapid-prototyping.md).
+narration, spoken compression, hook, humor, and factual-boundary application, follow [the rapid drafting method](references/rapid-prototyping.md).
 
 When the request is for a complete script, follow the full-script review order below.
 Complete and show Martin the whole narration before running any editorial, retention, or
@@ -324,6 +312,7 @@ Before presenting a complete draft narration for creative approval, dispatch the
 fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
+<<<<<<< HEAD
 direction. It re-runs during the final audit battery. A finding flagged by two
 independent evaluator runs — substantially the same finding on substantially the same
 passage, across runs at any stage — is presented as adopted-unless-overruled: the
@@ -334,13 +323,19 @@ retention finding; see
 check of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
 on the same draft: every narration number, name, and attribution against its evidence
 row.
+=======
+direction; it re-runs during the final audit battery, and a finding flagged by two
+independent evaluator runs is adopted by default — keeping it requires Martin's overrule.
+Run the Layer 2 consistency check of
+[adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
+on the same draft: every narration number, name, and attribution against its evidence row.
+>>>>>>> fix/writing-skill-package-tests
 
 ### Creative approval gate
 
 Remain in the Draft stage until Martin explicitly approves the premise, voice, hook, story
 direction, and complete narration or directly requests evidence-backed finalization.
 Positive feedback on one line or passage does not approve the complete narration.
-
 Preserve the approved prototype as the voice baseline; research may narrow claims but must
 not silently replace its structure or personality.
 
@@ -350,6 +345,7 @@ These apply to the Blueprint intro, the Draft narration, and the Final narration
 
 ### Mark locked lines for memory delivery
 
+<<<<<<< HEAD
 No line is locked before it passes the spoken-readability gate. After locking, a gate
 failure on a locked line — readability, Layer 2 or 3 verification, retention, or any
 audit — reopens the lock explicitly: report the line to Martin by name with the
@@ -367,19 +363,30 @@ way, because the written line fixes the meaning, facts, locked story nouns, and 
 boundary, not the exact words. Apply the pair owner's markup and synchronization contract
 after selecting these lines. Strip markup from word counts and readability checks. Mark
 locked lines in complete draft or final narration; for a Script Blueprint, mark only intro
+=======
+Martin delivers from memory while walking — no teleprompter. In a complete script, mark
+**locked lines** bold inside the blockquote: the opening question, the learning promise,
+the reframe's retell sentence, each beat's punchline and exact-lesson line, and any
+sentence whose evidence-bounded wording a paraphrase could break. Deliver locked lines
+word-perfect and keep them memorizable — a handful per beat,
+each a single sentence. Everything unmarked is flexible tissue Martin may say his own way:
+the written line fixes the meaning, facts, locked story nouns, and evidence boundary, not
+the exact words. After selecting these lines, apply the pair owner's markup and
+synchronization contract and strip markup from word counts and readability checks. Mark
+locked lines in complete draft or final narration; in a Script Blueprint, mark only intro
+>>>>>>> fix/writing-skill-package-tests
 wording whose exact delivery has already been selected.
 
 ### Scope every universal verdict
 
 A locked line that diagnoses the viewer's own case universally in the second person
 ("you weren't X — you were Y") is a coverage claim, not a stylistic choice. Use one only
-when the architecture's coverage-and-rivals record shows the mechanism is the
-phenomenon's dominant account; otherwise write the verdict conditionally or name the
-covered case aloud. Material the episode's own appendix marks as an editorial bridge or
-lists under `Unverified or disputed material` may not appear in locked universal wording
-anywhere in the script. A ledger caveat or a single hedge line elsewhere does not
-license a universal verdict: the wording that carries the diagnosis carries the
-boundary.
+when the architecture's coverage-and-rivals record shows the mechanism is the phenomenon's
+dominant account; otherwise write the verdict conditionally or name the covered case
+aloud. Material the episode's own appendix marks as an editorial bridge or lists under
+`Unverified or disputed material` may not appear in locked universal wording anywhere in
+the script; a ledger caveat or a single hedge line elsewhere does not license a universal
+verdict — the wording that carries the diagnosis carries the boundary.
 
 ### Enforce spoken readability before delivery
 
@@ -426,8 +433,8 @@ For evidence-backed finalization, promote the approved draft into
    spoken words; exclude them from narration extraction, word count, table reads, and
    teleprompter output. Keep the full evidence record in the extended appendix.
 3. Use the detailed story method to test promise and payoff. When a comparison is useful,
-   develop and score three eligible opening candidates; do not force that exercise when
-   Martin has approved an opening that survives the evidence audit.
+   develop and score three eligible opening candidates, but never force that exercise
+   over an approved opening that survives the evidence audit.
 4. Confirm the approved story progression as the narrative-spine baseline. Evidence may
    narrow wording; if it breaks a load-bearing obstacle, reversal, proof handoff, or causal
    link, surface the conflict and reopen progression approval.
@@ -472,9 +479,8 @@ For evidence-backed finalization, promote the approved draft into
   the mechanism or institution, then say plainly what got worse and who paid.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
   `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it as
-  proof of prevalence, causality, or mechanism. Performed narrator reactions that claim
-  no event, memory, or biography follow the voice owner's persona license and need no
-  input decision; invented experience remains banned.
+  proof of prevalence, causality, or mechanism. Performed no-event narrator reactions
+  follow the voice owner's persona license and need no input decision; invented experience remains banned.
 - For every `FULL-SCRIPT`, voice all five viewer-application elements in narration:
   evidence-bounded insight; low-risk action, observation, or reflection; observable signal;
   real boundary; and larger benefit. The structured block does not substitute for spoken
@@ -485,32 +491,25 @@ For evidence-backed finalization, promote the approved draft into
 - Pass the spoken-readability delivery gate before showing any narration. A later
   editorial, retention, timing, or validator pass does not substitute for it.
 - Audit evidence sufficiency and asset rights separately.
-- Give every important fact a visual decision; do not assume every fact needs a unique
-  image.
+- Give every important fact a visual decision; not every fact needs a unique image.
 - Provide actual candidate asset pages when practical. Record the rights status and an
   ownable fallback, and never call an asset cleared without a documented basis.
-- State the explanatory purpose of each animation. If motion adds no understanding, choose
-  a still or no animation.
-- Keep raw narration free of evidence indicators and production annotations; keep the
-  matching editorial annotations and production notes in extended.
-- Keep production notes in the matching extended appendix beat so their relationship to
-  narration remains explicit without interrupting the readable raw script.
+- State the explanatory purpose of each animation; if motion adds no understanding, choose a still or none.
+- Keep raw narration free of evidence indicators and production annotations; keep
+  editorial annotations and production notes in the matching extended appendix beat so
+  their relationship to narration remains explicit without interrupting the readable raw
+  script.
 - Complete the end evidence ledger, visual ledger, uncertainty register, and attribution or
   credits section.
 - Never self-promote a script to `RECORD-READY` from a validator result or rubric score.
 
 ## Resource routing
 
-- Before web research, claim approval, visual sourcing, or rights labeling, read
-  [the research and rights method](references/research-and-rights.md).
-- Before building a final extended deliverable, read
-  [the annotated script format](references/annotated-script-format.md).
-- Use [the annotated script template](assets/annotated-script-template.md) as a worked shape,
-  never as preverified episode content.
-- During the final editorial pass, read
-  [the quality rubric](references/quality-rubric.md).
-- For a **Distill session lessons** operation — and only for that operation — read
-  [the lesson distillation method](references/lesson-distillation.md).
+- Before web research, claim approval, visual sourcing, or rights labeling, read [the research and rights method](references/research-and-rights.md).
+- Before building a final extended deliverable, read [the annotated script format](references/annotated-script-format.md).
+- Use [the annotated script template](assets/annotated-script-template.md) as a worked shape, never as preverified episode content.
+- During the final editorial pass, read [the quality rubric](references/quality-rubric.md).
+- For a **Distill session lessons** operation — and only for that operation — read [the lesson distillation method](references/lesson-distillation.md).
 
 ## Validation and completion
 
@@ -530,5 +529,5 @@ The dynamically resolved target path may be absolute; pass it as one quoted argu
 Treat the validator as structural only; factual truth, rights clearance, editorial judgment,
 and production approval still require human review.
 
-Report readiness honestly. List every unresolved fact, rights, and production item, and do
-not infer `RECORD-READY` from automated validation alone.
+Report readiness honestly: list every unresolved fact, rights, and production item, and
+do not infer `RECORD-READY` from automated validation alone.
