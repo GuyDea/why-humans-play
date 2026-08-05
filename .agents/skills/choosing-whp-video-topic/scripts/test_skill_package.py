@@ -443,8 +443,8 @@ class TopicSkillPackageTests(unittest.TestCase):
             2,
         )
         candidate_shape = (
-            "intended viewer | Audience pain or shared tension | recognizable moment | "
-            "human stake or cost, where applicable"
+            "intended viewer | primary script goal | Audience pain or shared tension | "
+            "recognizable moment | human stake or cost, where applicable"
         )
         self.assertIn(candidate_shape, output_schema)
         self.assertNotIn(
