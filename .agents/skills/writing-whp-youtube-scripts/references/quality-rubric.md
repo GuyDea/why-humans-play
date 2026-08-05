@@ -93,7 +93,8 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 
 - **0:** The narrative depends on invented dialogue, motives, thoughts, feelings,
   weather, chronology, sensory detail, or misleading reconstruction. First-person
-  material is invented, forced, or used as proof. A load-bearing transition also scores
+  events or memories are invented, first-person material of any kind is used as proof,
+  or persona-license reactions are stacked as quota-fill with no narrative job. A load-bearing transition also scores
   0 when it says only what the previous case did not prove and leaves the next point
   logically disconnected.
 - **1:** The sequence is honest and usable, but includes a stalled beat, trivia
@@ -102,7 +103,8 @@ anchor. A targeted artifact cannot promote the parent script's readiness.
 - **2:** Each beat changes viewer understanding, causes the next question, and builds
   momentum without invention; reconstructions and reenactments are unmistakable. When
   personal input is in scope, the work makes one explicit personal decision, uses only
-  authentic supplied material, and the sequence performs necessary narrative work or
+  authentic supplied material for events and memories (persona-license reactions are
+  exempt), and the sequence performs necessary narrative work or
   gives a specific reason for `OMIT`. Adjacent cases state the first case's exact
   takeaway, why it matters, the remaining question, and why the next evidence is needed —
   voiced in plain words, never implied through a bare pivot such as “So:” plus a new
@@ -333,11 +335,13 @@ chains under the status thresholds, and require stable source-native locators.
    confirm that its action, observation, or reflection preserves those evidence limits.
 3. **Story and personal authenticity:** Challenge dialogue, chronology, motives,
    thoughts, feelings, weather, sensory detail, and reconstruction labels. When personal
-   input is in scope, verify one explicit decision, supplied-and-approved material,
-   necessary narrative work or a specific `OMIT` reason, and no invented first-person
-   detail.
+   input is in scope, verify one explicit decision, supplied-and-approved material for
+   events and memories, necessary narrative work or a specific `OMIT` reason, and no
+   invented first-person event, memory, or chronology; persona-license reactions are
+   exempt when each performs a narrative job and carries no evidential weight.
 4. **Spoken flow and runtime:** Read aloud, time the narration, and revise density,
-   pronunciation, transitions, breaths, friendly-conversation flow, and any punchline
+   pronunciation, transitions, breaths, friendly-conversation flow, every aside's exit
+   seam (the resume line must re-name the referent it returns to), and any punchline
    that carries its own setup or explanation.
 5. **Visual relevance and identity accuracy:** Verify that each visual advances its
    claim and depicts or labels the correct person, species, item, place, and date.
@@ -364,8 +368,9 @@ chains under the status thresholds, and require stable source-native locators.
     progression before proposing another loop, following
     [the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity).
     Confirm the title and thumbnail promise is explicitly paid off in narration, and that
-    the early-episode runtime lands in the 6–10 minute band unless the assignment contract
-    fixes a different target. Report each sag or overrun as a named passage with its
+    the runtime respects the 20-minute ceiling (STEERING Law 3, adopted 2026-08-05).
+    Inside that ceiling, flag only stretches that fail to earn their time — never length
+    itself — unless the assignment contract fixes a tighter target. Report each sag or overrun as a named passage with its
     tradeoff; do not cut setup, referents, causality, humor, or the learning promise to
     satisfy this pass without Martin's review.
 11. **Readiness label:** Reapply the score threshold, protected-dimension rules,

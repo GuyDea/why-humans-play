@@ -2323,6 +2323,130 @@ in sync with the owner). Historical three-layer references in episode appendices
 prior ledger entries record what actually ran and are unchanged. The ep002 final pair
 is unchanged by this entry; its rework is a separate pending decision.
 
+## 2026-08-01 — EP2 thesis replaced: games-versus-studying task aversion
+
+**Decision:** Rebuild EP2 from scratch on the Angle A thesis — "why you can game for
+hours but can't study for ten minutes," decoding task aversiveness as motivational
+structure (chosen goals, immediate feedback, calibrated difficulty, surviving
+progress) with boredom as the attention system's cost signal — entering the pipeline
+at Architecture under the 2026-07-31 guardrails. The verified self-handicapping
+episode is preserved intact under `episodes/ep002-why-you-didnt-study/` and its
+backlog candidate returns to the pool re-scoped to its honest evidence boundary
+(self-sabotage after unexplained success, with an audience).
+
+**Rationale:** Martin's real-world conversation surfaced the deliberate-delay
+objection; the post-mortem coverage research confirmed task aversion and mood repair
+as the phenomenon's dominant account (Steel 2007: task aversiveness r=.40 vs
+intention r=-.03) and found the private-delay case outside self-handicapping's own
+boundary. The 2026-07-31 angle ideation (audience-language, mechanism, and
+competitive scans) found the games-versus-studying comparison to be the strongest
+open lane: a mass first-person question with no large general-audience owner, live
+small-channel breakouts nearby, and an intro whose paradox is the viewer's own lived
+behavior. Martin selected Angle A over the pressure-audit, laziness-demolition, and
+manufactured-aversion alternatives on intro strength.
+
+**Documents:** `whp-youtube/STEERING.md` (launch-sequence EP2 entry),
+`whp-youtube/topic-backlog.md` (candidate #4 returned and re-scoped). The
+`episodes/ep002-why-you-didnt-study/` final pair is deliberately unchanged — its
+directory-level disposition (archive naming, new stable name for the rebuilt EP2)
+is decided at the rebuild's Blueprint stage.
+
+## 2026-08-01 — EP2 rebuild: blueprint approved and promoted to draft
+
+**Decision:** The games-vs-studying Script Blueprint (polished contrast-pair intro,
+body logic map SP02–SP08, packaging trio W1–W3 pending the packaging-skill run) is
+approved and promoted into `whp-youtube/episodes/ep002-games-vs-studying/draft/` as a
+complete validated narration. Canon updated: "Attention's price tag," "The two
+nights," and "The price audit" registered; the retired self-handicapping ep002
+concepts and opening shape marked parked with their backlogged episode; the new
+opening shape recorded.
+
+**Rationale:** Sequential gate approvals by Martin on 2026-08-01 (architecture,
+progression, blueprint, promotion instruction "move it to draft"). First episode
+built end-to-end under the 2026-07-31 thesis-verification guardrails.
+
+**Documents:** `whp-youtube/episodes/ep002-games-vs-studying/{blueprint,draft}/`,
+`whp-youtube/canon.md`, `whp-youtube/STEERING.md` (EP2 working-state note). Draft
+remains AWAITING creative approval; cold-viewer evaluation and the ~12-minute
+timing diagnostic are before Martin.
+
+## 2026-08-05 — Law 3 revised: 20-minute ceiling, story sizes the episode
+
+**Decision:** Replace the 6–10 minute early-episode duration target with: every video
+runs at most 20 minutes; inside that ceiling, timing never sizes the episode — the
+story does, and timing pressure never cuts setup, referents, caveats, or connective
+tissue. Length must still be earned minute by minute against the retention pass
+(padding remains a defect), and exceeding 20 minutes requires Martin's explicit
+per-episode ruling.
+
+**Rationale:** Martin's direction during the ep002 draft review: the 6–10 band was
+forcing a compression question against a story-complete ~12-minute draft; "time
+cannot limit us, in case we have a great story to tell."
+
+**Documents:** `whp-youtube/STEERING.md` (Law 3),
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md` (retention
+audit pass), `whp-youtube/episodes/ep002-games-vs-studying/draft/script.extended.md`
+(timing note — the ~12-minute draft now stands without a compression question).
+Historical research artifacts, superseded specs, and prior ledger entries keep their
+period wording; the approved ep002 blueprint snapshot retains its original Law-3
+pointer per the review-snapshot rule, with the draft-stage record carrying the
+current target.
+
+## 2026-08-05 — Aside-resume seam rule and mechanical detector
+
+**Decision:** After an aside, holding line, or parenthetical beat, the resume line
+must re-grab the interrupted thought's referent by name — never a bare connective
+pointing across the aside — and temporal connectives must join real events, never a
+static description and a study. Wired three ways: the rapid drafting owner (rule +
+line-level checklist item), the cold-viewer reviewer brief (dimension 8 extension),
+and the quality rubric's spoken-flow audit pass; plus a mechanical detector in
+`check_spoken_readability.py` (REVIEW-level flag for connective-led resume lines
+after italic asides, with regression tests).
+
+**Rationale:** Martin caught a dangling "Then" after the ep002 intro's ADHD aside
+that had survived the blueprint sentence-function pass, the drafting checklist, the
+mechanical checker (which judges sentences in isolation), one cold-viewer run, and
+an author full review. Root cause is the post-mortem class again: the referent rule
+existed as prose with no consumer at the seam — and author review cannot detect
+referent loss because the author never loses the referent. The detector's first live
+run immediately caught a second seam in the same script (SP02's "So"), confirming
+the class.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readability.py`
+(+ tests), `whp-youtube/episodes/ep002-games-vs-studying/draft/` (both seams fixed
+alongside review findings 2–5).
+
+## 2026-08-05 — Persona license: performed reactions without confirmation
+
+**Decision:** Small first-person narrator reactions — surprise, amusement, a bet, a
+former assumption — may be written without Martin's prior confirmation when they
+claim no event, memory, or biography; carry no evidential weight (removing one
+changes no claim); stay harmless and non-promotional; and perform a narrative job
+(model the viewer's reaction, disarm, or hand off). Invented events, memories, and
+chronology remain banned everywhere; Martin's gate reviews are the standing veto and
+he rewords freely at delivery. Single detailed owner: the rapid voice owner's
+"Process is not reaction" rule; STEERING Law 2 states the principle and routes to
+it; every other reference is a one-line pointer to prevent definitional drift.
+
+**Rationale:** Martin's direction: the draft's missing first-person jabs were caused
+by an over-strict reading of the no-invention rule; the honesty moat lives in claims
+and evidence and in how he presents, not in pretending the persona is unscripted —
+the late-night convention of a host delivering team-written material in first
+person. Stories about Martin remain non-fabricable.
+
+**Documents:** `whp-youtube/STEERING.md` (Law 2 principle + route; story-momentum
+bullet scoped), `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
+(detailed owner; anti-skip defense line), `SKILL.md` (invariants; anti-skip; personal-input
+non-negotiable), `references/story-and-hook-method.md` (personal-experience beat, bridge
+seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape rule),
+`references/quality-rubric.md` (dimension 3 anchors; audit pass 3),
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (four persona-license reactions
+added; personal-input record updated). Case-scene invention rules (participants'
+thoughts, dialogue, weather) are untouched.
+
 ## 2026-08-05 — One strict primary script goal per episode
 
 **Decision:** Every WHP episode is typed at topic selection by exactly one declared

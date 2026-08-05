@@ -150,7 +150,7 @@ exist. Do not optimize the sequence to a sentence count or timestamp.
    the viewer: `I used to read those stories and think — how naive; everyone knows AI
    makes things up.` The viewer recognizes their own objection inside the narrator's.
    Treat it as a reasonable position, not a prevalence claim; the narrator's former belief
-   is his own voiced stance, confirmed by Martin at review.
+   is a stance, not an event — persona license applies, and Martin rewords it at review.
 3. Overturn it with the observed result that sent the narrator digging — people who
    displayed meaningful resistance and were not protected by it. Treat measured
    skepticism, lower trust ratings, expertise, training, or prior warning as sufficient
@@ -271,8 +271,13 @@ Every drafted or reused passage passes four economy checks:
 - **Process is not reaction.** Cut narrator process bookkeeping — search logistics, "I
   needed a study," inventories of what remains to prove. Keep the narrator's felt
   reaction — the bet, the smile, the laugh, the discomfort — budgeted at roughly one
-  per beat, placed where the viewer's own reaction needs modeling, and always Martin's
-  confirmed stance, never invented emotion. An economy pass that strips every personal
+  per beat, placed where the viewer's own reaction needs modeling. Reactions are
+  **persona license**: they may be written without prior confirmation when they claim
+  no event, memory, or chronology, carry no evidential weight (removing one changes no
+  claim), stay harmless and non-promotional, and perform a narrative job — model,
+  disarm, or hand off. Martin rewords or vetoes them at his gate reviews; true
+  biography is still preferred where credibility is the job; invented events remain
+  banned everywhere. An economy pass that strips every personal
   reaction has cut voice, not fat: a beat with zero reaction reads as narration, not
   conversation.
 
@@ -531,6 +536,16 @@ Longer loops are structural decisions. Select and map them with
 [the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity),
 then voice them without breaking the current thought.
 
+An aside, holding line, or parenthetical beat creates a seam, and the seam is where
+referents die. The first line after an aside must re-grab the interrupted thought's
+referent by name — never a bare connective ("Then…", "So…", "But…") pointing across
+the aside, because a first-time listener attaches the connective to the aside, not to
+the thought it interrupts. Separately, a temporal connective must join real events:
+narrating a static description followed by evidence as "then" manufactures a
+chronology that never happened. The mechanical checker flags connective-led resume
+lines after italic asides for referent review; treat the flag as an instruction to
+re-hear the seam from the listener's memory, not as a style veto.
+
 Write for the real delivery context: Martin — a non-native English speaker — reads the
 narration aloud, often while walking and talking to the camera, for an audience that
 includes non-native listeners. Every factual sentence is a complete spoken clause with an
@@ -754,6 +769,8 @@ Hold these while writing. Each one changes the sentence in front of you.
   spoken, avoid outline labels, and break up unearned runs of polished aphorisms.
 - Does every mini-hook also make the next thought feel conversationally earned, with that
   thought delivering the promised content immediately?
+- After every aside or held thought, does the resume line re-name its referent — and
+  does every "then" connect two real events rather than a description and a study?
 - Are texture quantities spoken as truthful conversational magnitudes while claim-carrying
   numbers, small counts, dates, places, and institutions stay exact?
 - Does the narrator stay a peer throughout — former take mocked instead of the viewer,
