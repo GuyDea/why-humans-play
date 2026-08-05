@@ -2391,3 +2391,30 @@ Historical research artifacts, superseded specs, and prior ledger entries keep t
 period wording; the approved ep002 blueprint snapshot retains its original Law-3
 pointer per the review-snapshot rule, with the draft-stage record carrying the
 current target.
+
+## 2026-08-05 — Aside-resume seam rule and mechanical detector
+
+**Decision:** After an aside, holding line, or parenthetical beat, the resume line
+must re-grab the interrupted thought's referent by name — never a bare connective
+pointing across the aside — and temporal connectives must join real events, never a
+static description and a study. Wired three ways: the rapid drafting owner (rule +
+line-level checklist item), the cold-viewer reviewer brief (dimension 8 extension),
+and the quality rubric's spoken-flow audit pass; plus a mechanical detector in
+`check_spoken_readability.py` (REVIEW-level flag for connective-led resume lines
+after italic asides, with regression tests).
+
+**Rationale:** Martin caught a dangling "Then" after the ep002 intro's ADHD aside
+that had survived the blueprint sentence-function pass, the drafting checklist, the
+mechanical checker (which judges sentences in isolation), one cold-viewer run, and
+an author full review. Root cause is the post-mortem class again: the referent rule
+existed as prose with no consumer at the seam — and author review cannot detect
+referent loss because the author never loses the referent. The detector's first live
+run immediately caught a second seam in the same script (SP02's "So"), confirming
+the class.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`.agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readability.py`
+(+ tests), `whp-youtube/episodes/ep002-games-vs-studying/draft/` (both seams fixed
+alongside review findings 2–5).

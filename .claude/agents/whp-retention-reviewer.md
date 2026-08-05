@@ -37,7 +37,11 @@ Evaluate, in this order:
    double its narrative weight, name the beat and the approximate overage.
 8. **Referent tracking.** Reading strictly in order, quote any qualifier, comparison,
    or callback whose referent a first-time listener may no longer hold — including any
-   recurring object recalled by a bare common noun rather than a coined name.
+   recurring object recalled by a bare common noun rather than a coined name. Pay
+   special attention to the first line after every aside or parenthetical beat: quote
+   any resume line whose opening connective points across the aside to a referent the
+   listener no longer holds, and any temporal connective ("then") implying a
+   chronology the script never established.
 9. **Promise register.** For each opening promise or tease, find its payoff. Flag any
    payoff with less delivery weight than its tease (an aside paying locked wording) or
    in a mismatched register (lab dialect paying a household promise), or paid before

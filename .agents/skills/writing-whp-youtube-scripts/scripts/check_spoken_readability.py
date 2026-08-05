@@ -45,6 +45,13 @@ SUBSTANTIAL_QUOTATION_RE = re.compile(r"[“\"](?P<quotation>[^”\"]+)[”\"]")
 SUBSTANTIAL_QUOTATION_REVIEW_REASON = (
     "substantial quotation requires verbatim-or-paraphrase memory review"
 )
+ASIDE_PARAGRAPH_RE = re.compile(r"^\*[^*].*[^*]\*$", re.DOTALL)
+RESUME_CONNECTIVE_RE = re.compile(
+    r"^(?:then|so|but|and|which|that)\b", re.IGNORECASE
+)
+ASIDE_RESUME_REVIEW_REASON = (
+    "connective-led resume line after an aside requires referent review"
+)
 COMMON_ABBREVIATIONS = {
     "dr",
     "e.g",
@@ -80,6 +87,14 @@ class ReadabilityFinding:
     relationship_count: int
     level: str
     reason: str
+
+
+def _strip_keeping_storytelling_markup(text: str) -> str:
+    text = HTML_COMMENT_RE.sub("", text)
+    text = EVIDENCE_LINK_RE.sub("", text)
+    text = MARKDOWN_LINK_RE.sub(r"\1", text)
+    text = BARE_URL_RE.sub("", text)
+    return " ".join(text.split())
 
 
 def _strip_non_spoken_annotations(text: str) -> str:
@@ -153,15 +168,20 @@ def _substantial_quotation_spans(text: str) -> list[tuple[int, int]]:
 def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
     """Return spoken blockquote sentences before the document appendix."""
 
-    paragraphs: list[tuple[int, str]] = []
+    paragraphs: list[tuple[int, str, bool]] = []
     current: list[str] = []
+    current_marked: list[str] = []
     current_line = 0
+    previous_was_aside = False
 
     def flush() -> None:
-        nonlocal current, current_line
+        nonlocal current, current_marked, current_line, previous_was_aside
         if current:
-            paragraphs.append((current_line, " ".join(current)))
+            marked = " ".join(current_marked)
+            paragraphs.append((current_line, " ".join(current), previous_was_aside))
+            previous_was_aside = ASIDE_PARAGRAPH_RE.fullmatch(marked) is not None
             current = []
+            current_marked = []
             current_line = 0
 
     for line_number, raw_line in enumerate(markdown.splitlines(), start=1):
@@ -182,15 +202,26 @@ def extract_spoken_sentences(markdown: str) -> list[SpokenSentence]:
         if not current:
             current_line = line_number
         current.append(spoken)
+        current_marked.append(_strip_keeping_storytelling_markup(match.group(1)))
 
     flush()
 
     sentences: list[SpokenSentence] = []
-    for line_number, paragraph in paragraphs:
+    for line_number, paragraph, follows_aside in paragraphs:
         quotation_spans = _substantial_quotation_spans(paragraph)
-        for sentence_start, sentence_end in _split_sentence_spans(paragraph):
+        for index, (sentence_start, sentence_end) in enumerate(
+            _split_sentence_spans(paragraph)
+        ):
             semantic_review_reason = None
-            if any(
+            if (
+                follows_aside
+                and index == 0
+                and RESUME_CONNECTIVE_RE.match(
+                    paragraph[sentence_start:sentence_end].lstrip()
+                )
+            ):
+                semantic_review_reason = ASIDE_RESUME_REVIEW_REASON
+            elif any(
                 sentence_start < quotation_end
                 and quotation_start < sentence_end
                 for quotation_start, quotation_end in quotation_spans

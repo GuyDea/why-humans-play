@@ -79,6 +79,27 @@ Metadata does not count.
             ["First sentence.", "“Second sentence?”", "Third sentence!"],
         )
 
+    def test_connective_resume_after_aside_requires_review(self) -> None:
+        markdown = (
+            "> *Hold that thought. It gets its place.*\n"
+            "\n"
+            "> Then researchers pooled results. More text here.\n"
+        )
+        findings = analyze_markdown(markdown)
+        resume = findings[2]
+        self.assertEqual(resume.level, "review")
+        self.assertIn("resume line after an aside", resume.reason)
+        self.assertEqual(findings[3].level, "pass")
+
+    def test_named_referent_resume_after_aside_passes(self) -> None:
+        markdown = (
+            "> *Hold that thought. It gets its place.*\n"
+            "\n"
+            "> Back to those verdicts. Researchers tested them.\n"
+        )
+        findings = analyze_markdown(markdown)
+        self.assertTrue(all(f.level == "pass" for f in findings))
+
     def test_twenty_six_words_is_a_failure(self) -> None:
         sentence = " ".join(f"word{index}" for index in range(26)) + "."
 

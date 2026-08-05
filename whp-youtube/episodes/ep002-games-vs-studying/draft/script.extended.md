@@ -22,7 +22,7 @@
 
 [LOOP OPEN L-02 — The withheld number (intention null); pays at SP02.]
 
-> <u>Then researchers pooled almost seven hundred results on why people put things off. All three verdicts fell apart. One number in that pile ends the laziness story on its own. I'll show it to you.</u>
+> <u>Back to those three verdicts — because researchers have tested all three, and all three fell apart. The laziness verdict falls to a single number. I'll show it to you.</u>
 
 [PROMISE | LOCKED WORDING — The two-half learning contract, bounded to the intervention evidence ("try tonight," not "fix").]
 
@@ -68,7 +68,7 @@
 
 [TRANSITION — Closes the demolition and opens the model question SP03 answers.]
 
-> So the tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
+> The tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
 
 ## 3. The price tag
 
@@ -168,7 +168,7 @@
 
 > One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too. Though one school that dropped grades for a whole year saw it backfire, so the honest rule is narrower.
 >
-> Evaluation that points at you is the risky kind. Feedback that points at the work is the kind that pays.
+> Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
 
 [TRANSITION — Pays the intro's ADHD holding line: exchange-rate boundary, hyperfocus construct flagged young, the pricing-machine reframe — and the explicit adjudication of verdict three (broken attention).]
 
@@ -186,7 +186,7 @@
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
 >
-> Which resizes the second verdict, addicted. The diagnosis is real — and rare. Most six-hour nights aren't addiction. They're payday.
+> Which resizes the second verdict, addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
 
 [REVERSAL — Flip direction one: the undermining experiments scoped aloud to already-loved activities (never aimed at studying); the contract line carries the mechanism.]
 
@@ -230,7 +230,7 @@
 
 [REVERSAL — Decay honesty compressed to the megastudy line (61k, 8% post-program); the deadline-replication debunk was cut with the advice it debunked.]
 
-> One honest warning. These levers are real, but they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. When a fix stops working, that's normal. Re-rig the deal.
+> One honest warning. These levers are real, but modest — and they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. And studying's rewards really are far away; no trick fully closes that gap. So when a fix stops working, that's normal. Re-rig the deal.
 
 [APPLICATION — The clinical signpost, delivered plainly.]
 
@@ -238,7 +238,7 @@
 
 [APPLICATION — The single retained transfer: the chosen-constraint chore closes the loop that started this rebuild; kid and hobby transfers moved to Shorts/description material.]
 
-> One last transfer, for the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
+> And once you can read price tags, you'll start seeing them everywhere. Take the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
 
 ## 8. The verdict
 
@@ -303,4 +303,5 @@
 - **Approved by:** PENDING
 - **Layer 2 mechanical consistency check:** completed 2026-08-01; four wordings corrected (Lomas persistence metric held to "most motivating"; undermining tasks as "activity they already loved"; utility-value dosage claim removed; flow condition's skill half restored).
 - **Directed revision (2026-08-05, Martin: "do the option 1"):** applied the recommended set — SP07 tail restructured (~460→~360 words: one anointed tonight-move paying the promise's "one move," observable-signal line added, decay warning compressed to the megastudy line, deadline-replication debunk cut with its advice, clinical signpost kept, single chore transfer kept; kid and hobby transfers moved to Shorts/description material); all three intro verdicts now explicitly adjudicated (lazy at SP02, addicted at SP06, broken attention at SP05); referent debts fixed (flip, pricing curve, paint metaphor, discipline callback re-named at SP08); small-study caveats repositioned after their toppers (shock, Lego); absolutes softened ("finally got its biggest test," "almost never," "can do"); care-register kid line removed with its transfer; the two closers separated by one plain beat with the price-tag lesson as the final word. Not adopted, with reasons on record: cutting the grades walk-back and gamification concession (contested-findings honesty), the intro's approved wording (blueprint baseline), and the "sliver"/traits sentences (kill-panel-mandated bounds).
+- **Full-review findings applied (2026-08-05, Martin's direction):** the intro's ADHD-aside resume seam rebuilt (referent re-named, false chronology and all-three-from-the-pool attribution removed — Martin's catch); gaming-disorder "rare" replaced with "the tail, not the norm"; the feedback rule attributed as interpretation ("seems to be"); the Layer-0 rational-core concession restored ("modest… studying's rewards really are far away; no trick fully closes that gap"); the larger-benefit element restored ("once you can read price tags, you'll start seeing them everywhere"); a second aside seam cleaned at the SP02 close (bare "So" dropped). Provenance: this seam class produced the aside-resume rule and the mechanical seam detector (see DECISIONS.md 2026-08-05).
 - **Cold-viewer retention evaluation:** completed 2026-08-01 (single run; per doctrine, single-run findings are reported for Martin's direction, none auto-adopted). Headline findings: (1) verdict — cut SP07 by ~40%, ending shortly after Question Four with one anointed tonight-move; (2) two of the three intro verdicts (addicted, broken attention) are never explicitly adjudicated; (3) promise diffusion — "one evidence-backed move" pays as four unanointed moves; (4) referent debts ("the flip," "pricing curve," "paint wears off," discipline callback unre-named); (5) claim-smell list (absolutes: "Games never make that mistake," "tested properly," universalized shock line, vague "beat students told to try harder"); (6) mid-scene caveat placements deflate the shock and Lego reveals; (7) S8's two adjacent closers dilute each other; (8) care-register flip on the kid line; protected moments — the shock scene, the Sisyphus scene, the choice reveal + cat beat. Full report in the session record; findings await Martin's ruling at this gate.

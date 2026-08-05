@@ -531,6 +531,16 @@ Longer loops are structural decisions. Select and map them with
 [the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity),
 then voice them without breaking the current thought.
 
+An aside, holding line, or parenthetical beat creates a seam, and the seam is where
+referents die. The first line after an aside must re-grab the interrupted thought's
+referent by name — never a bare connective ("Then…", "So…", "But…") pointing across
+the aside, because a first-time listener attaches the connective to the aside, not to
+the thought it interrupts. Separately, a temporal connective must join real events:
+narrating a static description followed by evidence as "then" manufactures a
+chronology that never happened. The mechanical checker flags connective-led resume
+lines after italic asides for referent review; treat the flag as an instruction to
+re-hear the seam from the listener's memory, not as a style veto.
+
 Write for the real delivery context: Martin — a non-native English speaker — reads the
 narration aloud, often while walking and talking to the camera, for an audience that
 includes non-native listeners. Every factual sentence is a complete spoken clause with an
@@ -754,6 +764,8 @@ Hold these while writing. Each one changes the sentence in front of you.
   spoken, avoid outline labels, and break up unearned runs of polished aphorisms.
 - Does every mini-hook also make the next thought feel conversationally earned, with that
   thought delivering the promised content immediately?
+- After every aside or held thought, does the resume line re-name its referent — and
+  does every "then" connect two real events rather than a description and a study?
 - Are texture quantities spoken as truthful conversational magnitudes while claim-carrying
   numbers, small counts, dates, places, and institutions stay exact?
 - Does the narrator stay a peer throughout — former take mocked instead of the viewer,

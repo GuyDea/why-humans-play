@@ -12,7 +12,7 @@
 
 > *If your word is ADHD, hold that thought. It's part of this story, and it gets its honest place.*
 
-> <u>Then researchers pooled almost seven hundred results on why people put things off. All three verdicts fell apart. One number in that pile ends the laziness story on its own. I'll show it to you.</u>
+> <u>Back to those three verdicts — because researchers have tested all three, and all three fell apart. The laziness verdict falls to a single number. I'll show it to you.</u>
 
 > **By the end of this video, you'll know what actually stops you at minute ten — and it isn't weak will.**
 >
@@ -40,7 +40,7 @@
 
 > *To be fair, some traits do matter. Highly disciplined people put things off far less. Hold that thought too. It comes back at the end.*
 
-> So the tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
+> The tank was a metaphor, and the metaphor failed its biggest tests. Which leaves the real question. What is that wall you hit at minute ten?
 
 ## 3. The price tag
 
@@ -108,7 +108,7 @@
 
 > One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too. Though one school that dropped grades for a whole year saw it backfire, so the honest rule is narrower.
 >
-> Evaluation that points at you is the risky kind. Feedback that points at the work is the kind that pays.
+> Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
 
 > And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
 >
@@ -122,7 +122,7 @@
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
 >
-> Which resizes the second verdict, addicted. The diagnosis is real — and rare. Most six-hour nights aren't addiction. They're payday.
+> Which resizes the second verdict, addicted. The diagnosis is real — and it's the tail, not the norm. Most six-hour nights aren't addiction. They're payday.
 
 > Second, the same price change runs in reverse — from play toward chore. Take a thing you love, staple a contract to it, and watch the price change.
 >
@@ -152,11 +152,11 @@
 >
 > You'll know the audit is working when the gap between sitting down and actually starting begins to shrink.
 
-> One honest warning. These levers are real, but they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. When a fix stops working, that's normal. Re-rig the deal.
+> One honest warning. These levers are real, but modest — and they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. And studying's rewards really are far away; no trick fully closes that gap. So when a fix stops working, that's normal. Re-rig the deal.
 
 > And one boundary, and I mean it. If everything in your life feels like this — not just the textbook — that's not a design problem. That can be depression territory, and it deserves real support, not a productivity tip.
 
-> One last transfer, for the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
+> And once you can read price tags, you'll start seeing them everywhere. Take the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
 
 ## 8. The verdict
 
