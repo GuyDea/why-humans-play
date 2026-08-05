@@ -59,6 +59,13 @@ ends with a ranked trio. Stop at any operation boundary Martin names.
   delivery.
 - **Package-unit gate:** no artifact may present titles and thumbnails as separate
   pools. Candidates, scores, panel verdicts, and recommendations are always pairs.
+- **Primary-bet gate:** when the episode's topic brief, architecture, or blueprint
+  declares a primary script goal (emotional impact, expectation subversion, or
+  new-understanding lens per `whp-youtube/STEERING.md`), every candidate package makes
+  that goal's bet — one promise, one bet. Candidates vary the entry point, tension,
+  and visual, never the goal type they promise. If the strongest honest candidates
+  keep landing on a different goal's bet, surface a possible retype to Martin instead
+  of shipping a mixed promise.
 - **Cap gate:** at most 3 winning packages advance to rendering; each renders 5
   variants from the same prompt. The three winners are the Test & Compare trio.
 - **Decision gate:** the final package choice is Martin's. Recommendations rank; they

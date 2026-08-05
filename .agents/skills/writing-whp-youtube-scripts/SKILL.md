@@ -34,8 +34,9 @@ its [subject-to-angle development method](../choosing-whp-video-topic/references
 Preserve a supplied or approved angle without reopening selection.
 
 Use a supplied selected topic brief as the handoff from topic selection. Do not rerun topic
-ideation unless Martin explicitly asks. Carry forward the available audience, packaging
-promise, tension, by-end promise, payoff, factual anchors, and unknowns. Missing nonessential
+ideation unless Martin explicitly asks. Carry forward the available audience, declared
+primary script goal with its provisional transformation contract, packaging promise,
+tension, by-end promise, payoff, factual anchors, and unknowns. Missing nonessential
 fields must not block a useful prototype; ask only when a missing choice would materially
 change the requested artifact.
 
@@ -160,6 +161,13 @@ learning-and-action contract when drafting the opening promise, explanation, vie
 application, and final lesson.
 A complete-episode promise must name both the understanding the viewer will gain and the
 concrete response they will be able to use.
+
+When the topic brief declares a primary script goal, preserve it as the episode's single
+declared bet: build the opening promise around that goal, and treat the brief's
+provisional transformation contract as a draft for this stage to verify, narrow, or
+replace — never as pre-approved content. If architecture work shows the episode's real
+strength lies in a different goal, surface the retype to Martin instead of silently
+changing the bet.
 
 ### Architecture approval gate
 
