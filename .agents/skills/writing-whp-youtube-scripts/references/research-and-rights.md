@@ -16,6 +16,9 @@
 - [Use rights statuses exactly](#use-rights-statuses-exactly)
 - [Record attribution and operational details](#record-attribution-and-operational-details)
 - [Sources for this method](#sources-for-this-method)
+- [Adversarial claim verification](#adversarial-claim-verification)
+- [Gate precedence](#gate-precedence)
+- [Contested findings](#contested-findings)
 
 ## Keep two separate ledgers
 
@@ -350,7 +353,11 @@ differently, as described in its entry below.
   the phenomenon's own literature (meta-analyses, reviews, consensus sources found by
   the behavior's name) and name the dominant account and strongest rivals. Its verdict
   feeds the architecture's coverage-and-rivals record; an unanswered challenge blocks
-  architecture approval. This layer attacks the frame where Layers 1–3 attack the
+  architecture approval. If source access is unavailable, label the coverage record
+  `INCOMPLETE—LAYER 0 NOT RUN`; the architecture may circulate as provisional exactly
+  like an unscanned concept inventory, but it is not approval-ready until the layer
+  runs or Martin explicitly accepts the recorded omission risk. This layer attacks
+  the frame where Layers 1–3 attack the
   sentences — it exists because every sentence can verify while the composition
   overclaims.
 
@@ -372,6 +379,18 @@ differently, as described in its entry below.
 A claim that survives Layer 1 can still die at Layer 3 — the layers are cumulative,
 not alternative. No layer's pass is inferred from an earlier layer's.
 
+
+## Gate precedence
+
+When gates collide, evidence outranks retention and style. Wording mandated by the
+evidence apparatus — kill-panel bounds, contested-findings treatments, scope and
+population terms, spoken sample-size disclosures, confidence-status hedges — may not
+be cut on the strength of a retention, pacing, or style finding. A retention finding
+that targets mandated wording converts to *reposition or compress*: move the caveat
+after its beat's topper, tighten its words, fold it into a sentence doing other work —
+but the bound stays spoken. No evaluator-adoption default overrides this precedence,
+and a conflict between a mandated bound and a locked line reopens the lock through
+the locked-lines protocol rather than resolving silently in either direction.
 
 ## Contested findings
 

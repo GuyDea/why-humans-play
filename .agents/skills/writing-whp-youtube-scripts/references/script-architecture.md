@@ -398,7 +398,9 @@ understanding is generic self-help rather than a WHP payload.
 
 Reject an architecture that explains a common human behavior when its
 coverage-and-rivals record is missing, when Layer 0 thesis verification has not run,
-or when a Layer 0 challenge remains unanswered.
+or when a Layer 0 challenge remains unanswered — unless the record carries an
+explicit `INCOMPLETE—LAYER 0 NOT RUN` label and Martin accepts the omission risk,
+mirroring the offline concept-scan path.
 
 Reject an architecture presented as complete when its concept inventory is absent,
 recall-only, unsourced, omits the intervention and countermeasure bucket, or hides

@@ -2446,3 +2446,31 @@ seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape ru
 `whp-youtube/episodes/ep002-games-vs-studying/draft/` (four persona-license reactions
 added; personal-input record updated). Case-scene invention rules (participants'
 thoughts, dialogue, weather) are untouched.
+
+## 2026-08-05 — Gate-precedence rules: contradictory gates resolved
+
+**Decision:** Five gate collisions resolved with single-owner rules. (1) Evaluator
+two-strikes adoption is a recommendation posture — "adopted unless overruled" —
+never applied before Martin's gate response; (2) a two-strike is substantially the
+same finding on substantially the same passage, across runs at any stage; (3) a new
+Gate precedence rule in the research-and-rights owner: evidence-mandated wording
+(kill-panel bounds, contested-findings treatments, scope terms, sample-size
+disclosures) outranks retention and style findings, which convert to
+reposition-or-compress, never cut; (4) locked lines get an explicit reopening
+protocol — no lock before readability passes, and any later gate failure on a locked
+line is reported by name and waits for Martin, never silently rewritten; (5) Layer 0
+gains the same offline-provisional path as the concept scan
+(`INCOMPLETE—LAYER 0 NOT RUN` + explicit risk acceptance), removing the offline
+deadlock. Cross-level: reconcile-whp's commit default now defers to user-level
+steering (progressive commits).
+
+**Rationale:** Martin's request after two live collisions (persona license; Law 3
+timing): audit for gate pairs that negate each other. The retention evaluator had
+already targeted kill-panel-mandated wording twice; combined with unqualified
+auto-adoption, honesty wording could have been deleted by default.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (adoption
+posture; locked-lines protocol), `references/research-and-rights.md` (Gate
+precedence section; Layer 0 provisional path; contents index),
+`references/script-architecture.md` (approval-gate mirror),
+`.agents/skills/reconcile-whp/SKILL.md` (commit-precedence line).

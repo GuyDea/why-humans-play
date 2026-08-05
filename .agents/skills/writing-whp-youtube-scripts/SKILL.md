@@ -325,7 +325,12 @@ fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
 direction. It re-runs during the final audit battery. A finding flagged by two
-independent evaluator runs is adopted by default; keeping it requires Martin's overrule. Run the Layer 2 consistency
+independent evaluator runs — substantially the same finding on substantially the same
+passage, across runs at any stage — is presented as adopted-unless-overruled: the
+default recommendation is to apply it, but nothing is applied before Martin's gate
+response, and his overrule keeps the wording. Evidence-mandated wording outranks any
+retention finding; see
+[the gate-precedence rule](references/research-and-rights.md#gate-precedence). Run the Layer 2 consistency
 check of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
 on the same draft: every narration number, name, and attribution against its evidence
 row.
@@ -344,6 +349,13 @@ not silently replace its structure or personality.
 These apply to the Blueprint intro, the Draft narration, and the Final narration alike.
 
 ### Mark locked lines for memory delivery
+
+No line is locked before it passes the spoken-readability gate. After locking, a gate
+failure on a locked line — readability, Layer 2 or 3 verification, retention, or any
+audit — reopens the lock explicitly: report the line to Martin by name with the
+failing gate and the proposed change, and wait. Never silently rewrite locked
+wording; a lock is Martin's approval of exact delivery, and only Martin closes it
+again.
 
 Martin delivers from memory while walking — there is no teleprompter on a walk. In a
 complete script, mark **locked lines** bold inside the blockquote: the opening question,
