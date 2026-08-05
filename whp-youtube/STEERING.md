@@ -431,9 +431,17 @@ when that feature receives its own design; do not scaffold placeholder app code 
 
 ## Law 3 — Duration and retention pacing
 
-- **Target 6–10 minutes for early episodes.** The 5–10 min band shows the highest
-  average retention of any length (~31.5%). `[reported]` Don't pad to hit some imagined
-  "long-form" length; a tight 7 minutes beats a soft 15.
+- **Every video runs at most 20 minutes — and inside that ceiling, time never sizes
+  the episode; the story does.** *(Adopted 2026-08-05, replacing the earlier 6–10
+  minute early-episode band.)* A great story is told at the length its causal chain,
+  evidence boundaries, and payoff genuinely earn; timing pressure never cuts setup,
+  referents, caveats, or connective tissue. The flip side stays in force: length must
+  be **earned** — the 5–10 min band still shows the highest average retention of any
+  length (~31.5%) `[reported]`, so every minute past ten has to survive the retention
+  pass on its own merit. Don't pad to hit some imagined "long-form" length; a tight
+  7 minutes still beats a soft 15 — but a genuinely earned 18 beats an amputated 9.
+  Exceeding 20 minutes is exceptional and requires Martin's explicit per-episode
+  ruling that the story earns it.
 - **Use the fewest open loops that sustain a clear progression.** A partial answer may
   create the next question, but a completed thought does not need decorative suspense.
   Loop selection and payoff follow the structural loop owner linked in Law 2.

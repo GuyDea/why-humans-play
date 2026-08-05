@@ -2369,3 +2369,25 @@ built end-to-end under the 2026-07-31 thesis-verification guardrails.
 `whp-youtube/canon.md`, `whp-youtube/STEERING.md` (EP2 working-state note). Draft
 remains AWAITING creative approval; cold-viewer evaluation and the ~12-minute
 timing diagnostic are before Martin.
+
+## 2026-08-05 — Law 3 revised: 20-minute ceiling, story sizes the episode
+
+**Decision:** Replace the 6–10 minute early-episode duration target with: every video
+runs at most 20 minutes; inside that ceiling, timing never sizes the episode — the
+story does, and timing pressure never cuts setup, referents, caveats, or connective
+tissue. Length must still be earned minute by minute against the retention pass
+(padding remains a defect), and exceeding 20 minutes requires Martin's explicit
+per-episode ruling.
+
+**Rationale:** Martin's direction during the ep002 draft review: the 6–10 band was
+forcing a compression question against a story-complete ~12-minute draft; "time
+cannot limit us, in case we have a great story to tell."
+
+**Documents:** `whp-youtube/STEERING.md` (Law 3),
+`.agents/skills/writing-whp-youtube-scripts/references/quality-rubric.md` (retention
+audit pass), `whp-youtube/episodes/ep002-games-vs-studying/draft/script.extended.md`
+(timing note — the ~12-minute draft now stands without a compression question).
+Historical research artifacts, superseded specs, and prior ledger entries keep their
+period wording; the approved ep002 blueprint snapshot retains its original Law-3
+pointer per the review-snapshot rule, with the draft-stage record carrying the
+current target.

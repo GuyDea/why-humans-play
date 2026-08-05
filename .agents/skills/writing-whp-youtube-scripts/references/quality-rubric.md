@@ -364,8 +364,9 @@ chains under the status thresholds, and require stable source-native locators.
     progression before proposing another loop, following
     [the structural loop owner](story-and-hook-method.md#plan-loops-without-withholding-clarity).
     Confirm the title and thumbnail promise is explicitly paid off in narration, and that
-    the early-episode runtime lands in the 6–10 minute band unless the assignment contract
-    fixes a different target. Report each sag or overrun as a named passage with its
+    the runtime respects the 20-minute ceiling (STEERING Law 3, adopted 2026-08-05).
+    Inside that ceiling, flag only stretches that fail to earn their time — never length
+    itself — unless the assignment contract fixes a tighter target. Report each sag or overrun as a named passage with its
     tradeoff; do not cut setup, referents, causality, humor, or the learning promise to
     satisfy this pass without Martin's review.
 11. **Readiness label:** Reapply the score threshold, protected-dimension rules,

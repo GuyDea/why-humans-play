@@ -271,7 +271,7 @@
 - **Status:** DRAFT
 - **Date:** 2026-08-01
 - **Deliverable:** FULL-SCRIPT
-- **Word count (spoken):** ~2,060 after the directed revision (≈12 minutes at 160 wpm). The cold-viewer restructure traded SP07 tail fat for the verdict adjudications and the anointed-move block, so runtime is roughly unchanged; the Law-3 timing question (6–10 minutes) remains Martin's open call. Next candidate compression targets if directed: the SP04 proximity tidbits, the SP05 grades passage, the SP02 Inzlicht sentence.
+- **Word count (spoken):** ~2,060 after the directed revision (≈12 minutes at 160 wpm). The cold-viewer restructure traded SP07 tail fat for the verdict adjudications and the anointed-move block, so runtime is roughly unchanged — and under the revised Law 3 (max 20 minutes; the story sizes the episode; adopted 2026-08-05), ~12 minutes needs no compression unless a stretch fails to earn its time. Former compression candidates kept for reference only: the SP04 proximity tidbits, the SP05 grades passage, the SP02 Inzlicht sentence.
 - **Working title:** Why You Can Game for 6 Hours but Can't Study for 10 Minutes (packaging trio W1–W3 recorded in the blueprint appendix; final choice pending Martin).
 
 ### Story progression and payoff audit
