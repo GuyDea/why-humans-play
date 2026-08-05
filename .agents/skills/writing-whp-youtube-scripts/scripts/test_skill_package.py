@@ -3612,6 +3612,8 @@ class SkillPackageTests(unittest.TestCase):
             "references/rapid-prototyping.md",
             "references/research-and-rights.md",
             "references/research-and-rights.md",
+            "references/script-artifact-pair.md",
+            "references/rapid-prototyping.md",
             "references/rapid-prototyping.md",
             "references/research-and-rights.md",
             "references/annotated-script-format.md",

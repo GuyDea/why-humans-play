@@ -229,9 +229,9 @@ load-bearing choice.
 Always-loaded invariants:
 
 - Use only story moves the real material earns. Never invent a roadblock, contradiction,
-  motive, chronology, failed hypothesis, research event, or near-surrender; performed
-  no-event narrator reactions follow the rapid voice owner's persona license. The
-  no-invention rule under [Production non-negotiables](#production-non-negotiables) applies from the first draft onward.
+  motive, chronology, failed hypothesis, research event, or near-surrender (no-event
+  reactions: persona license); the no-invention rule under
+  [Production non-negotiables](#production-non-negotiables) applies from the first draft onward.
 - But / Therefore diagnoses causal movement; it is not a literal-word or per-beat quota.
 - Keep adjacent proof jobs distinct; the remaining question creates the next evidence need.
 - Prefer a well-supported Western case when one can perform the same proof job clearly.
@@ -312,13 +312,10 @@ Before presenting a complete draft narration for creative approval, dispatch the
 fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
-direction. It re-runs during the final audit battery. A finding flagged by two
-independent evaluator runs — substantially the same finding on substantially the same
-passage, across runs at any stage — is presented as adopted-unless-overruled: the
-default recommendation is to apply it, but nothing is applied before Martin's gate
-response, and his overrule keeps the wording. Evidence-mandated wording outranks any
-retention finding; see
-[the gate-precedence rule](references/research-and-rights.md#gate-precedence).
+direction. It re-runs during the final audit battery. A finding flagged twice — the
+same finding, same passage, any stage — is presented adopted-unless-overruled; nothing
+applies before Martin's gate response, and mandated evidence wording outranks retention
+findings per [the gate-precedence rule](references/research-and-rights.md#gate-precedence).
 Run the Layer 2 consistency check of
 [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
 on the same draft: every narration number, name, and attribution against its evidence row.
@@ -337,12 +334,10 @@ These apply to the Blueprint intro, the Draft narration, and the Final narration
 
 ### Mark locked lines for memory delivery
 
-No line is locked before it passes the spoken-readability gate. After locking, a gate
-failure on a locked line — readability, Layer 2 or 3 verification, retention, or any
-audit — reopens the lock explicitly: report the line to Martin by name with the
-failing gate and the proposed change, and wait. Never silently rewrite locked
-wording; a lock is Martin's approval of exact delivery, and only Martin closes it
-again.
+Locks have a lifecycle owned by [the pair
+owner](references/script-artifact-pair.md#storytelling-markup): no lock before spoken
+readability passes; a later gate failure on a locked line reopens it at Martin's desk,
+never as a silent rewrite.
 
 Martin delivers from memory while walking — no teleprompter. In a complete script, mark
 **locked lines** bold inside the blockquote: the opening question, the learning promise,
@@ -358,14 +353,8 @@ wording whose exact delivery has already been selected.
 
 ### Scope every universal verdict
 
-A locked line that diagnoses the viewer's own case universally in the second person
-("you weren't X — you were Y") is a coverage claim, not a stylistic choice. Use one only
-when the architecture's coverage-and-rivals record shows the mechanism is the phenomenon's
-dominant account; otherwise write the verdict conditionally or name the covered case
-aloud. Material the episode's own appendix marks as an editorial bridge or lists under
-`Unverified or disputed material` may not appear in locked universal wording anywhere in
-the script; a ledger caveat or a single hedge line elsewhere does not license a universal
-verdict — the wording that carries the diagnosis carries the boundary.
+A locked second-person verdict on the viewer's own case is a coverage claim; its
+conditions live in [the rapid voice owner](references/rapid-prototyping.md#scope-every-universal-verdict).
 
 ### Enforce spoken readability before delivery
 
@@ -457,9 +446,8 @@ For evidence-backed finalization, promote the approved draft into
   behavior, the number that improved, and the damaged goal and human cost. Direct humor at
   the mechanism or institution, then say plainly what got worse and who paid.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
-  `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it as
-  proof of prevalence, causality, or mechanism. Performed no-event narrator reactions
-  follow the voice owner's persona license and need no input decision; invented experience remains banned.
+  `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it
+  as proof; no-event reactions follow the persona license and need no input decision.
 - For every `FULL-SCRIPT`, voice all five viewer-application elements in narration:
   evidence-bounded insight; low-risk action, observation, or reflection; observable signal;
   real boundary; and larger benefit. The structured block does not substitute for spoken

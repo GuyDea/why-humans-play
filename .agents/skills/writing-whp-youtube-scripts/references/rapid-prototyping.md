@@ -636,6 +636,16 @@ Otherwise label and speak a faithful paraphrase, and preserve the exact wording 
 appendix or source notes. Replace research-admin wording and outline transitions with
 language Martin could reproduce naturally after one hearing.
 
+## Scope every universal verdict
+
+A locked line that diagnoses the viewer's own case universally in the second person
+("you weren't X — you were Y") is a coverage claim, not a stylistic choice. Use one only
+when the architecture's coverage-and-rivals record shows the mechanism is the phenomenon's
+dominant account; otherwise write the verdict conditionally or name the covered case
+aloud. Ledger-marked editorial bridges and `Unverified or disputed material` never
+appear in locked universal wording; a caveat or hedge elsewhere does not license a
+universal verdict — the wording carrying the diagnosis carries the boundary.
+
 ## Pass the spoken-readability delivery gate
 
 Readability is a delivery gate, not a post-draft editorial audit.

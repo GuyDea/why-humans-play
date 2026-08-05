@@ -93,6 +93,13 @@ em dash must name that passage's episode-specific purpose; a generic tag is not 
 
 Do not underline a mini-hook.
 
+Bold's lock carries a lifecycle: no line is locked before it passes the
+spoken-readability gate, and after locking, any gate failure on the line —
+readability, Layer 2 or 3 verification, retention, or an audit — reopens the lock
+explicitly. Report the line to Martin by name with the failing gate and the proposed
+change, and wait; never silently rewrite locked wording. A lock is Martin's approval
+of exact delivery, and only Martin closes it again.
+
 Mark the smallest complete passage that performs the named job. Do not style ordinary
 connective prose merely to make the page look active.
 
