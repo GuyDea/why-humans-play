@@ -61,6 +61,8 @@
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
 > Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+>
+> Honestly, this one stung. I'd explained half my life with that tank.
 
 [MINI-HOOK — The traits boundary (conscientiousness/self-discipline strong) seeded here; pays at the SP08 exchange-rate line. Guardrail: never "task beats traits."]
 
@@ -87,6 +89,8 @@
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
 > Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
+>
+> I laughed at that man — for about a second. Then I remembered my phone.
 
 [AHA — Lands the beat's lesson in the price vocabulary.]
 
@@ -134,6 +138,8 @@
 
 [AHA — The effort-paradox seal: contrafreeloading with the cat exception as the beat's earned joke; closes on the product line.]
 
+> I build brain games for a living, and I would still have bet on difficulty. I'd have lost.
+>
 > You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat.
 >
 > You crave chosen difficulty. And games sell chosen difficulty as a product.
@@ -159,6 +165,8 @@
 > Which brings in the second half of the bill. For tasks that measure you, the price isn't paid in boredom anymore. It's paid in fear.
 >
 > In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping a feeling works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
+>
+> I didn't expect fear on that bill. But it explains the nights that boredom never could.
 
 [TRANSITION — Safe failure as games' answer to the fear denomination.]
 
@@ -293,7 +301,7 @@
 
 ### Personal-input decision
 
-- **Decision:** INPUT-REQUESTED (draft narrates without personal material; both slots optional).
+- **Decision:** INPUT-REQUESTED for events; persona-license reactions in use (doctrine adopted 2026-08-05, see DECISIONS.md). Four performed reactions were added under the license — the tank sting (SP02), the laugh-then-phone turn (SP03), the builder's bet (SP04: true credential, no app name, performed bet), and the unexpected-fear line (SP05). Each claims stance only, carries no evidential weight, and is Martin's to reword or veto at the creative gate.
 - **Slot A — SP01 verdict line.** Primary prompt: on your own game-versus-study nights, which of the three verdicts did you reach for — lazy, addicted, or broken? Follow-ups: a specific night you remember; what you tried the next day; what you believed the games were doing to you. Bridge in: the verdict lineup. Bridge out: "Then researchers pooled…" Personal visuals: none needed. Omit when: no truthful single label existed.
 - **Slot B — SP04 builder line.** Primary prompt: as someone who builds brain-training games, what do you deliberately build into a level so people stay — and did you recognize the four payments? Follow-ups: one concrete design decision; one thing school gets wrong that you'd never ship. Bridge in: "payment four." Bridge out: the Lomas result. Personal visuals: Apexwit screen only if separately cleared. Omit when: the line would read as product promotion (Law 5 boundary).
 

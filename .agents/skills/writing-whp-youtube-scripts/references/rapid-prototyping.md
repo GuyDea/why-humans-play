@@ -150,7 +150,7 @@ exist. Do not optimize the sequence to a sentence count or timestamp.
    the viewer: `I used to read those stories and think — how naive; everyone knows AI
    makes things up.` The viewer recognizes their own objection inside the narrator's.
    Treat it as a reasonable position, not a prevalence claim; the narrator's former belief
-   is his own voiced stance, confirmed by Martin at review.
+   is a stance, not an event — persona license applies, and Martin rewords it at review.
 3. Overturn it with the observed result that sent the narrator digging — people who
    displayed meaningful resistance and were not protected by it. Treat measured
    skepticism, lower trust ratings, expertise, training, or prior warning as sufficient
@@ -271,8 +271,13 @@ Every drafted or reused passage passes four economy checks:
 - **Process is not reaction.** Cut narrator process bookkeeping — search logistics, "I
   needed a study," inventories of what remains to prove. Keep the narrator's felt
   reaction — the bet, the smile, the laugh, the discomfort — budgeted at roughly one
-  per beat, placed where the viewer's own reaction needs modeling, and always Martin's
-  confirmed stance, never invented emotion. An economy pass that strips every personal
+  per beat, placed where the viewer's own reaction needs modeling. Reactions are
+  **persona license**: they may be written without prior confirmation when they claim
+  no event, memory, or chronology, carry no evidential weight (removing one changes no
+  claim), stay harmless and non-promotional, and perform a narrative job — model,
+  disarm, or hand off. Martin rewords or vetoes them at his gate reviews; true
+  biography is still preferred where credibility is the job; invented events remain
+  banned everywhere. An economy pass that strips every personal
   reaction has cut voice, not fat: a beat with zero reaction reads as narration, not
   conversation.
 

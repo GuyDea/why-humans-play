@@ -37,6 +37,8 @@
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
 > Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+>
+> Honestly, this one stung. I'd explained half my life with that tank.
 
 > *To be fair, some traits do matter. Highly disciplined people put things off far less. Hold that thought too. It comes back at the end.*
 
@@ -55,6 +57,8 @@
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
 > Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
+>
+> I laughed at that man — for about a second. Then I remembered my phone.
 
 > That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
 
@@ -84,6 +88,8 @@
 
 > <u>**But when players chose their level, moderate challenge became the most motivating. The ingredient was never difficulty. It was choice.**</u>
 
+> I build brain games for a living, and I would still have bet on difficulty. I'd have lost.
+>
 > You don't actually crave easy. Given free food right next to a puzzle with the same food inside, most lab animals still work the puzzle. Rats do it. Pigeons do it. The one animal that reliably refuses is the house cat.
 >
 > You crave chosen difficulty. And games sell chosen difficulty as a product.
@@ -103,6 +109,8 @@
 > Which brings in the second half of the bill. For tasks that measure you, the price isn't paid in boredom anymore. It's paid in fear.
 >
 > In the classic studies of why students put off studying, the biggest factor wasn't disliking the work. It was fear of failing it. And escaping a feeling works — instantly, and briefly. That relief loop is the thing you've been calling procrastination.
+>
+> I didn't expect fear on that bill. But it explains the nights that boredom never could.
 
 > Now notice what games did with failure. They made it free. You die, you respawn, and nobody updates your permanent record.
 

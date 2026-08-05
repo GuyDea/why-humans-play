@@ -262,8 +262,9 @@ recreating it.
   and loop choice and delivery to
   [the structural loop owner](../.agents/skills/writing-whp-youtube-scripts/references/story-and-hook-method.md#plan-loops-without-withholding-clarity).
 - **Keep story momentum evidence-earned and owner-routed.** Use only story moves earned by
-  the real material. Never manufacture an obstacle, contradiction, emotion, failed
-  hypothesis, research chronology, or personal event. Treat But / Therefore as a causal
+  the real material. Never manufacture an obstacle, contradiction, failed
+  hypothesis, research chronology, or personal event; performed no-event narrator
+  reactions follow the persona license above. Treat But / Therefore as a causal
   diagnostic, not mandatory wording. Once approved, the Story Progression Plan remains the
   story baseline; any load-bearing progression change reopens whole-plan approval.
   Structural planning lives in
@@ -281,9 +282,15 @@ recreating it.
   gates. Keep the real location explicit and use later examples to widen geographic scope.
 - **Keep voice truthful, peer-level, and evidence-bounded.** **Precision controls what we
   claim. Personality controls how we say it.** The narrator stays a peer, never above the
-  viewer. Claim personal research chronology only when Martin supplied or confirmed it.
-  First-person narrator reactions and direct-address check-ins are optional tools used only
-  when the approved plan and material earn them; neither is a per-beat quota. Emotional
+  viewer. Claim personal research chronology or life events only when Martin supplied or
+  confirmed them. Performed narrator reactions are **persona license** *(adopted
+  2026-08-05)*: stance without biography may be written unconfirmed, because the
+  honesty moat lives in claims and evidence, not in pretending the persona is
+  unscripted — the same convention as a late-night host delivering a team-written
+  script in first person. The license's exact conditions and execution live in
+  [the rapid voice owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#write-for-speech-and-momentum);
+  invented events, memories, and chronology remain banned everywhere.
+  Direct-address check-ins remain optional tools; neither is a per-beat quota. Emotional
   directness and humor may sharpen supported stakes, but they never lower the evidence bar
   or target vulnerable people. Detailed cadence, wording, quantities, and humor execution
   live in [the rapid voice owner](../.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md#write-for-speech-and-momentum).
@@ -502,6 +509,7 @@ millions on junk science).
   the trust that turns a first-time viewer into a subscriber.**
 - **Make personal material authentic and necessary.** Every complete script makes an
   explicit decision to request, use, or omit Martin's experience. Never invent a memory,
+  event, or chronology — performed no-event reactions follow Law 2's persona license —
   and cut autobiographical material that does not create stakes, test the idea, reveal a
   misconception, or change the viewer's route through the story.
 - **Use compact informational rewards.** Once the viewer understands a pattern, add a

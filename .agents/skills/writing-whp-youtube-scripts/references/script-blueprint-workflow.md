@@ -81,8 +81,9 @@ The intro must make a precise, topic-specific choice about how to:
 These are required jobs, not a fixed sentence order. The topic decides whether the best
 route is question-first, event-first, personal, study-led, paradox-led, or another
 approved structure. Compress stories to the minimum details needed for trust, causal
-clarity, emotion, and consequence. Never invent a defense, emotion, chronology,
-investigation struggle, or escalation merely to satisfy the shape.
+clarity, emotion, and consequence. Never invent a defense, chronology,
+investigation struggle, or escalation merely to satisfy the shape; a performed
+no-event reaction follows the rapid voice owner's persona license.
 
 Run a sentence-function pass before handoff. Every intro sentence must hook, ground,
 connect, disarm, escalate, promise, or pay off. Cut sentences that only repeat tone or
