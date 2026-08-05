@@ -123,8 +123,9 @@ bridge seed must cite the inventory item or architecture row that makes it true.
 forms include “But that seemed impossible, because…”, “That left me with one problem…”,
 “Which meant I needed a study that…”, and “The first case answered X. It left Y wide open.”
 
-Do not invent “I almost gave up,” surprise, frustration, a failed hypothesis, or chronology
-Martin did not experience. A logical gap may be voiced without pretending it was a personal
+Do not invent “I almost gave up,” a failed hypothesis, or chronology Martin did not
+experience; a performed flash of surprise or frustration with no event attached follows
+the persona license. A logical gap may be voiced without pretending it was a personal
 event.
 
 ### Loop and payoff check
@@ -143,8 +144,9 @@ evidence.
 
 ### Anti-shoehorn check
 
-Reject manufactured obstacles or contradictions; invented emotion, motive, memory,
-chronology, or research events; challenge language with no real gap; repetitive
+Reject manufactured obstacles or contradictions; invented motive, memory,
+chronology, or research events (a performed no-event reaction follows the persona
+license); challenge language with no real gap; repetitive
 But / Therefore phrasing; “and then” sequencing with no necessary job; quota-driven
 techniques; a sidecar that competes with the thesis; and promises the episode does not pay.
 
@@ -547,7 +549,9 @@ For delivery execution, follow
 For every `FULL-SCRIPT`, choose exactly one personal-input decision. Use
 `INPUT-REQUESTED` when Martin has not supplied the experience, `COMPLETED` only when he
 has supplied and approved it, and `OMIT` when autobiography would not improve the story.
-Never infer or invent first-person facts.
+Never infer or invent first-person facts — events, memories, chronology. Performed
+reactions that claim no such facts follow the rapid voice owner's persona license and
+need no input decision.
 
 The sequence must create stakes, reveal why Martin cared, test the episode's claim
 against experience, surface a misconception, or show how the insight changed a choice.

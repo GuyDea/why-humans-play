@@ -2418,3 +2418,31 @@ the class.
 `.agents/skills/writing-whp-youtube-scripts/scripts/check_spoken_readability.py`
 (+ tests), `whp-youtube/episodes/ep002-games-vs-studying/draft/` (both seams fixed
 alongside review findings 2–5).
+
+## 2026-08-05 — Persona license: performed reactions without confirmation
+
+**Decision:** Small first-person narrator reactions — surprise, amusement, a bet, a
+former assumption — may be written without Martin's prior confirmation when they
+claim no event, memory, or biography; carry no evidential weight (removing one
+changes no claim); stay harmless and non-promotional; and perform a narrative job
+(model the viewer's reaction, disarm, or hand off). Invented events, memories, and
+chronology remain banned everywhere; Martin's gate reviews are the standing veto and
+he rewords freely at delivery. Single detailed owner: the rapid voice owner's
+"Process is not reaction" rule; STEERING Law 2 states the principle and routes to
+it; every other reference is a one-line pointer to prevent definitional drift.
+
+**Rationale:** Martin's direction: the draft's missing first-person jabs were caused
+by an over-strict reading of the no-invention rule; the honesty moat lives in claims
+and evidence and in how he presents, not in pretending the persona is unscripted —
+the late-night convention of a host delivering team-written material in first
+person. Stories about Martin remain non-fabricable.
+
+**Documents:** `whp-youtube/STEERING.md` (Law 2 principle + route; story-momentum
+bullet scoped), `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`
+(detailed owner; anti-skip defense line), `SKILL.md` (invariants; anti-skip; personal-input
+non-negotiable), `references/story-and-hook-method.md` (personal-experience beat, bridge
+seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape rule),
+`references/quality-rubric.md` (dimension 3 anchors; audit pass 3),
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (four persona-license reactions
+added; personal-input record updated). Case-scene invention rules (participants'
+thoughts, dialogue, weather) are untouched.

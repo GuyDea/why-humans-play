@@ -127,8 +127,9 @@ claim rather than drafting around the gap. Match the case's population, behavior
 mechanism, and outcome to the narration; state any gap and use separate evidence for the
 episode mechanism rather than allowing one adjacent finding to imply both.
 For a problem-led opening where the viewer may claim immunity, use concise anti-skip doctrine.
-Keep the narrator stance truthful, ground the disarm in observed behavior rather than
-attributed inner states, and place a literal remedy before detailed case exposition. Never
+Keep the narrator stance inside the persona license (stance is free; events,
+memories, and chronology need Martin), ground the disarm in observed behavior rather
+than attributed inner states, and place a literal remedy before detailed case exposition. Never
 invent the narrator's research process or chronology. Follow
 [the rapid drafting method](references/rapid-prototyping.md) for the exact anti-skip
 sequence, proof interpretation, and line-level execution.
@@ -234,7 +235,8 @@ load-bearing choice.
 Always-loaded invariants:
 
 - Use only story moves the real material earns. Never invent a roadblock, contradiction,
-  emotion, motive, chronology, failed hypothesis, research event, or near-surrender. The
+  motive, chronology, failed hypothesis, research event, or near-surrender; performed
+  no-event narrator reactions follow the rapid voice owner's persona license. The
   no-invention rule under [Production non-negotiables](#production-non-negotiables)
   applies from the first draft onward, not only in production.
 - But / Therefore diagnoses causal movement; it is not a literal-word or per-beat quota.
@@ -458,7 +460,9 @@ For evidence-backed finalization, promote the approved draft into
   the mechanism or institution, then say plainly what got worse and who paid.
 - For every `FULL-SCRIPT`, choose exactly one personal-input decision:
   `INPUT-REQUESTED`, `COMPLETED`, or `OMIT`. Never invent Martin's experience or use it as
-  proof of prevalence, causality, or mechanism.
+  proof of prevalence, causality, or mechanism. Performed narrator reactions that claim
+  no event, memory, or biography follow the voice owner's persona license and need no
+  input decision; invented experience remains banned.
 - For every `FULL-SCRIPT`, voice all five viewer-application elements in narration:
   evidence-bounded insight; low-risk action, observation, or reflection; observable signal;
   real boundary; and larger benefit. The structured block does not substitute for spoken
