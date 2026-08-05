@@ -36,7 +36,7 @@
 
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
-> Then the tank was tested properly. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
 
 > *To be fair, some traits do matter. Highly disciplined people put things off far less. Hold that thought too. It comes back at the end.*
 
@@ -54,9 +54,9 @@
 >
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
-> Left alone with a shock button anyway, two-thirds of the men shocked themselves. Eighteen men in that group — a small study with an unforgettable result. One man pressed the button a hundred and ninety times.
+> Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
 
-> That is what an unpaid moment does to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
+> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
 
 > *So if attention has a price, the next question writes itself. What exactly do games pay?*
 
@@ -66,11 +66,11 @@
 >
 > In 2008, economists Dan Ariely, Emir Kamenica and Dražen Prelec paid students to build small Lego robots. Same toys, same pay, one difference. In one group, finished robots stacked up on the desk. In the other, the experimenter took each finished robot apart right in front of the builder.
 
-> The pay never changed. But the people watching their work get erased quit far earlier — and demanded about forty percent more to keep going.
+> The pay never changed. But the people watching their work get erased quit far earlier — and demanded about forty percent more to keep going. Twenty people per group, one small lab — and a result your gut recognizes instantly.
 >
-> It was a small study, twenty people per group. But the authors named the erasing condition after Sisyphus, and your gut already agrees. Work that stops existing stops being worth doing.
+> The authors named the erasing condition after Sisyphus. Work that stops existing stops being worth doing.
 
-> Games never make that mistake. The level stays beaten. The score stays up.
+> Games almost never make that mistake. The level stays beaten. The score stays up.
 >
 > And visible progress pulls. Coffee-card customers bought faster and faster as the free cup got close — about twenty percent faster by the end. Hand people a loyalty card with two stamps pre-filled, and completion nearly doubles. Thirty-four percent instead of nineteen.
 
@@ -110,9 +110,9 @@
 >
 > Evaluation that points at you is the risky kind. Feedback that points at the work is the kind that pays.
 
-> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate; the pricing curve runs steeper, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
+> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
 >
-> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine.
+> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third verdict — your attention was never broken. It was expensive.
 
 ## 6. The flip works both ways
 
@@ -121,12 +121,14 @@
 > First, not every game payment is a wage. Some are rigged lotteries. When researchers audited twenty-two big games with loot boxes, ten met the formal criteria for gambling. And at the far tail, the World Health Organization now lists gaming disorder as a real diagnosis.
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
+>
+> Which resizes the second verdict, addicted. The diagnosis is real — and rare. Most six-hour nights aren't addiction. They're payday.
 
-> Second, the flip runs backwards too. Take a thing you love, staple a contract to it, and watch the price change.
+> Second, the same price change runs in reverse — from play toward chore. Take a thing you love, staple a contract to it, and watch the price change.
 >
 > The classic experiments paid people an expected reward for an activity they already loved. Once the paying stopped, people chose that activity less than before. The contract, not the money, was the poison.
 
-> Bolt badges and leaderboards onto a college course, and things can sour the same way. In one careful semester-long comparison, motivation and exam scores both drifted down. On average, game elements in class do help a little. The real lesson is that bad gamification backfires, not that all of it is evil.
+> Bolt badges and leaderboards onto a college course, and things can sour the same way. One careful semester-long comparison watched motivation and exam scores drift down. On average, game elements in class do help a little. The backfire comes from bad design, not from the idea.
 
 > And gamers already know the last proof. Dailies. Streaks. Battle passes. The moment a game starts assigning homework, players start calling it a second job. Same activity, new frame, new price.
 
@@ -140,27 +142,21 @@
 >
 > **Question two. Where is my feedback?** If the work only answers you in two weeks, build a faster reply. Check answers per problem, not per evening.
 >
-> **Question three. Does my progress survive anywhere I can see it?** Don't let finished work vanish into a folder. Keep a visible count, and cross things off where crossed-off things stay.
+> **Question three. Does my progress survive anywhere I can see it?** Keep a visible count, and cross things off where crossed-off things stay.
 >
-> **Question four. Is this bill boredom — or fear?** The fixes differ. Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
+> **Question four. Is this bill boredom — or fear?** Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
 
-> Then one warning, because I promised honesty, not hacks.
+> And the one move to try tonight is the simplest one on record. Before you sit down, take the competing option out of the room entirely.
 >
-> These levers are real but modest, and they fade. Researchers tested fifty-four motivation programs on sixty-one thousand gym members. Only eight percent still worked after the program ended. Even the famous trick of setting your own deadlines just failed a major replication attempt.
+> In student experiments, some people were told to remove the temptation from their space. Others were told to resist it. The removers hit more of their study goals that week. Willpower lost to furniture moving.
 >
-> So don't build a system once and trust it forever. Re-rig the deal every few weeks, when the paint wears off.
+> You'll know the audit is working when the gap between sitting down and actually starting begins to shrink.
 
-> The best-tested moves are simple. Take the competing option out of the room — students assigned that strategy beat students told to try harder. Pick one if-then trigger for starting. Bundle something you genuinely love exclusively with the work.
->
-> And if the material feels pointless, try writing what it could actually do in your own life. In real classrooms, that small exercise lifted grades. It helped most for people who doubted they belonged.
+> One honest warning. These levers are real, but they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. When a fix stops working, that's normal. Re-rig the deal.
 
-> One boundary, and I mean it. If everything in your life feels like this — not just the textbook — that's not a design problem. That can be depression territory, and it deserves real support, not a productivity tip.
+> And one boundary, and I mean it. If everything in your life feels like this — not just the textbook — that's not a design problem. That can be depression territory, and it deserves real support, not a productivity tip.
 
-> This works outside studying too. The chore you save until the deadline? If the delay just shrinks the job, that's not a character flaw — that's a chosen constraint doing its work.
->
-> Your kid who won't do homework isn't defective either. Check the same four payments before checking their character.
->
-> And the hobby you're about to turn into a business — read the contract twice. You now know what expected rewards can do to things you love.
+> One last transfer, for the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
 
 ## 8. The verdict
 
@@ -172,8 +168,10 @@
 >
 > Same brain, both nights. Working correctly, both nights.
 
-> Your traits set the exchange rate. The task sets the price. So here is the sentence I want you to keep.
-
+> And that discipline caveat I told you to hold? This is where it lands. Your traits set the exchange rate. The task sets the price.
+>
 > <u>**Your focus isn't broken — games just pay attention's price, and studying usually doesn't.**</u>
+
+> The next time you hit the wall at minute ten, it won't read as an accusation. It will read as a bill.
 >
 > <u>**Boredom was never the verdict on you. It's the price tag on the task. Read it — and renegotiate.**</u>

@@ -60,7 +60,7 @@
 
 > Which leaves the favorite one: willpower. The story that you run on a fuel tank of discipline, and yours drains too fast.
 >
-> Then the tank was tested properly. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
+> Then the tank finally got its biggest test. Twenty-three labs, then thirty-six labs, thousands of people. The effect came out at roughly zero, both times. One later attempt found a sliver. One of the field's own leading researchers, Michael Inzlicht, publicly walked away from it.
 
 [MINI-HOOK — The traits boundary (conscientiousness/self-discipline strong) seeded here; pays at the SP08 exchange-rate line. Guardrail: never "task beats traits."]
 
@@ -80,17 +80,17 @@
 >
 > Boredom isn't your engine failing. Boredom is a bid.
 
-[TRANSITION — The shock study as the alarm's demonstration; cell size (18 men) and outlier spoken; one compact beat by scope boundary (the full story belongs to a future episode).]
+[TRANSITION — The shock study as the alarm's demonstration; the cell-size caveat repositioned after the 190-presses topper per the directed cold-viewer revision; one compact beat by scope boundary.]
 
 > And that bid has real teeth. In 2014, researchers at the University of Virginia asked people to sit alone and just think for fifteen minutes. No phone. No task.
 >
 > Before that, each person had said they would pay money to avoid a mild electric shock.
 >
-> Left alone with a shock button anyway, two-thirds of the men shocked themselves. Eighteen men in that group — a small study with an unforgettable result. One man pressed the button a hundred and ninety times.
+> Left alone with a shock button anyway, two-thirds of the men shocked themselves. One man pressed the button a hundred and ninety times. Eighteen men in that room — a small study, an unforgettable result.
 
 [AHA — Lands the beat's lesson in the price vocabulary.]
 
-> That is what an unpaid moment does to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
+> That's what an unpaid moment can do to a human brain. It doesn't go quiet. It starts bidding on anything else in the room.
 
 [MINI-HOOK — Opens the payment-list question SP04 answers.]
 
@@ -106,13 +106,13 @@
 
 [REVERSAL — The result with N spoken and the study's own Sisyphus framing; claims erasure→collapse only (visibility→boost was never tested).]
 
-> The pay never changed. But the people watching their work get erased quit far earlier — and demanded about forty percent more to keep going.
+> The pay never changed. But the people watching their work get erased quit far earlier — and demanded about forty percent more to keep going. Twenty people per group, one small lab — and a result your gut recognizes instantly.
 >
-> It was a small study, twenty people per group. But the authors named the erasing condition after Sisyphus, and your gut already agrees. Work that stops existing stops being worth doing.
+> The authors named the erasing condition after Sisyphus. Work that stops existing stops being worth doing.
 
 [TRANSITION — Bridges to games' rendering of progress; goal-gradient (20%) and endowed-progress (34/19) as fast informational rewards, labeled as the proximity pull, distinct from survival.]
 
-> Games never make that mistake. The level stays beaten. The score stays up.
+> Games almost never make that mistake. The level stays beaten. The score stays up.
 >
 > And visible progress pulls. Coffee-card customers bought faster and faster as the free cup got close — about twenty percent faster by the end. Hand people a loyalty card with two stamps pre-filled, and completion nearly doubles. Thirty-four percent instead of nineteen.
 
@@ -170,31 +170,33 @@
 >
 > Evaluation that points at you is the risky kind. Feedback that points at the work is the kind that pays.
 
-[TRANSITION — Pays the intro's ADHD holding line: exchange-rate boundary, hyperfocus construct flagged young, and the pricing-machine reframe of the lived pattern.]
+[TRANSITION — Pays the intro's ADHD holding line: exchange-rate boundary, hyperfocus construct flagged young, the pricing-machine reframe — and the explicit adjudication of verdict three (broken attention).]
 
-> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate; the pricing curve runs steeper, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
+> And your ADHD thought from the start — here is its honest place. ADHD genuinely changes the exchange rate — the same tasks charge more, and that part of the science is solid. The "hyperfocus" label is younger and still loosely defined, so hold it gently.
 >
-> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine.
+> But look at what the pattern actually shows. The same brain that can't afford the textbook can afford the raid. That's not a broken machine. That's a pricing machine. And there goes the third verdict — your attention was never broken. It was expensive.
 
 ## 6. The flip works both ways
 
-[TRANSITION — The rigged half: loot-box audit (10/22) and the ICD-11 tail in one line each; the honest split protects against the industry-PR reading.]
+[TRANSITION — The rigged half: loot-box audit (10/22) and the ICD-11 tail in one line each; the honest split protects against the industry-PR reading and explicitly adjudicates verdict two (addicted).]
 
 > Now, before this becomes a games-good-school-bad video — no. Two corrections, and both cut against the games.
 >
 > First, not every game payment is a wage. Some are rigged lotteries. When researchers audited twenty-two big games with loot boxes, ten met the formal criteria for gambling. And at the far tail, the World Health Organization now lists gaming disorder as a real diagnosis.
 >
 > So the honest split: most of what holds you is fair pay. Some of it is a casino wearing a quest marker.
+>
+> Which resizes the second verdict, addicted. The diagnosis is real — and rare. Most six-hour nights aren't addiction. They're payday.
 
 [REVERSAL — Flip direction one: the undermining experiments scoped aloud to already-loved activities (never aimed at studying); the contract line carries the mechanism.]
 
-> Second, the flip runs backwards too. Take a thing you love, staple a contract to it, and watch the price change.
+> Second, the same price change runs in reverse — from play toward chore. Take a thing you love, staple a contract to it, and watch the price change.
 >
 > The classic experiments paid people an expected reward for an activity they already loved. Once the paying stopped, people chose that activity less than before. The contract, not the money, was the poison.
 
 [TRANSITION — The gamification backfire case bounded against the modest positive meta average; "bad gamification backfires" as the narrow lesson.]
 
-> Bolt badges and leaderboards onto a college course, and things can sour the same way. In one careful semester-long comparison, motivation and exam scores both drifted down. On average, game elements in class do help a little. The real lesson is that bad gamification backfires, not that all of it is evil.
+> Bolt badges and leaderboards onto a college course, and things can sour the same way. One careful semester-long comparison watched motivation and exam scores drift down. On average, game elements in class do help a little. The backfire comes from bad design, not from the idea.
 
 [TRANSITION — Flip direction two in the audience's own lived vocabulary; survey/ethnography basis kept observational ("players start calling it").]
 
@@ -214,35 +216,29 @@
 >
 > **Question two. Where is my feedback?** If the work only answers you in two weeks, build a faster reply. Check answers per problem, not per evening.
 >
-> **Question three. Does my progress survive anywhere I can see it?** Don't let finished work vanish into a folder. Keep a visible count, and cross things off where crossed-off things stay.
+> **Question three. Does my progress survive anywhere I can see it?** Keep a visible count, and cross things off where crossed-off things stay.
 >
-> **Question four. Is this bill boredom — or fear?** The fixes differ. Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
+> **Question four. Is this bill boredom — or fear?** Boredom wants better payments. Fear wants a smaller first bet — one page, one problem, failure made cheap. The way games do it.
 
-[REVERSAL — The decay honesty beat: megastudy (54 programs, 61k members, 8% post-program) and the failed deadline replication; re-rig rule.]
+[APPLICATION — The anointed tonight-move (situation modification) paying the promise's "one move" exactly, with its student-experiment evidence, one mechanism-mapped joke, and the observable signal (the starting gap shrinks).]
 
-> Then one warning, because I promised honesty, not hacks.
+> And the one move to try tonight is the simplest one on record. Before you sit down, take the competing option out of the room entirely.
 >
-> These levers are real but modest, and they fade. Researchers tested fifty-four motivation programs on sixty-one thousand gym members. Only eight percent still worked after the program ended. Even the famous trick of setting your own deadlines just failed a major replication attempt.
+> In student experiments, some people were told to remove the temptation from their space. Others were told to resist it. The removers hit more of their study goals that week. Willpower lost to furniture moving.
 >
-> So don't build a system once and trust it forever. Re-rig the deal every few weeks, when the paint wears off.
+> You'll know the audit is working when the gap between sitting down and actually starting begins to shrink.
 
-[APPLICATION — The best-tested levers with their populations honest (situational beats willpower; if-then; bundling; utility-value mainly for low-expectancy students).]
+[REVERSAL — Decay honesty compressed to the megastudy line (61k, 8% post-program); the deadline-replication debunk was cut with the advice it debunked.]
 
-> The best-tested moves are simple. Take the competing option out of the room — students assigned that strategy beat students told to try harder. Pick one if-then trigger for starting. Bundle something you genuinely love exclusively with the work.
->
-> And if the material feels pointless, try writing what it could actually do in your own life. In real classrooms, that small exercise lifted grades. It helped most for people who doubted they belonged.
+> One honest warning. These levers are real, but they fade. In one test across sixty-one thousand people, only eight percent of motivation programs still worked after they ended. When a fix stops working, that's normal. Re-rig the deal.
 
 [APPLICATION — The clinical signpost, delivered plainly.]
 
-> One boundary, and I mean it. If everything in your life feels like this — not just the textbook — that's not a design problem. That can be depression territory, and it deserves real support, not a productivity tip.
+> And one boundary, and I mean it. If everything in your life feels like this — not just the textbook — that's not a design problem. That can be depression territory, and it deserves real support, not a productivity tip.
 
-[APPLICATION — Three transfers, each mapped to existing evidence: the chosen-constraint chore, the kid's homework (structure before character), the monetized hobby (undermining scope).]
+[APPLICATION — The single retained transfer: the chosen-constraint chore closes the loop that started this rebuild; kid and hobby transfers moved to Shorts/description material.]
 
-> This works outside studying too. The chore you save until the deadline? If the delay just shrinks the job, that's not a character flaw — that's a chosen constraint doing its work.
->
-> Your kid who won't do homework isn't defective either. Check the same four payments before checking their character.
->
-> And the hobby you're about to turn into a business — read the contract twice. You now know what expected rewards can do to things you love.
+> One last transfer, for the chore you always save until the deadline. If the delay just shrinks the job, that's not a character flaw. That's a chosen constraint — you built yourself a game timer.
 
 ## 8. The verdict
 
@@ -256,13 +252,15 @@
 >
 > Same brain, both nights. Working correctly, both nights.
 
-[TRANSITION — Pays the SP02 traits aside with the exchange-rate line and hands off to the locked close.]
+[LOOP PAYOFF L-01 | LOCKED WORDING — Partial close: pays the discipline callback by name (exchange rate) and lands the retell verdict on the task.]
 
-> Your traits set the exchange rate. The task sets the price. So here is the sentence I want you to keep.
-
-[LOOP PAYOFF L-01 | FINAL PAYOFF | LOCKED WORDING — The retell sentence and final lesson close the title question as a verdict on the task, not the viewer.]
-
+> And that discipline caveat I told you to hold? This is where it lands. Your traits set the exchange rate. The task sets the price.
+>
 > <u>**Your focus isn't broken — games just pay attention's price, and studying usually doesn't.**</u>
+
+[LOOP PAYOFF L-01 | FINAL PAYOFF | LOCKED WORDING — One plain beat separates the two locked closers so each lands alone; the price-tag lesson is the episode's final word.]
+
+> The next time you hit the wall at minute ten, it won't read as an accusation. It will read as a bill.
 >
 > <u>**Boredom was never the verdict on you. It's the price tag on the task. Read it — and renegotiate.**</u>
 
@@ -273,7 +271,7 @@
 - **Status:** DRAFT
 - **Date:** 2026-08-01
 - **Deliverable:** FULL-SCRIPT
-- **Word count (spoken):** ~2,060 (≈12 minutes at 160 wpm). Exceeds the Law-3 early-episode band of 6–10 minutes; reported as a timing diagnostic for Martin's review, not silently cut. Candidate compression targets if Martin directs: SP04 tidbet pair, SP06 gamification passage, SP07 transfers.
+- **Word count (spoken):** ~2,060 after the directed revision (≈12 minutes at 160 wpm). The cold-viewer restructure traded SP07 tail fat for the verdict adjudications and the anointed-move block, so runtime is roughly unchanged; the Law-3 timing question (6–10 minutes) remains Martin's open call. Next candidate compression targets if directed: the SP04 proximity tidbits, the SP05 grades passage, the SP02 Inzlicht sentence.
 - **Working title:** Why You Can Game for 6 Hours but Can't Study for 10 Minutes (packaging trio W1–W3 recorded in the blueprint appendix; final choice pending Martin).
 
 ### Story progression and payoff audit
@@ -304,4 +302,5 @@
 - **Status:** AWAITING-APPROVAL
 - **Approved by:** PENDING
 - **Layer 2 mechanical consistency check:** completed 2026-08-01; four wordings corrected (Lomas persistence metric held to "most motivating"; undermining tasks as "activity they already loved"; utility-value dosage claim removed; flow condition's skill half restored).
+- **Directed revision (2026-08-05, Martin: "do the option 1"):** applied the recommended set — SP07 tail restructured (~460→~360 words: one anointed tonight-move paying the promise's "one move," observable-signal line added, decay warning compressed to the megastudy line, deadline-replication debunk cut with its advice, clinical signpost kept, single chore transfer kept; kid and hobby transfers moved to Shorts/description material); all three intro verdicts now explicitly adjudicated (lazy at SP02, addicted at SP06, broken attention at SP05); referent debts fixed (flip, pricing curve, paint metaphor, discipline callback re-named at SP08); small-study caveats repositioned after their toppers (shock, Lego); absolutes softened ("finally got its biggest test," "almost never," "can do"); care-register kid line removed with its transfer; the two closers separated by one plain beat with the price-tag lesson as the final word. Not adopted, with reasons on record: cutting the grades walk-back and gamification concession (contested-findings honesty), the intro's approved wording (blueprint baseline), and the "sliver"/traits sentences (kill-panel-mandated bounds).
 - **Cold-viewer retention evaluation:** completed 2026-08-01 (single run; per doctrine, single-run findings are reported for Martin's direction, none auto-adopted). Headline findings: (1) verdict — cut SP07 by ~40%, ending shortly after Question Four with one anointed tonight-move; (2) two of the three intro verdicts (addicted, broken attention) are never explicitly adjudicated; (3) promise diffusion — "one evidence-backed move" pays as four unanointed moves; (4) referent debts ("the flip," "pricing curve," "paint wears off," discipline callback unre-named); (5) claim-smell list (absolutes: "Games never make that mistake," "tested properly," universalized shock line, vague "beat students told to try harder"); (6) mid-scene caveat placements deflate the shock and Lego reveals; (7) S8's two adjacent closers dilute each other; (8) care-register flip on the kid line; protected moments — the shock scene, the Sisyphus scene, the choice reveal + cat beat. Full report in the session record; findings await Martin's ruling at this gate.
