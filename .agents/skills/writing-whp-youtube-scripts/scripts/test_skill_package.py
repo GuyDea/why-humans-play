@@ -1293,8 +1293,9 @@ class SkillPackageTests(unittest.TestCase):
             "Record rows only for selected moves and notable rejections",
             "Every Natural bridge seed must cite the inventory item or architecture row "
             "that makes it true.",
-            "Do not invent “I almost gave up,” surprise, frustration, a failed "
-            "hypothesis, or chronology",
+            "Do not invent “I almost gave up,” a failed hypothesis, or chronology "
+            "Martin did not experience; a performed flash of surprise or "
+            "frustration with no event attached follows the persona license.",
             "change only the addressed progression beat or field",
             "Name every downstream causal consequence instead of silently rewriting "
             "later beats.",
@@ -1516,7 +1517,10 @@ class SkillPackageTests(unittest.TestCase):
 
         architecture_contracts = (
             "Build query vocabulary from the topic's plain-language mechanism, "
-            "synonyms, causes, consequences, and possible remedies.",
+            "synonyms, causes, consequences, and possible remedies — and, when "
+            "the episode explains a common human behavior, from the behavior's "
+            "own plain name, so the scan reaches the phenomenon's literature "
+            "and not only the chosen mechanism's.",
             "Continue until two materially different query passes add no new "
             "decision-relevant concept.",
             "Treat this as systematic best-effort coverage, not a literal guarantee "
@@ -1831,9 +1835,10 @@ class SkillPackageTests(unittest.TestCase):
 
         consumer_contracts = {
             "skill": (
-                "Keep the narrator stance truthful, ground the disarm in observed "
-                "behavior rather than attributed inner states, and place a literal "
-                "remedy before detailed case exposition.",
+                "Keep the narrator stance inside the persona license (stance is "
+                "free; events, memories, and chronology need Martin), ground the "
+                "disarm in observed behavior rather than attributed inner states, "
+                "and place a literal remedy before detailed case exposition.",
                 "[the rapid drafting method](references/rapid-prototyping.md)",
             ),
             "story": (
@@ -2018,8 +2023,8 @@ class SkillPackageTests(unittest.TestCase):
             "Do not invent thoughts, motives, or quotations for the people in the case."
         )
         allowed_comparison = (
-            "narrator's former belief is his own voiced stance, confirmed by "
-            "Martin at review."
+            "narrator's former belief is a stance, not an event — persona license "
+            "applies, and Martin rewords it at review."
         )
 
         for contract in (resistance, invention_boundary, allowed_comparison):
@@ -2435,11 +2440,10 @@ class SkillPackageTests(unittest.TestCase):
 
         steering_contracts = (
             "The narrator stays a peer, never above the viewer.",
-            "Claim personal research chronology only when Martin supplied or "
-            "confirmed it.",
-            "First-person narrator reactions and direct-address check-ins are "
-            "optional tools used only when the approved plan and material earn "
-            "them; neither is a per-beat quota.",
+            "Claim personal research chronology or life events only when Martin "
+            "supplied or confirmed them.",
+            "Direct-address check-ins remain optional tools; neither is a "
+            "per-beat quota.",
             "Emotional directness and humor may sharpen supported stakes, but they "
             "never lower the evidence bar or target vulnerable people.",
             "[the rapid voice owner]"
@@ -2863,9 +2867,8 @@ class SkillPackageTests(unittest.TestCase):
             rapid,
         )
         self.assertIn(
-            "First-person narrator reactions and direct-address check-ins are "
-            "optional tools used only when the approved plan and material earn "
-            "them; neither is a per-beat quota.",
+            "Direct-address check-ins remain optional tools; neither is a "
+            "per-beat quota.",
             steering,
         )
 
@@ -2894,8 +2897,8 @@ class SkillPackageTests(unittest.TestCase):
                 self.assertLess(guard_index - claim_index, 700)
 
         self.assertIn(
-            "Claim personal research chronology only when Martin supplied or "
-            "confirmed it.",
+            "Claim personal research chronology or life events only when Martin "
+            "supplied or confirmed them.",
             steering,
         )
 
@@ -3598,6 +3601,7 @@ class SkillPackageTests(unittest.TestCase):
             "../choosing-whp-video-topic/references/research-method.md",
             "references/rapid-prototyping.md",
             "references/script-architecture.md",
+            "references/research-and-rights.md",
             "references/story-and-hook-method.md",
             "references/research-and-rights.md",
             "references/rapid-prototyping.md",

@@ -2446,3 +2446,40 @@ seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape ru
 `whp-youtube/episodes/ep002-games-vs-studying/draft/` (four persona-license reactions
 added; personal-input record updated). Case-scene invention rules (participants'
 thoughts, dialogue, weather) are untouched.
+
+## 2026-08-05 — One strict primary script goal per episode
+
+**Decision:** Every WHP episode is typed at topic selection by exactly one declared
+primary script goal — emotional impact, expectation subversion, or new-understanding
+lens — with no declared secondary; the goal carries a per-type qualifying artifact
+(the evidence-supported nerve and felt moment; the documented, commonly held prior
+belief and its reversal; or the one-sentence retellable lens), every deep-research
+finalist must state a provisional transformation contract to be winner-eligible, all
+packaging directions for a finalist make the declared goal's bet, goal variety is a
+portfolio tiebreaker only, and post-publish readbacks record results per goal.
+
+**Rationale:** A breakthrough happens at the package, which can carry exactly one
+promise; a single declared goal keeps the package bet sharp. One goal per episode
+also makes each publish a clean experiment — per-goal CTR and retention comparisons
+stay attributable and steer later topic selection, which stacked goals would destroy.
+The provisional transformation contract addresses the ep002 failure mode of angles
+that win selection and collapse at the architecture gate. The episode still lands
+emotionally, surprises, and leaves understanding behind; the primary goal types the
+bet, not the total content. Declared secondaries were rejected for now as attribution
+noise; revisit once per-goal published data is exhausted.
+
+**Documents:** `whp-youtube/STEERING.md` (new "Type every episode by one primary
+script goal" rule; Law 1 primary-bet bullet; Law 7 per-goal readback),
+`.agents/skills/choosing-whp-video-topic/references/research-method.md` (angle field,
+"Declare the primary script goal" owner section, deep-research artifact evidence,
+handoff, packaging-direction bet rule with mistype/retype, goal-variety tiebreaker),
+`.agents/skills/choosing-whp-video-topic/SKILL.md` (ideate operation typing,
+package-promise bet, winner-eligibility contract requirement),
+`.agents/skills/choosing-whp-video-topic/references/output-contract.md` (landscape
+row, finalist goal line, packaging retype note, winner-brief field, audit item 13),
+`.agents/skills/writing-whp-youtube-scripts/SKILL.md` (handoff carry-forward;
+architecture preserves the bet and surfaces retypes),
+`.agents/skills/packaging-whp-videos/SKILL.md` (primary-bet gate). The required
+progress checklist and `WHP_PROGRESS/4` transport are deliberately unchanged — the
+new requirements live inside already-listed checklist steps. Published and committed
+episodes are not retroactively typed.
