@@ -2447,7 +2447,6 @@ seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape ru
 added; personal-input record updated). Case-scene invention rules (participants'
 thoughts, dialogue, weather) are untouched.
 
-<<<<<<< HEAD
 ## 2026-08-05 — Gate-precedence rules: contradictory gates resolved
 
 **Decision:** Five gate collisions resolved with single-owner rules. (1) Evaluator
@@ -2475,7 +2474,7 @@ posture; locked-lines protocol), `references/research-and-rights.md` (Gate
 precedence section; Layer 0 provisional path; contents index),
 `references/script-architecture.md` (approval-gate mirror),
 `.agents/skills/reconcile-whp/SKILL.md` (commit-precedence line).
-=======
+
 ## 2026-08-05 — One strict primary script goal per episode
 
 **Decision:** Every WHP episode is typed at topic selection by exactly one declared
@@ -2512,4 +2511,3 @@ architecture preserves the bet and surfaces retypes),
 progress checklist and `WHP_PROGRESS/4` transport are deliberately unchanged — the
 new requirements live inside already-listed checklist steps. Published and committed
 episodes are not retroactively typed.
->>>>>>> fix/writing-skill-package-tests

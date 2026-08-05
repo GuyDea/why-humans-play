@@ -312,24 +312,16 @@ Before presenting a complete draft narration for creative approval, dispatch the
 fresh-context reviewer given only the draft `script.raw.md` — never baselines,
 appendices, approvals, or the drafting rationale — returning findings without
 rewriting. Report the findings alongside the draft and apply them only with Martin's
-<<<<<<< HEAD
 direction. It re-runs during the final audit battery. A finding flagged by two
 independent evaluator runs — substantially the same finding on substantially the same
 passage, across runs at any stage — is presented as adopted-unless-overruled: the
 default recommendation is to apply it, but nothing is applied before Martin's gate
 response, and his overrule keeps the wording. Evidence-mandated wording outranks any
 retention finding; see
-[the gate-precedence rule](references/research-and-rights.md#gate-precedence). Run the Layer 2 consistency
-check of [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
-on the same draft: every narration number, name, and attribution against its evidence
-row.
-=======
-direction; it re-runs during the final audit battery, and a finding flagged by two
-independent evaluator runs is adopted by default — keeping it requires Martin's overrule.
+[the gate-precedence rule](references/research-and-rights.md#gate-precedence).
 Run the Layer 2 consistency check of
 [adversarial claim verification](references/research-and-rights.md#adversarial-claim-verification)
 on the same draft: every narration number, name, and attribution against its evidence row.
->>>>>>> fix/writing-skill-package-tests
 
 ### Creative approval gate
 
@@ -345,7 +337,6 @@ These apply to the Blueprint intro, the Draft narration, and the Final narration
 
 ### Mark locked lines for memory delivery
 
-<<<<<<< HEAD
 No line is locked before it passes the spoken-readability gate. After locking, a gate
 failure on a locked line — readability, Layer 2 or 3 verification, retention, or any
 audit — reopens the lock explicitly: report the line to Martin by name with the
@@ -353,17 +344,6 @@ failing gate and the proposed change, and wait. Never silently rewrite locked
 wording; a lock is Martin's approval of exact delivery, and only Martin closes it
 again.
 
-Martin delivers from memory while walking — there is no teleprompter on a walk. In a
-complete script, mark **locked lines** bold inside the blockquote: the opening question,
-the learning promise, the reframe's retell sentence, each beat's punchline and
-exact-lesson line, and any sentence whose evidence-bounded wording a paraphrase could
-break. Deliver locked lines word-perfect and keep them memorizable — a handful per beat,
-each a single sentence. Everything unmarked is flexible tissue: Martin may say it his own
-way, because the written line fixes the meaning, facts, locked story nouns, and evidence
-boundary, not the exact words. Apply the pair owner's markup and synchronization contract
-after selecting these lines. Strip markup from word counts and readability checks. Mark
-locked lines in complete draft or final narration; for a Script Blueprint, mark only intro
-=======
 Martin delivers from memory while walking — no teleprompter. In a complete script, mark
 **locked lines** bold inside the blockquote: the opening question, the learning promise,
 the reframe's retell sentence, each beat's punchline and exact-lesson line, and any
@@ -374,7 +354,6 @@ the written line fixes the meaning, facts, locked story nouns, and evidence boun
 the exact words. After selecting these lines, apply the pair owner's markup and
 synchronization contract and strip markup from word counts and readability checks. Mark
 locked lines in complete draft or final narration; in a Script Blueprint, mark only intro
->>>>>>> fix/writing-skill-package-tests
 wording whose exact delivery has already been selected.
 
 ### Scope every universal verdict
