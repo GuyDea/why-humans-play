@@ -40,6 +40,14 @@
 >
 > Honestly, this one stung. I'd explained half my life with that tank.
 
+> And I know how wrong that sounds — because you have felt the tank run empty. That evening state where one more page feels impossible. Nobody is calling that feeling fake.
+>
+> But here's the clue the tank can't explain. On those same drained evenings, the game still works. Three hours of raids, after a day that left you unable to read one page.
+>
+> If your fuel were truly gone, it would be gone for everything. But an empty tank doesn't pick favorites — and yours says no to the textbook and yes to the game.
+>
+> So it isn't a tank. And that clue is the key to the real answer.
+
 > *To be fair, some traits do matter. Highly disciplined people put things off far less. Hold that thought too. It comes back at the end.*
 
 > The tank was a metaphor, and the metaphor is gone. Which leaves the real question. What is that wall you hit at minute ten?
@@ -48,7 +56,9 @@
 
 > Here's the model that's replacing the tank. And I'll say it straight — this is the current best explanation, not settled law.
 >
-> Think of your attention as something your brain sells, one minute at a time. Every activity within reach is a buyer. And every buyer bids in feelings — interest, progress, relief, fun. The feeling of effort is your brain telling you the current buyer's offer is too low.
+> Think of your attention as something your brain sells, one minute at a time. The buyers are the activities around you — and they pay in feelings. Interest, progress, relief, fun.
+>
+> An enjoyable activity is simply one that pays well. And the feeling of effort is your brain telling you the activity in front of you is underpaying.
 >
 > Boredom isn't your engine failing. Boredom is your brain hearing a better bid.
 
