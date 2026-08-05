@@ -34,6 +34,9 @@ Evaluate, in this order:
 5. **Claim smell.** As a skeptical layperson: quote any sentence that sounds bigger
    than the evidence shown on screen ("this exact loop", "the difference is X", "as Y
    as it gets"), and any place a proposed explanation is voiced as a settled rule.
+   Also quote any place the script asks the viewer to override their own lived
+   experience on data alone — without honoring the experience as real, reinterpreting
+   it, and handing them a discriminating observation they can check themselves.
 6. **Visual starvation.** Flag stretches over ~30 spoken seconds with nothing concrete
    to show. Say what the screen is stuck on.
 7. **Word budget.** Estimate spoken runtime at ~160 wpm. If any beat exceeds roughly

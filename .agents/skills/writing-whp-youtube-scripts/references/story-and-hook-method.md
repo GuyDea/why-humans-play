@@ -313,6 +313,17 @@ demonstration, informational reward, humor placement, and Throughline decision a
 structural baseline. Do not add an unplanned move merely because it sounds dramatic in
 prose.
 
+When a beat overturns a belief the viewer holds from lived experience — not merely a
+folk label — data alone loses the exchange. Plan the **entrenched-belief disarm**:
+state the experiential evidence as real, in the viewer's own terms, before refuting
+its interpretation; reinterpret the experience inside the new model rather than
+denying it; and hand the viewer one discriminating observation from their own life
+that the old belief predicts wrongly and the new model predicts rightly. Argument
+length scales with entrenchment — an overturn that feels fast reads as dismissal, and
+Law 3 sizes the episode by its story, so spend the minutes. (Template: the willpower
+tank — evening depletion honored as real, shown to be selective, discriminated by the
+drained-evening game.)
+
 The complete structural story contract remains:
 
 - Apply these story-construction rules to every beat and developed example in the complete

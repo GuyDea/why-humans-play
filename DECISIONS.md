@@ -2551,3 +2551,23 @@ stack in the same session.
 `.claude/agents/whp-retention-reviewer.md`,
 `whp-youtube/episodes/ep002-games-vs-studying/draft/` (both files; locked-line
 register, PI record, and sweep record updated; ~2,245 spoken words).
+
+## 2026-08-06 — Entrenched-belief disarm
+
+**Decision:** When an episode overturns a belief the viewer holds from lived
+experience (not merely a folk label), data alone is insufficient: the architecture's
+coverage record classifies each rival's entrenchment, and the story plan includes an
+entrenched-belief disarm — the experience stated as real in the viewer's terms, then
+reinterpreted inside the new model, then discriminated by one observation from the
+viewer's own life that the old belief predicts wrongly. Argument length scales with
+entrenchment under the revised Law 3. Cold-viewer claim-smell checks for
+data-over-experience overrides.
+
+**Rationale:** Martin's direction after the tank-defense revision: the original
+demolition spent lab replications against lived evening-depletion experience and
+would have lost that exchange; the fix that worked was reinterpretation plus the
+drained-evening discriminator, generalized here.
+
+**Documents:** `references/script-architecture.md` (coverage-record entrenchment
+field), `references/story-and-hook-method.md` (the disarm), 
+`.claude/agents/whp-retention-reviewer.md` (claim-smell check).

@@ -194,6 +194,11 @@ causal map, record:
   viewer's most likely true self-explanation — and, for each, whether the episode
   **beats** it (shows it wrong), **bounds** it (states honestly which cases the thesis
   owns), or **absorbs** it (integrates it into the thesis); and
+- each rival's **entrenchment**: held as a folk label, or as lived experience. A
+  rival rooted in lived experience cannot be beaten by data alone — plan a
+  reinterpretation that honors the experience as real and supplies a discriminating
+  observation the viewer can check in their own life, and size the argument to the
+  root depth (Law 3 affords the minutes); and
 - the resulting scope of diagnosis: what the episode may honestly tell the viewer
   their own moment was.
 
