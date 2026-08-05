@@ -1516,7 +1516,10 @@ class SkillPackageTests(unittest.TestCase):
 
         architecture_contracts = (
             "Build query vocabulary from the topic's plain-language mechanism, "
-            "synonyms, causes, consequences, and possible remedies.",
+            "synonyms, causes, consequences, and possible remedies — and, when "
+            "the episode explains a common human behavior, from the behavior's "
+            "own plain name, so the scan reaches the phenomenon's literature "
+            "and not only the chosen mechanism's.",
             "Continue until two materially different query passes add no new "
             "decision-relevant concept.",
             "Treat this as systematic best-effort coverage, not a literal guarantee "
@@ -3598,6 +3601,7 @@ class SkillPackageTests(unittest.TestCase):
             "../choosing-whp-video-topic/references/research-method.md",
             "references/rapid-prototyping.md",
             "references/script-architecture.md",
+            "references/research-and-rights.md",
             "references/story-and-hook-method.md",
             "references/research-and-rights.md",
             "references/rapid-prototyping.md",
