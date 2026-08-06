@@ -14,7 +14,7 @@
 
 ## Candidates
 
-### 1. The hobby you monetized — SELECTED (EP3, 2026-08-06)
+### 1. The hobby you monetized — selection withdrawn 2026-08-06 (typed angles didn't resonate; audience/folk/competitive scans completed and recorded in session; ep002's comments-CTA remains payable by this candidate)
 - **Nerve:** "I turned what I love into income and now I can't love it."
 - **Gap:** breaks the near-universal "do what you love" model; side-hustle culture makes
   it personal for almost everyone.

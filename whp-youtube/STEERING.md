@@ -68,13 +68,14 @@ accepted current launch sequence, dated launch research, and historical episode 
    (self-sabotage after unexplained success, with an audience). The earlier
    interviews premise remains rejected and the sports-betting premise parked
    ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
-3. **EP3 — The hobby you monetized (selected 2026-08-06, sequence swap).** The
-   do-what-you-love inversion: what a hobby pays you, and what happens when someone
-   else starts writing the paychecks. Pays ep002's on-camera contract deferral (the
-   comments CTA), reuses its verified undermining evidence rows, and compounds the
-   attention-payments canon for the same warm audience. First episode selected under
-   the folk-observation doctrine. Working state: angle ideation in progress
-   (audience/folk and competitive scans); no angle chosen yet.
+3. **EP3 — topic in selection (2026-08-06).** The hobby-monetized selection was
+   withdrawn same-day at Martin's direction after typed angle proposals (the angles
+   did not resonate; candidate and its completed audience/folk/competitive scans
+   return to the backlog with the ep002 comments-CTA promise still payable later).
+   Current ideation subject: the super-rich — why the game seems to have no "enough"
+   and why its top players read as disconnected — under the hidden-game lens,
+   mechanism-first and non-partisan per the rigor covenant. Scans in progress; no
+   angle chosen.
 4. **EP4 — Does chess actually make you smarter?** Audit what chess reliably trains,
    what may transfer, and what the evidence does not support. (Moved from EP3 in the
    2026-08-06 swap: resets the audience lane and reuses no ep002 evidence, so it

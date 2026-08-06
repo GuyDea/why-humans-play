@@ -2645,3 +2645,14 @@ ad-suitability wiring first).
 
 **Documents:** `whp-youtube/STEERING.md` (launch sequence), `whp-youtube/topic-backlog.md`
 (candidate #1 marked selected).
+
+## 2026-08-06 — EP3 hobby selection withdrawn; oligarch-subject ideation opened
+
+**Decision:** The same-day hobby-monetized EP3 selection is withdrawn (angles did not
+resonate with Martin); the candidate returns to the backlog with its completed scans
+banked and ep002's contract-deferral CTA still payable later. New ideation subject:
+the super-rich as players of a game with no satiation point — disconnection and
+insatiability under the hidden-game lens, explicitly mechanism-first and
+non-partisan. Engagement/packaging potential weighted per Martin's direction.
+
+**Documents:** `whp-youtube/STEERING.md`, `whp-youtube/topic-backlog.md`.
