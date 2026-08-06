@@ -2447,6 +2447,34 @@ seeds, anti-shoehorn), `references/script-blueprint-workflow.md` (intro-shape ru
 added; personal-input record updated). Case-scene invention rules (participants'
 thoughts, dialogue, weather) are untouched.
 
+## 2026-08-05 — Gate-precedence rules: contradictory gates resolved
+
+**Decision:** Five gate collisions resolved with single-owner rules. (1) Evaluator
+two-strikes adoption is a recommendation posture — "adopted unless overruled" —
+never applied before Martin's gate response; (2) a two-strike is substantially the
+same finding on substantially the same passage, across runs at any stage; (3) a new
+Gate precedence rule in the research-and-rights owner: evidence-mandated wording
+(kill-panel bounds, contested-findings treatments, scope terms, sample-size
+disclosures) outranks retention and style findings, which convert to
+reposition-or-compress, never cut; (4) locked lines get an explicit reopening
+protocol — no lock before readability passes, and any later gate failure on a locked
+line is reported by name and waits for Martin, never silently rewritten; (5) Layer 0
+gains the same offline-provisional path as the concept scan
+(`INCOMPLETE—LAYER 0 NOT RUN` + explicit risk acceptance), removing the offline
+deadlock. Cross-level: reconcile-whp's commit default now defers to user-level
+steering (progressive commits).
+
+**Rationale:** Martin's request after two live collisions (persona license; Law 3
+timing): audit for gate pairs that negate each other. The retention evaluator had
+already targeted kill-panel-mandated wording twice; combined with unqualified
+auto-adoption, honesty wording could have been deleted by default.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (adoption
+posture; locked-lines protocol), `references/research-and-rights.md` (Gate
+precedence section; Layer 0 provisional path; contents index),
+`references/script-architecture.md` (approval-gate mirror),
+`.agents/skills/reconcile-whp/SKILL.md` (commit-precedence line).
+
 ## 2026-08-05 — One strict primary script goal per episode
 
 **Decision:** Every WHP episode is typed at topic selection by exactly one declared
@@ -2484,12 +2512,6 @@ progress checklist and `WHP_PROGRESS/4` transport are deliberately unchanged —
 new requirements live inside already-listed checklist steps. Published and committed
 episodes are not retroactively typed.
 
-**Documents:** `.agents/skills/writing-whp-youtube-scripts/SKILL.md` (adoption
-posture; locked-lines protocol), `references/research-and-rights.md` (Gate
-precedence section; Layer 0 provisional path; contents index),
-`references/script-architecture.md` (approval-gate mirror),
-`.agents/skills/reconcile-whp/SKILL.md` (commit-precedence line).
-
 ## 2026-08-05 — Rebrand: accent red → accent green
 
 **Decision:** The WHP brand accent changes from red `#aa0a0a` to green `#309420`
@@ -2510,3 +2532,116 @@ reached main 2026-08-05 (initially swept into an unrelated commit; ratified here
 
 **Documents:** as listed; historical research artifacts, superseded plans, and prior
 ledger entries keep period wording.
+## 2026-08-05 — Inline brace comments: Martin's in-script review channel
+
+**Decision:** Martin may write review comments in curly braces (`{…}`) directly inside
+a stage's narration; the assistant sweeps them, answers each in conversation with a
+disposition, applies or contests under the existing gate rules (locks reopen; mandated
+wording follows gate precedence), removes the braces, and re-runs validation. The pair
+validator now fails fast on any remaining non-empty `{…}` so an unprocessed comment
+cannot reach approval or production surfaces.
+
+**Rationale:** Martin's request for a lightweight in-context review loop while reading
+drafts in the IDE, extending the earlier inline-proposal workflow.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/script-artifact-pair.md`
+(practice owner), `scripts/validate_script_pair.py` (+ regression test).
+
+## 2026-08-06 — First brace-sweep merge: clarity rules and ep002 revision
+
+**Decision:** Two drafting rules adopted from Martin's first inline brace review of
+the ep002 draft: (1) **core-model clarity** — a central model's roles (who acts, on
+what, with what currency, which direction) are assigned in plain words before any of
+its metaphor vocabulary travels alone; (2) **never half-wink** — every named idea is
+explained to the size of its introduction or explicitly deferred aloud as its own
+future video, optionally with a comments CTA. Both live in the rapid drafting owner
+with a matching cold-viewer check. All 15 review comments applied to the draft,
+including the three-accusations rename, the attention-market transaction rewrite, the
+SP06 two-topic deferral, the SP07 rule-first compression ("When a task repels you,
+don't upgrade your discipline. Upgrade the deal."), and the Apexwit credential line
+(personal-input slot B completed by Martin's direction).
+
+**Rationale:** Martin's review found the recurring defect class was referent debt —
+terms and implications arriving before the viewer holds their meaning — plus two
+half-explained neighbor topics and a diffuse ending. The seam detector's flag on the
+first fix placement (deferral orphaning the frame line's "So") validated the gate
+stack in the same session.
+
+**Documents:** `.agents/skills/writing-whp-youtube-scripts/references/rapid-prototyping.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (both files; locked-line
+register, PI record, and sweep record updated; ~2,245 spoken words).
+
+## 2026-08-06 — Entrenched-belief disarm
+
+**Decision:** When an episode overturns a belief the viewer holds from lived
+experience (not merely a folk label), data alone is insufficient: the architecture's
+coverage record classifies each rival's entrenchment, and the story plan includes an
+entrenched-belief disarm — the experience stated as real in the viewer's terms, then
+reinterpreted inside the new model, then discriminated by one observation from the
+viewer's own life that the old belief predicts wrongly. Argument length scales with
+entrenchment under the revised Law 3. Cold-viewer claim-smell checks for
+data-over-experience overrides.
+
+**Rationale:** Martin's direction after the tank-defense revision: the original
+demolition spent lab replications against lived evening-depletion experience and
+would have lost that exchange; the fix that worked was reinterpretation plus the
+drained-evening discriminator, generalized here.
+
+**Documents:** `references/script-architecture.md` (coverage-record entrenchment
+field), `references/story-and-hook-method.md` (the disarm), 
+`.claude/agents/whp-retention-reviewer.md` (claim-smell check).
+
+## 2026-08-06 — Value-inventory close
+
+**Decision:** Every complete episode ends by counting the delivered value out loud —
+the understanding gained and the tools handed over, in the episode's own vocabulary —
+immediately before the final lesson; when a predictable cheap deflation exists ("so
+it's just X"), it is voiced and defeated with the episode's own logic right before
+the count. The inventory recaps only; it introduces nothing new. Owner: the story
+method's hand-back section, with a cold-viewer promise-register check. Applied to
+ep002 (deflation-defeat + counted take + steal-back callback closing SP08).
+
+**Rationale:** Martin's direction: the viewer must finish feeling given as much value
+as possible — the close was landing a verdict without a receipt, and his own "so it's
+just more fun?" probe exposed the unvoiced deflation.
+
+**Documents:** `references/story-and-hook-method.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/`.
+
+## 2026-08-06 — The folk-observation sweep
+
+**Decision:** Every common-behavior episode inventories the phenomenon's folk
+observations — the first-person things "everyone knows" from living it — and gives
+each one a disposition against the thesis: explained (where), absorbed (with what),
+or out of scope (said or deferred). A dangling observation blocks architecture
+approval like an unanswered rival. Wired four ways: the architecture coverage record
+(owner), Layer 0's brief (lay-observation enumeration), the cold-viewer reviewer
+(new dimension 12, the obviousness sweep), and the topic-selection audience scan
+(folk observations preserved as their own output).
+
+**Rationale:** Martin's escalation after the second miss of an "obvious" lived
+observation: the deliberate-timeboxing delayers missed in the original ep002, and
+familiarity/cold-start missed in the rebuild until his review. Root cause both times:
+every discovery pass was literature-shaped or nerve-shaped; none asked what ordinary
+experience already knows. Folk observations are coverage tests at observation
+granularity — cheap to enumerate, fatal to dangle.
+
+**Documents:** `references/script-architecture.md`,
+`references/research-and-rights.md`, `.claude/agents/whp-retention-reviewer.md`,
+`choosing-whp-video-topic/references/research-method.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (cold-start absorption applied).
+
+## 2026-08-06 — EP3 selected: the hobby you monetized (sequence swap)
+
+**Decision:** Backlog candidate #1 ("The hobby you monetized") becomes EP3; chess
+moves to EP4 and the brain-games audit to EP5. Rationale accepted: pays ep002's
+on-camera contract deferral, reuses verified undermining evidence, compounds the
+attention-payments canon for the same warm audience, and passes the folk-observation
+sweep richly at first test. Angle remains unselected pending the bounded ideation
+operation; the loot-box deferral stays tracked for a later slot (needs the
+ad-suitability wiring first).
+
+**Documents:** `whp-youtube/STEERING.md` (launch sequence), `whp-youtube/topic-backlog.md`
+(candidate #1 marked selected).

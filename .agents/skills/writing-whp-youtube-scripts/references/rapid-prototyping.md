@@ -463,6 +463,19 @@ opens with acknowledgment instead of a promise. It is the default, not a straitj
 beat with no established term, or where the name itself is the earned punchline, may
 demonstrate first and name after.
 
+Assign the core model's roles before its vocabulary. When the episode's central model
+or metaphor enters, name every role in plain words first — who acts, on what, with
+what currency, in which direction the exchange runs. Only after that assignment may
+the metaphor's vocabulary (the bid, the price, the tank) travel alone. A core model
+whose transaction cannot be answered in one breath — who pays whom, with what, for
+what — is not yet explained, and a metaphor term that appears before its role exists
+is a defect, not foreshadowing.
+
+Never half-wink a topic. Every named idea is explained to the size of its
+introduction, or explicitly deferred aloud — "a whole video of its own," optionally
+with a call for comments — before the narration moves on. A concept introduced and
+neither explained nor deferred reads as a wink the viewer cannot cash.
+
 Check audience familiarity before naming any concept. When a term is already mainstream
 for the target audience — research current awareness rather than assuming — acknowledge
 the familiarity (“you've probably heard this called sycophancy”) and add something beyond
@@ -635,6 +648,16 @@ Use a verbatim quotation in narration only when its exact wording earns the memo
 Otherwise label and speak a faithful paraphrase, and preserve the exact wording in the
 appendix or source notes. Replace research-admin wording and outline transitions with
 language Martin could reproduce naturally after one hearing.
+
+## Scope every universal verdict
+
+A locked line that diagnoses the viewer's own case universally in the second person
+("you weren't X — you were Y") is a coverage claim, not a stylistic choice. Use one only
+when the architecture's coverage-and-rivals record shows the mechanism is the phenomenon's
+dominant account; otherwise write the verdict conditionally or name the covered case
+aloud. Ledger-marked editorial bridges and `Unverified or disputed material` never
+appear in locked universal wording; a caveat or hedge elsewhere does not license a
+universal verdict — the wording carrying the diagnosis carries the boundary.
 
 ## Pass the spoken-readability delivery gate
 

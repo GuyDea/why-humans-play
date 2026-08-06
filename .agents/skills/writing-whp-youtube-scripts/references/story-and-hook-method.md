@@ -313,6 +313,17 @@ demonstration, informational reward, humor placement, and Throughline decision a
 structural baseline. Do not add an unplanned move merely because it sounds dramatic in
 prose.
 
+When a beat overturns a belief the viewer holds from lived experience — not merely a
+folk label — data alone loses the exchange. Plan the **entrenched-belief disarm**:
+state the experiential evidence as real, in the viewer's own terms, before refuting
+its interpretation; reinterpret the experience inside the new model rather than
+denying it; and hand the viewer one discriminating observation from their own life
+that the old belief predicts wrongly and the new model predicts rightly. Argument
+length scales with entrenchment — an overturn that feels fast reads as dismissal, and
+Law 3 sizes the episode by its story, so spend the minutes. (Template: the willpower
+tank — evening depletion honored as real, shown to be selective, discriminated by the
+drained-evening game.)
+
 The complete structural story contract remains:
 
 - Apply these story-construction rules to every beat and developed example in the complete
@@ -616,6 +627,15 @@ Reject endings such as “be more mindful,” “use this knowledge,” or “tr
 Narration—not only the structured block—must voice all five application elements: the
 insight; the action, observation, or reflection to try; the observable signal; the
 boundary; and the larger benefit.
+
+Close by counting the value out loud. Before the final lesson, the ending names what
+the viewer is leaving with — the understanding gained and the tools handed over — in
+the episode's own concrete vocabulary, compressed to a few spoken lines. A lesson
+line alone is a verdict, not a receipt, and a viewer who never hears the take
+itemized undervalues what they received. When a predictable cheap deflation of the
+episode exists ("so it's just X"), voice it and defeat it with the episode's own
+logic immediately before the count. The inventory recaps delivered content only — it
+never introduces a new claim, tool, or caveat.
 
 Close a complete narration with a declarative line that resolves the central question and
 states the lesson; do not end on an unanswered question alone. Make that final line an earned

@@ -68,14 +68,24 @@ accepted current launch sequence, dated launch research, and historical episode 
    (self-sabotage after unexplained success, with an audience). The earlier
    interviews premise remains rejected and the sports-betting premise parked
    ([parked architecture](drafts/parked-betting-on-you-architecture.md)).
-3. **EP3 — Does chess actually make you smarter?** Audit what chess reliably trains,
-   what may transfer, and what the evidence does not support.
-4. **EP4 — What brain games actually train.** Use Martin's builder perspective as a
+3. **EP3 — The hobby you monetized (selected 2026-08-06, sequence swap).** The
+   do-what-you-love inversion: what a hobby pays you, and what happens when someone
+   else starts writing the paychecks. Pays ep002's on-camera contract deferral (the
+   comments CTA), reuses its verified undermining evidence rows, and compounds the
+   attention-payments canon for the same warm audience. First episode selected under
+   the folk-observation doctrine. Working state: angle ideation in progress
+   (audience/folk and competitive scans); no angle chosen yet.
+4. **EP4 — Does chess actually make you smarter?** Audit what chess reliably trains,
+   what may transfer, and what the evidence does not support. (Moved from EP3 in the
+   2026-08-06 swap: resets the audience lane and reuses no ep002 evidence, so it
+   lands better once the channel has viewers who trust a "no.")
+5. **EP5 — What brain games actually train.** Use Martin's builder perspective as a
    credibility frame for an evidence audit, never as promotion or proof.
 
-This breadth-first sequence is deliberate: the first four episodes establish WHP's range
-across AI and incentives, a second hidden-game episode, an explicit game, and the science
-of playful cognitive training. Current evidence and packaging still require verification
+This sequence balances breadth with compounding: the first five episodes establish
+WHP's range across AI and incentives, two hidden-game episodes that share a canon, an
+explicit game, and the science of playful cognitive training — with EP3 deliberately
+serving the EP2 audience while it is warm and honoring an on-camera promise. Current evidence and packaging still require verification
 inside each episode assignment; the sequence is direction, not a performance guarantee.
 
 ---

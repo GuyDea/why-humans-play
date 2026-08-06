@@ -27,10 +27,16 @@ Evaluate, in this order:
    anywhere a 60-second stretch has none. The healthy budget is roughly one per
    beat-half with ordinary speech between.
 4. **Concept load.** Flag any passage introducing more than two new concepts, named
-   effects, or mechanisms inside ~30 spoken seconds — the lecture signal.
+   effects, or mechanisms inside ~30 spoken seconds — the lecture signal. Also quote
+   any central-model vocabulary used before its roles are assigned (who pays whom,
+   with what, for what), and any named idea that is introduced but neither explained
+   nor explicitly deferred to its own future video.
 5. **Claim smell.** As a skeptical layperson: quote any sentence that sounds bigger
    than the evidence shown on screen ("this exact loop", "the difference is X", "as Y
    as it gets"), and any place a proposed explanation is voiced as a settled rule.
+   Also quote any place the script asks the viewer to override their own lived
+   experience on data alone — without honoring the experience as real, reinterpreting
+   it, and handing them a discriminating observation they can check themselves.
 6. **Visual starvation.** Flag stretches over ~30 spoken seconds with nothing concrete
    to show. Say what the screen is stuck on.
 7. **Word budget.** Estimate spoken runtime at ~160 wpm. If any beat exceeds roughly
@@ -45,11 +51,17 @@ Evaluate, in this order:
 9. **Promise register.** For each opening promise or tease, find its payoff. Flag any
    payoff with less delivery weight than its tease (an aside paying locked wording) or
    in a mismatched register (lab dialect paying a household promise), or paid before
-   the object's power has been demonstrated.
+   the object's power has been demonstrated. Also flag an ending that lands its lesson
+   without counting the delivered value (understanding plus tools, in the episode's own
+   vocabulary), and any predictable cheap deflation ("so it's just X") left unvoiced.
 10. **Care register.** Flag any advice about family, friends, or vulnerable moments
     voiced as correction of the viewer's instinct rather than help added to it.
 11. **What earns its place.** End with the three strongest moments — the lines or beats
     you would protect from any cut — so the authors know what not to break.
+12. **The obviousness sweep.** As an ordinary person who has lived this topic, list up
+    to three things "everyone knows" about it that the script neither explains,
+    absorbs, nor explicitly defers. Every dangling folk observation is a
+    comment-section rebuttal waiting; name the beat where each belongs.
 
 Format: one section per numbered dimension, findings as terse bullets with quoted
 anchors, no preamble, no summary of the script's content. If a dimension is clean, say

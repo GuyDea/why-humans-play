@@ -34,8 +34,10 @@ focused question and stop. Do not write partial reconciliation changes while blo
 5. If a required edit overlaps unresolved user changes, ask how to proceed.
 
 Explicit agreement authorizes content updates, but never bypasses branch, approval,
-filesystem, or worktree safeguards. Do not commit unless the encompassing task
-explicitly calls for a commit.
+filesystem, or worktree safeguards. Committing follows the instruction hierarchy:
+user-level steering (such as a progressive-commit mandate in the user's global
+CLAUDE.md) outranks this default; absent such steering, do not commit unless the
+encompassing task explicitly calls for a commit.
 
 ## Discover and classify documents
 

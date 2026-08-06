@@ -194,6 +194,22 @@ causal map, record:
   viewer's most likely true self-explanation — and, for each, whether the episode
   **beats** it (shows it wrong), **bounds** it (states honestly which cases the thesis
   owns), or **absorbs** it (integrates it into the thesis); and
+- each rival's **entrenchment**: held as a folk label, or as lived experience. A
+  rival rooted in lived experience cannot be beaten by data alone — plan a
+  reinterpretation that honors the experience as real and supplies a discriminating
+  observation the viewer can check in their own life, and size the argument to the
+  root depth (Law 3 affords the minutes); and
+- the **folk-observation inventory**: the widely shared first-person observations
+  laypeople volunteer about this phenomenon — the things "everyone knows" from living
+  it ("it gets interesting once you know some of it," "I only work under deadline,"
+  "I delay chores on purpose to force-timebox them"). Source them from the
+  audience-language scan's wording, from Layer 0's lay-observation list, and from
+  deliberately simulating the viewer's lived experience. Give every observation one
+  disposition: **explained** by the thesis (name where), **absorbed** (name the
+  addition), or **out of scope** (deferred or stated aloud). An observation the model
+  cannot place is an unanswered rival at observation granularity — the architecture
+  is not approval-ready while one dangles, because every dangling folk observation is
+  either a hole in the model or a comment-section rebuttal; and
 - the resulting scope of diagnosis: what the episode may honestly tell the viewer
   their own moment was.
 
@@ -398,7 +414,9 @@ understanding is generic self-help rather than a WHP payload.
 
 Reject an architecture that explains a common human behavior when its
 coverage-and-rivals record is missing, when Layer 0 thesis verification has not run,
-or when a Layer 0 challenge remains unanswered.
+or when a Layer 0 challenge remains unanswered — unless the record carries an
+explicit `INCOMPLETE—LAYER 0 NOT RUN` label and Martin accepts the omission risk,
+mirroring the offline concept-scan path.
 
 Reject an architecture presented as complete when its concept inventory is absent,
 recall-only, unsourced, omits the intervention and countermeasure bucket, or hides

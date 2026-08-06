@@ -111,6 +111,11 @@ STORY_MARKER_RE = re.compile(r"</?u>|\*+")
 ESCAPABLE_STORY_MARKER_RE = re.compile(r"</?u>|\*+|_+")
 
 DRIFT_ERROR = "extended narration does not exactly match raw"
+REVIEW_COMMENT_ERROR = (
+    "unprocessed inline review comment {…} — respond, apply or decline, and remove"
+    " the braces before validation"
+)
+REVIEW_COMMENT_RE = re.compile(r"\{[^{}]+\}")
 STAGE_APPENDIX_CONTRACTS = {
     "blueprint": (
         "- **Status:** BLUEPRINT",
@@ -1597,6 +1602,8 @@ def validate_pair(pair: PairPaths) -> list[str]:
 
     raw = pair.raw.read_bytes().decode("utf-8")
     extended = pair.extended.read_bytes().decode("utf-8")
+    if REVIEW_COMMENT_RE.search(raw) or REVIEW_COMMENT_RE.search(extended):
+        return [REVIEW_COMMENT_ERROR]
     raw_errors = _validate_raw(raw)
     errors = list(raw_errors)
     for error in _validate_extended(extended):
