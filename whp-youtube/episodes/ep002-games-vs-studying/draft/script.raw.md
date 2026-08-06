@@ -194,7 +194,7 @@
 
 > Maybe you're thinking this all boils down to games being more fun. Sure — the way a restaurant is good because people like it. The real question was always what the fun is made of.
 >
-> So count what you're leaving with. You know the four payments that make a game grip you — chosen challenge, instant answers, progress that survives, failure made cheap. You know the two currencies a task bills you in — boredom and fear — and which fix answers each. And you know the rule that carries it all. Upgrade the deal, not the discipline.
+> So count what you're leaving with. You know the four payments that make a game grip you. Chosen challenge. Instant answers. Progress that survives. Failure made cheap. You know the two currencies a task bills you in — boredom and fear — and which fix answers each. And you know the rule that carries it all. Upgrade the deal, not the discipline.
 >
 > Games spent decades perfecting those payments to hold your attention. Tonight, you can start stealing them back — and pay yourself with the same coins, for the boring things that actually matter.
 
