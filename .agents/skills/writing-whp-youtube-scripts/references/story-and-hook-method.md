@@ -628,6 +628,15 @@ Narration—not only the structured block—must voice all five application elem
 insight; the action, observation, or reflection to try; the observable signal; the
 boundary; and the larger benefit.
 
+Close by counting the value out loud. Before the final lesson, the ending names what
+the viewer is leaving with — the understanding gained and the tools handed over — in
+the episode's own concrete vocabulary, compressed to a few spoken lines. A lesson
+line alone is a verdict, not a receipt, and a viewer who never hears the take
+itemized undervalues what they received. When a predictable cheap deflation of the
+episode exists ("so it's just X"), voice it and defeat it with the episode's own
+logic immediately before the count. The inventory recaps delivered content only — it
+never introduces a new claim, tool, or caveat.
+
 Close a complete narration with a declarative line that resolves the central question and
 states the lesson; do not end on an unanswered question alone. Make that final line an earned
 payoff to the opening, not a new slogan or a fresh idea.

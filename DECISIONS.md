@@ -2571,3 +2571,21 @@ drained-evening discriminator, generalized here.
 **Documents:** `references/script-architecture.md` (coverage-record entrenchment
 field), `references/story-and-hook-method.md` (the disarm), 
 `.claude/agents/whp-retention-reviewer.md` (claim-smell check).
+
+## 2026-08-06 — Value-inventory close
+
+**Decision:** Every complete episode ends by counting the delivered value out loud —
+the understanding gained and the tools handed over, in the episode's own vocabulary —
+immediately before the final lesson; when a predictable cheap deflation exists ("so
+it's just X"), it is voiced and defeated with the episode's own logic right before
+the count. The inventory recaps only; it introduces nothing new. Owner: the story
+method's hand-back section, with a cold-viewer promise-register check. Applied to
+ep002 (deflation-defeat + counted take + steal-back callback closing SP08).
+
+**Rationale:** Martin's direction: the viewer must finish feeling given as much value
+as possible — the close was landing a verdict without a receipt, and his own "so it's
+just more fun?" probe exposed the unvoiced deflation.
+
+**Documents:** `references/story-and-hook-method.md`,
+`.claude/agents/whp-retention-reviewer.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/`.
