@@ -2612,3 +2612,16 @@ granularity — cheap to enumerate, fatal to dangle.
 `references/research-and-rights.md`, `.claude/agents/whp-retention-reviewer.md`,
 `choosing-whp-video-topic/references/research-method.md`,
 `whp-youtube/episodes/ep002-games-vs-studying/draft/` (cold-start absorption applied).
+
+## 2026-08-06 — EP3 selected: the hobby you monetized (sequence swap)
+
+**Decision:** Backlog candidate #1 ("The hobby you monetized") becomes EP3; chess
+moves to EP4 and the brain-games audit to EP5. Rationale accepted: pays ep002's
+on-camera contract deferral, reuses verified undermining evidence, compounds the
+attention-payments canon for the same warm audience, and passes the folk-observation
+sweep richly at first test. Angle remains unselected pending the bounded ideation
+operation; the loot-box deferral stays tracked for a later slot (needs the
+ad-suitability wiring first).
+
+**Documents:** `whp-youtube/STEERING.md` (launch sequence), `whp-youtube/topic-backlog.md`
+(candidate #1 marked selected).
