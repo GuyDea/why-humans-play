@@ -2589,3 +2589,26 @@ just more fun?" probe exposed the unvoiced deflation.
 **Documents:** `references/story-and-hook-method.md`,
 `.claude/agents/whp-retention-reviewer.md`,
 `whp-youtube/episodes/ep002-games-vs-studying/draft/`.
+
+## 2026-08-06 — The folk-observation sweep
+
+**Decision:** Every common-behavior episode inventories the phenomenon's folk
+observations — the first-person things "everyone knows" from living it — and gives
+each one a disposition against the thesis: explained (where), absorbed (with what),
+or out of scope (said or deferred). A dangling observation blocks architecture
+approval like an unanswered rival. Wired four ways: the architecture coverage record
+(owner), Layer 0's brief (lay-observation enumeration), the cold-viewer reviewer
+(new dimension 12, the obviousness sweep), and the topic-selection audience scan
+(folk observations preserved as their own output).
+
+**Rationale:** Martin's escalation after the second miss of an "obvious" lived
+observation: the deliberate-timeboxing delayers missed in the original ep002, and
+familiarity/cold-start missed in the rebuild until his review. Root cause both times:
+every discovery pass was literature-shaped or nerve-shaped; none asked what ordinary
+experience already knows. Folk observations are coverage tests at observation
+granularity — cheap to enumerate, fatal to dangle.
+
+**Documents:** `references/script-architecture.md`,
+`references/research-and-rights.md`, `.claude/agents/whp-retention-reviewer.md`,
+`choosing-whp-video-topic/references/research-method.md`,
+`whp-youtube/episodes/ep002-games-vs-studying/draft/` (cold-start absorption applied).

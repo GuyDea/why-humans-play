@@ -351,7 +351,10 @@ differently, as described in its entry below.
   central question, core answer, and earned reframe, and answers one question: is this
   the field's standard account of that behavior, and if not, what is? It must search
   the phenomenon's own literature (meta-analyses, reviews, consensus sources found by
-  the behavior's name) and name the dominant account and strongest rivals. Its verdict
+  the behavior's name) and name the dominant account and strongest rivals. It also
+  enumerates the everyday observations laypeople commonly volunteer about the
+  phenomenon and marks, for each, whether the thesis explains it, must absorb it, or
+  leaves it dangling — feeding the architecture's folk-observation inventory. Its verdict
   feeds the architecture's coverage-and-rivals record; an unanswered challenge blocks
   architecture approval. If source access is unavailable, label the coverage record
   `INCOMPLETE—LAYER 0 NOT RUN`; the architecture may circulate as provisional exactly

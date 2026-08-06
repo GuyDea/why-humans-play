@@ -124,6 +124,12 @@
 
 > Now notice what games did with failure. They made it free. You die, you respawn, and nobody updates your permanent record.
 
+> And there's a reason the very start of anything is the worst stretch. An unfamiliar subject can't pay you yet. You can't see progress. The feedback doesn't parse. The challenge towers over your skill. So it bills you in both currencies at once — boredom and fear.
+>
+> You've felt the other side of this too. Every subject gets more interesting once you actually know some of it. That's not you finally maturing. That's the payments starting to arrive.
+>
+> Games know the cold-start problem. It's why the first level is a tutorial. And it's why the sequel to a game you love hooks you in minutes.
+
 > One more school habit deserves a price check: grades. In the head-to-head studies, kids who got written comments beat kids who got grades. Not just on motivation — on achievement too.
 >
 > That doesn't mean grades must go — one school dropped them for a whole year, and things got worse. The lesson is narrower, and more useful. Evaluation that points at you seems to be the risky kind. Feedback that points at the work is the kind that pays.
@@ -194,7 +200,7 @@
 
 > Maybe you're thinking this all boils down to games being more fun. Sure — the way a restaurant is good because people like it. The real question was always what the fun is made of.
 >
-> So count what you're leaving with. You know the four payments that make a game grip you. Chosen challenge. Instant answers. Progress that survives. Failure made cheap. You know the two currencies a task bills you in — boredom and fear — and which fix answers each. And you know the rule that carries it all. Upgrade the deal, not the discipline.
+> So count what you're leaving with. You know the four payments that make a game grip you. Chosen challenge. Instant answers. Progress that survives. Failure made cheap. You know the two currencies a task bills you in — boredom and fear — and which fix answers each. And you know why the beginning is always the worst part — the payments haven't started arriving yet. And you know the rule that carries it all. Upgrade the deal, not the discipline.
 >
 > Games spent decades perfecting those payments to hold your attention. Tonight, you can start stealing them back — and pay yourself with the same coins, for the boring things that actually matter.
 

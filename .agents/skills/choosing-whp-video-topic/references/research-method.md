@@ -113,7 +113,9 @@ replaces the full demand, supply, timing, scoring, and packaging pipeline; apply
 the promising subjects being turned into exact angle proposals.
 
 Preserve recurring wording closely enough to show how people describe the moment and
-stake, while protecting private material. Separate an audience's wording from the truth of
+stake, while protecting private material. Preserve separately the audience's **folk
+observations** about the phenomenon — the things "everyone knows" from living it —
+which later feed the architecture's folk-observation inventory. Separate an audience's wording from the truth of
 its premise: a repeated phrase can reveal a felt concern without proving the condition it
 describes. Date volatile observations, compare independent contexts, and treat one query,
 comment, post, poll, or autocomplete phrase as a lead rather than proof of breadth.

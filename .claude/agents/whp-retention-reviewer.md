@@ -58,6 +58,10 @@ Evaluate, in this order:
     voiced as correction of the viewer's instinct rather than help added to it.
 11. **What earns its place.** End with the three strongest moments — the lines or beats
     you would protect from any cut — so the authors know what not to break.
+12. **The obviousness sweep.** As an ordinary person who has lived this topic, list up
+    to three things "everyone knows" about it that the script neither explains,
+    absorbs, nor explicitly defers. Every dangling folk observation is a
+    comment-section rebuttal waiting; name the beat where each belongs.
 
 Format: one section per numbered dimension, findings as terse bullets with quoted
 anchors, no preamble, no summary of the script's content. If a dimension is clean, say
